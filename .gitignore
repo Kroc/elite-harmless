@@ -1,0 +1,3 @@
+# ignore any folder beginning with "!" (used to hide stuff from the repository)
+\!*
+**\!*
