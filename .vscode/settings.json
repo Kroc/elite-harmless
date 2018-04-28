@@ -3,5 +3,8 @@
     "editor.wordWrapColumn": 80,
     "editor.rulers": [
         80
-    ]
+    ],
+    "ca65.cl65.target": "c64",
+    "csharp.suppressDotnetInstallWarning": true,
+    "powershell.integratedConsole.showOnStartup": false
 }

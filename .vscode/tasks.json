@@ -12,6 +12,12 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Install build tools",
+            "type": "shell",
+            "command": "bash setup.sh",
+            "problemMatcher": []
         }
     ]
 }
