@@ -6,5 +6,6 @@
     ],
     "ca65.cl65.target": "c64",
     "csharp.suppressDotnetInstallWarning": true,
-    "powershell.integratedConsole.showOnStartup": false
+    "powershell.integratedConsole.showOnStartup": false,
+    "powershell.startAutomatically": false
 }
