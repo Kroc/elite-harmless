@@ -41,6 +41,12 @@ echo "- linking 'gma3.prg'..."
     build/loader_stage2.o \
     c64.lib
 
+# echo
+# echo "* verifying checksums"
+# cd bin
+# md5sum -c checksums.txt
+# cd ..
+
 echo
 echo "complete."
 exit 0
