@@ -3,6 +3,9 @@
 echo "building Elite DX:"
 echo
 
+# the stage 0 loader is what gets loaded by `LOAD"*",8,1`
+# its only purpose is to hijack BASIC and load the next stage
+
 echo "* building loader - stage 0:"
 echo "- compiling 'loader_stage0.asm'..."
 ./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage0.o \
@@ -24,6 +27,18 @@ echo "- linking 'gma1.prg'..."
 ./bin/cc65/bin/ld65 -C c64-asm.cfg \
     --start-addr \$0334 -o bin/gma1.prg \
     build/loader_stage1.o \
+    c64.lib
+
+echo
+echo "* building loader - stage 2:"
+echo "- compiling 'loader_stage2.asm'..."
+./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage2.o \
+    src/loader_stage2.asm
+
+echo "- linking 'gma3.prg'..."
+./bin/cc65/bin/ld65 -C c64-asm.cfg \
+    --start-addr \$C800 -o bin/gma3.prg \
+    build/loader_stage2.o \
     c64.lib
 
 echo

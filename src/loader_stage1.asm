@@ -7,9 +7,13 @@
     jmp start
 
 _0337:
-.byte                                      $00
-.byte   $00, $00, $00, $11, $04, $11, $05, $11
-.byte   $06, $13, $00, $14, $08
+.byte   $00, $00    ; "GMA0" (invalid)
+.byte   $00, $00    ; "GMA1" (invalid)
+.byte   $11, $04    ; "GMA2" (invalid?)
+.byte   $11, $05    ; "GMA3" (slow-loader)
+.byte   $11, $06    ; "GMA4"
+.byte   $13, $00    ; "GMA5"
+.byte   $14, $08    ; "GMA6"
 
 start:
     ; call Kernel SETMSG, "Set system error display switch at
@@ -33,6 +37,7 @@ start:
     lda #$03
     jsr _03b5
 
+    ; start GMA3's code -- note that the current X & Y are used in here
     jsr $c800
 
 ;035a a5 02    lda $02
@@ -92,18 +97,24 @@ _03b5:
 
 _03c7:
     ; select file name:
-    tax         ; put the current A value aside
-    clc         ; clear carry flag
-    adc #'0'    ; convert A to a PETSCII numeral
-    sta _filename_num
+    ;---------------------------------------------------------------------------
+    ; A = number of file to load, i.e. $03 = "GMA3"
     
-    txa
-    asl a
-    tax
+    tax                 ; put the current A value aside
 
-    lda _0337+0, x
+    clc                 ; clear carry flag (before doing add)
+    adc #'0'            ; convert A to a PETSCII numeral "0"+A
+    sta _filename_num   ; change the filename to load, e.g. "GMA3"
+    
+    ; lookup the number in a table:
+
+    txa                 ; get the original number back
+    asl a               ; shift-left, i.e. multiply by 2
+    tax                 ; use it as the index
+
+    lda _0337+0, x      ; load 16-bit low-byte
     sta _04b9
-    lda _0337+1, x
+    lda _0337+1, x      ; load 16-bit high-byte
     sta _04bd
 
     ; set file name
@@ -118,17 +129,8 @@ _filename:
 _filename_num:
 .byte   $20
 
-_03eb:
-;03eb 20 57 41 jsr $4157
-;03ee 53       ???
-;03ef 20 48 45 jsr $4548
-;03f2 52       ???
-;03f3 45 20    eor $20
-;03f5 31 39    and ($39),y
-;03f7 38       sec 
-;03f8 35 20    and $20,x
-;03fa 4f       ???
-;03fb 4b       ???
+;$03eb:
+.byte   " was here 1985 ok"
 
 _03fc:
 ;03fc 20 da 05 jsr $05da
