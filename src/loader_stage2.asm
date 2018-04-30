@@ -1,3 +1,7 @@
+; "Elite" C64 disassembly / "Elite DX", cc0 2018, see LICENSE.txt
+; "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
+; <github.com/Kroc/EliteDX>
+;===============================================================================
 
 .zeropage
 ; 4 unused (by the Kernal) bytes exist at $FB-$FE
@@ -92,10 +96,11 @@ ZP_C1541_PROGRAM   := $fd
     ; close deafult output channel
     jsr $ffcc
 
+    ; wait on the serial bus:
 :   bit $dd00
-    bmi :-
+    bmi :-          ; wait for the sign-bit to zero
 :   bit $dd00
-    bpl :-
+    bpl :-          ; wait for the sign-bit to set
 
     rts
 
@@ -132,23 +137,29 @@ _c873:
     rts
 
 ;===============================================================================
-; address from the perspective of the drive's memory
-.org    $0300
-
 ; this is a program uploaded to the drive:
 .proc   drive_program
 
+    ; address from the perspective of the drive's memory
+    .org    $0300
+
+    ; strobe the serial line (why?)
     lda # $0f
     sta $1800
     sta $1800
-    lda $1c00
-    and # $9f
+
+    lda $1c00           ; read the port B status
+    and # %10011111     ; set data density to lowest (why?)
     sta $1c00
-    ldy # $5a
+    
+    ldy # $5a           ; = 90
 
 _0312:
+    ; countdown for a time-out
     dey
     bne :+
+
+    ; time-out
     lda # $02
     jmp $f969
 
@@ -197,35 +208,52 @@ _0312:
     jmp $f969
 
 init:
+    ;---------------------------------------------------------------------------
     jsr $d042       ; initialise drive
-    lda # $25
+    
+    ; buffer#0 track no.
+    lda # 37
     sta $06
-    lda # $01
+    ; buffer#0 sector no.
+    lda # 1
     sta $07
-    jsr $c118
-    lda # $e0
+
+    jsr $c118       ; turn on drive LED
+    
+    ; * * *   C O P Y   P R O T E C T I O N !  * * *
+
+    ; write to buffer#0 commad/status register:
+    ; "Read in sector header and then execute code in buffer"
+    ; i.e. look at T37:S01 (outside the normal disk range!), but no data
+    ; is loaded. buffer#0 is executed (which contains this drive program)
+    ; so execution jumps to the start of `drive_program`
+    lda # $e0       
     sta $00
 
-:   lda $00
-    bmi :-
-    cmp # $02
+    ; wait for the drive to finish loading:
+:   lda $00         ; read the status register
+    bmi :-          ; wait for bit 7 to switch to 0, i.e. "job done"
+    cmp # $02       ; block header not found on disk?
     bcc :+
-    jmp $037e
+    jmp *           ; kill the disk drive!
     jsr $c12c       ; turn on error LED
+
+    ; strobe the serial line to alert
+    ; the C64 that we're finished here
 :   lda # $00
     sta $1800
     sta $1800
+    
     rts 
 
 ; note the address of the last byte, as this is used by
 ; the upload routine to check for the end of the program
 end:
 
+    ; switch off addressing from the drive's memory
+    .reloc
 .endproc
 ; make these available for use before the .proc definition,
 ; https://github.com/cc65/cc65/issues/479
 drive_program_init  := drive_program::init
 drive_program_end   := drive_program::end
-
-; switch off addressing from the drive's memory
-.reloc

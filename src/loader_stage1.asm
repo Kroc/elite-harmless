@@ -1,3 +1,10 @@
+; "Elite" C64 disassembly / "Elite DX", cc0 2018, see LICENSE.txt
+; "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
+; <github.com/Kroc/EliteDX>
+;===============================================================================
+
+; a jump is made to code within the stage 3 loader ("gma4.prg")
+.import _7596
 
 ; eight bytes of unused (by the Kernal) RAM exist at $0334, followed by
 ; the 192 byte Datasette buffer (no use to us here), another 4 unused bytes
@@ -10,7 +17,7 @@ _0337:
 .byte   $00, $00    ; "GMA0" (invalid)
 .byte   $00, $00    ; "GMA1" (invalid)
 .byte   $11, $04    ; "GMA2" (invalid?)
-.byte   $11, $05    ; "GMA3" (slow-loader)
+.byte   $11, $05    ; "GMA3" (copy-protection?)
 .byte   $11, $06    ; "GMA4"
 .byte   $13, $00    ; "GMA5"
 .byte   $14, $08    ; "GMA6"
@@ -37,28 +44,44 @@ start:
     lda #$03
     jsr _03b5
 
-    ; start GMA3's code -- note that the current X & Y are used in here
+    ; start GMA3's code -- note that the current X & Y
+    ; (pointer to filename) are re-used in here
     jsr $c800
 
-;035a a5 02    lda $02
-;035c 49 97    eor #$97
-;035e f0 03    beq $0363
-;0360 6c fc ff jmp ($fffc)
-;0363 a9 04    lda #$04
-;0365 20 b5 03 jsr $03b5
-;0368 20 81 ff jsr $ff81
-;036b a9 02    lda #$02
-;036d 8d 20 d0 sta $d020
-;0370 8d 21 d0 sta $d021
-;0373 a9 04    lda #$04
-;0375 8d 88 02 sta $0288
-;0378 a9 4c    lda #$4c
-;037a 8d 0e ce sta $ce0e
-;037d a9 8a    lda #$8a
-;037f 8d 0f ce sta $ce0f
-;0382 a9 03    lda #$03
-;0384 8d 10 ce sta $ce10
-;0387 4c 96 75 jmp $7596
+    ; is the value at $02 exactly $97?
+    ; (i.e. the result of copy-protection check)
+    lda $02
+    eor # $97
+    beq :+              ; skip ahead if [$02] = $97
+    jmp ($fffc)         ; hard reset!
+
+    ; load "GMA4" file
+:   lda # $04
+    jsr _03b5
+
+    jsr $ff81           ; re-init the screen again
+
+    ; change background / border colour to red
+    lda # $02
+    sta $d020
+    sta $d021
+    
+    ; change the text-screen back to $0400:
+    lda # $04
+    sta $0288
+
+    ; change code somewhere?
+    lda #$4c
+    sta $ce0e
+    lda #$8a
+    sta $ce0f
+    lda #$03
+    sta $ce10
+    jmp _7596
+
+    ;---------------------------------------------------------------------------
+
+_038a:
 ;038a 18       clc 
 ;038b 20 19 06 jsr $0619
 ;038e a5 01    lda $01
@@ -103,7 +126,7 @@ _03c7:
     tax                 ; put the current A value aside
 
     clc                 ; clear carry flag (before doing add)
-    adc #'0'            ; convert A to a PETSCII numeral "0"+A
+    adc #'0'            ; convert A to a PETSCII numeral, i.e. "0"+A
     sta _filename_num   ; change the filename to load, e.g. "GMA3"
     
     ; lookup the number in a table:
@@ -120,7 +143,7 @@ _03c7:
     ; set file name
     ldx #<_filename
     ldy #>_filename
-    lda #$04    ; file name length
+    lda #$04            ; file name length
     jsr $ffbd
     rts 
 
@@ -129,7 +152,7 @@ _filename:
 _filename_num:
 .byte   $20
 
-;$03eb:
+;$03eb: hidden message (not part of the filename)
 .byte   " was here 1985 ok"
 
 _03fc:
