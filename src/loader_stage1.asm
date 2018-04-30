@@ -18,7 +18,7 @@ _0337:
 .byte   $00, $00    ; "GMA1" (invalid)
 .byte   $11, $04    ; "GMA2" (invalid?)
 .byte   $11, $05    ; "GMA3" (copy-protection?)
-.byte   $11, $06    ; "GMA4"
+.byte   $11, $06    ; "GMA4" (decryption)
 .byte   $13, $00    ; "GMA5"
 .byte   $14, $08    ; "GMA6"
 

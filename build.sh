@@ -3,12 +3,10 @@
 echo "building Elite DX:"
 echo
 
-# the stage 0 loader is what gets loaded by `LOAD"*",8,1`
-# its only purpose is to hijack BASIC and load the next stage
-
-echo
 echo "* building loader:"
 
+# the stage 0 loader is what gets loaded by `LOAD"*",8,1`
+# its only purpose is to hijack BASIC and load the next stage
 echo "- compiling 'loader_stage0.asm'..."
 ./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage0.o \
     src/loader_stage0.asm
