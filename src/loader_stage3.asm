@@ -3,6 +3,8 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+; this file is part of "gma4.prg"
+
 ; this file includes two large blocks of scrambled code/data
 ; with the decryption routine wedged between at $7596
 

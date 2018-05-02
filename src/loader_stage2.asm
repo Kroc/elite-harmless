@@ -3,6 +3,8 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+; this file is part of "gma3.prg", there is no "gma2.prg" for reasons unknown
+
 .zeropage
 ; 4 unused (by the Kernal) bytes exist at $FB-$FE
 ZP_C1541_MEM       := $fb

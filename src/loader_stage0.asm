@@ -3,6 +3,8 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+; this file is part of "firebird.prg", the first stage in loading 
+
 ; this to be disassembled soon
 .byte   $0B
 .byte   $08, $01, $00, $9E, $32, $30, $36, $31
@@ -11,37 +13,37 @@
 .byte   $02
 
 filename:
-.byte   "GM*"       ; $47, $4D, $2A (PETSCII)
+.byte   "gm*"       ; $47, $4D, $2A (PETSCII)
 
 start:
     ; call Kernel SETMSG, "Set system error display switch at
     ; memory address $009D". A = the switch value.
     ; i.e. disable error messages?
-    lda #$00
+    lda # $00
     jsr $FF90
 
     ; set file parameters:
-    lda #$02        ; logical file number
-    ldx #$08        ; device number == drive 8
-    ldy #$FF        ; "secondary address" (i.e. use the PRG load address)
+    lda # $02       ; logical file number
+    ldx # $08       ; device number == drive 8
+    ldy # $FF       ; "secondary address" (i.e. use the PRG load address)
     jsr $FFBA
 
     ; set file name
-    lda #$03        ; length of file name
-    ldx #<filename  ; pointer to name address (lo)
-    ldy #>filename  ; pointer to name address (hi)
+    lda # $03       ; length of file name
+    ldx #< filename ; pointer to name address (lo)
+    ldy #> filename ; pointer to name address (hi)
     jsr $FFBD
 
     ; load file:
     ; note that the "secondary address" has been set as non-zero,
     ; telling the drive to use the load address present in the PRG file
-    lda #$00        ; = LOAD
+    lda # $00       ; = LOAD
     jsr $FFD5
     
     ; change the address of STOP key routine from $F6ED,
     ; to $FFED: the SCREEN routine which returns row/col count
     ; i.e. does nothing of use -- this effectively disables the STOP key
-    lda #$FF
+    lda # $FF
     sta $0329
 
 .repeat 24

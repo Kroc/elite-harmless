@@ -3,6 +3,8 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+; this file is part of "gma1.prg"
+
 ; a jump is made to code within the stage 3 loader ("gma4.prg")
 .import _7596
 
@@ -26,13 +28,13 @@ start:
     ; call Kernel SETMSG, "Set system error display switch at
     ; memory address $009D". A = the switch value.
     ; i.e. disable error messages?
-    lda #$00
+    lda # $00
     jsr $ff90
 
     ; change the address of STOP key routine from $F6ED,
     ; to $FFED: the SCREEN routine which returns row/col count
     ; i.e. does nothing of use -- this effectively disables the STOP key
-    lda #$ff
+    lda # $ff
     sta $0329
 
     ; set up the screen, display the "use the fast loader?" message.
@@ -41,7 +43,7 @@ start:
     jsr _062b
 
     ; load "GMA3" file
-    lda #$03
+    lda # $03
     jsr _03b5
 
     ; start GMA3's code -- note that the current X & Y
@@ -71,49 +73,49 @@ start:
     sta $0288
 
     ; change code somewhere?
-    lda #$4c
+    lda # $4c
     sta $ce0e
-    lda #$8a
+    lda # $8a
     sta $ce0f
-    lda #$03
+    lda # $03
     sta $ce10
     jmp _7596
 
     ;---------------------------------------------------------------------------
 
 _038a:
-;038a 18       clc 
-;038b 20 19 06 jsr $0619
-;038e a5 01    lda $01
-;0390 29 f8    and #$f8
-;0392 09 2e    ora #$2e
-;0394 85 01    sta $01
-;0396 a9 05    lda #$05
-;0398 20 b5 03 jsr $03b5
-;039b a9 06    lda #$06
-;039d 20 b5 03 jsr $03b5
-;03a0 a5 01    lda $01
-;03a2 29 f8    and #$f8
-;03a4 09 06    ora #$06
-;03a6 85 01    sta $01
-;03a8 38       sec 
-;03a9 20 19 06 jsr $0619
-;03ac 20 8a ff jsr $ff8a
-;03af 20 e7 ff jsr $ffe7
-;03b2 4c 22 1d jmp $1d22
+    clc 
+    jsr _0619
+    lda $01
+    and # $f8
+    ora # $2e
+    sta $01
+    lda # $05
+    jsr _03b5
+    lda # $06
+    jsr _03b5
+    lda $01
+    and # $f8
+    ora # $06
+    sta $01
+    sec 
+    jsr _0619
+    jsr $ff8a
+    jsr $ffe7
+    jmp $1d22
 
 _03b5:
     ; select the filename
     jsr _03c7
 
     ; set file parameters:
-    lda #$01        ; file number
-    ldx #$08        ; drive number
-    ldy #$01        ; "secondary address"
+    lda # $01       ; file number
+    ldx # $08       ; drive number
+    ldy # $01       ; "secondary address"
     jsr $ffba
 
     ; load file from disk:
-    lda #$00
+    lda # $00
     jsr $ffd5
     
     rts
@@ -126,7 +128,7 @@ _03c7:
     tax                 ; put the current A value aside
 
     clc                 ; clear carry flag (before doing add)
-    adc #'0'            ; convert A to a PETSCII numeral, i.e. "0"+A
+    adc # '0'           ; convert A to a PETSCII numeral, i.e. "0"+A
     sta _filename_num   ; change the filename to load, e.g. "GMA3"
     
     ; lookup the number in a table:
@@ -141,9 +143,9 @@ _03c7:
     sta _04bd
 
     ; set file name
-    ldx #<_filename
-    ldy #>_filename
-    lda #$04            ; file name length
+    ldx #< _filename
+    ldy #> _filename
+    lda # $04           ; file name length
     jsr $ffbd
     rts 
 
@@ -419,15 +421,20 @@ _04bd:
 ;0616 00       brk 
 ;0617 00       brk 
 ;0618 ff       ???
-;0619 a2 02    ldx #$02
-;061b b5 00    lda $00,x
-;061d 90 03    bcc $0622
-;061f bd 00 ce lda $ce00,x
-;0622 95 00    sta $00,x
-;0624 9d 00 ce sta $ce00,x
-;0627 e8       inx 
-;0628 d0 f1    bne $061b
-;062a 60       rts
+_0619:
+    ldx #$02
+_061b:
+    lda $00,x
+    bcc _0622
+    lda $ce00,x
+_0622:
+    sta $00,x
+    sta $ce00,x
+    inx 
+    bne _061b
+    rts
+
+;===============================================================================
 
 _062b:
     ; wait until the screen register is non-zero
@@ -439,7 +446,7 @@ _062b:
     ; move the text screen (from $0400) to $0800 by changing the value at
     ; $0288 that contains the high byte for the screen address. this means
     ; that the text screen now appears within the BASIC program area
-    lda #$08
+    lda # $08
     sta $0288
 
     ; reset the VIC II chip; clears the screen (at its new location)
@@ -447,18 +454,18 @@ _062b:
 
     ; change the RAM / ROM layout
     lda $d018       ; read the current state
-    and #%00001111  ; strip out bits 4-7 leaving the bits 0-3 intact
-    ora #%00100000  ; set bit 5 "%0010xxxx" to move the screen to $0800
+    and # %00001111 ; strip out bits 4-7 leaving the bits 0-3 intact
+    ora # %00100000 ; set bit 5 "%0010xxxx" to move the screen to $0800
     sta $d018            
 
     ; change border / background colour
-    lda $02
+    lda # $02
     sta $d020
     sta $d021
 
     ; write text to the screen
     ; "do you want to use the fast loader?"
-    ldx #$00
+    ldx # $00
     jsr _0670
 
     ; store the character index of the next string on the stack
@@ -476,7 +483,7 @@ _062b:
     ; write the red colour to the string, so when it gets printed again,
     ; the "use the fast loader?" text is made 'invisible'. this appears
     ; not to actually be used in practice
-    lda #$1c        ; red colour
+    lda # $1c       ; red colour
     sta _06b3
 
     ; read a keypress
@@ -485,10 +492,10 @@ _keypress:
     jsr $ffe4
     beq _keypress
 
-    cmp #'n'
+    cmp # 'n'
     beq _066e       ; user pressed N, print the next string and return
 
-    cmp #'y'        ; if user did not press Y, get another keypress
+    cmp # 'y'       ; if user did not press Y, get another keypress
     bne _keypress
 
     ; use fast-loader?
@@ -524,7 +531,7 @@ _067e:
 .repeat 35
 .byte   " "     ; 35 spaces (i.e. move to the right corner)
 .endrepeat
-.byte   "GMA86"
+.byte   "gma86"
 .repeat 9
 .byte   $11     ; cursor down 9 times
 .endrepeat
@@ -541,7 +548,7 @@ _06b3:
 .repeat 35
 .byte   " "     ; 35 spaces (i.e. move to the right corner)
 .endrepeat
-.byte   "GMA86"
+.byte   "gma86"
 .repeat 9
 .byte   $11     ; cursor down 9 times
 .endrepeat

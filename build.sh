@@ -7,18 +7,22 @@ echo "* building loader:"
 
 # the stage 0 loader is what gets loaded by `LOAD"*",8,1`
 # its only purpose is to hijack BASIC and load the next stage
-echo "- compiling 'loader_stage0.asm'..."
+echo "- assembling 'loader_stage0.asm'..."
 ./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage0.o \
     src/loader_stage0.asm
-echo "- compiling 'loader_stage1.asm'..."
+echo "- assembling 'loader_stage1.asm'..."
 ./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage1.o \
     src/loader_stage1.asm
-echo "- compiling 'loader_stage2.asm'..."
+echo "- assembling 'loader_stage2.asm'..."
 ./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage2.o \
     src/loader_stage2.asm
-echo "- compiling 'loader_stage3.asm'..."
+echo "- assembling 'loader_stage3.asm'..."
 ./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage3.o \
     src/loader_stage3.asm
+
+echo "- assembling 'loader_stage3b.asm'..."
+./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage3b.o \
+    src/loader_stage3b.asm
 
 echo "- linking 'firebird.prg'..."
 ./bin/cc65/bin/ld65 -C c64-asm.cfg \
