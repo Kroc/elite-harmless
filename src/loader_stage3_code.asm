@@ -33,6 +33,8 @@
 
 ;===============================================================================
 
+.code
+
 ;$4000:
 .byte   $7e, $56, $24, $03, $63, $cb, $14, $20
 .byte   $77, $64, $d0, $21, $26, $de, $db, $1f
@@ -1833,3 +1835,13 @@ decrypt_byte:                                                           ;$75c8
 ;===============================================================================
 
 _75e4:
+
+; these bytes are not encrypted!!! (they're the background-fill)
+; the linker will exclude these from the binary of the data-to-be-encrypted.
+; when the code is re-linked with the encrypted blob, these bytes are appended 
+.segment    "FILL"
+
+;_865b:
+.byte   $83, $00, $ff, $00, $ff, $00
+
+;$8660

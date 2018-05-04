@@ -42,6 +42,8 @@ echo "-     link 'gma3.prg'"
     build/loader_stage2.o \
     c64.lib
 
+#-------------------------------------------------------------------------------
+
 # "gma4.prg" will contain encrypted data/code blocks, so these areas of code
 # have to be linked first, then encrypted and then re-linked. this link
 # outputs the code and data-to-be-encrypted to seprate binaries:
@@ -69,6 +71,8 @@ echo "-     link 'gma4.prg'"
     build/loader_stage3_code.o \
     build/gma4_data.o \
     c64.lib
+
+#-------------------------------------------------------------------------------
 
 echo
 echo "* verifying checksums"
