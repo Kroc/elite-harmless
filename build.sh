@@ -43,9 +43,14 @@ echo "-     link 'gma3.prg'"
     c64.lib
 
 # "gma4.prg" will contain encrypted data/code blocks, so these areas of code
-# have to be linked first, then encrypted and then re-linked
+# have to be linked first, then encrypted and then re-linked. this link
+# outputs the code and data-to-be-encrypted to seprate binaries:
+#
+# - "gma4_code.o" = the decryption routine
+# - "gma4_data.o" = the binary to be encrypted and re-linked
+#
 echo "-     link 'gma4_*.bin'"
-./bin/cc65/bin/ld65 -C build/gma4_stage1.cfg -o build/gma4 \
+./bin/cc65/bin/ld65 -C build/gma4_decrypted.cfg -o build/gma4 \
     build/loader_stage3_code.o \
     build/loader_stage3_data.o \
 
@@ -60,7 +65,7 @@ echo "- assemble 'gma4_data.s'"
 
 # now re-link with the encrypted binary blobs
 echo "-     link 'gma4.prg'"
-./bin/cc65/bin/ld65 -C c64-asm.cfg -o bin/gma4.prg \
+./bin/cc65/bin/ld65 -C build/gma4_encrypted.cfg -o bin/gma4.prg \
     build/loader_stage3_code.o \
     build/gma4_data.o \
     c64.lib
