@@ -5,8 +5,12 @@
 
 ; this file is part of "gma1.prg"
 
+;-------------------------------------------------------------------------------
+
 ; a jump is made to code within the stage 3 loader ("gma4.prg")
-.import _7596
+.import     _7596
+
+;===============================================================================
 
 ; eight bytes of unused (by the Kernal) RAM exist at $0334, followed by
 ; the 192 byte Datasette buffer (no use to us here), another 4 unused bytes

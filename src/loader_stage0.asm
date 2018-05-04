@@ -3,13 +3,15 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-; this file is part of "firebird.prg", the first stage in loading 
+; this file is part of "firebird.prg", the first stage in loading
+
+.code
 
 ; this to be disassembled soon
-.byte   $0B
-.byte   $08, $01, $00, $9E, $32, $30, $36, $31
-.byte   $00, $00, $00, $A2, $65, $BD, $01, $08
-.byte   $9D, $A7, $02, $CA, $10, $F7, $4C, $C4
+.byte   $0b
+.byte   $08, $01, $00, $9e, $32, $30, $36, $31
+.byte   $00, $00, $00, $a2, $65, $bd, $01, $08
+.byte   $9d, $a7, $02, $ca, $10, $f7, $4c, $c4
 .byte   $02
 
 filename:
@@ -20,41 +22,45 @@ start:
     ; memory address $009D". A = the switch value.
     ; i.e. disable error messages?
     lda # $00
-    jsr $FF90
+    jsr $ff90
 
     ; set file parameters:
     lda # $02       ; logical file number
     ldx # $08       ; device number == drive 8
-    ldy # $FF       ; "secondary address" (i.e. use the PRG load address)
-    jsr $FFBA
+    ldy # $ff       ; "secondary address" (i.e. use the PRG load address)
+    jsr $ffba
 
     ; set file name
     lda # $03       ; length of file name
     ldx #< filename ; pointer to name address (lo)
     ldy #> filename ; pointer to name address (hi)
-    jsr $FFBD
+    jsr $ffbd
 
     ; load file:
     ; note that the "secondary address" has been set as non-zero,
     ; telling the drive to use the load address present in the PRG file
     lda # $00       ; = LOAD
-    jsr $FFD5
+    jsr $ffd5
     
     ; change the address of STOP key routine from $F6ED,
     ; to $FFED: the SCREEN routine which returns row/col count
     ; i.e. does nothing of use -- this effectively disables the STOP key
-    lda # $FF
+    lda # $ff
     sta $0329
 
 .repeat 24
-.byte   $EA
+    nop
 .endrepeat
 
     jmp $0334
 
+;===============================================================================
+
+.segment    "VECTORS"
+
 ; these are various vectors for BASIC -- the loader hijacks these to cause
 ; the loader to start immediately withtout the need for a BASIC bootstrap
-basic_vectors:
+
     ;$0300/1    execution address of warm reset, displaying optional BASIC
     ;           error message and entering BASIC idle loop. default: $E38B
 .addr   start

@@ -1,2 +1,4 @@
-*
-!.gitignore
+*.o
+*.s
+*.bin
+*.prg

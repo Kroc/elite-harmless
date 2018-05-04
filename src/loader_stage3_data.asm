@@ -3,13 +3,22 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-; this file is part of "gma4.prg"
+; "gma4.prg" consists of three parts, an encrypted data block ("DATA1"),
+; the decryption routine, and the encrypted binary of this code/data ("DATA2").
+; we need to be able to refer back to the load address of "gma4.prg", so this
+; import gets the load address as selected by the linker in "gam4.cfg"
+;;.import __DATA1_LOAD__
+
+;===============================================================================
 
 .zeropage
 ZP_COPY_TO      := $18
 ZP_COPY_FROM    := $1a
 
-.code
+;-------------------------------------------------------------------------------
+
+.segment    "DATA"
+
 ;$75e4
     ; relocate part of the binary payload in "gma4.prg"
     ; (copy $4000-$5600 to $0700-$1D00)
@@ -26,11 +35,12 @@ ZP_COPY_FROM    := $1a
 
     ;---------------------------------------------------------------------------
 
+    sei
+    
     ; change the C64's memory layout:
     ; bits 0-2 of the processor port ($01) control the memory banks,
     ; a value of of %xxxxx100 turns off the BASIC & KERNAL ROMS and
-    ; places the character ROM/RAM into $D000-$DFFF
-    sei 
+    ; places the character ROM/RAM into $D000-$DFFF 
     lda $01             ; get the current processor port value
     and # %11111000     ; reset the bottom 3 bits and keep the top 5 the same 
     ora # %00000100     ; switch BASIC & KERNAL to RAM, Character ROM on
@@ -183,16 +193,15 @@ ZP_COPY_FROM    := $1a
     ;---------------------------------------------------------------------------
 
     lda # $00
-    sta $18
+    sta ZP_COPY_TO+0
     tay 
     ldx #> $4000
 _76d8:
-    stx $19
-_76da:
-    sta ($18), y
+    stx ZP_COPY_TO+1
+:   sta (ZP_COPY_TO), y
     iny 
-    bne _76da
-    ldx $19
+    bne :-
+    ldx ZP_COPY_TO+1
     inx 
     cpx # $60
     bne _76d8
@@ -202,88 +211,91 @@ _76da:
 
     lda # $10           ; is this intended to mimic the normal C64 reset state?
 _76e8:
-    stx $19
-_76ea:
-    sta ($18), y
+    stx ZP_COPY_TO+1
+:   sta (ZP_COPY_TO), y
     iny 
-    bne _76ea
-    ldx $19
+    bne :-
+    ldx ZP_COPY_TO+1
     inx 
     cpx # $68
     bne _76e8
 
+    ; copy 279 bytes of data to $66d0-$67E7
     ;---------------------------------------------------------------------------
 
     lda #< $66d0
-    sta $18
+    sta ZP_COPY_TO+0
     lda #> $66d0
-    sta $19
-    lda # $3a
-    sta $1a
-    lda # $78
+    sta ZP_COPY_TO+1
+    lda #< _783a
+    sta ZP_COPY_FROM+0
+    lda #> _783a
     jsr _7827
 
-    lda # $00
-    sta $18
-    lda # $60
-    sta $19
-    ldx # $19
+    ; todo: this looks like some kind of monkey-patch
+    ;---------------------------------------------------------------------------
+
+    lda #< $6000
+    sta ZP_COPY_TO+0
+    lda #> $6000
+    sta ZP_COPY_TO+1
+    ldx # $19               ; size of copy - 25 x 256 = 6'400 bytes
 _7711:
     lda # $70
     ldy # $24
-    sta ($18),y
+    sta (ZP_COPY_TO), y
     ldy # $03
-    sta ($18),y
+    sta (ZP_COPY_TO), y
     dey 
     lda # $00
 _771e:
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     dey 
     bpl _771e
     ldy # $25
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     iny 
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     iny 
-    sta ($18),y
-    lda $18
+    sta (ZP_COPY_TO),y
+    lda ZP_COPY_TO+0
     clc 
     adc # $28
-    sta $18
+    sta ZP_COPY_TO+0
     bcc _7738
-    inc $19
+    inc ZP_COPY_TO+1
 _7738:
     dex 
     bne _7711
     lda # $00
-    sta $18
+    sta ZP_COPY_TO+0
     lda # $64
-    sta $19
+    sta ZP_COPY_TO+1
     ldx # $12
 _7745:
     lda # $70
     ldy # $24
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     ldy # $03
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     dey 
     lda # $00
 _7752:
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     dey 
     bpl _7752
     ldy # $25
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     iny 
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     iny 
-    sta ($18),y
-    lda $18
+    sta (ZP_COPY_TO),y
+    lda ZP_COPY_TO+0
     clc 
     adc # $28
-    sta $18
+    sta ZP_COPY_TO+0
     bcc _776c
-    inc $19
+    inc ZP_COPY_TO+1
 _776c:
     dex 
     bne _7745
@@ -294,24 +306,24 @@ _7773:
     dey 
     bpl _7773
     lda # $00
-    sta $18
+    sta ZP_COPY_TO+0
     tay 
     ldx # $d8
-    stx $19
+    stx ZP_COPY_TO+1
     ldx # $04
 _7784:
-    sta ($18),y
+    sta (ZP_COPY_TO),y
     iny 
     bne _7784
-    inc $19
+    inc ZP_COPY_TO+1
     dex 
     bne _7784
     lda # $d0
-    sta $18
+    sta ZP_COPY_TO+0
     lda # $da
-    sta $19
+    sta ZP_COPY_TO+1
     lda # $5a
-    sta $1a
+    sta ZP_COPY_FROM+0
     lda # $79
     jsr _7827
     ldy # $22
@@ -347,11 +359,11 @@ _77a3:
     cli 
     ldx # $09
     lda # $90
-    sta $18
+    sta ZP_COPY_TO+0
     lda # $ef
-    sta $19
+    sta ZP_COPY_TO+1
     lda # $7a
-    sta $1a
+    sta ZP_COPY_FROM+0
     lda # $7d
     jsr copy_bytes
     ldy # $00
@@ -374,7 +386,7 @@ copy_bytes:                                                             ;$7814
     ; $18/$19 = pointer to address to copy to
     ;     $1a = low-byte of address to copy from
     ;       A = high-byte of address to copy from (gets placed into $1b)
-    ;       X = number of 265-bytes blocks to copy
+    ;       X = number of 265-byte blocks to copy
 
     sta ZP_COPY_FROM+1
     ldy # $00
@@ -394,13 +406,13 @@ _7827:                                                                  ;$7827
     ldx # $01
     jsr copy_bytes
 
+    ; copy a further 22 bytes
     ldy # $17
     ldx # $01
-_7830:                                                                  ;$7830
-    lda ($1a), y
-    sta ($18), y
+:   lda (ZP_COPY_FROM), y                                               ;$7830
+    sta (ZP_COPY_TO), y
     dey 
-    bpl _7830
+    bpl :-
     ldx # $00
     rts 
 
@@ -441,7 +453,10 @@ _783a:
 .byte   $07, $07, $07, $27, $07, $27, $27, $27
 .byte   $27, $27, $27, $27, $27, $27, $27, $27
 .byte   $27, $27, $27, $27, $27, $07, $27, $24
-.byte   $24, $24, $24, $17, $17, $07, $00, $00
+.byte   $24, $24, $24, $17, $17, $07
+
+_7951:
+.byte                                 $00, $00
 .byte   $00, $60, $d3, $66, $1d, $a0, $40, $b3
 .byte   $d3, $00, $00, $00, $00, $05, $05, $05
 .byte   $05, $05, $05, $0d, $0d, $0d, $0d, $0d
@@ -860,3 +875,5 @@ _783a:
 .byte   $00, $00, $00, $00, $00, $00, $00, $00
 .byte   $00, $00, $00, $00, $00, $00, $00, $00
 .byte   $00, $f5, $00, $ff, $00, $ff, $00, $ff
+
+;$8660
