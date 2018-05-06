@@ -17,5 +17,6 @@
     "[cc65]": {
         "editor.tabSize": 8,
         "editor.detectIndentation": false,
+        "editor.wordWrap": "off"
     },
 }
