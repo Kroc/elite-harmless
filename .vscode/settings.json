@@ -10,8 +10,12 @@
     "powershell.startAutomatically": false,
     "files.exclude": {
         "**/*.o": true,
-        "**/*.s" : true,
+        "**/*.s": true,
         "**/*.prg": true,
         "**/*.bin": true
-    }
+    },
+    "[cc65]": {
+        "editor.tabSize": 8,
+        "editor.detectIndentation": false,
+    },
 }

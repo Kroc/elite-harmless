@@ -1,4 +1,5 @@
 #!/usr/bin/sh
+set -o pipefail 
 
 echo "building Elite DX:"
 echo

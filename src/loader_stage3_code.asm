@@ -1757,7 +1757,7 @@
 ;===============================================================================
 
 _7593:
-.byte   $20, $34, $01   ;jsr $0134?
+.byte   $20, $34, $01
 
 _7596:
     cld                 ; clear decimal mode (why??)
@@ -1814,8 +1814,7 @@ decrypt_byte:                                                           ;$75c8
     ; look up the data-table given by pointer in $18/$19 and add Y
     lda (TABLELO), y
     sec                 ; set carry flag (?)
-    sbc PARAM_X         ; subtract the X parameter value, plus 1
-                        ; A:$83 - X':$8e + 1 = $F5 (carry)
+    sbc PARAM_X         ; subtract the X parameter value
     sta (TABLELO), y    ; write this back to the table
     sta PARAM_X         ; use this as the next deduction
 
@@ -1835,6 +1834,8 @@ decrypt_byte:                                                           ;$75c8
 ;===============================================================================
 
 _75e4:
+
+;===============================================================================
 
 ; these bytes are not encrypted!!! (they're the background-fill)
 ; the linker will exclude these from the binary of the data-to-be-encrypted.
