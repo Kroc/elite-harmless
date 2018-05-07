@@ -6,6 +6,9 @@ echo
 
 echo "* building loader:"
 
+echo "- assemble 'elite_consts.asm'"
+./bin/cc65/bin/ca65 -t c64 -g -o build/elite_consts.o \
+    src/elite_consts.asm
 echo "- assemble 'loader_stage0.asm'"
 ./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage0.o \
     src/loader_stage0.asm
@@ -35,6 +38,7 @@ echo "-     link 'gma1.prg'"
     build/loader_stage1.o \
     build/loader_stage3_code.o \
     build/loader_stage3_data.o \
+    build/elite_consts.o \
     c64.lib
 
 echo "-     link 'gma3.prg'"
@@ -56,6 +60,7 @@ echo "-     link 'gma4_*.bin'"
 ./bin/cc65/bin/ld65 -C build/gma4_decrypted.cfg -o build/gma4 \
     build/loader_stage3_code.o \
     build/loader_stage3_data.o \
+    build/elite_consts.o
 
 echo "-  encrypt 'gma4_data.bin'"
 python3 build/encrypt.py \
