@@ -8,9 +8,15 @@
 ;-------------------------------------------------------------------------------
 
 ; a jump is made to code within the stage 3 loader ("gma4.prg")
+; TODO: this import is not working correctly because the code/data in GMA4
+; needs assigning to segments to generate the correct address
 .import _7596
 
+.export _gma1_end
+
 ;===============================================================================
+
+.segment        "GMA1"
 
 ; eight bytes of unused (by the Kernal) RAM exist at $0334, followed by
 ; the 192 byte Datasette buffer (no use to us here), another 4 unused bytes
@@ -24,9 +30,9 @@ _0337:
         .byte   $00, $00        ; "GMA1" (invalid)
         .byte   $11, $04        ; "GMA2" (invalid?)
         .byte   $11, $05        ; "GMA3" (copy-protection?)
-        .byte   $11, $06        ; "GMA4" (decryption)
-        .byte   $13, $00        ; "GMA5"
-        .byte   $14, $08        ; "GMA6"
+        .byte   $11, $06        ; "GMA4" (decryption, payload 1 & 2)
+        .byte   $13, $00        ; "GMA5" (payload 3?)
+        .byte   $14, $08        ; "GMA6" (payload 4?)
 
 start:
         ; call Kernel SETMSG, "Set system error display switch at
@@ -79,9 +85,9 @@ start:
         ; change code somewhere?
         lda # $4c
         sta $ce0e
-        lda # $8a
+        lda #< _038a
         sta $ce0f
-        lda # $03
+        lda #> _038a
         sta $ce10
         jmp _7596
 
@@ -94,10 +100,13 @@ _038a:  clc
         and # $f8
         ora # $2e
         sta $01
+        
         lda # $05
         jsr _03b5
+
         lda # $06
         jsr _03b5
+        
         lda $01
         and # $f8
         ora # $06
@@ -162,6 +171,9 @@ _filename_num:
         .byte   " was here 1985 ok"
 
 _03fc:
+        ; fast-loader:
+        ; (to be decompiled later)
+
         ;03fc 20 da 05 jsr $05da
         ;03ff 20 cf 05 jsr $05cf
         ;0402 60       rts 
@@ -250,13 +262,107 @@ _03fc:
         ;04b5 20 42 d0 jsr $d042
         ;04b8 a9 ff    lda #$ff
 
-_04b9:
-        .byte   $ff
+        .byte   $20, $da, $05
+        .byte   $20, $cf, $05
+        .byte   $60
+        .byte   $a9, $06
+        .byte   $85, $31
+        .byte   $20, $0a, $f5
+        .byte   $50, $fe
+        .byte   $b8
+        .byte   $ad, $01, $1c
+        .byte   $99, $00, $06
+        .byte   $c8
+        .byte   $d0, $f4
+        .byte   $a0, $ba
+        .byte   $50, $fe
+        .byte   $b8
+        .byte   $ad, $01, $1c
+        .byte   $99, $00, $01
+        .byte   $c8
+        .byte   $d0, $f4
+        .byte   $20, $e0, $f8
+        .byte   $a5, $38
+        .byte   $c5, $47
+        .byte   $f0, $04
+        .byte   $a9, $04
+        .byte   $d0, $3f
+        .byte   $20, $e9, $f5
+        .byte   $c5, $3a
+        .byte   $f0, $04
+        .byte   $a9, $05
+        .byte   $d0, $34
+        .byte   $ad, $01, $06
+        .byte   $85, $07
+        .byte   $a0, $02
+        .byte   $a2, $ff
+        .byte   $ad, $00, $06
+        .byte   $f0, $03
+        .byte   $8e, $01, $06
+        .byte   $ee, $01, $06
+        .byte   $be, $00, $06
+        .byte   $e0, $01
+        .byte   $d0, $03
+        .byte   $20, $82, $03
+        .byte   $20, $82, $03
+        .byte   $c8
+        .byte   $cc, $01, $06
+        .byte   $d0, $ed
+        .byte   $ad, $00, $06
+        .byte   $f0, $0e
+        .byte   $c5, $06
+        .byte   $85, $06
+        .byte   $f0, $05
+        .byte   $a9, $01
+        .byte   $4c, $69, $f9
+        .byte   $4c, $04, $03
+        .byte   $a2, $01
+        .byte   $20, $82, $03
+        .byte   $a2, $02
+        .byte   $20, $82, $03
+        .byte   $a9, $7f
+        .byte   $4c, $69, $f9
+        .byte   $2c, $00, $18
+        .byte   $10, $fb
+        .byte   $a9, $10
+        .byte   $8d, $00, $18
+        .byte   $2c, $00, $18
+        .byte   $30, $fb
+        .byte   $8a
+        .byte   $4a
+        .byte   $4a       
+        .byte   $4a       
+        .byte   $4a       
+        .byte   $8d, $00, $18
+        .byte   $0a       
+        .byte   $29, $0f    
+        .byte   $8d, $00, $18 
+        .byte   $8a        
+        .byte   $29, $0f    
+        .byte   $8d, $00, $18 
+        .byte   $0a       
+        .byte   $29, $0f    
+        .byte   $8d, $00, $18 
+        .byte   $a9, $0f    
+        .byte   $ea        
+        .byte   $8d, $00, $18 
+        .byte   $60        
+        .byte   $20, $42, $d0 
+        .byte   $a9
+
+        ; this label reference appears to be for self-modifying code
+_04b9:        
+        .byte   $ff    
+
         ;04ba 85 06    sta $06
         ;04bc a9 ff    lda #$ff
 
+        .byte   $85, $06, $a9
+        
+        ; self-modifying code again
 _04bd:
         .byte   $ff
+
         ;04be 85 07    sta $07
         ;04c0 a9 e0    lda #$e0
         ;04c2 85 00    sta $00
@@ -400,7 +506,8 @@ _04bd:
         ;05f4 60       rts 
         ;05f5 ee 20 d0 inc $d020
         ;05f8 ce 20 d0 dec $d020
-        ;05fb 60       rts 
+        ;05fb 60       rts
+
         ;05fc a0 50    ldy #$50
         ;05fe 0a       asl a
         ;05ff 05 00    ora $00
@@ -426,12 +533,60 @@ _04bd:
         ;0617 00       brk 
         ;0618 ff       ???
 
-_0619:  ldx #$02
-_061b:  lda $00,x
+        .byte   $85, $07, $a9, $e0, $85, $00, $a5, $00
+        .byte   $30, $fc, $c9, $7f, $f0, $02, $90, $f2
+        .byte   $4c, $48, $d0, $a5, $a4, $8d, $00, $dd
+        .byte   $ad, $00, $dd, $10, $fb, $ad, $12, $d0
+        .byte   $c9, $31, $90, $06, $29, $06, $c9, $02
+        .byte   $f0, $f3, $a5, $a5, $8d, $00, $dd, $ea
+        .byte   $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+        .byte   $ea, $ae, $00, $dd, $bd, $00, $cf, $ae
+        .byte   $00, $dd, $1d, $08, $cf, $ae, $00, $dd
+        .byte   $1d, $10, $cf, $ae, $00, $dd, $1d, $18
+        .byte   $cf, $60, $a9, $00, $85, $a4, $20, $a4
+        .byte   $05, $a9, $57, $20, $dd, $ed, $a5, $a4
+        .byte   $20, $dd, $ed, $a9, $03, $20, $dd, $ed
+        .byte   $a9, $20, $20, $dd, $ed, $a4, $a4, $18
+        .byte   $a5, $a4, $69, $20, $85, $a4, $b9, $03
+        .byte   $04, $20, $dd, $ed, $c8, $c4, $a4, $d0
+        .byte   $f5, $20, $cc, $ff, $a5, $a4, $c9, $ce
+        .byte   $90, $cc, $20, $a4, $05, $a9, $45, $20
+        .byte   $dd, $ed, $a9, $b2, $20, $dd, $ed, $a9
+        .byte   $03, $20, $dd, $ed, $20, $cc, $ff, $ad
+        .byte   $00, $dd, $29, $07, $85, $a5, $09, $08
+        .byte   $85, $a4, $78, $20, $c4, $05, $a0, $00
+        .byte   $20, $f5, $05, $20, $d1, $04, $c9, $01
+        .byte   $d0, $07, $20, $d1, $04, $c9, $01, $d0
+        .byte   $09, $91, $ae, $c8, $d0, $ea, $e6, $af
+        .byte   $d0, $e6, $a5, $a5, $8d, $18, $06, $20
+        .byte   $46, $f6, $ad, $11, $d0, $10, $fb, $20
+        .byte   $a3, $fd, $ad, $00, $dd, $29, $f8, $0d
+        .byte   $18, $06, $8d, $00, $dd, $60, $a9, $00
+        .byte   $20, $bd, $ff, $a9, $0f, $a8, $a2, $08
+        .byte   $20, $ba, $ff, $20, $c0, $ff, $a2, $0f
+        .byte   $20, $c9, $ff, $a9, $4d, $20, $d2, $ff
+        .byte   $a9, $2d, $20, $d2, $ff, $60, $20, $d1
+        .byte   $04, $85, $ae, $20, $d1, $04, $85, $af
+        .byte   $60, $a9, $10, $8d, $30, $03, $a9, $05
+        .byte   $8d, $31, $03, $60, $a2, $00, $a0, $00
+        .byte   $a9, $08, $8d, $18, $06, $bd, $fc, $05
+        .byte   $99, $00, $cf, $c8, $ce, $18, $06, $d0
+        .byte   $f7, $e8, $e0, $1c, $90, $ea, $60, $ee
+        .byte   $20, $d0, $ce, $20, $d0, $60, $a0, $50
+        .byte   $0a, $05, $00, $00, $00, $00, $20, $10
+        .byte   $02, $01, $ff, $ff, $ff, $ff, $80, $40
+        .byte   $08, $04, $ff, $ff, $ff, $ff, $00, $00
+        .byte   $00, $00, $ff
+
+
+;-------------------------------------------------------------------------------
+
+_0619:  ldx # $02
+_061b:  lda $00, x
         bcc _0622
-        lda $ce00,x
-_0622:  sta $00,x
-        sta $ce00,x
+        lda $ce00, x
+_0622:  sta $00, x
+        sta $ce00, x
         inx 
         bne _061b
         rts
@@ -555,8 +710,10 @@ _06b3:  .byte   $9e             ; yellow text
                 .byte   " "     ; 14 spaces (centre text)
         .endrepeat
         .byte   "loading", $0d, $0d
-        .repeat 14
+        .repeat 15
                 .byte   " "     ; 15 spaces (centre text)
         .endrepeat
         .byte   "elite."
         .byte   $00             ; terminate string
+
+_gma1_end:

@@ -1,5 +1,12 @@
 #!/usr/bin/sh
-set -o pipefail 
+
+# "Elite" C64 disassembly / "Elite DX", cc0 2018, see LICENSE.txt
+# "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
+# <github.com/Kroc/EliteDX>
+#===============================================================================
+
+# stop further processing on any error
+set -e
 
 echo "building Elite DX:"
 echo
@@ -32,6 +39,8 @@ echo "-     link 'firebird.prg'"
     build/loader_stage0.o \
     c64.lib
 
+# the stage 1 loader contains the fast-loader code,
+# but also a menu to opt for slow-loading
 echo "-     link 'gma1.prg'"
 ./bin/cc65/bin/ld65 -C build/gma1.cfg \
     -o bin/gma1.prg \

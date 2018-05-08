@@ -1,5 +1,7 @@
-
-
+; "Elite" C64 disassembly / "Elite DX", cc0 2018, see LICENSE.txt
+; "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
+; <github.com/Kroc/EliteDX>
+;===============================================================================
 
 ; the VIC-II bank, where Elite places graphics (bitmap, sprites)
 ; it's a 16 KB block of memory selected from these choices:
@@ -14,6 +16,13 @@ vic_bank = 1
 ; the lower two-bits of register $DD00 controls the VIC-II bank
 ; use this exported value to set the correct VIC-II bank chosen above
 ; (the binary value is inverted compared to the canonical bank numbers)
+; you should retain the top 6 bits, e.g.:
+;
+;       lda $dd00               ; read the serial bus / VIC-II bank state
+;       and # %11111100         ; keep current value except bits 0-1 (VIC bank)
+;       ora # ELITE_VIC_BANK    ; set bits for the VIC-II bank (inverted)
+;       sta $dd00
+;
 .export ELITE_VIC_BANK = ~vic_bank & %00000011
 .export ELITE_VIC_ADDR = vic_bank * $4000
 
@@ -48,8 +57,10 @@ vic_screen = 8
 ;
 vic_memory = 0
 
-.export ELITE_CHARSET_ADDR = vic_memory * $0800
-.export ELITE_BITMAP_ADDR  = ((vic_memory & %0000100) >> 2) * $2000
+.export ELITE_CHARSET_ADDR = ELITE_VIC_ADDR + (vic_memory * $0800)
+.out .sprintf("%s%04x", ": ELITE_CHARSET_ADDR = $", ELITE_CHARSET_ADDR)
+.export ELITE_BITMAP_ADDR  = ELITE_VIC_ADDR + ((vic_memory & %0000100) >> 2) * $2000
+.out .sprintf("%s%04x", ": ELITE_BITMAP_ADDR  = $", ELITE_BITMAP_ADDR)
 
 .export ELITE_D018 = ((vic_screen & 15) << 4) | (((vic_memory & 7) << 1) & %00001110 )
 

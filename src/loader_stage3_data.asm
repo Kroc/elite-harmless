@@ -87,12 +87,16 @@ ZP_COPY_FROM    := $1a
         sta $dd0d               ; non-maskable interrupt register
 
         ; set up VIC-II memory:
+        ; NOTE: during loading, the bitmap screen is not set at the same
+        ;       location as it will be when the game begins
+        ;
         ; %1000xxxx = set screen to VIC+$2000,
         ;             text screen   @ $6000..$6400
-        ; %xxxx000x = set character set to VIC+$0000 ($6000..$6800)
-        ;             bitmap screen @ $6000..$8000
+        ; %xxxx000x = set character set to VIC+$0000 ($4000..$4800)
+        ;             bitmap screen @ $4000..$6000
         ; %xxxxxxx1 = N/A! (but included in the original source)
-        lda # ELITE_D018 | %00000001
+        ;
+        lda # %10000001
         sta $d018
 
         ; border colour black
@@ -162,11 +166,13 @@ ZP_COPY_FROM    := $1a
         sta $d010
 
         ; roughly centre sprite 0 on screen
+        ; (crosshair?)
         ldx # 161
         ldy # 101
         stx $d000               ; sprite 0 x-position
         sty $d001               ; sprite 0 y-position
         
+        ; setup (but don't display) the trumbles
         lda # 18
         ldy # 12
         sta $d002               ; sprite 1 x-position
@@ -194,7 +200,7 @@ ZP_COPY_FROM    := $1a
         lda # %0000010
         sta $d01b
 
-        ; erase $4000-$6000:
+        ; erase $4000-$6000: (bitmap screen?)
         ;-----------------------------------------------------------------------
 
         lda # $00
@@ -211,7 +217,7 @@ _76d8:  stx ZP_COPY_TO+1
         cpx # $60
         bne _76d8
 
-        ; erase $6000-$6800
+        ; erase $6000-$6800 (character set?)
         ;-----------------------------------------------------------------------
 
         lda # $10
