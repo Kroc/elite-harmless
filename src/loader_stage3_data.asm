@@ -4,12 +4,7 @@
 ;===============================================================================
 
 .include        "c64.asm"
-
-.import ELITE_VIC_DD00          :direct
-.import ELITE_TXTSCR_D018       :direct
-
-.import ELITE_TXTSCR_ADDR       :absolute                       ;=$6000..$6400
-.import ELITE_BITMAP_ADDR       :absolute                       ;=$4000..$6000
+.include        "elite_consts.asm"
 
 ;-------------------------------------------------------------------------------
 
@@ -251,12 +246,13 @@ _76e8:  stx ZP_COPY_TO+1
         lda #> _783a
         jsr _7827
 
-        ; set the screen-colours for the hi-res bitmap
+        ; set the screen-colours for the menu-screen:
+        ; (high-resolution section only, no HUD)
         ;-----------------------------------------------------------------------
 
-        lda #< $6000
+        lda #< ELITE_MENUSCR_COLOR_ADDR
         sta ZP_COPY_TO+0
-        lda #> $6000
+        lda #> ELITE_MENUSCR_COLOR_ADDR
         sta ZP_COPY_TO+1
 
         ldx # 25                ; 25-rows
@@ -267,7 +263,7 @@ _76e8:  stx ZP_COPY_TO+1
 _7711:  lda # .color_nybbles( YELLOW, BLACK )
         ldy # 36                ; set the colour on column 37
         sta (ZP_COPY_TO), y
-        ldy # $03               ; set the colour on column 4
+        ldy # 3                 ; set the colour on column 4
         sta (ZP_COPY_TO), y
         dey
 
@@ -284,7 +280,8 @@ _7711:  lda # .color_nybbles( YELLOW, BLACK )
         iny 
         sta (ZP_COPY_TO), y     ; and column 40
     
-        ; move to the next row (add 40 columns)
+        ; move to the next row
+        ; (add 40 columns)
         lda ZP_COPY_TO+0
         clc 
         adc # 40
@@ -294,14 +291,16 @@ _7711:  lda # .color_nybbles( YELLOW, BLACK )
 :       dex                     ; repeat for 25 rows
         bne _7711
 
+        ; set the screen-colours for the high-resolution
+        ; bitmap portion of the main flight-screen
         ;-----------------------------------------------------------------------
 
-        lda #< $6400
+        lda #< ELITE_MAINSCR_COLOR_ADDR
         sta ZP_COPY_TO+0
-        lda #> $6400
+        lda #> ELITE_MAINSCR_COLOR_ADDR
         sta ZP_COPY_TO+1
 
-        ldx # $12
+        ldx # $12               ; 18 rows
 
 _7745:  lda # $70
         ldy # $24
@@ -330,11 +329,11 @@ _776c:
         dex 
         bne _7745
 
-        ; set yellow colour across the bottom row of the text-screen
+        ; set yellow colour across the bottom row of the menu-screen
         ; write $70 from $63e4 to $63c4
         lda # .color_nybbles( YELLOW, BLACK )
         ldy # $1f               ; we'll write 31 chars (colour-cells)
-:       sta ELITE_TXTSCR_ADDR + (24 * 40) + 4, y
+:       sta ELITE_MENUSCR_COLOR_ADDR + (24 * 40) + 4, y
         dey 
         bpl :-
 

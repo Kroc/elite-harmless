@@ -31,8 +31,11 @@ vic_bank = 1
 ; or, in the case of high-resolution bitmap mode, colour-cell information where
 ; each byte represents the fore/back colour (two nybbles) for each 8x8 cell.
 ;
-; elite uses two game screens -- a flight screen (high-resolution bitmap mode),
-; and a menu screen (text-mode) such as when docked.
+; elite uses two game screens -- a main-screen (flight) and a menu-screen
+; (such as when docked). the flight-screen switches from high-resolution bitmap
+; mode to multi-colour bitmap mode for the HUD at the bottom of the screen
+; -- it's important to note that the way high-resolution and multi-colour
+; bitmap modes store colour is _very_ different
 ;
 ; the location in memory of the text-screen / colour-data, character-set and
 ; bitmap are determined by a single register, $D018, consisting of two fields:
@@ -50,12 +53,12 @@ vic_bank = 1
 ;  6 = +$1800   /   14 = +$3800
 ;  7 = +$1C00   /   15 = +$3C00
 ;
-vic_text_screen   = 8
+elite_menuscr_vic   = 8
 vic_bitmap_colour = 9
 
-.export ELITE_TXTSCR_ADDR       :absolute \
-        = ELITE_VIC_ADDR + vic_text_screen   * $0400
-.export ELITE_BITMAP_COLOR_ADDR :absolute \
+.export ELITE_MENUSCR_COLOR_ADDR :absolute \
+        = ELITE_VIC_ADDR + elite_menuscr_vic * $0400
+.export ELITE_MAINSCR_COLOR_ADDR :absolute \
         = ELITE_VIC_ADDR + vic_bitmap_colour * $0400
 
 ; the upper bits of register $D018 select the location of the character set,
@@ -78,11 +81,11 @@ vic_memory = 0
 
 .export ELITE_BITMAP_ADDR :absolute \
         = ELITE_VIC_ADDR + ((vic_memory & %0000100) >> 2) * $2000
-.out .sprintf("%s%04x", ": ELITE_BITMAP_ADDR       = $", ELITE_BITMAP_ADDR)
-.out .sprintf("%s%04x", ": ELITE_BITMAP_COLOR_ADDR = $", ELITE_BITMAP_COLOR_ADDR)
-.out .sprintf("%s%04x", ": ELITE_TXTSCR_ADDR       = $", ELITE_TXTSCR_ADDR)
+.out .sprintf("%s%04x", ": ELITE_BITMAP_ADDR        = $", ELITE_BITMAP_ADDR)
+.out .sprintf("%s%04x", ": ELITE_MAINSCR_COLOR_ADDR = $", ELITE_MAINSCR_COLOR_ADDR)
+.out .sprintf("%s%04x", ": ELITE_MENUSCR_COLOR_ADDR = $", ELITE_MENUSCR_COLOR_ADDR)
 
 .export ELITE_BITMAP_D018 :direct \
-        = ((vic_text_screen & 15) << 4) | (((vic_memory & 7) << 1) & %00001110)
+        = ((elite_menuscr_vic & 15) << 4) | (((vic_memory & 7) << 1) & %00001110)
 .export ELITE_TXTSCR_D018 :direct \
-        = ((vic_text_screen & 15) << 4) | (((vic_memory & 7) << 1) & %00001110)
+        = ((elite_menuscr_vic & 15) << 4) | (((vic_memory & 7) << 1) & %00001110)
