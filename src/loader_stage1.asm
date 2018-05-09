@@ -54,9 +54,13 @@ start:
         lda # $03
         jsr _03b5
 
+.ifdef  OPTION_NOCOPY
         ; start GMA3's code -- note that the current X & Y
         ; (pointer to filename) are re-used in here
         jsr $c800
+.else
+        jmp :+
+.endif
 
         ; is the value at $02 exactly $97?
         ; (i.e. the result of copy-protection check)

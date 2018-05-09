@@ -12,6 +12,8 @@
         "**/*.o": true,
         "**/*.s": true,
         "**/*.prg": true,
+        "**/*.d64": true,
+        "**/*.g64": true,
         "**/*.bin": true
     },
     "[cc65]": {
@@ -19,4 +21,5 @@
         "editor.detectIndentation": false,
         "editor.wordWrap": "off"
     },
+    "terminal.integrated.shell.windows": "C:\\Windows\\sysnative\\bash.exe",
 }
