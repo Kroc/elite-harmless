@@ -7,6 +7,8 @@
 
 ;-------------------------------------------------------------------------------
 
+.include        "c64.asm"
+
 ; a jump is made to code within the stage 3 loader ("gma4.prg")
 ; TODO: this import is not working correctly because the code/data in GMA4
 ; needs assigning to segments to generate the correct address
@@ -76,12 +78,12 @@ start:
         jsr $ff81           ; re-init the screen again
 
         ; change background / border colour to red
-        lda # $02
+        lda # RED
         sta $d020
         sta $d021
     
         ; change the text-screen back to $0400:
-        lda # $04
+        lda #> $0400
         sta $0288
 
         ; change code somewhere?
@@ -96,30 +98,38 @@ start:
         ;-----------------------------------------------------------------------
 
         ; after GMA4's post-decrypt code, we jump here!
-_038a:  clc 
+_038a:  clc
         jsr _0619
-        lda $01
-        and # $f8
-        ora # $2e
+        
+        lda $01                 ; read the processor port
+        and # %11111000         ; unset the bottom three bits
+        ora # %00101110         ; KERNAL ROM on / turn off the datasette!?
         sta $01
         
+        ; load "gma5.prg"
         lda # $05
         jsr _03b5
 
+        ; load "gma6.prg"
         lda # $06
         jsr _03b5
         
         lda $01
-        and # $f8
-        ora # $06
+        and # %11111000
+        ora # %00000110         ; KERNAL ROM on
         sta $01
+
         sec 
         jsr _0619
-        jsr $ff8a
-        jsr $ffe7
+
+        jsr $ff8a               ; restore the vector table ($0314-$0333)
+        jsr $ffe7               ; close all open files
+
         jmp $1d22
 
+
 _03b5:
+        ;-----------------------------------------------------------------------
         ; select the filename
         jsr _03c7
 
@@ -171,6 +181,8 @@ _filename_num:
 
         ;$03eb: hidden message (not part of the filename)
         .byte   " was here 1985 ok"
+
+;===============================================================================
 
 _03fc:
         ; fast-loader:
@@ -583,11 +595,15 @@ _04bd:
 
 ;-------------------------------------------------------------------------------
 
+        ; backup $02-$FF to $CE02-$CEFF
+
+        ; load value at $02 (should be $97?)
+        ; carry is a flag
 _0619:  ldx # $02
 _061b:  lda $00, x
-        bcc _0622
+        bcc :+
         lda $ce00, x
-_0622:  sta $00, x
+:       sta $00, x
         sta $ce00, x
         inx 
         bne _061b

@@ -26,7 +26,7 @@
 
 ;-------------------------------------------------------------------------------
 
-; the stage 1 loader ("gma3.prg") jumps into here 
+; the stage 1 loader ("gma1.prg") jumps into here 
 .export _7596
 
 .export _75e4

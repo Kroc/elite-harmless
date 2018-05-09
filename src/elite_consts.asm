@@ -53,13 +53,13 @@ vic_bank = 1
 ;  6 = +$1800   /   14 = +$3800
 ;  7 = +$1C00   /   15 = +$3C00
 ;
-elite_menuscr_vic   = 8
-vic_bitmap_colour = 9
+elite_menuscr_vic = 8
+elite_mainscr_vic = 9
 
 .export ELITE_MENUSCR_COLOR_ADDR :absolute \
         = ELITE_VIC_ADDR + elite_menuscr_vic * $0400
 .export ELITE_MAINSCR_COLOR_ADDR :absolute \
-        = ELITE_VIC_ADDR + vic_bitmap_colour * $0400
+        = ELITE_VIC_ADDR + elite_mainscr_vic * $0400
 
 ; the upper bits of register $D018 select the location of the character set,
 ; or the bitmap screen (if enabled). Again, note that this is relative to the
@@ -76,11 +76,9 @@ vic_bitmap_colour = 9
 ;
 vic_memory = 0
 
-;;.export ELITE_CHARSET_ADDR = ELITE_VIC_ADDR + (vic_memory * $0800)
-;;.out .sprintf("%s%04x", ": ELITE_CHARSET_ADDR = $", ELITE_CHARSET_ADDR)
-
 .export ELITE_BITMAP_ADDR :absolute \
         = ELITE_VIC_ADDR + ((vic_memory & %0000100) >> 2) * $2000
+
 .out .sprintf("%s%04x", ": ELITE_BITMAP_ADDR        = $", ELITE_BITMAP_ADDR)
 .out .sprintf("%s%04x", ": ELITE_MAINSCR_COLOR_ADDR = $", ELITE_MAINSCR_COLOR_ADDR)
 .out .sprintf("%s%04x", ": ELITE_MENUSCR_COLOR_ADDR = $", ELITE_MENUSCR_COLOR_ADDR)

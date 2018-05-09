@@ -23,14 +23,14 @@ echo "- assemble 'loader_stage0.asm'"
 $ca65 -o build/loader_stage0.o      src/loader_stage0.asm
 echo "- assemble 'loader_stage1.asm'"
 $ca65 -o build/loader_stage1.o      src/loader_stage1.asm
-echo "- assemble 'byebyejulie.asm'"
-$ca65 -o build/byebyejulie.o        src/byebyejulie.asm
 echo "- assemble 'loader_stage2.asm'"
 $ca65 -o build/loader_stage2.o      src/loader_stage2.asm
-echo "- assemble 'loader_stage3_code.asm'"
-$ca65 -o build/loader_stage3_code.o src/loader_stage3_code.asm
-echo "- assemble 'loader_stage3_data.asm'"
-$ca65 -o build/loader_stage3_data.o src/loader_stage3_data.asm
+echo "- assemble 'loader_stage3.asm'"
+$ca65 -o build/loader_stage3.o      src/loader_stage3.asm
+echo "- assemble 'loader_stage4_code.asm'"
+$ca65 -o build/loader_stage4_code.o src/loader_stage4_code.asm
+echo "- assemble 'loader_stage4_data.asm'"
+$ca65 -o build/loader_stage4_data.o src/loader_stage4_data.asm
 echo "- assemble 'gma5.asm'"
 $ca65 -o build/gma5.o               src/gma5.asm
 echo "- assemble 'gma6.asm'"
@@ -49,19 +49,19 @@ echo "-     link 'gma1.prg'"
 $ld65 -C build/gma1.cfg \
     -o bin/gma1.prg \
     build/loader_stage1.o \
-    build/loader_stage3_code.o \
-    build/loader_stage3_data.o \
+    build/loader_stage4_code.o \
+    build/loader_stage4_data.o \
     c64.lib
 
 echo "-     link 'byebyejulie.prg'"
 $ld65 -C c64-asm.cfg -o bin/byebyejulie.prg \
-    build/byebyejulie.o \
+    build/loader_stage2.o \
     c64.lib
 
 echo "-     link 'gma3.prg'"
 $ld65 -C c64-asm.cfg \
     --start-addr \$C800 -o bin/gma3.prg \
-    build/loader_stage2.o \
+    build/loader_stage3.o \
     c64.lib
 
 #-------------------------------------------------------------------------------
@@ -75,8 +75,8 @@ $ld65 -C c64-asm.cfg \
 #
 echo "-     link 'gma4_*.bin'"
 $ld65 -C build/gma4_decrypted.cfg -o build/gma4 \
-    build/loader_stage3_code.o \
-    build/loader_stage3_data.o
+    build/loader_stage4_code.o \
+    build/loader_stage4_data.o
 
 echo "-  encrypt 'gma4_data.bin'"
 python3 build/encrypt.py \
@@ -90,7 +90,7 @@ $ca65 -o build/gma4_data.o \
 # now re-link with the encrypted binary blobs
 echo "-     link 'gma4.prg'"
 $ld65 -C build/gma4_encrypted.cfg -o bin/gma4.prg \
-    build/loader_stage3_code.o \
+    build/loader_stage4_code.o \
     build/gma4_data.o \
     c64.lib
 
