@@ -12,8 +12,6 @@
 ; needs assigning to segments to generate the correct address
 .import _7596
 
-.export _gma1_end
-
 ;===============================================================================
 
 .segment        "GMA1"
@@ -352,7 +350,7 @@ _03fc:
 
         ; this label reference appears to be for self-modifying code
 _04b9:        
-        .byte   $ff    
+        .byte   $ff
 
         ;04ba 85 06    sta $06
         ;04bc a9 ff    lda #$ff
@@ -715,5 +713,3 @@ _06b3:  .byte   $9e             ; yellow text
         .endrepeat
         .byte   "elite."
         .byte   $00             ; terminate string
-
-_gma1_end:

@@ -2,6 +2,7 @@
 ; "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
+.linecont+
 
 ; the VIC-II bank, where Elite places graphics (bitmap, sprites)
 ; it's a 16 KB block of memory selected from these choices:
@@ -13,22 +14,33 @@
 ;
 vic_bank = 1
 
-; the lower two-bits of register $DD00 controls the VIC-II bank
+; the lower two-bits of register $DD00 controls the VIC-II bank.
 ; use this exported value to set the correct VIC-II bank chosen above
 ; (the binary value is inverted compared to the canonical bank numbers)
 ; you should retain the top 6 bits, e.g.:
 ;
 ;       lda $dd00               ; read the serial bus / VIC-II bank state
 ;       and # %11111100         ; keep current value except bits 0-1 (VIC bank)
-;       ora # ELITE_VIC_BANK    ; set bits for the VIC-II bank (inverted)
+;       ora # ELITE_VIC_DD00    ; set bits for the VIC-II bank
 ;       sta $dd00
 ;
-.export ELITE_VIC_BANK = ~vic_bank & %00000011
-.export ELITE_VIC_ADDR = vic_bank * $4000
+.export ELITE_VIC_DD00 :direct   = ~vic_bank & %00000011
+.export ELITE_VIC_ADDR :absolute = vic_bank * $4000
 
-; the text screen is relative to the bank adress, above.
-; provide a value from 0 to 15:
+; the VIC-II uses a 1 KB block of RAM for the text-screen (40x25 = 1'000 bytes)
+; or, in the case of high-resolution bitmap mode, colour-cell information where
+; each byte represents the fore/back colour (two nybbles) for each 8x8 cell.
 ;
+; elite uses two game screens -- a flight screen (high-resolution bitmap mode),
+; and a menu screen (text-mode) such as when docked.
+;
+; the location in memory of the text-screen / colour-data, character-set and
+; bitmap are determined by a single register, $D018, consisting of two fields:
+;
+; bits 4-7 select the location of the text-screen / colour-data, which can be
+; any of these values: (note that these addresses are relative to the VIC-II
+; bank address above)
+; 
 ;  0 = +$0000   /    8 = +$2000
 ;  1 = +$0400   /    9 = +$2400
 ;  2 = +$0800   /   10 = +$2800
@@ -38,9 +50,13 @@ vic_bank = 1
 ;  6 = +$1800   /   14 = +$3800
 ;  7 = +$1C00   /   15 = +$3C00
 ;
-vic_screen = 8
+vic_text_screen   = 8
+vic_bitmap_colour = 9
 
-.export ELITE_SCREEN_ADDR := vic_screen * $0400
+.export ELITE_TXTSCR_ADDR       :absolute \
+        = ELITE_VIC_ADDR + vic_text_screen   * $0400
+.export ELITE_BITMAP_COLOR_ADDR :absolute \
+        = ELITE_VIC_ADDR + vic_bitmap_colour * $0400
 
 ; the upper bits of register $D018 select the location of the character set,
 ; or the bitmap screen (if enabled). Again, note that this is relative to the
@@ -57,10 +73,16 @@ vic_screen = 8
 ;
 vic_memory = 0
 
-.export ELITE_CHARSET_ADDR = ELITE_VIC_ADDR + (vic_memory * $0800)
-.out .sprintf("%s%04x", ": ELITE_CHARSET_ADDR = $", ELITE_CHARSET_ADDR)
-.export ELITE_BITMAP_ADDR  = ELITE_VIC_ADDR + ((vic_memory & %0000100) >> 2) * $2000
-.out .sprintf("%s%04x", ": ELITE_BITMAP_ADDR  = $", ELITE_BITMAP_ADDR)
+;;.export ELITE_CHARSET_ADDR = ELITE_VIC_ADDR + (vic_memory * $0800)
+;;.out .sprintf("%s%04x", ": ELITE_CHARSET_ADDR = $", ELITE_CHARSET_ADDR)
 
-.export ELITE_D018 = ((vic_screen & 15) << 4) | (((vic_memory & 7) << 1) & %00001110 )
+.export ELITE_BITMAP_ADDR :absolute \
+        = ELITE_VIC_ADDR + ((vic_memory & %0000100) >> 2) * $2000
+.out .sprintf("%s%04x", ": ELITE_BITMAP_ADDR       = $", ELITE_BITMAP_ADDR)
+.out .sprintf("%s%04x", ": ELITE_BITMAP_COLOR_ADDR = $", ELITE_BITMAP_COLOR_ADDR)
+.out .sprintf("%s%04x", ": ELITE_TXTSCR_ADDR       = $", ELITE_TXTSCR_ADDR)
 
+.export ELITE_BITMAP_D018 :direct \
+        = ((vic_text_screen & 15) << 4) | (((vic_memory & 7) << 1) & %00001110)
+.export ELITE_TXTSCR_D018 :direct \
+        = ((vic_text_screen & 15) << 4) | (((vic_memory & 7) << 1) & %00001110)

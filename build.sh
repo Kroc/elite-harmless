@@ -11,25 +11,28 @@ set -e
 echo "building Elite DX:"
 echo
 
+
+ca65="./bin/cc65/bin/ca65 -t c64 --debug-info"
+
 echo "* building loader:"
 
 echo "- assemble 'elite_consts.asm'"
-./bin/cc65/bin/ca65 -t c64 -g -o build/elite_consts.o \
+$ca65 -o build/elite_consts.o \
     src/elite_consts.asm
 echo "- assemble 'loader_stage0.asm'"
-./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage0.o \
+$ca65 -o build/loader_stage0.o \
     src/loader_stage0.asm
 echo "- assemble 'loader_stage1.asm'"
-./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage1.o \
+$ca65 -o build/loader_stage1.o \
     src/loader_stage1.asm
 echo "- assemble 'loader_stage2.asm'"
-./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage2.o \
+$ca65 -o build/loader_stage2.o \
     src/loader_stage2.asm
 echo "- assemble 'loader_stage3_code.asm'"
-./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage3_code.o \
+$ca65 -o build/loader_stage3_code.o \
     src/loader_stage3_code.asm
 echo "- assemble 'loader_stage3_data.asm'"
-./bin/cc65/bin/ca65 -t c64 -g -o build/loader_stage3_data.o \
+$ca65 -o build/loader_stage3_data.o \
     src/loader_stage3_data.asm
 
 # the stage 0 loader is what gets loaded by `LOAD"*",8,1`
@@ -77,7 +80,7 @@ python3 build/encrypt.py \
 
 # assemble the newly encrypted data
 echo "- assemble 'gma4_data.s'"
-./bin/cc65/bin/ca65 -t c64 -g -o build/gma4_data.o \
+$ca65 -o build/gma4_data.o \
     build/gma4_data.s
 
 # now re-link with the encrypted binary blobs
