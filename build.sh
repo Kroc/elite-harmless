@@ -12,37 +12,31 @@ echo "building Elite DX:"
 echo
 
 
-ca65="./bin/cc65/bin/ca65 -t c64 --debug-info"
+ca65="./bin/cc65/bin/ca65 --target c64 --debug-info \
+        --feature leading_dot_in_identifiers"
 ld65="./bin/cc65/bin/ld65"
 mkd64="./bin/mkd64/bin/mkd64"
 
 echo "* building loader:"
 
 echo "- assemble 'elite_consts.asm'"
-$ca65 -o build/elite_consts.o \
-    src/elite_consts.asm
+$ca65 -o build/elite_consts.o       src/elite_consts.asm
 echo "- assemble 'loader_stage0.asm'"
-$ca65 -o build/loader_stage0.o \
-    src/loader_stage0.asm
+$ca65 -o build/loader_stage0.o      src/loader_stage0.asm
 echo "- assemble 'loader_stage1.asm'"
-$ca65 -o build/loader_stage1.o \
-    src/loader_stage1.asm
+$ca65 -o build/loader_stage1.o      src/loader_stage1.asm
 echo "- assemble 'byebyejulie.asm'"
-$ca65 -o build/byebyejulie.o \
-    src/byebyejulie.asm
+$ca65 -o build/byebyejulie.o        src/byebyejulie.asm
 echo "- assemble 'loader_stage2.asm'"
-$ca65 -o build/loader_stage2.o \
-    src/loader_stage2.asm
+$ca65 -o build/loader_stage2.o      src/loader_stage2.asm
 echo "- assemble 'loader_stage3_code.asm'"
-$ca65 -o build/loader_stage3_code.o \
-    src/loader_stage3_code.asm
+$ca65 -o build/loader_stage3_code.o src/loader_stage3_code.asm
 echo "- assemble 'loader_stage3_data.asm'"
-$ca65 -o build/loader_stage3_data.o \
-    src/loader_stage3_data.asm
+$ca65 -o build/loader_stage3_data.o src/loader_stage3_data.asm
 echo "- assemble 'gma5.asm'"
-$ca65 -o build/gma5.o src/gma5.asm
+$ca65 -o build/gma5.o               src/gma5.asm
 echo "- assemble 'gma6.asm'"
-$ca65 -o build/gma6.o src/gma6.asm
+$ca65 -o build/gma6.o               src/gma6.asm
 
 # the stage 0 loader is what gets loaded by `LOAD"*",8,1`
 # its only purpose is to hijack BASIC and load the next stage
@@ -129,7 +123,9 @@ $mkd64 -o bin/elite_gma86.d64 \
     -f bin/gma3.prg         -t 17 -s 5 -n "GMA3"        -P -S 4 -w \
     -f bin/gma4.prg         -t 17 -s 6 -n "GMA4"        -P -S 5 -w \
     -f bin/gma5.prg         -t 19 -s 0 -n "GMA5"        -P -S 6 -w \
-    -f bin/gma6.prg         -t 20 -s 8 -n "GMA6"        -P -S 7 -w
+    -f bin/gma6.prg         -t 20 -s 8 -n "GMA6"        -P -S 7 -w \
+    1>/dev/null
+echo "- OK"
 
 #-------------------------------------------------------------------------------
 

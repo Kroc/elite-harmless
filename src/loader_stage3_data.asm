@@ -3,9 +3,13 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+.include        "c64.asm"
+
 .import ELITE_VIC_DD00          :direct
 .import ELITE_TXTSCR_D018       :direct
-.import ELITE_BITMAP_ADDR       :absolute       ;=$4000
+
+.import ELITE_TXTSCR_ADDR       :absolute                       ;=$6000..$6400
+.import ELITE_BITMAP_ADDR       :absolute                       ;=$4000..$6000
 
 ;-------------------------------------------------------------------------------
 
@@ -104,10 +108,10 @@ ZP_COPY_FROM    := $1a
         sta $d018
 
         ; border colour black
-        lda # $00
+        lda # BLACK
         sta $d020
         ; background colour black
-        lda # $00
+        lda # BLACK
         sta $d021
 
         ; set up the bitmap screen:
@@ -131,37 +135,37 @@ ZP_COPY_FROM    := $1a
         sta $d015
 
         ; set sprite 2 colour to brown
-        lda # $09
+        lda # BROWN
         sta $d029
         ; set sprite 3 colour to medium-grey
-        lda # $0c
+        lda # GREY
         sta $d02a
         ; set sprite 4 colour to blue
-        lda # $06
+        lda # BLUE
         sta $d02b
         ; set sprite 5 colour to white
-        lda # $01
+        lda # WHITE
         sta $d02c
         ; set sprite 6 colour to green
-        lda # $05
+        lda # GREEN
         sta $d02d
         ; set sprite 7 colour to brown
-        lda # $09
+        lda # BROWN
         sta $d02e
 
         ; set sprite multi-colour 1 to orange
-        lda # $08
+        lda # ORANGE
         sta $d025
         ; set sprite multi-colour 2 to yellow
-        lda # $07
+        lda # YELLOW
         sta $d026
 
         ; set all sprites to single-colour
-        lda # $00
+        lda # %00000000
         sta $d01c
 
         ; set all sprites to double-width, double-height
-        lda # $ff
+        lda # %11111111
         sta $d017               ; sprite double-height register
         sta $d01d               ; sprite double-width register
 
@@ -259,7 +263,8 @@ _76e8:  stx ZP_COPY_TO+1
 
         ; colour the borders yellow down the sides of the view-port:
 
-_7711:  lda # $70               ; yellow fore / black back colour
+        ; yellow fore / black back colour
+_7711:  lda # .color_nybbles( YELLOW, BLACK )
         ldy # 36                ; set the colour on column 37
         sta (ZP_COPY_TO), y
         ldy # $03               ; set the colour on column 4
@@ -267,8 +272,7 @@ _7711:  lda # $70               ; yellow fore / black back colour
         dey
 
         ; colour the area outside the viewport black
-
-        lda # $00               ; black fore / back colour
+        lda # .color_nybbles( BLACK, BLACK )
 :       sta (ZP_COPY_TO), y     ; set columns 2, 1 & 0 to black
         dey 
         bpl :-
@@ -328,9 +332,9 @@ _776c:
 
         ; set yellow colour across the bottom row of the text-screen
         ; write $70 from $63e4 to $63c4
-        lda # $70               ; yellow foreground / black background
+        lda # .color_nybbles( YELLOW, BLACK )
         ldy # $1f               ; we'll write 31 chars (colour-cells)
-:       sta $63c4, y            ; = $63c4+$1f=$63e3 , 24x40 + 4
+:       sta ELITE_TXTSCR_ADDR + (24 * 40) + 4, y
         dey 
         bpl :-
 
