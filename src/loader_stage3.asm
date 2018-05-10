@@ -6,6 +6,8 @@
 ; this file is part of "gma3.prg",
 ; it contains the copy-protection routines
 
+.include        "c64.asm"
+
 .zeropage
 
 ; 4 unused (by the Kernal) bytes exist at $FB-$FE
@@ -31,18 +33,18 @@ ZP_C1541_PROGRAM        := $fd
 
         ; add the "w" to the disk command to specify memory-write
         lda # 'w'
-        jsr $ffd2
+        jsr KERNAL_CHROUT
 
         ; specify the memory address in the drive, read from $FB/FC,
         ; set at the top of this routine = $0300. these are the data-buffers
         lda ZP_C1541_MEM+0     
-        jsr $ffd2
+        jsr KERNAL_CHROUT
         lda ZP_C1541_MEM+1
-        jsr $ffd2
+        jsr KERNAL_CHROUT
         ; uploads are done 32-bytes at a time
         ; (the 1541 manual says 32 bytes maximum)
         lda # $20
-        jsr $ffd2
+        jsr KERNAL_CHROUT
 
         ; set a countdown for writing the bytes out
         ldx # $20
@@ -62,7 +64,7 @@ ZP_C1541_PROGRAM        := $fd
         ; read a byte from the program (via pointer)
         ; and send to the drive
         lda (ZP_C1541_PROGRAM+0), y
-        jsr $ffd2
+        jsr KERNAL_CHROUT
 
         ; move to the next byte
         inc ZP_C1541_PROGRAM+0
@@ -77,7 +79,7 @@ ZP_C1541_PROGRAM        := $fd
         bne @upload_bytes
     
         ; close deafult output channel
-        jsr $ffcc
+        jsr KERNAL_CLRCHN
 
         ; have we reached the end of the program?
         lda ZP_C1541_MEM+0
@@ -90,14 +92,14 @@ ZP_C1541_PROGRAM        := $fd
         jsr _c873
         ; add an E to the command ("M-E"), for Memory-Execute
         lda #'e'
-        jsr $ffd2
+        jsr KERNAL_CHROUT
         ; write the drive memory address to execute
         lda #< drive_program_init
-        jsr $ffd2
+        jsr KERNAL_CHROUT
         lda #> drive_program_init
-        jsr $ffd2
+        jsr KERNAL_CHROUT
         ; close deafult output channel
-        jsr $ffcc
+        jsr KERNAL_CLRCHN
 
         ; wait on the serial bus:
 :       bit $dd00
@@ -112,18 +114,18 @@ _c873:
         ; the pointer to the file name, "gma3", although a file name is not
         ; used yet
         lda # $00               ; no file name length!
-        jsr $ffbd       
+        jsr KERNAL_SETNAM       
 
         ; set file parameters
         lda # $0f               ; open file "15" (any non-zero number would do)
         tay                     ; set Y to open the disk command channel
         ldx # $08               ; drive 8
-        jsr $ffba               ; set file parameters
-        jsr $ffc0               ; open the command channel
+        jsr KERNAL_SETLFS       ; set file parameters
+        jsr KERNAL_OPEN         ; open the command channel
 
         ; default all output to the disk drive:
         ldx # $0f               ; logical file 15 (as above)
-        jsr $ffc9               ; CHKOUT - define the default output
+        jsr KERNAL_CHKOUT       ; define the default output
 
         ; unused byte at $02
         ; -- not used again in this file 
@@ -134,9 +136,9 @@ _c873:
         ; the last letter is left off for the caller to specify
         ; "m-w" = memory write, "m-e" = memory execute
         lda # 'm'
-        jsr $ffd2
+        jsr KERNAL_CHROUT
         lda # '-'
-        jsr $ffd2
+        jsr KERNAL_CHROUT
 
         rts
 

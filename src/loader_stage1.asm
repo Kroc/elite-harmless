@@ -39,7 +39,7 @@ start:
         ; memory address $009D". A = the switch value.
         ; i.e. disable error messages?
         lda # $00
-        jsr $ff90
+        jsr KERNAL_SETMSG
 
         ; change the address of STOP key routine from $F6ED,
         ; to $FFED: the SCREEN routine which returns row/col count
@@ -68,14 +68,14 @@ start:
         ; (i.e. the result of copy-protection check)
         lda $02
         eor # $97
-        beq :+              ; skip ahead if [$02] = $97
-        jmp ($fffc)         ; hard reset!
+        beq :+                  ; skip ahead if [$02] = $97
+        jmp ($fffc)             ; hard reset!
 
         ; load "GMA4" file
 :       lda # $04
         jsr _03b5
 
-        jsr $ff81           ; re-init the screen again
+        jsr KERNAL_SCINIT       ; re-init the screen again
 
         ; change background / border colour to red
         lda # RED
@@ -122,8 +122,8 @@ _038a:  clc
         sec 
         jsr _0619
 
-        jsr $ff8a               ; restore the vector table ($0314-$0333)
-        jsr $ffe7               ; close all open files
+        jsr KERNAL_RESTOR       ; restore the vector table ($0314-$0333)
+        jsr KERNAL_CLALL        ; close all open files
 
         jmp $1d22
 
@@ -137,11 +137,11 @@ _03b5:
         lda # $01       ; file number
         ldx # $08       ; drive number
         ldy # $01       ; "secondary address"
-        jsr $ffba
+        jsr KERNAL_SETLFS
 
         ; load file from disk:
         lda # $00
-        jsr $ffd5
+        jsr KERANL_LOAD
     
         rts
 
@@ -171,13 +171,13 @@ _03c7:
         ldx #< _filename
         ldy #> _filename
         lda # $04           ; file name length
-        jsr $ffbd
+        jsr KERNAL_SETNAM
         rts 
 
 _filename:
         .byte   "gma"
 _filename_num:
-        .byte   $20
+        .byte   " "
 
         ;$03eb: hidden message (not part of the filename)
         .byte   " was here 1985 ok"
