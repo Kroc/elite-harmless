@@ -3,7 +3,12 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-.data
+; mostly "graphics" data (includes the charset and HUD image),
+; this data is encrypted before being included as part of GMA4.PRG
+
+; as the disassembly improves, this 'opaque' data will be broken out
+; to more useful files such as BMPs/PNGs that will get translated into
+; the code the C64 needs during the build process
 
         .byte   $4c, $32, $24, $00, $03, $60, $6b, $a9                  ;$4000
         .byte   $77, $00, $64, $6c, $b5, $71, $6d, $6e

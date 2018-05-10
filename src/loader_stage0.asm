@@ -3,9 +3,12 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-.include        "c64.asm"
+; this file is the code for "firebird.prg", the first stage in loading,
+; it's what gets loaded by the normal C64 KERNAL. rather than a BASIC program
+; bootstrap, this program hijacks the BASIC vectors causing the code to
+; immediately run without intervention (i.e. `RUN`)
 
-; this file is part of "firebird.prg", the first stage in loading
+.include        "c64.asm"
 
 .code
 

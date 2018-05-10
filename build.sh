@@ -16,6 +16,7 @@ ca65="./bin/cc65/bin/ca65 --target c64 --debug-info \
         --feature leading_dot_in_identifiers"
 ld65="./bin/cc65/bin/ld65"
 mkd64="./bin/mkd64/bin/mkd64"
+encrypt="python3 build/encrypt.py"
 
 echo "* building loader:"
 
@@ -27,6 +28,19 @@ echo "- assemble 'loader_stage2.asm'"
 $ca65 -o build/loader_stage2.o      src/loader_stage2.asm
 echo "- assemble 'loader_stage3.asm'"
 $ca65 -o build/loader_stage3.o      src/loader_stage3.asm
+
+# encrypt a block of Elite data
+
+echo "- assemble 'elite_4000.asm'"
+$ca65 -o build/elite_4000.o src/elite_4000.asm
+# simply convert this to a binary as-is
+echo "-     link 'elite_4000.bin'"
+$ld65 -C build/gma4_bin.cfg -o build/elite_4000.bin build/elite_4000.o
+# run the binary for the encrypt script, which will spit out an assembler file,
+# this gets included in the relevant position by the stage 4 loader (GMA4.PRG)
+echo "-  encrypt 'elite_4000.bin'"
+$encrypt build/elite_4000.bin build/elite_4000.s
+
 echo "- assemble 'loader_stage4_code.asm'"
 $ca65 -o build/loader_stage4_code.o src/loader_stage4_code.asm
 echo "- assemble 'loader_stage4_data.asm'"
@@ -79,8 +93,7 @@ $ld65 -C build/gma4_decrypted.cfg -o build/gma4 \
     build/loader_stage4_data.o
 
 echo "-  encrypt 'gma4_data.bin'"
-python3 build/encrypt.py \
-    build/gma4_data.bin build/gma4_data.s
+$encrypt build/gma4_data.bin build/gma4_data.s
 
 # assemble the newly encrypted data
 echo "- assemble 'gma4_data.s'"
