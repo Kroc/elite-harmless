@@ -62,12 +62,12 @@ _7596:
 
         ; second block -- set where to stop
         ; (at the loading address = $4000)
-        lda #< ($4000 - 1)   ;=$ff
+        lda #< ($4000 - 1)
         sta _7593+0
-        lda #> ($4000 - 1)   ;=$3f
+        lda #> ($4000 - 1)
         sta _7593+1
 
-        lda #> $7500
+        lda #> $7500            ;TODO: link this!
         ldy # $8f
         ldx # $6c
         jsr decrypt_block

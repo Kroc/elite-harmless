@@ -1,0 +1,41 @@
+
+$02A7..$03AB    BOOTSTRAP: (FIREBIRD.PRG)
+                this code is what's loaded when you `LOAD"*",8,1`. it's only
+                purpose is to load "GMA1.PRG". it overwrites the BASIC vectors
+                at $0300..$03AB so that the program runs instantly without
+                any BASIC bootstrap or `RUN` 
+
+$0334..$0743    LOADER/FAST-LOADER: (GMA1.PRG)
+                presents a menu for choosing slow or fast loading and then
+                loads GMA3.PRG for copy-protection and GMA4.PRG for the first
+                Elite payload
+
+$0700..$1D00    ?
+                GMA4.PRG contains a payload at $4000..$7590,
+                from this, $4000..$5600 is copied to $0700..$1D00
+
+------------    ----------------------------------------------------------------
+
+$4000..$6000    HIGH-RESOLUTION BITMAP SCREEN:
+
+$6000..$6400    MENU-SCREEN COLOUR MAP:
+                this is the 1K of colour map information for the bitmap screen,
+                when Elite is displaying menu screens (no HUD), such as when
+                docked
+
+$6400..$6800    MAIN-SCREEN COLOUR MAP:
+                this is the 1K of colour map information for the bitmap screen,
+                when Elite is displaying the main flight screen (3D graphics)
+
+$6800..?        SPRITE GRAPHICS:
+                contains sprite definitions; 4 crosshairs, an explosion(?),
+                and two trumble images
+
+------------    ----------------------------------------------------------------
+
+$D000..$F900    ? (I/O, KERNAL OFF)
+                copied from GMA4.PRG, relocated from $5600..$7F00
+                to $D000..$F900 in RAM (not over the I/O or KERNAL)
+
+$EF90..$F890    ?
+                Copied from $7D7A..$867A by GMA4.PRG
