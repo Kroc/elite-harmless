@@ -144,7 +144,8 @@ echo "- OK"
 echo
 echo "* verifying checksums"
 cd bin
-md5sum -c checksums.txt
+md5sum --ignore-missing --quiet --check checksums.txt
+if [ $? -eq 0 ]; then echo "- OK"; fi
 cd ..
 
 echo

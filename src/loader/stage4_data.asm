@@ -439,7 +439,7 @@ _77ff:  lda $7a7a, y
         bne _77ff
 
         ; copy $7B7A..$7C7A to $6900..$6A00
-        ; ?
+        ; two sprites, plus a bunch of unknown data
 
 _7808:  lda $7b7a, y
         sta $6900, y
@@ -449,7 +449,7 @@ _7808:  lda $7b7a, y
         ;-----------------------------------------------------------------------
 
         ; NOTE: this memory address has been modified to say `jmp $038a`
-        ; (part of 'loader_stage1.asm', GMA1.PRG)
+        ; (part of 'loader/stage1.asm', GMA1.PRG)
         jmp $ce0e
 
 

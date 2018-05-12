@@ -1,6 +1,7 @@
 d27a8291ccf85963feb9efbe8194470a *byebyejulie.prg
 72f92e60149a2873d61524a1569702aa *firebird.prg
-08a1626d855e3377bd0b917ff95ed0eb *gma1.prg
+73a119de752100c29f1faddccfca7ef9 *gma1.prg
+08a1626d855e3377bd0b917ff95ed0eb *gma1_nocopy.prg
 a77bd477333f5f79e5974f090c922b75 *gma3.prg
 0a5f8661b48d6f3042e82e9f946badea *gma4.prg
 880bbf88c3b0d407fb7d11bcaab477f6 *gma5.prg

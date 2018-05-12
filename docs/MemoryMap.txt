@@ -37,5 +37,8 @@ $D000..$F900    ? (I/O, KERNAL OFF)
                 copied from GMA4.PRG, relocated from $5600..$7F00
                 to $D000..$F900 in RAM (not over the I/O or KERNAL)
 
-$EF90..$F890    ?
-                Copied from $7D7A..$867A by GMA4.PRG
+$EF90..$F890    HUD IMAGE (COPY)
+                copied from $7D7A..$867A by GMA4.PRG.
+                this appears to be a backup-copy of the HUD.
+                this is probably used for keeping the radar intact when
+                erasing and drawing the poles on the radar

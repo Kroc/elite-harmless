@@ -15,6 +15,8 @@ _1d1c:  .byte   $2e, $17, $2c, $32, $24, $60
 
 ;-------------------------------------------------------------------------------
 
+        ; another bloody decryption routine
+        
 _1d22:
         cld                     ; clear decimal mode (why?)
 
@@ -27,6 +29,7 @@ _1d22:
         bne :-
 
         jsr _1d36
+
         jsr $aab2               ;<-- GMA6.PRG; $6A00..$CCE0
 
         jmp $8863               ;<-- GMA6.PRG; $6A00..$CCE0
@@ -37,7 +40,7 @@ _1d36:
         lda #> _1d80
         sta $0453
 
-        lda # $3e
+        lda #> $3e00
         ldy # $d1
         ldx # $36
         jsr _1d59
@@ -47,12 +50,17 @@ _1d36:
         lda #> $69ff
         sta $0453
 
-        lda # $cc
+        lda #> $cc00
         ldy # $d6
         ldx # $49
 
-_1d59:
+.proc   _1d59
+        ;=======================================================================
+        ; A = high-byte of address
+        ; Y = index into address
+
         stx $bb
+
         sta $08
         lda # $00
         sta $07
@@ -73,6 +81,7 @@ _1d6f:  dey
         bne _1d61
 
         rts
+.endproc
 
 ;-------------------------------------------------------------------------------
 
