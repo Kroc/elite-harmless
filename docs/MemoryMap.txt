@@ -27,7 +27,7 @@ $6400..$6800    MAIN-SCREEN COLOUR MAP:
                 this is the 1K of colour map information for the bitmap screen,
                 when Elite is displaying the main flight screen (3D graphics)
 
-$6800..?        SPRITE GRAPHICS:
+$6800..$69C0    SPRITE GRAPHICS:
                 contains sprite definitions; 4 crosshairs, an explosion(?),
                 and two trumble images
 

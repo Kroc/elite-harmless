@@ -597,7 +597,6 @@ _04bd:
 
         ; backup $02-$FF to $CE02-$CEFF
 
-        ; load value at $02 (should be $97?)
         ; carry is a flag
 _0619:  ldx # $02
 _061b:  lda $00, x
