@@ -8,26 +8,29 @@
 # stop further processing on any error
 set -e
 
-echo "building Elite DX:"
-echo
-
 
 ca65="./bin/cc65/bin/ca65 --target c64 --debug-info \
-        --feature leading_dot_in_identifiers"
+    --include-dir src \
+    --include-dir build \
+    --feature leading_dot_in_identifiers"
 ld65="./bin/cc65/bin/ld65"
 mkd64="./bin/mkd64/bin/mkd64"
 encrypt="python3 build/encrypt.py"
 
+
+echo "building Elite DX:"
+echo
+
 echo "* building loader:"
 
-echo "- assemble 'loader_stage0.asm'"
-$ca65 -o build/loader_stage0.o      src/loader_stage0.asm
-echo "- assemble 'loader_stage1.asm'"
-$ca65 -o build/loader_stage1.o      src/loader_stage1.asm
-echo "- assemble 'loader_stage2.asm'"
-$ca65 -o build/loader_stage2.o      src/loader_stage2.asm
-echo "- assemble 'loader_stage3.asm'"
-$ca65 -o build/loader_stage3.o      src/loader_stage3.asm
+echo "- assemble 'loader/stage0.asm'"
+$ca65 -o build/loader_stage0.o      src/loader/stage0.asm
+echo "- assemble 'loader/stage1.asm'"
+$ca65 -o build/loader_stage1.o      src/loader/stage1.asm
+echo "- assemble 'loader/stage2.asm'"
+$ca65 -o build/loader_stage2.o      src/loader/stage2.asm
+echo "- assemble 'loader/stage3.asm'"
+$ca65 -o build/loader_stage3.o      src/loader/stage3.asm
 
 # encrypt a block of Elite data
 
@@ -41,10 +44,10 @@ $ld65 -C build/gma4_bin.cfg -o build/elite_4000.bin build/elite_4000.o
 echo "-  encrypt 'elite_4000.bin'"
 $encrypt build/elite_4000.bin build/elite_4000.s
 
-echo "- assemble 'loader_stage4_code.asm'"
-$ca65 -o build/loader_stage4_code.o src/loader_stage4_code.asm
-echo "- assemble 'loader_stage4_data.asm'"
-$ca65 -o build/loader_stage4_data.o src/loader_stage4_data.asm
+echo "- assemble 'loader/stage4_code.asm'"
+$ca65 -o build/loader_stage4_code.o src/loader/stage4_code.asm
+echo "- assemble 'loader/stage4_data.asm'"
+$ca65 -o build/loader_stage4_data.o src/loader/stage4_data.asm
 echo "- assemble 'gma5.asm'"
 $ca65 -o build/gma5.o               src/gma5.asm
 echo "- assemble 'gma6.asm'"
