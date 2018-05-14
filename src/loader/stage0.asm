@@ -12,17 +12,24 @@
 
 .code
 
-; this to be disassembled soon
-        .byte   $0b
-        .byte   $08, $01, $00, $9e, $32, $30, $36, $31
-        .byte   $00, $00, $00, $a2, $65, $bd, $01, $08
-        .byte   $9d, $a7, $02, $ca, $10, $f7, $4c, $c4
-        .byte   $02
+        ; this is possibly unused code
 
-filename:
+_02a7:  .byte   $0b, $08, $01, $00, $9e, $32, $30, $36
+        .byte   $31, $00, $00, $00
+        
+        ldx # $65
+:       lda $0801, x
+        sta _02a7, x
+        dex 
+        bpl :-
+        jmp start
+
+        ;-----------------------------------------------------------------------
+
+filename:                                                               ;$02c1
         .byte   "gm*"           ; $47, $4D, $2A (PETSCII)
 
-start:
+start:                                                                  ;$02c1
         ; call Kernel SETMSG, "Set system error display switch at
         ; memory address $009D". A = the switch value.
         ; i.e. disable error messages?

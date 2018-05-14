@@ -5,6 +5,15 @@
 
 ; "gma5.prg"
 
+; this is the entry point, jumped to by the stage 1 loader
+.export _1d22
+
+;-------------------------------------------------------------------------------
+
+.org    $1d00
+
+.code
+
 _1d00:
         .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
         .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
@@ -34,16 +43,24 @@ _1d22:
 
         jmp $8863               ;<-- GMA6.PRG; $6A00..$CCE0
 
-_1d36:
-        lda #< _1d80
+_1d36:                                                                  ;$13d6
+        ;-----------------------------------------------------------------------
+        ; walks backward through code/data un-scrambling it
+
+        ; decrypt $1D80..$3ED1
+
+        ; set where to stop decryption
+        lda #< (_1d81 - 1)
         sta $0452
-        lda #> _1d80
+        lda #> (_1d81 - 1)
         sta $0453
 
         lda #> $3e00
         ldy # $d1
         ldx # $36
         jsr _1d59
+
+        ; decrypt $6700..$CCD6
 
         lda #< $69ff
         sta $0452
@@ -86,10 +103,10 @@ _1d6f:  dey
 ;-------------------------------------------------------------------------------
 
 _1d7d:
-        .byte   $b7, $aa, $45
+        .byte   $b7, $aa, $45, $23
 
-_1d80:
-        .byte   $23, $ff, $62, $a3, $be, $d5, $e0, $a9
+_1d81:
+        .byte   $ff, $62, $a3, $be, $d5, $e0, $a9
         .byte   $85, $1b, $23, $15, $8c, $89, $eb, $0f
         .byte   $a8, $8c, $74, $eb, $91, $75, $ec, $91
         .byte   $76, $ed, $a4, $cc, $4c, $c1, $df, $eb
@@ -1161,3 +1178,4 @@ _2e1c:
         .byte   $00
 
 ;$3ED5
+.reloc

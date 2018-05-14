@@ -3,6 +3,8 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+; "elite_init.asm" : contains intialisation code and graphics data
+
 .include        "c64.asm"
 .include        "elite_consts.asm"
 
@@ -383,6 +385,7 @@ _77a3:  sta $d802,y
         dey 
         bne _77a3
 
+        ; sprite indicies
         lda # $a0
         sta $63f8
         sta $67f8

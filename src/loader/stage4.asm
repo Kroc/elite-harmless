@@ -78,10 +78,13 @@ _7596:
 
 .proc   decrypt_block                                                   ;$75C0
         ;=======================================================================
-        ; walks backward through code/data un-scrambling it
-        
-        ; A = high byte of pointer to aligned data-table, i.e. $8600 or $7500
-        ; Y = index into table pointer to by A
+        ; walks backward through code/data un-scrambling it. since it works
+        ; backwards, the starting point is provided as an address + offset
+        ; where A is the high byte of the 256-byte page werein the data ends
+        ; and Y is the offset to the last byte to work from, e.g. $8600+$5A
+        ;
+        ; A = high byte of where the 'starting' point is
+        ; Y = offset from the address assumed above, i.e. where the data ends
         ; X = amount to subtract from value from table? (decryption key?)
         ; _7593/4 contains the address at which to stop processing, less one
 

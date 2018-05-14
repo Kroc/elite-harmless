@@ -5,6 +5,10 @@
 
 ; "gma6.prg" - this is an encrypted payload and will be disassembled soon
 
+.org    $6a00
+
+.code
+
         .byte   $7c, $f3, $ad, $aa, $49, $ea, $ae, $f8
         .byte   $db, $f3, $94, $9e, $8b, $2d, $b4, $ce
         .byte   $da, $0a, $67, $37, $ce, $d1, $7c, $b3

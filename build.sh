@@ -21,7 +21,18 @@ encrypt="python3 build/encrypt.py"
 echo "building Elite DX:"
 echo
 
-echo "* building loader:"
+echo "* cleaning up:"
+
+rm -f build/*.o
+rm -f build/*.s
+rm -f build/*.bin
+rm -f build/*.prg
+rm -f build/*.d64
+
+echo "- OK"
+
+echo
+echo "* building GMA86 disk:"
 
 echo "- assemble 'loader/stage0.asm'"
 $ca65 -o build/loader_stage0.o      src/loader/stage0.asm
@@ -44,14 +55,14 @@ $ld65 -C build/gma4_bin.cfg -o build/elite_4000.bin build/elite_4000.o
 echo "-  encrypt 'elite_4000.bin'"
 $encrypt build/elite_4000.bin build/elite_4000.s
 
-echo "- assemble 'loader/stage4_code.asm'"
-$ca65 -o build/loader_stage4_code.o src/loader/stage4_code.asm
-echo "- assemble 'loader/stage4_data.asm'"
-$ca65 -o build/loader_stage4_data.o src/loader/stage4_data.asm
-echo "- assemble 'gma5.asm'"
-$ca65 -o build/gma5.o               src/gma5.asm
-echo "- assemble 'gma6.asm'"
-$ca65 -o build/gma6.o               src/gma6.asm
+echo "- assemble 'loader/stage4.asm'"
+$ca65 -o build/loader_stage4.o src/loader/stage4.asm
+echo "- assemble 'elite_init.asm'"
+$ca65 -o build/elite_init.o src/elite_init.asm
+echo "- assemble 'loader/gma5.asm'"
+$ca65 -o build/gma5.o               src/loader/gma5.asm
+echo "- assemble 'loader/gma6.asm'"
+$ca65 -o build/gma6.o               src/loader/gma6.asm
 
 # the stage 0 loader is what gets loaded by `LOAD"*",8,1`
 # its only purpose is to hijack BASIC and load the next stage
@@ -66,8 +77,9 @@ echo "-     link 'gma1.prg'"
 $ld65 -C build/gma1.cfg \
     -o bin/gma1.prg \
     build/loader_stage1.o \
-    build/loader_stage4_code.o \
-    build/loader_stage4_data.o \
+    build/loader_stage4.o \
+    build/elite_init.o \
+    build/gma5.o \
     c64.lib
 
 echo "-     link 'byebyejulie.prg'"
@@ -92,8 +104,8 @@ $ld65 -C c64-asm.cfg \
 #
 echo "-     link 'gma4_*.bin'"
 $ld65 -C build/gma4_decrypted.cfg -o build/gma4 \
-    build/loader_stage4_code.o \
-    build/loader_stage4_data.o
+    build/loader_stage4.o \
+    build/elite_init.o
 
 echo "-  encrypt 'gma4_data.bin'"
 $encrypt build/gma4_data.bin build/gma4_data.s
@@ -106,7 +118,7 @@ $ca65 -o build/gma4_data.o \
 # now re-link with the encrypted binary blobs
 echo "-     link 'gma4.prg'"
 $ld65 -C build/gma4_encrypted.cfg -o bin/gma4.prg \
-    build/loader_stage4_code.o \
+    build/loader_stage4.o \
     build/gma4_data.o \
     c64.lib
 

@@ -10,9 +10,9 @@
 .include        "c64.asm"
 
 ; a jump is made to code within the stage 3 loader ("gma4.prg")
-; TODO: this import is not working correctly because the code/data in GMA4
-; needs assigning to segments to generate the correct address
 .import _7596
+; jump into GMA5.PRG
+.import _1d22
 
 ;===============================================================================
 
@@ -23,9 +23,9 @@
 ; and then the text screen. since the text screen gets moved to $0800,
 ; this gives us plenty of space in low-memory for the loader
 
-        jmp     start
+        jmp     start                                                   ;$0334
 
-_0337:
+_0337:                                                                  ;$0337
         .byte   $00, $00        ; "GMA0" (invalid)
         .byte   $00, $00        ; "GMA1" (invalid)
         .byte   $11, $04        ; "GMA2" (invalid?)
@@ -34,7 +34,7 @@ _0337:
         .byte   $13, $00        ; "GMA5" (payload 3?)
         .byte   $14, $08        ; "GMA6" (payload 4?)
 
-start:
+start:                                                                  ;$0345
         ; call Kernel SETMSG, "Set system error display switch at
         ; memory address $009D". A = the switch value.
         ; i.e. disable error messages?
@@ -125,7 +125,7 @@ _038a:  clc
         jsr KERNAL_RESTOR       ; restore the vector table ($0314-$0333)
         jsr KERNAL_CLALL        ; close all open files
 
-        jmp $1d22
+        jmp _1d22
 
 
 _03b5:
