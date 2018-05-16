@@ -3,28 +3,77 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-; this file is the code for "firebird.prg", the first stage in loading,
-; it's what gets loaded by the normal C64 KERNAL. rather than a BASIC program
-; bootstrap, this program hijacks the BASIC vectors causing the code to
-; immediately run without intervention (i.e. `RUN`)
-
 .include        "c64.asm"
 
-.code
+; this file is the code for "firebird.prg", the first stage in loading,
+; it's what gets loaded by the normal C64 KERNAL. the program is designed to
+; hijack BASIC via the BASIC vectors located at $0300+, this means that the
+; program starts automatically without a BASIC bootstrap or `RUN`
 
-        ; this is possibly unused code
+; interesting tidbit: the `,1` in `LOAD"*",8,1` tells the C64 to use the
+; load address given by the program, in this case $02A7. if the user uses
+; `LOAD"*",8` instead, the program will be placed in the BASIC area -- $0801
+; onwards -- which obviously breaks this program's attempt at hijacking the
+; BASIC vectors. a BASIC bootstrap picks up this scenario and copies the
+; program to the intended load address before executing it
 
-_02a7:  .byte   $0b, $08, $01, $00, $9e, $32, $30, $36
-        .byte   $31, $00, $00, $00
+; the BASIC bootstrap needs to be stored at the beginning of the program,
+; canonically $02A7, but needs to be address as loaded in $0801. the linker
+; configuration handles this ("build/firebird.cfg")
+
+.segment        "BOOTSTRAP"
+
+        ; the C64 BASIC binary format is described here:
+        ; <https://www.c64-wiki.com/wiki/BASIC_token> 
+
+        .word   @end            ; pointer to next line
+        .word   1               ; BASIC line-number
         
-        ldx # $65
-:       lda $0801, x
-        sta _02a7, x
+        .byte   $9e             ; "SYS"
+
+        ; convert the address of the machine language routine, that comes after
+        ; this BASIC program, to PETSCII decimals. this trick taken from CC65's
+        ; "exehdr.s" file by Ullrich von Bassewitz
+        .byte   <(((@copy /  1000) .mod 10) + '0')
+        .byte   <(((@copy /   100) .mod 10) + '0')
+        .byte   <(((@copy /    10) .mod 10) + '0')
+        .byte   <(((@copy /     1) .mod 10) + '0')
+
+        .byte   0               ; end of line
+        
+        ; end of program
+@end:   .word   $0000
+        
+        ;-----------------------------------------------------------------------
+
+.import __MAIN_START__          ; get the load address of the program
+.import __BOOTSTRAP_RUN__       ; and, as seen by BASIC, i.e. $0801
+
+; get the size of the segments to be able to calculate the size
+; of the whole program (see linker script "build/firebird.cfg")
+.import __BOOTSTRAP_SIZE__, __CODE_SIZE__, __VECTORS_SIZE__
+
+@copy:                                                                  ;$080D
+        ; the length of FIREBIRD.PRG (sans PRG header)
+        size = __BOOTSTRAP_SIZE__ + __CODE_SIZE__ + __VECTORS_SIZE__
+
+        ; note that these are 16-bit data types and the `ldx` is limited to
+        ; 8-bit values so we have to coerce the result to 8-bits using the
+        ; lower-byte `<`. this means that the total program size CANNOT
+        ; exceed 255 bytes
+.assert (size < 255), error, "Program exceeds 255 bytes!"
+        ldx # <size
+
+:       lda __BOOTSTRAP_RUN__, x        ; copy from $0801..
+        sta __MAIN_START__, x           ; to $02A7..
         dex 
         bpl :-
+
         jmp start
 
-        ;-----------------------------------------------------------------------
+;===============================================================================
+
+.code
 
 filename:                                                               ;$02c1
         .byte   "gm*"           ; $47, $4D, $2A (PETSCII)
