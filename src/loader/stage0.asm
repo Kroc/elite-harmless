@@ -18,8 +18,8 @@
 ; program to the intended load address before executing it
 
 ; the BASIC bootstrap needs to be stored at the beginning of the program,
-; canonically $02A7, but needs to be address as loaded in $0801. the linker
-; configuration handles this ("build/firebird.cfg")
+; canonically $02A7, but needs to be addressed as running from $0801.
+; the linker configuration handles this ("build/firebird.cfg")
 
 .segment        "BOOTSTRAP"
 
@@ -32,8 +32,8 @@
         .byte   $9e             ; "SYS"
 
         ; convert the address of the machine language routine, that comes after
-        ; this BASIC program, to PETSCII decimals. this trick taken from CC65's
-        ; "exehdr.s" file by Ullrich von Bassewitz
+        ; this BASIC program, to PETSCII decimals, i.e. "2061". this trick
+        ; taken from CC65's "exehdr.s" file by Ullrich von Bassewitz
         .byte   <(((@copy /  1000) .mod 10) + '0')
         .byte   <(((@copy /   100) .mod 10) + '0')
         .byte   <(((@copy /    10) .mod 10) + '0')
@@ -44,26 +44,34 @@
         ; end of program
 @end:   .word   $0000
         
+        ; immediately following the BASIC bootstrap is a small machine-langauge
+        ; routine to copy the program to its intended location
         ;-----------------------------------------------------------------------
+
+        ; please note: the linker configuration ("build/firebird.cfg") defines
+        ; the segments, their addresses, and exports those values for use here:
 
 .import __MAIN_START__          ; get the load address of the program
 .import __BOOTSTRAP_RUN__       ; and, as seen by BASIC, i.e. $0801
 
-; get the size of the segments to be able to calculate the size
-; of the whole program (see linker script "build/firebird.cfg")
+        ; get the size of the segments to be able to
+        ; calculate the size of the whole program
 .import __BOOTSTRAP_SIZE__, __CODE_SIZE__, __VECTORS_SIZE__
 
-@copy:                                                                  ;$080D
-        ; the length of FIREBIRD.PRG (sans PRG header)
+@copy:  ; the BASIC bootstrap `SYS` calls here:                         ;$080D
+
+        ; calculate the length of FIREBIRD.PRG (sans PRG header)
         size = __BOOTSTRAP_SIZE__ + __CODE_SIZE__ + __VECTORS_SIZE__
 
         ; note that these are 16-bit data types and the `ldx` is limited to
         ; 8-bit values so we have to coerce the result to 8-bits using the
-        ; lower-byte `<`. this means that the total program size CANNOT
-        ; exceed 255 bytes
-.assert (size < 255), error, "Program exceeds 255 bytes!"
-        ldx # <size
+        ; lower-byte `<`. this means that the total program size CANNOT exceed
+        ; 255 bytes! for reasons of disk optimisation, we use a limit of 254
+        ; bytes instead to fit wholly within one disk sector
+        ldx #< size
 
+        .assert (size <= 254), error, "Program exceeds one disk sector!"
+        
 :       lda __BOOTSTRAP_RUN__, x        ; copy from $0801..
         sta __MAIN_START__, x           ; to $02A7..
         dex 
@@ -104,9 +112,9 @@ start:                                                                  ;$02c1
         lda # $00               ; = LOAD
         jsr KERANL_LOAD
     
-        ; change the address of STOP key routine from $F6ED,
-        ; to $FFED: the SCREEN routine which returns row/col count
-        ; i.e. does nothing of use -- this effectively disables the STOP key
+        ; change the address of STOP key routine from $F6ED, to $FFED:
+        ; the SCREEN routine which returns row/col count, i.e. does
+        ; nothing of use -- this effectively disables the STOP key
         lda # $ff
         sta $0329
 
@@ -114,6 +122,7 @@ start:                                                                  ;$02c1
         nop
         .endrepeat
 
+        ; TODO: need to cross-link this
         jmp $0334
 
 ;===============================================================================
