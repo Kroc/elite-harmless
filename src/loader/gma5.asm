@@ -39,7 +39,7 @@ _1d22:
 
         jsr _1d36
 
-        jsr $aab2               ;<-- GMA6.PRG; $6A00..$CCE0
+        jsr $aab2               ;<-- GMA6.PRG; $6A00..$CCE0             ;$1d30
 
         jmp $8863               ;<-- GMA6.PRG; $6A00..$CCE0
 
@@ -67,8 +67,8 @@ _1d36:                                                                  ;$13d6
         lda #> $69ff
         sta $0453
 
-        lda #> $cc00
-        ldy # $d6
+        lda #> $ccd6
+        ldy #< $ccd6
         ldx # $49
 
 .proc   _1d59

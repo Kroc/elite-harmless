@@ -64,6 +64,18 @@ $ca65 -o build/gma5.o               src/loader/gma5.asm
 echo "- assemble 'loader/gma6.asm'"
 $ca65 -o build/gma6.o               src/loader/gma6.asm
 
+# 
+
+echo "- assemble 'elite_6A00.asm'"
+$ca65 -o build/elite_6A00.o src/elite_6A00.asm
+
+# build a test version to check binary exactness
+$ld65 -C c64-asm.cfg -o bin/elite_6A00.prg \
+    --start-addr \$6A00 \
+    build/elite_6A00.o \
+    c64.lib
+
+
 # the stage 0 loader is what gets loaded by `LOAD"*",8,1`
 # its only purpose is to hijack BASIC and load the next stage
 echo "-     link 'firebird.prg'"

@@ -26,6 +26,20 @@
 
 ;===============================================================================
 
+;                                     BASIC | I/O or CHAR | KERNAL
+;                               ;-----------+-------------+---------
+.define MEM_CHAR_ONLY   %001    ; 1:  OFF   |     CHAR    |  OFF
+.define MEM_CHAR_KERNAL %010    ; 2:  OFF   |     CHAR    |  KERNAL    
+.define MEM_IO_OFF      %011    ; 3:  BASIC |     CHAR    |  KERNAL
+.define MEM_64K         %100    ; 4:  OFF   |     OFF     |  OFF
+.define MEM_IO_ONLY     %101    ; 5:  OFF   |     I/O     |  OFF
+.define MEM_IO_KERNAL   %110    ; 6:  OFF   |     I/O     |  KERNAL
+.define MEM_DEFAULT     %111    ; 7 : BASIC |     I/O     |  KERNAL
+
+
+; KERNAL routines:
+;===============================================================================
+
 ; initialize VIC; restore default input/output to keyboard/screen;
 ; clear screen; set PAL/NTSC switch and interrupt timer
 .define KERNAL_SCINIT   $ff81

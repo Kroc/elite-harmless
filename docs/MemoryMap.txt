@@ -1,18 +1,12 @@
 
-$02A7..$03AB    BOOTSTRAP: (FIREBIRD.PRG)
-                this code is what's loaded when you `LOAD"*",8,1`. it's only
-                purpose is to load "GMA1.PRG". it overwrites the BASIC vectors
-                at $0300..$03AB so that the program runs instantly without
-                any BASIC bootstrap or `RUN` 
-
-$0334..$0743    LOADER/FAST-LOADER: (GMA1.PRG)
-                presents a menu for choosing slow or fast loading and then
-                loads GMA3.PRG for copy-protection and GMA4.PRG for the first
-                Elite payload
+$0400..$0700    ?
+                a work area for variables / data?
 
 $0700..$1D00    ?
                 GMA4.PRG contains a payload at $4000..$7590,
                 from this, $4000..$5600 is copied to $0700..$1D00
+
+$1D00..$3ED4    CODE/DATA? (GMA5.PRG)
 
 ------------    ----------------------------------------------------------------
 
@@ -31,6 +25,8 @@ $6800..$69C0    SPRITE GRAPHICS:
                 contains sprite definitions; 4 crosshairs, an explosion(?),
                 and two trumble images
 
+$6A00..$CCE0    CODE/DATA? (GMA6.PRG)
+
 ------------    ----------------------------------------------------------------
 
 $D000..$F900    ? (I/O, KERNAL OFF)
@@ -41,4 +37,5 @@ $EF90..$F890    HUD IMAGE (COPY)
                 copied from $7D7A..$867A by GMA4.PRG.
                 this appears to be a backup-copy of the HUD.
                 this is probably used for keeping the radar intact when
-                erasing and drawing the poles on the radar
+                erasing and drawing the poles on the radar; could sprite
+                multiplexing be used to avoid this?

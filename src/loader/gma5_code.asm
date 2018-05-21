@@ -3,13 +3,30 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+.import _6a00:absolute
+.import _6a25:absolute
+.import _745a:absolute
+.import _7481:absolute
+.import _777e:absolute
+.import _7c6b:absolute
+.import _81ee:absolute
+.import _83df:absolute
+.import _8447:absolute
+.import _88e7:absolute
+.import _8d53:absolute
+.import _9a86:absolute
+.import _a2a0:absolute
+.import _a72f:absolute
+.import _b148:absolute
+
+;-------------------------------------------------------------------------------
 
 .org    $1d81
 
 .code
 
 _1d81:                                                                  ;$1d81
-        jsr $83df
+        jsr _83df
         jsr _379e
         lda # $00
         sta $96
@@ -80,7 +97,7 @@ _1e00:                                                                  ;$1e00
         bne _1e11
         jmp _3dc0
 _1e11:                                                                  ;$1e11
-        jmp $88e7
+        jmp _88e7
 
 ;===============================================================================
 
@@ -116,8 +133,8 @@ _1e21:                                                                  ;$1e21
 
 ; $1e41: 0a          b1e41   asl 
 ; $1e42: a8                  tay 
-; $1e43: a9 05               lda #$05
-; $1e45: 20 7f 82            jsr e827f
+; $1e43: a9 05               lda # MEM_IO_ONLY  ;=5
+; $1e45: 20 7f 82            jsr _827f
 ; $1e48: 20 af 84            jsr e84af
 ; $1e4b: c9 eb               cmp #$eb
 ; $1e4d: 90 1b               bcc b1e6a
@@ -166,8 +183,8 @@ _1e21:                                                                  ;$1e21
 ; $1eb3: a5 bb       b1eb3   lda abb
 ; $1eb5: 99 04 d0            sta $d004,y  ;sprite 2 x pos
 ; $1eb8: 58                  cli 
-; $1eb9: a9 04               lda #$04
-; $1ebb: 20 7f 82            jsr e827f
+; $1eb9: a9 04               lda # MEM_64K
+; $1ebb: 20 7f 82            jsr _827f
 ; $1ebe: 4c ce 1e            jmp j1ece
 
 ; $1ec1: ad 00 f9            lda af900
@@ -376,7 +393,7 @@ _1e21:                                                                  ;$1e21
 ; $2072: 66 28               ror a28
 ; $2074: a6 a5               ldx aa5
 ; $2076: 20 a6 a7            jsr ea7a6
-; $2079: 20 a0 a2    b2079   jsr ea2a0
+; $2079: 20 a0 a2    b2079   jsr _a2a0
 ; $207c: a0 24               ldy #$24
 ; $207e: b9 09 00    b207e   lda f0009,y
 ; $2081: 91 59               sta (p59),y
@@ -415,7 +432,7 @@ _1e21:                                                                  ;$1e21
 ; $20be: d0 05               bne b20c5
 ; $20c0: 20 af 84    b20c0   jsr e84af
 ; $20c3: 29 07               and #$07
-; $20c5: 20 00 6a    b20c5   jsr e6a00
+; $20c5: 20 00 6a    b20c5   jsr _6a00
 ; $20c8: a0 4e               ldy #$4e
 ; $20ca: b0 44               bcs b2110
 ; $20cc: ac ef 04            ldy a04ef
@@ -522,7 +539,7 @@ _1e21:                                                                  ;$1e21
 ; $21a1: 85 2c       b21a1   sta a2c
 ; $21a3: a5 a5       b21a3   lda aa5
 ; $21a5: 20 c5 36            jsr s36c5
-; $21a8: 20 86 9a    b21a8   jsr e9a86
+; $21a8: 20 86 9a    b21a8   jsr _9a86
 ; $21ab: a0 23       b21ab   ldy #$23
 ; $21ad: a5 2c               lda a2c
 ; $21af: 91 59               sta (p59),y
@@ -668,13 +685,13 @@ _1e21:                                                                  ;$1e21
 ; $22e5: 90 35               bcc j231c
 ; $22e7: c9 f0               cmp #$f0
 ; $22e9: 90 18               bcc b2303
-; $22eb: a9 05               lda #$05
-; $22ed: 20 7f 82            jsr e827f
+; $22eb: a9 05               lda # MEM_IO_ONLY  ;=5
+; $22ed: 20 7f 82            jsr _827f
 ; $22f0: ad 15 d0            lda $d015    ;sprite display enable
 ; $22f3: 29 03               and #$03
 ; $22f5: 8d 15 d0            sta $d015    ;sprite display enable
-; $22f8: a9 04               lda #$04
-; $22fa: 20 7f 82            jsr e827f
+; $22f8: a9 04               lda # MEM_64K      ;=4
+; $22fa: 20 7f 82            jsr _827f
 ; $22fd: 4e ca 04            lsr a04ca
 ; $2300: 6e c9 04            ror a04c9
 ; $2303: ad c2 04    b2303   lda a04c2
@@ -807,7 +824,7 @@ _23cf:                                                                  ;$23cf
         lda $5c
         pha 
         txa 
-        jsr $777e
+        jsr _777e
         jmp _2438
 _23e8:                                                                  ;$23e8
         cmp # $5b
@@ -898,15 +915,15 @@ _2441:
 ; $2477: 60                  rts 
 
 ; $2478: a9 06       a2478   lda #$06
-; $247a: 20 25 6a            jsr e6a25
+; $247a: 20 25 6a            jsr _6a25
 ; $247d: a9 ff               lda #$ff
 ; $247f: 8d 19 2f            sta _2f19
 ; $2482: 60                  rts 
 
 ; $2483: a9 01               lda #$01
-; $2485: 20 25 6a            jsr e6a25
+; $2485: 20 25 6a            jsr _6a25
 ;                    f248a   =*+$02
-; $2488: 4c 2f a7            jmp ea72f
+; $2488: 4c 2f a7            jmp _a72f
 
 _248b:
 ; $248b: a9 80       a248b   lda #$80
@@ -934,7 +951,7 @@ _248b:
 ; $24b2: 29 bf               and #$bf
 ; $24b4: 85 34               sta a34
 ; $24b6: a9 03               lda #$03
-; $24b8: 20 7e 77            jsr e777e
+; $24b8: 20 7e 77            jsr _777e
 ; $24bb: ae 1c 2f            ldx a2f1c
 ; $24be: bd 47 06            lda f0647,x
 ; $24c1: 20 f3 24            jsr s24f3
@@ -1489,7 +1506,7 @@ _28a5:
 ; $28b1: f9 03 fa            sbc ffa03,y
 ; $28b4: 28                  plp 
 ; $28b5: fa                  nop 
-; $28b6: 4d fa 72            eor a72fa
+; $28b6: 4d fa 72            eor _72fa
 ; $28b9: fa                  nop 
 ; $28ba: 80 40               nop #$40
 ; $28bc: 20 10 08            jsr e0810
@@ -1505,11 +1522,12 @@ _28a5:
 ; $28cd: 0c 06 03            nop a0306
 ; $28d0: c0 30       f28d0   cpy #$30
 ; $28d2: 0c 03 c0            nop ac003
+_28d5:
 ; $28d5: a9 0f               lda #$0f
 ; $28d7: aa                  tax 
 ; $28d8: 60                  rts 
 
-; $28d9: 20 7e 77    s28d9   jsr e777e
+; $28d9: 20 7e 77    s28d9   jsr _777e
 ; $28dc: a9 13               lda #$13
 ; $28de: d0 05               bne b28e5
 ; $28e0: a9 17               lda #$17
@@ -1980,7 +1998,7 @@ _28a5:
 ; $2c9d: 20 2f 6a            jsr e6a2f
 ; $2ca0: 20 ab 70            jsr e70ab
 ; $2ca3: a9 07               lda #$07
-; $2ca5: 20 25 6a            jsr e6a25
+; $2ca5: 20 25 6a            jsr _6a25
 ; $2ca8: a9 7e               lda #$7e
 ; $2caa: 20 d9 28            jsr s28d9
 ; $2cad: a9 0f               lda #$0f
@@ -2070,7 +2088,7 @@ _28a5:
 
 ; $2d61: 20 73 77    s2d61   jsr e7773
 ; $2d64: a9 06               lda #$06
-; $2d66: 4c 25 6a            jmp e6a25
+; $2d66: 4c 25 6a            jmp _6a25
 
 ; $2d69: a5 7a       s2d69   lda a7a
 ; $2d6b: 85 9c               sta a9c
@@ -2622,7 +2640,7 @@ _2f24:
 ; $316b: 85 08               sta a08
 ; $316d: 60                  rts 
 
-; $316e: 20 df 83    j316e   jsr e83df
+; $316e: 20 df 83    j316e   jsr _83df
 ; $3171: a2 0b               ldx #$0b
 ; $3173: 86 a5               stx aa5
 ; $3175: 20 80 36            jsr s3680
@@ -2635,8 +2653,8 @@ _2f24:
 ; $3185: 85 27               sta a27
 ; $3187: 4a                  lsr 
 ; $3188: 85 29               sta a29
-; $318a: 20 a0 a2    b318a   jsr ea2a0
-; $318d: 20 86 9a            jsr e9a86
+; $318a: 20 a0 a2    b318a   jsr _a2a0
+; $318d: 20 86 9a            jsr _9a86
 ; $3190: c6 29               dec a29
 ; $3192: d0 f6               bne b318a
 ; $3194: 20 10 b4            jsr eb410
@@ -3277,7 +3295,7 @@ _2f24:
 ; $367e: 18          b367e   clc 
 ; $367f: 60                  rts 
 
-; $3680: 20 47 84    s3680   jsr e8447
+; $3680: 20 47 84    s3680   jsr _8447
 ; $3683: a9 1c               lda #$1c
 ; $3685: 85 0c               sta a0c
 ; $3687: 4a                  lsr 
@@ -3296,7 +3314,7 @@ _2f24:
 ; $369f: 2a                  rol 
 ; $36a0: 85 24               sta a24
 ; $36a2: 8a                  txa 
-; $36a3: 4c 6b 7c            jmp e7c6b
+; $36a3: 4c 6b 7c            jmp _7c6b
 
 ; $36a6: a2 01       s36a6   ldx #$01
 ; $36a8: 20 80 36            jsr s3680
@@ -3405,7 +3423,7 @@ _2f24:
 ; $376c: 6a                  ror 
 ; $376d: 85 26               sta a26
 ; $376f: 68                  pla 
-; $3770: 20 6b 7c    b3770   jsr e7c6b
+; $3770: 20 6b 7c    b3770   jsr _7c6b
 ; $3773: 68                  pla 
 ; $3774: 85 5a               sta a5a
 ; $3776: 68                  pla 
@@ -3444,7 +3462,7 @@ _379e:
 ; $37a7: a5 a0               lda aa0
 ; $37a9: 48                  pha 
 ; $37aa: a9 00               lda #$00
-; $37ac: 20 2f a7            jsr ea72f
+; $37ac: 20 2f a7            jsr _a72f
 ; $37af: 68                  pla 
 ; $37b0: 85 a0               sta aa0
 ; $37b2: a2 80               ldx #$80
@@ -4265,7 +4283,7 @@ _3d7d:                                                                  ;$3d7d
 _3d87:                                                                  ;$3d87
         jsr _2390
 _3d8a:                                                                  ;$3d8a
-        jmp $88e7
+        jmp _88e7
 
 ;===============================================================================
 
@@ -4290,7 +4308,7 @@ _3daf:                                                                  ;$3daf
         asl $0499
         ldx # $50
         ldy # $c3
-        jsr $7481
+        jsr _7481
         lda # $0f
 _3dbe:                                                                  ;$3dbe
         bne _3d87
@@ -4300,13 +4318,13 @@ _3dc0:                                                                  ;$3dc0
         sta $0499
         lda # $c7
         jsr _2390
-        jsr $81ee
+        jsr _81ee
         bcc _3d8a
         ldy # $c3
         ldx # $50
-        jsr $745a
+        jsr _745a
         inc $04c9
-        jmp $88e7
+        jmp _88e7
 
 ;===============================================================================
 
@@ -4315,22 +4333,22 @@ _3dff:                                                                  ;$3dff
         sec 
         rol $0499
         jsr _3e37
-        jsr $8447
+        jsr _8447
         lda # $1f
         sta $a5
-        jsr $7c6b
+        jsr _7c6b
         lda # $01
-        jsr $6a25
+        jsr _6a25
         sta $10
-        jsr $a72f
+        jsr _a72f
         lda # $40
         sta $a3
 _3e01:                                                                  ;$3e01
         ldx # $7f
         stx $26
         stx $27
-        jsr $9a86
-        jsr $a2a0
+        jsr _9a86
+        jsr _a2a0
         dec $a3
         bne _3e01
 _3e11:                                                                  ;$3e11
@@ -4346,8 +4364,8 @@ _3e11:                                                                  ;$3e11
         ldx # $50
 _3e24:                                                                  ;$3e24
         stx $0c
-        jsr $9a86
-        jsr $a2a0
+        jsr _9a86
+        jsr _a2a0
         dec $a3
         jmp _3e11
 _3e31:                                                                  ;$3e31
@@ -4372,8 +4390,8 @@ _3e46:                                                                  ;$3e46
         sta $28
         lda # $01
 _3e51:                                                                  ;$3e51
-        jsr $a72f
-        jsr $9a86
+        jsr _a72f
+        jsr _9a86
         lda # $0a
         bit $06a9
         jsr $6a28
@@ -4387,16 +4405,16 @@ _3e65:                                                                  ;$3e65
         sta $0f
         lda # $02
         sta $10
-        jsr $9a86
-        jsr $a2a0
-        jmp $8d53
+        jsr _9a86
+        jsr _a2a0
+        jmp _8d53
 
 ;===============================================================================
 
 _3e7c:                                                                  ;$3e7c
-        jsr $8d53
+        jsr _8d53
         bne _3e7c
-        jsr $8d53
+        jsr _8d53
         beq _3e7c
         rts 
 
@@ -4426,7 +4444,7 @@ _3e97:                                                                  ;$3e97
 ;===============================================================================
 
 _3ea1:
-        jsr $b148
+        jsr _b148
         dey 
         bne _3ea1
         rts 

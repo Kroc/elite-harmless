@@ -55,8 +55,8 @@ _7596:
         lda #> (_75e4 - 1)
         sta _7593+1
 
-        lda #> $8600            ; pointer high-byte to data-table, i.e. $8600
-        ldy # $5a               ; indirect index y (=>$865a = $83)
+        lda #> $865a            ; pointer high-byte to data-table, i.e. $8600
+        ldy #< $855a            ; indirect index y (=>$865a = $83)
         ldx # $8e
         jsr decrypt_block
 
@@ -67,8 +67,8 @@ _7596:
         lda #> ($4000 - 1)
         sta _7593+1
 
-        lda #> $7500            ;TODO: link this!
-        ldy # $8f
+        lda #> $758f            ;TODO: link this!
+        ldy #< $758f
         ldx # $6c
         jsr decrypt_block
 

@@ -107,12 +107,10 @@ ZP_COPY_FROM    := $1a
         lda # ELITE_TXTSCR_D018 | %00000001
         sta $d018
 
-        ; border colour black
         lda # BLACK
-        sta $d020
-        ; background colour black
+        sta $d020               ; border colour black
         lda # BLACK
-        sta $d021
+        sta $d021               ; background colour black
 
         ; set up the bitmap screen:
         ; - bit 0-2: raster scroll (default value)
