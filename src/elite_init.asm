@@ -18,17 +18,20 @@ ZP_COPY_FROM    := $1a
 ;-------------------------------------------------------------------------------
 
 .data                                                                   ;$75e4
-        ; this code will switch the VIC-II bank to $4000..$8000
+        ; this code will switch the VIC-II bank to $4000..$8000;
+        ; all graphics to displayed (characters, sprites, bitmaps)
+        ; must therfore exist within this memory range
 
-        ; relocate part of the binary payload in "gma4.prg"
-        ; (copy $4000..$5600 to $0700..$1D00)
+        ; the program file on disk uses the bitmap screen area ($4000..$6000)
+        ; to store some code & data, which gets relocated during this routine.
+        ; this is so that the disk file can be smaller by making use of space
+        ; that would otherwise consist mostly of zeroes
 
-        ; NOTE: this will overwrite part of GMA1.PRG,
-        ; just the "do you want to use the fast loader?" menu
+        ; copy $4000..$5600 to $0700..$1D00:
 
         ; oddly, $4000..$4800 would be the character set, however only graphics
-        ; for $4400..$4800 are defined, therefore the [used] character graphics
-        ; get copied to $0B00..$0F00 (is this overwritten later?)
+        ; for $4400..$4700 are defined, therefore the [used] character graphics
+        ; get copied to $0B00..$0E00 (is this overwritten later?)
 
         ldx # $16               ; size of block-copy -- 22 x 256 = 5'632 bytes
         lda #< $0700
@@ -50,10 +53,10 @@ ZP_COPY_FROM    := $1a
         ; bits 0-2 of the processor port ($01) control the memory banks,
         ; a value of of %xxxxx100 turns off all ROM shadows (KERNAL, BASIC,
         ; and character ROM) enabling all 64 KB RAM for use
-        lda $01                 ; get the current processor port value
+        lda CPU_CONTROL         ; get the current processor port value
         and # %11111000         ; reset bottom 3 bits and keep top 5 unchanged
-        ora # %00000100         ; turn all ROM shadows off
-        sta $01
+        ora # MEM_64K           ; turn all ROM shadows off, gives 64K of RAM
+        sta CPU_CONTROL
 
         ; relocate part of the binary payload in "gma4.prg" --
         ; copy $5600..$7F00 to $D000..$F900 -- note that includes this code!
@@ -69,10 +72,10 @@ ZP_COPY_FROM    := $1a
         jsr copy_bytes
 
         ; switch the I/O area back on:
-        lda $01                 ; get the current processor port value
+        lda CPU_CONTROL         ; get the current processor port value
         and # %11111000         ; reset bottom 3 bits, top 5 unchanged 
-        ora # %00000101         ; switch I/O on, BASIC & KERNAL ROM off
-        sta $01
+        ora # MEM_IO_ONLY       ; switch I/O on, BASIC & KERNAL ROM off
+        sta CPU_CONTROL
 
         lda $dd02               ; read Port A ($DD00) data-direction register
         ora # %00000011         ; set bits 0/1 to R+W, all others read-only
@@ -105,7 +108,7 @@ ZP_COPY_FROM    := $1a
         ; %xxxxxxx1 = N/A! (but included in the original source)
         ;
         lda # ELITE_TXTSCR_D018 | %00000001
-        sta $d018
+        sta VIC_MEMORY          ;=$d018, VIC-II memory control register
 
         lda # BLACK
         sta $d020               ; border colour black
@@ -407,10 +410,10 @@ _77a3:  sta $d802,y
 
         ;-----------------------------------------------------------------------
 
-        lda $01                 ; get processor port state
+        lda CPU_CONTROL         ; get processor port state
         and # %11111000         ; retain everything except bits 0-2 
-        ora # %00000110         ; turn KERNAL ROM on?
-        sta $01
+        ora # MEM_IO_KERNAL     ; I/O & KERNAL ON, BASIC OFF
+        sta CPU_CONTROL
 
         ;-----------------------------------------------------------------------
 

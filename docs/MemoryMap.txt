@@ -6,6 +6,11 @@ $0700..$1D00    ?
                 GMA4.PRG contains a payload at $4000..$7590,
                 from this, $4000..$5600 is copied to $0700..$1D00
 
+$0B00..$0E00    CHARACTER GFX:
+                the font used. interestingly, the characters are defined in
+                ASCII order, regardless of C64's PETSCII appearance. this is
+                very likely for compatibility with the BBC Micro's data 
+
 $1D00..$3ED4    CODE/DATA? (GMA5.PRG)
 
 ------------    ----------------------------------------------------------------

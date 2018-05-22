@@ -26,6 +26,18 @@
 
 ;===============================================================================
 
+; memory address $00/$01 is hard-wired to the C64's 6510 CPU;
+; the "processor port", $01, controls the memory layout of the C64 as well as
+; the Datasette. the "data direction" register, $00, controls which bits of the
+; processor port can be written to, allowing you to mask out writes to certain
+; bits -- e.g. ignore writes to the Datasette when changing memory layout
+
+.define CPU_MASK        $00     ; data direction register
+.define CPU_CONTROL     $01     ; processor port (memory layout and Datasette)
+
+; C64 memory layout:
+;-------------------------------------------------------------------------------
+
 ;                                     BASIC | I/O or CHAR | KERNAL
 ;                               ;-----------+-------------+---------
 .define MEM_CHAR_ONLY   %001    ; 1:  OFF   |     CHAR    |  OFF
@@ -37,6 +49,59 @@
 .define MEM_DEFAULT     %111    ; 7 : BASIC |     I/O     |  KERNAL
 
 
+;===============================================================================
+; VIC-II registers:
+;===============================================================================
+
+.define VIC_SPRITE0_X           $d000
+.define VIC_SPRITE0_Y           $d001
+.define VIC_SPRITE1_X           $d002
+.define VIC_SPRITE1_Y           $d003
+.define VIC_SPRITE2_X           $d004
+.define VIC_SPRITE2_Y           $d005
+.define VIC_SPRITE3_X           $d006
+.define VIC_SPRITE3_Y           $d007
+.define VIC_SPRITE4_X           $d008
+.define VIC_SPRITE4_Y           $d009
+.define VIC_SPRITE5_X           $d00a
+.define VIC_SPRITE5_Y           $d00b
+.define VIC_SPRITE6_X           $d00c
+.define VIC_SPRITE6_Y           $d00d
+.define VIC_SPRITE7_X           $d00e
+.define VIC_SPRITE7_Y           $d00f
+
+.define VIC_SPRITE_X            $d010
+
+.define VIC_SCREEN_VERT         $d011
+.define VIC_SCREEN_HORZ         $d016
+
+.define VIC_RASTER              $d012
+
+.define VIC_LIGHT_X             $d013
+.define VIC_LIGHT_Y             $d014
+
+.define VIC_SPRITE_ENABLE       $d015
+
+.define VIC_SPRITE_DBLHEIGHT    $d017
+.define VIC_SPRITE_DBLWIDTH     $d01d
+
+.define VIC_MEMORY              $d018
+
+.define VIC_INTERRUPT_STATUS    $d019
+.define VIC_INTERRUPT_CONTROL   $d01a
+
+.define VIC_SPRITE_PRIORITY     $d01b
+
+.define VIC_SPRITE_MULTICOLOR   $d01c
+
+.define VIC_SPRITE_SPCOLLISION  $d01e
+.define VIC_SPRITE_BGCOLLISION  $d01f
+
+.define VIC_BORDER              $d020
+.define VIC_BACKGROUND          $d021
+
+
+;===============================================================================
 ; KERNAL routines:
 ;===============================================================================
 

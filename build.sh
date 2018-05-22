@@ -43,17 +43,22 @@ $ca65 -o build/loader_stage2.o      src/loader/stage2.asm
 echo "- assemble 'loader/stage3.asm'"
 $ca65 -o build/loader_stage3.o      src/loader/stage3.asm
 
-# encrypt a block of Elite data
+#-------------------------------------------------------------------------------
 
-echo "- assemble 'elite_4000.asm'"
-$ca65 -o build/elite_4000.o src/elite_4000.asm
+# encrypt a block of Elite data
+# (todo: generate this from "elite_0700.asm")
+
+echo "- assemble 'gma4_4000.asm'"
+$ca65 -o build/gma4_4000.o src/loader/gma4_4000.asm
 # simply convert this to a binary as-is
-echo "-     link 'elite_4000.bin'"
-$ld65 -C build/gma4_bin.cfg -o build/elite_4000.bin build/elite_4000.o
+echo "-     link 'gma4_4000.bin'"
+$ld65 -C build/gma4_bin.cfg -o build/gma4_4000.bin build/gma4_4000.o
 # run the binary for the encrypt script, which will spit out an assembler file,
 # this gets included in the relevant position by the stage 4 loader (GMA4.PRG)
-echo "-  encrypt 'elite_4000.bin'"
-$encrypt build/elite_4000.bin build/elite_4000.s
+echo "-  encrypt 'gma4_4000.bin'"
+$encrypt build/gma4_4000.bin build/gma4_4000.s
+
+#-------------------------------------------------------------------------------
 
 echo "- assemble 'loader/stage4.asm'"
 $ca65 -o build/loader_stage4.o src/loader/stage4.asm

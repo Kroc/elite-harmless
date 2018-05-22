@@ -101,10 +101,10 @@ start:                                                                  ;$0345
 _038a:  clc
         jsr _0619
         
-        lda $01                 ; read the processor port
+        lda CPU_CONTROL         ; read the processor port
         and # %11111000         ; unset the bottom three bits
         ora # %00101110         ; KERNAL ROM on / turn off the datasette!?
-        sta $01
+        sta CPU_CONTROL
         
         ; load "gma5.prg"
         lda # $05
@@ -114,10 +114,10 @@ _038a:  clc
         lda # $06
         jsr _03b5
         
-        lda $01
+        lda CPU_CONTROL
         and # %11111000
         ora # %00000110         ; KERNAL ROM on
-        sta $01
+        sta CPU_CONTROL
 
         sec 
         jsr _0619
@@ -379,8 +379,8 @@ _04bd:
 
         ;04be 85 07    sta $07
         ;04c0 a9 e0    lda #$e0
-        ;04c2 85 00    sta $00
-        ;04c4 a5 00    lda $00
+        ;04c2 85 00    sta CPU_CONTROL
+        ;04c4 a5 00    lda CPU_CONTROL
         ;04c6 30 fc    bmi $04c4
         ;04c8 c9 7f    cmp #$7f
         ;04ca f0 02    beq $04ce
@@ -627,10 +627,10 @@ _062b:
         jsr $ff81
 
         ; change the RAM / ROM layout
-        lda $d018       ; read the current state
+        lda VIC_MEMORY  ;=$d018, read the current state
         and # %00001111 ; strip out bits 4-7 leaving the bits 0-3 intact
         ora # %00100000 ; set bit 5 "%0010xxxx" to move the screen to $0800
-        sta $d018            
+        sta VIC_MEMORY
 
         ; change border / background colour
         lda # $02

@@ -35,7 +35,7 @@
 
 .code
 
-.include        "../build/elite_4000.s"
+.include        "../build/gma4_4000.s"
 
 ;$7590  junk data -- not encrypted!
         .byte   $c4, $4c, $85, $01

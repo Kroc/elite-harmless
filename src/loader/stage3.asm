@@ -236,12 +236,12 @@ init:
         sta $00
 
         ; wait for the drive to finish loading:
-:       lda $00         ; read the status register
-        bmi :-          ; wait for bit 7 to switch to 0, i.e. "job done"
-        cmp # $02       ; block header not found on disk?
+:       lda $00                 ; read the status register
+        bmi :-                  ; wait for bit 7 to switch to 0, i.e. "job done"
+        cmp # $02               ; block header not found on disk?
         bcc :+
-        jmp *           ; kill the disk drive!
-        jsr $c12c       ; turn on error LED
+        jmp *                   ; kill the disk drive!
+        jsr $c12c               ; turn on error LED
 
         ; strobe the serial line to alert
         ; the C64 that we're finished here
