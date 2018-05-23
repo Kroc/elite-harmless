@@ -79,8 +79,8 @@ start:                                                                  ;$0345
 
         ; change background / border colour to red
         lda # RED
-        sta $d020
-        sta $d021
+        sta VIC_BORDER
+        sta VIC_BACKGROUND
     
         ; change the text-screen back to $0400:
         lda #> $0400
@@ -141,7 +141,7 @@ _03b5:
 
         ; load file from disk:
         lda # $00
-        jsr KERANL_LOAD
+        jsr KERNAL_LOAD
     
         rts
 
@@ -438,7 +438,7 @@ _04bd:
         ;053a c8       iny 
         ;053b c4 a4    cpy $a4
         ;053d d0 f5    bne $0534
-        ;053f 20 cc ff jsr $ffcc
+        ;053f 20 cc ff jsr KERNAL_CLRCHN
         ;0542 a5 a4    lda $a4
         ;0544 c9 ce    cmp #$ce
         ;0546 90 cc    bcc $0514
@@ -449,7 +449,7 @@ _04bd:
         ;0552 20 dd ed jsr $eddd
         ;0555 a9 03    lda #$03
         ;0557 20 dd ed jsr $eddd
-        ;055a 20 cc ff jsr $ffcc
+        ;055a 20 cc ff jsr KERNAL_CLRCHN
         ;055d ad 00 dd lda $dd00
         ;0560 29 07    and #$07
         ;0562 85 a5    sta $a5
@@ -482,18 +482,18 @@ _04bd:
         ;05a0 8d 00 dd sta $dd00
         ;05a3 60       rts 
         ;05a4 a9 00    lda #$00
-        ;05a6 20 bd ff jsr $ffbd
+        ;05a6 20 bd ff jsr KERNAL_SETNAM
         ;05a9 a9 0f    lda #$0f
         ;05ab a8       tay 
         ;05ac a2 08    ldx #$08
-        ;05ae 20 ba ff jsr $ffba
-        ;05b1 20 c0 ff jsr $ffc0
+        ;05ae 20 ba ff jsr KERNAL_SETLFS
+        ;05b1 20 c0 ff jsr KERNAL_OPEN
         ;05b4 a2 0f    ldx #$0f
-        ;05b6 20 c9 ff jsr $ffc9
+        ;05b6 20 c9 ff jsr KERNAL_CHKOUT
         ;05b9 a9 4d    lda #$4d
-        ;05bb 20 d2 ff jsr $ffd2
+        ;05bb 20 d2 ff jsr KERNAL_CHROUT
         ;05be a9 2d    lda #$2d
-        ;05c0 20 d2 ff jsr $ffd2
+        ;05c0 20 d2 ff jsr KERNAL_CHROUT
         ;05c3 60       rts 
         ;05c4 20 d1 04 jsr $04d1
         ;05c7 85 ae    sta $ae
@@ -518,8 +518,8 @@ _04bd:
         ;05f0 e0 1c    cpx #$1c
         ;05f2 90 ea    bcc $05de
         ;05f4 60       rts 
-        ;05f5 ee 20 d0 inc $d020
-        ;05f8 ce 20 d0 dec $d020
+        ;05f5 ee 20 d0 inc VIC_BORDER
+        ;05f8 ce 20 d0 dec VIC_BORDER
         ;05fb 60       rts
 
         ;05fc a0 50    ldy #$50
@@ -624,7 +624,7 @@ _062b:
         sta $0288
 
         ; reset the VIC II chip; clears the screen (at its new location)
-        jsr $ff81
+        jsr KERNAL_SCINIT
 
         ; change the RAM / ROM layout
         lda VIC_MEMORY  ;=$d018, read the current state
@@ -634,8 +634,8 @@ _062b:
 
         ; change border / background colour
         lda # $02
-        sta $d020
-        sta $d021
+        sta VIC_BORDER
+        sta VIC_BACKGROUND
 
         ; write text to the screen
         ; "do you want to use the fast loader?"
@@ -663,7 +663,7 @@ _062b:
         ; read a keypress
         ; (returns A = keycode)
 _keypress:
-        jsr $ffe4
+        jsr KERNAL_GETIN
         beq _keypress
 
         cmp # 'n'
@@ -686,7 +686,7 @@ _0670:
         lda _067e, x
         beq _067b               ; is the value zero? (exit routine)
 
-        jsr $ffd2               ; print char to screen
+        jsr KERNAL_CHROUT       ; print char to screen
         inx                     ; move to next char in string
         bne _0670               ; loop, unless 255 characters have been printed
 

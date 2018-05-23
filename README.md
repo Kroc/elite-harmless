@@ -18,7 +18,7 @@ Elite DX can be built on Windows, Linux & Mac.
 
 1. Install [VSCode](https://code.visualstudio.com/)
 
-2. Open VSCode, open the Extensions panel (`CTRL+SHIFT+X`), search for "CC65" and install the CC65 extnesion
+2. Open VSCode, open the Extensions panel (`CTRL+SHIFT+X`), search for "CC65" and install the CC65 extension
 
 3. From the VSCode menu, select "Tasks" > "Run Task..." and click on "Install build tools".
    The setup Bash script will download and compile CC65. The script will ask for your Linux password so as to install the GCC compiler suite and required tools (`sudo apt-get install git gcc make`).

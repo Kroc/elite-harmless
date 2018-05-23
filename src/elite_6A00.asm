@@ -2523,11 +2523,11 @@ _79ed:
         ora _79a7, x
         sta $d010               ;sprites 0-7 msb of x coordinate
         ldx $07
-        sty $d003               ;sprite 1 y pos
-        stx $d002               ;sprite 1 x pos
-        lda $d015               ;sprite display enable
+        sty VIC_SPRITE1_Y
+        stx VIC_SPRITE1_X
+        lda VIC_SPRITE_ENABLE
         ora # $02
-        sta $d015               ;sprite display enable
+        sta VIC_SPRITE_ENABLE
 _7a36:
         ldy # $02
 _7a38:
@@ -2858,16 +2858,16 @@ _7c24:
         jsr _7d03
         jsr _7d03
         lda _8861
-        sta $d002               ;sprite 1 x pos
+        sta VIC_SPRITE1_X
         lda _8862
-        sta $d003               ;sprite 1 y pos
+        sta VIC_SPRITE1_Y
         lda $04f1
         cmp # $0a
         bcc _7c61
         lda $d040               ;?
-        sta $d002               ;sprite 1 x pos
+        sta VIC_SPRITE1_X
         lda $d041               ;?
-        sta $d003               ;sprite 1 y pos
+        sta VIC_SPRITE1_Y
 _7c61:
         lda #< $0580
         sta $2a
@@ -3819,7 +3819,7 @@ _8273:  ; disable sprites:                                              ;$8273
 
         ; disable all sprites
         lda # %00000000
-        sta $d015
+        sta VIC_SPRITE_ENABLE
 
         ; switch back to 64K RAM layout
         lda # MEM_64K           ; =4; full 64K RAM. BASIC, I/O & KERNAL OFF!
@@ -4091,9 +4091,9 @@ _8430:
 _8437:
         jsr _7b1a
         jsr _8ac7
-        lda #< $ffc0
+        lda #< $ffc0            ;=KERNAL_OPEN?
         sta $04f2
-        lda #> $ffc0
+        lda #> $ffc0            ;=KERNAL_OPEN?
         sta $04f3
 _8447:
         ldy # $24
@@ -4682,7 +4682,7 @@ _87fd:
         and # $87
         sta $27
         ldx # $05
-        lda $d007               ;sprite 3 y pos
+        lda VIC_SPRITE3_Y
         beq _8835
         bcc _8835
         dex 
@@ -4724,9 +4724,9 @@ _8867:
         sta _1d01, x
         dex 
         bpl _8867
-        lda $d002    ;sprite 1 x pos
+        lda VIC_SPRITE1_X
         sta _8861
-        lda $d003    ;sprite 1 y pos
+        lda VIC_SPRITE1_Y
         sta _8862
         jsr _8a0c
         ldx # $ff
@@ -5172,7 +5172,7 @@ _8b37:
         lda # $fd
         ldx # $00
         ldy # $26
-        jsr $ffd8               ;$ffd8 - save after call setlfs,setnam    
+        jsr KERNAL_SAVE         ;save after call setlfs,setnam    
         php 
         sei 
         bit $dc0d               ;cia1: cia interrupt control register
@@ -5181,7 +5181,7 @@ _8b37:
         ldx # $00
         stx _a8d9
         inx 
-        stx $d01a               ;vic interrupt mask register (imr)
+        stx VIC_INTERRUPT_CONTROL
         lda $d011               ;vic control register 1
         and # $7f
         sta $d011               ;vic control register 1
@@ -5217,23 +5217,23 @@ _8bc0:
         sei 
         jsr _827f
         lda # $00
-        sta $d01a               ;vic interrupt mask register (imr)
+        sta VIC_INTERRUPT_CONTROL
         cli 
         lda # $81
         sta $dc0d               ;cia1: cia interrupt control register
         lda # $c0
-        jsr $ff90               ;$ff90 - enable/disable kernal messages   
+        jsr KERNAL_SETMSG       ;enable/disable kernal messages   
         ldx _1d0e
         inx 
         lda _8c0b, x
         tax 
         lda # $01
         ldy # $00
-        jsr $ffba               ;$ffba - set file parameters              
+        jsr KERNAL_SETLFS       ;set file parameters              
         lda _8bbe
         ldx # $0e
         ldy # $00
-        jmp $ffbd               ;$ffbd - set file name                    
+        jmp KERNAL_SETNAM       ;set file name                    
         
         ;bug / unused code? (`jmp` instead of `jsr` above)
         lda # $02
@@ -5259,7 +5259,7 @@ _8c0d:
         lda # $00
         ldx # $00
         ldy # $cf
-        jsr $ffd5               ;$ffd5 - load after call setlfs,setnam    
+        jsr KERNAL_LOAD         ;load after call setlfs,setnam    
         php 
         lda # $01
         sta $dc0d               ;cia1: cia interrupt control register
@@ -5267,7 +5267,7 @@ _8c0d:
         ldx # $00
         stx _a8d9
         inx 
-        stx $d01a               ;vic interrupt mask register (imr)
+        stx VIC_INTERRUPT_CONTROL
         lda $d011               ;vic control register 1
         and # $7f
         sta $d011               ;vic control register 1
@@ -5459,9 +5459,9 @@ _8d53:
         pha 
         lda # MEM_IO_ONLY       ;=5
         jsr _827f
-        lda $d015               ;sprite display enable
+        lda VIC_SPRITE_ENABLE
         and # $fd
-        sta $d015               ;sprite display enable
+        sta VIC_SPRITE_ENABLE
         jsr _8c6d
         ldx _1d0c
         beq _8d73
@@ -8589,7 +8589,7 @@ _a700:
         sta $0510
         lda _a727, x
         ora $bb
-        sta $d015               ;sprite display enable
+        sta VIC_SPRITE_ENABLE
         lda # MEM_64K           ;=4
         jmp _827f
 
@@ -8904,9 +8904,9 @@ _a8fa:
         ora # $05
         sta CPU_CONTROL
 
-        lda $d019               ;vic interrupt request register (irr)
+        lda VIC_INTERRUPT_STATUS
         ora # $80
-        sta $d019               ;vic interrupt request register (irr)
+        sta VIC_INTERRUPT_STATUS
         
         txa 
         pha 
@@ -8923,7 +8923,7 @@ _a8fa:
         sta $d012               ;raster position
         
         lda _a8e2, x
-        sta $d01c               ;sprites multi-color mode select
+        sta VIC_SPRITE_MULTICOLOR
         
         lda _a8e4, x
         sta $d028               ;sprite 1 color
@@ -8932,7 +8932,7 @@ _a8fa:
         bpl :+
         inc _a8e6
 :       lda _a8e6, x                                                    ;$A936
-        sta $d021               ;background color 0
+        sta VIC_BACKGROUND
 
         lda _a8dc, x
         sta _a8d9
@@ -9155,7 +9155,7 @@ _aab2:
         ldx # $00
         stx _a8d9
         inx 
-        stx $d01a               ;vic interrupt mask register (imr)
+        stx VIC_INTERRUPT_CONTROL
         lda $d011               ;vic control register 1
         and # $7f
         sta $d011               ;vic control register 1

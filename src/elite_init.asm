@@ -31,7 +31,7 @@ ZP_COPY_FROM    := $1a
 
         ; oddly, $4000..$4800 would be the character set, however only graphics
         ; for $4400..$4700 are defined, therefore the [used] character graphics
-        ; get copied to $0B00..$0E00 (is this overwritten later?)
+        ; get copied to $0B00..$0E00
 
         ldx # $16               ; size of block-copy -- 22 x 256 = 5'632 bytes
         lda #< $0700
@@ -111,9 +111,9 @@ ZP_COPY_FROM    := $1a
         sta VIC_MEMORY          ;=$d018, VIC-II memory control register
 
         lda # BLACK
-        sta $d020               ; border colour black
+        sta VIC_BORDER          ; set border colour black
         lda # BLACK
-        sta $d021               ; background colour black
+        sta VIC_BACKGROUND      ; set background colour black
 
         ; set up the bitmap screen:
         ; - bit 0-2: raster scroll (default value)
@@ -132,8 +132,8 @@ ZP_COPY_FROM    := $1a
         sta $d016
 
         ; disable all sprites
-        lda # $00
-        sta $d015
+        lda # %00000000
+        sta VIC_SPRITE_ENABLE
 
         ; set sprite 2 colour to brown
         lda # BROWN
@@ -165,7 +165,7 @@ ZP_COPY_FROM    := $1a
         ; (the trumbles are actually multi-colour,
         ;  so this must be changed at some point)
         lda # %00000000
-        sta $d01c
+        sta VIC_SPRITE_MULTICOLOR
 
         ; set all sprites to double-width, double-height
         lda # %11111111
@@ -181,36 +181,36 @@ ZP_COPY_FROM    := $1a
         ; (crosshair?)
         ldx # 161
         ldy # 101
-        stx $d000               ; sprite 0 x-position
-        sty $d001               ; sprite 0 y-position
+        stx VIC_SPRITE0_X
+        sty VIC_SPRITE0_Y
         
         ; setup (but don't display) the trumbles
         lda # 18
         ldy # 12
-        sta $d002               ; sprite 1 x-position
-        sty $d003               ; sprite 1 y-position
+        sta VIC_SPRITE1_X
+        sty VIC_SPRITE1_Y
         asl a                   ; double x-position (=36)
-        sta $d004               ; sprite 2 x-position
-        sty $d005               ; sprite 2 y-position
+        sta VIC_SPRITE2_X
+        sty VIC_SPRITE2_Y
         asl a                   ; double x-position (=72)
-        sta $d006               ; sprite 3 x-position
-        sty $d007               ; sprite 3 y-position
+        sta VIC_SPRITE3_X
+        sty VIC_SPRITE3_Y
         asl a                   ; double x-position (=144)
-        sta $d008               ; sprite 4 x-position
-        sty $d009               ; sprite 4 y-position
+        sta VIC_SPRITE4_X
+        sty VIC_SPRITE4_Y
         lda # 14
-        sta $d00a               ; sprite 5 x-position
-        sty $d00b               ; sprite 5 y-position
+        sta VIC_SPRITE5_X
+        sty VIC_SPRITE5_Y
         asl a                   ; double x-position (=28)
-        sta $d00c               ; sprite 6 x-position
-        sty $d00d               ; sprite 6 y-position
+        sta VIC_SPRITE6_X
+        sty VIC_SPRITE6_Y
         asl a                   ; double x-position (=56)
-        sta $d00e               ; sprite 7 x-position
-        sty $d00f               ; sprite 7 y-position
+        sta VIC_SPRITE7_X
+        sty VIC_SPRITE7_Y
 
         ; set sprite priority: only sprite 1 is behind screen
         lda # %0000010
-        sta $d01b
+        sta VIC_SPRITE_PRIORITY
 
         ; clear the bitmap screen:
         ;-----------------------------------------------------------------------
@@ -455,8 +455,6 @@ _7808:  lda $7b7a, y
         ; NOTE: this memory address has been modified to say `jmp $038a`
         ; (part of 'loader/stage1.asm', GMA1.PRG)
         jmp $ce0e
-
-
 
 
 .proc   copy_bytes                                                      ;$7814

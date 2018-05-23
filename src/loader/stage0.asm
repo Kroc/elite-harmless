@@ -110,7 +110,7 @@ start:                                                                  ;$02c1
         ; note that the "secondary address" has been set as non-zero,
         ; telling the drive to use the load address present in the PRG file
         lda # $00               ; = LOAD
-        jsr KERANL_LOAD
+        jsr KERNAL_LOAD
     
         ; change the address of STOP key routine from $F6ED, to $FFED:
         ; the SCREEN routine which returns row/col count, i.e. does

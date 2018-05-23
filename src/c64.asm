@@ -4,6 +4,9 @@
 ;===============================================================================
 .linecont+
 
+; colours
+;===============================================================================
+
 .define BLACK   $00
 .define WHITE   $01
 .define RED     $02
@@ -24,6 +27,9 @@
 .define .color_nybbles(fore, back) \
         (fore & 15) << 4 | (back & 15)
 
+
+;===============================================================================
+; CPU port: memory layout & Datasette
 ;===============================================================================
 
 ; memory address $00/$01 is hard-wired to the C64's 6510 CPU;
@@ -285,7 +291,7 @@
 ;           A : KERNAL error code (if carry = 1)
 ;         X/Y : address of last byte loaded/verified (if carry = 0)
 ;
-.define KERANL_LOAD     $ffd5
+.define KERNAL_LOAD     $ffd5
 
 ; save file. (must call SETLFS and SETNAM beforehand)
 ; input:

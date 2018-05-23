@@ -18,6 +18,7 @@ mkd64="./bin/mkd64/bin/mkd64"
 encrypt="python3 build/encrypt.py"
 
 
+clear
 echo "building Elite DX:"
 echo
 
