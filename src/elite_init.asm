@@ -19,7 +19,7 @@ ZP_COPY_FROM    := $1a
 
 .data                                                                   ;$75e4
         ; this code will switch the VIC-II bank to $4000..$8000;
-        ; all graphics to displayed (characters, sprites, bitmaps)
+        ; all graphics to be displayed (characters, sprites, bitmaps)
         ; must therfore exist within this memory range
 
         ; the program file on disk uses the bitmap screen area ($4000..$6000)
@@ -31,8 +31,8 @@ ZP_COPY_FROM    := $1a
 
         ; oddly, $4000..$4800 would be the character set, however only graphics
         ; for $4400..$4700 are defined, therefore the [used] character graphics
-        ; get copied to $0B00..$0E00
-
+        ; get copied to $0B00..$0E00 (the rest is other data)
+        
         ldx # $16               ; size of block-copy -- 22 x 256 = 5'632 bytes
         lda #< $0700
         sta ZP_COPY_TO+0

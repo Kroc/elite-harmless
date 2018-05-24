@@ -965,10 +965,12 @@ _23e8:                                                                  ;$23e8
         tax 
         lda _254d, x
 _2404:                                                                  ;$2404
-        cmp # $41
+        cmp # $41               ; is A an `eor ($??, x)` instruction?
         bcc _2418
+        
         bit _2f1d
         bmi _2412
+        
         bit _2f19
         bmi _2415
 _2412:                                                                  ;$2412
@@ -1128,14 +1130,18 @@ _24ce:  ; NOTE: this address is used in the table in _250c
         tay 
 _24d7:
         jsr $84af
-        and # $3e
+        and # %00111110
         tax 
+
         lda _254e+0, x
         jsr _2404
+        
         lda _254e+1, x
         jsr _2404
+        
         dey 
         bpl _24d7
+        
         rts 
 
 ;===============================================================================
@@ -1148,25 +1154,29 @@ _24ed:  ; NOTE: this address is used in the table in _250c
 ;===============================================================================
 
 _24f3:
-; $24f3: 09 20       s24f3   ora # $20
-; $24f5: c9 61               cmp # $61
-; $24f7: f0 11               beq _250a
-; $24f9: c9 65               cmp # $65
-; $24fb: f0 0d               beq _250a
-; $24fd: c9 69               cmp # $69
-; $24ff: f0 09               beq _250a
-; $2501: c9 6f               cmp # $6f
-; $2503: f0 05               beq _250a
-; $2505: c9 75               cmp # $75
-; $2507: f0 01               beq _250a
-; $2509: 18                  clc 
+        ora # $20
+        cmp # $61
+        beq _250a
+        cmp # $65
+        beq _250a
+        cmp # $69
+        beq _250a
+        cmp # $6f
+        beq _250a
+        cmp # $75
+        beq _250a
+        
+        clc 
 _250a:  ; NOTE: references to _250c, actually begin at _250a!
-; $250a: 60          f250a   rts 
+        rts 
 
 _250b:
         rts 
 
 ;===============================================================================
+
+; some kind of lookup table. note that the caller is indexing from this address
+; minus 2, so that the table begins with an index of 1?
 
 _250c:
         .addr   _246a
