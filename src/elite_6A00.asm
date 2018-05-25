@@ -2466,8 +2466,8 @@ _79a9:
         ldx # $20
         ldy # $1e
 _79c0:
-        sta $d017               ;sprites expand 2x vertical (y)
-        sta $d01d               ;sprites expand 2x horizontal (x)
+        sta VIC_SPRITE_DBLHEIGHT
+        sta VIC_SPRITE_DBLWIDTH
         stx $050e
         sty $050f
         ldy # $00
@@ -2518,10 +2518,10 @@ _79ed:
         bne _7a36
         cpy # $c2
         bcs _7a36
-        lda $d010               ;sprites 0-7 msb of x coordinate
+        lda VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         and # $fd
         ora _79a7, x
-        sta $d010               ;sprites 0-7 msb of x coordinate
+        sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         ldx $07
         sty VIC_SPRITE1_Y
         stx VIC_SPRITE1_X
@@ -2857,17 +2857,20 @@ _7c24:
         jsr _7d03
         jsr _7d03
         jsr _7d03
+
         lda _8861
-        sta VIC_SPRITE1_X
+        sta $d002               ;I/O or ship-data?
         lda _8862
-        sta VIC_SPRITE1_Y
+        sta $d003               ;I/O or ship-data?
+        
         lda $04f1
         cmp # $0a
         bcc _7c61
-        lda $d040               ;?
-        sta VIC_SPRITE1_X
-        lda $d041               ;?
-        sta VIC_SPRITE1_Y
+        
+        lda $d040               ;I/O or ship-data?
+        sta $d002
+        lda $d041               ;I/O or ship-data?
+        sta $d003
 _7c61:
         lda #< $0580
         sta $2a
@@ -2950,7 +2953,7 @@ _7ce9:
         inc $045d, x
 _7cec:
         ldy $bb
-        lda $d041, y            ;?
+        lda $d041, y            ;sprite 0 X-position?
         and # $6f
         ora $2d
         sta $2d

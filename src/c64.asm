@@ -76,7 +76,7 @@
 .define VIC_SPRITE7_X           $d00e
 .define VIC_SPRITE7_Y           $d00f
 
-.define VIC_SPRITE_X            $d010
+.define VIC_SPRITES_X           $d010
 
 .define VIC_SCREEN_VERT         $d011
 .define VIC_SCREEN_HORZ         $d016

@@ -27,6 +27,12 @@ Elite DX can be built on Windows, Linux & Mac.
 
 Just press `CTRL+SHIFT+B` in VSCode to build the source code.
 
+## Resources Used ##
+
+This work was made possible by various resources available on the web, for which I would like to give thanks to the people involved and for the love and effort they've poured into their work.
+
+* [Classic BBC Elite Disk flight code](http://www.elitehomepage.org/archive/a/d4090012.txt) and [Classic BBC Elite Disk docked code](http://www.elitehomepage.org/archive/a/d4090010.txt) by Paul Brink, 2014
+
 ## Legal ##
 
 "Elite" is copyright David Braben & Ian Bell, Firebird / British Telecom, 1984-1985, all rights reserved. The name "Elite" is used in this project for historical, educational and archival purposes only.

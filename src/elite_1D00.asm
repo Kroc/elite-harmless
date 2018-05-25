@@ -154,14 +154,14 @@ _1e41:
         sta $0512, y
 _1e6a:
         lda _1e29, y
-        and $d010               ;sprites 0-7 msb of x coordinate
-        sta $d010               ;sprites 0-7 msb of x coordinate
-        lda $d005, y            ;sprite 2 y pos
+        and VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
+        sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
+        lda VIC_SPRITE2_Y, y
         clc 
         adc $0512, y
-        sta $d005, y            ;sprite 2 y pos
+        sta VIC_SPRITE2_Y, y
         clc 
-        lda $d004, y            ;sprite 2 x pos
+        lda VIC_SPRITE2_X, y
         adc $0511, y
         sta $bb
         lda $0531, y
@@ -183,12 +183,12 @@ _1ea4:
         sta $0531, y
         beq _1eb3
         lda _1e2a, y
-        ora $d010               ;sprites 0-7 msb of x coordinate
+        ora VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         sei 
-        sta $d010               ;sprites 0-7 msb of x coordinate
+        sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
 _1eb3:
         lda $bb
-        sta $d004, y            ;sprite 2 x pos
+        sta VIC_SPRITE2_X, y
         cli 
 
         lda # MEM_64K
@@ -3470,7 +3470,7 @@ _33a8:
         cmp # $e6
         bcc _33d6
         ldx $a5
-        lda $d041, x
+        lda $d041, x            ;sprite 0 Y-position?
         bpl _33d6
         lda $2d
         and # $f0
@@ -3752,26 +3752,31 @@ _357b:
         lda #< $f925
         sta $5b
         lda #> $f925
-_3581:
-        sta $5c
+_3581:  sta $5c
         ldy # $02
         jsr _358f
+
         ldy # $05
         jsr _358f
+        
         ldy # $08
 _358f:
         lda ($5b), y
-        eor # $80
+        eor # %10000000
         sta $7a
+
         dey 
         lda ($5b), y
         sta $79
+        
         dey 
         lda ($5b), y
         sta $78
+        
         sty $99
         ldx $99
         jsr _2d69
+        
         ldy $99
         sta $37, x
         lda $79
