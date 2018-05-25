@@ -14,39 +14,39 @@
 
 _d000:
         ; pointers?
-        .addr   _d0a5           ; missile?                              ;$D000
-        .addr   _d1a3           ; ?
-        .addr   _d2bf           ; escape capsule?
-        .addr   _d313           ; plate / alloys?
-        .addr   _d353           ; cargo cannister?
+        .addr   _d0a5           ; missile                               ;$D000
+        .addr   _d1a3           ; space station (coreolis)
+        .addr   _d2bf           ; escape capsule
+        .addr   _d313           ; plate / alloys
+        .addr   _d353           ; cargo cannister
         .addr   _d3fb           ; boulder?
         .addr   _d49d           ; asteroid?
-        .addr   _d573           ; splinter / rock?
-        .addr   _d5af           ; shuttle?                              ;$D010
-        .addr   _d6e1           ; transporter?
-        .addr   _d8c3           ; cobra mk-III?
-        .addr   _da4b           ; ?
-        .addr   _db3d           ; ?
-        .addr   _dc33           ; ?
-        .addr   _dd35           ; ?
-        .addr   _de0b           ; viper?
-        .addr   _dee5           ; ?                                     ;$D020
-        .addr   _df8d           ; mamba?
-        .addr   _e0bb           ; krait?
-        .addr   _e1a1           ; adder?
-        .addr   _e2d1           ; gecko?
-        .addr   _e395           ; ?
-        .addr   _e45b           ; ?
-        .addr   _e50b           ; combra mk-III? (duplicate?)
-        .addr   _e693           ; ?                                     ;$D030
-        .addr   _e7bd           ; ?
-        .addr   _e8af           ; fer-de-lance?
-        .addr   _e9c9           ; moray?
-        .addr   _eaa1           ; thargoid?
-        .addr   _ebbd           ; thargon?
-        .addr   _ec29           ; constrictor?
-        .addr   _ed2b           ; ?
-        .addr   _ee2d           ; space station?                        ;$D040
+        .addr   _d573           ; splinter / rock
+        .addr   _d5af           ; shuttle                               ;$D010
+        .addr   _d6e1           ; transporter
+        .addr   _d8c3           ; cobra mk-III (trader?)
+        .addr   _da4b           ; python (trader?)
+        .addr   _db3d           ; boa?
+        .addr   _dc33           ; anaconda?
+        .addr   _dd35           ; asteroid?
+        .addr   _de0b           ; viper
+        .addr   _dee5           ; sidewinder                            ;$D020
+        .addr   _df8d           ; mamba
+        .addr   _e0bb           ; krait
+        .addr   _e1a1           ; adder
+        .addr   _e2d1           ; gecko
+        .addr   _e395           ; cobra mk-I
+        .addr   _e45b           ; worm
+        .addr   _e50b           ; combra mk-III (lone wolf?)
+        .addr   _e693           ; asp mk-II                             ;$D030
+        .addr   _e7bd           ; python (lone wolf?)
+        .addr   _e8af           ; fer-de-lance
+        .addr   _e9c9           ; moray
+        .addr   _eaa1           ; thargoid
+        .addr   _ebbd           ; thargon
+        .addr   _ec29           ; constrictor
+        .addr   _ed2b           ; cougar
+        .addr   _ee2d           ; space station (dodecahedral)          ;$D040
 
 ;===============================================================================
 
@@ -67,28 +67,28 @@ _d000:
 
 ;===============================================================================
 
-.proc   _d0a5   ; missle?
+.proc   _d0a5   ; missle
 
         .proc   header
 
-        .byte   $00             ; scoop / debris
-        .word   $0640           ; missile lock area
-        .byte   < edges_offset  ; edges data offset lo
-        .byte   < faces_offset  ; faces data offset lo
+        .byte   $00             ; "scoop / debris"
+        .word   $0640           ; "missile lock area"?
+        .byte   < edges_offset  ; "edges data offset lo"
+        .byte   < faces_offset  ; "faces data offset lo"
         .byte   $55             ; "4*maxlines+1 for ship lines stack"?
-        .byte   $00             ; "gun vertex*4"
-        .byte   $0a             ; "explosion count"
-        .byte   vertices_size             ; verticies byte count
-        .byte   edge_count      ; edge count?
+        .byte   $00             ; "gun vertex*4"?
+        .byte   $0a             ; "explosion count"?
+        .byte   vertex_bytes    ; verticies byte count
+        .byte   edge_count      ; edge count
         .word   $0000           ; bounty
         .byte   face_count      ; face count
         .byte   $0e             ; LOD distance
         .byte   $02             ; energy
-        .byte   $2c             ; speed?
-        .byte   > edges_offset  ; edges data offset hi
-        .byte   > faces_offset  ; faces data offset hi
+        .byte   $2c             ; speed
+        .byte   > edges_offset  ; "edges data offset hi"
+        .byte   > faces_offset  ; "faces data offset hi"
         .byte   $02             ; scaling of normals
-        .byte   $00             ; laser / missile
+        .byte   $00             ; laser / missile count?
         
         .endproc
 
@@ -145,23 +145,19 @@ _d000:
         
         .proc   faces
 
-        .byte   $9f, $40, $00, $10
-        .byte   $5f, $00, $40, $10
-        .byte   $1f, $40, $00, $10
-        .byte   $1f, $00, $40, $10
-        .byte   $1f, $20, $00, $00
-        .byte   $5f, $00, $20, $00
-        .byte   $9f, $20, $00, $00
-        .byte   $1f, $00, $20, $00
+        .byte   $9f, $40, $00, $10, $5f, $00, $40, $10
+        .byte   $1f, $40, $00, $10, $1f, $00, $40, $10
+        .byte   $1f, $20, $00, $00, $5f, $00, $20, $00
+        .byte   $9f, $20, $00, $00, $1f, $00, $20, $00
         .byte   $3f, $00, $00, $b0
 
         .endproc
 
-        vertices_size = .sizeof ( verticies )
-        edges_offset  = edges - header
-        edge_count    = .sizeof( edges ) / 4
-        faces_offset  = faces - header
-        face_count    = .sizeof( faces )
+        vertex_bytes = .sizeof ( verticies )
+        edges_offset = edges - header
+        edge_count   = .sizeof( edges ) / 4
+        faces_offset = faces - header
+        face_count   = .sizeof( faces )
 
         ; .byte                            $00, $40, $06
         ; .byte   $7a, $da, $55, $00, $0a, $66, $18, $00
@@ -200,7 +196,7 @@ _d000:
 
 ;-------------------------------------------------------------------------------
 
-_d1a3:  ; ?
+_d1a3:  ; space station (coreolis)
         .byte                  $00, $00, $64, $74, $e4
         .byte   $59, $00, $36, $60, $1c, $00, $00, $38
         .byte   $78, $f0, $00, $00, $00, $00, $06, $a0                  ;$D1B0
@@ -240,7 +236,7 @@ _d1a3:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_d2bf:  ; escape capsule?
+_d2bf:  ; escape capsule
         .byte                                      $20
         .byte   $00, $01, $2c, $44, $1d, $00, $16, $18                  ;$D2C0
         .byte   $06, $00, $00, $10, $08, $11, $08, $00
@@ -256,7 +252,7 @@ _d2bf:  ; escape capsule?
 
 ;-------------------------------------------------------------------------------
 
-_d313:  ; plate / alloys?
+_d313:  ; plate / alloys
         .byte                  $80, $64, $00, $2c, $3c
         .byte   $15, $00, $0a, $18, $04, $00, $00, $04
         .byte   $05, $10, $10, $00, $00, $03, $00, $0f                  ;$D320
@@ -269,7 +265,7 @@ _d313:  ; plate / alloys?
 
 ;-------------------------------------------------------------------------------
 
-_d353:  ; cargo cannister?
+_d353:  ; cargo cannister
         .byte                  $00, $90, $01, $50, $8c
         .byte   $35, $00, $12, $3c, $0f, $00, $00, $1c
         .byte   $0c, $11, $0f, $00, $00, $02, $00, $18                  ;$D360
@@ -352,7 +348,7 @@ _d49d:  ; asteroid?
 
 ;-------------------------------------------------------------------------------
 
-_d573:  ; splinter / rock?
+_d573:  ; splinter / rock
         .byte                  $b0, $00, $01, $78, $44
         .byte   $1d, $00, $16, $18, $06, $00, $00, $10
         .byte   $08, $14, $0a, $fd, $00, $05, $00, $18                  ;$D580
@@ -364,7 +360,7 @@ _d573:  ; splinter / rock?
 
 ;-------------------------------------------------------------------------------
 
-_d5af:  ; shuttle?
+_d5af:  ; shuttle
         .byte                                      $0f
         .byte   $c4, $09, $86, $fe, $71, $00, $26, $72                  ;$D5B0
         .byte   $1e, $00, $00, $34, $16, $20, $08, $00
@@ -408,7 +404,7 @@ _d5af:  ; shuttle?
 
 ;-------------------------------------------------------------------------------
 
-_d6e1:  ; transporter?
+_d6e1:  ; transporter
         .byte        $00, $c4, $09, $f2, $aa, $95, $30
         .byte   $1a, $de, $2e, $00, $00, $38, $10, $20
         .byte   $0a, $00, $01, $02, $00, $00, $0a, $1a                  ;$D6F0
@@ -473,7 +469,7 @@ _d6e1:  ; transporter?
 
 ;-------------------------------------------------------------------------------
 
-_d8c3:  ; cobra mk-III?
+_d8c3:  ; cobra mk-III
         .byte                  $03, $41, $23, $bc, $54
         .byte   $9d, $54, $2a, $a8, $26, $00, $00, $34
         .byte   $32, $96, $1c, $00, $01, $01, $13, $20                  ;$D8D0
@@ -527,7 +523,7 @@ _d8c3:  ; cobra mk-III?
 
 ;-------------------------------------------------------------------------------
 
-_da4b:  ; ?
+_da4b:  ; python (trader?)
         .byte                  $05, $00, $19, $56, $be
         .byte   $59, $00, $2a, $42, $1a, $00, $00, $34                  ;$DA50
         .byte   $28, $fa, $14, $00, $00, $00, $1b, $00
@@ -562,7 +558,7 @@ _da4b:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_db3d:  ; ?
+_db3d:  ; boa?
         .byte                            $05, $24, $13
         .byte   $62, $c2, $5d, $00, $26, $4e, $18, $00                  ;$DB40
         .byte   $00, $34, $28, $fa, $18, $00, $00, $00
@@ -598,7 +594,7 @@ _db3d:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_dc33:  ; ?
+_dc33:  ; anaconda?
         .byte                  $07, $10, $27, $6e, $d2
         .byte   $5d, $30, $2e, $5a, $19, $00, $00, $30
         .byte   $24, $fc, $0e, $00, $00, $01, $3f, $00                  ;$DC40
@@ -635,7 +631,7 @@ _dc33:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_dd35:  ; ?
+_dd35:  ; asteroid?
         .byte                            $07, $00, $19
         .byte   $4a, $9e, $45, $00, $32, $36, $15, $00
         .byte   $00, $38, $32, $b4, $1e, $00, $00, $01                  ;$DD40
@@ -667,7 +663,7 @@ _dd35:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_de0b:  ; viper?
+_de0b:  ; viper
         .byte                  $00, $f9, $15, $6e, $be
         .byte   $51, $00, $2a, $5a, $14, $00, $00, $1c                  ;$DE10
         .byte   $17, $8c, $20, $00, $00, $01, $11, $00
@@ -699,7 +695,7 @@ _de0b:  ; viper?
 
 ;-------------------------------------------------------------------------------
 
-_dee5:  ; ?
+_dee5:  ; sidewinder
         .byte                            $00, $81, $10
         .byte   $50, $8c, $41, $00, $1e, $3c, $0f, $32
         .byte   $00, $1c, $14, $46, $25, $00, $00, $02                  ;$DEF0
@@ -725,7 +721,7 @@ _dee5:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_df8d:  ; mamba?
+_df8d:  ; mamba
         .byte                            $01, $24, $13
         .byte   $aa, $1a, $61, $00, $22, $96, $1c, $96                  ;$DF90
         .byte   $00, $14, $19, $5a, $1e, $00, $01, $02
@@ -768,7 +764,7 @@ _df8d:  ; mamba?
 
 ;-------------------------------------------------------------------------------
 
-_e0bb:  ; krait?
+_e0bb:  ; krait
         .byte   $01, $10, $0e, $7a, $ce
         .byte   $59, $00, $12, $66, $15, $64, $00, $18                  ;$E0C0
         .byte   $14, $50, $1e, $00, $00, $01, $10, $00
@@ -802,7 +798,7 @@ _e0bb:  ; krait?
 
 ;-------------------------------------------------------------------------------
 
-_e1a1:  ; adder?
+_e1a1:  ; adder
         .byte        $00, $c4, $09, $80, $f4, $65, $00
         .byte   $16, $6c, $1d, $28, $00, $3c, $14, $55
         .byte   $18, $00, $00, $02, $10, $12, $00, $28                  ;$E1B0
@@ -845,7 +841,7 @@ _e1a1:  ; adder?
 
 ;-------------------------------------------------------------------------------
 
-_e2d1:  ; gecko?
+_e2d1:  ; gecko
         .byte        $00, $49, $26, $5c, $a0, $45, $00
         .byte   $1a, $48, $11, $37, $00, $24, $12, $46
         .byte   $1e, $00, $00, $03, $10, $0a, $04, $2f                  ;$E2E0
@@ -874,7 +870,7 @@ _e2d1:  ; gecko?
 
 ;-------------------------------------------------------------------------------
 
-_e395:  ; ?
+_e395:  ; cobra mk-I
         .byte                            $03, $49, $26
         .byte   $56, $9e, $49, $28, $1a, $42, $12, $4b
         .byte   $00, $28, $13, $5a, $1a, $00, $00, $02                  ;$E3A0
@@ -904,7 +900,7 @@ _e395:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_e45b:  ; ?
+_e45b:  ; worm
         .byte                  $00, $49, $26, $50, $90
         .byte   $4d, $00, $12, $3c, $10, $00, $00, $20                  ;$E460
         .byte   $13, $1e, $17, $00, $00, $03, $08, $0a
@@ -931,7 +927,7 @@ _e45b:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_e50b:  ; combra mk-III? (duplicate?)
+_e50b:  ; combra mk-III (lone wolf?)
         .byte                  $01, $41, $23, $bc, $54
         .byte   $9d, $54, $2a, $a8, $26, $af, $00, $34                  ;$E510
         .byte   $32, $96, $1c, $00, $01, $01, $12, $20
@@ -985,7 +981,7 @@ _e50b:  ; combra mk-III? (duplicate?)
 
 ;-------------------------------------------------------------------------------
 
-_e693:  ; ?
+_e693:  ; asp mk-II
         .byte                  $00, $10, $0e, $86, $f6
         .byte   $69, $20, $1a, $72, $1c, $c8, $00, $30
         .byte   $28, $96, $28, $00, $00, $01, $29, $00                  ;$E6A0
@@ -1027,7 +1023,7 @@ _e693:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_e7bd:  ; ?
+_e7bd:  ; python (lone-wolf?)
         .byte                            $02, $00, $19
         .byte   $56, $be, $59, $00, $2a, $42, $1a, $c8                  ;$E7C0
         .byte   $00, $34, $28, $fa, $14, $00, $00, $00
@@ -1062,7 +1058,7 @@ _e7bd:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_e8af:  ; fer-de-lance?
+_e8af:  ; fer-de-lance
         .byte                                      $00
         .byte   $40, $06, $86, $f2, $6d, $00, $1a, $72                  ;$E8B0
         .byte   $1b, $00, $00, $28, $28, $a0, $1e, $00
@@ -1103,7 +1099,7 @@ _e8af:  ; fer-de-lance?
 
 ;-------------------------------------------------------------------------------
 
-_e9c9:  ; moray?
+_e9c9:  ; moray
         .byte        $01, $84, $03, $68, $b4, $49, $00
         .byte   $1a, $54, $13, $32, $00, $24, $28, $64                  ;$E9D0
         .byte   $19, $00, $00, $02, $10, $0f, $00, $41
@@ -1135,7 +1131,7 @@ _e9c9:  ; moray?
 
 ;-------------------------------------------------------------------------------
 
-_eaa1:  ; thargoid?
+_eaa1:  ; thargoid
         .byte        $00, $49, $26, $8c, $f4, $69, $3c
         .byte   $26, $78, $1a, $f4, $01, $28, $37, $f0
         .byte   $27, $00, $00, $02, $16, $20, $30, $30                  ;$EAB0
@@ -1175,7 +1171,7 @@ _eaa1:  ; thargoid?
 
 ;-------------------------------------------------------------------------------
 
-_ebbd:  ; thargon?
+_ebbd:  ; thargon
         .byte                            $f0, $40, $06
         .byte   $e6, $50, $45, $00, $12, $3c, $0f, $32                  ;$EBC0
         .byte   $00, $1c, $14, $14, $1e, $e7, $00, $02
@@ -1194,7 +1190,7 @@ _ebbd:  ; thargon?
 
 ;-------------------------------------------------------------------------------
 
-_ec29:  ; constrictor?
+_ec29:  ; constrictor
         .byte        $03, $81, $10, $7a, $da, $51, $00
         .byte   $2e, $66, $18, $00, $00, $28, $2d, $fc                  ;$EC30
         .byte   $24, $00, $00, $02, $34, $14, $07, $50
@@ -1231,7 +1227,7 @@ _ec29:  ; constrictor?
 
 ;-------------------------------------------------------------------------------
 
-_ed2b:  ; ?
+_ed2b:  ; cougar
         .byte                  $03, $24, $13, $86, $ea
         .byte   $69, $00, $2a, $72, $19, $00, $00, $18                  ;$ED30
         .byte   $22, $fc, $28, $00, $00, $02, $34, $00
@@ -1268,7 +1264,7 @@ _ed2b:  ; ?
 
 ;-------------------------------------------------------------------------------
 
-_ee2d:  ; space station?
+_ee2d:  ; space station (dodecahedral)
         .byte                            $00, $90, $7e
         .byte   $a4, $2c, $65, $00, $36, $90, $22, $00                  ;$EE30
         .byte   $00, $30, $7d, $f0, $00, $00, $01, $00
