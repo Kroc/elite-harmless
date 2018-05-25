@@ -67,40 +67,136 @@ _d000:
 
 ;===============================================================================
 
-_d0a5:  ; missle?
-        .byte                            $00, $40, $06
-        .byte   $7a, $da, $55, $00, $0a, $66, $18, $00
-        .byte   $00, $24, $0e, $02, $2c, $00, $00, $02                  ;$D0B0
-        .byte   $00, $00, $00, $44, $1f, $10, $32, $08
-        .byte   $08, $24, $5f, $21, $54, $08, $08, $24                  ;$D0C0
-        .byte   $1f, $32, $74, $08, $08, $24, $9f, $30
-        .byte   $76, $08, $08, $24, $df, $10, $65, $08                  ;$D0D0
-        .byte   $08, $2c, $3f, $74, $88, $08, $08, $2c
-        .byte   $7f, $54, $88, $08, $08, $2c, $ff, $65                  ;$D0E0
-        .byte   $88, $08, $08, $2c, $bf, $76, $88, $0c
-        .byte   $0c, $2c, $28, $74, $88, $0c, $0c, $2c                  ;$D0F0
-        .byte   $68, $54, $88, $0c, $0c, $2c, $e8, $65
-        .byte   $88, $0c, $0c, $2c, $a8, $76, $88, $08                  ;$D100
-        .byte   $08, $0c, $a8, $76, $77, $08, $08, $0c
-        .byte   $e8, $65, $66, $08, $08, $0c, $28, $74                  ;$D110
-        .byte   $77, $08, $08, $0c, $68, $54, $55, $1f
-        .byte   $21, $00, $04, $1f, $32, $00, $08, $1f                  ;$D120
-        .byte   $30, $00, $0c, $1f, $10, $00, $10, $1f
-        .byte   $24, $04, $08, $1f, $51, $04, $10, $1f                  ;$D130
-        .byte   $60, $0c, $10, $1f, $73, $08, $0c, $1f
-        .byte   $74, $08, $14, $1f, $54, $04, $18, $1f                  ;$D140
-        .byte   $65, $10, $1c, $1f, $76, $0c, $20, $1f
-        .byte   $86, $1c, $20, $1f, $87, $14, $20, $1f                  ;$D150
-        .byte   $84, $14, $18, $1f, $85, $18, $1c, $08
-        .byte   $85, $18, $28, $08, $87, $14, $24, $08                  ;$D160
-        .byte   $87, $20, $30, $08, $85, $1c, $2c, $08
-        .byte   $74, $24, $3c, $08, $54, $28, $40, $08                  ;$D170
-        .byte   $76, $30, $34, $08, $65, $2c, $38, $9f
-        .byte   $40, $00, $10, $5f, $00, $40, $10, $1f                  ;$D180
-        .byte   $40, $00, $10, $1f, $00, $40, $10, $1f
-        .byte   $20, $00, $00, $5f, $00, $20, $00, $9f                  ;$D190
-        .byte   $20, $00, $00, $1f, $00, $20, $00, $3f
-        .byte   $00, $00, $b0                                           ;$D1A0
+.proc   _d0a5   ; missle?
+
+        .proc   header
+
+        .byte   $00             ; scoop / debris
+        .word   $0640           ; missile lock area
+        .byte   < edges_offset  ; edges data offset lo
+        .byte   < faces_offset  ; faces data offset lo
+        .byte   $55             ; "4*maxlines+1 for ship lines stack"?
+        .byte   $00             ; "gun vertex*4"
+        .byte   $0a             ; "explosion count"
+        .byte   vertices_size             ; verticies byte count
+        .byte   edge_count      ; edge count?
+        .word   $0000           ; bounty
+        .byte   face_count      ; face count
+        .byte   $0e             ; LOD distance
+        .byte   $02             ; energy
+        .byte   $2c             ; speed?
+        .byte   > edges_offset  ; edges data offset hi
+        .byte   > faces_offset  ; faces data offset hi
+        .byte   $02             ; scaling of normals
+        .byte   $00             ; laser / missile
+        
+        .endproc
+
+        .proc   verticies
+
+        .byte   $00, $00, $44, $1f, $10, $32                    ; vertex 1
+        .byte   $08, $08, $24, $5f, $21, $54                    ; vertex 2
+        .byte   $08, $08, $24, $1f, $32, $74                    ; vertex 3
+        .byte   $08, $08, $24, $9f, $30, $76                    ; vertex 4
+        .byte   $08, $08, $24, $df, $10, $65                    ; vertex 5
+        .byte   $08, $08, $2c, $3f, $74, $88                    ; vertex 6
+        .byte   $08, $08, $2c, $7f, $54, $88                    ; vertex 7
+        .byte   $08, $08, $2c, $ff, $65, $88                    ; vertex 8
+        .byte   $08, $08, $2c, $bf, $76, $88                    ; vertex 9
+        .byte   $0c, $0c, $2c, $28, $74, $88                    ; vertex 10
+        .byte   $0c, $0c, $2c, $68, $54, $88                    ; vertex 11
+        .byte   $0c, $0c, $2c, $e8, $65, $88                    ; vertex 12
+        .byte   $0c, $0c, $2c, $a8, $76, $88                    ; vertex 13
+        .byte   $08, $08, $0c, $a8, $76, $77                    ; vertex 14
+        .byte   $08, $08, $0c, $e8, $65, $66                    ; vertex 15
+        .byte   $08, $08, $0c, $28, $74, $77                    ; vertex 16
+        .byte   $08, $08, $0c, $68, $54, $55                    ; vertex 17
+
+        .endproc
+
+        .proc   edges
+
+        .byte   $1f, $21, $00, $04                              ; edge 1
+        .byte   $1f, $32, $00, $08                              ; edge 2
+        .byte   $1f, $30, $00, $0c                              ; edge 3
+        .byte   $1f, $10, $00, $10                              ; edge 4
+        .byte   $1f, $24, $04, $08                              ; edge 5
+        .byte   $1f, $51, $04, $10                              ; edge 6
+        .byte   $1f, $60, $0c, $10                              ; edge 7
+        .byte   $1f, $73, $08, $0c                              ; edge 8
+        .byte   $1f, $74, $08, $14                              ; edge 9
+        .byte   $1f, $54, $04, $18                              ; edge 10
+        .byte   $1f, $65, $10, $1c                              ; edge 11
+        .byte   $1f, $76, $0c, $20                              ; edge 12
+        .byte   $1f, $86, $1c, $20                              ; edge 13
+        .byte   $1f, $87, $14, $20                              ; edge 14
+        .byte   $1f, $84, $14, $18                              ; edge 15
+        .byte   $1f, $85, $18, $1c                              ; edge 16
+        .byte   $08, $85, $18, $28                              ; edge 17
+        .byte   $08, $87, $14, $24                              ; edge 18
+        .byte   $08, $87, $20, $30                              ; edge 19
+        .byte   $08, $85, $1c, $2c                              ; edge 20
+        .byte   $08, $74, $24, $3c                              ; edge 21
+        .byte   $08, $54, $28, $40                              ; edge 22
+        .byte   $08, $76, $30, $34                              ; edge 23
+        .byte   $08, $65, $2c, $38                              ; edge 24
+
+        .endproc
+        
+        .proc   faces
+
+        .byte   $9f, $40, $00, $10
+        .byte   $5f, $00, $40, $10
+        .byte   $1f, $40, $00, $10
+        .byte   $1f, $00, $40, $10
+        .byte   $1f, $20, $00, $00
+        .byte   $5f, $00, $20, $00
+        .byte   $9f, $20, $00, $00
+        .byte   $1f, $00, $20, $00
+        .byte   $3f, $00, $00, $b0
+
+        .endproc
+
+        vertices_size = .sizeof ( verticies )
+        edges_offset  = edges - header
+        edge_count    = .sizeof( edges ) / 4
+        faces_offset  = faces - header
+        face_count    = .sizeof( faces )
+
+        ; .byte                            $00, $40, $06
+        ; .byte   $7a, $da, $55, $00, $0a, $66, $18, $00
+        ; .byte   $00, $24, $0e, $02, $2c, $00, $00, $02                  ;$D0B0
+        ; .byte   $00, $00, $00, $44, $1f, $10, $32, $08
+        ; .byte   $08, $24, $5f, $21, $54, $08, $08, $24                  ;$D0C0
+        ; .byte   $1f, $32, $74, $08, $08, $24, $9f, $30
+        ; .byte   $76, $08, $08, $24, $df, $10, $65, $08                  ;$D0D0
+        ; .byte   $08, $2c, $3f, $74, $88, $08, $08, $2c
+        ; .byte   $7f, $54, $88, $08, $08, $2c, $ff, $65                  ;$D0E0
+        ; .byte   $88, $08, $08, $2c, $bf, $76, $88, $0c
+        ; .byte   $0c, $2c, $28, $74, $88, $0c, $0c, $2c                  ;$D0F0
+        ; .byte   $68, $54, $88, $0c, $0c, $2c, $e8, $65
+        ; .byte   $88, $0c, $0c, $2c, $a8, $76, $88, $08                  ;$D100
+        ; .byte   $08, $0c, $a8, $76, $77, $08, $08, $0c
+        ; .byte   $e8, $65, $66, $08, $08, $0c, $28, $74                  ;$D110
+        ; .byte   $77, $08, $08, $0c, $68, $54, $55, $1f
+        ; .byte   $21, $00, $04, $1f, $32, $00, $08, $1f                  ;$D120
+        ; .byte   $30, $00, $0c, $1f, $10, $00, $10, $1f
+        ; .byte   $24, $04, $08, $1f, $51, $04, $10, $1f                  ;$D130
+        ; .byte   $60, $0c, $10, $1f, $73, $08, $0c, $1f
+        ; .byte   $74, $08, $14, $1f, $54, $04, $18, $1f                  ;$D140
+        ; .byte   $65, $10, $1c, $1f, $76, $0c, $20, $1f
+        ; .byte   $86, $1c, $20, $1f, $87, $14, $20, $1f                  ;$D150
+        ; .byte   $84, $14, $18, $1f, $85, $18, $1c, $08
+        ; .byte   $85, $18, $28, $08, $87, $14, $24, $08                  ;$D160
+        ; .byte   $87, $20, $30, $08, $85, $1c, $2c, $08
+        ; .byte   $74, $24, $3c, $08, $54, $28, $40, $08                  ;$D170
+        ; .byte   $76, $30, $34, $08, $65, $2c, $38, $9f
+        ; .byte   $40, $00, $10, $5f, $00, $40, $10, $1f                  ;$D180
+        ; .byte   $40, $00, $10, $1f, $00, $40, $10, $1f
+        ; .byte   $20, $00, $00, $5f, $00, $20, $00, $9f                  ;$D190
+        ; .byte   $20, $00, $00, $1f, $00, $20, $00, $3f
+        ; .byte   $00, $00, $b0                                           ;$D1A0
+.endproc
 
 ;-------------------------------------------------------------------------------
 
