@@ -44,11 +44,10 @@ $ca65 -o build/loader_stage2.o      src/loader/stage2.asm
 echo "- assemble 'loader/stage3.asm'"
 $ca65 -o build/loader_stage3.o      src/loader/stage3.asm
 
+# loader stage 4:
 #-------------------------------------------------------------------------------
 
-# encrypt a block of Elite data
-# (todo: generate this from "elite_0700.asm")
-
+# assemble the original source, before encrypting
 echo "- assemble 'gma4_4000.asm'"
 $ca65 -o build/gma4_4000.o src/loader/gma4_4000.asm
 # simply convert this to a binary as-is
@@ -58,29 +57,36 @@ $ld65 -C build/gma4_bin.cfg -o build/gma4_4000.bin build/gma4_4000.o
 # this gets included in the relevant position by the stage 4 loader (GMA4.PRG)
 echo "-  encrypt 'gma4_4000.bin'"
 $encrypt build/gma4_4000.bin build/gma4_4000.s
-
-#-------------------------------------------------------------------------------
-
+# assemble the stage 4 loader, with the encrypted binary payload
 echo "- assemble 'loader/stage4.asm'"
 $ca65 -o build/loader_stage4.o src/loader/stage4.asm
+
+# loader stage 5:
+#-------------------------------------------------------------------------------
+
 echo "- assemble 'elite_init.asm'"
 $ca65 -o build/elite_init.o src/elite_init.asm
 echo "- assemble 'loader/gma5.asm'"
 $ca65 -o build/gma5.o               src/loader/gma5.asm
-echo "- assemble 'loader/gma6.asm'"
-$ca65 -o build/gma6.o               src/loader/gma6.asm
 
-# 
+# loader stage 6:
+#-------------------------------------------------------------------------------
 
+# assemble the original source, before encrypting
 echo "- assemble 'elite_6A00.asm'"
 $ca65 -o build/elite_6A00.o src/elite_6A00.asm
+# simply convert this to a binary as-is
+echo "-     link 'gma6.bin'"
+$ld65 -C build/gma6_bin.cfg -o build/gma6.bin build/elite_6A00.o
+# run the binary for the encrypt script, which will spit out an assembler file,
+# this gets included in the relevant position by the stage 6 loader (GMA6.PRG)
+echo "-  encrypt 'gma6.bin'"
+$encrypt build/gma6.bin build/gma6_bin.s
+# assemble the stage 6 loader, with the encrypted binary payload
+echo "- assemble 'loader/stage6.asm'"
+$ca65 -o build/loader_stage6.o  src/loader/stage6.asm
 
-# build a test version to check binary exactness
-$ld65 -C c64-asm.cfg -o bin/elite_6A00.prg \
-    --start-addr \$6A00 \
-    build/elite_6A00.o \
-    c64.lib
-
+#-------------------------------------------------------------------------------
 
 # the stage 0 loader is what gets loaded by `LOAD"*",8,1`
 # its only purpose is to hijack BASIC and load the next stage
@@ -111,8 +117,6 @@ $ld65 -C c64-asm.cfg \
     build/loader_stage3.o \
     c64.lib
 
-#-------------------------------------------------------------------------------
-
 # "gma4.prg" will contain encrypted data/code blocks, so these areas of code
 # have to be linked first, then encrypted and then re-linked. this link
 # outputs the code and data-to-be-encrypted to seprate binaries:
@@ -140,17 +144,17 @@ $ld65 -C build/gma4_encrypted.cfg -o bin/gma4.prg \
     build/gma4_data.o \
     c64.lib
 
-# link the encrypted payloads (to be disassembled and rebuilt)
-
 echo "-     link 'gma5.prg'"
 $ld65 -C c64-asm.cfg -o bin/gma5.prg \
     build/gma5.o --start-addr \$1D00 \
     c64.lib
 
+# re-link with the encrypted binary blobs
 echo "-     link 'gma6.prg'"
-$ld65 -C c64-asm.cfg -o bin/gma6.prg \
-    build/gma6.o --start-addr \$6A00 \
+$ld65 -C build/gma6_encrypted.cfg -o bin/gma6.prg \
+    build/loader_stage6.o \
     c64.lib
+
 
 #-------------------------------------------------------------------------------
 

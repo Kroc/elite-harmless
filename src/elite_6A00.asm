@@ -10446,16 +10446,19 @@ _b301:
         sta _a8e1
         lda _1d04
         bne _b335
+        
+        ; reset the HUD graphics from the copy kept in RAM
         ldx # $08
-        lda #< $ef90            ;?
+        lda #< $ef90            ; HUD copy
         sta $5b
-        lda #> $ef90            ;?
+        lda #> $ef90            ; HUD copy
         sta $5c
         lda #< $5680
         sta $07
         lda #> $5680
         sta $08
         jsr _b3c3
+
         ldy # $c0
         ldx # $01
         jsr _b3c5
@@ -11837,11 +11840,4 @@ _b71d:
         .byte   $86, $04, $30, $0a, $8f, $43, $0f, $ff                  ;$cccd
         .byte   $9f, $00                                                ;$ccd5
 
-;===============================================================================
-
-; fill data, not encrypted
-
-        .byte   $ff, $00, $ff, $00, $ff, $00, $ff, $00                  ;$ccd7
-        .byte   $ff, $ff                                                ;$ccdf
-
-;$cce1
+;$CCD7
