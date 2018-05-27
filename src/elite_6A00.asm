@@ -2680,7 +2680,7 @@ _7b44:
         stx $7e
         dex 
         stx _26a4
-        stx _27a4
+        stx _27a4               ; write to code??
 _7b4f:
         ldy # $c7
         lda # $00
@@ -3534,7 +3534,7 @@ _80bb:
 _80c0:
         cpy $7e
         bcs _80f5
-        lda _27a4, y
+        lda _27a4, y            ; write to code??
         cmp # $ff
         beq _80e6
         sta $6e
@@ -3554,7 +3554,7 @@ _80e6:
         iny 
         lda _26a4, y
         sta $6b
-        lda _27a4, y
+        lda _27a4, y            ; write to code??
         sta $6c
         iny 
         jmp _80c0
@@ -4061,7 +4061,7 @@ _83ed:
         sta $050b
         ldx # $ff
         stx _26a4
-        stx _27a4
+        stx _27a4               ; write to code??
         stx $7c
         lda # $80
         sta $048e

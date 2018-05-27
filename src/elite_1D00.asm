@@ -3,6 +3,8 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+.include        "c64.asm"
+
 .import _6a00:absolute
 .import _6a25:absolute
 .import _745a:absolute
@@ -46,7 +48,7 @@ _1d81:                                                                  ;$1d81
         lda $04a8
         lsr 
         bne _1e00
-        jmp _3ddf
+        jmp _3dff
 
 _1db5:                                                                  ;$1db5
         cmp # $03
@@ -136,7 +138,7 @@ _1e41:
         tay 
 
         lda # MEM_IO_ONLY       ;=5
-        jsr _827f
+        jsr $827f
         
         jsr $84af
         cmp # $eb
@@ -192,7 +194,7 @@ _1eb3:
         cli 
 
         lda # MEM_64K
-        jsr _827f
+        jsr $827f
         
         jmp _1ece
 
@@ -779,14 +781,14 @@ _22c2:
         bcc _2303
 
         lda # MEM_IO_ONLY  ;=5
-        jsr _827f
+        jsr $827f
         
         lda VIC_SPRITE_ENABLE
         and # $03
         sta VIC_SPRITE_ENABLE
         
         lda # MEM_64K      ;=4
-        jsr _827f
+        jsr $827f
         
         lsr $04ca
         ror $04c9
@@ -821,7 +823,7 @@ _2330:
 _233a:
         lda $67
         beq _2345
-        dec a67
+        dec $67
         bne _2345
 _2342:
         jsr $a786
@@ -854,7 +856,7 @@ _2366:
 ;===============================================================================
 
 _2367:
-.export $2367
+.export _2367
         lda # $c0
         sta $a8e0
         lda # $00
@@ -1219,351 +1221,116 @@ _254c:
 _254d:
         .byte   $0a
 _254e:
-        .byte   $41, $42
-; $254e: 41 42       f254e   eor (p42, x)
-; $2550: 4f 55 53            sre a5355
-; $2553: 45 49               eor a49
-; $2555: 54 49               nop f49, x
-; $2557: 4c 45 54            jmp e5445
-
-; $255a: 53 54               sre (p54), y
-; $255c: 4f 4e 4c            sre a4c4e
-; $255f: 4f 4e 55            sre a554e
-; $2562: 54 48               nop f48, x
-; $2564: 4e 4f 41            lsr a414f
+        .byte   $41, $42, $4f, $55, $53, $45, $49, $54
+        .byte   $49, $4c, $45, $54, $53, $54, $4f, $4e
+        .byte   $4c, $4f, $4e, $55, $54, $48, $4e, $4f
+        .byte   $41
 _2566:
 .export _2566
 _2567:
 .export _2567
-; $2567: 4c 4c 45            jmp e454c
+        .byte   $4c, $4c, $45, $58, $45, $47, $45, $5a
+        .byte   $41, $43, $45, $42, $49, $53, $4f, $55
+        .byte   $53, $45, $53, $41, $52, $4d, $41, $48
+        .byte   $4e, $44, $49, $52, $45, $41, $3f, $45
+        .byte   $52, $41, $54, $45, $4e, $42, $45, $52
+        .byte   $41, $4c, $41, $56, $45, $54, $49, $45
+        .byte   $44, $4f, $52, $51, $55, $41, $4e, $54
+        .byte   $45, $49, $53, $52, $49, $4f, $4e
 
-; $256a: 58                  cli 
-; $256b: 45 47               eor a47
-; $256d: 45 5a               eor a5a
-; $256f: 41 43               eor (p43, x)
-; $2571: 45 42               eor a42
-; $2573: 49 53               eor # $53
-; $2575: 4f 55 53            sre a5355
-; $2578: 45 53               eor a53
-; $257a: 41 52               eor (p52, x)
-; $257c: 4d 41 49            eor a4941
-; $257f: 4e 44 49            lsr a4944
-; $2582: 52                  jam 
-; $2583: 45 41               eor a41
-; $2585: 3f 45 52            rla f5245, x
-; $2588: 41 54               eor (p54, x)
-; $258a: 45 4e               eor a4e
-; $258c: 42                  jam 
-; $258d: 45 52               eor a52
-; $258f: 41 4c               eor (p4c, x)
-; $2591: 41 56               eor (p56, x)
-; $2593: 45 54               eor a54
-; $2595: 49 45               eor # $45
-; $2597: 44 4f               nop a4f
-; $2599: 52                  jam 
-; $259a: 51 55               eor (p55), y
-; $259c: 41 4e               eor (p4e, x)
-; $259e: 54 45               nop f45, x
-; $25a0: 49 53               eor # $53
-; $25a2: 52                  jam 
-; $25a3: 49 4f               eor # $4f
-; $25a5: 4e 3a 30            lsr a303a
 _25a6:
 .export _25a6
-; $25a8: 2e 45 2e            rol a2e45
+        .byte   $3a, $30, $2e,$45
 _25aa:
 .export _25aa
+        .byte   $2e
 _25ab:
 .export _25ab
-; $25ab: 6a                  ror 
-; $25ac: 61 6d               adc (p6d, x)
-; $25ae: 65 73               adc a73
-; $25b0: 6f 6e 0d            rra a0d6e
+        .byte   $6a, 61, $6d, $65, $73, $6f, $6e
 _25b2:
 .export _25b2
+        .byte   $0d
 _25b3:
 .export _25b3
-; $25b3: 00 00               brk # $00
-; $25b5: 00 00               brk # $00
-; $25b7: 00 00               brk # $00
-; $25b9: 00 00               brk # $00
-; $25bb: 00 00               brk # $00
-; $25bd: 00 00               brk # $00
-; $25bf: 00 00               brk # $00
-; $25c1: 00 00               brk # $00
-; $25c3: 00 00               brk # $00
-; $25c5: 00 00               brk # $00
-; $25c7: 00 00               brk # $00
-; $25c9: 00 00               brk # $00
-; $25cb: 00 00               brk # $00
-; $25cd: 00 00               brk # $00
-; $25cf: 00 00               brk # $00
-; $25d1: 00 00               brk # $00
-; $25d3: 00 00               brk # $00
-; $25d5: 00 00               brk # $00
-; $25d7: 00 00               brk # $00
-; $25d9: 00 00               brk # $00
-; $25db: 00 00               brk # $00
-; $25dd: 00 00               brk # $00
-; $25df: 00 00               brk # $00
-; $25e1: 00 00               brk # $00
-; $25e3: 00 00               brk # $00
-; $25e5: 00 00               brk # $00
-; $25e7: 00 10               brk # $10
-; $25e9: 0f 11 00            slo a0011
-; $25ec: 03 1c               slo (p1c, x)
-; $25ee: 0e 00 00            asl f0000
-; $25f1: 0a                  asl 
-; $25f2: 00 11               brk # $11
-; $25f4: 3a                  nop 
-; $25f5: 07 09               slo a09
-; $25f7: 08                  php 
-; $25f8: 00 00               brk # $00
-; $25fa: 00 00               brk # $00
-; $25fc: 80 00               nop # $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $10, $0f, $11
+        .byte $00, $03, $1c, $0e, $00, $00, $0a, $00
+        .byte $11, $3a, $07, $09, $08, $00, $00, $00
+        .byte $00, $80
+
 _25fd:
 .export _25fd
+        .byte   $00
 _25fe:
 .export _25fe
+        .byte   $00
 _25ff:
 .export _25ff
-; $25fe: 00 00               brk # $00
-; $2600: 00 00               brk # $00
-; $2602: 00 00               brk # $00
-; $2604: 00 00               brk # $00
-; $2606: 00 00               brk # $00
-; $2608: 00 00               brk # $00
-; $260a: 00 00               brk # $00
-; $260c: 00 00               brk # $00
-; $260e: 00 00               brk # $00
-; $2610: 00 00               brk # $00
-; $2612: 00 00               brk # $00
-; $2614: 3a                  nop 
-; $2615: 30 2e               bmi b2645
-; $2617: 45 2e               eor a2e
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $3a, $30, $2e
+        .byte   $45, $2e
 _2619:
 .export _2619
-; $2619: 4a                  lsr 
-; $261a: 41 4d               eor (p4d, x)
-; $261c: 45 53               eor a53
-; $261e: 4f 4e 0d            sre a0d4e
-; $2621: 00 14               brk # $14
-; $2623: ad 4a 5a            lda a5a4a
-; $2626: 48                  pha 
-; $2627: 02                  jam 
-; $2628: 53 b7               sre (pb7), y
-; $262a: 00 00               brk # $00
-; $262c: 03 e8               slo (pe8, x)
-; $262e: 46 00               lsr a00
-; $2630: 00 0f               brk # $0f
-; $2632: 00 00               brk # $00
-; $2634: 00 00               brk # $00
-; $2636: 00 16               brk # $16
-; $2638: 00 00               brk # $00
-; $263a: 00 00               brk # $00
-; $263c: 00 00               brk # $00
-; $263e: 00 00               brk # $00
-; $2640: 00 00               brk # $00
-; $2642: 00 00               brk # $00
-;                    b2645   =*+$01
-; $2644: 00 00               brk # $00
-; $2646: 00 00               brk # $00
-; $2648: 00 00               brk # $00
-; $264a: 00 00               brk # $00
-; $264c: 00 00               brk # $00
-; $264e: 00 00               brk # $00
-; $2650: 00 00               brk # $00
-; $2652: 00 00               brk # $00
-; $2654: 03 00               slo (p00, x)
-; $2656: 10 0f               bpl b2667
-; $2658: 11 00               ora (p00), y
-; $265a: 03 1c               slo (p1c, x)
-; $265c: 0e 00 00            asl f0000
-; $265f: 0a                  asl 
-; $2660: 00 11               brk # $11
-; $2662: 3a                  nop 
-; $2663: 07 09               slo a09
-; $2665: 08                  php 
-;                    b2667   =*+$01
-; $2666: 00 00               brk # $00
-; $2668: 00 00               brk # $00
-; $266a: 80 aa               nop # $aa
-; $266c: 27 03               rla a03
-; $266e: 00 00               brk # $00
-; $2670: 00 00               brk # $00
-; $2672: 00 00               brk # $00
-; $2674: 00 00               brk # $00
-; $2676: 00 00               brk # $00
-; $2678: 00 00               brk # $00
-; $267a: 00 00               brk # $00
-; $267c: 00 00               brk # $00
-
+        .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d
+        .byte   $00 ,$14, $ad, $4a, $5a, $48, $02, $53
+        .byte   $b7 ,$00, $00, $03, $e8, $46, $00, $00
+        .byte   $0f ,$00, $00, $00, $00, $00, $16, $00
+        .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
+        .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
+        .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
+        .byte   $00 ,$00, $00, $03, $00, $10, $0f, $11
+        .byte   $00 ,$03, $1c, $0e, $00, $00, $0a, $00
+        .byte   $11 ,$3a, $07, $09, $08, $00, $00, $00
+        .byte   $00 ,$80, $aa, $27, $03, $00, $00, $00
+        .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
+        .byte   $00 ,$00, $00, $00, $00
 _267e:
 .export _267e
-; $267e: 00 ff               brk # $ff
-; $2680: ff aa aa            isc faaaa, x
-; $2683: aa                  tax 
-; $2684: 55 55       b2684   eor f55, x
-; $2686: 55 aa               eor faa, x
-; $2688: aa                  tax 
-; $2689: aa                  tax 
-; $268a: aa                  tax 
-; $268b: aa                  tax 
-; $268c: aa                  tax 
-; $268d: 55 aa               eor faa, x
-; $268f: aa                  tax 
-; $2690: aa                  tax 
-; $2691: aa                  tax 
-; $2692: aa                  tax 
-; $2693: aa                  tax 
-; $2694: aa                  tax 
-; $2695: aa                  tax 
-; $2696: aa                  tax 
-; $2697: aa                  tax 
-; $2698: aa                  tax 
-; $2699: aa                  tax 
-; $269a: aa                  tax 
-; $269b: 5a                  nop 
-; $269c: aa                  tax 
-; $269d: aa                  tax 
-; $269e: 00 aa               brk # $aa
-; $26a0: 00 00               brk # $00
-; $26a2: 00 00               brk # $00
-
+        .byte   $00, $ff, $ff, $aa, $aa, $aa, $55, $55
+        .byte   $55, $aa, $aa, $aa, $aa, $aa, $aa, $55
+        .byte   $aa, $aa, $aa, $aa, $aa, $aa, $aa, $aa
+        .byte   $aa, $aa, $aa, $aa, $aa, $5a, $aa, $aa
+        .byte   $00, $aa, $00, $00, $00, $00
 _26a4:
 .export _26a4
-; $26a4: 76 85       f26a4   ror f85, x
-; $26a6: 9c a5 8b            shy f8ba5, x
-; $26a9: 85 9a               sta a9a
-; $26ab: a5 8d               lda a8d
-; $26ad: 20 0c 9a            jsr e9a0c
-; $26b0: b0 d2               bcs b2684
-; $26b2: 85 6f               sta a6f
-; $26b4: a5 9c               lda a9c
-; $26b6: 85 70               sta a70
-; $26b8: a5 6b               lda a6b
-; $26ba: 85 9b               sta a9b
-; $26bc: a5 72               lda a72
-; $26be: 85 9c               sta a9c
-; $26c0: a5 85               lda a85
-; $26c2: 85 9a               sta a9a
-; $26c4: a5 87               lda a87
-; $26c6: 20 0c 9a            jsr e9a0c
-; $26c9: b0 b9               bcs b2684
-; $26cb: 85 6b               sta a6b
-; $26cd: a5 9c               lda a9c
-; $26cf: 85 6c               sta a6c
-; $26d1: a5 6d               lda a6d
-; $26d3: 85 9b               sta a9b
-; $26d5: a5 74               lda a74
-; $26d7: 85 9c               sta a9c
-; $26d9: a5 88               lda a88
-; $26db: 85 9a               sta a9a
-; $26dd: a5 8a               lda a8a
-; $26df: 20 0c 9a            jsr e9a0c
-; $26e2: b0 a0               bcs b2684
-; $26e4: 85 6d               sta a6d
-; $26e6: a5 9c               lda a9c
-; $26e8: 85 6e               sta a6e
-; $26ea: a5 71               lda a71
-; $26ec: 85 9a               sta a9a
-; $26ee: a5 6b               lda a6b
-; $26f0: 20 ea 39            jsr s39ea
-; $26f3: 85 bb               sta abb
-; $26f5: a5 72               lda a72
-; $26f7: 45 6c               eor a6c
-; $26f9: 85 9c               sta a9c
-; $26fb: a5 73               lda a73
-; $26fd: 85 9a               sta a9a
-; $26ff: a5 6d               lda a6d
-; $2701: 20 ea 39            jsr s39ea
-; $2704: 85 9a               sta a9a
-; $2706: a5 bb               lda abb
-; $2708: 85 9b               sta a9b
-; $270a: a5 74               lda a74
-; $270c: 45 6e               eor a6e
-; $270e: 20 0c 9a            jsr e9a0c
-; $2711: 85 bb               sta abb
-; $2713: a5 75               lda a75
-; $2715: 85 9a               sta a9a
-; $2717: a5 6f               lda a6f
-; $2719: 20 ea 39            jsr s39ea
-; $271c: 85 9a               sta a9a
-; $271e: a5 bb               lda abb
-; $2720: 85 9b               sta a9b
-; $2722: a5 70               lda a70
-; $2724: 45 76               eor a76
-; $2726: 20 0c 9a            jsr e9a0c
-; $2729: 48                  pha 
-; $272a: 98                  tya 
-; $272b: 4a                  lsr 
-; $272c: 4a                  lsr 
-; $272d: aa                  tax 
-; $272e: 68                  pla 
-; $272f: 24 9c               bit a9c
-; $2731: 30 02               bmi b2735
-; $2733: a9 00               lda # $00
-; $2735: 95 35       b2735   sta f35, x
-; $2737: c8                  iny 
-; $2738: c4 ae               cpy aae
-; $273a: b0 fe       b273a   bcs b273a
-; $273c: 4c f2 9b            jmp e9bf2
-
-; $273f: a4 47               ldy a47
-; $2741: a6 48               ldx a48
-; $2743: a5 4b               lda a4b
-; $2745: 85 47               sta a47
-; $2747: a5 4c               lda a4c
-; $2749: 85 48               sta a48
-; $274b: 84 4b               sty a4b
-; $274d: 86 4c               stx a4c
-; $274f: a4 49               ldy a49
-; $2751: a6 4a               ldx a4a
-; $2753: a5 51               lda a51
-; $2755: 85 49               sta a49
-; $2757: a5 52               lda a52
-; $2759: 85 4a               sta a4a
-; $275b: 84 51               sty a51
-; $275d: 86 52               stx a52
-; $275f: a4 4f               ldy a4f
-; $2761: a6 50               ldx a50
-; $2763: a5 53               lda a53
-; $2765: 85 4f               sta a4f
-; $2767: a5 54               lda a54
-; $2769: 85 50               sta a50
-; $276b: 84 53               sty a53
-; $276d: 86 54               stx a54
-; $276f: a0 08               ldy # $08
-; $2771: b1 57               lda (p57), y
-; $2773: 85 ae               sta aae
-; $2775: a5 57               lda a57
-; $2777: 18                  clc 
-; $2778: 69 14               adc # $14
-; $277a: 85 5b               sta a5b
-; $277c: a5 58               lda a58
-; $277e: 69 00               adc # $00
-; $2780: 85 5c               sta a5c
-; $2782: a0 00               ldy # $00
-; $2784: 84 aa               sty aaa
-; $2786: 84 9f               sty a9f
-; $2788: b1 5b               lda (p5b), y
-; $278a: 85 6b               sta a6b
-; $278c: c8                  iny 
-; $278d: b1 5b               lda (p5b), y
-; $278f: 85 6d               sta a6d
-; $2791: c8                  iny 
-; $2792: b1 5b               lda (p5b), y
-; $2794: 85 6f               sta a6f
-; $2796: c8                  iny 
-; $2797: b1 5b               lda (p5b), y
-; $2799: 85 bb               sta abb
-;                    b279c   =*+$01
-; $279b: 29 1f               and # $1f
-; $279d: c5 ad               cmp aad
-; $279f: 90 fb               bcc b279c
-; $27a1: c8                  iny 
-;                    f27a3   =*+$01
-; $27a2: b1 5b               lda (p5b), y
+        .byte   $76, $85, $9c, $a5, $8b, $85, $9a, $a5
+        .byte   $8d, $20, $0c, $9a, $b0, $d2, $85, $6f
+        .byte   $a5, $9c, $85, $70, $a5, $6b, $85, $9b
+        .byte   $a5, $72, $85, $9c, $a5, $85, $85, $9a
+        .byte   $a5, $87, $20, $0c, $9a, $b0, $b9, $85
+        .byte   $6b, $a5, $9c, $85, $6c, $a5, $6d, $85
+        .byte   $9b, $a5, $74, $85, $9c, $a5, $88, $85
+        .byte   $9a, $a5, $8a, $20, $0c, $9a, $b0, $a0
+        .byte   $85, $6d, $a5, $9c, $85, $6e, $a5, $71
+        .byte   $85, $9a, $a5, $6b, $20, $ea, $39, $85
+        .byte   $bb, $a5, $72, $45, $6c, $85, $9c, $a5
+        .byte   $73, $85, $9a, $a5, $6d, $20, $ea, $39
+        .byte   $85, $9a, $a5, $bb, $85, $9b, $a5, $74
+        .byte   $45, $6e, $20, $0c, $9a, $85, $bb, $a5
+        .byte   $75, $85, $9a, $a5, $6f, $20, $ea, $39
+        .byte   $85, $9a, $a5, $bb, $85, $9b, $a5, $70
+        .byte   $45, $76, $20, $0c, $9a, $48, $98, $4a
+        .byte   $4a, $aa, $68, $24, $9c, $30, $02, $a9
+        .byte   $00, $95, $35, $c8, $c4, $ae, $b0, $fe
+        .byte   $4c, $f2, $9b, $a4, $47, $a6, $48, $a5
+        .byte   $4b, $85, $47, $a5, $4c, $85, $48, $84
+        .byte   $4b, $86, $4c, $a4, $49, $a6, $4a, $a5
+        .byte   $51, $85, $49, $a5, $52, $85, $4a, $84
+        .byte   $51, $86, $52, $a4, $4f, $a6, $50, $a5
+        .byte   $53, $85, $4f, $a5, $54, $85, $50, $84
+        .byte   $53, $86, $54, $a0, $08, $b1, $57, $85
+        .byte   $ae, $a5, $57, $18, $69, $14, $85, $5b
+        .byte   $a5, $58, $69, $00, $85, $5c, $a0, $00
+        .byte   $84, $aa, $84, $9f, $b1, $5b, $85, $6b
+        .byte   $c8, $b1, $5b, $85, $6d, $c8, $b1, $5b
+        .byte   $85, $6f, $c8, $b1, $5b, $85, $bb, $29
+        .byte   $1f, $c5, $ad, $90, $fb, $c8, $b1
 
 ;===============================================================================
 
@@ -1571,157 +1338,183 @@ _27a3:
         .byte   $5b
 _27a4:
 .export _27a4
-; $27a4: 85 2e       f27a4   sta a2e
-; $27a6: 29 0f               and # $0f
-; $27a8: aa                  tax 
-; $27a9: b5 35               lda f35, x
-; $27ab: d0 fe       b27ab   bne b27ab
-; $27ad: a5 2e               lda a2e
-; $27af: 4a                  lsr 
-; $27b0: 4a                  lsr 
-; $27b1: 4a                  lsr 
-; $27b2: 4a                  lsr 
-; $27b3: aa                  tax 
-; $27b4: b5 35               lda f35, x
-; $27b6: d0 fe       b27b6   bne b27b6
-; $27b8: c8                  iny 
-; $27b9: b1 5b               lda (p5b), y
-; $27bb: 85 2e               sta a2e
-; $27bd: 29 0f               and # $0f
-; $27bf: aa                  tax 
-; $27c0: b5 35               lda f35, x
-; $27c2: d0 fe       b27c2   bne b27c2
-; $27c4: a5 2e               lda a2e
-; $27c6: 4a                  lsr 
-; $27c7: 4a                  lsr 
-; $27c8: 4a                  lsr 
-; $27c9: 4a                  lsr 
-; $27ca: aa                  tax 
-; $27cb: b5 35               lda f35, x
-; $27cd: d0 fe       b27cd   bne b27cd
-; $27cf: 4c 8e 9d            jmp e9d8e
-
-; $27d2: a5 bb               lda abb
-; $27d4: 85 6c               sta a6c
-; $27d6: 0a                  asl 
-; $27d7: 85 6e               sta a6e
-; $27d9: 0a                  asl 
-; $27da: 85 70               sta a70
-; $27dc: 20 2c 9a            jsr e9a2c
-; $27df: a5 0b               lda a0b
-; $27e1: 85 6d               sta a6d
-; $27e3: 45 72               eor a72
-; $27e5: 30 fe       b27e5   bmi b27e5
-; $27e7: 18                  clc 
-; $27e8: a5 71               lda a71
-; $27ea: 65 09               adc a09
-; $27ec: 85 6b               sta a6b
-; $27ee: a5 0a               lda a0a
-; $27f0: 69 00               adc # $00
-; $27f2: 85 6c               sta a6c
-; $27f4: 4c b3 9d            jmp e9db3
-
-; $27f7: a5 09               lda a09
-; $27f9: 38                  sec 
-; $27fa: e5 71               sbc a71
-; $27fc: 85 6b               sta a6b
-; $27fe: a5 0a               lda a0a
-; $2800: e9 00               sbc # $00
-; $2802: 85 6c               sta a6c
-; $2804: b0 fe       b2804   bcs b2804
-; $2806: 49 ff               eor # $ff
-; $2808: 85 6c               sta a6c
-; $280a: a9 01               lda # $01
-; $280c: e5 6b               sbc a6b
-; $280e: 85 6b               sta a6b
-; $2810: 90 02               bcc b2814
-; $2812: e6 6c               inc a6c
-; $2814: a5 6d       b2814   lda a6d
-; $2816: 49 80               eor # $80
-; $2818: 85 6d               sta a6d
-; $281a: a5 0e               lda a0e
-; $281c: 85 70               sta a70
-; $281e: 45 74               eor a74
-; $2820: 30 fe       b2820   bmi b2820
-; $2822: 18                  clc 
-; $2823: a5 73               lda a73
-; $2825: 65 0c               adc a0c
-; $2827: 85 6e               sta a6e
-; $2829: a5 0d               lda a0d
-; $282b: 69 00               adc # $00
-; $282d: 85 6f               sta a6f
-; $282f: 4c ee 9d            jmp e9dee
-
-; $2832: a5 0c               lda a0c
-; $2834: 38                  sec 
-; $2835: e5 73               sbc a73
-; $2837: 85 6e               sta a6e
-; $2839: a5 0d               lda a0d
-; $283b: e9 00               sbc # $00
-; $283d: 85 6f               sta a6f
-; $283f: b0 fe       b283f   bcs b283f
-; $2841: 49 ff               eor # $ff
-; $2843: 85 6f               sta a6f
-; $2845: a5 6e               lda a6e
-; $2847: 49 ff               eor # $ff
-; $2849: 69 01               adc # $01
-; $284b: 85 6e               sta a6e
-; $284d: a5 70               lda a70
-; $284f: 49 80               eor # $80
-; $2851: 85 70               sta a70
-; $2853: 90 fe       b2853   bcc b2853
-; $2855: e6 6f               inc a6f
-; $2857: a5 76               lda a76
-; $2859: 30 fe       b2859   bmi b2859
-; $285b: a5 75               lda a75
-; $285d: 18                  clc 
-; $285e: 65 0f               adc a0f
-; $2860: 85 bb               sta abb
-; $2862: a5 10               lda a10
-; $2864: 69 00               adc # $00
-; $2866: 85 99               sta a99
-; $2868: 4c 27 9e            jmp e9e27
-
-; $286b: a6 9a               ldx a9a
-; $286d: f0 fe       b286d   beq b286d
-; $286f: a2 00               ldx # $00
-; $2871: 4a          b2871   lsr 
-; $2872: e8                  inx 
-; $2873: c5 9a               cmp a9a
-; $2875: b0 fa               bcs b2871
-; $2877: 86 9c               stx a9c
-; $2879: 20 af 99            jsr $99af
-; $287c: a6 9c               ldx a9c
-; $287e: a5 9b               lda a9b
-; $2880: 0a          b2880   asl 
-; $2881: 26 99               rol a99
-; $2883: 30 fe       b2883   bmi b2883
-; $2885: ca                  dex 
-; $2886: d0 f8               bne b2880
-; $2888: 85 9b               sta a9b
-; $288a: 60                  rts 
-
-; $288b: a9 32               lda # $32
-; $288d: 85 9b               sta a9b
-; $288f: 85 99               sta a99
-; $2891: 60                  rts 
-
-; $2892: a9 80               lda # $80
-; $2894: 38                  sec 
-; $2895: e5 9b               sbc a9b
-; $2897: 9d 00 01            sta f0100, x
-; $289a: e8                  inx 
-; $289b: a9 00               lda # $00
-; $289d: e5 99               sbc a99
-; $289f: 9d 00 01            sta f0100, x
-;                    f28a4   =*+$02
-; $28a2: 4c 61 00            jmp e0061
+        sta $2e
+        and # $0f
+        tax 
+        lda $35, x
+_27ab:  bne _27ab               ; infinite loop, why?
+        lda $2e
+        lsr 
+        lsr 
+        lsr 
+        lsr 
+        tax 
+        lda $35, x
+_27b6:  bne _27b6               ; infinite loop, why?
+        iny 
+        lda ($5b), y
+        sta $2e
+        and # $0f
+        tax 
+        lda $35, x
+_27c2:  bne _27c2               ; infinite loop, why?
+        lda $2e
+        lsr 
+        lsr 
+        lsr 
+        lsr 
+        tax 
+        lda $35, x
+_27cd:  bne _27cd               ; infinite loop, why?
+        jmp $9d8e
 
 ;===============================================================================
 
-_28a4:
-.export _28a4
-        .byte   $00
+; unreferenced / unused?
+;$27D2:
+        lda $bb
+        sta $6c
+        asl 
+        sta $6e
+        asl 
+        sta $70
+        jsr $9a2c
+        lda $0b
+        sta $6d
+        eor $72
+_27e5:
+        bmi _27e5               ; infinite loop, why??
+        clc 
+        lda $71
+        adc $09
+        sta $6b
+        lda $0a
+        adc # $00
+        sta $6c
+        jmp $9db3
+
+;===============================================================================
+
+; unreferenced / unused?
+;$27f7:
+        lda $09
+        sec 
+        sbc $71
+        sta $6b
+        lda $0a
+        sbc # $00
+        sta $6c
+_2804:  bcs _2804               ; infinite loop, why??
+        eor # $ff
+        sta $6c
+        lda # $01
+        sbc $6b
+        sta $6b
+        bcc _2814
+        inc $6c
+_2814:
+        lda $6d
+        eor # $80
+        sta $6d
+        lda $0e
+        sta $70
+        eor $74
+_2820:  bmi _2820               ; infinite loop, why??
+        clc 
+        lda $73
+        adc $0c
+        sta $6e
+        lda $0d
+        adc # $00
+        sta $6f
+        jmp $9dee
+
+;===============================================================================
+
+; unreferenced / unused?
+;$2832:
+        lda $0c
+        sec 
+        sbc $73
+        sta $6e
+        lda $0d
+        sbc # $00
+        sta $6f
+_283f:  bcs _283f               ; infinite loop, why??
+        eor # $ff
+        sta $6f
+        lda $6e
+        eor # $ff
+        adc # $01
+        sta $6e
+        lda $70
+        eor # $80
+        sta $70
+_2853:  bcc _2853               ; infinite loop, why??
+        inc $6f
+        lda $76
+_2859:  bmi _2859               ; inifinite loop, why??
+        lda $75
+        clc 
+        adc $0f
+        sta $bb
+        lda $10
+        adc # $00
+        sta $99
+        jmp $9e27
+
+;===============================================================================
+
+; unreferenced / unused?
+;$286b:
+        ldx $9a
+_286d:  beq _286d               ; infinite loop, why??
+        ldx # $00
+_2871:
+        lsr 
+        inx 
+        cmp $9a
+        bcs _2871
+        stx $9c
+        jsr $99af
+        ldx $9c
+        lda $9b
+_2880:
+        asl 
+        rol $99
+_2883:  bmi _2883               ; infinite loop, why??
+        dex 
+        bne _2880
+        sta $9b
+        rts 
+
+;===============================================================================
+
+; unreferenced / unused?
+;$288b:
+        lda # $32
+        sta $9b
+        sta $99
+        rts 
+
+;===============================================================================
+
+; unreferenced / unused?
+;$2892:
+        lda # $80
+        sec 
+        sbc $9b
+        sta $0100, x
+        inx 
+        lda # $00
+        sbc $99
+        sta $0100, x
+_28a2:
+.export _28a4 := _28a2 + 2
+        jmp $0061
+
+;===============================================================================
+        
 _28a5:
 .export _28a5
         .byte   $f9, $25, $f9, $4a, $f9, $6f, $f9, $94
@@ -1763,7 +1556,7 @@ _28d5:
 ;===============================================================================
 
 _28d9:
-.export _28d9:
+.export _28d9
         jsr _777e
 
 _28dc:  ; NOTE: this address is used in the table in _250c
@@ -1880,7 +1673,7 @@ _296d:
         eor ($07), y
         sta ($07), y
 _2974:
-        ldy a06
+        ldy $06
 _2976:
         rts 
 
@@ -1902,7 +1695,7 @@ _2988:
         lda # $ff
         cmp _27a3, y
         beq _29fa
-        sta _27a4, y
+        sta _27a4, y            ; writing to code??
         inc $7e
         bne _29fa
 _2998:
@@ -1942,13 +1735,13 @@ _29d2:
         lda $6b
         sta _26a4, y
         lda $6c
-        sta _27a4, y
+        sta _27a4, y            ; writing to code??
         iny 
 _29e6:
         lda $6d
         sta _26a4, y
         lda $6e
-        sta _27a4, y
+        sta _27a4, y            ; writing to code??
         iny 
         sty $7e
         jsr $ab91
@@ -2437,7 +2230,7 @@ _2d59:
 
 ;===============================================================================
 
-_26d1:
+_2d61:
         jsr $7773
         lda # $06
         jmp _6a25
@@ -2741,7 +2534,7 @@ _2f21:
 
 _2f24:  ; NOTE: this address is used in the table in _250c
 .export _2f24
-        stx a07
+        stx $07
         ldx # $ff
         stx _2f1e
         cmp # $2e
@@ -2846,7 +2639,7 @@ _2fc8:
         beq _2f67
 _2fd4:
         ldy # $00
-_2fd6
+_2fd6:
         lda $0648, y
         jsr $b17b
         iny 
@@ -3737,7 +3530,7 @@ _3556:
         cmp # $42
         bcs _3524
         jsr _350a
-_b3571:
+_3571:
         lda $3f
         bne _357a
         asl $2d
@@ -3857,7 +3650,7 @@ _3617:
         sbc # $00
         sta $36, x
         bcs _3616
-        lda f35, x
+        lda $35, x
         eor # $ff
         adc # $01
         sta $35, x
@@ -3978,7 +3771,7 @@ _36d4:
         asl 
         ldy # $1e
         sta ($59), y
-        lda aa5
+        lda $a5
         cmp # $0b
         bcc _36f7
         ldy # $24
@@ -4090,7 +3883,7 @@ _377b:
 
 _378c:
         asl 
-        sta a9b
+        sta $9b
         lda # $00
         ror 
         jmp $a44c
@@ -4735,7 +4528,7 @@ _3b27:
 
 _3b30:
         lda $06d6, y
-_3b30:
+_3b33:
         sta $9a
         lda $96
 _3b37:
@@ -4747,7 +4540,7 @@ _3b37:
         cmp $9a
         bcc _3b43
         sbc $9a
-_3b43::
+_3b43:
         rol $2e
         rol 
         cmp $9a
@@ -4821,7 +4614,7 @@ _3ba9:
         ;-----------------------------------------------------------------------
 
 _3bae:
-        ldx ab6
+        ldx $b6
         lda $9300, x
         ldx $9a
         sbc $9300, x
@@ -5054,7 +4847,7 @@ _3cdb:
         jsr $84af
         and # $07
         adc # $44
-        sta a06f1
+        sta $06f1
         jsr $84af
         and # $07
         adc # $7c
@@ -5096,7 +4889,7 @@ _3d2f:
         lda $0507
         ora $0508
         bne _3d6f
-        lda aa7
+        lda $a7
         bpl _3d6f
         ldy # $00
 _3d3d:
@@ -5121,7 +4914,7 @@ _3d5e:
         jsr _237e
         lda # $b1
         bne _3d7a
-_3dc6:
+_3d6c:
         dey 
         bne _3d3d
 _3d6f:
@@ -5231,7 +5024,7 @@ _3e24:                                                                  ;$3e24
         dec $a3
         jmp _3e11
 _3e31:                                                                  ;$3e31
-        inc a10
+        inc $10
         lda # $0a
         bne _3dbe
 _3e37:  ; NOTE: this address is used in the table in _250c              ;$3e37

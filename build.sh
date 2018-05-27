@@ -64,15 +64,18 @@ $ca65 -o build/loader_stage4.o src/loader/stage4.asm
 # loader stage 5:
 #-------------------------------------------------------------------------------
 
+# assemble the Elite source, before encrypting
+echo "- assemble 'elite_1D00.asm'"
+$ca65 -o build/elite_1D00.o src/elite_1D00.asm
 echo "- assemble 'elite_init.asm'"
 $ca65 -o build/elite_init.o src/elite_init.asm
-echo "- assemble 'loader/gma5.asm'"
-$ca65 -o build/gma5.o               src/loader/gma5.asm
+echo "- assemble 'loader/stage5.asm'"
+$ca65 -o build/loader_stage5.o src/loader/stage5.asm
 
 # loader stage 6:
 #-------------------------------------------------------------------------------
 
-# assemble the original source, before encrypting
+# assemble the Elite source, before encrypting
 echo "- assemble 'elite_6A00.asm'"
 $ca65 -o build/elite_6A00.o src/elite_6A00.asm
 # simply convert this to a binary as-is
@@ -103,7 +106,7 @@ $ld65 -C build/gma1.cfg \
     build/loader_stage1.o \
     build/loader_stage4.o \
     build/elite_init.o \
-    build/gma5.o \
+    build/loader_stage5.o \
     c64.lib
 
 echo "-     link 'byebyejulie.prg'"
@@ -146,7 +149,7 @@ $ld65 -C build/gma4_encrypted.cfg -o bin/gma4.prg \
 
 echo "-     link 'gma5.prg'"
 $ld65 -C c64-asm.cfg -o bin/gma5.prg \
-    build/gma5.o --start-addr \$1D00 \
+    build/loader_stage5.o --start-addr \$1D00 \
     c64.lib
 
 # re-link with the encrypted binary blobs
