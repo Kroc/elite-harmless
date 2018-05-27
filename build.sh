@@ -47,6 +47,8 @@ echo "- assemble 'elite_1D00.asm'"
 $ca65 -o build/elite_1D00.o src/elite_1D00.asm
 echo "- assemble 'elite_1D81.asm'"
 $ca65 -o build/elite_1D81.o src/elite_1D81.asm
+echo "- assemble 'elite_6A00.asm'"
+$ca65 -o build/elite_6A00.o src/elite_6A00.asm
 
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
@@ -111,12 +113,11 @@ $ld65 -C build/gma5.cfg -o bin/gma5.prg \
 # loader stage 6:
 #-------------------------------------------------------------------------------
 
-# assemble the Elite source, before encrypting
-echo "- assemble 'elite_6A00.asm'"
-$ca65 -o build/elite_6A00.o src/elite_6A00.asm
-# simply convert this to a binary as-is
+# convert the source to a binary as-is
 echo "-     link 'gma6.bin'"
-$ld65 -C build/gma6_bin.cfg -o build/gma6.bin build/elite_6A00.o
+$ld65 -C build/gma6_bin.cfg -o build/gma6.bin \
+    build/elite_6A00.o \
+    build/elite_1D00.o
 # run the binary for the encrypt script, which will spit out an assembler file,
 # this gets included in the relevant position by the stage 6 loader (GMA6.PRG)
 echo "-  encrypt 'gma6.bin'"

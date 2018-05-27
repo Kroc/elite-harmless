@@ -5,29 +5,29 @@
 
 .include        "c64.asm"
 
+.import _1d01:absolute
+.import _1d02:absolute
+.import _1d03:absolute
+.import _1d04:absolute
+.import _1d05:absolute
+.import _1d06:absolute
+.import _1d08:absolute
+.import _1d0a:absolute
+.import _1d0b:absolute
+.import _1d0c:absolute
+.import _1d0d:absolute
+.import _1d0e:absolute
+.import _1d0f:absolute
+.import _1d10:absolute
+.import _1d11:absolute
+.import _1d12:absolute
+.import _1d13:absolute
+.import _1d14:absolute
+.import _1d21:absolute
+
 ; these will be replaced with imports once I've disassembled $1D00...$3DE4,
 ; and yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
-
-.define _1d01   $1d01
-.define _1d02   $1d02
-.define _1d03   $1d03
-.define _1d04   $1d04
-.define _1d05   $1d05
-.define _1d06   $1d06
-.define _1d08   $1d08
-.define _1d0a   $1d0a
-.define _1d0b   $1d0b
-.define _1d0c   $1d0c
-.define _1d0d   $1d0d
-.define _1d0e   $1d0e
-.define _1d0f   $1d0f
-.define _1d10   $1d10
-.define _1d11   $1d11
-.define _1d12   $1d12
-.define _1d13   $1d13
-.define _1d14   $1d14
-.define _1d21   $1d21
 
 .define _1ec1   $1ec1
 .define _202f   $202f
