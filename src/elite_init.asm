@@ -582,8 +582,9 @@ _783a:
 
 .include        "elite_sprites.asm"
 
-;-------------------------------------------------------------------------------
-
+        ; some data that comes after the sprites, but isn't sprites.
+        ; this block gets copied along with the sprites to $6800+
+        
         .byte   $38, $35, $25, $67, $fa, $b5, $a5, $a2                  ;$7C3A
         .byte   $22, $c1, $df, $eb, $77, $ce, $f4, $07
         .byte   $37, $cf, $33, $4d, $a5, $89, $76, $cd                  ;$7C4A

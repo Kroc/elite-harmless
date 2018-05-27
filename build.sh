@@ -117,7 +117,9 @@ $ld65 -C build/gma5.cfg -o bin/gma5.prg \
 echo "-     link 'gma6.bin'"
 $ld65 -C build/gma6_bin.cfg -o build/gma6.bin \
     build/elite_6A00.o \
-    build/elite_1D00.o
+    build/elite_1D00.o \
+    build/loader_stage5.o \
+    build/elite_1D81.o
 # run the binary for the encrypt script, which will spit out an assembler file,
 # this gets included in the relevant position by the stage 6 loader (GMA6.PRG)
 echo "-  encrypt 'gma6.bin'"

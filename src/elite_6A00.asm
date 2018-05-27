@@ -5,6 +5,10 @@
 
 .include        "c64.asm"
 
+; yes, I am aware that cc65 allows for 'default import of undefined labels'
+; but I want to keep track of things explicitly for clarity and helping others
+
+
 .import _1d01:absolute
 .import _1d02:absolute
 .import _1d03:absolute
@@ -25,93 +29,88 @@
 .import _1d14:absolute
 .import _1d21:absolute
 
-; these will be replaced with imports once I've disassembled $1D00...$3DE4,
-; and yes, I am aware that cc65 allows for 'default import of undefined labels'
-; but I want to keep track of things explicitly for clarity and helping others
-
-.define _1ec1   $1ec1
-.define _202f   $202f
-.define _2367   $2367
-.define _2390   $2390
-.define _246d   $246d
-.define _24a6   $24a6
-.define _2566   $2566
-.define _2567   $2567
-.define _25a6   $25a6
-.define _25aa   $25aa
-.define _25ab   $25ab
-.define _25b2   $25b2
-.define _25b3   $25b3
-.define _25fd   $25fd
-.define _25fe   $25fe
-.define _25ff   $25ff
-.define _2619   $2619
-.define _267e   $267e
-.define _26a4   $26a4
-.define _27a4   $27a4
-.define _28a4   $28a4
-.define _28a5   $28a5
-.define _28d5   $28d5
-.define _28d9   $28d9
-.define _28dc   $28dc
-.define _28e0   $28e0
-.define _28e5   $28e5
-.define _28f3   $28f3
-.define _2900   $2900
-.define _2907   $2907
-.define _2918   $2918
-.define _293a   $293a
-.define _2977   $2977
-.define _2a12   $2a12
-.define _2c4e   $2c4e
-.define _2c50   $2c50
-.define _2c9b   $2c9b
-.define _2d69   $2d69
-.define _2dc5   $2dc5
-.define _2e55   $2e55
-.define _2e57   $2e57
-.define _2e59   $2e59
-.define _2e65   $2e65
-.define _2f19   $2f19
-.define _2f1b   $2f1b
-.define _2f1c   $2f1c
-.define _2f1f   $2f1f
-.define _2f24   $2f24
-.define _2fee   $2fee
-.define _2ff3   $2ff3
-
-.define _31c6   $31c6
-.define _32ad   $32ad
-.define _3385   $3385
-.define _34bc   $34bc
-.define _3695   $3695
-.define _3708   $3708
-.define _3795   $3795
-.define _379e   $379e
-.define _37b2   $37b2
-.define _3895   $3895
-.define _38f8   $38f8
-.define _3986   $3986
-.define _3988   $3988
-.define _399b   $399b
-.define _39e0   $39e0
-.define _39ea   $39ea
-.define _3a25   $3a25
-.define _3a27   $3a27
-.define _3aa8   $3aa8
-.define _3ace   $3ace
-.define _3ad1   $3ad1
-.define _3b0d   $3b0d
-.define _3b37   $3b37
-.define _3bc1   $3bc1
-.define _3c6f   $3c6f
-.define _3c7f   $3c7f
-.define _3c95   $3c95
-.define _3d2f   $3d2f
-.define _3e08   $3e08
-.define _3e87   $3e87
-.define _3e95   $3e95
-.define _3ea1   $3ea1
+.import _1ec1:absolute
+.import _202f:absolute
+.import _2367:absolute
+.import _2390:absolute
+.import _246d:absolute
+.import _24a6:absolute
+.import _2566:absolute
+.import _2567:absolute
+.import _25a6:absolute
+.import _25aa:absolute
+.import _25ab:absolute
+.import _25b2:absolute
+.import _25b3:absolute
+.import _25fd:absolute
+.import _25fe:absolute
+.import _25ff:absolute
+.import _2619:absolute
+.import _267e:absolute
+.import _26a4:absolute
+.import _27a4:absolute
+.import _28a4:absolute
+.import _28a5:absolute
+.import _28d5:absolute
+.import _28d9:absolute
+.import _28dc:absolute
+.import _28e0:absolute
+.import _28e5:absolute
+.import _28f3:absolute
+.import _2900:absolute
+.import _2907:absolute
+.import _2918:absolute
+.import _293a:absolute
+.import _2977:absolute
+.import _2a12:absolute
+.import _2c4e:absolute
+.import _2c50:absolute
+.import _2c9b:absolute
+.import _2d69:absolute
+.import _2dc5:absolute
+.import _2e55:absolute
+.import _2e57:absolute
+.import _2e59:absolute
+.import _2e65:absolute
+.import _2f19:absolute
+.import _2f1b:absolute
+.import _2f1c:absolute
+.import _2f1f:absolute
+.import _2f24:absolute
+.import _2fee:absolute
+.import _2ff3:absolute
+.import _31c6:absolute
+.import _32ad:absolute
+.import _3385:absolute
+.import _34bc:absolute
+.import _3695:absolute
+.import _3708:absolute
+.import _3795:absolute
+.import _379e:absolute
+.import _37b2:absolute
+.import _3895:absolute
+.import _38f8:absolute
+.import _3986:absolute
+.import _3988:absolute
+.import _399b:absolute
+.import _39e0:absolute
+.import _39ea:absolute
+.import _3a25:absolute
+.import _3a27:absolute
+.import _3aa8:absolute
+.import _3ace:absolute
+.import _3ad1:absolute
+.import _3b0d:absolute
+.import _3b37:absolute
+.import _3bc1:absolute
+.import _3c6f:absolute
+.import _3c7f:absolute
+.import _3c95:absolute
+.import _3d2f:absolute
+.import _3e08:absolute
+.import _3e87:absolute
+.import _3e95:absolute
+.import _3ea1:absolute
 
 ;===============================================================================
 
@@ -8577,7 +8576,7 @@ _a6f2:
         sty $63f8               ;?
         sty $67f8               ;?
         lda _3e08, y            ;!?
-        sta $d027               ;sprite 0 color
+        sta $d027               ;sprite 0 color? (or ship model table)
         lda # $01
 _a700:
         sta $bb
