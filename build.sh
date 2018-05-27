@@ -86,7 +86,8 @@ $ca65 -o build/loader_stage4.o src/loader/stage4.asm
 #-------------------------------------------------------------------------------
 
 # convert the Elite code portion of this to a binary, for encrypting; this will
-# split the code/data into "gma5_code.bin" (unused), the unencrypted area, and "gma5_data.bin" the block to be encypted
+# split the code/data into "gma5_code.bin" (unused), the unencrypted area, and
+# "gma5_data.bin" the block to be encypted
 echo "-     link 'gma5.bin'"
 $ld65 -C build/gma5_bin.cfg -o build/gma5 \
     build/loader_stage5.o \

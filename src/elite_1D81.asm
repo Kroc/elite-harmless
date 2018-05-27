@@ -5,6 +5,10 @@
 
 .include        "c64.asm"
 
+.import _1d06:absolute
+.import _1d07:absolute
+.import _1d09:absolute
+
 .define _6a00   $6a00
 .define _6a25   $6a25
 .define _745a   $745a
@@ -2775,7 +2779,7 @@ _30bb:
         ldx # $aa
         lda $a3
         and # $08
-        and $1d09
+        and _1d09
         beq _30c7+1
         txa 
 _30c7:
@@ -4737,7 +4741,7 @@ _3c4d:
 _3c58:
         lda $0480
         bne _3c62
-        lda $1d06
+        lda _1d06
         bne _3c6e
 _3c62:
         txa 
@@ -4783,7 +4787,7 @@ _3c7f:
 _3c8a:
         bpl _3c7c
 _3c8c:
-        lda $1d07
+        lda _1d07
         bne _3c7c
         ldx # $80
         bmi _3c7c

@@ -3,12 +3,6 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-; mostly "graphics" data (includes the charset and HUD image)
-
-; as the disassembly improves, this 'opaque' data will be broken out
-; to more useful files such as BMPs/PNGs that will get translated into
-; the code the C64 needs during the build process
-
 _0700:
         .byte   $4c, $32, $24, $00, $03, $60, $6b, $a9                  ;$0700
         .byte   $77, $00, $64, $6c, $b5, $71, $6d, $6e
