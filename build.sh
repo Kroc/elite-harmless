@@ -30,11 +30,30 @@ rm -f build/*.bin
 rm -f build/*.prg
 rm -f build/*.d64
 
+rm -f bin/*.prg
+rm -f bin/*.d64
+
 echo "- OK"
 
-echo
-echo "* building GMA86 disk:"
+# assemble the stand-alone Elite code into object files;
+# these can be linked into program files in whichever order we please later
 
+echo
+echo "* assemble Elite source code:"
+echo "  ==========================="
+echo "- assemble 'elite_init.asm'"
+$ca65 -o build/elite_init.o src/elite_init.asm
+echo "- assemble 'elite_1D00.asm'"
+$ca65 -o build/elite_1D00.o src/elite_1D00.asm
+echo "- assemble 'elite_1D81.asm'"
+$ca65 -o build/elite_1D81.o src/elite_1D81.asm
+
+# let's build an original floppy disk to verify that we haven't broken
+# the code or failed to preserve the original somewhere along the lines
+
+echo
+echo "* assemble GMA86 loader:"
+echo "  ======================"
 echo "- assemble 'loader/stage0.asm'"
 $ca65 -o build/loader_stage0.o      src/loader/stage0.asm
 echo "- assemble 'loader/stage1.asm'"
@@ -43,6 +62,8 @@ echo "- assemble 'loader/stage2.asm'"
 $ca65 -o build/loader_stage2.o      src/loader/stage2.asm
 echo "- assemble 'loader/stage3.asm'"
 $ca65 -o build/loader_stage3.o      src/loader/stage3.asm
+echo "- assemble 'loader/stage5.asm'"
+$ca65 -o build/loader_stage5.o      src/loader/stage5.asm
 
 # loader stage 4:
 #-------------------------------------------------------------------------------
@@ -64,13 +85,27 @@ $ca65 -o build/loader_stage4.o src/loader/stage4.asm
 # loader stage 5:
 #-------------------------------------------------------------------------------
 
-# assemble the Elite source, before encrypting
-echo "- assemble 'elite_1D00.asm'"
-$ca65 -o build/elite_1D00.o src/elite_1D00.asm
-echo "- assemble 'elite_init.asm'"
-$ca65 -o build/elite_init.o src/elite_init.asm
-echo "- assemble 'loader/stage5.asm'"
-$ca65 -o build/loader_stage5.o src/loader/stage5.asm
+# convert the Elite code portion of this to a binary, for encrypting; this will
+# split the code/data into "gma5_code.bin" (unused), the unencrypted area, and "gma5_data.bin" the block to be encypted
+echo "-     link 'gma5.bin'"
+$ld65 -C build/gma5_bin.cfg -o build/gma5 \
+    build/loader_stage5.o \
+    build/elite_1D00.o \
+    build/elite_1D81.o
+# run the binary for the encrypt script, which will spit out an assembler file
+echo "-  encrypt 'gma5.bin'"
+$encrypt build/gma5_data.bin build/gma5_bin.s
+# assemble the stage 5 loader, with encrypted binary payload
+echo "- assemble 'loader/gma5.asm'"
+$ca65 -o build/gma5.o src/loader/gma5.asm
+
+# link the final .PRG file
+echo "-     link 'gma5.prg'"
+$ld65 -C build/gma5.cfg -o bin/gma5.prg \
+    build/gma5.o \
+    build/elite_1D00.o \
+    build/loader_stage5.o \
+    c64.lib
 
 # loader stage 6:
 #-------------------------------------------------------------------------------
@@ -106,6 +141,7 @@ $ld65 -C build/gma1.cfg \
     build/loader_stage1.o \
     build/loader_stage4.o \
     build/elite_init.o \
+    build/elite_1D00.o \
     build/loader_stage5.o \
     c64.lib
 
@@ -147,17 +183,20 @@ $ld65 -C build/gma4_encrypted.cfg -o bin/gma4.prg \
     build/gma4_data.o \
     c64.lib
 
-echo "-     link 'gma5.prg'"
-$ld65 -C c64-asm.cfg -o bin/gma5.prg \
-    build/loader_stage5.o --start-addr \$1D00 \
-    c64.lib
-
 # re-link with the encrypted binary blobs
 echo "-     link 'gma6.prg'"
 $ld65 -C build/gma6_encrypted.cfg -o bin/gma6.prg \
     build/loader_stage6.o \
     c64.lib
 
+#-------------------------------------------------------------------------------
+
+echo
+echo "* verifying checksums"
+cd bin
+md5sum --ignore-missing --quiet --check checksums.txt
+if [ $? -eq 0 ]; then echo "- OK"; fi
+cd ..
 
 #-------------------------------------------------------------------------------
 
@@ -175,15 +214,6 @@ $mkd64 -o bin/elite_gma86.d64 \
     -f bin/gma6.prg         -t 20 -s 8 -n "GMA6"        -P -S 7 -w \
     1>/dev/null
 echo "- OK"
-
-#-------------------------------------------------------------------------------
-
-echo
-echo "* verifying checksums"
-cd bin
-md5sum --ignore-missing --quiet --check checksums.txt
-if [ $? -eq 0 ]; then echo "- OK"; fi
-cd ..
 
 echo
 echo "complete."
