@@ -9126,13 +9126,13 @@ _aaa2:
         .byte   $03, $03, $03, $0f, $0f, $ff, $ff, $1f
         .byte   $ff, $ff, $03, $03, $0f, $ff, $ff, $03
 
-;===============================================================================
 
 ; CALL FROM LOADER; this is the first thing called after initialisation
 
-_aab2:
 .export _aab2
-
+.proc   _aab2                                                           ;$AAB2
+        ;=======================================================================
+        
         ; erase $0400..$0700
         lda #> $0400
         sta $08
@@ -9153,13 +9153,13 @@ _aab2:
 
         ; set non-maskable interrupt location
 
-        lda #< _ab27
-        sta $0318               ;nmi
-        lda #> _ab27
-        sta $0319               ;nmi
+        lda #< nmi_null
+        sta $0318
+        lda #> nmi_null
+        sta $0319
         
         ; set new KERNAL_CHROUT (print character) routine
-        ; (I think this is intended to re-route printing to the bitmap screen)
+        ; -- re-route printing to the bitmap screen
 
         lda #< chrout
         sta $0326
@@ -9174,43 +9174,71 @@ _aab2:
         jsr _827f
 
         sei 
-        lda # $03
-        sta $dc0d               ;cia1: cia interrupt control register
-        sta $dd0d               ;cia2: cia interrupt control register
+
+        ; enable interrupts (regular and non-interruptable) for system
+        ; timers A & B. do not use the TimeOfDay timer
+        lda # TIMER_A | TIMER_B
+        sta CIA1_INTERRUPT
+        sta CIA2_INTERRUPT
+        
         lda # $0f
         sta $d418               ;select filter mode and volume
+        
         ldx # $00
         stx _a8d9
+
+        ; set the flag for raster interrupts, but note that with CIA1 & 2
+        ; interrupts currently enabled, the raster interrupt won't fire
         inx 
         stx VIC_INTERRUPT_CONTROL
+        
         lda $d011               ;vic control register 1
         and # $7f
         sta $d011               ;vic control register 1
-        lda # $28
+        
+        ; set the interrupt to occur at line 40 (and 296?)
+        lda # 40
         sta $d012               ;raster position
+        
         lda CPU_CONTROL
-        and # $f8
-        ora # $04
+        and # %11111000
+        ora # MEM_64K
         sta CPU_CONTROL
-        lda # $04
+        
+        ; record this as the game's
+        ; current memory-layout state
+        lda # MEM_64K
         sta _828e
-        lda #< _ab27
-        sta $fffa               ;nmi
-        lda #> _ab27
-        sta $fffb               ;nmi
+        
+        ; set up the routines for the interrupts:
+        ; NOTE: with the KERNAL ROM off, the hardware vectors at $FFFA...$FFFF
+        ;       are now being defined by empty RAM -- we need to set something
+        ;       there to prevent crashes when KERNAL ROM is off 
+
+        ; non-maskable interrupt:
+        lda #< nmi_null
+        sta VECTOR_NMI+0
+        lda #> nmi_null
+        sta VECTOR_NMI+1
+
+        ; regular interrupt:
         lda #>_a8fa
-        sta $ffff               ;irq
+        sta VECTOR_IRQ+1
         lda #<_a8fa
-        sta $fffe               ;irq
+        sta VECTOR_IRQ+0
         
         cli 
         rts 
+.endproc
 
-;===============================================================================
+.proc   nmi_null                                                        ;$AB27
+        ;=======================================================================
+        ; a Non-Maskable-Interrupt that does nothing; used to disable the
+        ; RESTORE key and to prevent crashes when the KERNAL ROM is off
 
-_ab27:
-        cli 
-        rti 
+        cli                     ; re-enable interrupts
+        rti                     ; "ReTurn from Interrupt"
+.endproc
 
 ;===============================================================================
 
@@ -9230,9 +9258,32 @@ _ab27:
 ;===============================================================================
 
 _ab31:
-        .byte   $80, $40, $20, $10, $08, $04, $02, $01
-        .byte   $80, $40, $c0, $30, $0c, $03, $c0, $c0
-        .byte   $60, $30, $18, $0c, $06, $03
+        .byte   %10000000
+        .byte   %01000000
+        .byte   %00100000
+        .byte   %00010000
+        .byte   %00001000
+        .byte   %00000100
+        .byte   %00000010
+        .byte   %00000001
+
+        .byte   %10000000
+        .byte   %01000000
+
+        .byte   %11000000
+        .byte   %00110000
+        .byte   %00001100
+        .byte   %00000011
+        .byte   %11000000
+
+        .byte   %11000000
+        .byte   %01100000
+        .byte   %00110000
+        .byte   %00011000
+        .byte   %00001100
+        .byte   %00000110
+        .byte   %00000011
+
 _ab47:
         .byte   $c0, $c0
 _ab49:

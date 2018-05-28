@@ -32,6 +32,8 @@ _1d22:
         ; decrypt the payload from GMA6.PRG
         jsr _1d36
 
+        ; initialise interrupts,
+        ; clears $0400..$0700
         jsr _aab2               ;<-- GMA6.PRG; $6A00..$CCE0             ;$1d30
 
         jmp _8863               ;<-- GMA6.PRG; $6A00..$CCE0

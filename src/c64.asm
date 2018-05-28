@@ -56,6 +56,21 @@
 
 
 ;===============================================================================
+; CIA
+;===============================================================================
+.define CIA1_INTERRUPT          $dc0d
+.define CIA2_INTERRUPT          $dd0d
+
+.define TIMER_A                 %001
+.define TIMER_B                 %010
+.define TIMER_TOD               %100
+
+.define VECTOR_NMI              $fffa
+.define VECTOR_RESET            $fffc
+.define VECTOR_IRQ              $fffe
+
+
+;===============================================================================
 ; VIC-II registers:
 ;===============================================================================
 
@@ -95,6 +110,11 @@
 
 .define VIC_INTERRUPT_STATUS    $d019
 .define VIC_INTERRUPT_CONTROL   $d01a
+
+.define INTERRUPT_RASTER        %0001
+.define INTERRUPT_BGCOLLISION   %0010
+.define INTERRUPT_SPCOLLISION   %0100
+.define INTERRUPT_LIGHTPEN      %1000
 
 .define VIC_SPRITE_PRIORITY     $d01b
 
