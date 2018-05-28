@@ -4042,38 +4042,46 @@ _83c9:
 ;===============================================================================
 
 _83ca:
-        jsr _8ac7
-        ldx # $06
-_83cf:
-        sta $63, x
-        dex 
-        bpl _83cf
-        txa 
-        sta $a7
-        ldx # $02
-_83d9:
-        sta $04e7, x
-        dex 
-        bpl _83d9
+        jsr _8ac7               ; erase $0452...$048C
 
-;===============================================================================
+        ; erase $63...$69
+
+        ldx # $06
+:       sta $63, x                                                      ;$83CF
+        dex 
+        bpl :-
+
+        txa                     ; set A = 0 (saves a byte over `lda # $00`)
+        sta $a7
+
+        ; erase $04e7...$04e9
+
+        ldx # $02
+:       sta $04e7, x                                                    ;$83D9
+        dex 
+        bpl :-
 
 _83df:
 .export _83df
         jsr _923b
+
         lda $04c3
         bpl _83ed
+
         jsr _2367
         sta $04c3
 _83ed:
         lda # $0c
         sta $050b
+
         ldx # $ff
         stx _26a4
         stx _27a4               ; write to code??
         stx $7c
+
         lda # $80
         sta $048e
+        
         sta $69
         sta $94
         asl 
@@ -4083,16 +4091,20 @@ _83ed:
         sta $95
         sta $a3
         sta $0510
+
         lda # $03
         sta $96
         sta $a6
         sta $68
+        
         lda # $10
         sta $050c
+        
         lda #< (_8eff+1)        ;incorrect disassembly?
         sta $b7
         lda #> (_8eff+1)        ;incorrect disassembly?
         sta $b8
+        
         lda $045f
         beq _8430
         jsr _b10e
@@ -4103,23 +4115,28 @@ _8430:
 _8437:
         jsr _7b1a
         jsr _8ac7
+        
         lda #< $ffc0            ;=KERNAL_OPEN?
         sta $04f2
         lda #> $ffc0            ;=KERNAL_OPEN?
         sta $04f3
 _8447:
 .export _8447
+
+        ; erase $09...$2D:
+
         ldy # $24
         lda # $00
-_844b:
-        sta $0009, y            ;16-bit reference?
+:       sta $09, y                                                      ;$844B
         dey 
-        bpl _844b
+        bpl :-
+
         lda # $60
         sta $1b
         sta $1f
         ora # $80
         sta $17
+        
         rts 
 
 ;===============================================================================
@@ -4733,23 +4750,30 @@ _8862:
 _8863:
 .export _8863
 
+        ; erase $1D12..$1D01
+
         ldx # $11
         lda # $00
-_8867:
-        sta _1d01, x
+
+:       sta _1d01, x                                                    ;$8867
         dex 
-        bpl _8867
+        bpl :-
+
         lda VIC_SPRITE1_X
         sta _8861
         lda VIC_SPRITE1_Y
         sta _8862
+        
         jsr _8a0c
+
         ldx # $ff
         txs 
+
         jsr _83ca
 _8882:
         ldx # $ff
         txs 
+        
         jsr _83df
 _8888:
         jsr _8c6d
@@ -4957,15 +4981,19 @@ _89fd:
 ;===============================================================================
 
 _8a0c:
+        ; copy $2619..$267A to $25AB..$260C
+
         ldy # $61
-_8a0e:
-        lda _2619, y
+
+:       lda _2619, y                                                    ;$8A0E
         sta _25ab, y
         dey 
-        bpl _8a0e
+        bpl :-
+
         ldy # $07
         sty _8bbf
-        rts
+
+        rts 
 
 ;===============================================================================
 
@@ -5077,15 +5105,17 @@ _8ab4:
 
 ;===============================================================================
 
-_8ac7:
+; erase $0452...$048C
+
+_8ac7:  
         ldx # $3a
         lda # $00
-_8acb:
-        sta $0452, x
+
+:       sta $0452, x                                                    ;$8ACB
         dex 
-        bpl _8acb
+        bpl :-
         rts 
-        rts        ;?
+        rts                     ;?
 
 ;===============================================================================
 
@@ -6179,15 +6209,18 @@ _9231:
         bmi _9222
 _923b:
         bit _1d13
-        bmi _91fd
+        bmi _91fd               ; negative value?
         bit _1d10
-        bmi _9204
+        bmi _9204               ; negative value?
 _9245:
         bit _1d03
-        bpl _91fd
+        bpl _91fd               ; positive value? (bit 7 is off)
+
         jsr _a817
-        lda # MEM_IO_ONLY       ;=5
+
+        lda # MEM_IO_ONLY
         jsr _827f
+        
         lda # $00
         sta _1d03
         ldx # $18
@@ -8887,6 +8920,7 @@ _a8dc:
 _a8de:
         .byte   $c2, $33
 _a8e0:
+.export _a8e0
         .byte   $c0
 _a8e1:
         .byte   $c0
@@ -8895,6 +8929,7 @@ _a8e2:
 _a8e4:
         .byte   $02, $00
 _a8e6:
+.export _a8e6
         .byte   $00, $00
 
 ;===============================================================================
@@ -9141,7 +9176,7 @@ _aaa2:
         sta $07
         tay                     ; =0
 
-:       sta ($07), y                                                    ;$aabd
+:       sta ($07), y                                                    ;$AABD
         iny 
         bne :-
 

@@ -23,6 +23,8 @@
 .import _9a86:absolute
 .import _a2a0:absolute
 .import _a72f:absolute
+.import _a8e0:absolute
+.import _a8e6:absolute
 .import _b148:absolute
 .import _b179:absolute
 
@@ -861,9 +863,11 @@ _2366:
 _2367:
 .export _2367
         lda # $c0
-        sta $a8e0
+        sta _a8e0
+
         lda # $00
-        sta $a8e6
+        sta _a8e6
+
         rts 
 
 ;===============================================================================
