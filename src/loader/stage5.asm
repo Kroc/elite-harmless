@@ -40,7 +40,7 @@ _1d36:                                                                  ;$13d6
         ;-----------------------------------------------------------------------
         ; walks backward through code/data un-scrambling it
 
-        ; decrypt $1D80..$3ED1
+        ; decrypt $1D81..$3ED1
 
         ; set where to stop decryption
         lda #< (_1d81 - 1)

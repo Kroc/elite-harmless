@@ -9114,7 +9114,7 @@ _aaa2:
 
 ;===============================================================================
 
-; CALL FROM LOADER
+; CALL FROM LOADER; this is the first thing called after initialisation
 
 _aab2:
 .export _aab2
@@ -9145,13 +9145,18 @@ _aab2:
         sta $0319               ;nmi
         
         ; set new KERNAL_CHROUT (print character) routine
+        ; (I think this is intended to re-route printing to the bitmap screen)
 
-        lda #< _b155
+        lda #< chrout
         sta $0326
-        lda #> _b155
+        lda #> chrout
         sta $0327
 
-        lda # MEM_IO_ONLY       ;=5
+        ;-----------------------------------------------------------------------
+
+        ; change the C64's memory layout, turn off the BASIC & KERNAL ROMs
+        ; leaving just the I/O registers ($D000...)
+        lda # MEM_IO_ONLY
         jsr _827f
 
         sei 
@@ -10170,20 +10175,27 @@ _b14e:
         pla 
         rts 
 
-;===============================================================================
 
-_b155:
-        cmp # $7b
-        bcs _b166
-        cmp # $0d
-        bcc _b166
+.proc   chrout                                                          ;$B155
+        ;=======================================================================
+        ; replaces the KERNAL's `CHROUT` routine for printing text to screen
+        ; (since Elite uses only the bitmap screen)
+        ;
+        ; A = PETSCII code of character to print
+
+        cmp # $7b               ; is code is greater than $7B?
+        bcs :+                  ; if yes, skip it
+        cmp # $0d               ; is code less than or equal to $0D?
+        bcc :+                  ; if yes, skip it
+
         bne _b17b
         lda # $0c
         jsr _b17b
         lda # $0d
-_b166:
-        clc 
+
+:       clc                     ; clear carry flag before returning     ;$B166 
         rts 
+.endproc
 
 ;===============================================================================
 
