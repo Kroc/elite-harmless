@@ -3,7 +3,7 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-.segment    "CODE_1D00"
+.segment    "ENCRYPTED_GMA5"
 
 .include    "../../build/gma5_bin.s"
 

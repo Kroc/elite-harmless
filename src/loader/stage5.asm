@@ -8,6 +8,10 @@
 ; this is the entry point, jumped to by the stage 1 loader
 .export _1d22
 
+
+.import _aab2:absolute
+.import _8863:absolute
+
 ;-------------------------------------------------------------------------------
 
 .segment        "LOADER_STAGE5"
@@ -25,11 +29,12 @@ _1d22:
         inx 
         bne :-
 
+        ; decrypt the payload from GMA6.PRG
         jsr _1d36
 
-        jsr $aab2               ;<-- GMA6.PRG; $6A00..$CCE0             ;$1d30
+        jsr _aab2               ;<-- GMA6.PRG; $6A00..$CCE0             ;$1d30
 
-        jmp $8863               ;<-- GMA6.PRG; $6A00..$CCE0
+        jmp _8863               ;<-- GMA6.PRG; $6A00..$CCE0
 
 _1d36:                                                                  ;$13d6
         ;-----------------------------------------------------------------------

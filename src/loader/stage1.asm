@@ -44,13 +44,15 @@ start:                                                                  ;$0345
         ; change the address of STOP key routine from $F6ED,
         ; to $FFED: the SCREEN routine which returns row/col count
         ; i.e. does nothing of use -- this effectively disables the STOP key
-        lda # $ff
+        lda #> KERNAL_SCREEN
         sta $0329
 
         ; set up the screen, display the "use the fast loader?" message.
         ; if fast-loader is selected, control will have gone to _03fc,
         ; if slow-loader is selected, we will have returned here
         jsr _062b
+
+        ; * * *   C O P Y   P R O T E C T I O N !  * * *
 
         ; load "GMA3" file
         lda # $03
@@ -65,11 +67,13 @@ start:                                                                  ;$0345
 .endif
 
         ; is the value at $02 exactly $97?
-        ; (i.e. the result of copy-protection check)
+        ; (i.e. the result of copy-protection check?)
         lda $02
         eor # $97
         beq :+                  ; skip ahead if [$02] = $97
         jmp ($fffc)             ; hard reset!
+
+        ; * * * * * *
 
         ; load "GMA4" file
 :       lda # $04
@@ -95,7 +99,7 @@ start:                                                                  ;$0345
         sta $ce10
         jmp _7596
 
-        ;-----------------------------------------------------------------------
+;===============================================================================
 
         ; after GMA4's post-decrypt code, we jump here!
 _038a:  clc
@@ -125,6 +129,9 @@ _038a:  clc
         jsr KERNAL_RESTOR       ; restore the vector table ($0314-$0333)
         jsr KERNAL_CLALL        ; close all open files
 
+        ; jump into GMA5.PRG ("stage5.asm")
+        ; -- another decryption routine follows that unscrambles
+        ;    the payload in GAM6.PRG
         jmp _1d22
 
 
@@ -657,7 +664,7 @@ _062b:
         ; write the red colour to the string, so when it gets printed again,
         ; the "use the fast loader?" text is made 'invisible'. this appears
         ; not to actually be used in practice
-        lda # $1c       ; red colour
+        lda # $1c       ; red colour PETSCII code
         sta _06b3
 
         ; read a keypress

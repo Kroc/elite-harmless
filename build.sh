@@ -94,7 +94,8 @@ echo "-     link 'gma5.bin'"
 $ld65 -C build/gma5_bin.cfg -o build/gma5 \
     build/loader_stage5.o \
     build/elite_1D00.o \
-    build/elite_1D81.o
+    build/elite_1D81.o \
+    build/elite_6A00.o
 # run the binary for the encrypt script, which will spit out an assembler file
 echo "-  encrypt 'gma5.bin'"
 $encrypt build/gma5_data.bin build/gma5_bin.s
@@ -108,6 +109,8 @@ $ld65 -C build/gma5.cfg -o bin/gma5.prg \
     build/gma5.o \
     build/elite_1D00.o \
     build/loader_stage5.o \
+    build/elite_1D81.o \
+    build/elite_6A00.o \
     c64.lib
 
 # loader stage 6:
@@ -147,6 +150,8 @@ $ld65 -C build/gma1.cfg \
     build/elite_init.o \
     build/elite_1D00.o \
     build/loader_stage5.o \
+    build/elite_1D81.o \
+    build/elite_6A00.o \
     c64.lib
 
 echo "-     link 'byebyejulie.prg'"
