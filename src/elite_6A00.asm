@@ -117,6 +117,7 @@
 .segment        "CODE_6A00"
 
 _6a00:                                                                  ;$6A00
+.export _6a00
         sta $04ef
         lda # $01
 _6a05:  pha                                                             ;$6a05 
@@ -141,6 +142,7 @@ _6a1b:                                                                  ;$6a1b
 ;===============================================================================
 
 _6a25:                                                                  ;$6a25
+.export _6a25
         sta $31
         rts 
 
@@ -1607,6 +1609,7 @@ _7457:                                                                  ;$7457
 ;===============================================================================
 
 _745a:                                                                  ;$745a
+.export _745a
         stx $06
         lda $04a5
         sec 
@@ -1624,6 +1627,7 @@ _745a:                                                                  ;$745a
         sta $04a2
         bcs _74a1
 _7481:                                                                  ;$7481
+.export _7481
         txa 
         clc 
         adc $04a5
@@ -2076,6 +2080,7 @@ _7779:
 _777c:
         lda # $3a
 _777e:
+.export _777e
         tax 
         beq _775f
         bmi _77f9
@@ -2879,6 +2884,7 @@ _7c61:
         sta $2b
         lda # $02
 _7c6b:
+.export _7c6b
         sta $bb
         ldx # $00
 _7c6f:
@@ -3729,6 +3735,7 @@ _81ed:
 ;===============================================================================
 
 _81ee:
+.export _81ee
         jsr _8fec
         cmp # $59
         beq _81ed
@@ -4052,6 +4059,7 @@ _83d9:
 ;===============================================================================
 
 _83df:
+.export _83df
         jsr _923b
         lda $04c3
         bpl _83ed
@@ -4100,6 +4108,7 @@ _8437:
         lda #> $ffc0            ;=KERNAL_OPEN?
         sta $04f3
 _8447:
+.export _8447
         ldy # $24
         lda # $00
 _844b:
@@ -4783,6 +4792,7 @@ _88c9:
         lda $0501
         sta $04f0
 _88e7:
+.export _88e7
         lda # $ff
         sta $a7
         lda # $25
@@ -5461,6 +5471,7 @@ _8d4b:
 ;===============================================================================
 
 _8d53:
+.export _8d53
         tya 
         pha 
         lda # MEM_IO_ONLY       ;=5
@@ -6690,6 +6701,7 @@ _9a83:
         jmp _7d62
 
 _9a86:
+.export _9a86
         lda $a5
         bmi _9a83
         lda # $1f
@@ -7958,6 +7970,7 @@ _a29d:
 ;===============================================================================
 
 _a2a0:
+.export _a2a0
         lda $28
         and # $a0
         bne _a2cb
@@ -8609,6 +8622,7 @@ _a727:
 ;===============================================================================
 
 _a72f:
+.export _a72f
         sta $a0
 _a731:
         jsr _246d
@@ -10165,6 +10179,7 @@ _b146:
 ;===============================================================================
 
 _b148:
+.export _b148
         pha 
 _b149:
         lda _a8d9
@@ -10181,14 +10196,18 @@ _b14e:
         ; replaces the KERNAL's `CHROUT` routine for printing text to screen
         ; (since Elite uses only the bitmap screen)
         ;
-        ; A = PETSCII code of character to print
+        ; IMPORTANT NOTE: Elite stores its text in ASCII, not PETSCII!
+        ; this is due to the data being copied over as-is from the BBC
+        ;
+        ; A = ASCII code of character to print
 
-        cmp # $7b               ; is code is greater than $7B?
+        cmp # $7b               ; is code greater than or equal to $7B?
         bcs :+                  ; if yes, skip it
-        cmp # $0d               ; is code less than or equal to $0D?
+        cmp # $0d               ; is code less than $0D? (RETURN)
         bcc :+                  ; if yes, skip it
+        bne _b17b               ; if it's not RETURN, process it
 
-        bne _b17b
+        ; handle the RETURN code
         lda # $0c
         jsr _b17b
         lda # $0d
@@ -10197,7 +10216,9 @@ _b14e:
         rts 
 .endproc
 
-;===============================================================================
+;define the use of some zero-page variables for this routine
+.exportzp       ZP_CHROUT_COL := $31
+.exportzp       ZP_CHROUT_ROW := $33
 
 _b168:
         jsr _a80f
@@ -10212,80 +10233,111 @@ _b16e:
 
         ;-----------------------------------------------------------------------
 
-_b176:
+_b176:  ; this is a trampoline to account for a branch range limitation below
+        ; TODO: this could be combined with the one at `_b168` to save 3 bytes
         jmp _b210
 
         ;-----------------------------------------------------------------------
 
-_b179:
+_b179:  ; called only ever by `_2c7d`!
+.export _b179
         lda # $0c
-_b17b:
-        sta $35
-        sty $0490
-        stx $048f
+
+_b17b:  ; `chrout` jumps here                                           ;$B17B
+        ;-----------------------------------------------------------------------
+        sta $35                 ; put aside ASCII character to print
+        sty $0490               ; y-position on screen?
+        stx $048f               ; x-position on screen?
+        
+        ; cancel if text reaches a certain point?
+        ; prevent off-screen writing?
         ldy $34
         cpy # $ff
         beq _b176
 _b189:
-        cmp # $07
+        cmp # $07               ; code $07? (unspecified in PETSCII)
         beq _b168
-        cmp # $20
+        cmp # $20               ; is it SPC or above? (i.e. printable)
         bcs _b1a1
-        cmp # $0a
+        cmp # $0a               ; is it $0A? (unspecified in PETSCII)
         beq _b199
 _b195:
-        ldx # $01
+        ; start at column 2, i.e. leave a one-char padding from the viewport
+        ldx # $01               
         stx $31
 _b199:
-        cmp # $0d
+        cmp # $0d               ; is it RETURN? although note that `chrout`
+                                ; replaces $0D codes with $0C
         beq _b176
-        inc $33
+        inc ZP_CHROUT_ROW
         bne _b176
+
+        ;-----------------------------------------------------------------------
 _b1a1:
-        tay 
-        ldx # $0a
+        tay                     ; put aside the ASCII code 
+        ldx # $0a               
+        
+        ; is the PETSCII code less than 64?
+        ; if you shift any number 63 or less twice to the left,
+        ; then you will get a number <= 255 (no carry)
         asl 
         asl 
-        bcc _b1aa
-        ldx # $0c
+        bcc _b1aa               ; no carry (PETSCII < 64)
+        ldx # $0c               
 _b1aa:
-        asl 
-        bcc _b1ae
+        asl                     ; any number 32 or more will
+                                ; carry if shifted left 3 times
+        bcc _b1ae               ; branch if ASCII code is < 32, i.e. SPC
         inx 
 _b1ae:
         sta $2f
         stx $30
-        lda $31
-        cmp # $1f
-        bcs _b195
-        lda # $80
+
+        lda ZP_CHROUT_COL
+        cmp # 31               ; max width of line? (32 chars = 256 px)
+        bcs _b195              ; reach the end of the line, carriage-return!
+        
+        lda # $80               ; 256 + 64 = 320 (bitmap row in bytes)
         sta $07
-        lda $33
-        cmp # $18
-        bcc _b1c5
+        
+        lda ZP_CHROUT_ROW
+        cmp # $18               ; less than 24?
+        bcc :+
+        
+        ; SPEED: just copy that code here, or change the branch above to go
+        ;        to `_b16e` and favour falling through for the majority case
         jmp _b16e
 
         ;-----------------------------------------------------------------------
 
-_b1c5:
-        lsr 
+        ; calculate the size of the offset needed for bitmap rows
+        ; (320 bytes each). note that A is the current `chrout` row
+
+        ; SPEED: this whole thing could seriously do with a lookup table
+
+:       lsr                     ; x2                                    ;$B1C5
         ror $07
-        lsr 
+        lsr                     ; x4
         ror $07
-        adc $33
+        
+        adc ZP_CHROUT_ROW
         adc # $40
         sta $08
-        lda $31
-        asl 
-        asl 
-        asl 
+
+        ; calculte the offset of the column
+        ; (each character is 8-bytes in the bitmap screen)
+        lda ZP_CHROUT_COL 
+        asl                     ; x2
+        asl                     ; x4
+        asl                     ; x8
         adc $07
         sta $07
-        bcc _b1de
+        bcc :+
         inc $08
-_b1de:
-        cpy # $7f
+
+:       cpy # $7f                                                       ;$B1DE
         bne _b1ed
+
         dec $31
         dec $08
         ldy # $f8

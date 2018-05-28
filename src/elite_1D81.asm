@@ -9,21 +9,22 @@
 .import _1d07:absolute
 .import _1d09:absolute
 
-.define _6a00   $6a00
-.define _6a25   $6a25
-.define _745a   $745a
-.define _7481   $7481
-.define _777e   $777e
-.define _7c6b   $7c6b
-.define _81ee   $81ee
-.define _83df   $83df
-.define _8447   $8447
-.define _88e7   $88e7
-.define _8d53   $8d53
-.define _9a86   $9a86
-.define _a2a0   $a2a0
-.define _a72f   $a72f
-.define _b148   $b148
+.import _6a00:absolute
+.import _6a25:absolute
+.import _745a:absolute
+.import _7481:absolute
+.import _777e:absolute
+.import _7c6b:absolute
+.import _81ee:absolute
+.import _83df:absolute
+.import _8447:absolute
+.import _88e7:absolute
+.import _8d53:absolute
+.import _9a86:absolute
+.import _a2a0:absolute
+.import _a72f:absolute
+.import _b148:absolute
+.import _b179:absolute
 
 ;-------------------------------------------------------------------------------
 
@@ -2112,7 +2113,7 @@ _2c7c:
 _2c7d:
         lda # $cd
         jsr _2390
-        jsr $b179
+        jsr _b179
         jmp _2cc7
 
 _2c88:
