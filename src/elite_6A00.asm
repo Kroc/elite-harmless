@@ -8,7 +8,6 @@
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
 
-
 .import _1d01:absolute
 .import _1d02:absolute
 .import _1d03:absolute
@@ -10477,6 +10476,7 @@ _b1ed:
 :       lda (ZP_CHROUT_CHARADDR), y                                     ;$B1F4
         eor (ZP_CHROUT_DRAWADDR), y
         sta (ZP_CHROUT_DRAWADDR), y
+
         dey 
         bpl :-
 

@@ -914,4 +914,6 @@ _783a:
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
         .byte   $f5
 
+        ; when encrypted, an extra byte will go here
+
 ;_865b:

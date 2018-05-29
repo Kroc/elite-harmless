@@ -18,7 +18,7 @@
 
 .segment        "FILL"
 
-        .byte   $49, $ff, $00, $ff, $00, $ff, $00, $ff                  ;$CCD7
-        .byte   $00, $ff                                                ;$CCDF
+        .byte   $ff, $00, $ff, $00, $ff, $00, $ff, $00                  ;$CCD8
+        .byte   $ff                                                     ;$CCE0
 
 ;$CCE1

@@ -7,5 +7,5 @@
 
 .include    "../../build/gma5_bin.s"
 
-; trailing, un-ecrypted bytes
-        .byte   $b3, $00, $ff, $00
+        ; trailing, un-ecrypted bytes
+        .byte   $00, $ff, $00

@@ -79,7 +79,7 @@ $ld65 -C build/gma4_bin.cfg -o build/gma4_4000.bin build/gma4_4000.o
 # run the binary for the encrypt script, which will spit out an assembler file,
 # this gets included in the relevant position by the stage 4 loader (GMA4.PRG)
 echo "-  encrypt 'gma4_4000.bin'"
-$encrypt build/gma4_4000.bin build/gma4_4000.s
+$encrypt 6C build/gma4_4000.bin build/gma4_4000.s
 # assemble the stage 4 loader, with the encrypted binary payload
 echo "- assemble 'loader/stage4.asm'"
 $ca65 -o build/loader_stage4.o src/loader/stage4.asm
@@ -98,7 +98,7 @@ $ld65 -C build/gma5_bin.cfg -o build/gma5 \
     build/elite_6A00.o
 # run the binary for the encrypt script, which will spit out an assembler file
 echo "-  encrypt 'gma5.bin'"
-$encrypt build/gma5_data.bin build/gma5_bin.s
+$encrypt 36 build/gma5_data.bin build/gma5_bin.s
 # assemble the stage 5 loader, with encrypted binary payload
 echo "- assemble 'loader/gma5.asm'"
 $ca65 -o build/gma5.o src/loader/gma5.asm
@@ -126,7 +126,7 @@ $ld65 -C build/gma6_bin.cfg -o build/gma6.bin \
 # run the binary for the encrypt script, which will spit out an assembler file,
 # this gets included in the relevant position by the stage 6 loader (GMA6.PRG)
 echo "-  encrypt 'gma6.bin'"
-$encrypt build/gma6.bin build/gma6_bin.s
+$encrypt 49 build/gma6.bin build/gma6_bin.s
 # assemble the stage 6 loader, with the encrypted binary payload
 echo "- assemble 'loader/stage6.asm'"
 $ca65 -o build/loader_stage6.o  src/loader/stage6.asm
@@ -178,7 +178,7 @@ $ld65 -C build/gma4_decrypted.cfg -o build/gma4 \
     build/elite_init.o
 
 echo "-  encrypt 'gma4_data.bin'"
-$encrypt build/gma4_data.bin build/gma4_data.s
+$encrypt 8E build/gma4_data.bin build/gma4_data.s
 
 # assemble the newly encrypted data
 echo "- assemble 'gma4_data.s'"

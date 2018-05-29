@@ -14,9 +14,6 @@ is encoded by adding $4c and $32 = $7e, then $32 + $24, $24 + $00, and so on giv
 
     $7e, $56, $24, $03, $63, $cb, $14, ...
 
-This requires that there be three extra 'junk' padding bytes on the end to ensure that all the actual data is encoded.
-
-The final caluclated value is the 'decryption key', used to reverse the process.
 """
 
 import argparse
@@ -26,6 +23,7 @@ parser = argparse.ArgumentParser(description="A script to 'encrypt' (scramble wo
 parser.add_argument("--prg",
     help="if present, ignore a PRG file header",
     action="store_true")
+parser.add_argument("key", help="decryption key ,in hex")
 parser.add_argument("infile", help="input file")
 parser.add_argument("outfile", help="output file")
 
@@ -46,12 +44,18 @@ with open(args.outfile, "w") as outfile:
     byte = 0
     # we'll batch bytes up into groups of 8 per line
     count = 0
-
+    
     # should we skip a PRG header?
     # (two bytes that specify load address)
     if args.prg: byte += 2
 
-    # walk along the bytes in the input file
+    # walk along the bytes in the input file:
+    # the last byte in the encrypted data is where to subtract the decryption
+    # key to get the last byte of actual data, then work backwards from there
+
+    # the decryption key was probably produced from some running checksum
+    # of the data, but I can't recreate this without knowing the algorithm
+
     for i in range(byte, len(infile) - 1):
         # should we start a new line?
         if count == 0:
@@ -64,11 +68,19 @@ with open(args.outfile, "w") as outfile:
         # ensure bytes wrap around
         if out > 255:
             out = out - 256
+
         # write to the output file
         outfile.write("$%0.2x" % out)
 
         count = (count + 1) % 8
 
-    outfile.write("\n\n")
+    # pair the last data byte with the decryption key
+    out = int(infile[len(infile) - 1]) + int(args.key, 16)
+    if out > 255:
+            out = out - 256
 
-    print(":          decrypt key =", "$%0.2x" % out)
+    # write the final byte (on its own line)
+    outfile.write("\n\n")
+    outfile.write(".byte   $%0.2x" % out)
+    
+

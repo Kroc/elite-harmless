@@ -18,12 +18,6 @@
 
 ;   $7e, $56, $24, $03, $63, $cb, $14, ...
 
-; this requires that there be three extra 'junk' padding bytes
-; on the end to ensure that all the actual data is encoded.
-
-; the final caluclated value is the 'decryption key',
-; used to reverse the process 
-
 ;-------------------------------------------------------------------------------
 
 ; the stage 1 loader ("gma1.prg") jumps into here 
@@ -37,8 +31,8 @@
 
 .include        "../build/gma4_4000.s"
 
-;$7590  junk data -- not encrypted!
-        .byte   $c4, $4c, $85, $01
+;$7591  junk data -- not encrypted!
+        .byte   $4c, $85, $01
 
 ;===============================================================================
 
@@ -56,7 +50,7 @@ _7596:
         sta _7593+1
 
         lda #> $865a            ; pointer high-byte to data-table, i.e. $8600
-        ldy #< $855a            ; indirect index y (=>$865a = $83)
+        ldy #< $865a            ; indirect index y (=>$865a = $83)
         ldx # $8e
         jsr decrypt_block
 
@@ -110,12 +104,13 @@ decrypt_byte:                                                           ;$75c8
         sta PARAM_X         ; use this as the next deduction
 
         tya                 ; examine the index used
-        bne :+              ; if the y-index is equal, then...
-        dec TABLEHI         ; decrease the high-byte for the lookup-table,
-                            ; switching to another table further up
+        bne :+              ; if > 0, then skip ahead, otherwise..
+        dec TABLEHI         ; move down a page
 :       dey                 ; move the index down
+
         cpy _7593+0         ; does it match the low address?
         bne decrypt_byte    ; no -- keep processing
+        
         lda TABLEHI
         cmp _7593+1
         bne decrypt_byte
@@ -136,6 +131,6 @@ _75e4:
 .segment        "FILL"
 
 ;_865b:
-        .byte   $83, $00, $ff, $00, $ff, $00
+        .byte   $00, $ff, $00, $ff, $00
 
 ;$8660
