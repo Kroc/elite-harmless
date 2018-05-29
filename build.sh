@@ -43,6 +43,12 @@ echo "* assemble Elite source code:"
 echo "  ==========================="
 echo "- assemble 'elite_init.asm'"
 $ca65 -o build/elite_init.o     src/elite_init.asm
+echo "- assemble 'elite_0700.asm'"
+$ca65 -o build/elite_0700.o     src/elite_0700.asm
+echo "- assemble 'elite_font.asm'"
+$ca65 -o build/elite_font.o     src/elite_font.asm
+echo "- assemble 'elite_0E00.asm'"
+$ca65 -o build/elite_0E00.o     src/elite_0E00.asm
 echo "- assemble 'elite_1D00.asm'"
 $ca65 -o build/elite_1D00.o     src/elite_1D00.asm
 echo "- assemble 'elite_1D81.asm'"
@@ -72,13 +78,12 @@ $ca65 -o build/loader_stage5.o      src/loader/stage5.asm
 # loader stage 4:
 #-------------------------------------------------------------------------------
 
-# assemble the original source, before encrypting
-echo "- assemble 'gma4_4000.asm'"
-$ca65 -o build/gma4_4000.o src/loader/gma4_4000.asm
 # simply convert this to a binary as-is
 echo "-     link 'gma4_4000.bin'"
 $ld65 -C build/gma4_bin.cfg -o build/gma4_4000.bin \
-    build/gma4_4000.o \
+    build/elite_0700.o \
+    build/elite_font.o \
+    build/elite_0E00.o \
     build/elite_hulls.o
 # run the binary for the encrypt script, which will spit out an assembler file,
 # this gets included in the relevant position by the stage 4 loader (GMA4.PRG)

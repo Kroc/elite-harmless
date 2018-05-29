@@ -3,10 +3,10 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-;;.segment        "FONT"
-
 ; NOTE: must be aligned; the printing routine relies on the number of
 ; characters per page to calculate which page each character is in
+
+.segment        "DATA_FONT"
 
 _0b00:
         .byte   $00, $00, $00, $00, $00, $00, $00, $00  ; " "           ;$0B00
