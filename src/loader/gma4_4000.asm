@@ -16,4 +16,3 @@
 
 .include        "../elite_0E00.asm"
 
-.include        "../elite_shipmodels.asm"

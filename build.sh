@@ -42,13 +42,15 @@ echo
 echo "* assemble Elite source code:"
 echo "  ==========================="
 echo "- assemble 'elite_init.asm'"
-$ca65 -o build/elite_init.o src/elite_init.asm
+$ca65 -o build/elite_init.o     src/elite_init.asm
 echo "- assemble 'elite_1D00.asm'"
-$ca65 -o build/elite_1D00.o src/elite_1D00.asm
+$ca65 -o build/elite_1D00.o     src/elite_1D00.asm
 echo "- assemble 'elite_1D81.asm'"
-$ca65 -o build/elite_1D81.o src/elite_1D81.asm
+$ca65 -o build/elite_1D81.o     src/elite_1D81.asm
 echo "- assemble 'elite_6A00.asm'"
-$ca65 -o build/elite_6A00.o src/elite_6A00.asm
+$ca65 -o build/elite_6A00.o     src/elite_6A00.asm
+echo "- assemble 'elite_hulls.asm'"
+$ca65 -o build/elite_hulls.o    src/elite_hulls.asm
 
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
@@ -75,7 +77,9 @@ echo "- assemble 'gma4_4000.asm'"
 $ca65 -o build/gma4_4000.o src/loader/gma4_4000.asm
 # simply convert this to a binary as-is
 echo "-     link 'gma4_4000.bin'"
-$ld65 -C build/gma4_bin.cfg -o build/gma4_4000.bin build/gma4_4000.o
+$ld65 -C build/gma4_bin.cfg -o build/gma4_4000.bin \
+    build/gma4_4000.o \
+    build/elite_hulls.o
 # run the binary for the encrypt script, which will spit out an assembler file,
 # this gets included in the relevant position by the stage 4 loader (GMA4.PRG)
 echo "-  encrypt 'gma4_4000.bin'"

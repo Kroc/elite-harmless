@@ -10,8 +10,6 @@
 
 ; this file was produced with the help of nc513 on the lemon64 forums
 
-.org    $d000
-
 .segment        "HULL_TABLE"
 
 _d000:
