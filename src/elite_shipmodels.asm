@@ -12,6 +12,8 @@
 
 .org    $d000
 
+.segment        "HULL_TABLE"
+
 _d000:
         ; pointers?
         .addr   _d0a5           ; missile                               ;$D000
@@ -49,6 +51,8 @@ _d000:
         .addr   _ee2d           ; space station (dodecahedral)          ;$D040
 
 ;===============================================================================
+
+.segment        "HULL_DATA"
 
 ;$d042:
         .byte             $00, $00, $01, $00, $00, $00
