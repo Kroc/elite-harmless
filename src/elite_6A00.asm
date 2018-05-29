@@ -4773,7 +4773,7 @@ _8863:
 _8882:
         ldx # $ff
         txs 
-        
+
         jsr _83df
 _8888:
         jsr _8c6d
@@ -10303,8 +10303,13 @@ _b14e:
 .endproc
 
 ;define the use of some zero-page variables for this routine
-.exportzp       ZP_CHROUT_COL := $31
-.exportzp       ZP_CHROUT_ROW := $33
+.exportzp       ZP_CHROUT_COL           := $31
+.exportzp       ZP_CHROUT_ROW           := $33
+.exportzp       ZP_CHROUT_CHARADDR      := $2f  ; $2f/$30
+
+.exportzp       ZP_CHROUT_DRAWADDR      := $07  ; $07/$08
+.exportzp       ZP_CHROUT_DRAWADDR_LO   := $07
+.exportzp       ZP_CHROUT_DRAWADDR_HI   := $08
 
 _b168:
         jsr _a80f
@@ -10325,13 +10330,13 @@ _b176:  ; this is a trampoline to account for a branch range limitation below
 
         ;-----------------------------------------------------------------------
 
-_b179:  ; called only ever by `_2c7d`!
+_b179:  ; NOTE: called only ever by `_2c7d`!
 .export _b179
         lda # $0c
 
 _b17b:  ; `chrout` jumps here                                           ;$B17B
         ;-----------------------------------------------------------------------
-        sta $35                 ; put aside ASCII character to print
+        sta $35                 ; put aside ASCII character to print?
         sty $0490               ; y-position on screen?
         stx $048f               ; x-position on screen?
         
@@ -10350,44 +10355,76 @@ _b189:
 _b195:
         ; start at column 2, i.e. leave a one-char padding from the viewport
         ldx # $01               
-        stx $31
+        stx ZP_CHROUT_COL
 _b199:
         cmp # $0d               ; is it RETURN? although note that `chrout`
                                 ; replaces $0D codes with $0C
         beq _b176
+
         inc ZP_CHROUT_ROW
         bne _b176
 
-        ;-----------------------------------------------------------------------
 _b1a1:
-        tay                     ; put aside the ASCII code 
-        ldx # $0a               
-        
-        ; is the PETSCII code less than 64?
-        ; if you shift any number 63 or less twice to the left,
-        ; then you will get a number <= 255 (no carry)
-        asl 
-        asl 
-        bcc _b1aa               ; no carry (PETSCII < 64)
-        ldx # $0c               
-_b1aa:
-        asl                     ; any number 32 or more will
-                                ; carry if shifted left 3 times
-        bcc _b1ae               ; branch if ASCII code is < 32, i.e. SPC
-        inx 
-_b1ae:
-        sta $2f
-        stx $30
+        ;-----------------------------------------------------------------------
+        ; convert the PETSCII code to an address in the char gfx (font):
+        ; note that the font is ASCII so a few characters appear different
+        ; and font graphics are only provided for 96 characters, from space
+        ; (32 / $20) onwards
 
-        lda ZP_CHROUT_COL
-        cmp # 31               ; max width of line? (32 chars = 256 px)
-        bcs _b195              ; reach the end of the line, carriage-return!
+        tay                     ; put aside the ASCII code
         
-        lda # $80               ; 256 + 64 = 320 (bitmap row in bytes)
-        sta $07
+        ; at 8 bytes per character, each page (256 bytes) occupies 32 chars,
+        ; so the initial part of this routine is concerned with finding what
+        ; the high-address of the character will be
+
+        ; Elite's font defines 96 characters (3 usable pages),
+        ; consisting (roughly) of:
+        ;
+        ; page 0 = codes 0-31   : invalid, no font gfx here
+        ; page 1 = codes 32-63  : most punctuation and numbers
+        ; page 2 = codes 64-95  : "@", "A" to "Z", "[", "\", "]", "^", "_"
+        ; page 3 = codes 96-127 : "£", "a" to "z", "{", "|", "}", "~"
+
+        ; default to 0th page since character codes begin from 0,
+        ; but in practice we'll only see codes 32-128
+        ldx # $0a
+        
+        ; if you shift any number twice to the left
+        ; then numbers 64 or above will carry (> 255) 
+        asl 
+        asl 
+        bcc :+                  ; no carry (char code was < 64),
+                                ; char is in the 0th (unlikely) or 1st page
+
+        ; -- char is in the 2rd or 3rd page
+        ldx # $0c
+
+        ; shift left again -- codes 32 or over will carry,
+        ; so we can determine which of the two possible pages it's in
+:       asl                                                             ;$B1AA
+        bcc :+                  ; < 32, lower-page
+        inx                     ; >= 32, upper-page
+
+        ; note that shifting left 3 times has multiplied our character code
+        ; by 8 -- producing an offset appropriate for the font gfx
+
+:       sta ZP_CHROUT_CHARADDR+0                                        ;$B1AE
+        stx ZP_CHROUT_CHARADDR+1
+
+        ;-----------------------------------------------------------------------
+
+        ; line-wrap?
+        ; SPEED: this causes the character address to
+        ;        have to be recalculated again!
+        lda ZP_CHROUT_COL
+        cmp # 31                ; max width of line? (32 chars = 256 px)
+        bcs _b195               ; reach the end of the line, carriage-return!
+        
+        lda # $80
+        sta ZP_CHROUT_DRAWADDR_LO
         
         lda ZP_CHROUT_ROW
-        cmp # $18               ; less than 24?
+        cmp # 24
         bcc :+
         
         ; SPEED: just copy that code here, or change the branch above to go
@@ -10402,13 +10439,13 @@ _b1ae:
         ; SPEED: this whole thing could seriously do with a lookup table
 
 :       lsr                     ; x2                                    ;$B1C5
-        ror $07
+        ror ZP_CHROUT_DRAWADDR_LO
         lsr                     ; x4
-        ror $07
+        ror ZP_CHROUT_DRAWADDR_LO
         
         adc ZP_CHROUT_ROW
         adc # $40
-        sta $08
+        sta ZP_CHROUT_DRAWADDR_HI
 
         ; calculte the offset of the column
         ; (each character is 8-bytes in the bitmap screen)
@@ -10416,37 +10453,41 @@ _b1ae:
         asl                     ; x2
         asl                     ; x4
         asl                     ; x8
-        adc $07
-        sta $07
+        adc ZP_CHROUT_DRAWADDR_LO
+        sta ZP_CHROUT_DRAWADDR_LO
         bcc :+
-        inc $08
+        inc ZP_CHROUT_DRAWADDR_HI
 
 :       cpy # $7f                                                       ;$B1DE
         bne _b1ed
 
         dec $31
-        dec $08
+        dec ZP_CHROUT_DRAWADDR_HI
         ldy # $f8
         jsr _b3b5
         beq _b210
 _b1ed:
         inc $31
         bit $0885
+
+        ; paint the character (8-bytes) to the screen
+        ; SPEED: this could be unrolled
+
         ldy # $07
-_b1f4:
-        lda ($2f), y
-        eor ($07), y
-        sta ($07), y
+:       lda (ZP_CHROUT_CHARADDR), y                                     ;$B1F4
+        eor (ZP_CHROUT_DRAWADDR), y
+        sta (ZP_CHROUT_DRAWADDR), y
         dey 
-        bpl _b1f4
+        bpl :-
+
         ldy $33
         lda _9900, y
-        sta $07
+        sta ZP_CHROUT_DRAWADDR_LO
         lda _9919, y
-        sta $08
+        sta ZP_CHROUT_DRAWADDR_HI
         ldy $31
         lda $050c
-        sta ($07), y
+        sta (ZP_CHROUT_DRAWADDR), y
 _b210:
         ldy $0490
         ldx $048f

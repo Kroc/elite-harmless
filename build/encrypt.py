@@ -68,3 +68,7 @@ with open(args.outfile, "w") as outfile:
         outfile.write("$%0.2x" % out)
 
         count = (count + 1) % 8
+
+    outfile.write("\n\n")
+
+    print(":          decrypt key =", "$%0.2x" % out)

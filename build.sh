@@ -201,15 +201,6 @@ $ld65 -C build/gma6_encrypted.cfg -o bin/gma6.prg \
 #-------------------------------------------------------------------------------
 
 echo
-echo "* verifying checksums"
-cd bin
-md5sum --ignore-missing --quiet --check checksums.txt
-if [ $? -eq 0 ]; then echo "- OK"; fi
-cd ..
-
-#-------------------------------------------------------------------------------
-
-echo
 echo "* write floppy disk image"
 $mkd64 -o bin/elite_gma86.d64 \
     -m xtracks -XDS \
@@ -223,6 +214,15 @@ $mkd64 -o bin/elite_gma86.d64 \
     -f bin/gma6.prg         -t 20 -s 8 -n "GMA6"        -P -S 7 -w \
     1>/dev/null
 echo "- OK"
+
+#-------------------------------------------------------------------------------
+
+echo
+echo "* verifying checksums"
+cd bin
+md5sum --ignore-missing --quiet --check checksums.txt
+if [ $? -eq 0 ]; then echo "- OK"; fi
+cd ..
 
 echo
 echo "complete."
