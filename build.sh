@@ -78,6 +78,8 @@ echo "- assemble 'loader/stage4.asm'"
 $ca65 -o build/loader_stage4.o  src/loader/stage4.asm
 echo "- assemble 'loader/stage5.asm'"
 $ca65 -o build/loader_stage5.o  src/loader/stage5.asm
+echo "- assemble 'loader/stage6.asm'"
+$ca65 -o build/loader_stage6.o  src/loader/stage6.asm
 
 # loader stage 4:
 #-------------------------------------------------------------------------------
@@ -204,22 +206,31 @@ $ld65 \
 #-------------------------------------------------------------------------------
 
 # convert the source to a binary as-is
-echo "-     link 'gma6.bin'"
+echo "-     link 'gma6_data.bin'"
 $ld65 \
-       -C build/gma6_bin.cfg \
-       -o build/gma6.bin \
+       -C build/gma6_data.cfg \
+       -o build/gma6_data.bin \
     --obj build/elite_6A00.o \
     --obj build/elite_1D00.o \
     --obj build/loader_stage5.o \
     --obj build/elite_1D81.o
 
-# run the binary for the encrypt script, which will spit out an assembler file,
-# this gets included in the relevant position by the stage 6 loader (GMA6.PRG)
-echo "-  encrypt 'gma6.bin'"
-$encrypt 49 build/gma6.bin build/gma6_bin.s
-# assemble the stage 6 loader, with the encrypted binary payload
-echo "- assemble 'loader/stage6.asm'"
-$ca65 -o build/loader_stage6.o  src/loader/stage6.asm
+# run the binary for the encrypt script, which will spit out an assembler file
+echo "-  encrypt 'gma6_data.bin'"
+$encrypt 49 build/gma6_data.bin build/gma6_data.s
+
+# assemble the encrypted payload
+echo "- assemble 'gma6_data.s'"
+$ca65 -o build/gma6_data.o  build/gma6_data.s
+
+# link the final .PRG file
+echo "-     link 'gma6.prg'"
+$ld65 \
+       -C build/gma6.cfg \
+       -o bin/gma6.prg \
+    --obj build/prgheader.o \
+    --obj build/gma6_data.o \
+    --obj build/loader_stage6.o
 
 #-------------------------------------------------------------------------------
 
@@ -259,13 +270,6 @@ $ld65 \
        -S \$C800 \
     --obj build/prgheader.o \
     --obj build/loader_stage3.o
-
-echo "-     link 'gma6.prg'"
-$ld65 \
-       -C build/gma6_encrypted.cfg \
-       -o bin/gma6.prg \
-    --obj build/prgheader.o \
-    --obj build/loader_stage6.o
 
 #-------------------------------------------------------------------------------
 

@@ -3,20 +3,13 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-; "gma6.prg" - this is an encrypted payload and will be disassembled soon
-
-.data
-.org    $6a00
-
-.include        "../build/gma6_bin.s"
-
-.reloc
+; "gma6.prg"
 
 ; these bytes are not encrypted!!! (they're the background-fill)
 ; the linker will exclude these from the binary of the data-to-be-encrypted.
 ; when the code is re-linked with the encrypted blob, these bytes are appended
 
-.segment        "FILL"
+.segment        "JUNK_GMA6"
 
         .byte   $ff, $00, $ff, $00, $ff, $00, $ff, $00                  ;$CCD8
         .byte   $ff                                                     ;$CCE0
