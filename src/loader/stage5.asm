@@ -5,6 +5,16 @@
 
 ; "gma5.prg"
 
+; $1D00 +--------+
+;       |  VARS  |    variable / scratch space used by Elite
+; $1D22 |--------|
+;       |  CODE  |    stage 5 decryption routine
+; $1D81 |--------|
+;       |        |
+;       |  DATA  |    encrypted payload
+;       |        |
+; $3ED5 +--------+
+
 ; this is the entry point, jumped to by the stage 1 loader
 .export _1d22
 
@@ -14,7 +24,7 @@
 
 ;-------------------------------------------------------------------------------
 
-.segment        "LOADER_STAGE5"
+.segment        "CODE_GMA5"
 
         ; another bloody decryption routine
         
@@ -95,8 +105,6 @@ _1d6f:  dey
         rts
 .endproc
 
-;-------------------------------------------------------------------------------
-
 _1d7d:
         .byte   $b7, $aa, $45, $23
 
@@ -104,4 +112,10 @@ _1d81:
 .export _1d81
 
 ;$3ED5
-.code
+
+;===============================================================================
+
+.segment        "JUNK_GMA5"
+
+        ; trailing, un-ecrypted bytes
+        .byte   $00, $ff, $00

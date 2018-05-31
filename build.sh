@@ -96,7 +96,10 @@ $ld65 \
 # (it's very hard to track down errors post-encryption!)
 echo -n "-   verify 'gma4_data1.bin' "
 if [[
-    $(md5sum -b < build/gma4_data1.bin) == "049a1004768ed1de4e220923ea865f78 *-"
+    # note that this hash was produced by dumping $4000..$758F,
+    # just after decryption (but before relocation)
+    $(md5sum -b < build/gma4_data1.bin) \
+ == "049a1004768ed1de4e220923ea865f78 *-"
 ]]; then
     echo "[OK]"
 else
@@ -130,7 +133,10 @@ $ld65 \
 # (it's very hard to track down errors post-encryption!)
 echo -n "-   verify 'gma4_data2.bin' "
 if [[
-    $(md5sum -b < build/gma4_data2.bin) == "32cba4aa5d3ee363c0bdfb77e95c1fc3 *-"
+    # note that this hash was produced by dumping $75E4..$865F,
+    # just after decryption (but before relocation)
+    $(md5sum -b < build/gma4_data2.bin) \
+ == "32cba4aa5d3ee363c0bdfb77e95c1fc3 *-"
 ]]; then
     echo "[OK]"
 else
@@ -161,28 +167,26 @@ $ld65 \
 # loader stage 5:
 #-------------------------------------------------------------------------------
 
-# convert the Elite code portion of this to a binary, for encrypting; this will
-# split the code/data into "gma5_code.bin" (unused), the unencrypted area, and
-# "gma5_data.bin" the block to be encypted
-echo "-     link 'gma5.bin'"
+# convert the Elite code portion of this to a binary, for encrypting
+echo "-     link 'gma5_data.bin'"
 $ld65 \
-       -C build/gma5_bin.cfg \
-       -o build/gma5 \
+       -C build/gma5_data.cfg \
+       -o build/gma5_data.bin \
     --obj build/loader_stage5.o \
     --obj build/elite_1D00.o \
     --obj build/elite_1D81.o \
     --obj build/elite_6A00.o
 
 # run the binary for the encrypt script, which will spit out an assembler file
-echo "-  encrypt 'gma5.bin'"
+echo "-  encrypt 'gma5_data.bin'"
 $encrypt 36 \
     build/gma5_data.bin \
-    build/gma5_bin.s \
-    --segment "ENCRYPTED_GMA5"
+    build/gma5_data.s \
+    --segment "DATA_GMA5"
 
-# assemble the stage 5 loader, with encrypted binary payload
-echo "- assemble 'loader/gma5.asm'"
-$ca65 -o build/gma5.o src/loader/gma5.asm
+# assemble the encrypted payload
+echo "- assemble 'gma5_data.s'"
+$ca65 -o build/gma5_data.o build/gma5_data.s
 
 # link the final .PRG file
 echo "-     link 'gma5.prg'"
@@ -190,7 +194,7 @@ $ld65 \
        -C build/gma5.cfg \
        -o bin/gma5.prg \
     --obj build/prgheader.o \
-    --obj build/gma5.o \
+    --obj build/gma5_data.o \
     --obj build/elite_1D00.o \
     --obj build/loader_stage5.o \
     --obj build/elite_1D81.o \
