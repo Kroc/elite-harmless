@@ -5,6 +5,8 @@
 
 ; TODO: calculate indicies here?
 
+; NOTE: must be aligned to 64 bytes
+
 ;;.segment        "SPRITES"
 
 _6800:  ; sprites:                                                      ;$6800

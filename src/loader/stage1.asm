@@ -10,7 +10,8 @@
 .include        "c64.asm"
 
 ; a jump is made to code within the stage 3 loader ("gma4.prg")
-.import _7596
+;;.import _7596
+.define _7596   $7596
 ; jump into GMA5.PRG
 .import _1d22
 

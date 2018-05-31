@@ -41,8 +41,8 @@ echo "- OK"
 echo
 echo "* assemble Elite source code:"
 echo "  ==========================="
-echo "- assemble 'elite_init.asm'"
-$ca65 -o build/elite_init.o     src/elite_init.asm
+echo "- assemble 'prgheader.asm'"
+$ca65 -o build/prgheader.o      src/prgheader.asm
 echo "- assemble 'elite_0700.asm'"
 $ca65 -o build/elite_0700.o     src/elite_0700.asm
 echo "- assemble 'elite_font.asm'"
@@ -53,6 +53,8 @@ echo "- assemble 'elite_1D00.asm'"
 $ca65 -o build/elite_1D00.o     src/elite_1D00.asm
 echo "- assemble 'elite_1D81.asm'"
 $ca65 -o build/elite_1D81.o     src/elite_1D81.asm
+echo "- assemble 'elite_init.asm'"
+$ca65 -o build/elite_init.o     src/elite_init.asm
 echo "- assemble 'elite_6A00.asm'"
 $ca65 -o build/elite_6A00.o     src/elite_6A00.asm
 echo "- assemble 'elite_hulls.asm'"
@@ -65,34 +67,97 @@ echo
 echo "* assemble GMA86 loader:"
 echo "  ======================"
 echo "- assemble 'loader/stage0.asm'"
-$ca65 -o build/loader_stage0.o      src/loader/stage0.asm
+$ca65 -o build/loader_stage0.o  src/loader/stage0.asm
 echo "- assemble 'loader/stage1.asm'"
-$ca65 -o build/loader_stage1.o      src/loader/stage1.asm
+$ca65 -o build/loader_stage1.o  src/loader/stage1.asm
 echo "- assemble 'loader/stage2.asm'"
-$ca65 -o build/loader_stage2.o      src/loader/stage2.asm
+$ca65 -o build/loader_stage2.o  src/loader/stage2.asm
 echo "- assemble 'loader/stage3.asm'"
-$ca65 -o build/loader_stage3.o      src/loader/stage3.asm
+$ca65 -o build/loader_stage3.o  src/loader/stage3.asm
+echo "- assemble 'loader/stage4.asm'"
+$ca65 -o build/loader_stage4.o  src/loader/stage4.asm
 echo "- assemble 'loader/stage5.asm'"
-$ca65 -o build/loader_stage5.o      src/loader/stage5.asm
+$ca65 -o build/loader_stage5.o  src/loader/stage5.asm
 
 # loader stage 4:
 #-------------------------------------------------------------------------------
 
-# simply convert this to a binary as-is
-echo "-     link 'gma4_4000.bin'"
-$ld65 -C build/gma4_bin.cfg -o build/gma4_4000.bin \
-    build/elite_0700.o \
-    build/elite_font.o \
-    build/elite_0E00.o \
-    build/elite_hulls.o
-# run the binary for the encrypt script, which will spit out an assembler file,
-# this gets included in the relevant position by the stage 4 loader (GMA4.PRG)
-echo "-  encrypt 'gma4_4000.bin'"
-$encrypt 6C build/gma4_4000.bin build/gma4_4000.s
-# assemble the stage 4 loader, with the encrypted binary payload
-echo "- assemble 'loader/stage4.asm'"
-$ca65 -o build/loader_stage4.o src/loader/stage4.asm
+# pack the data for the first encrypted block into a single binary file
+echo "-     link 'gma4_data1.bin'"
+$ld65 \
+       -C build/gma4_data1.cfg \
+       -o build/gma4_data1.bin \
+    --obj build/elite_0700.o \
+    --obj build/elite_font.o \
+    --obj build/elite_0E00.o \
+    --obj build/elite_hulls.o
 
+# verify this is as expected before encrypting 
+# (it's very hard to track down errors post-encryption!)
+echo -n "-   verify 'gma4_data1.bin' "
+if [[
+    $(md5sum -b < build/gma4_data1.bin) == "049a1004768ed1de4e220923ea865f78 *-"
+]]; then
+    echo "[OK]"
+else
+    echo "[FAIL]"
+fi
+
+# run the binary through the encrypt script, which will spit out an assembler
+# file we can then re-link into the stage 4 loader ("GMA4.PRG")
+echo "-  encrypt 'gma4_data1.bin'"
+$encrypt 6C \
+    build/gma4_data1.bin \
+    build/gma4_data1.s \
+    --segment "DATA1"
+
+# assemble the first encrypted payload
+echo "- assemble 'gma4_data1.s'"
+$ca65 -o build/gma4_data1.o build/gma4_data1.s
+
+# the second data block is trickier to handle as the location of the decryption
+# routine is dependent on the size of the first block of data, but we don't
+# want to include this in the output
+echo "-     link 'gma4_data2.bin'"
+$ld65 \
+       -C build/gma4_data2.cfg \
+       -o build/gma4_data2.bin \
+    --obj build/gma4_data1.o \
+    --obj build/loader_stage4.o \
+    --obj build/elite_init.o
+
+# verify this is as expected before encrypting 
+# (it's very hard to track down errors post-encryption!)
+echo -n "-   verify 'gma4_data2.bin' "
+if [[
+    $(md5sum -b < build/gma4_data2.bin) == "32cba4aa5d3ee363c0bdfb77e95c1fc3 *-"
+]]; then
+    echo "[OK]"
+else
+    echo "[FAIL]"
+fi
+
+# encrypt the second block
+echo "-  encrypt 'gma4_data2.bin'"
+$encrypt 8E \
+    build/gma4_data2.bin \
+    build/gma4_data2.s \
+    --segment "DATA2"
+
+# assemble the second encrypted payload
+echo "- assemble 'gma_data2.s'"
+$ca65 -o build/gma4_data2.o build/gma4_data2.s
+
+# link the final program with both encrypted binary blobs
+echo "-     link 'gma4.prg'"
+$ld65 \
+       -C build/gma4.cfg \
+       -o bin/gma4.prg \
+    --obj build/prgheader.o \
+    --obj build/loader_stage4.o \
+    --obj build/gma4_data1.o \
+    --obj build/gma4_data2.o
+    
 # loader stage 5:
 #-------------------------------------------------------------------------------
 
@@ -100,38 +165,50 @@ $ca65 -o build/loader_stage4.o src/loader/stage4.asm
 # split the code/data into "gma5_code.bin" (unused), the unencrypted area, and
 # "gma5_data.bin" the block to be encypted
 echo "-     link 'gma5.bin'"
-$ld65 -C build/gma5_bin.cfg -o build/gma5 \
-    build/loader_stage5.o \
-    build/elite_1D00.o \
-    build/elite_1D81.o \
-    build/elite_6A00.o
+$ld65 \
+       -C build/gma5_bin.cfg \
+       -o build/gma5 \
+    --obj build/loader_stage5.o \
+    --obj build/elite_1D00.o \
+    --obj build/elite_1D81.o \
+    --obj build/elite_6A00.o
+
 # run the binary for the encrypt script, which will spit out an assembler file
 echo "-  encrypt 'gma5.bin'"
-$encrypt 36 build/gma5_data.bin build/gma5_bin.s
+$encrypt 36 \
+    build/gma5_data.bin \
+    build/gma5_bin.s \
+    --segment "ENCRYPTED_GMA5"
+
 # assemble the stage 5 loader, with encrypted binary payload
 echo "- assemble 'loader/gma5.asm'"
 $ca65 -o build/gma5.o src/loader/gma5.asm
 
 # link the final .PRG file
 echo "-     link 'gma5.prg'"
-$ld65 -C build/gma5.cfg -o bin/gma5.prg \
-    build/gma5.o \
-    build/elite_1D00.o \
-    build/loader_stage5.o \
-    build/elite_1D81.o \
-    build/elite_6A00.o \
-    c64.lib
+$ld65 \
+       -C build/gma5.cfg \
+       -o bin/gma5.prg \
+    --obj build/prgheader.o \
+    --obj build/gma5.o \
+    --obj build/elite_1D00.o \
+    --obj build/loader_stage5.o \
+    --obj build/elite_1D81.o \
+    --obj build/elite_6A00.o
 
 # loader stage 6:
 #-------------------------------------------------------------------------------
 
 # convert the source to a binary as-is
 echo "-     link 'gma6.bin'"
-$ld65 -C build/gma6_bin.cfg -o build/gma6.bin \
-    build/elite_6A00.o \
-    build/elite_1D00.o \
-    build/loader_stage5.o \
-    build/elite_1D81.o
+$ld65 \
+       -C build/gma6_bin.cfg \
+       -o build/gma6.bin \
+    --obj build/elite_6A00.o \
+    --obj build/elite_1D00.o \
+    --obj build/loader_stage5.o \
+    --obj build/elite_1D81.o
+
 # run the binary for the encrypt script, which will spit out an assembler file,
 # this gets included in the relevant position by the stage 6 loader (GMA6.PRG)
 echo "-  encrypt 'gma6.bin'"
@@ -145,73 +222,53 @@ $ca65 -o build/loader_stage6.o  src/loader/stage6.asm
 # the stage 0 loader is what gets loaded by `LOAD"*",8,1`
 # its only purpose is to hijack BASIC and load the next stage
 echo "-     link 'firebird.prg'"
-$ld65 -C build/firebird.cfg -o bin/firebird.prg \
-    build/loader_stage0.o \
-    c64.lib
+$ld65 \
+       -C build/firebird.cfg \
+       -o bin/firebird.prg \
+    --obj build/prgheader.o \
+    --obj build/loader_stage0.o
 
 # the stage 1 loader contains the fast-loader code,
 # but also a menu to opt for slow-loading
 echo "-     link 'gma1.prg'"
-$ld65 -C build/gma1.cfg \
-    -o bin/gma1.prg \
-    build/loader_stage1.o \
-    build/loader_stage4.o \
-    build/elite_init.o \
-    build/elite_1D00.o \
-    build/loader_stage5.o \
-    build/elite_1D81.o \
-    build/elite_6A00.o \
-    c64.lib
+$ld65 \
+       -C build/gma1.cfg \
+       -o bin/gma1.prg \
+    --obj build/prgheader.o \
+    --obj build/loader_stage1.o \
+    --obj build/elite_1D00.o \
+    --obj build/loader_stage5.o \
+    --obj build/elite_1D81.o \
+    --obj build/elite_6A00.o
 
 echo "-     link 'byebyejulie.prg'"
-$ld65 -C c64-asm.cfg -o bin/byebyejulie.prg \
-    build/loader_stage2.o \
-    c64.lib
+$ld65 \
+       -C build/c64-prg.cfg \
+       -o bin/byebyejulie.prg \
+    --obj build/prgheader.o \
+    --obj build/loader_stage2.o
 
 echo "-     link 'gma3.prg'"
-$ld65 -C c64-asm.cfg \
-    --start-addr \$C800 -o bin/gma3.prg \
-    build/loader_stage3.o \
-    c64.lib
+$ld65 \
+       -C build/c64-prg.cfg \
+       -o bin/gma3.prg \
+       -S \$C800 \
+    --obj build/prgheader.o \
+    --obj build/loader_stage3.o
 
-# "gma4.prg" will contain encrypted data/code blocks, so these areas of code
-# have to be linked first, then encrypted and then re-linked. this link
-# outputs the code and data-to-be-encrypted to seprate binaries:
-#
-# - "gma4_code.o" = the decryption routine
-# - "gma4_data.o" = the binary to be encrypted and re-linked
-#
-echo "-     link 'gma4_*.bin'"
-$ld65 -C build/gma4_decrypted.cfg -o build/gma4 \
-    build/loader_stage4.o \
-    build/elite_init.o
-
-echo "-  encrypt 'gma4_data.bin'"
-$encrypt 8E build/gma4_data.bin build/gma4_data.s
-
-# assemble the newly encrypted data
-echo "- assemble 'gma4_data.s'"
-$ca65 -o build/gma4_data.o \
-    build/gma4_data.s
-
-# now re-link with the encrypted binary blobs
-echo "-     link 'gma4.prg'"
-$ld65 -C build/gma4_encrypted.cfg -o bin/gma4.prg \
-    build/loader_stage4.o \
-    build/gma4_data.o \
-    c64.lib
-
-# re-link with the encrypted binary blobs
 echo "-     link 'gma6.prg'"
-$ld65 -C build/gma6_encrypted.cfg -o bin/gma6.prg \
-    build/loader_stage6.o \
-    c64.lib
+$ld65 \
+       -C build/gma6_encrypted.cfg \
+       -o bin/gma6.prg \
+    --obj build/prgheader.o \
+    --obj build/loader_stage6.o
 
 #-------------------------------------------------------------------------------
 
 echo
 echo "* write floppy disk image"
-$mkd64 -o bin/elite_gma86.d64 \
+$mkd64 \
+    -o bin/elite_gma86.d64 \
     -m xtracks -XDS \
     -m cbmdos -d "ELITE 040486" -i "GMA86" \
     -f bin/firebird.prg     -t 17 -s 0 -n "FIREBIRD"    -P -S 1 -w \
@@ -229,7 +286,7 @@ echo "- OK"
 echo
 echo "* verifying checksums"
 cd bin
-md5sum --ignore-missing --quiet --check checksums.txt
+md5sum --ignore-missing --quiet --check checksums.md5
 if [ $? -eq 0 ]; then echo "- OK"; fi
 cd ..
 

@@ -17,7 +17,10 @@ ZP_COPY_FROM    := $1a
 
 ;-------------------------------------------------------------------------------
 
-.data                                                                   ;$75e4
+.segment        "INIT"
+.export         __INIT__:absolute = 1
+
+_75e4:                                                                  ;$75E4
         ; this code will switch the VIC-II bank to $4000..$8000;
         ; all graphics to be displayed (characters, sprites, bitmaps)
         ; must therfore exist within this memory range
@@ -584,6 +587,7 @@ _783a:
 
         ; some data that comes after the sprites, but isn't sprites.
         ; this block gets copied along with the sprites to $6800+
+        ; -- purpose unknown
         
         .byte   $38, $35, $25, $67, $fa, $b5, $a5, $a2                  ;$7C3A
         .byte   $22, $c1, $df, $eb, $77, $ce, $f4, $07

@@ -3,7 +3,10 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-.include    "../../build/gma5_bin.s"
+; C64 .PRG files, both on PC and on D64 disk, begin with a two-byte header
+; that give the load-address of the program in little Endian low-hi order
 
-        ; trailing, un-ecrypted bytes
-        .byte   $00, $ff, $00
+.segment        "PRGHEADER"
+.export         __PRGHEADER__:absolute = 1
+
+        .addr   *+2

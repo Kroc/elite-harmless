@@ -3,11 +3,22 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-; this file is part of "gma4.prg"
+; the stage-4 loader ("GMA4.PRG") consists of two large blocks of scrambled
+; code/data with the decryption routine wedged between:
 
-; this file includes two large blocks of scrambled code/data
-; with the decryption routine wedged between at $7596
+; $4000 +---------+
+;       |         |
+;       |  DATA1  |
+;       |         |
+; $7593 +---------+
+;       |   CODE  |    decryption routine
+; $75E4 +---------+               
+;       |         |
+;       |  DATA2  |
+;       |         |
+; $8660 +---------+
 
+; a python script "build/encrypt.py" will handle encrypting the data blocks.
 ; the 'encryption' is done by simply adding one byte to the next and saving
 ; the resultant byte. for example, the following original data:
 
@@ -18,51 +29,54 @@
 
 ;   $7e, $56, $24, $03, $63, $cb, $14, ...
 
-;-------------------------------------------------------------------------------
+;===============================================================================
 
-; the stage 1 loader ("gma1.prg") jumps into here 
-.export _7596
+.segment        "JUNK1"
+.export         __JUNK1__:absolute = 1
 
-.export _75e4
+;$7590  junk data -- not encrypted!
+        .byte   $4c, $85, $01                                           ;$7590
 
 ;===============================================================================
 
 .code
+.export         __CODE__:absolute = 1
 
-.include        "../build/gma4_4000.s"
-
-;$7591  junk data -- not encrypted!
-        .byte   $4c, $85, $01
-
-;===============================================================================
-
-_7593:
+_7593:                                                                  ;$7593
         .byte   $20, $34, $01
 
-_7596:
+; the stage 1 loader ("gma1.prg") jumps into here 
+_7596:                                                                  ;$7596
+.export _7596
         cld                     ; clear decimal mode (why??)
     
+.import __DATA2_LOAD__
+.import __DATA2_SIZE__
+
         ; first block -- set where to stop
         ; (at the end of this rountine)
-        lda #< (_75e4 - 1)
+        lda #< (__DATA2_LOAD__ - 1)
         sta _7593+0
-        lda #> (_75e4 - 1)
+        lda #> (__DATA2_LOAD__)
         sta _7593+1
 
-        lda #> $865a            ; pointer high-byte to data-table, i.e. $8600
-        ldy #< $865a            ; indirect index y (=>$865a = $83)
+        lda #> (__DATA2_LOAD__ + __DATA2_SIZE__ - 1)
+        ldy #< (__DATA2_LOAD__ + __DATA2_SIZE__ - 1)
         ldx # $8e
         jsr decrypt_block
 
+.import __DATA1_LOAD__
+.import __DATA1_SIZE__
+
         ; second block -- set where to stop
         ; (at the loading address = $4000)
-        lda #< ($4000 - 1)
+        lda #< (__DATA1_LOAD__ - 1)
         sta _7593+0
-        lda #> ($4000 - 1)
+        lda #> (__DATA1_LOAD__ - 1)
         sta _7593+1
 
-        lda #> $758f            ;TODO: link this!
-        ldy #< $758f
+        lda #> (__DATA1_LOAD__ + __DATA1_SIZE__ - 1)
+        ldy #< (__DATA1_LOAD__ + __DATA1_SIZE__ - 1)
         ldx # $6c
         jsr decrypt_block
 
@@ -120,7 +134,9 @@ decrypt_byte:                                                           ;$75c8
 
 ;===============================================================================
 
+; TODO: import this from "elite_init.asm" instead
 _75e4:
+.export _75e4
 
 ;===============================================================================
 
@@ -128,7 +144,8 @@ _75e4:
 ; the linker will exclude these from the binary of the data-to-be-encrypted.
 ; when the code is re-linked with the encrypted blob, these bytes are appended
 
-.segment        "FILL"
+.segment        "JUNK2"
+.export         __JUNK2__:absolute = 1
 
 ;_865b:
         .byte   $00, $ff, $00, $ff, $00
