@@ -175,6 +175,7 @@ echo "-     link 'gma5_data.bin'"
 $ld65 \
        -C link/loader/gma5_data.cfg \
        -o build/loader/gma5_data.bin \
+    --obj build/elite_font.o \
     --obj build/loader/stage5.o \
     --obj build/elite_1D00.o \
     --obj build/elite_1D81.o \
@@ -197,6 +198,7 @@ $ld65 \
        -C link/loader/gma5.cfg \
        -o bin/gma5.prg \
     --obj build/prgheader.o \
+    --obj build/elite_font.o \
     --obj build/loader/gma5_data.o \
     --obj build/elite_1D00.o \
     --obj build/loader/stage5.o \
@@ -211,10 +213,13 @@ echo "-     link 'gma6_data.bin'"
 $ld65 \
        -C link/loader/gma6_data.cfg \
        -o build/loader/gma6_data.bin \
-    --obj build/elite_6A00.o \
+    --obj build/elite_0700.o \
+    --obj build/elite_font.o \
+    --obj build/elite_0E00.o \
     --obj build/elite_1D00.o \
     --obj build/loader/stage5.o \
-    --obj build/elite_1D81.o
+    --obj build/elite_1D81.o \
+    --obj build/elite_6A00.o
 
 # run the binary for the encrypt script, which will spit out an assembler file
 echo "-  encrypt 'gma6_data.bin'"
@@ -230,6 +235,9 @@ $ld65 \
        -C link/loader/gma6.cfg \
        -o bin/gma6.prg \
     --obj build/prgheader.o \
+    --obj build/elite_0700.o \
+    --obj build/elite_font.o \
+    --obj build/elite_0E00.o \
     --obj build/loader/gma6_data.o \
     --obj build/loader/stage6.o
 
@@ -252,6 +260,9 @@ $ld65 \
        -o bin/gma1.prg \
     --obj build/prgheader.o \
     --obj build/loader/stage1.o \
+    --obj build/elite_0700.o \
+    --obj build/elite_font.o \
+    --obj build/elite_0E00.o \
     --obj build/elite_1D00.o \
     --obj build/loader/stage5.o \
     --obj build/elite_1D81.o \

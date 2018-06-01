@@ -11,6 +11,8 @@ $0B00..$0E00    CHARACTER GFX:
                 ASCII order, regardless of C64's PETSCII appearance. this is
                 very likely for compatibility with the BBC Micro's data 
 
+$0E00..$1D00    ?
+
 $1D00..$3ED4    CODE/DATA? (GMA5.PRG)
 
 ------------    ----------------------------------------------------------------
