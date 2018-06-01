@@ -133,6 +133,7 @@ $ld65 \
     --obj build/loader/gma4_data1.o \
     --obj build/loader/stage4.o \
     --obj build/elite_init.o \
+    --obj build/elite_hulls.o \
     --obj build/elite_hud.o
 
 # verify this is as expected before encrypting 

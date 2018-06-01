@@ -423,11 +423,10 @@ _77a3:  sta $d802,y
         ; copy $7D7A..$867A to $EF90-$F890 (under the KERNAL ROM)
         ; -- HUD (backup?)
 
-        ; get the location of the HUD data from the linker configuration
-        ; TODO: calc size -- is wrong here due to HUD data being trimmed
-.import __DATA_HUD_LOAD__, __DATA_HUD_SIZE__
-
         cli 
+
+        ; get the location of the HUD data from the linker configuration
+.import __DATA_HUD_LOAD__, __DATA_HUD_SIZE__
 
         ; number of whole pages to copy. note that, the lack of a rounding-up
         ; divide is fixed by adding just shy of one page before dividing,
@@ -436,11 +435,12 @@ _77a3:  sta $d802,y
         ; than necessary 
         ldx #< ((__DATA_HUD_SIZE__ + 255) / 256)
 
-        ; TODO: the copy-to location comes after the hull data,
-        ;       handle this positioning in the linker config
-        lda #< $ef90
+        ; get the location where the HUD data is to be copied to
+.import __DATA_HUD_RUN__
+
+        lda #< __DATA_HUD_RUN__
         sta ZP_COPY_TO+0
-        lda #> $ef90
+        lda #> __DATA_HUD_RUN__
         sta ZP_COPY_TO+1
         lda #< __DATA_HUD_LOAD__
         sta ZP_COPY_FROM+0
