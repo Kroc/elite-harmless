@@ -60,6 +60,8 @@ echo "- assemble 'elite_6A00.asm'"
 $ca65 -o build/elite_6A00.o     src/elite_6A00.asm
 echo "- assemble 'elite_hulls.asm'"
 $ca65 -o build/elite_hulls.o    src/elite_hulls.asm
+echo "- assemble 'elite_hud.asm'"
+$ca65 -o build/elite_hud.o      src/elite_hud.asm
 
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
@@ -130,7 +132,8 @@ $ld65 \
        -o build/loader/gma4_data2.bin \
     --obj build/loader/gma4_data1.o \
     --obj build/loader/stage4.o \
-    --obj build/elite_init.o
+    --obj build/elite_init.o \
+    --obj build/elite_hud.o
 
 # verify this is as expected before encrypting 
 # (it's very hard to track down errors post-encryption!)

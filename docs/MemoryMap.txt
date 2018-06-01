@@ -2,9 +2,7 @@
 $0400..$0700    ?
                 a work area for variables / data?
 
-$0700..$1D00    ?
-                GMA4.PRG contains a payload at $4000..$7590,
-                from this, $4000..$5600 is copied to $0700..$1D00
+$0700..$0B00    ?
 
 $0B00..$0E00    CHARACTER GFX:
                 the font used. interestingly, the characters are defined in
