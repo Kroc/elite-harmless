@@ -6,7 +6,25 @@
 ; this data is part of the GMA4 2nd payload, but appears unreferenced.
 ; it gets overwritten by the game's code at $6A00..
 
-.segment        "DATA_7C7A"
+.segment        "DATA_7C3A"
+
+        ; some data that comes after the sprites (in GMA4), but isn't sprites.
+        ; this block gets copied along with the sprites to $6800+
+        ; -- purpose unknown
+        
+        .byte   $38, $35, $25, $67, $fa, $b5, $a5, $a2                  ;$7C3A
+        .byte   $22, $c1, $df, $eb, $77, $ce, $f4, $07
+        .byte   $37, $cf, $33, $4d, $a5, $89, $76, $cd                  ;$7C4A
+        .byte   $6d, $69, $8d, $56, $cd, $94, $98, $f6
+        .byte   $b8, $ce, $14, $13, $d1, $98, $ce, $b1                  ;$7C5A
+        .byte   $77, $ce, $f4, $1c, $b1, $40, $68, $30
+        .byte   $87, $cd, $a9, $90, $b2, $08, $c1, $db                  ;$7C6A
+        .byte   $cf, $33, $49, $80, $6b, $ca, $3a, $cf
+
+        ;-----------------------------------------------------------------------
+
+        ; this block appears to be unused and doesn't get copied out
+        ; before being overwritten by GMA6.PRG
 
         .byte   $33, $8d, $49, $ea, $53, $29, $2c, $2f                  ;$7C7A
         .byte   $87, $c4, $a0, $70, $96, $90, $b3, $38

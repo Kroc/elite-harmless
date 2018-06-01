@@ -124,8 +124,8 @@ echo "- assemble 'gma4_data1.s'"
 $ca65 -o build/loader/gma4_data1.o build/loader/gma4_data1.s
 
 # assemble the loose data used in the second block
-echo "- assemble 'gma4_7C7A.asm'"
-$ca65 -o build/loader/gma4_7C7A.o src/loader/gma4_7C7A.asm
+echo "- assemble 'gma4_7C3A.asm'"
+$ca65 -o build/loader/gma4_7C3A.o src/loader/gma4_7C3A.asm
 
 # the second data block is trickier to handle as the location of the decryption
 # routine is dependent on the size of the first block of data, but we don't
@@ -137,7 +137,7 @@ $ld65 \
     --obj build/loader/gma4_data1.o \
     --obj build/loader/stage4.o \
     --obj build/elite_init.o \
-    --obj build/loader/gma4_7C7A.o \
+    --obj build/loader/gma4_7C3A.o \
     --obj build/elite_hulls.o \
     --obj build/elite_hud.o
 
