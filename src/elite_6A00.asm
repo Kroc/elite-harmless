@@ -4,6 +4,7 @@
 ;===============================================================================
 
 .include        "c64.asm"
+.include        "elite_consts.asm"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -6483,16 +6484,42 @@ _9800:
 
 ;===============================================================================
 
-_9900:
-        .byte   $03, $2b, $53, $7b, $a3, $cb, $f3, $1b                  ;$9900
-        .byte   $43, $6b, $93, $bb, $e3, $0b, $33, $5b                  ;$9908
-        .byte   $83, $ab, $d3, $fb, $23, $4b, $73, $9b                  ;$9910
-        .byte   $c3                                                     ;$9918
-_9919:
-        .byte   $60, $60, $60, $60, $60, $60, $60, $61                  ;$9919
-        .byte   $61, $61, $61, $61, $61, $62, $62, $62                  ;$9921
-        .byte   $62, $62, $62, $62, $63, $63, $63, $63                  ;$9929
-        .byte   $63                                                     ;$9931
+; referenced in the `chrout` routine, these are a pair of hi/lo-byte lookup
+; tables that index a row number (0-24) to the place in the menu screen memory
+; where that row starts -- note that Elite uses a 32-char (256 px) wide
+; 'screen' so this equates the the 4th character in on each row
+
+.define menuscr_pos  \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  0, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  1, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  2, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  3, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  4, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  5, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  6, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  7, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  8, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  9, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 10, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 11, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 12, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 13, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 14, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 15, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 16, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 17, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 18, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 19, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 20, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 21, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 22, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 23, 3 ), \
+        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 24, 3 )
+
+menuscr_lo:                                                             ;$9900
+        .lobytes menuscr_pos
+menuscr_hi:                                                             ;$9919
+        .hibytes menuscr_pos
 
 ;===============================================================================
 
@@ -10335,10 +10362,11 @@ _b179:  ; NOTE: called only ever by `_2c7d`!
 
 _b17b:  ; `chrout` jumps here                                           ;$B17B
         ;-----------------------------------------------------------------------
-        sta $35                 ; put aside ASCII character to print?
-        sty $0490               ; y-position on screen?
-        stx $048f               ; x-position on screen?
-        
+        ; store current registers
+        sta $35
+        sty $0490
+        stx $048f
+
         ; cancel if text reaches a certain point?
         ; prevent off-screen writing?
         ldy $34
@@ -10440,13 +10468,18 @@ _b1a1:
 
         ; SPEED: this whole thing could seriously do with a lookup table
 
-:       lsr                     ; x2                                    ;$B1C5
+        ; divide into 64?
+:       lsr                                                             ;$B1C5                     
         ror ZP_CHROUT_DRAWADDR_LO
-        lsr                     ; x4
+        lsr 
         ror ZP_CHROUT_DRAWADDR_LO
         
+        ; taking a number and making it the high-byte of a word is just
+        ; multiplying it by 256, i.e. shifting left 8 bits
+        
         adc ZP_CHROUT_ROW
-        adc # $40
+        ; re-base to the start of the bitmap screen
+        adc #> ELITE_BITMAP_ADDR
         sta ZP_CHROUT_DRAWADDR_HI
 
         ; calculte the offset of the column
@@ -10460,38 +10493,46 @@ _b1a1:
         bcc :+
         inc ZP_CHROUT_DRAWADDR_HI
 
+        ; is this the character code for the solid-block character?
+        ; TODO: generate this index in "gfx/font.asm"?
 :       cpy # $7f                                                       ;$B1DE
         bne _b1ed
 
-        dec $31
+        ; backspace?
+        dec ZP_CHROUT_COL
+        ; go back 256 pixels??
         dec ZP_CHROUT_DRAWADDR_HI
+        
         ldy # $f8
         jsr _b3b5
         beq _b210
 _b1ed:
-        inc $31
+        inc ZP_CHROUT_COL
+        ; this is `sta $08` if you jump in after the `bit` instruction,
+        ; but it doesn't look like this actually occurs
         bit $0885
 
         ; paint the character (8-bytes) to the screen
         ; SPEED: this could be unrolled
 
-        ldy # $07
+        ldy # 7
 :       lda (ZP_CHROUT_CHARADDR), y                                     ;$B1F4
         eor (ZP_CHROUT_DRAWADDR), y
         sta (ZP_CHROUT_DRAWADDR), y
-
         dey 
         bpl :-
 
-        ldy $33
-        lda _9900, y
+        ldy ZP_CHROUT_ROW
+        lda menuscr_lo, y
         sta ZP_CHROUT_DRAWADDR_LO
-        lda _9919, y
+        lda menuscr_hi, y
         sta ZP_CHROUT_DRAWADDR_HI
-        ldy $31
+
+        ldy ZP_CHROUT_COL
         lda $050c
         sta (ZP_CHROUT_DRAWADDR), y
 _b210:
+        ; restore registers before returning
         ldy $0490
         ldx $048f
         lda $35

@@ -27,6 +27,8 @@
 .define .color_nybbles(fore, back) \
         (fore & 15) << 4 | (back & 15)
 
+.define .scrpos(ypos, xpos) \
+        ((ypos * 40) + xpos)
 
 ;===============================================================================
 ; CPU port: memory layout & Datasette
