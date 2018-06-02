@@ -43,29 +43,29 @@ echo
 echo "* assemble Elite source code:"
 echo "  ==========================="
 echo "- assemble 'prgheader.asm'"
-$ca65 -o build/prgheader.o          src/prgheader.asm
+$ca65 -o build/prgheader.o      src/prgheader.asm
 echo "- assemble 'elite_0700.asm'"
-$ca65 -o build/elite_0700.o         src/elite_0700.asm
-echo "- assemble 'elite_font.asm'"
-$ca65 -o build/elite_font.o         src/elite_font.asm
+$ca65 -o build/elite_0700.o     src/elite_0700.asm
+echo "- assemble 'gfx_font.asm'"
+$ca65 -o build/gfx_font.o       src/gfx/font.asm
 echo "- assemble 'elite_0E00.asm'"
-$ca65 -o build/elite_0E00.o         src/elite_0E00.asm
+$ca65 -o build/elite_0E00.o     src/elite_0E00.asm
 echo "- assemble 'elite_1D00.asm'"
-$ca65 -o build/elite_1D00.o         src/elite_1D00.asm
+$ca65 -o build/elite_1D00.o     src/elite_1D00.asm
 echo "- assemble 'elite_1D81.asm'"
-$ca65 -o build/elite_1D81.o         src/elite_1D81.asm
+$ca65 -o build/elite_1D81.o     src/elite_1D81.asm
 echo "- assemble 'elite_init.asm'"
-$ca65 -o build/elite_init.o         src/elite_init.asm
-echo "- assemble 'elite_sprites.asm'"
-$ca65 -o build/elite_sprites.o      src/elite_sprites.asm
+$ca65 -o build/elite_init.o     src/elite_init.asm
+echo "- assemble 'gfx_sprites.asm'"
+$ca65 -o build/gfx_sprites.o    src/gfx/sprites.asm
 echo "- assemble 'elite_6A00.asm'"
-$ca65 -o build/elite_6A00.o         src/elite_6A00.asm
-echo "- assemble 'elite_hulls.asm'"
-$ca65 -o build/elite_hulls.o        src/elite_hulls.asm
-echo "- assemble 'elite_hud.asm'"
-$ca65 -o build/elite_hud.o          src/elite_hud.asm
-echo "- assemble 'elite_hud_color.asm'"
-$ca65 -o build/elite_hud_color.o    src/elite_hud_color.asm
+$ca65 -o build/elite_6A00.o     src/elite_6A00.asm
+echo "- assemble 'gfx_hulls.asm'"
+$ca65 -o build/gfx_hulls.o      src/gfx/hulls.asm
+echo "- assemble 'gfx_hud.asm'"
+$ca65 -o build/gfx_hud.o        src/gfx/hud.asm
+echo "- assemble 'gfx_hud_color.asm'"
+$ca65 -o build/gfx_hud_color.o  src/gfx/hud_color.asm
 
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
@@ -97,9 +97,9 @@ $ld65 \
        -C link/loader/gma4_data1.cfg \
        -o build/loader/gma4_data1.bin \
     --obj build/elite_0700.o \
-    --obj build/elite_font.o \
+    --obj build/gfx_font.o \
     --obj build/elite_0E00.o \
-    --obj build/elite_hulls.o
+    --obj build/gfx_hulls.o
 
 # verify this is as expected before encrypting 
 # (it's very hard to track down errors post-encryption!)
@@ -141,11 +141,11 @@ $ld65 \
     --obj build/loader/gma4_data1.o \
     --obj build/loader/stage4.o \
     --obj build/elite_init.o \
-    --obj build/elite_hud_color.o \
-    --obj build/elite_sprites.o \
+    --obj build/gfx_hud_color.o \
+    --obj build/gfx_sprites.o \
     --obj build/loader/gma4_7C3A.o \
-    --obj build/elite_hulls.o \
-    --obj build/elite_hud.o
+    --obj build/gfx_hulls.o \
+    --obj build/gfx_hud.o
 
 # verify this is as expected before encrypting 
 # (it's very hard to track down errors post-encryption!)
@@ -190,7 +190,7 @@ echo "-     link 'gma5_data.bin'"
 $ld65 \
        -C link/loader/gma5_data.cfg \
        -o build/loader/gma5_data.bin \
-    --obj build/elite_font.o \
+    --obj build/gfx_font.o \
     --obj build/loader/stage5.o \
     --obj build/elite_1D00.o \
     --obj build/elite_1D81.o \
@@ -213,7 +213,7 @@ $ld65 \
        -C link/loader/gma5.cfg \
        -o bin/gma5.prg \
     --obj build/prgheader.o \
-    --obj build/elite_font.o \
+    --obj build/gfx_font.o \
     --obj build/loader/gma5_data.o \
     --obj build/elite_1D00.o \
     --obj build/loader/stage5.o \
@@ -229,7 +229,7 @@ $ld65 \
        -C link/loader/gma6_data.cfg \
        -o build/loader/gma6_data.bin \
     --obj build/elite_0700.o \
-    --obj build/elite_font.o \
+    --obj build/gfx_font.o \
     --obj build/elite_0E00.o \
     --obj build/elite_1D00.o \
     --obj build/loader/stage5.o \
@@ -251,7 +251,7 @@ $ld65 \
        -o bin/gma6.prg \
     --obj build/prgheader.o \
     --obj build/elite_0700.o \
-    --obj build/elite_font.o \
+    --obj build/gfx_font.o \
     --obj build/elite_0E00.o \
     --obj build/loader/gma6_data.o \
     --obj build/loader/stage6.o
@@ -273,7 +273,7 @@ $ld65 \
     --obj build/elite_1D00.o \
     --obj build/elite_1D81.o \
     --obj build/elite_0700.o \
-    --obj build/elite_font.o \
+    --obj build/gfx_font.o \
     --obj build/elite_0E00.o
 
 # the stage 1 loader contains the fast-loader code,
@@ -285,7 +285,7 @@ $ld65 \
     --obj build/prgheader.o \
     --obj build/loader/stage1.o \
     --obj build/elite_0700.o \
-    --obj build/elite_font.o \
+    --obj build/gfx_font.o \
     --obj build/elite_0E00.o \
     --obj build/elite_1D00.o \
     --obj build/loader/stage5.o \
