@@ -258,14 +258,23 @@ $ld65 \
 
 #-------------------------------------------------------------------------------
 
-# the stage 0 loader is what gets loaded by `LOAD"*",8,1`
-# its only purpose is to hijack BASIC and load the next stage
+# the stage 0 loader is what gets loaded by `LOAD"*",8,1`, its only purpose is
+# to hijack BASIC and load the next stage. it jumps into GMA1.PRG once loaded,
+# which necessitates a whole ton of cross-linking (this to clean-up / improve) 
 echo "-     link 'firebird.prg'"
 $ld65 \
        -C link/loader/firebird.cfg \
        -o bin/firebird.prg \
     --obj build/prgheader.o \
-    --obj build/loader/stage0.o
+    --obj build/loader/stage0.o \
+    --obj build/loader/stage1.o \
+    --obj build/loader/stage5.o \
+    --obj build/elite_6A00.o \
+    --obj build/elite_1D00.o \
+    --obj build/elite_1D81.o \
+    --obj build/elite_0700.o \
+    --obj build/elite_font.o \
+    --obj build/elite_0E00.o
 
 # the stage 1 loader contains the fast-loader code,
 # but also a menu to opt for slow-loading

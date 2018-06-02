@@ -17,16 +17,18 @@
 
 ;===============================================================================
 
-.segment        "GMA1"
+.segment        "CODE_GMA1"
 
 ; eight bytes of unused (by the Kernal) RAM exist at $0334, followed by
 ; the 192 byte Datasette buffer (no use to us here), another 4 unused bytes
 ; and then the text screen. since the text screen gets moved to $0800,
 ; this gives us plenty of space in low-memory for the loader
 
-        jmp     start                                                   ;$0334
+        jmp     gma1_start                                              ;$0334
 
 _0337:                                                                  ;$0337
+        ; Track / Sector locations? (for the fast-loader)
+
         .byte   $00, $00        ; "GMA0" (invalid)
         .byte   $00, $00        ; "GMA1" (invalid)
         .byte   $11, $04        ; "GMA2" (invalid?)
@@ -35,7 +37,7 @@ _0337:                                                                  ;$0337
         .byte   $13, $00        ; "GMA5" (payload 3?)
         .byte   $14, $08        ; "GMA6" (payload 4?)
 
-start:                                                                  ;$0345
+gma1_start:                                                             ;$0345
         ; call Kernel SETMSG, "Set system error display switch at
         ; memory address $009D". A = the switch value.
         ; i.e. disable error messages?

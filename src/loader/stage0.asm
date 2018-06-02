@@ -19,7 +19,7 @@
 
 ; the BASIC bootstrap needs to be stored at the beginning of the program,
 ; canonically $02A7, but needs to be addressed as running from $0801.
-; the linker configuration handles this ("build/firebird.cfg")
+; the linker configuration handles this ("link/loader/firebird.cfg")
 
 .segment        "BOOTSTRAP"
 
@@ -48,8 +48,9 @@
         ; routine to copy the program to its intended location
         ;-----------------------------------------------------------------------
 
-        ; please note: the linker configuration ("build/firebird.cfg") defines
-        ; the segments, their addresses, and exports those values for use here:
+        ; NOTE: the linker configuration ("link/loader/firebird.cfg")
+        ;       defines the segments, their addresses, and exports those
+        ;       values for use here:
 
 .import __MAIN_START__          ; get the load address of the program
 .import __BOOTSTRAP_RUN__       ; and, as seen by BASIC, i.e. $0801
@@ -119,11 +120,14 @@ start:                                                                  ;$02c1
         sta $0329
 
         .repeat 24
-        nop
+        nop 
         .endrepeat
 
-        ; TODO: need to cross-link this
-        jmp $0334
+        ; get the address where GMA1.PRG loads from the linker
+        ; (see "link/loader/firebird.cfg")
+.import __CODE_GMA1_LOAD__
+
+        jmp __CODE_GMA1_LOAD__
 
 ;===============================================================================
 
