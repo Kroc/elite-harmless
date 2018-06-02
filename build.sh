@@ -44,14 +44,14 @@ echo "* assemble Elite source code:"
 echo "  ==========================="
 echo "- assemble 'prgheader.asm'"
 $ca65 -o build/prgheader.o      src/prgheader.asm
-echo "- assemble 'elite_0700.asm'"
-$ca65 -o build/elite_0700.o     src/elite_0700.asm
+echo "- assemble 'data_0700.asm'"
+$ca65 -o build/data_0700.o      src/data_0700.asm
 echo "- assemble 'gfx_font.asm'"
 $ca65 -o build/gfx_font.o       src/gfx/font.asm
-echo "- assemble 'elite_0E00.asm'"
-$ca65 -o build/elite_0E00.o     src/elite_0E00.asm
-echo "- assemble 'elite_1D00.asm'"
-$ca65 -o build/elite_1D00.o     src/elite_1D00.asm
+echo "- assemble 'data_0E00.asm'"
+$ca65 -o build/data_0E00.o      src/data_0E00.asm
+echo "- assemble 'data_1D00.asm'"
+$ca65 -o build/data_1D00.o      src/data_1D00.asm
 echo "- assemble 'elite_1D81.asm'"
 $ca65 -o build/elite_1D81.o     src/elite_1D81.asm
 echo "- assemble 'elite_init.asm'"
@@ -94,16 +94,16 @@ echo "-     link 'gma4_data1.bin'"
 $ld65 \
        -C link/loader/gma4_data1.cfg \
        -o build/loader/gma4_data1.bin \
-    --obj build/elite_0700.o \
+    --obj build/data_0700.o \
     --obj build/gfx_font.o \
-    --obj build/elite_0E00.o \
+    --obj build/data_0E00.o \
     --obj build/gfx_hulls.o
 
 # verify this is as expected before encrypting 
 # (it's very hard to track down errors post-encryption!)
 echo -n "-   verify 'gma4_data1.bin' "
 if [[
-    # note that this hash was produced by dumping $4000..$758F,
+    # note that this hash was produced by dumping $4000...$758F,
     # just after decryption (but before relocation)
     $(md5sum -b < build/loader/gma4_data1.bin) \
  == "049a1004768ed1de4e220923ea865f78 *-"
@@ -148,7 +148,7 @@ $ld65 \
 # (it's very hard to track down errors post-encryption!)
 echo -n "-   verify 'gma4_data2.bin' "
 if [[
-    # note that this hash was produced by dumping $75E4..$865F,
+    # note that this hash was produced by dumping $75E4...$865F,
     # just after decryption (but before relocation)
     $(md5sum -b < build/loader/gma4_data2.bin) \
  == "32cba4aa5d3ee363c0bdfb77e95c1fc3 *-"
@@ -189,7 +189,7 @@ $ld65 \
        -o build/loader/gma5_data.bin \
     --obj build/gfx_font.o \
     --obj build/loader/stage5.o \
-    --obj build/elite_1D00.o \
+    --obj build/data_1D00.o \
     --obj build/elite_1D81.o \
     --obj build/elite_6A00.o
 
@@ -212,7 +212,7 @@ $ld65 \
     --obj build/prgheader.o \
     --obj build/gfx_font.o \
     --obj build/loader/gma5_data.o \
-    --obj build/elite_1D00.o \
+    --obj build/data_1D00.o \
     --obj build/loader/stage5.o \
     --obj build/elite_1D81.o \
     --obj build/elite_6A00.o
@@ -225,10 +225,10 @@ echo "-     link 'gma6_data.bin'"
 $ld65 \
        -C link/loader/gma6_data.cfg \
        -o build/loader/gma6_data.bin \
-    --obj build/elite_0700.o \
+    --obj build/data_0700.o \
     --obj build/gfx_font.o \
-    --obj build/elite_0E00.o \
-    --obj build/elite_1D00.o \
+    --obj build/data_0E00.o \
+    --obj build/data_1D00.o \
     --obj build/loader/stage5.o \
     --obj build/elite_1D81.o \
     --obj build/elite_6A00.o
@@ -247,9 +247,9 @@ $ld65 \
        -C link/loader/gma6.cfg \
        -o bin/gma6.prg \
     --obj build/prgheader.o \
-    --obj build/elite_0700.o \
+    --obj build/data_0700.o \
     --obj build/gfx_font.o \
-    --obj build/elite_0E00.o \
+    --obj build/data_0E00.o \
     --obj build/loader/gma6_data.o \
     --obj build/loader/stage6.o
 
@@ -267,11 +267,11 @@ $ld65 \
     --obj build/loader/stage1.o \
     --obj build/loader/stage5.o \
     --obj build/elite_6A00.o \
-    --obj build/elite_1D00.o \
+    --obj build/data_1D00.o \
     --obj build/elite_1D81.o \
-    --obj build/elite_0700.o \
+    --obj build/data_0700.o \
     --obj build/gfx_font.o \
-    --obj build/elite_0E00.o
+    --obj build/data_0E00.o
 
 # the stage 1 loader contains the fast-loader code,
 # but also a menu to opt for slow-loading
@@ -281,10 +281,10 @@ $ld65 \
        -o bin/gma1.prg \
     --obj build/prgheader.o \
     --obj build/loader/stage1.o \
-    --obj build/elite_0700.o \
+    --obj build/data_0700.o \
     --obj build/gfx_font.o \
-    --obj build/elite_0E00.o \
-    --obj build/elite_1D00.o \
+    --obj build/data_0E00.o \
+    --obj build/data_1D00.o \
     --obj build/loader/stage5.o \
     --obj build/elite_1D81.o \
     --obj build/elite_6A00.o
