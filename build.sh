@@ -43,25 +43,29 @@ echo
 echo "* assemble Elite source code:"
 echo "  ==========================="
 echo "- assemble 'prgheader.asm'"
-$ca65 -o build/prgheader.o      src/prgheader.asm
+$ca65 -o build/prgheader.o          src/prgheader.asm
 echo "- assemble 'elite_0700.asm'"
-$ca65 -o build/elite_0700.o     src/elite_0700.asm
+$ca65 -o build/elite_0700.o         src/elite_0700.asm
 echo "- assemble 'elite_font.asm'"
-$ca65 -o build/elite_font.o     src/elite_font.asm
+$ca65 -o build/elite_font.o         src/elite_font.asm
 echo "- assemble 'elite_0E00.asm'"
-$ca65 -o build/elite_0E00.o     src/elite_0E00.asm
+$ca65 -o build/elite_0E00.o         src/elite_0E00.asm
 echo "- assemble 'elite_1D00.asm'"
-$ca65 -o build/elite_1D00.o     src/elite_1D00.asm
+$ca65 -o build/elite_1D00.o         src/elite_1D00.asm
 echo "- assemble 'elite_1D81.asm'"
-$ca65 -o build/elite_1D81.o     src/elite_1D81.asm
+$ca65 -o build/elite_1D81.o         src/elite_1D81.asm
 echo "- assemble 'elite_init.asm'"
-$ca65 -o build/elite_init.o     src/elite_init.asm
+$ca65 -o build/elite_init.o         src/elite_init.asm
+echo "- assemble 'elite_sprites.asm'"
+$ca65 -o build/elite_sprites.o      src/elite_sprites.asm
 echo "- assemble 'elite_6A00.asm'"
-$ca65 -o build/elite_6A00.o     src/elite_6A00.asm
+$ca65 -o build/elite_6A00.o         src/elite_6A00.asm
 echo "- assemble 'elite_hulls.asm'"
-$ca65 -o build/elite_hulls.o    src/elite_hulls.asm
+$ca65 -o build/elite_hulls.o        src/elite_hulls.asm
 echo "- assemble 'elite_hud.asm'"
-$ca65 -o build/elite_hud.o      src/elite_hud.asm
+$ca65 -o build/elite_hud.o          src/elite_hud.asm
+echo "- assemble 'elite_hud_color.asm'"
+$ca65 -o build/elite_hud_color.o    src/elite_hud_color.asm
 
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
@@ -137,6 +141,8 @@ $ld65 \
     --obj build/loader/gma4_data1.o \
     --obj build/loader/stage4.o \
     --obj build/elite_init.o \
+    --obj build/elite_hud_color.o \
+    --obj build/elite_sprites.o \
     --obj build/loader/gma4_7C3A.o \
     --obj build/elite_hulls.o \
     --obj build/elite_hud.o

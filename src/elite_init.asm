@@ -192,22 +192,22 @@ _75e4:                                                                  ;$75E4
         ldy # 12
         sta VIC_SPRITE1_X
         sty VIC_SPRITE1_Y
-        asl a                   ; double x-position (=36)
+        asl                     ; double x-position (=36)
         sta VIC_SPRITE2_X
         sty VIC_SPRITE2_Y
-        asl a                   ; double x-position (=72)
+        asl                     ; double x-position (=72)
         sta VIC_SPRITE3_X
         sty VIC_SPRITE3_Y
-        asl a                   ; double x-position (=144)
+        asl                     ; double x-position (=144)
         sta VIC_SPRITE4_X
         sty VIC_SPRITE4_Y
         lda # 14
         sta VIC_SPRITE5_X
         sty VIC_SPRITE5_Y
-        asl a                   ; double x-position (=28)
+        asl                     ; double x-position (=28)
         sta VIC_SPRITE6_X
         sty VIC_SPRITE6_Y
-        asl a                   ; double x-position (=56)
+        asl                     ; double x-position (=56)
         sta VIC_SPRITE7_X
         sty VIC_SPRITE7_Y
 
@@ -249,13 +249,15 @@ _76e8:  stx ZP_COPY_TO+1
         ; copy 279 bytes of data to $66d0-$67E7
         ;-----------------------------------------------------------------------
 
+.import __HUD_SCRCOLOR_LOAD__   ;=$783A
+
         lda #< $66d0
         sta ZP_COPY_TO+0
         lda #> $66d0
         sta ZP_COPY_TO+1
-        lda #< _783a
+        lda #< __HUD_SCRCOLOR_LOAD__
         sta ZP_COPY_FROM+0
-        lda #> _783a
+        lda #> __HUD_SCRCOLOR_LOAD__
         jsr _7827
 
         ; set the screen-colours for the menu-screen:
@@ -319,7 +321,7 @@ _7745:  lda # .color_nybbles( YELLOW, BLACK )
         sta (ZP_COPY_TO), y
         ldy # 3
         sta (ZP_COPY_TO), y
-        dey
+        dey 
         lda # $00
 
 _7752:  sta (ZP_COPY_TO), y
@@ -353,7 +355,7 @@ _776c:
         ;-----------------------------------------------------------------------
 
         ; set $d800-$dc00 (colour RAM) to black
-        lda # $00
+        lda # BLACK
         sta ZP_COPY_TO+0
         tay 
         ldx #> $d800
@@ -369,16 +371,18 @@ _7784:  sta (ZP_COPY_TO), y
 
         ; colour the HUD:
         ;-----------------------------------------------------------------------
-        ; copy 279? bytes from $795a to $d0da
+        ; copy 279? bytes from $795a to $dada
         ; multi-colour bitmap colour nybbles
+
+.import __HUD_COLORRAM_LOAD__   ;=$795A
 
         lda #< $dad0
         sta ZP_COPY_TO+0
         lda #> $dad0
         sta ZP_COPY_TO+1
-        lda #< $795a
+        lda #< __HUD_COLORRAM_LOAD__
         sta ZP_COPY_FROM+0
-        lda #> $795a
+        lda #> __HUD_COLORRAM_LOAD__
         jsr _7827
 
         ; write $07 to $d802-$d824
@@ -449,11 +453,13 @@ _77a3:  sta $d802,y
 
         ;-----------------------------------------------------------------------
 
+.import __DATA_SPRITES_LOAD__   ;=$7A7A
+
         ; copy $7A7A..$7B7A to $6800..$6900
         ; SPRITES!
 
         ldy # $00
-_77ff:  lda $7a7a, y
+_77ff:  lda __DATA_SPRITES_LOAD__, y
         sta $6800, y
         dey 
         bne _77ff
@@ -461,7 +467,7 @@ _77ff:  lda $7a7a, y
         ; copy $7B7A..$7C7A to $6900..$6A00
         ; two sprites, plus a bunch of unknown data
 
-_7808:  lda $7b7a, y
+_7808:  lda __DATA_SPRITES_LOAD__+$100, y
         sta $6900, y
         dey 
         bne _7808
@@ -514,88 +520,3 @@ _7808:  lda $7b7a, y
         rts
 
 .endproc
-
-;===============================================================================
-
-; this is the decrypted version of the data in "gma4.prg"
-; note: the first 279 bytes are copied via _7827 above
-
-_783a:
-        .byte   $00, $00, $00, $07, $17, $17, $74, $74                  ;$783A
-        .byte   $74, $74, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27                  ;$784A
-        .byte   $27, $27, $27, $27, $67, $27, $27, $27
-        .byte   $27, $27, $37, $37, $07, $00, $00, $00                  ;$785A
-        .byte   $00, $00, $00, $07, $17, $17, $24, $24
-        .byte   $24, $24, $27, $27, $27, $27, $27, $27                  ;$786A
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $67, $67, $67, $67, $23, $23                  ;$787A
-        .byte   $23, $23, $37, $37, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $37, $37, $29, $29                  ;$788A
-        .byte   $29, $29, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27                  ;$789A
-        .byte   $27, $27, $27, $27, $67, $27, $23, $23
-        .byte   $23, $23, $37, $37, $07, $00, $00, $00                  ;$78AA
-        .byte   $00, $00, $00, $07, $37, $37, $28, $28
-        .byte   $28, $28, $27, $27, $27, $27, $27, $27                  ;$78BA
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $24, $24                  ;$78CA
-        .byte   $24, $24, $17, $17, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $37, $37, $2a, $2a                  ;$78DA
-        .byte   $2a, $2a, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27                  ;$78EA
-        .byte   $27, $27, $27, $27, $27, $27, $24, $24
-        .byte   $24, $24, $17, $17, $07, $00, $00, $00                  ;$78FA
-        .byte   $00, $00, $00, $07, $37, $37, $2d, $2d
-        .byte   $2d, $2d, $27, $07, $27, $27, $27, $27                  ;$790A
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $07, $27, $24, $24                  ;$791A
-        .byte   $24, $24, $17, $17, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $c7, $c7, $07, $07                  ;$792A
-        .byte   $07, $07, $27, $07, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27                  ;$793A
-        .byte   $27, $27, $27, $27, $07, $27, $24, $24
-        .byte   $24, $24, $17, $17, $07, $00, $00, $00                  ;$794A
-        .byte   $60, $d3, $66, $1d, $a0, $40, $b3, $d3
-
-_795a:
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05                  ;$795A
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d                  ;$796A
-        .byte   $0d, $0d, $05, $05, $05, $05, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00                  ;$797A
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d                  ;$798A
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $05, $05, $05, $05, $05, $05                  ;$799A
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05                  ;$79AA
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d                  ;$79BA
-        .byte   $0d, $0d, $05, $05, $05, $05, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00                  ;$79CA
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d                  ;$79DA
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $05, $05, $05, $05, $05                  ;$79EA
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05                  ;$79FA
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d                  ;$7A0A
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00                  ;$7A1A
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d                  ;$7A2A
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $05, $05                  ;$7A3A
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $0f, $0f, $07, $07                  ;$7A4A
-        .byte   $07, $07, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $03, $03, $03, $03, $03, $0d, $0d                  ;$7A5A
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $07, $07
-        .byte   $07, $07, $05, $05, $00, $00, $00, $00                  ;$7A6A
-        .byte   $8d, $18, $8f, $50, $46, $7e, $a4, $f4
-
-;-------------------------------------------------------------------------------
-
-.include        "elite_sprites.asm"
