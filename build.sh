@@ -64,8 +64,6 @@ echo "- assemble 'gfx_hulls.asm'"
 $ca65 -o build/gfx_hulls.o      src/gfx/hulls.asm
 echo "- assemble 'gfx_hud.asm'"
 $ca65 -o build/gfx_hud.o        src/gfx/hud.asm
-echo "- assemble 'gfx_hud_color.asm'"
-$ca65 -o build/gfx_hud_color.o  src/gfx/hud_color.asm
 
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
@@ -141,7 +139,6 @@ $ld65 \
     --obj build/loader/gma4_data1.o \
     --obj build/loader/stage4.o \
     --obj build/elite_init.o \
-    --obj build/gfx_hud_color.o \
     --obj build/gfx_sprites.o \
     --obj build/loader/gma4_7C3A.o \
     --obj build/gfx_hulls.o \
