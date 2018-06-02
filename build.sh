@@ -65,6 +65,25 @@ $ca65 -o build/gfx_hulls.o      src/gfx/hulls.asm
 echo "- assemble 'gfx_hud.asm'"
 $ca65 -o build/gfx_hud.o        src/gfx/hud.asm
 
+# let's try ham-fistedly link our own PRG without the loader
+echo
+echo "* build Elite DX (incomplete)"
+echo "============================="
+echo "- link 'elite-dx.prg'"
+$ld65 \
+       -C link/elite_dx.cfg \
+       -o bin/elite-dx.prg \
+    --obj build/prgheader.o \
+    --obj build/data_0700.o \
+    --obj build/gfx_font.o \
+    --obj build/data_0E00.o \
+    --obj build/data_1D00.o \
+    --obj build/elite_1D81.o \
+    --obj build/gfx_sprites.o \
+    --obj build/elite_6A00.o \
+    --obj build/gfx_hulls.o \
+    --obj build/gfx_hud.o
+
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
 
