@@ -68,7 +68,7 @@ $ca65 -o build/gfx_hud.o        src/gfx/hud.asm
 # let's try ham-fistedly link our own PRG without the loader
 echo
 echo "* build Elite DX (incomplete)"
-echo "============================="
+echo "  ==========================="
 echo "- link 'elite-dx.prg'"
 $ld65 \
        -C link/elite_dx.cfg \
@@ -104,6 +104,7 @@ echo "- assemble 'loader/stage5.asm'"
 $ca65 -o build/loader/stage5.o  src/loader/stage5.asm
 echo "- assemble 'loader/stage6.asm'"
 $ca65 -o build/loader/stage6.o  src/loader/stage6.asm
+
 
 # loader stage 4:
 #-------------------------------------------------------------------------------
@@ -349,6 +350,26 @@ cd bin
 md5sum --ignore-missing --quiet --check checksums.md5
 if [ $? -eq 0 ]; then echo "- OK"; fi
 cd ..
+
+
+# let's attempt to link the whole program at once;
+# this is bad, and kills the program
+
+echo
+echo "* link 'elite-gma86.prg'"
+$ld65 \
+       -C link/loader/gma86.cfg \
+       -o build/elite-gma86.prg \
+    --obj build/prgheader.o \
+    --obj build/loader/stage0.o \
+    --obj build/loader/stage1.o \
+    --obj build/loader/stage5.o \
+    --obj build/elite_6A00.o \
+    --obj build/data_1D00.o \
+    --obj build/elite_1D81.o \
+    --obj build/data_0700.o \
+    --obj build/gfx_font.o \
+    --obj build/data_0E00.o
 
 echo
 echo "complete."
