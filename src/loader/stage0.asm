@@ -21,7 +21,7 @@
 ; canonically $02A7, but needs to be addressed as running from $0801.
 ; the linker configuration handles this ("link/loader/firebird.cfg")
 
-.segment        "BASIC_BOOT"
+.segment        "BASIC_STAGE0"
 
         ; the C64 BASIC binary format is described here:
         ; <https://www.c64-wiki.com/wiki/BASIC_token> 
@@ -54,7 +54,7 @@
 
 .import __STAGE0_START__        ; get the load address of the program
 .import __STAGE0_LAST__         ; and the last address used (i.e. size)
-.import __BASIC_BOOT_RUN__      ; and, as seen by BASIC, i.e. $0801
+.import __BASIC_STAGE0_RUN__    ; and, as seen by BASIC, i.e. $0801
 
         ; get the size of the segments to be able to
         ; calculate the size of the whole program
@@ -73,7 +73,7 @@
 
         .assert (size <= 254), error, "Program exceeds one disk sector!"
         
-:       lda __BASIC_BOOT_RUN__, x       ; copy from $0801..
+:       lda __BASIC_STAGE0_RUN__, x     ; copy from $0801..
         sta __STAGE0_START__, x         ; to $02A7..
         dex 
         bpl :-
@@ -82,7 +82,7 @@
 
 ;===============================================================================
 
-.segment        "CODE_FIREBIRD"
+.segment        "CODE_STAGE0"
 
 filename:                                                               ;$02c1
         .byte   "gm*"           ; $47, $4D, $2A (PETSCII)
@@ -125,9 +125,9 @@ start:                                                                  ;$02c1
 
         ; get the address where GMA1.PRG loads from the linker
         ; (see "link/loader/firebird.cfg")
-.import __CODE_GMA1_LOAD__
+.import __CODE_STAGE1_LOAD__
 
-        jmp __CODE_GMA1_LOAD__
+        jmp __CODE_STAGE1_LOAD__
 
 ;===============================================================================
 

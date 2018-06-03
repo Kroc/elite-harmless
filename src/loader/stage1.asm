@@ -17,7 +17,7 @@
 
 ;===============================================================================
 
-.segment        "CODE_GMA1"
+.segment        "CODE_STAGE1"
 
 ; eight bytes of unused (by the Kernal) RAM exist at $0334, followed by
 ; the 192 byte Datasette buffer (no use to us here), another 4 unused bytes
