@@ -21,7 +21,7 @@
 ; canonically $02A7, but needs to be addressed as running from $0801.
 ; the linker configuration handles this ("link/loader/firebird.cfg")
 
-.segment        "BOOTSTRAP"
+.segment        "BASIC_BOOT"
 
         ; the C64 BASIC binary format is described here:
         ; <https://www.c64-wiki.com/wiki/BASIC_token> 
@@ -52,17 +52,17 @@
         ;       defines the segments, their addresses, and exports those
         ;       values for use here:
 
-.import __MAIN_START__          ; get the load address of the program
-.import __BOOTSTRAP_RUN__       ; and, as seen by BASIC, i.e. $0801
+.import __STAGE0_START__        ; get the load address of the program
+.import __STAGE0_LAST__         ; and the last address used (i.e. size)
+.import __BASIC_BOOT_RUN__      ; and, as seen by BASIC, i.e. $0801
 
         ; get the size of the segments to be able to
         ; calculate the size of the whole program
-.import __BOOTSTRAP_SIZE__, __CODE_SIZE__, __VECTORS_SIZE__
 
 @copy:  ; the BASIC bootstrap `SYS` calls here:                         ;$080D
 
         ; calculate the length of FIREBIRD.PRG (sans PRG header)
-        size = __BOOTSTRAP_SIZE__ + __CODE_SIZE__ + __VECTORS_SIZE__
+        size = __STAGE0_LAST__ - __STAGE0_START__
 
         ; note that these are 16-bit data types and the `ldx` is limited to
         ; 8-bit values so we have to coerce the result to 8-bits using the
@@ -73,8 +73,8 @@
 
         .assert (size <= 254), error, "Program exceeds one disk sector!"
         
-:       lda __BOOTSTRAP_RUN__, x        ; copy from $0801..
-        sta __MAIN_START__, x           ; to $02A7..
+:       lda __BASIC_BOOT_RUN__, x       ; copy from $0801..
+        sta __STAGE0_START__, x         ; to $02A7..
         dex 
         bpl :-
 
@@ -82,7 +82,7 @@
 
 ;===============================================================================
 
-.code
+.segment        "CODE_FIREBIRD"
 
 filename:                                                               ;$02c1
         .byte   "gm*"           ; $47, $4D, $2A (PETSCII)
@@ -131,7 +131,7 @@ start:                                                                  ;$02c1
 
 ;===============================================================================
 
-.segment        "VECTORS"
+.segment        "BASIC_VECTORS"
 
 ; these are various vectors for BASIC -- the loader hijacks these to cause
 ; the loader to start immediately withtout the need for a BASIC bootstrap

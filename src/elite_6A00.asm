@@ -4659,7 +4659,7 @@ _87b8:
         tay 
         lda # $07
 _87c5:
-        jsr _b17b
+        jsr print_char
         iny 
         lda ($fd), y
         bne _87c5
@@ -4901,7 +4901,7 @@ _8978:
         jsr _6a28
         ldy # $00
 _898c:
-        jsr _b17b
+        jsr print_char
         iny 
         lda ($fd), y
         bne _898c
@@ -5062,14 +5062,14 @@ _8a6a:
 _8a8c:  ; NOTE: when accessed as $8A8D, appears as `lda # $07`
         bit $07a9
 _8a8f:
-        jsr _b17b
+        jsr print_char
         bcc _8a6a
 _8a94:
         sta $000e, y
         lda # $10
         sta $050c
         lda # $0c
-        jmp _b17b
+        jmp print_char
 
 _8aa1:
         lda # $10
@@ -5286,7 +5286,7 @@ _8bc0:
         jsr _2390
         jsr _8fec
         ora # $10
-        jsr _b17b
+        jsr print_char
         pha 
         jsr _2f1f
         pla 
@@ -10317,11 +10317,11 @@ _b14e:
         bcs :+                  ; if yes, skip it
         cmp # $0d               ; is code less than $0D? (RETURN)
         bcc :+                  ; if yes, skip it
-        bne _b17b               ; if it's not RETURN, process it
+        bne print_char          ; if it's not RETURN, process it
 
         ; handle the RETURN code
         lda # $0c
-        jsr _b17b
+        jsr print_char
         lda # $0d
 
 :       clc                     ; clear carry flag before returning     ;$B166 
@@ -10360,8 +10360,12 @@ _b179:  ; NOTE: called only ever by `_2c7d`!
 .export _b179
         lda # $0c
 
-_b17b:  ; `chrout` jumps here                                           ;$B17B
+print_char:                                                             ;$B17B
+.export print_char
         ;-----------------------------------------------------------------------
+        ; write a character to the bitmap screen as if it were the text screen
+        ; (automatically advances the cursor)
+
         ; store current registers
         sta $35
         sty $0490

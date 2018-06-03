@@ -27,6 +27,7 @@
 .import _a8e6:absolute
 .import _b148:absolute
 .import _b179:absolute
+.import print_char:absolute
 
 ;-------------------------------------------------------------------------------
 
@@ -2567,7 +2568,7 @@ _2f40:
         ldx $07
         bit _2f1b
         bmi _2f4d
-        jmp $b17b
+        jmp print_char
 
         ;-----------------------------------------------------------------------
 
@@ -2636,7 +2637,7 @@ _2fb0:
         ldx # $1e
         jsr _2fd4
         lda # $0c
-        jsr $b17b
+        jsr print_char
         lda _2f1c
         sbc # $1e
         sta _2f1c
@@ -2655,7 +2656,7 @@ _2fd4:
         ldy # $00
 _2fd6:
         lda $0648, y
-        jsr $b17b
+        jsr print_char
         iny 
         dex 
         bne _2fd6
@@ -2676,7 +2677,7 @@ _2fe4:
 _2fed:
 .export _2fee := _2fed+1
         bit $07a9
-        jmp $b17b
+        jmp print_char
 
 ;===============================================================================
 
