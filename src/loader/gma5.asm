@@ -3,8 +3,6 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-.include        "loader/gma4_data1.s"
-.incbin         "loader/gma4_junk1.bin"
-.incbin         "loader/gma4_code.bin"
-.include        "loader/gma4_data2.s"
-.incbin         "loader/gma4_junk2.bin"
+.incbin         "loader/gma5_code.bin"
+.include        "loader/gma5_data.s"
+.incbin         "loader/gma5_junk.bin"
