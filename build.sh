@@ -111,100 +111,6 @@ echo "- assemble 'loader/stage6.asm'"
 $ca65 -o build/loader/stage6.o  src/loader/stage6.asm
 
 
-# loader stage 4:
-#-------------------------------------------------------------------------------
-
-# pack the data for the first encrypted block into a single binary file
-echo "-     link 'gma4_data1.bin'"
-$ld65 \
-       -C link/loader/gma4_data1.cfg \
-       -o build/loader/gma4_data1.bin \
-    --obj build/data_0700.o \
-    --obj build/gfx_font.o \
-    --obj build/data_0E00.o \
-    --obj build/gfx_hulls.o
-
-# verify this is as expected before encrypting 
-# (it's very hard to track down errors post-encryption!)
-echo -n "-   verify 'gma4_data1.bin' "
-if [[
-    # note that this hash was produced by dumping $4000...$758F,
-    # just after decryption (but before relocation)
-    $(md5sum -b < build/loader/gma4_data1.bin) \
- == "049a1004768ed1de4e220923ea865f78 *-"
-]]; then
-    echo "[OK]"
-else
-    echo "[FAIL]"
-fi
-
-# run the binary through the encrypt script, which will spit out an assembler
-# file we can then re-link into the stage 4 loader ("GMA4.PRG")
-echo "-  encrypt 'gma4_data1.bin'"
-$encrypt 6C \
-    build/loader/gma4_data1.bin \
-    build/loader/gma4_data1.s \
-    --segment "DATA1"
-
-# assemble the first encrypted payload
-echo "- assemble 'gma4_data1.s'"
-$ca65 -o build/loader/gma4_data1.o build/loader/gma4_data1.s
-
-# assemble the loose data used in the second block
-echo "- assemble 'gma4_7C3A.asm'"
-$ca65 -o build/loader/gma4_7C3A.o src/loader/gma4_7C3A.asm
-
-# the second data block is trickier to handle as the location of the decryption
-# routine is dependent on the size of the first block of data, but we don't
-# want to include this in the output
-echo "-     link 'gma4_data2.bin'"
-$ld65 \
-       -C link/loader/gma4_data2.cfg \
-       -o build/loader/gma4_data2.bin \
-    --obj build/elite_consts.o \
-    --obj build/loader/gma4_data1.o \
-    --obj build/loader/stage4.o \
-    --obj build/elite_init.o \
-    --obj build/gfx_sprites.o \
-    --obj build/loader/gma4_7C3A.o \
-    --obj build/gfx_hulls.o \
-    --obj build/gfx_hud.o
-
-# verify this is as expected before encrypting 
-# (it's very hard to track down errors post-encryption!)
-echo -n "-   verify 'gma4_data2.bin' "
-if [[
-    # note that this hash was produced by dumping $75E4...$865F,
-    # just after decryption (but before relocation)
-    $(md5sum -b < build/loader/gma4_data2.bin) \
- == "32cba4aa5d3ee363c0bdfb77e95c1fc3 *-"
-]]; then
-    echo "[OK]"
-else
-    echo "[FAIL]"
-fi
-
-# encrypt the second block
-echo "-  encrypt 'gma4_data2.bin'"
-$encrypt 8E \
-    build/loader/gma4_data2.bin \
-    build/loader/gma4_data2.s \
-    --segment "DATA2"
-
-# assemble the second encrypted payload
-echo "- assemble 'gma_data2.s'"
-$ca65 -o build/loader/gma4_data2.o build/loader/gma4_data2.s
-
-# link the final program with both encrypted binary blobs
-echo "-     link 'gma4.prg'"
-$ld65 \
-       -C link/loader/gma4.cfg \
-       -o bin/gma4.prg \
-    --obj build/prgheader.o \
-    --obj build/loader/stage4.o \
-    --obj build/loader/gma4_data1.o \
-    --obj build/loader/gma4_data2.o
-    
 # loader stage 5:
 #-------------------------------------------------------------------------------
 
@@ -347,33 +253,6 @@ $ld65 \
     --obj build/prgheader.o \
     --obj build/loader/stage3.o
 
-#-------------------------------------------------------------------------------
-
-echo
-echo "* write floppy disk image"
-$mkd64 \
-    -o bin/elite_gma86.d64 \
-    -m xtracks -XDS \
-    -m cbmdos -d "ELITE 040486" -i "GMA86" \
-    -f bin/firebird.prg     -t 17 -s 0 -n "FIREBIRD"    -P -S 1 -w \
-    -f bin/gma1.prg         -t 17 -s 1 -n "GMA1"        -P -S 2 -w \
-    -f bin/byebyejulie.prg  -t 17 -s 4 -n "BYEBYEJULIE" -P -S 3 -w \
-    -f bin/gma3.prg         -t 17 -s 5 -n "GMA3"        -P -S 4 -w \
-    -f bin/gma4.prg         -t 17 -s 6 -n "GMA4"        -P -S 5 -w \
-    -f bin/gma5.prg         -t 19 -s 0 -n "GMA5"        -P -S 6 -w \
-    -f bin/gma6.prg         -t 20 -s 8 -n "GMA6"        -P -S 7 -w \
-    1>/dev/null
-echo "- OK"
-
-#-------------------------------------------------------------------------------
-
-echo
-echo "* verifying checksums"
-cd bin
-md5sum --ignore-missing --quiet --check checksums.md5
-if [ $? -eq 0 ]; then echo "- OK"; fi
-cd ..
-
 
 # let's attempt to link the whole program at once;
 # this is bad, and kills the program
@@ -402,6 +281,8 @@ $ld65 \
     --obj build/gfx_hud.o \
     --obj build/gfx_sprites.o
 
+# verify that the packed data is correct:
+# (this will be harder to debug once encrypted)
 echo -n "-   verify 'gma4_data1.bin' "
 if [[
     # note that this hash was produced by dumping $4000...$758F,
@@ -421,6 +302,8 @@ $encrypt 6C \
     build/gma4_data1.bin \
     build/gma4_data1.s \
 
+# verify that the packed data is correct:
+# (this will be harder to debug once encrypted)
 echo -n "-   verify 'gma4_data2.bin' "
 if [[
     # note that this hash was produced by dumping $75E4...$865F,
@@ -439,6 +322,7 @@ $encrypt 8E \
     build/gma4_data2.bin \
     build/gma4_data2.s \
 
+echo "- assemble 'gma4.asm'"
 $ca65 -o build/gma4.o   src/loader/gma4.asm
 
 echo "-     link 'gma4.prg'"
@@ -448,6 +332,33 @@ $ld65 \
        -o bin/gma4.prg \
     --obj build/prgheader.o \
     --obj build/gma4.o \
+
+#-------------------------------------------------------------------------------
+
+echo
+echo "* write floppy disk image"
+$mkd64 \
+    -o bin/elite_gma86.d64 \
+    -m xtracks -XDS \
+    -m cbmdos -d "ELITE 040486" -i "GMA86" \
+    -f bin/firebird.prg     -t 17 -s 0 -n "FIREBIRD"    -P -S 1 -w \
+    -f bin/gma1.prg         -t 17 -s 1 -n "GMA1"        -P -S 2 -w \
+    -f bin/byebyejulie.prg  -t 17 -s 4 -n "BYEBYEJULIE" -P -S 3 -w \
+    -f bin/gma3.prg         -t 17 -s 5 -n "GMA3"        -P -S 4 -w \
+    -f bin/gma4.prg         -t 17 -s 6 -n "GMA4"        -P -S 5 -w \
+    -f bin/gma5.prg         -t 19 -s 0 -n "GMA5"        -P -S 6 -w \
+    -f bin/gma6.prg         -t 20 -s 8 -n "GMA6"        -P -S 7 -w \
+    1>/dev/null
+echo "- OK"
+
+#-------------------------------------------------------------------------------
+
+echo
+echo "* verifying checksums"
+cd bin
+md5sum --ignore-missing --quiet --check checksums.md5
+if [ $? -eq 0 ]; then echo "- OK"; fi
+cd ..
 
 #===============================================================================
 
