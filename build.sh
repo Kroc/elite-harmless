@@ -377,7 +377,9 @@ cd ..
 # this is bad, and kills the program
 
 echo
-echo "* link 'elite-gma86.prg'"
+echo "* build 'elite-gma86.prg'"
+echo "  ======================="
+echo "-     link 'elite-gma86.cfg'"
 $ld65 \
        -C link/loader/gma86.cfg \
        -o build/elite-gma86.prg \
@@ -397,6 +399,47 @@ $ld65 \
     --obj build/loader/gma4_7C3A.o \
     --obj build/gfx_hud.o \
     --obj build/gfx_sprites.o
+
+echo -n "-   verify 'gma4_data1.bin' "
+if [[
+    # note that this hash was produced by dumping $4000...$758F,
+    # just after decryption (but before relocation)
+    $(md5sum -b < build/gma4_data1.bin) \
+ == "049a1004768ed1de4e220923ea865f78 *-"
+]]; then
+    echo "[OK]"
+else
+    echo "[FAIL]"
+fi
+
+# run the binary through the encrypt script, which will spit out an assembler
+# file we can then re-link into the stage 4 loader ("GMA4.PRG")
+echo "-  encrypt 'gma4_data1.bin'"
+$encrypt 6C \
+    build/gma4_data1.bin \
+    build/gma4_data1.s \
+    --segment "DATA1"
+
+echo -n "-   verify 'gma4_data2.bin' "
+if [[
+    # note that this hash was produced by dumping $75E4...$865F,
+    # just after decryption (but before relocation)
+    $(md5sum -b < build/loader/gma4_data2.bin) \
+ == "32cba4aa5d3ee363c0bdfb77e95c1fc3 *-"
+]]; then
+    echo "[OK]"
+else
+    echo "[FAIL]"
+fi
+
+# encrypt the second block
+echo "-  encrypt 'gma4_data2.bin'"
+$encrypt 8E \
+    build/loader/gma4_data2.bin \
+    build/loader/gma4_data2.s \
+    --segment "DATA2"
+
+#===============================================================================
 
 echo
 echo "complete."
