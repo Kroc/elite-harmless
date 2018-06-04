@@ -285,13 +285,19 @@ $ld65 \
     --obj build/prgheader.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
+    --obj build/loader/stage4.o \
     --obj build/loader/stage5.o \
     --obj build/elite_6A00.o \
     --obj build/data_1D00.o \
     --obj build/elite_1D81.o \
     --obj build/data_0700.o \
     --obj build/gfx_font.o \
-    --obj build/data_0E00.o
+    --obj build/data_0E00.o \
+    --obj build/elite_init.o \
+    --obj build/gfx_hud.o \
+    --obj build/gfx_sprites.o \
+    --obj build/loader/gma4_7C3A.o \
+    --obj build/gfx_hulls.o
 
 # the stage 1 loader contains the fast-loader code,
 # but also a menu to opt for slow-loading
@@ -307,7 +313,13 @@ $ld65 \
     --obj build/data_1D00.o \
     --obj build/loader/stage5.o \
     --obj build/elite_1D81.o \
-    --obj build/elite_6A00.o
+    --obj build/elite_6A00.o \
+    --obj build/loader/stage4.o \
+    --obj build/elite_init.o \
+    --obj build/gfx_hud.o \
+    --obj build/loader/gma4_7C3A.o \
+    --obj build/gfx_sprites.o \
+    --obj build/gfx_hulls.o
 
 echo "-     link 'byebyejulie.prg'"
 $ld65 \
@@ -360,7 +372,6 @@ echo "* link 'elite-gma86.prg'"
 $ld65 \
        -C link/loader/gma86.cfg \
        -o build/elite-gma86.prg \
-    --obj build/prgheader.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
     --obj build/loader/stage5.o \
@@ -369,7 +380,13 @@ $ld65 \
     --obj build/elite_1D81.o \
     --obj build/data_0700.o \
     --obj build/gfx_font.o \
-    --obj build/data_0E00.o
+    --obj build/data_0E00.o \
+    --obj build/loader/stage4.o \
+    --obj build/gfx_hulls.o \
+    --obj build/elite_init.o \
+    --obj build/loader/gma4_7C3A.o \
+    --obj build/gfx_hud.o \
+    --obj build/gfx_sprites.o
 
 echo
 echo "complete."

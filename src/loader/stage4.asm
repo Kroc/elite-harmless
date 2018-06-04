@@ -31,16 +31,15 @@
 
 ;===============================================================================
 
-.segment        "JUNK1"
-.export         __JUNK1__:absolute = 1
+.segment        "GMA4_JUNK1"
+.export         __GMA4_JUNK1__:absolute = 1
 
 ;$7590  junk data -- not encrypted!
         .byte   $4c, $85, $01                                           ;$7590
 
 ;===============================================================================
 
-.code
-.export         __CODE__:absolute = 1
+.segment        "CODE_STAGE4"
 
 _7593:                                                                  ;$7593
         .byte   $20, $34, $01
@@ -144,8 +143,8 @@ _75e4:
 ; the linker will exclude these from the binary of the data-to-be-encrypted.
 ; when the code is re-linked with the encrypted blob, these bytes are appended
 
-.segment        "JUNK2"
-.export         __JUNK2__:absolute = 1
+.segment        "GMA4_JUNK2"
+.export         __GMA4_JUNK2__:absolute = 1
 
 ;_865b:
         .byte   $00, $ff, $00, $ff, $00

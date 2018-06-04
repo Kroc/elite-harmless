@@ -3,17 +3,16 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-; this file is part of "gma1.prg"
+; this file is part of "GMA1.PRG"
 
 ;-------------------------------------------------------------------------------
 
 .include        "c64.asm"
 
-; a jump is made to code within the stage 3 loader ("gma4.prg")
-;;.import _7596
-.define _7596   $7596
-; jump into GMA5.PRG
-.import _1d22
+; jump into the stage 4 loader ("GMA4.PRG")
+.import _7596:absolute
+; jump into the stage 5 loader ("GMA5.PRG")
+.import _1d22:absolute
 
 ;===============================================================================
 
@@ -64,6 +63,7 @@ gma1_start:                                                             ;$0345
 .ifdef  OPTION_NOCOPY
         ; start GMA3's code -- note that the current X & Y
         ; (pointer to filename) are re-used in here
+        ; TODO: link this with "loader/stage3.asm"
         jsr $c800
 .else
         jmp :+
