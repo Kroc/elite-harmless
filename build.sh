@@ -13,6 +13,8 @@ ca65="./bin/cc65/bin/ca65 \
     --target c64 \
     --debug-info \
     --include-dir src \
+    --include-dir build \
+    --bin-include-dir build \
     --feature leading_dot_in_identifiers"
 ld65="./bin/cc65/bin/ld65"
 mkd64="./bin/mkd64/bin/mkd64"
@@ -418,7 +420,6 @@ echo "-  encrypt 'gma4_data1.bin'"
 $encrypt 6C \
     build/gma4_data1.bin \
     build/gma4_data1.s \
-    --segment "DATA1"
 
 echo -n "-   verify 'gma4_data2.bin' "
 if [[
@@ -435,9 +436,18 @@ fi
 # encrypt the second block
 echo "-  encrypt 'gma4_data2.bin'"
 $encrypt 8E \
-    build/loader/gma4_data2.bin \
-    build/loader/gma4_data2.s \
-    --segment "DATA2"
+    build/gma4_data2.bin \
+    build/gma4_data2.s \
+
+$ca65 -o build/gma4.o   src/loader/gma4.asm
+
+echo "-     link 'gma4.prg'"
+$ld65 \
+       -C link/c64-prg.cfg \
+       -S \$4000 \
+       -o bin/gma4.prg \
+    --obj build/prgheader.o \
+    --obj build/gma4.o \
 
 #===============================================================================
 
