@@ -44,6 +44,8 @@ echo "* assemble Elite source code:"
 echo "  ==========================="
 echo "- assemble 'prgheader.asm'"
 $ca65 -o build/prgheader.o      src/prgheader.asm
+echo "- assemble 'elite_consts.asm'"
+$ca65 -o build/elite_consts.o   src/elite_consts.asm
 echo "- assemble 'data_0700.asm'"
 $ca65 -o build/data_0700.o      src/data_0700.asm
 echo "- assemble 'gfx_font.asm'"
@@ -74,6 +76,7 @@ $ld65 \
        -C link/elite_dx.cfg \
        -o bin/elite-dx.prg \
     --obj build/prgheader.o \
+    --obj build/elite_consts.o \
     --obj build/data_0700.o \
     --obj build/gfx_font.o \
     --obj build/data_0E00.o \
@@ -156,6 +159,7 @@ echo "-     link 'gma4_data2.bin'"
 $ld65 \
        -C link/loader/gma4_data2.cfg \
        -o build/loader/gma4_data2.bin \
+    --obj build/elite_consts.o \
     --obj build/loader/gma4_data1.o \
     --obj build/loader/stage4.o \
     --obj build/elite_init.o \
@@ -207,6 +211,7 @@ echo "-     link 'gma5_data.bin'"
 $ld65 \
        -C link/loader/gma5_data.cfg \
        -o build/loader/gma5_data.bin \
+    --obj build/elite_consts.o \
     --obj build/gfx_font.o \
     --obj build/loader/stage5.o \
     --obj build/data_1D00.o \
@@ -230,6 +235,7 @@ $ld65 \
        -C link/loader/gma5.cfg \
        -o bin/gma5.prg \
     --obj build/prgheader.o \
+    --obj build/elite_consts.o \
     --obj build/gfx_font.o \
     --obj build/loader/gma5_data.o \
     --obj build/data_1D00.o \
@@ -245,6 +251,7 @@ echo "-     link 'gma6_data.bin'"
 $ld65 \
        -C link/loader/gma6_data.cfg \
        -o build/loader/gma6_data.bin \
+    --obj build/elite_consts.o \
     --obj build/data_0700.o \
     --obj build/gfx_font.o \
     --obj build/data_0E00.o \
@@ -283,6 +290,7 @@ $ld65 \
        -C link/loader/firebird.cfg \
        -o bin/firebird.prg \
     --obj build/prgheader.o \
+    --obj build/elite_consts.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
     --obj build/loader/stage4.o \
@@ -306,6 +314,7 @@ $ld65 \
        -C link/loader/gma1.cfg \
        -o bin/gma1.prg \
     --obj build/prgheader.o \
+    --obj build/elite_consts.o \
     --obj build/loader/stage1.o \
     --obj build/data_0700.o \
     --obj build/gfx_font.o \
@@ -372,6 +381,7 @@ echo "* link 'elite-gma86.prg'"
 $ld65 \
        -C link/loader/gma86.cfg \
        -o build/elite-gma86.prg \
+    --obj build/elite_consts.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
     --obj build/loader/stage5.o \

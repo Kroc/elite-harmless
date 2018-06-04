@@ -79,9 +79,9 @@ vic_memory = 0
 .export ELITE_BITMAP_ADDR :absolute \
         = ELITE_VIC_ADDR + ((vic_memory & %0000100) >> 2) * $2000
 
-.out .sprintf("%s%04x", ": ELITE_BITMAP_ADDR        = $", ELITE_BITMAP_ADDR)
-.out .sprintf("%s%04x", ": ELITE_MAINSCR_COLOR_ADDR = $", ELITE_MAINSCR_COLOR_ADDR)
-.out .sprintf("%s%04x", ": ELITE_MENUSCR_COLOR_ADDR = $", ELITE_MENUSCR_COLOR_ADDR)
+;;.out .sprintf("%s%04x", ": ELITE_BITMAP_ADDR        = $", ELITE_BITMAP_ADDR)
+;;.out .sprintf("%s%04x", ": ELITE_MAINSCR_COLOR_ADDR = $", ELITE_MAINSCR_COLOR_ADDR)
+;;.out .sprintf("%s%04x", ": ELITE_MENUSCR_COLOR_ADDR = $", ELITE_MENUSCR_COLOR_ADDR)
 
 .export ELITE_BITMAP_D018 :direct \
         = ((elite_menuscr_vic & 15) << 4) | (((vic_memory & 7) << 1) & %00001110)

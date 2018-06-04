@@ -4,7 +4,6 @@
 ;===============================================================================
 
 .include        "c64.asm"
-.include        "elite_consts.asm"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -6489,6 +6488,7 @@ _9800:
 ; where that row starts -- note that Elite uses a 32-char (256 px) wide
 ; 'screen' so this equates the the 4th character in on each row
 
+.import ELITE_MENUSCR_COLOR_ADDR
 .define menuscr_pos  \
         ELITE_MENUSCR_COLOR_ADDR + .scrpos(  0, 3 ), \
         ELITE_MENUSCR_COLOR_ADDR + .scrpos(  1, 3 ), \
@@ -10483,6 +10483,7 @@ _b1a1:
         
         adc ZP_CHROUT_ROW
         ; re-base to the start of the bitmap screen
+.import ELITE_BITMAP_ADDR
         adc #> ELITE_BITMAP_ADDR
         sta ZP_CHROUT_DRAWADDR_HI
 

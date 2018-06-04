@@ -6,7 +6,6 @@
 ; "elite_init.asm" : contains intialisation code and graphics data
 
 .include        "c64.asm"
-.include        "elite_consts.asm"
 
 ;-------------------------------------------------------------------------------
 
@@ -86,6 +85,7 @@ _75e4:                                                                  ;$75E4
 
         ; set the VIC-II to get screen / sprite
         ; data from the zone $4000-$7FFF
+.import ELITE_VIC_DD00:direct
 
         lda $dd00               ; read the serial bus / VIC-II bank state
         and # %11111100         ; keep current value except bits 0-1 (VIC bank)
@@ -110,6 +110,8 @@ _75e4:                                                                  ;$75E4
         ;             bitmap screen @ $4000..$6000
         ; %xxxxxxx1 = N/A! (but included in the original source)
         ;
+.import ELITE_TXTSCR_D018:direct
+
         lda # ELITE_TXTSCR_D018 | %00000001
         sta VIC_MEMORY          ;=$d018, VIC-II memory control register
 
@@ -219,6 +221,8 @@ _75e4:                                                                  ;$75E4
         ;-----------------------------------------------------------------------
         ; erase $4000-$6000
 
+.import ELITE_BITMAP_ADDR
+
         lda # $00
         sta ZP_COPY_TO+0
         tay 
@@ -264,6 +268,8 @@ _76e8:  stx ZP_COPY_TO+1
         ; (high-resolution section only, no HUD)
         ;-----------------------------------------------------------------------
 
+.import ELITE_MENUSCR_COLOR_ADDR
+
         lda #< ELITE_MENUSCR_COLOR_ADDR
         sta ZP_COPY_TO+0
         lda #> ELITE_MENUSCR_COLOR_ADDR
@@ -308,6 +314,8 @@ _7711:  lda # .color_nybbles( YELLOW, BLACK )
         ; set the screen-colours for the high-resolution
         ; bitmap portion of the main flight-screen
         ;-----------------------------------------------------------------------
+
+.import ELITE_MAINSCR_COLOR_ADDR
 
         lda #< ELITE_MAINSCR_COLOR_ADDR
         sta ZP_COPY_TO+0
