@@ -9,7 +9,7 @@
 ; the linker will exclude these from the binary of the data-to-be-encrypted.
 ; when the code is re-linked with the encrypted blob, these bytes are appended
 
-.segment        "JUNK_GMA6"
+.segment        "GMA6_JUNK"
 
         .byte   $ff, $00, $ff, $00, $ff, $00, $ff, $00                  ;$CCD8
         .byte   $ff                                                     ;$CCE0

@@ -10417,11 +10417,11 @@ _b1a1:
         ; page 3 = codes 96-127 : "£", "a" to "z", "{", "|", "}", "~"
 
         ; get the location of the font data in RAM
-.import __DATA_FONT_LOAD__:absolute
+.import __DATA_FONT_RUN__:absolute
 
         ; default to 0th page since character codes begin from 0,
         ; but in practice we'll only see codes 32-128
-        ldx # (>__DATA_FONT_LOAD__) - 1
+        ldx # (>__DATA_FONT_RUN__) - 1
         
         ; if you shift any number twice to the left
         ; then numbers 64 or above will carry (> 255) 
@@ -10431,7 +10431,7 @@ _b1a1:
                                 ; char is in the 0th (unlikely) or 1st page
 
         ; -- char is in the 2rd or 3rd page
-        ldx # (>__DATA_FONT_LOAD__) + 1
+        ldx # (>__DATA_FONT_RUN__) + 1
 
         ; shift left again -- codes 32 or over will carry,
         ; so we can determine which of the two possible pages it's in

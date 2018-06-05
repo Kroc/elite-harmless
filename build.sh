@@ -110,43 +110,6 @@ $ca65 -o build/loader/stage5.o  src/loader/stage5.asm
 echo "- assemble 'loader/stage6.asm'"
 $ca65 -o build/loader/stage6.o  src/loader/stage6.asm
 
-# loader stage 6:
-#-------------------------------------------------------------------------------
-
-# convert the source to a binary as-is
-echo "-     link 'gma6_data.bin'"
-$ld65 \
-       -C link/loader/gma6_data.cfg \
-       -o build/loader/gma6_data.bin \
-    --obj build/elite_consts.o \
-    --obj build/data_0700.o \
-    --obj build/gfx_font.o \
-    --obj build/data_0E00.o \
-    --obj build/data_1D00.o \
-    --obj build/loader/stage5.o \
-    --obj build/elite_1D81.o \
-    --obj build/elite_6A00.o
-
-# run the binary for the encrypt script, which will spit out an assembler file
-echo "-  encrypt 'gma6_data.bin'"
-$encrypt 49 build/loader/gma6_data.bin build/loader/gma6_data.s
-
-# assemble the encrypted payload
-echo "- assemble 'gma6_data.s'"
-$ca65 -o build/loader/gma6_data.o  build/loader/gma6_data.s
-
-# link the final .PRG file
-echo "-     link 'gma6.prg'"
-$ld65 \
-       -C link/loader/gma6.cfg \
-       -o bin/gma6.prg \
-    --obj build/prgheader.o \
-    --obj build/data_0700.o \
-    --obj build/gfx_font.o \
-    --obj build/data_0E00.o \
-    --obj build/loader/gma6_data.o \
-    --obj build/loader/stage6.o
-
 #-------------------------------------------------------------------------------
 
 # the stage 0 loader is what gets loaded by `LOAD"*",8,1`, its only purpose is
@@ -227,14 +190,15 @@ $ld65 \
     --obj build/elite_consts.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
+    --obj build/loader/stage4.o \
     --obj build/loader/stage5.o \
+    --obj build/loader/stage6.o \
     --obj build/elite_6A00.o \
     --obj build/data_1D00.o \
     --obj build/elite_1D81.o \
     --obj build/data_0700.o \
     --obj build/gfx_font.o \
     --obj build/data_0E00.o \
-    --obj build/loader/stage4.o \
     --obj build/gfx_hulls.o \
     --obj build/elite_init.o \
     --obj build/loader/gma4_7C3A.o \
@@ -314,6 +278,25 @@ $ld65 \
        -o bin/gma5.prg \
     --obj build/prgheader.o \
     --obj build/loader/gma5.o
+
+# encrypt GMA6.PRG:
+#-------------------------------------------------------------------------------
+
+echo "-  encrypt 'gma6_data.bin'"
+$encrypt 49 \
+    build/loader/gma6_data.bin \
+    build/loader/gma6_data.s
+
+echo "- assemble 'gma6.asm'"
+$ca65 -o build/loader/gma6.o    src/loader/gma6.asm
+
+echo "-     link 'gma6.prg'"
+$ld65 \
+       -C link/c64-prg.cfg \
+       -S \$6A00 \
+       -o bin/gma6.prg \
+    --obj build/prgheader.o \
+    --obj build/loader/gma6.o
 
 #-------------------------------------------------------------------------------
 
