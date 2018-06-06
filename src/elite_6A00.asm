@@ -3846,12 +3846,13 @@ _826f:
         rts 
 
 
-_8273:  ; disable sprites:                                              ;$8273
+disable_sprites:                                                        ;$8273
         ;=======================================================================
+        ; disable all sprites: (for example, when switching to menu screen)
 
         ; ensure the I/O is enabled so we can talk to the VIC-II:
 
-        lda # MEM_IO_ONLY       ; I/O on, no KERNAL present
+        lda # MEM_IO_ONLY
         jsr set_memory_layout
 
         ; disable all sprites
@@ -3859,7 +3860,7 @@ _8273:  ; disable sprites:                                              ;$8273
         sta VIC_SPRITE_ENABLE
 
         ; switch back to 64K RAM layout
-        lda # MEM_64K           ; full 64K RAM. BASIC, I/O & KERNAL OFF!
+        lda # MEM_64K
 
 set_memory_layout:                                                      ;$827f
         ;=======================================================================
@@ -4766,7 +4767,7 @@ _8835:
         jsr _8ed5
         sta $96
         jsr _1ec1
-        jsr _8273
+        jsr disable_sprites
 _8851:
         jsr _1ec1
         dec $0487
@@ -10716,7 +10717,7 @@ _b267:
         stx $33
         jsr _b359
         jsr _b341
-        jsr _8273
+        jsr disable_sprites
         ldy # $1f
         lda # $70
 _b289:
@@ -10822,9 +10823,11 @@ _b301:
         jsr _2ff3
 _b335:
         jsr _b359
-        jsr _8273
+        jsr disable_sprites
+
         lda # $ff
         sta _1d04
+        
         rts 
 
 ;===============================================================================
