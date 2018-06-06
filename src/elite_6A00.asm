@@ -8,6 +8,11 @@
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
 
+; from "data_0700.asm"
+.import _0700:absolute
+.import _0ac0:absolute
+
+; from "data_1D00.asm"
 .import _1d01:absolute
 .import _1d02:absolute
 .import _1d03:absolute
@@ -28,6 +33,7 @@
 .import _1d14:absolute
 .import _1d21:absolute
 
+; from "elite_1D81.asm"
 .import _1ec1:absolute
 .import _202f:absolute
 .import _2367:absolute
@@ -2191,9 +2197,9 @@ _7811:
         sbc # $a0
 _7813:
         tax 
-        lda #< $0700
+        lda #< _0700
         sta $5b
-        lda #> $0700
+        lda #> _0700
         sta $5c
         ldy # $00
         txa 
@@ -3202,7 +3208,7 @@ _7e5f:
         lda $ab
         and # $1f
         tax 
-        lda $0ac0, x
+        lda _0ac0, x
         sta $9a
         lda $b4
         jsr _39ea
@@ -3220,7 +3226,7 @@ _7e5f:
         adc # $10
         and # $1f
         tax 
-        lda $0ac0, x
+        lda _0ac0, x
         sta $9a
         lda $b3
         jsr _39ea

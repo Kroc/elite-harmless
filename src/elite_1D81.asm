@@ -5,16 +5,21 @@
 
 .include        "c64.asm"
 
+; from "data_0700.asm"
 .import _0ac0:absolute
 .import _0ae0:absolute
 
+; from "data_0E00.asm"
+.import _0e00:absolute
 .import _1a27:absolute
 .import _1a41:absolute
 
+; from "data_1D00.asm"
 .import _1d06:absolute
 .import _1d07:absolute
 .import _1d09:absolute
 
+; from "elite_6A00.asm"
 .import _6a00:absolute
 .import _6a25:absolute
 .import _6a28:absolute
@@ -117,6 +122,7 @@
 .import _b179:absolute
 .import _b3d4:absolute
 .import _b410:absolute
+
 .import print_char:absolute
 
 ;-------------------------------------------------------------------------------
@@ -480,7 +486,7 @@ _2014:
         beq _201a+1
         ldy # $0a
 _201a:
-        bit $0ba0
+        bit $0ba0               ; `ldy # $0b`?
 _201d:
         jsr _a858
         jsr _3cdb
@@ -997,11 +1003,9 @@ _2390:                                                                  ;$2390
         lda $5c
         pha 
 
-.import __DATA_0E00_RUN__
-
-        lda #< __DATA_0E00_RUN__
+        lda #< _0e00
         sta $5b
-        lda #> __DATA_0E00_RUN__
+        lda #> _0e00
 _23a0:                                                                  ;$23a0
         sta $5c
         ldy # $00
@@ -2769,7 +2773,7 @@ _2fe4:
         lda # $0c
 _2fed:
 .export _2fee := _2fed+1
-        bit $07a9
+        bit $07a9               ; = `lda # $07`
         jmp print_char
 
 ;===============================================================================
