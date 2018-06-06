@@ -17,16 +17,22 @@
 ; BASIC vectors. a BASIC bootstrap picks up this scenario and copies the
 ; program to the intended load address before executing it
 
+; populate the .PRG header using the address given
+; by the linker config (see "link/elite-gma86.cfg")
+.segment        "HEAD_STAGE0"
+.import         __FIREBIRD_PRG_START__
+        .addr   __FIREBIRD_PRG_START__+2
+
 ; the BASIC bootstrap needs to be stored at the beginning of the program,
 ; canonically $02A7, but needs to be addressed as running from $0801.
-; the linker configuration handles this ("link/loader/firebird.cfg")
+; the linker configuration handles this ("link/elite-gma86.cfg")
 
 .segment        "BASIC_STAGE0"
 
         ; the C64 BASIC binary format is described here:
         ; <https://www.c64-wiki.com/wiki/BASIC_token> 
 
-        .word   @end            ; pointer to next line
+        .addr   @end            ; pointer to next line
         .word   1               ; BASIC line-number
         
         .byte   $9e             ; "SYS"
@@ -48,12 +54,12 @@
         ; routine to copy the program to its intended location
         ;-----------------------------------------------------------------------
 
-        ; NOTE: the linker configuration ("link/loader/firebird.cfg")
+        ; NOTE: the linker configuration ("link/elite-gma86.cfg")
         ;       defines the segments, their addresses, and exports those
         ;       values for use here:
 
-.import __STAGE0_START__        ; get the load address of the program
-.import __STAGE0_LAST__         ; and the last address used (i.e. size)
+.import __FIREBIRD_START__      ; get the load address of the program
+.import __FIREBIRD_LAST__       ; and the last address used (i.e. size)
 .import __BASIC_STAGE0_RUN__    ; and, as seen by BASIC, i.e. $0801
 
         ; get the size of the segments to be able to
@@ -62,7 +68,7 @@
 @copy:  ; the BASIC bootstrap `SYS` calls here:                         ;$080D
 
         ; calculate the length of FIREBIRD.PRG (sans PRG header)
-        size = __STAGE0_LAST__ - __STAGE0_START__
+        size = __FIREBIRD_LAST__ - __FIREBIRD_START__
 
         ; note that these are 16-bit data types and the `ldx` is limited to
         ; 8-bit values so we have to coerce the result to 8-bits using the
@@ -74,7 +80,7 @@
         .assert (size <= 254), error, "Program exceeds one disk sector!"
         
 :       lda __BASIC_STAGE0_RUN__, x     ; copy from $0801..
-        sta __STAGE0_START__, x         ; to $02A7..
+        sta __FIREBIRD_START__, x       ; to $02A7..
         dex 
         bpl :-
 
@@ -124,7 +130,7 @@ start:                                                                  ;$02c1
         .endrepeat
 
         ; get the address where GMA1.PRG loads from the linker
-        ; (see "link/loader/firebird.cfg")
+        ; (see "link/elite-gma86.cfg")
 .import __CODE_STAGE1_LOAD__
 
         jmp __CODE_STAGE1_LOAD__

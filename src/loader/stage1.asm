@@ -5,14 +5,20 @@
 
 ; this file is part of "GMA1.PRG"
 
-;-------------------------------------------------------------------------------
-
 .include        "c64.asm"
 
 ; jump into the stage 4 loader ("GMA4.PRG")
 .import _7596:absolute
 ; jump into the stage 5 loader ("GMA5.PRG")
 .import _1d22:absolute
+
+;===============================================================================
+
+; populate the .PRG header using the address given
+; by the linker config (see "link/elite-gma86.cfg")
+.segment        "HEAD_STAGE1"
+.import         __GMA1_PRG_START__
+        .addr   __GMA1_PRG_START__+2
 
 ;===============================================================================
 

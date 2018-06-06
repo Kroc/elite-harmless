@@ -31,6 +31,14 @@
 
 ;===============================================================================
 
+; populate the .PRG header using the address given
+; by the linker config (see "link/elite-gma86.cfg")
+.segment        "HEAD_STAGE4"
+.import         __GMA4_PRG_START__
+        .addr   __GMA4_PRG_START__+2
+
+;===============================================================================
+
 .segment        "GMA4_JUNK1"
 .export         __GMA4_JUNK1__:absolute = 1
 

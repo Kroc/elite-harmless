@@ -8,15 +8,19 @@
 
 .include        "c64.asm"
 
-.zeropage
+; populate the .PRG header using the address given
+; by the linker config (see "link/elite-gma86.cfg")
+.segment        "HEAD_STAGE3"
+.import         __GMA3_PRG_START__
+        .addr   __GMA3_PRG_START__+2
 
 ; 4 unused (by the Kernal) bytes exist at $FB-$FE
 ZP_C1541_MEM            := $fb
 ZP_C1541_PROGRAM        := $fd
 
-.code                                                                   ;$C800
+.segment        "CODE_STAGE3"
         ; save a pointer for a memory address inside the drive
-        lda #< $0300
+        lda #< $0300                                                    ;$C800
         sta ZP_C1541_MEM+0
         lda #> $0300
         sta ZP_C1541_MEM+1
