@@ -57,33 +57,33 @@ _7596:                                                                  ;$7596
 .export _7596
         cld                     ; clear decimal mode (why??)
     
-.import __DATA2_LOAD__
-.import __DATA2_SIZE__
+.import __GMA4_DATA2_START__
+.import __GMA4_DATA2_LAST__
 
         ; first block -- set where to stop
         ; (at the end of this rountine)
-        lda #< (__DATA2_LOAD__ - 1)
+        lda #< (__GMA4_DATA2_START__ - 1)
         sta _7593+0
-        lda #> (__DATA2_LOAD__)
+        lda #> (__GMA4_DATA2_START__ - 1)
         sta _7593+1
 
-        lda #> (__DATA2_LOAD__ + __DATA2_SIZE__ - 1)
-        ldy #< (__DATA2_LOAD__ + __DATA2_SIZE__ - 1)
+        lda #> (__GMA4_DATA2_LAST__ - 1)
+        ldy #< (__GMA4_DATA2_LAST__ - 1)
         ldx # $8e
         jsr decrypt_block
 
-.import __DATA1_LOAD__
-.import __DATA1_SIZE__
+.import __GMA4_DATA1_START__
+.import __GMA4_DATA1_LAST__
 
         ; second block -- set where to stop
         ; (at the loading address = $4000)
-        lda #< (__DATA1_LOAD__ - 1)
+        lda #< (__GMA4_DATA1_START__ - 1)
         sta _7593+0
-        lda #> (__DATA1_LOAD__ - 1)
+        lda #> (__GMA4_DATA1_START__ - 1)
         sta _7593+1
 
-        lda #> (__DATA1_LOAD__ + __DATA1_SIZE__ - 1)
-        ldy #< (__DATA1_LOAD__ + __DATA1_SIZE__ - 1)
+        lda #> (__GMA4_DATA1_LAST__ - 1)
+        ldy #< (__GMA4_DATA1_LAST__ - 1)
         ldx # $6c
         jsr decrypt_block
 

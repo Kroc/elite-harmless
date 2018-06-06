@@ -6486,7 +6486,7 @@ _9800:
 ; referenced in the `chrout` routine, these are a pair of hi/lo-byte lookup
 ; tables that index a row number (0-24) to the place in the menu screen memory
 ; where that row starts -- note that Elite uses a 32-char (256 px) wide
-; 'screen' so this equates the the 4th character in on each row
+; 'screen' so this equates the the 4th character in each row
 
 .import ELITE_MENUSCR_COLOR_ADDR
 .define menuscr_pos  \
