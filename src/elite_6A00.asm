@@ -2473,8 +2473,8 @@ _79a7:
 ;===============================================================================
 
 _79a9:
-        lda # MEM_IO_ONLY       ;=5
-        jsr _827f
+        lda # MEM_IO_ONLY
+        jsr set_memory_layout
 
         lda $10
         cmp # $07
@@ -2588,8 +2588,8 @@ _7a78:
         pla 
         sta $03
         
-        lda # MEM_64K           ; =4
-        jsr _827f
+        lda # MEM_64K
+        jsr set_memory_layout
 
         lda $f906
         sta $05
@@ -3851,34 +3851,37 @@ _8273:  ; disable sprites:                                              ;$8273
 
         ; ensure the I/O is enabled so we can talk to the VIC-II:
 
-        lda # MEM_IO_ONLY       ; =5; I/O on, no KERNAL present
-        jsr _827f
+        lda # MEM_IO_ONLY       ; I/O on, no KERNAL present
+        jsr set_memory_layout
 
         ; disable all sprites
         lda # %00000000
         sta VIC_SPRITE_ENABLE
 
         ; switch back to 64K RAM layout
-        lda # MEM_64K           ; =4; full 64K RAM. BASIC, I/O & KERNAL OFF!
+        lda # MEM_64K           ; full 64K RAM. BASIC, I/O & KERNAL OFF!
 
-_827f:                                                                  ;$827f
-.export _827f
+set_memory_layout:                                                      ;$827f
         ;=======================================================================
-        sei                     ; disable interrupts
-        sta _828e               ; remember the requested memory layout state
-        
-        ; update the processor port:
+.export set_memory_layout
 
+        sei                     ; disable interrupts
+        
+        ; remember the requested memory layout state
+        sta current_memory_layout
+        
+        ; set the given memory layout:
+        ; (update the processor port)
         lda CPU_CONTROL
         and # %11111000         ; clear lower 3-bits whilst keeping upper bits
-        ora _828e               ; set the given memory layout
+        ora current_memory_layout
         sta CPU_CONTROL
         
         cli                     ; enable interrupts
         rts 
 
-_828e:                                                                  ;$828e
-        .byte   MEM_64K         ; =4; full 64K RAM. BASIC, I/O & KERNAL OFF!
+current_memory_layout:                                                  ;$828e
+        .byte   MEM_64K
 
 ;===============================================================================
 
@@ -5271,8 +5274,8 @@ _8b37:
         lda # $28
         sta $d012               ;raster position
 
-        lda # MEM_64K           ;=4
-        jsr _827f
+        lda # MEM_64K
+        jsr set_memory_layout
         
         cli 
         jsr _784f
@@ -5296,9 +5299,11 @@ _8bbf:
 
 _8bc0:
         jsr _784f
-        lda # MEM_IO_KERNAL     ;=6
+        
+        lda # MEM_IO_KERNAL
         sei 
-        jsr _827f
+        jsr set_memory_layout
+        
         lda # $00
         sta VIC_INTERRUPT_CONTROL
         cli 
@@ -5356,8 +5361,10 @@ _8c0d:
         sta $d011               ;vic control register 1
         lda # $28
         sta $d012               ;raster position
-        lda # MEM_64K           ;=4
-        jsr _827f
+        
+        lda # MEM_64K
+        jsr set_memory_layout
+        
         cli 
         jsr _784f
         plp 
@@ -5560,8 +5567,10 @@ _8d53:
 .export _8d53
         tya 
         pha 
-        lda # MEM_IO_ONLY       ;=5
-        jsr _827f
+        
+        lda # MEM_IO_ONLY
+        jsr set_memory_layout
+
         lda VIC_SPRITE_ENABLE
         and # $fd
         sta VIC_SPRITE_ENABLE
@@ -5666,8 +5675,9 @@ _8dfd:
         sta _8d38
         sta _8d23
 _8e1e:
-        lda # MEM_64K           ;=4
-        jsr _827f
+        lda # MEM_64K
+        jsr set_memory_layout
+
         pla 
         tay 
         lda $7d
@@ -5738,8 +5748,9 @@ _8e92:
 
 ; ununsed / unreferenced?
 ; $8e99:
-        lda # MEM_IO_ONLY       ;=5
-        jsr _827f
+        lda # MEM_IO_ONLY
+        jsr set_memory_layout
+        
         sei 
         stx $dc00               ;cia1: data port register a
         ldx $dc01               ;cia1: data port register b
@@ -5748,8 +5759,9 @@ _8e92:
         beq _8eab
         ldx # $ff
 _8eab:
-        lda # MEM_64K           ;=4
-        jsr _827f
+        lda # MEM_64K
+        jsr set_memory_layout
+
         txa 
         rts 
 
@@ -6255,8 +6267,9 @@ _920d:
         bit _1d0d
         bmi _91fd
 _9222:
-        lda # MEM_IO_ONLY       ;=5
-        jsr _827f
+        lda # MEM_IO_ONLY
+        jsr set_memory_layout
+
         jsr _b664
         lda # $ff
         sta _1d03
@@ -6279,7 +6292,7 @@ _9245:
         jsr _a817
 
         lda # MEM_IO_ONLY
-        jsr _827f
+        jsr set_memory_layout
         
         lda # $00
         sta _1d03
@@ -6293,8 +6306,8 @@ _925a:
         sta $d418               ;select filter mode and volume
         cli 
 _9266:
-        lda # MEM_64K           ;=4
-        jmp _827f
+        lda # MEM_64K
+        jmp set_memory_layout
 
 ;===============================================================================
 
@@ -8713,8 +8726,9 @@ _a6ba:
         jsr _2a12
         jsr _7b1a
 _a6d4:
-        lda # MEM_IO_ONLY  ;=5
-        jsr _827f
+        lda # MEM_IO_ONLY
+        jsr set_memory_layout
+
         ldy $0486
         lda $04a9, y
         beq _a700
@@ -8748,8 +8762,9 @@ _a700:
         lda _a727, x
         ora $bb
         sta VIC_SPRITE_ENABLE
-        lda # MEM_64K           ;=4
-        jmp _827f
+
+        lda # MEM_64K
+        jmp set_memory_layout
 
 ;===============================================================================
 
@@ -9056,10 +9071,12 @@ _a8e8:
 _a8ed:
         pla 
         tax 
+
         lda CPU_CONTROL         ; [$01]
         and # $f8
-        ora _828e
+        ora current_memory_layout
         sta CPU_CONTROL         ; [$01]
+        
         pla 
         rti 
 
@@ -9214,7 +9231,7 @@ _aa04:
 
         lda CPU_CONTROL
         and # $f8
-        ora _828e
+        ora current_memory_layout
         sta CPU_CONTROL
 
         pla 
@@ -9320,7 +9337,7 @@ _aaa2:
         ; change the C64's memory layout, turn off the BASIC & KERNAL ROMs
         ; leaving just the I/O registers ($D000...)
         lda # MEM_IO_ONLY
-        jsr _827f
+        jsr set_memory_layout
 
         sei 
 
@@ -9357,7 +9374,7 @@ _aaa2:
         ; record this as the game's
         ; current memory-layout state
         lda # MEM_64K
-        sta _828e
+        sta current_memory_layout
         
         ; set up the routines for the interrupts:
         ; NOTE: with the KERNAL ROM off, the hardware vectors at $FFFA...$FFFF

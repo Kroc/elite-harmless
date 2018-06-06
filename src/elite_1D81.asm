@@ -47,7 +47,7 @@
 .import _80ff:absolute
 .import _811e:absolute
 .import _81ee:absolute
-.import _827f:absolute
+.import set_memory_layout:absolute
 .import _829a:absolute
 .import _83df:absolute
 .import _8447:absolute
@@ -242,8 +242,8 @@ _1e41:
         asl 
         tay 
 
-        lda # MEM_IO_ONLY       ;=5
-        jsr _827f
+        lda # MEM_IO_ONLY
+        jsr set_memory_layout
         
         jsr _84af
         cmp # $eb
@@ -299,7 +299,7 @@ _1eb3:
         cli 
 
         lda # MEM_64K
-        jsr _827f
+        jsr set_memory_layout
         
         jmp _1ece
 
@@ -885,15 +885,15 @@ _22c2:
         cmp # $f0
         bcc _2303
 
-        lda # MEM_IO_ONLY  ;=5
-        jsr _827f
+        lda # MEM_IO_ONLY
+        jsr set_memory_layout
         
         lda VIC_SPRITE_ENABLE
         and # $03
         sta VIC_SPRITE_ENABLE
         
-        lda # MEM_64K      ;=4
-        jsr _827f
+        lda # MEM_64K
+        jsr set_memory_layout
         
         lsr $04ca
         ror $04c9
