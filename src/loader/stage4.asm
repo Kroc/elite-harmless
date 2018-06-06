@@ -118,10 +118,10 @@ _7596:                                                                  ;$7596
 decrypt_byte:                                                           ;$75c8
         ;-----------------------------------------------------------------------
         ; look up the data-table given by pointer in $18/$19 and add Y
-        lda (TABLELO), y
+        lda [TABLELO], y
         sec                 ; set carry flag (?)
         sbc PARAM_X         ; subtract the X parameter value
-        sta (TABLELO), y    ; write this back to the table
+        sta [TABLELO], y    ; write this back to the table
         sta PARAM_X         ; use this as the next deduction
 
         tya                 ; examine the index used

@@ -67,7 +67,7 @@ ZP_C1541_PROGRAM        := $fd
 @upload_bytes:
         ; read a byte from the program (via pointer)
         ; and send to the drive
-        lda (ZP_C1541_PROGRAM+0), y
+        lda [ZP_C1541_PROGRAM+0], y
         jsr KERNAL_CHROUT
 
         ; move to the next byte

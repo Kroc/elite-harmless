@@ -13,6 +13,7 @@
 .segment        "HULL_TABLE"
 
 _d000:
+.export _d000
         ; pointers?
         .addr   _d0a5           ; missile                               ;$D000
         .addr   _d1a3           ; space station (coreolis)
@@ -155,7 +156,7 @@ _d000:
 
         .endproc
 
-        vertex_bytes = .sizeof ( verticies )
+        vertex_bytes = .sizeof( verticies )
         edges_offset = edges - header
         edge_count   = .sizeof( edges ) / 4
         faces_offset = faces - header

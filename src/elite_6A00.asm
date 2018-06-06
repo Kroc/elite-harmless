@@ -2205,7 +2205,7 @@ _7813:
         txa 
         beq _7834
 _7821:
-        lda ($5b), y
+        lda [$5b], y
         beq _782c
         iny 
         bne _7821
@@ -2223,7 +2223,7 @@ _7834:
         pha 
         lda $5c
         pha 
-        lda ($5b), y
+        lda [$5b], y
         eor # $23
         jsr _777e
         pla 
@@ -2234,7 +2234,7 @@ _7834:
         bne _784a
         inc $5c
 _784a:
-        lda ($5b), y
+        lda [$5b], y
         bne _7834
 _784e:
         rts 
@@ -2285,11 +2285,11 @@ _787d:
 _7885:
         sta $9a
         ldy # $01
-        lda ($2a), y
+        lda [$2a], y
         sta $050d
         adc # $04
         bcs _785f
-        sta ($2a), y
+        sta [$2a], y
         jsr _3b37
         lda $2e
         cmp # $1c
@@ -2305,18 +2305,18 @@ _78a1:
         rol 
 _78aa:
         dey 
-        sta ($2a), y
+        sta [$2a], y
         lda $28
         and # $bf
         sta $28
         and # $08
         beq _784e
         ldy # $02
-        lda ($2a), y
+        lda [$2a], y
         tay 
 _78bc:
         lda $00f9, y               ;16-bit reference?
-        sta ($2a), y
+        sta [$2a], y
         dey 
         cpy # $06
         bne _78bc
@@ -2330,10 +2330,10 @@ _78bc:
 
 _78d6:
         ldy # $00
-        lda ($2a), y
+        lda [$2a], y
         sta $9a
         iny 
-        lda ($2a), y
+        lda [$2a], y
         bpl _78e3
         eor # $ff
 _78e3:
@@ -2344,7 +2344,7 @@ _78e3:
         ora # $01
         sta $99
         iny 
-        lda ($2a), y
+        lda [$2a], y
         sta $a8
         lda $03
         pha 
@@ -2353,7 +2353,7 @@ _78f5:
         ldx # $03
 _78f7:
         iny 
-        lda ($2a), y
+        lda [$2a], y
         sta $35, x
         dex 
         bpl _78f7
@@ -2361,7 +2361,7 @@ _78f7:
         ldy # $02
 _7903:
         iny 
-        lda ($2a), y
+        lda [$2a], y
         eor $aa
         sta $ffff, y            ;irq
         cpy # $06
@@ -2491,10 +2491,10 @@ _79c0:
         stx $050e
         sty $050f
         ldy # $00
-        lda ($2a), y
+        lda [$2a], y
         sta $9a
         iny 
-        lda ($2a), y
+        lda [$2a], y
         bpl _79d9
         eor # $ff
 _79d9:
@@ -2505,7 +2505,7 @@ _79d9:
         ora # $01
         sta $99
         iny 
-        lda ($2a), y
+        lda [$2a], y
         sta $a8
         lda $03
         pha 
@@ -2514,7 +2514,7 @@ _79eb:
         ldx # $03
 _79ed:
         iny 
-        lda ($2a), y
+        lda [$2a], y
         sta $35, x
         dex 
         bpl _79ed
@@ -2552,7 +2552,7 @@ _7a36:
         ldy # $02
 _7a38:
         iny 
-        lda ($2a), y
+        lda [$2a], y
         eor $aa
         sta $ffff, y            ;irq
         cpy # $06
@@ -2681,7 +2681,7 @@ _7b1c:
         jsr _3e87
         ldy # $1f
 _7b2a:
-        lda ($59), y
+        lda [$59], y
         sta $0009, y
         dey 
         bpl _7b2a
@@ -2689,9 +2689,9 @@ _7b2a:
         jsr _b410
         ldx $9d
         ldy # $1f
-        lda ($59), y
+        lda [$59], y
         and # $a7
-        sta ($59), y
+        sta [$59], y
 _7b41:
         inx 
         bne _7b1c
@@ -2818,7 +2818,7 @@ _7bd2:
         sta $bb
         ldx # $00
         ldy # $08
-        lda ($59), y
+        lda [$59], y
         bmi _7bee
         lda $04e7
         sbc $bb
@@ -2932,7 +2932,7 @@ _7c7b:
         cpy # $04
         beq _7cc4
         ldy # $05
-        lda ($57), y
+        lda [$57], y
         sta $06
         lda $04f2
         sec 
@@ -2957,10 +2957,10 @@ _7cba:
         sta $04f3
 _7cc4:
         ldy # $0e
-        lda ($57), y
+        lda [$57], y
         sta $2c
         ldy # $13
-        lda ($57), y
+        lda [$57], y
         and # $07
         sta $28
         lda $bb
@@ -2987,7 +2987,7 @@ _7cec:
         ldy # $24
 _7cf9:
         lda $0009, y            ;16-bit reference?
-        sta ($59), y
+        sta [$59], y
         dey 
         bpl _7cf9
         sec 
@@ -3929,7 +3929,7 @@ _82be:
         lda _28a5, y
         sta $08
         ldy # $20
-        lda ($07), y
+        lda [$07], y
         bpl _82be
         and # $7f
         lsr 
@@ -3939,11 +3939,11 @@ _82be:
         sbc # $01
         asl 
         ora # $80
-        sta ($07), y
+        sta [$07], y
         bne _82be
 _82ed:
         lda # $00
-        sta ($07), y
+        sta [$07], y
         beq _82be
 _82f3:
         stx $ad
@@ -3978,13 +3978,13 @@ _832c:
         dec $045d, x
         ldx $ad
         ldy # $05
-        lda ($57), y
+        lda [$57], y
         ldy # $21
         clc 
-        adc ($59), y
+        adc [$59], y
         sta $2e
         iny 
-        lda ($59), y
+        lda [$59], y
         adc # $00
         sta $2f
 _8343:
@@ -4002,7 +4002,7 @@ _834f:
         lda $cfff, y            ;?
         sta $08
         ldy # $05
-        lda ($07), y
+        lda [$07], y
         sta $bb
         lda $2e
         sec 
@@ -4019,25 +4019,25 @@ _834f:
         lda _28a5, y
         sta $08
         ldy # $24
-        lda ($07), y
-        sta ($59), y
+        lda [$07], y
+        sta [$59], y
         dey 
-        lda ($07), y
-        sta ($59), y
+        lda [$07], y
+        sta [$59], y
         dey 
-        lda ($07), y
+        lda [$07], y
         sta $78
         lda $2f
-        sta ($59), y
+        sta [$59], y
         dey 
-        lda ($07), y
+        lda [$07], y
         sta $77
         lda $2e
-        sta ($59), y
+        sta [$59], y
         dey 
 _8399:
-        lda ($07), y
-        sta ($59), y
+        lda [$07], y
+        sta [$59], y
         dey 
         bpl _8399
         lda $07
@@ -4047,8 +4047,8 @@ _8399:
         ldy $bb
 _83aa:
         dey 
-        lda ($77), y
-        sta ($2e), y
+        lda [$77], y
+        sta [$2e], y
         tya 
         bne _83aa
         beq _8343
@@ -4696,7 +4696,7 @@ _87b9:
 _87c5:
         jsr print_char
         iny 
-        lda ($fd), y
+        lda [$fd], y
         bne _87c5
         jmp _8888
 
@@ -4757,7 +4757,7 @@ _8835:
         jsr _84af
         and # $80
         ldy # $1f
-        sta ($59), y
+        sta [$59], y
         lda $0456
         beq _87fd
         jsr _8ed5
@@ -4939,7 +4939,7 @@ _8978:
 _898c:
         jsr print_char
         iny 
-        lda ($fd), y
+        lda [$fd], y
         bne _898c
 _8994:
         ldy # $00
@@ -5167,7 +5167,7 @@ _8ad9:
         lda # $00
         stx $08
 _8ae1:
-        sta ($07), y
+        sta [$07], y
         iny 
         bne _8ae1
         rts 
@@ -6622,18 +6622,18 @@ _995d:
 ;===============================================================================
 
 _9964:
-        sta ($2a), y
+        sta [$2a], y
         iny 
         iny 
-        sta ($2a), y
+        sta [$2a], y
         lda $35
         dey 
-        sta ($2a), y
+        sta [$2a], y
         adc # $03
         bcs _995b
         dey 
         dey 
-        sta ($2a), y
+        sta [$2a], y
         rts 
 
 ;===============================================================================
@@ -6846,21 +6846,21 @@ _9a86:
         sta $28
         lda # $00
         ldy # $1c
-        sta ($59), y
+        sta [$59], y
         ldy # $1e
-        sta ($59), y
+        sta [$59], y
         jsr _9ad8
         ldy # $01
         lda # $12
-        sta ($2a), y
+        sta [$2a], y
         ldy # $07
-        lda ($57), y
+        lda [$57], y
         ldy # $02
-        sta ($2a), y
+        sta [$2a], y
 _9abb:
         iny 
         jsr _84af
-        sta ($2a), y
+        sta [$2a], y
         cpy # $06
         bne _9abb
 _9ac5:
@@ -6901,7 +6901,7 @@ _9ae6:
         sbc $10
         bcs _9ac9
         ldy # $06
-        lda ($57), y
+        lda [$57], y
         tax 
         lda # $ff
         sta $0100, x
@@ -6926,7 +6926,7 @@ _9ae6:
         bpl _9b3a
 _9b29:
         ldy # $0d
-        lda ($57), y
+        lda [$57], y
         cmp $10
         bcs _9b3a
         lda # $20
@@ -6971,7 +6971,7 @@ _9b66:
         lda $28
         and # $20
         beq _9b8b
-        lda ($57), y
+        lda [$57], y
         lsr 
         lsr 
         tax 
@@ -6986,11 +6986,11 @@ _9b88:
         jmp _9cfe
 
 _9b8b:
-        lda ($57), y
+        lda [$57], y
         beq _9b88
         sta $ae
         ldy # $12
-        lda ($57), y
+        lda [$57], y
         tax 
         lda $8c
         tay 
@@ -7033,17 +7033,17 @@ _9baa:
         lda $76
         sta $8d
         ldy # $04
-        lda ($57), y
+        lda [$57], y
         clc 
         adc $57
         sta $5b
         ldy # $11
-        lda ($57), y
+        lda [$57], y
         adc $58
         sta $5c
         ldy # $00
 _9bf2:
-        lda ($5b), y
+        lda [$5b], y
         sta $72
         and # $1f
         cmp $ad
@@ -7066,13 +7066,13 @@ _9c0b:
         asl 
         sta $76
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $71
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $73
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $75
         ldx $9f
         cpx # $04
@@ -7223,7 +7223,7 @@ _9cfe:
         sty $53
         stx $54
         ldy # $08
-        lda ($57), y
+        lda [$57], y
         sta $ae
         lda $57
         clc 
@@ -7236,22 +7236,22 @@ _9cfe:
         sty $aa
 _9d45:
         sty $9f
-        lda ($5b), y
+        lda [$5b], y
         sta $6b
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $6d
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $6f
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $bb
         and # $1f
         cmp $ad
         bcc _9d8e
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $2e
         and # $0f
         tax 
@@ -7266,7 +7266,7 @@ _9d45:
         lda $35, x
         bne _9d91
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $2e
         and # $0f
         tax 
@@ -7552,7 +7552,7 @@ _9f35:
         ora $28
         sta $28
         ldy # $09
-        lda ($57), y
+        lda [$57], y
         sta $ae
         ldy # $00
         sty $99
@@ -7564,7 +7564,7 @@ _9f35:
         and # $bf
         sta $28
         ldy # $06
-        lda ($57), y
+        lda [$57], y
         tay 
         ldx $0100, y
         stx $6b
@@ -7592,38 +7592,38 @@ _9f82:
         bcs _9f9f
         ldy $99
         lda $6b
-        sta ($2a), y
+        sta [$2a], y
         iny 
         lda $6c
-        sta ($2a), y
+        sta [$2a], y
         iny 
         lda $6d
-        sta ($2a), y
+        sta [$2a], y
         iny 
         lda $6e
-        sta ($2a), y
+        sta [$2a], y
         iny 
         sty $99
 _9f9f:
         ldy # $03
         clc 
-        lda ($57), y
+        lda [$57], y
         adc $57
         sta $5b
         ldy # $10
-        lda ($57), y
+        lda [$57], y
         adc $58
         sta $5c
         ldy # $05
-        lda ($57), y
+        lda [$57], y
         sta $06
         ldy $9f
 _9fb8:
-        lda ($5b), y
+        lda [$5b], y
         cmp $ad
         bcc _9fd6
         iny 
-        lda ($5b), y
+        lda [$5b], y
         iny 
         sta $2e
         and # $0f
@@ -7642,10 +7642,10 @@ _9fd6:
         jmp _a15b
 
 _9fd9:
-        lda ($5b), y
+        lda [$5b], y
         tax 
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $9a
         lda $0101, x
         sta $6c
@@ -7864,16 +7864,16 @@ _a13b:
 _a13f:
         ldy $99
         lda $6b
-        sta ($2a), y
+        sta [$2a], y
         iny 
         lda $6c
-        sta ($2a), y
+        sta [$2a], y
         iny 
         lda $6d
-        sta ($2a), y
+        sta [$2a], y
         iny 
         lda $6e
-        sta ($2a), y
+        sta [$2a], y
         iny 
         sty $99
         cpy $06
@@ -7898,25 +7898,25 @@ _a172:
         lda $99
 _a174:
         ldy # $00
-        sta ($2a), y
+        sta [$2a], y
 _a178:
         ldy # $00
-        lda ($2a), y
+        lda [$2a], y
         sta $ae
         cmp # $04
         bcc _a19e
         iny 
 _a183:
-        lda ($2a), y
+        lda [$2a], y
         sta $6b
         iny 
-        lda ($2a), y
+        lda [$2a], y
         sta $6c
         iny 
-        lda ($2a), y
+        lda [$2a], y
         sta $6d
         iny 
-        lda ($2a), y
+        lda [$2a], y
         sta $6e
         jsr _ab91
         iny 
@@ -8168,9 +8168,9 @@ _a2cb:
         lda # $00
 _a30d:
         ldy # $0f
-        cmp ($57), y
+        cmp [$57], y
         bcc _a315
-        lda ($57), y
+        lda [$57], y
 _a315:
         sta $24
         lda # $00
@@ -8595,12 +8595,12 @@ _a604:
         ldy # $00
         sty $5b
         ldx # $10
-        lda ($07), y
+        lda [$07], y
         txa 
 _a60e:
         stx $5c
         sty $bb
-        adc ($5b), y
+        adc [$5b], y
         eor $bb
         sbc $5c
         dey 
@@ -9290,7 +9290,7 @@ _aaa2:
         sta $07
         tay                     ; =0
 
-:       sta ($07), y                                                    ;$AABD
+:       sta [$07], y                                                    ;$AABD
         iny 
         bne :-
 
@@ -9580,8 +9580,8 @@ _ac5d:
 
 _ac60:
         lda # $80
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _ac5d
         lda $bf
@@ -9601,8 +9601,8 @@ _ac82:
         clc 
 _ac83:
         lda # $40
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _ac5d
         lda $bf
@@ -9622,8 +9622,8 @@ _aca5:
         clc 
 _aca6:
         lda # $20
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _ac5d
         lda $bf
@@ -9643,8 +9643,8 @@ _acc8:
         clc 
 _acc9:
         lda # $10
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _ac5d
         lda $bf
@@ -9664,8 +9664,8 @@ _aceb:
         clc 
 _acec:
         lda # $08
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _ad39
         lda $bf
@@ -9685,8 +9685,8 @@ _ad0e:
         clc 
 _ad0f:
         lda # $04
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _ad88
         lda $bf
@@ -9706,8 +9706,8 @@ _ad31:
         clc 
 _ad32:
         lda # $02
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
 _ad39:
         beq _ad88
@@ -9728,8 +9728,8 @@ _ad54:
         clc 
 _ad55:
         lda # $01
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _ad88
         lda $bf
@@ -9825,8 +9825,8 @@ _addd:
 
 _ade0:
         lda # $80
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _addd
         lda $bf
@@ -9846,8 +9846,8 @@ _ae02:
         clc 
 _ae03:
         lda # $40
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _addd
         lda $bf
@@ -9867,8 +9867,8 @@ _ae25:
         clc 
 _ae26:
         lda # $20
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _addd
         lda $bf
@@ -9888,8 +9888,8 @@ _ae48:
         clc 
 _ae49:
         lda # $10
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _aeb9
         lda $bf
@@ -9909,8 +9909,8 @@ _ae6b:
         clc 
 _ae6c:
         lda # $08
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _aeb9
         lda $bf
@@ -9930,8 +9930,8 @@ _ae8e:
         clc 
 _ae8f:
         lda # $04
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _af05
         lda $bf
@@ -9951,8 +9951,8 @@ _aeb1:
         clc 
 _aeb2:
         lda # $02
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
 _aeb9:
         beq _af05
@@ -9973,8 +9973,8 @@ _aed4:
         clc 
 _aed5:
         lda # $01
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         beq _af05
         lda $bf
@@ -10083,8 +10083,8 @@ _af77:
         dex 
 _af88:
         lda $be
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
 _af8e:
         dey 
         bpl _af9f
@@ -10123,8 +10123,8 @@ _afbe:
         dex 
 _afc4:
         lda $be
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
 _afca:
         dey 
         bpl _afdb
@@ -10202,8 +10202,8 @@ _b025:
         and # $07
         tax 
         lda _2907, x
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         tya 
         adc # $08
         tay 
@@ -10216,8 +10216,8 @@ _b04c:
         clc 
 _b052:
         lda # $ff
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         tya 
         adc # $08
         tay 
@@ -10232,8 +10232,8 @@ _b064:
         and # $07
         tax 
         lda _2900, x
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         ldy $9e
         rts 
 
@@ -10250,8 +10250,8 @@ _b073:
         tax 
         lda _2900, x
         and $c0
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         ldy $9e
         rts 
 
@@ -10294,8 +10294,8 @@ _b0b5:
         tax 
         lda _ab47, x
         and $32
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         lda _ab49, x
         bpl _b0ed
         lda $07
@@ -10308,8 +10308,8 @@ _b0ea:
         lda _ab49, x
 _b0ed:
         and $32
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         rts 
 
 ;===============================================================================
@@ -10613,9 +10613,9 @@ _b1ed:
         ; SPEED: this could be unrolled
 
         ldy # 7
-:       lda (ZP_CHROUT_CHARADDR), y                                     ;$B1F4
-        eor (ZP_CHROUT_DRAWADDR), y
-        sta (ZP_CHROUT_DRAWADDR), y
+:       lda [ZP_CHROUT_CHARADDR], y                                     ;$B1F4
+        eor [ZP_CHROUT_DRAWADDR], y
+        sta [ZP_CHROUT_DRAWADDR], y
         dey 
         bpl :-
 
@@ -10627,7 +10627,7 @@ _b1ed:
 
         ldy ZP_CHROUT_COL
         lda $050c
-        sta (ZP_CHROUT_DRAWADDR), y
+        sta [ZP_CHROUT_DRAWADDR], y
 _b210:
         ; restore registers before returning
         ldy $0490
@@ -10648,7 +10648,7 @@ _b224:
         lda # $10
         ldy # $1f
 _b228:
-        sta ($07), y
+        sta [$07], y
         dey 
         bpl _b228
         lda $07
@@ -10668,7 +10668,7 @@ _b23d:
         bne _b23d
         ldy # $7f
         jsr _b3ab
-        sta ($07), y
+        sta [$07], y
         lda # $01
         sta $31
         sta $33
@@ -10758,8 +10758,8 @@ _b2e5:
         ldy # $07
 _b2e7:
         lda $be
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dey 
         bpl _b2e7
         lda $07
@@ -10820,9 +10820,9 @@ _b343:
         bmi _b355
         jsr _3e87
         ldy # $1f
-        lda ($59), y
+        lda [$59], y
         and # $ef
-        sta ($59), y
+        sta [$59], y
 _b355:
         inx 
         bne _b343
@@ -10845,7 +10845,7 @@ _b36a:
         ldy # $17
 _b36c:
         lda # $ff
-        sta ($07), y
+        sta [$07], y
         dey 
         bpl _b36c
         lda $07
@@ -10872,7 +10872,7 @@ _b389:
         sta $08
         tya 
 _b394:
-        sta ($07), y
+        sta [$07], y
         dey 
         bne _b394
         txa 
@@ -10894,7 +10894,7 @@ _b3ab:
         lda # $00
         stx $08
 _b3af:
-        sta ($07), y
+        sta [$07], y
         dey 
         bne _b3af
         rts
@@ -10904,7 +10904,7 @@ _b3af:
 _b3b5:
         lda # $00
 _b3b7:
-        sta ($07), y
+        sta [$07], y
         iny 
         bne _b3b7
         rts 
@@ -10927,8 +10927,8 @@ _b3c0:
 _b3c3:
         ldy # $00
 _b3c5:
-        lda ($5b), y
-        sta ($07), y
+        lda [$5b], y
+        sta [$07], y
         dey 
         bne _b3c5
         inc $5c
@@ -10961,7 +10961,7 @@ _b3f7:
         lda # $00
         tay 
 _b3fa:
-        sta ($07), y
+        sta [$07], y
         dey 
         bne _b3fa
         clc 
@@ -11059,8 +11059,8 @@ _b47f:
         sta $08
 _b491:
         lda $6b
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         dex 
         bne _b47f
 _b49a:
@@ -11092,8 +11092,8 @@ _b4ae:
         sta $08
 _b4c1:
         lda $6b
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         inx 
         bne _b4ae
         rts 
@@ -11320,7 +11320,7 @@ _b60c:
         bne _b612
         inc $c3
 _b612:
-        lda ($c2), y
+        lda [$c2], y
         rts 
 
 ;===============================================================================

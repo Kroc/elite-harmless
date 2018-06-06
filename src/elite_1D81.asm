@@ -125,6 +125,9 @@
 
 .import print_char:absolute
 
+; from "data_hulls.asm"
+.import _d000:absolute
+
 ;-------------------------------------------------------------------------------
 
 .segment        "CODE_1D00"
@@ -512,7 +515,7 @@ _2039:
         jsr _3e87
         ldy # $24
 _2040:
-        lda ($59), y
+        lda [$59], y
         sta $0009, y
         dey 
         bpl _2040
@@ -520,9 +523,9 @@ _2040:
         bmi _2079
         asl 
         tay 
-        lda $cffe, y            ; HULL_TABLE?
+        lda _d000 - 2, y        ; HULL_TABLE?
         sta $57
-        lda $cfff, y            ; HULL_TABLE?
+        lda _d000 - 1, y        ; HULL_TABLE?
         sta $58
         lda $04c3
         bpl _2079
@@ -545,7 +548,7 @@ _2079:
         ldy # $24
 _207e:
         lda $0009, y
-        sta ($59), y
+        sta [$59], y
         dey 
         bpl _207e
         lda $28
@@ -570,7 +573,7 @@ _207e:
         cpx # $05
         beq _20c0
         ldy # $00
-        lda ($57), y
+        lda [$57], y
         lsr 
         lsr 
         lsr 
@@ -715,7 +718,7 @@ _21a8:
 _21ab:
         ldy # $23
         lda $2c
-        sta ($59), y
+        sta [$59], y
         lda $2d
         bmi _21e2
         lda $28
@@ -730,11 +733,11 @@ _21ab:
         ora $0482
         bne _21e2
         ldy # $0a
-        lda ($57), y
+        lda [$57], y
         beq _21e2
         tax 
         iny 
-        lda ($57), y
+        lda [$57], y
         tay 
         jsr _7481
         lda # $00
@@ -752,7 +755,7 @@ _21e5:
 _21ee:
         ldy # $1f
         lda $28
-        sta ($59), y
+        sta [$59], y
         ldx $9d
         inx 
         jmp _202f
@@ -942,7 +945,7 @@ _234c:
         tya 
         tax 
         ldy # $00
-        and ($57), y
+        and [$57], y
         and # $0f
 _2359:
         sta $aa
@@ -1010,7 +1013,7 @@ _23a0:                                                                  ;$23a0
         sta $5c
         ldy # $00
 _23a4:                                                                  ;$23a4
-        lda ($5b), y
+        lda [$5b], y
         eor # $57
         bne _23ad
         dex 
@@ -1025,7 +1028,7 @@ _23b4:                                                                  ;$23b4
         bne _23b9
         inc $5c
 _23b9:                                                                  ;$23b9
-        lda ($5b), y
+        lda [$5b], y
         eor # $57
         beq _23c5
         jsr _23cf
@@ -1072,7 +1075,7 @@ _23e8:                                                                  ;$23e8
         tax 
         lda _254d, x
 _2404:                                                                  ;$2404
-        cmp # $41               ; is A an `eor ($??, x)` instruction?
+        cmp # $41               ; is A an `eor [$??, x]` instruction?
         bcc _2418
         
         bit _2f1d
@@ -1461,7 +1464,7 @@ _27ab:  bne _27ab               ; infinite loop, why?
         lda $35, x
 _27b6:  bne _27b6               ; infinite loop, why?
         iny 
-        lda ($5b), y
+        lda [$5b], y
         sta $2e
         and # $0f
         tax 
@@ -1770,8 +1773,8 @@ _293a:
         cmp # $90
         bcs _296d
         lda _28c8, x
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
         lda $a1
         cmp # $50
         bcs _2974
@@ -1780,8 +1783,8 @@ _293a:
         ldy # $01
 _296d:
         lda _28c8, x
-        eor ($07), y
-        sta ($07), y
+        eor [$07], y
+        sta [$07], y
 _2974:
         ldy $06
 _2976:
@@ -2923,11 +2926,11 @@ _30e5:
         lda $9b
 _30f1:
         and $32
-        sta ($07), y
+        sta [$07], y
         iny 
-        sta ($07), y
+        sta [$07], y
         iny 
-        sta ($07), y
+        sta [$07], y
         tya 
         clc 
         adc # $06
@@ -2987,13 +2990,13 @@ _3149:
         sta $9a
         lda # $00
 _314d:
-        sta ($07), y
+        sta [$07], y
         iny 
-        sta ($07), y
+        sta [$07], y
         iny 
-        sta ($07), y
+        sta [$07], y
         iny 
-        sta ($07), y
+        sta [$07], y
         tya 
         clc 
         adc # $05
@@ -3153,11 +3156,11 @@ _3244:
         cmp # $82
         beq _321e
         ldy # $1f
-        lda ($5b), y
+        lda [$5b], y
         bit _32a0+1             ;!?
         bne _327d
         ora # $80
-        sta ($5b), y
+        sta [$5b], y
 _327d:
         lda $09
         ora $0c
@@ -3187,7 +3190,7 @@ _3299:
         bcs _32a7
 _32a0:
         ldy # $20
-        lda ($5b), y
+        lda [$5b], y
         lsr 
         bcs _32aa
 _32a7:
@@ -3259,7 +3262,7 @@ _32ef:
 _330f:
         ldy # $0e
         lda $2c
-        cmp ($57), y
+        cmp [$57], y
         bcs _3319
         inc $2c
 _3319:
@@ -3363,7 +3366,7 @@ _339a:
         sta $26
 _33a8:
         ldy # $0e
-        lda ($57), y
+        lda [$57], y
         lsr 
         cmp $2c
         bcc _33fd
@@ -3381,7 +3384,7 @@ _33a8:
         and # $f0
         sta $2d
         ldy # $24
-        sta ($59), y
+        sta [$59], y
         lda # $00
         sta $29
         jmp _3706
@@ -3423,7 +3426,7 @@ _33fd:
         cpx # $a0
         bcc _3434
         ldy # $13
-        lda ($57), y
+        lda [$57], y
         and # $f8
         beq _3434
         lda $28
@@ -3431,7 +3434,7 @@ _33fd:
         sta $28
         cpx # $a3
         bcc _3434
-        lda ($57), y
+        lda [$57], y
         lsr 
         jsr _7bd2
         dec $25
@@ -3666,16 +3669,16 @@ _3581:  sta $5c
         
         ldy # $08
 _358f:
-        lda ($5b), y
+        lda [$5b], y
         eor # %10000000
         sta $7a
 
         dey 
-        lda ($5b), y
+        lda [$5b], y
         sta $79
         
         dey 
-        lda ($5b), y
+        lda [$5b], y
         sta $78
         
         sty $99
@@ -3804,11 +3807,11 @@ _363f:
         bcs _367e
         sta $9c
         ldy # $02
-        lda ($57), y
+        lda [$57], y
         cmp $9c
         bne _367d
         dey 
-        lda ($57), y
+        lda [$57], y
         cmp $9b
 _367d:
         rts 
@@ -3867,29 +3870,29 @@ _36c5:
         cmp # $02
         beq _36f8
         ldy # $24
-        lda ($59), y
+        lda [$59], y
         and # $20
         beq _36d4
         jsr _36f8
 _36d4:
         ldy # $20
-        lda ($59), y
+        lda [$59], y
         beq _367d
         ora # $80
-        sta ($59), y
+        sta [$59], y
         ldy # $1c
         lda # $02
-        sta ($59), y
+        sta [$59], y
         asl 
         ldy # $1e
-        sta ($59), y
+        sta [$59], y
         lda $a5
         cmp # $0b
         bcc _36f7
         ldy # $24
-        lda ($59), y
+        lda [$59], y
         ora # $04
-        sta ($59), y
+        sta [$59], y
 _36f7:
         rts 
 
@@ -3928,7 +3931,7 @@ _370a:
 _371c:
         lda $0009, y
         sta $0100, y
-        lda ($59), y
+        lda [$59], y
         sta $0009, y
         dey 
         bpl _371c

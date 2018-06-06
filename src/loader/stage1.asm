@@ -80,7 +80,7 @@ gma1_start:                                                             ;$0345
         lda $02
         eor # $97
         beq :+                  ; skip ahead if [$02] = $97
-        jmp ($fffc)             ; hard reset!
+        jmp [$fffc]             ; hard reset!
 
         ; * * * * * *
 
@@ -481,7 +481,7 @@ _04bd:
         ;0578 20 d1 04 jsr $04d1
         ;057b c9 01    cmp #$01
         ;057d d0 09    bne $0588
-        ;057f 91 ae    sta ($ae),y
+        ;057f 91 ae    sta [$ae],y
         ;0581 c8       iny 
         ;0582 d0 ea    bne $056e
         ;0584 e6 af    inc $af
@@ -545,7 +545,7 @@ _04bd:
         ;0602 00       brk 
         ;0603 00       brk 
         ;0604 20 10 02 jsr $0210
-        ;0607 01 ff    ora ($ff,x)
+        ;0607 01 ff    ora [$ff,x]
         ;0609 ff       ???
         ;060a ff       ???
         ;060b ff       ???

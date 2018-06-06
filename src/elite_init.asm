@@ -229,7 +229,7 @@ _75e4:                                                                  ;$75E4
         ldx #> ELITE_BITMAP_ADDR
 
 _76d8:  stx ZP_COPY_TO+1
-:       sta (ZP_COPY_TO), y
+:       sta [ZP_COPY_TO], y
         iny 
         bne :-
         ldx ZP_COPY_TO+1
@@ -242,7 +242,7 @@ _76d8:  stx ZP_COPY_TO+1
 
         lda # $10
 _76e8:  stx ZP_COPY_TO+1
-:       sta (ZP_COPY_TO), y
+:       sta [ZP_COPY_TO], y
         iny 
         bne :-
         ldx ZP_COPY_TO+1
@@ -282,23 +282,23 @@ _76e8:  stx ZP_COPY_TO+1
         ; yellow fore / black back colour
 _7711:  lda # .color_nybbles( YELLOW, BLACK )
         ldy # 36                ; set the colour on column 37
-        sta (ZP_COPY_TO), y
+        sta [ZP_COPY_TO], y
         ldy # 3                 ; set the colour on column 4
-        sta (ZP_COPY_TO), y
+        sta [ZP_COPY_TO], y
         dey
 
         ; colour the area outside the viewport black
         lda # .color_nybbles( BLACK, BLACK )
-:       sta (ZP_COPY_TO), y     ; set columns 2, 1 & 0 to black
+:       sta [ZP_COPY_TO], y     ; set columns 2, 1 & 0 to black
         dey 
         bpl :-
 
         ldy # 37                ; begin at column 38
-        sta (ZP_COPY_TO), y     ; set column 38 black
+        sta [ZP_COPY_TO], y     ; set column 38 black
         iny 
-        sta (ZP_COPY_TO), y     ; and column 39
+        sta [ZP_COPY_TO], y     ; and column 39
         iny 
-        sta (ZP_COPY_TO), y     ; and column 40
+        sta [ZP_COPY_TO], y     ; and column 40
     
         ; move to the next row
         ; (add 40 columns)
@@ -326,21 +326,21 @@ _7711:  lda # .color_nybbles( YELLOW, BLACK )
 
 _7745:  lda # .color_nybbles( YELLOW, BLACK )
         ldy # 36
-        sta (ZP_COPY_TO), y
+        sta [ZP_COPY_TO], y
         ldy # 3
-        sta (ZP_COPY_TO), y
+        sta [ZP_COPY_TO], y
         dey 
         lda # $00
 
-_7752:  sta (ZP_COPY_TO), y
+_7752:  sta [ZP_COPY_TO], y
         dey 
         bpl _7752
         ldy # $25
-        sta (ZP_COPY_TO), y
+        sta [ZP_COPY_TO], y
         iny 
-        sta (ZP_COPY_TO), y
+        sta [ZP_COPY_TO], y
         iny 
-        sta (ZP_COPY_TO), y
+        sta [ZP_COPY_TO], y
         lda ZP_COPY_TO+0
         clc 
         adc # 40
@@ -370,7 +370,7 @@ _776c:
         stx ZP_COPY_TO+1
 
         ldx # $04               ; 4 x 256 = 1'024 bytes
-_7784:  sta (ZP_COPY_TO), y
+_7784:  sta [ZP_COPY_TO], y
         iny 
         bne _7784
         inc ZP_COPY_TO+1
@@ -499,8 +499,8 @@ _7808:  lda __DATA_SPRITES_LOAD__+$100, y
         sta ZP_COPY_FROM+1
         ldy # $00
 
-:       lda (ZP_COPY_FROM), y                                           ;$7818
-        sta (ZP_COPY_TO), y
+:       lda [ZP_COPY_FROM], y                                           ;$7818
+        sta [ZP_COPY_TO], y
         dey 
         bne :-
         inc ZP_COPY_FROM+1
@@ -520,8 +520,8 @@ _7808:  lda __DATA_SPRITES_LOAD__+$100, y
         ; copy a further 22 bytes
         ldy # $17
         ldx # $01
-:       lda (ZP_COPY_FROM), y                                           ;$7830
-        sta (ZP_COPY_TO), y
+:       lda [ZP_COPY_FROM], y                                           ;$7830
+        sta [ZP_COPY_TO], y
         dey 
         bpl :-
         ldx # $00

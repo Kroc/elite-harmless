@@ -92,10 +92,10 @@ _1d36:                                                                  ;$13d6
         lda # $00
         sta $07
 _1d61:
-        lda ($07), y
+        lda [$07], y
         sec 
         sbc $bb
-        sta ($07), y
+        sta [$07], y
         sta $bb
         tya 
         bne _1d6f
