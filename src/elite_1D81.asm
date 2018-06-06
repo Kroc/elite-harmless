@@ -5,28 +5,118 @@
 
 .include        "c64.asm"
 
+.import _0ac0:absolute
+.import _0ae0:absolute
+
+.import _1a27:absolute
+.import _1a41:absolute
+
 .import _1d06:absolute
 .import _1d07:absolute
 .import _1d09:absolute
 
 .import _6a00:absolute
 .import _6a25:absolute
+.import _6a28:absolute
+.import _6a2f:absolute
+.import _6a2b:absolute
+.import _6a3b:absolute
+.import _6a9b:absolute
+.import _6f82:absolute
+.import _70a0:absolute
+.import _70ab:absolute
 .import _745a:absolute
 .import _7481:absolute
+.import _76e9:absolute
+.import _7773:absolute
 .import _777e:absolute
+.import _7b61:absolute
+.import _7b64:absolute
+.import _7b6f:absolute
+.import _7bd2:absolute
+.import _7c24:absolute
 .import _7c6b:absolute
+.import _7d0c:absolute
+.import _7d0e:absolute
+.import _805e:absolute
+.import _80ff:absolute
+.import _811e:absolute
 .import _81ee:absolute
+.import _827f:absolute
+.import _829a:absolute
 .import _83df:absolute
 .import _8447:absolute
+.import _84af:absolute
+.import _872f:absolute
+.import _877e:absolute
+.import _87a4:absolute
+.import _87a6:absolute
+.import _87b1:absolute
+.import _87b9:absolute
+.import _87d0:absolute
 .import _88e7:absolute
+.import _8a5b:absolute
+.import _8ab5:absolute
+.import _8abe:absolute
+.import _8c7b:absolute
+.import _8c8a:absolute
+.import _8cad:absolute
+.import _8d0f:absolute
+.import _8d10:absolute
+.import _8d13:absolute
+.import _8d15:absolute
+.import _8d23:absolute
+.import _8d28:absolute
+.import _8d2a:absolute
+.import _8d2e:absolute
+.import _8d36:absolute
+.import _8d38:absolute
+.import _8d3e:absolute
+.import _8d42:absolute
 .import _8d53:absolute
+.import _8e29:absolute
+.import _900d:absolute
+.import _9204:absolute
+.import _923b:absolute
+
+.import _9300:absolute
+.import _9400:absolute
+.import _9500:absolute
+.import _9600:absolute
+.import _9700:absolute
+.import _9800:absolute
+
+.import _9978:absolute
+.import _99af:absolute
+.import _9a2c:absolute
 .import _9a86:absolute
+.import _9d8e:absolute
+.import _9db3:absolute
+.import _9dee:absolute
+.import _9e27:absolute
+.import _a013:absolute
 .import _a2a0:absolute
+.import _a44c:absolute
+.import _a626:absolute
 .import _a72f:absolute
+.import _a7a6:absolute
+.import _a786:absolute
+.import _a795:absolute
+.import _a7e9:absolute
+.import _a80f:absolute
+.import _a813:absolute
+.import _a839:absolute
+.import _a858:absolute
 .import _a8e0:absolute
 .import _a8e6:absolute
+.import _ab91:absolute
+.import _affa:absolute
+.import _b0f4:absolute
+.import _b11f:absolute
 .import _b148:absolute
 .import _b179:absolute
+.import _b3d4:absolute
+.import _b410:absolute
 .import print_char:absolute
 
 ;-------------------------------------------------------------------------------
@@ -110,13 +200,13 @@ _1e11:                                                                  ;$1e11
 ;===============================================================================
 
 _1e14:                                                                  ;$1e14
-        lda # $b9
+        lda #< _87b9
         sei 
-        sta $0316
-        lda # $87
-        sta $0317
+        sta $0316               ; vector for BRK routine 
+        lda #> _87b9
+        sta $0317               ; vector for BRK routine
         cli 
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -144,9 +234,9 @@ _1e41:
         tay 
 
         lda # MEM_IO_ONLY       ;=5
-        jsr $827f
+        jsr _827f
         
-        jsr $84af
+        jsr _84af
         cmp # $eb
         bcc _1e6a
         and # $03
@@ -155,7 +245,7 @@ _1e41:
         sta $0511, y
         lda _1e25, x
         sta $0521, y
-        jsr $84af
+        jsr _84af
         and # $03
         tax 
         lda _1e21, x
@@ -200,7 +290,7 @@ _1eb3:
         cli 
 
         lda # MEM_64K
-        jsr $827f
+        jsr _827f
         
         jmp _1ece
 
@@ -269,61 +359,61 @@ _1f20:
         sta $64
         ora $94
         sta $63
-        lda $8d10
+        lda _8d10
         beq _1f33
         lda $96
         cmp # $28
         bcs _1f33
         inc $96
 _1f33:
-        lda $8d15
+        lda _8d15
         beq _1f3e
         dec $96
         bne _1f3e
         inc $96
 _1f3e:
-        lda $8d2e
+        lda _8d2e
         and $04cc
         beq _1f55
         ldy # $57
-        jsr $7d0c
+        jsr _7d0c
         ldy # $06
-        jsr $a858
+        jsr _a858
         lda # $00
         sta $0485
 _1f55:
         lda $7c
         bpl _1f6b
-        lda $8d36
+        lda _8d36
         beq _1f6b
         ldx $04cc
         beq _1f6b
         sta $0485
         ldy # $87
-        jsr $b11f
+        jsr _b11f
 _1f6b:
-        lda $8d28
+        lda _8d28
         beq _1f77
         lda $7c
         bmi _1fc2
         jsr _36a6
 _1f77:
-        lda $8d0f
+        lda _8d0f
         beq _1f8b
         asl $04c3
         beq _1f8b
         ldy # $d0
-        sty $a8e0
+        sty _a8e0
         ldy # $0d
-        jsr $a858
+        jsr _a858
 _1f8b:
-        lda $8d23
+        lda _8d23
         beq _1f98
         lda # $00
         sta $0480
-        jsr $923b
+        jsr _923b
 _1f98:
-        lda $8d13
+        lda _8d13
         and $04c7
         beq _1fa8
         lda $0482
@@ -333,25 +423,25 @@ _1f98:
         ;-----------------------------------------------------------------------
 
 _1fa8:
-        lda $8d2a
+        lda _8d2a
         beq _1fb0
-        jsr $8e29
+        jsr _8e29
 _1fb0:
-        lda $8d3e
+        lda _8d3e
         and $04c1
         beq _1fc2
         lda $67
         bne _1fc2
         dec $0481
-        jsr $b0f4
+        jsr _b0f4
 _1fc2:
-        lda $8d38
+        lda _8d38
         and $04c5
         beq _1fd5
         eor $8d35
         beq _1fd5
         sta $0480
-        jsr $9204
+        jsr _9204
 _1fd5:
         lda # $00
         sta $7b
@@ -364,7 +454,7 @@ _1fd5:
         sta $98
         lda $0487
         bne _202d
-        lda $8d42
+        lda _8d42
         beq _202d
         lda $0488
         cmp # $f2
@@ -392,7 +482,7 @@ _2014:
 _201a:
         bit $0ba0
 _201d:
-        jsr $a858
+        jsr _a858
         jsr _3cdb
         pla 
         bpl _2028
@@ -424,9 +514,9 @@ _2040:
         bmi _2079
         asl 
         tay 
-        lda $cffe, y
+        lda $cffe, y            ; HULL_TABLE?
         sta $57
-        lda $cfff, y
+        lda $cfff, y            ; HULL_TABLE?
         sta $58
         lda $04c3
         bpl _2079
@@ -443,7 +533,7 @@ _2040:
         sec 
         ror $28
         ldx $a5
-        jsr $a7a6
+        jsr _a7a6
 _2079:
         jsr _a2a0
         ldy # $24
@@ -454,7 +544,7 @@ _207e:
         bpl _207e
         lda $28
         and # $a0
-        jsr $87b1
+        jsr _87b1
         bne _20e0
         lda $09
         ora $0c
@@ -483,7 +573,7 @@ _207e:
         adc # $01
         bne _20c5
 _20c0:
-        jsr $84af
+        jsr _84af
         and # $07
 _20c5:
         jsr _6a00
@@ -494,7 +584,7 @@ _20c5:
         sta $04b0, y
         tya 
         adc # $d0
-        jsr $900d
+        jsr _900d
         asl $2d
         sec 
         ror $2d
@@ -510,7 +600,7 @@ _20e3:
         lda $17
         cmp # $d6
         bcc _2107
-        jsr $8c7b
+        jsr _8c7b
         lda $6d
         cmp # $59
         bcc _2107
@@ -519,7 +609,7 @@ _20e3:
         cmp # $50
         bcc _2107
 _2101:
-        jsr $923b
+        jsr _923b
         jmp _1d81
 
         ;-----------------------------------------------------------------------
@@ -528,12 +618,12 @@ _2107:
         lda $96
         cmp # $05
         bcc _211a
-        jmp $87d0
+        jmp _87d0
 
         ;-----------------------------------------------------------------------
 
 _2110:
-        jsr $a813
+        jsr _a813
         asl $28
         sec 
         ror $28
@@ -551,29 +641,29 @@ _2122:
         sec 
         ror 
 _212b:
-        jsr $7bd2
-        jsr $a813
+        jsr _7bd2
+        jsr _a813
 _2131:
         lda $2d
         bpl _2138
-        jsr $b410
+        jsr _b410
 _2138:
         lda $a0
         bne _21ab
-        jsr $a626
+        jsr _a626
         jsr _363f
         bcc _21a8
         lda $0485
         beq _2153
-        jsr $a80f
+        jsr _a80f
         ldx $9d
         ldy # $27
-        jsr $7d0e
+        jsr _7d0e
 _2153:
         lda $7b
         beq _21a8
         ldx # $0f
-        jsr $a7e9
+        jsr _a7e9
         lda $a5
         cmp # $02
         beq _21a3
@@ -598,7 +688,7 @@ _2170:
         lda $7b
         cmp # $32
         bne _2192
-        jsr $84af
+        jsr _84af
         ldx # $08
         and # $03
         jsr _2359
@@ -608,7 +698,7 @@ _2192:
         ldy # $05
         jsr _234c
         ldx $a5
-        jsr $a7a6
+        jsr _a7a6
 _21a1:
         sta $2c
 _21a3:
@@ -640,18 +730,18 @@ _21ab:
         iny 
         lda ($57), y
         tay 
-        jsr $7481
+        jsr _7481
         lda # $00
-        jsr $900d
+        jsr _900d
 _21e2:
-        jmp $829a
+        jmp _829a
 
         ;-----------------------------------------------------------------------
 
 _21e5:
         lda $a5
         bmi _21ee
-        jsr $87a4
+        jsr _87a4
         bcc _21e2
 _21ee:
         ldy # $1f
@@ -676,10 +766,10 @@ _2207:
         ldx $04e9
         bpl _2224
         ldx $04e8
-        jsr $7b61
+        jsr _7b61
         stx $04e8
         ldx $04e7
-        jsr $7b61
+        jsr _7b61
         stx $04e7
 _2224:
         sec 
@@ -717,10 +807,10 @@ _2248:
         jsr _2c2d
         bne _2277
         lda # $c0
-        jsr $87a6
+        jsr _87a6
         bcc _2277
-        jsr $80ff
-        jsr $7c24
+        jsr _80ff
+        jsr _7c24
 _2277:
         jmp _231c
 
@@ -738,7 +828,7 @@ _2283:
         cmp $04e9
         bcc _2292
         asl 
-        jsr $900d
+        jsr _900d
 _2292:
         ldy # $ff
         sty $06f3
@@ -750,12 +840,12 @@ _2292:
         sbc # $24
         bcc _22b2
         sta $9b
-        jsr $9978
+        jsr _9978
         lda $9a
         sta $06f3
         bne _231c
 _22b2:
-        jmp $87d0
+        jmp _87d0
 
         ;-----------------------------------------------------------------------
 
@@ -787,14 +877,14 @@ _22c2:
         bcc _2303
 
         lda # MEM_IO_ONLY  ;=5
-        jsr $827f
+        jsr _827f
         
         lda VIC_SPRITE_ENABLE
         and # $03
         sta VIC_SPRITE_ENABLE
         
         lda # MEM_64K      ;=4
-        jsr $827f
+        jsr _827f
         
         lsr $04ca
         ror $04c9
@@ -811,7 +901,7 @@ _2314:
         sta $04a6
         lda # $a0
 _2319:
-        jsr $900d
+        jsr _900d
 _231c:
         lda $0484
         beq _2330
@@ -824,7 +914,7 @@ _231c:
 _2330:
         lda $0481
         beq _233a
-        jsr $7b64
+        jsr _7b64
         beq _2342
 _233a:
         lda $67
@@ -832,7 +922,7 @@ _233a:
         dec $67
         bne _2345
 _2342:
-        jsr $a786
+        jsr _a786
 _2345:
         lda $a0
         bne _2366
@@ -841,7 +931,7 @@ _2345:
 ;===============================================================================
 
 _234c:
-        jsr $84af
+        jsr _84af
         bpl _2366
         tya 
         tax 
@@ -906,9 +996,12 @@ _2390:                                                                  ;$2390
         pha 
         lda $5c
         pha 
-        lda #< $0e00
+
+.import __DATA_0E00_RUN__
+
+        lda #< __DATA_0E00_RUN__
         sta $5b
-        lda #> $0e00
+        lda #> __DATA_0E00_RUN__
 _23a0:                                                                  ;$23a0
         sta $5c
         ldy # $00
@@ -1036,7 +1129,7 @@ _2441:
         pha 
         lda $5c
         pha 
-        jsr $84af
+        jsr _84af
         tax 
         lda # $00
         cpx # $33
@@ -1139,11 +1232,11 @@ _24c9:
 
 _24ce:  ; NOTE: this address is used in the table in _250c
         jsr _24ed
-        jsr $84af
+        jsr _84af
         and # $03
         tay 
 _24d7:
-        jsr $84af
+        jsr _84af
         and # %00111110
         tax 
 
@@ -1213,17 +1306,17 @@ _250c:
         .addr   _24ce
         .addr   _24ed
         .addr   _2f24
-        .addr   $b3d4
+        .addr   _b3d4
         .addr   _3e41
         .addr   _3e57
         .addr   _3e7c
         .addr   _3e37
-        .addr   $8a5b
+        .addr   _8a5b
         .addr   _2372
         .addr   _2376
         .addr   _3e59+1         ; jumps into the middle of a `bit` instruction
-        .addr   $8ab5
-        .addr   $8abe
+        .addr   _8ab5
+        .addr   _8abe
         .addr   _2f24
 
 ;===============================================================================
@@ -1378,7 +1471,7 @@ _27c2:  bne _27c2               ; infinite loop, why?
         tax 
         lda $35, x
 _27cd:  bne _27cd               ; infinite loop, why?
-        jmp $9d8e
+        jmp _9d8e               ; SPEED: jump to a jump (`_9f06`)
 
 ;===============================================================================
 
@@ -1390,7 +1483,7 @@ _27cd:  bne _27cd               ; infinite loop, why?
         sta $6e
         asl 
         sta $70
-        jsr $9a2c
+        jsr _9a2c
         lda $0b
         sta $6d
         eor $72
@@ -1403,7 +1496,7 @@ _27e5:
         lda $0a
         adc # $00
         sta $6c
-        jmp $9db3
+        jmp _9db3               ; SPEED: jump to a jump (`_9dd9`)
 
 ;===============================================================================
 
@@ -1439,7 +1532,7 @@ _2820:  bmi _2820               ; infinite loop, why??
         lda $0d
         adc # $00
         sta $6f
-        jmp $9dee
+        jmp _9dee               ; SPEED: jump to a jump (`_9e16`)
 
 ;===============================================================================
 
@@ -1473,7 +1566,7 @@ _2859:  bmi _2859               ; inifinite loop, why??
         lda $10
         adc # $00
         sta $99
-        jmp $9e27
+        jmp _9e27               ; SPEED: jump to a jump (`_9e27`)
 
 ;===============================================================================
 
@@ -1488,7 +1581,7 @@ _2871:
         cmp $9a
         bcs _2871
         stx $9c
-        jsr $99af
+        jsr _99af
         ldx $9c
         lda $9b
 _2880:
@@ -1579,7 +1672,7 @@ _28dc:  ; NOTE: this address is used in the table in _250c
 _28e0:
 .export _28e0
         lda # $17
-        jsr $6a2b
+        jsr _6a2b               ; SPEED: inline this
 _28e5:
 .export _28e5
         sta $6c
@@ -1588,17 +1681,17 @@ _28e5:
         stx $6b
         dex 
         stx $6d
-        jmp $ab91
+        jmp _ab91
 
 ;===============================================================================
 
 _28f3:
 .export _28f3
-        jsr $811e
+        jsr _811e
         sty $6c
         lda # $00
         sta $0580, y
-        jmp $affa
+        jmp _affa
 
 ;===============================================================================
 
@@ -1658,9 +1751,9 @@ _293a:
         txa 
         and # $f8
         clc 
-        adc $9700, y
+        adc _9700, y
         sta $07
-        lda $9800, y
+        lda _9800, y
         adc # $00
         sta $08
         tya 
@@ -1728,7 +1821,7 @@ _2998:
         sta $71
         lda $8c
         sta $72
-        jsr $a013
+        jsr _a013
         bcs _2988
         lda $06f4
         beq _29d2
@@ -1757,7 +1850,7 @@ _29e6:
         sta _27a4, y            ; writing to code??
         iny 
         sty $7e
-        jsr $ab91
+        jsr _ab91
         lda $a2
         bne _2988
 _29fa:
@@ -1912,15 +2005,15 @@ _2b09:
         ;-----------------------------------------------------------------------
 
 _2b0a:
-        jsr $84af
+        jsr _84af
         ora # $04
         sta $6c
         sta $06bc, y
-        jsr $84af
+        jsr _84af
         ora # $08
         sta $6b
         sta $06a2, y
-        jsr $84af
+        jsr _84af
         ora # $90
         sta $06d6, y
         sta $a1
@@ -2030,7 +2123,7 @@ _2bf6:
         ;-----------------------------------------------------------------------
 
 _2bf7:
-        jsr $84af
+        jsr _84af
         and # $7f
         adc # $0a
         sta $06d6, y
@@ -2042,7 +2135,7 @@ _2bf7:
         ror 
         sta $6b
         sta $06a2, y
-        jsr $84af
+        jsr _84af
         sta $6c
         sta $06bc, y
         jmp _2bed
@@ -2050,7 +2143,7 @@ _2bf7:
         ;-----------------------------------------------------------------------
 
 _2c1a:
-        jsr $84af
+        jsr _84af
         sta $6b
         sta $06a2, y
         lsr 
@@ -2136,8 +2229,8 @@ _2c88:
 _2c9b:
 .export _2c9b
         lda # $08
-        jsr $6a2f
-        jsr $70ab
+        jsr _6a2f
+        jsr _70ab
         lda # $07
         jsr _6a25
         lda # $7e
@@ -2153,19 +2246,19 @@ _2c9b:
         cpy # $80
         adc # $01
 _2cc4:
-        jsr $7773
+        jsr _7773
 _2cc7:
         lda # $7d
-        jsr $6a9b
+        jsr _6a9b
         lda # $13
         ldy $04cd
         beq _2cd7
         cpy # $32
         adc # $01
 _2cd7:
-        jsr $7773
+        jsr _7773
         lda # $10
-        jsr $6a9b
+        jsr _6a9b
         lda $04e1
         bne _2c88
         tax 
@@ -2180,7 +2273,7 @@ _2cee:
         txa 
         clc 
         adc # $15
-        jsr $7773
+        jsr _7773
         lda # $12
         jsr _2d61
         lda $04c7
@@ -2218,7 +2311,7 @@ _2d2f:
         txa 
         clc 
         adc # $60
-        jsr $6a9b
+        jsr _6a9b
         lda # $67
         ldx $aa
         ldy $04a9, x
@@ -2245,7 +2338,7 @@ _2d59:
 ;===============================================================================
 
 _2d61:
-        jsr $7773
+        jsr _7773
         lda # $06
         jmp _6a25
 
@@ -2779,7 +2872,7 @@ _3068:
         sta $06
         lda $06f3
         jsr _30cb
-        jmp $7b6f
+        jmp _7b6f
 
 ;===============================================================================
 
@@ -2933,7 +3026,7 @@ _318a:
         jsr _9a86
         dec $29
         bne _318a
-        jsr $b410
+        jsr _b410
         lda # $00
         ldx # $10
 _319b:
@@ -2945,7 +3038,7 @@ _319b:
         lda $04c9
         ora $04ca
         beq _31be
-        jsr $84af
+        jsr _84af
         and # $07
         ora # $01
         sta $04c9
@@ -2962,13 +3055,13 @@ _31c6:
 .export _31c6
         lda # $0e
         jsr _2390
-        jsr $6f82
-        jsr $70a0
+        jsr _6f82
+        jsr _70a0
         lda # $00
         sta $ae
 _31d5:
         jsr _24a3
-        jsr $76e9
+        jsr _76e9
         ldx _2f1c
         lda $0e, x
         cmp # $0d
@@ -2982,13 +3075,13 @@ _31e4:
         txa 
         bmi _3208
 _31f1:
-        jsr $6a3b
+        jsr _6a3b
         inc $ae
         bne _31d5
-        jsr $70ab
-        jsr $6f82
+        jsr _70ab
+        jsr _6f82
         ldy # $06
-        jsr $a858
+        jsr _a858
         lda # $d7
         jmp _2390
 
@@ -2999,10 +3092,10 @@ _3208:
         sta $0509
         lda $80
         sta $050a
-        jsr $70ab
-        jsr $6f82
+        jsr _70ab
+        jsr _6f82
         jsr _24a6
-        jmp $877e
+        jmp _877e
 
 ;===============================================================================
 
@@ -3012,13 +3105,13 @@ _321e:
         ora $0f
         bne _322b
         lda # $50
-        jsr $7bd2
+        jsr _7bd2
 _322b:
         ldx # $04
         bne _3290
 _322f:
         lda # $00
-        jsr $87b1
+        jsr _87b1
         beq _3239
         jmp _3365
 
@@ -3026,9 +3119,9 @@ _322f:
 
 _3239:
         jsr _3293
-        jsr $a813
+        jsr _a813
         lda # $fa
-        jmp $7bd2
+        jmp _7bd2
 
         ;-----------------------------------------------------------------------
 
@@ -3067,14 +3160,14 @@ _327d:
         ora $0f
         bne _328a
         lda # $50
-        jsr $7bd2
+        jsr _7bd2
 _328a:
         lda $29
         and # $7f
         lsr 
         tax 
 _3290:
-        jsr $a7a6
+        jsr _a7a6
 _3293:
         asl $28
         sec 
@@ -3085,7 +3178,7 @@ _3298:
         ;-----------------------------------------------------------------------
 
 _3299:
-        jsr $84af
+        jsr _84af
         cmp # $10
         bcs _32a7
 _32a0:
@@ -3097,7 +3190,7 @@ _32a7:
         jmp _336e
 
 _32aa:
-        jmp $b0f4
+        jmp _b0f4
 
 ;===============================================================================
 
@@ -3118,7 +3211,7 @@ _32ad:
         bne _32da
         lda $0467
         bne _3298
-        jsr $84af
+        jsr _84af
         cmp # $fd
         bcc _3298
         and # $01
@@ -3126,7 +3219,7 @@ _32ad:
         tax 
         bne _32ea
 _32da:
-        jsr $84af
+        jsr _84af
         cmp # $f0
         bcc _3298
         lda $046d
@@ -3142,7 +3235,7 @@ _32ea:
 _32ef:
         cpx # $0f
         bne _330f
-        jsr $84af
+        jsr _84af
         cmp # $c8
         bcc _3328
         ldx # $00
@@ -3179,7 +3272,7 @@ _3328:
         ;-----------------------------------------------------------------------
 
 _3329:
-        jsr $84af
+        jsr _84af
         lda $2d
         lsr 
         bcc _3335
@@ -3207,7 +3300,7 @@ _3347:
         ;-----------------------------------------------------------------------
 
 _3351:
-        jsr $8c7b
+        jsr _8c7b
         jmp _34ac
 
         ;-----------------------------------------------------------------------
@@ -3228,7 +3321,7 @@ _3367:
         dex 
         bpl _3367
 _336e:
-        jsr $8c8a
+        jsr _8c8a
         ldy # $0a
         jsr _3ab2
         sta $aa
@@ -3244,10 +3337,10 @@ _3381:
         bne _339a
 _3385:
 .export _3385
-        jsr $84af
+        jsr _84af
         cmp # $c8
         bcc _339a
-        jsr $84af
+        jsr _84af
         ldx # $17
         cmp # $64
         bcs _3397
@@ -3258,10 +3351,10 @@ _3397:
         ;-----------------------------------------------------------------------
 
 _339a:
-        jsr $84af
+        jsr _84af
         cmp # $fa
         bcc _33a8
-        jsr $84af
+        jsr _84af
         ora # $68
         sta $26
 _33a8:
@@ -3274,11 +3367,11 @@ _33a8:
         lsr 
         cmp $2c
         bcc _33d6
-        jsr $84af
+        jsr _84af
         cmp # $e6
         bcc _33d6
         ldx $a5
-        lda $d041, x            ;sprite 0 Y-position?
+        lda $d041, x            ;TODO: HULL_DATA?
         bpl _33d6
         lda $2d
         and # $f0
@@ -3296,7 +3389,7 @@ _33d6:
         and # $07
         beq _33fd
         sta $bb
-        jsr $84af
+        jsr _84af
         and # $1f
         cmp $bb
         bcs _33fd
@@ -3313,13 +3406,13 @@ _33d6:
         ;-----------------------------------------------------------------------
 
 _33fa:
-        jmp $a795
+        jmp _a795
 
         ;-----------------------------------------------------------------------
 
 _33fd:
         lda # $00
-        jsr $87b1
+        jsr _87b1
         and # $e0
         bne _3434
         ldx $aa
@@ -3336,14 +3429,14 @@ _33fd:
         bcc _3434
         lda ($57), y
         lsr 
-        jsr $7bd2
+        jsr _7bd2
         dec $25
         lda $67
         bne _3499
         ldy # $01
-        jsr $a858
+        jsr _a858
         ldy # $0f
-        jmp $a858
+        jmp _a858
 
         ;-----------------------------------------------------------------------
 
@@ -3356,7 +3449,7 @@ _3434:
         and # $fe
         beq _3454
 _3442:
-        jsr $84af
+        jsr _84af
         ora # $80
         cmp $29
         bcs _3454
@@ -3461,10 +3554,10 @@ _34cf:
         ora $3d
         and # $7f
         bne _34cc
-        jsr $8cad
+        jsr _8cad
         lda $9a
         sta $77
-        jsr $8c8a
+        jsr _8c8a
         ldy # $0a
         jsr _35b3
         bmi _3512
@@ -3495,7 +3588,7 @@ _3512:
         jsr _357b
         jsr _35e8
         jsr _35e8
-        jsr $8c8a
+        jsr _8c8a
         jsr _35d5
         jmp _34ac
 
@@ -3759,10 +3852,10 @@ _36a6:
         lda $0452, x
         jsr _36c5
         ldy # $b7
-        jsr $7d0c
+        jsr _7d0c
         dec $04cc
         ldy # $04
-        jmp $a858
+        jmp _a858
 
 ;===============================================================================
 
@@ -3806,7 +3899,7 @@ _36f8:
 
 _3701:
         lda # $c9
-        jmp $900d
+        jmp _900d
 
 ;===============================================================================
 
@@ -3864,7 +3957,7 @@ _374d:
         cmp # $04
         bcc _3770
         pha 
-        jsr $84af
+        jsr _84af
         asl 
         sta $27
         txa 
@@ -3901,11 +3994,11 @@ _378c:
         sta $9b
         lda # $00
         ror 
-        jmp $a44c
+        jmp _a44c
 
 _3795:
 .export _3795
-        jsr $a839
+        jsr _a839
         lda # $04
         jsr _37a5
         rts 
@@ -3915,7 +4008,7 @@ _3795:
 _379e:
 .export _379e
         ldy # $04
-        jsr $a858
+        jsr _a858
         lda # $08
 _37a5:
         sta $ac
@@ -3954,7 +4047,7 @@ _37ce:
 _37d7:
         lda # $01
         sta $7e
-        jsr $805e
+        jsr _805e
         asl $77
         bcs _37e8
         lda $77
@@ -4077,7 +4170,7 @@ _38a3:
         ;-----------------------------------------------------------------------
 
 _38be:
-        jsr $84af
+        jsr _84af
         sta $6c
         sta $06bc, y
         lda # $73
@@ -4086,7 +4179,7 @@ _38be:
         sta $06a2, y
         bne _38e2
 _38d1:
-        jsr $84af
+        jsr _84af
         sta $6b
         sta $06a2, y
         lda # $6e
@@ -4094,7 +4187,7 @@ _38d1:
         sta $6c
         sta $06bc, y
 _38e2:
-        jsr $84af
+        jsr _84af
         ora # $08
         sta $a1
         sta $06d6, y
@@ -4292,7 +4385,7 @@ _39e0:
 .export _39e0
         and # $1f
         tax 
-        lda $0ac0, x
+        lda _0ac0, x
         sta $9a
         lda $77
 _39ea:
@@ -4301,30 +4394,30 @@ _39ea:
         sta $b6
         tax 
         beq _3a1d
-        lda $9400, x
+        lda _9400, x
         ldx $9a
         beq _3a20
         clc 
-        adc $9400, x
+        adc _9400, x
         bmi _3a0f
-        lda $9300, x
+        lda _9300, x
         ldx $b6
-        adc $9300, x
+        adc _9300, x
         bcc _3a20
         tax 
-        lda $9500, x
+        lda _9500, x
         ldx $2e
         rts 
 
         ;-----------------------------------------------------------------------
 
 _3a0f:
-        lda $9300, x
+        lda _9300, x
         ldx $b6
-        adc $9300, x
+        adc _9300, x
         bcc _3a20
         tax 
-        lda $9600, x
+        lda _9600, x
 _3a1d:
         ldx $2e
         rts 
@@ -4603,18 +4696,18 @@ _3b82:
         sta $b6
         tax 
         beq _3ba6
-        lda $9400, x
+        lda _9400, x
         ldx $9a
         sec 
-        sbc $9400, x
+        sbc _9400, x
         bmi _3bae
         ldx $b6
-        lda $9300, x
+        lda _9300, x
         ldx $9a
-        sbc $9300, x
+        sbc _9300, x
         bcs _3ba9
         tax 
-        lda $9500, x
+        lda _9500, x
 _3ba6:
         sta $9b
         rts 
@@ -4630,12 +4723,12 @@ _3ba9:
 
 _3bae:
         ldx $b6
-        lda $9300, x
+        lda _9300, x
         ldx $9a
-        sbc $9300, x
+        sbc _9300, x
         bcs _3ba9
         tax 
-        lda $9600, x
+        lda _9600, x
         sta $9b
         rts 
 
@@ -4846,31 +4939,31 @@ _3cc7:
         ;-----------------------------------------------------------------------
 
 _3cce:
-        jsr $99af
+        jsr _99af
         lda $9b
         lsr 
         lsr 
         lsr 
         tax 
-        lda $0ae0, x
+        lda _0ae0, x
 _3cda:
         rts 
 
 ;===============================================================================
 
 _3cdb:
-        jsr $84af
+        jsr _84af
         and # $07
         adc # $44
         sta $06f1
-        jsr $84af
+        jsr _84af
         and # $07
         adc # $7c
         sta $06f0
         lda $0488
         adc # $08
         sta $0488
-        jsr $7b64
+        jsr _7b64
 _3cfa:
         lda $a0
         bne _3cda
@@ -4887,7 +4980,7 @@ _3d09:
         sta $6c
         lda # $8f
         sta $6e
-        jsr $ab91
+        jsr _ab91
         lda $06f0
         sta $6b
         lda $06f1
@@ -4895,7 +4988,7 @@ _3d09:
         sty $6d
         lda # $8f
         sta $6e
-        jmp $ab91
+        jmp _ab91
 
 ;===============================================================================
 
@@ -4908,14 +5001,14 @@ _3d2f:
         bpl _3d6f
         ldy # $00
 _3d3d:
-        lda $1a27, y            ;from $4000..$5600
+        lda _1a27, y
         cmp $a1
         bne _3d6c
-        lda $1a41, y
+        lda _1a41, y
         and # $7f
         cmp $04a8
         bne _3d6c
-        lda $1a41, y
+        lda _1a41, y
         bmi _3d5e+1
         lda $0499
         lsr 
@@ -4923,7 +5016,7 @@ _3d3d:
         jsr _24a3
         lda # $01
 _3d5e:
-        bit $b0a9
+        bit $b0a9               ; `$A9, $B0` -- `lda # $b0`?
         jsr _23cf
         tya 
         jsr _237e
@@ -5069,7 +5162,7 @@ _3e57:  ; NOTE: this address is used in the table in _250c
 _3e59:  ; NOTE: this address is used in the table in _250c
         ; (jumps into the middle of this `bit` instruction)
         bit $06a9
-        jsr $6a28
+        jsr _6a28
         jsr _250b
         jmp _248b
 _3e65:                                                                  ;$3e65
