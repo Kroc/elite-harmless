@@ -30,6 +30,11 @@
 .define .scrpos(ypos, xpos) \
         ((ypos * 40) + xpos)
 
+; given a screen row + column, return a bitmap offset in bytes
+; where 1 char = 8 bytes, therefore one row is 320 bytes
+.define .bmppos(ypos, xpos) \
+        ((ypos * 320) + (xpos * 8))
+
 ;===============================================================================
 ; CPU port: memory layout & Datasette
 ;===============================================================================

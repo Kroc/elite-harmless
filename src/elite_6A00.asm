@@ -2,6 +2,7 @@
 ; "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
+.linecont+
 
 .include        "c64.asm"
 
@@ -116,6 +117,9 @@
 .import _3e87:absolute
 .import _3e95:absolute
 .import _3ea1:absolute
+
+; from "gfx/hulls.asm"
+.import _d000:absolute
 
 ;===============================================================================
 
@@ -2924,10 +2928,10 @@ _7c7b:
         bmi _7cd4
         asl 
         tay 
-        lda $cfff, y            ;?
-        beq _7c79
+        lda _d000 - 1, y        ;?
+        beq _7c79               ;!?
         sta $58
-        lda $cffe, y            ;?
+        lda _d000 - 2, y        ;?
         sta $57
         cpy # $04
         beq _7cc4
@@ -2980,7 +2984,7 @@ _7ce9:
         inc $045d, x
 _7cec:
         ldy $bb
-        lda $d041, y            ;sprite 0 X-position?
+        lda $d041, y
         and # $6f
         ora $2d
         sta $2d
@@ -6490,77 +6494,144 @@ _9600:
 
 ;===============================================================================
 
-_9700:
-.export _9700
-        .byte   $20, $20, $20, $20, $20, $20, $20, $20                  ;$9700
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$9708
-        .byte   $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0                  ;$9710
-        .byte   $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0                  ;$9718
-        .byte   $20, $20, $20, $20, $20, $20, $20, $20                  ;$9720
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$9728
-        .byte   $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0                  ;$9730
-        .byte   $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0                  ;$9738
-        .byte   $20, $20, $20, $20, $20, $20, $20, $20                  ;$9740
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$9748
-        .byte   $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0                  ;$9750
-        .byte   $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0                  ;$9758
-        .byte   $20, $20, $20, $20, $20, $20, $20, $20                  ;$9760
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$9768
-        .byte   $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0                  ;$9770
-        .byte   $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0                  ;$9778
-        .byte   $20, $20, $20, $20, $20, $20, $20, $20                  ;$9780
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$9788
-        .byte   $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0                  ;$9790
-        .byte   $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0                  ;$9798
-        .byte   $20, $20, $20, $20, $20, $20, $20, $20                  ;$97a0
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$97a8
-        .byte   $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0                  ;$97b0
-        .byte   $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0                  ;$97b8
-        .byte   $20, $20, $20, $20, $20, $20, $20, $20                  ;$97c0
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$97c8
-        .byte   $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0                  ;$97d0
-        .byte   $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0                  ;$97d8
-        .byte   $20, $20, $20, $20, $20, $20, $20, $20                  ;$97e0
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$97e8
-        .byte   $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0                  ;$97f0
-        .byte   $e0, $e0, $e0, $e0, $e0, $e0, $e0, $e0                  ;$97f8
+; the BBC Micro, unusually for an 8-bit, has programmable display circuitry
+; allowing the developer to create custom display modes. On the BBC, Elite uses
+; a 256-px wide display for easy math (x-coordinates do not have to be 2 bytes)
+; but on the C64 the screen is always 320-px wide and has a non-linear bitmap
+; layout (pixels are in order of char-cells, not scanlines)
+;
+; therefore on the C64, there is some level of translation between a centred
+; 256-px (32 char) display and the C64 screen.
+;
+;        1  4                             36  40
+;       +---=------------------------------=---+
+;       |   1                             32   |
+;       |  ,--------------------------------.  |
+;       |  |                                |  |
+;       :  :                                :  :
+;       '  '                                '  '
+;     
+; we're going to build a pair of lookup tables that translate a row index
+; to a bitmap address for the 1st column of the centred display. each entry
+; is repeated 8 times, probably to account for scanlines-per-char(?)
 
-;===============================================================================
+; first, calculate each row address:
+.define _bmprow00 ELITE_BITMAP_ADDR + .bmppos(  0, 4 ) ;=$4020
+.define _bmprow01 ELITE_BITMAP_ADDR + .bmppos(  1, 4 ) ;=$4160
+.define _bmprow02 ELITE_BITMAP_ADDR + .bmppos(  2, 4 ) ;=$42A0
+.define _bmprow03 ELITE_BITMAP_ADDR + .bmppos(  3, 4 ) ;=$43E0
+.define _bmprow04 ELITE_BITMAP_ADDR + .bmppos(  4, 4 ) ;=$4520
+.define _bmprow05 ELITE_BITMAP_ADDR + .bmppos(  5, 4 ) ;=$4660
+.define _bmprow06 ELITE_BITMAP_ADDR + .bmppos(  6, 4 ) ;=$47A0
+.define _bmprow07 ELITE_BITMAP_ADDR + .bmppos(  7, 4 ) ;=$48E0
+.define _bmprow08 ELITE_BITMAP_ADDR + .bmppos(  8, 4 ) ;=$4A20
+.define _bmprow09 ELITE_BITMAP_ADDR + .bmppos(  9, 4 ) ;=$4B60
+.define _bmprow10 ELITE_BITMAP_ADDR + .bmppos( 10, 4 ) ;=$4CA0
+.define _bmprow11 ELITE_BITMAP_ADDR + .bmppos( 11, 4 ) ;=$4DE0
+.define _bmprow12 ELITE_BITMAP_ADDR + .bmppos( 12, 4 ) ;=$4F20
+.define _bmprow13 ELITE_BITMAP_ADDR + .bmppos( 13, 4 ) ;=$5060
+.define _bmprow14 ELITE_BITMAP_ADDR + .bmppos( 14, 4 ) ;=$51A0
+.define _bmprow15 ELITE_BITMAP_ADDR + .bmppos( 15, 4 ) ;=$52E0
+.define _bmprow16 ELITE_BITMAP_ADDR + .bmppos( 16, 4 ) ;=$5420
+.define _bmprow17 ELITE_BITMAP_ADDR + .bmppos( 17, 4 ) ;=$5560
+.define _bmprow18 ELITE_BITMAP_ADDR + .bmppos( 18, 4 ) ;=$56A0
+.define _bmprow19 ELITE_BITMAP_ADDR + .bmppos( 19, 4 ) ;=$57E0
+.define _bmprow20 ELITE_BITMAP_ADDR + .bmppos( 20, 4 ) ;=$5920
+.define _bmprow21 ELITE_BITMAP_ADDR + .bmppos( 21, 4 ) ;=$5A60
+.define _bmprow22 ELITE_BITMAP_ADDR + .bmppos( 22, 4 ) ;=$5BA0
+.define _bmprow23 ELITE_BITMAP_ADDR + .bmppos( 23, 4 ) ;=$5CE0
+.define _bmprow24 ELITE_BITMAP_ADDR + .bmppos( 24, 4 ) ;=$5E20
 
-_9800:
-.export _9800
-        .byte   $40, $40, $40, $40, $40, $40, $40, $40                  ;$9800
-        .byte   $41, $41, $41, $41, $41, $41, $41, $41                  ;$9808
-        .byte   $42, $42, $42, $42, $42, $42, $42, $42                  ;$9810
-        .byte   $43, $43, $43, $43, $43, $43, $43, $43                  ;$9818
-        .byte   $45, $45, $45, $45, $45, $45, $45, $45                  ;$9820
-        .byte   $46, $46, $46, $46, $46, $46, $46, $46                  ;$9828
-        .byte   $47, $47, $47, $47, $47, $47, $47, $47                  ;$9830
-        .byte   $48, $48, $48, $48, $48, $48, $48, $48                  ;$9838
-        .byte   $4a, $4a, $4a, $4a, $4a, $4a, $4a, $4a                  ;$9840
-        .byte   $4b, $4b, $4b, $4b, $4b, $4b, $4b, $4b                  ;$9848
-        .byte   $4c, $4c, $4c, $4c, $4c, $4c, $4c, $4c                  ;$9850
-        .byte   $4d, $4d, $4d, $4d, $4d, $4d, $4d, $4d                  ;$9858
-        .byte   $4f, $4f, $4f, $4f, $4f, $4f, $4f, $4f                  ;$9860
-        .byte   $50, $50, $50, $50, $50, $50, $50, $50                  ;$9868
-        .byte   $51, $51, $51, $51, $51, $51, $51, $51                  ;$9870
-        .byte   $52, $52, $52, $52, $52, $52, $52, $52                  ;$9878
-        .byte   $54, $54, $54, $54, $54, $54, $54, $54                  ;$9880
-        .byte   $55, $55, $55, $55, $55, $55, $55, $55                  ;$9888
-        .byte   $56, $56, $56, $56, $56, $56, $56, $56                  ;$9890
-        .byte   $57, $57, $57, $57, $57, $57, $57, $57                  ;$9898
-        .byte   $59, $59, $59, $59, $59, $59, $59, $59                  ;$98a0
-        .byte   $5a, $5a, $5a, $5a, $5a, $5a, $5a, $5a                  ;$98a8
-        .byte   $5b, $5b, $5b, $5b, $5b, $5b, $5b, $5b                  ;$98b0
-        .byte   $5c, $5c, $5c, $5c, $5c, $5c, $5c, $5c                  ;$98b8
-        .byte   $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e                  ;$98c0
-        .byte   $5f, $5f, $5f, $5f, $5f, $5f, $5f, $5f                  ;$98c8
-        .byte   $60, $60, $60, $60, $60, $60, $60, $60                  ;$98d0
-        .byte   $61, $61, $61, $61, $61, $61, $61, $61                  ;$98d8
-        .byte   $63, $63, $63, $63, $63, $63, $63, $63                  ;$98e0
-        .byte   $64, $64, $64, $64, $64, $64, $64, $64                  ;$98e8
-        .byte   $65, $65, $65, $65, $65, $65, $65, $65                  ;$98f0
-        .byte   $66, $66, $66, $66, $66, $66, $66, $66                  ;$98f8
+; what is this madness!? despite the C64 screen being 25 rows, the data table
+; just keeps going! this is purely because the lo/hi tables are indexed and it
+; makes it faster to have these aligned a page ($00..$FF)
+
+.define _bmprow25 ELITE_BITMAP_ADDR + .bmppos( 25, 4 ) ;=$5F60
+.define _bmprow26 ELITE_BITMAP_ADDR + .bmppos( 26, 4 ) ;=$60A0
+.define _bmprow27 ELITE_BITMAP_ADDR + .bmppos( 27, 4 ) ;=$61E0
+.define _bmprow28 ELITE_BITMAP_ADDR + .bmppos( 28, 4 ) ;=$6320
+.define _bmprow29 ELITE_BITMAP_ADDR + .bmppos( 29, 4 ) ;=$6460
+.define _bmprow30 ELITE_BITMAP_ADDR + .bmppos( 30, 4 ) ;=$65A0
+.define _bmprow31 ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
+
+; repeat each row address 8 times:
+.define _rowtobmp \
+        _bmprow00, _bmprow00, _bmprow00, _bmprow00, \
+        _bmprow00, _bmprow00, _bmprow00, _bmprow00, \
+        _bmprow01, _bmprow01, _bmprow01, _bmprow01, \
+        _bmprow01, _bmprow01, _bmprow01, _bmprow01, \
+        _bmprow02, _bmprow02, _bmprow02, _bmprow02, \
+        _bmprow02, _bmprow02, _bmprow02, _bmprow02, \
+        _bmprow03, _bmprow03, _bmprow03, _bmprow03, \
+        _bmprow03, _bmprow03, _bmprow03, _bmprow03, \
+        _bmprow04, _bmprow04, _bmprow04, _bmprow04, \
+        _bmprow04, _bmprow04, _bmprow04, _bmprow04, \
+        _bmprow05, _bmprow05, _bmprow05, _bmprow05, \
+        _bmprow05, _bmprow05, _bmprow05, _bmprow05, \
+        _bmprow06, _bmprow06, _bmprow06, _bmprow06, \
+        _bmprow06, _bmprow06, _bmprow06, _bmprow06, \
+        _bmprow07, _bmprow07, _bmprow07, _bmprow07, \
+        _bmprow07, _bmprow07, _bmprow07, _bmprow07, \
+        _bmprow08, _bmprow08, _bmprow08, _bmprow08, \
+        _bmprow08, _bmprow08, _bmprow08, _bmprow08, \
+        _bmprow09, _bmprow09, _bmprow09, _bmprow09, \
+        _bmprow09, _bmprow09, _bmprow09, _bmprow09, \
+        _bmprow10, _bmprow10, _bmprow10, _bmprow10, \
+        _bmprow10, _bmprow10, _bmprow10, _bmprow10, \
+        _bmprow11, _bmprow11, _bmprow11, _bmprow11, \
+        _bmprow11, _bmprow11, _bmprow11, _bmprow11, \
+        _bmprow12, _bmprow12, _bmprow12, _bmprow12, \
+        _bmprow12, _bmprow12, _bmprow12, _bmprow12, \
+        _bmprow13, _bmprow13, _bmprow13, _bmprow13, \
+        _bmprow13, _bmprow13, _bmprow13, _bmprow13, \
+        _bmprow14, _bmprow14, _bmprow14, _bmprow14, \
+        _bmprow14, _bmprow14, _bmprow14, _bmprow14, \
+        _bmprow15, _bmprow15, _bmprow15, _bmprow15, \
+        _bmprow15, _bmprow15, _bmprow15, _bmprow15, \
+        _bmprow16, _bmprow16, _bmprow16, _bmprow16, \
+        _bmprow16, _bmprow16, _bmprow16, _bmprow16, \
+        _bmprow17, _bmprow17, _bmprow17, _bmprow17, \
+        _bmprow17, _bmprow17, _bmprow17, _bmprow17, \
+        _bmprow18, _bmprow18, _bmprow18, _bmprow18, \
+        _bmprow18, _bmprow18, _bmprow18, _bmprow18, \
+        _bmprow19, _bmprow19, _bmprow19, _bmprow19, \
+        _bmprow19, _bmprow19, _bmprow19, _bmprow19, \
+        _bmprow20, _bmprow20, _bmprow20, _bmprow20, \
+        _bmprow20, _bmprow20, _bmprow20, _bmprow20, \
+        _bmprow21, _bmprow21, _bmprow21, _bmprow21, \
+        _bmprow21, _bmprow21, _bmprow21, _bmprow21, \
+        _bmprow22, _bmprow22, _bmprow22, _bmprow22, \
+        _bmprow22, _bmprow22, _bmprow22, _bmprow22, \
+        _bmprow23, _bmprow23, _bmprow23, _bmprow23, \
+        _bmprow23, _bmprow23, _bmprow23, _bmprow23, \
+        _bmprow24, _bmprow24, _bmprow24, _bmprow24, \
+        _bmprow24, _bmprow24, _bmprow24, _bmprow24, \
+        _bmprow25, _bmprow25, _bmprow25, _bmprow25, \
+        _bmprow25, _bmprow25, _bmprow25, _bmprow25, \
+        _bmprow26, _bmprow26, _bmprow26, _bmprow26, \
+        _bmprow26, _bmprow26, _bmprow26, _bmprow26, \
+        _bmprow27, _bmprow27, _bmprow27, _bmprow27, \
+        _bmprow27, _bmprow27, _bmprow27, _bmprow27, \
+        _bmprow28, _bmprow28, _bmprow28, _bmprow28, \
+        _bmprow28, _bmprow28, _bmprow28, _bmprow28, \
+        _bmprow29, _bmprow29, _bmprow29, _bmprow29, \
+        _bmprow29, _bmprow29, _bmprow29, _bmprow29, \
+        _bmprow30, _bmprow30, _bmprow30, _bmprow30, \
+        _bmprow30, _bmprow30, _bmprow30, _bmprow30, \
+        _bmprow31, _bmprow31, _bmprow31, _bmprow31, \
+        _bmprow31, _bmprow31, _bmprow31, _bmprow31
+
+; write out separate 256-byte tables for lo-address / hi-address:
+; TODO: these must be aligned by the linker
+
+row_to_bitmap_lo:                                                       ;$9700
+        .lobytes _rowtobmp
+
+row_to_bitmap_hi:                                                       ;$9800
+        .hibytes _rowtobmp
+
+.export row_to_bitmap_lo
+.export row_to_bitmap_hi
 
 ;===============================================================================
 
@@ -6570,7 +6641,7 @@ _9800:
 ; 'screen' so this equates the the 4th character in each row
 
 .import ELITE_MENUSCR_COLOR_ADDR
-.define menuscr_pos  \
+.define menuscr_pos \
         ELITE_MENUSCR_COLOR_ADDR + .scrpos(  0, 3 ), \
         ELITE_MENUSCR_COLOR_ADDR + .scrpos(  1, 3 ), \
         ELITE_MENUSCR_COLOR_ADDR + .scrpos(  2, 3 ), \
@@ -8794,7 +8865,7 @@ _a731:
         lda # $01
         sta $31
         sta $33
-        jsr _b21a
+        jsr _b21a               ; clear screen -- called only here
         ldx $66
         beq _a75d
         jsr _7224
@@ -9558,9 +9629,9 @@ _ac19:
         lda $6b
         and # $f8
         clc 
-        adc _9700, y
+        adc row_to_bitmap_lo, y
         sta $07
-        lda _9800, y
+        lda row_to_bitmap_hi, y
         adc # $00
         sta $08
         tya 
@@ -9787,11 +9858,11 @@ _ad88:
 ;===============================================================================
 
 _ad8b:
-        lda _9800, y
+        lda row_to_bitmap_hi, y
         sta $08
         lda $6b
         and # $f8
-        adc _9700, y
+        adc row_to_bitmap_lo, y
         sta $07
         bcc _ad9e
         inc $08
@@ -10046,9 +10117,9 @@ _af22:
         txa 
         and # $f8
         clc 
-        adc _9700, y
+        adc row_to_bitmap_lo, y
         sta $07
-        lda _9800, y
+        lda row_to_bitmap_hi, y
         adc # $00
         sta $08
         tya 
@@ -10194,12 +10265,12 @@ _b00b:
         tay 
         and # $07
         sta $07
-        lda _9800, y
+        lda row_to_bitmap_hi, y
         sta $08
         txa 
         and # $f8
         clc 
-        adc _9700, y
+        adc row_to_bitmap_lo, y
         tay 
         bcc _b025
         inc $08
@@ -10299,9 +10370,9 @@ _b0b5:
         lda $6b
         and # $f8
         clc 
-        adc _9700, y
+        adc row_to_bitmap_lo, y
         sta $07
-        lda _9800, y
+        lda row_to_bitmap_hi, y
         adc # $00
         sta $08
         tya 
@@ -10471,12 +10542,13 @@ _b179:  ; NOTE: called only ever by `_2c7d`!
         lda # $0c
 
 print_char:                                                             ;$B17B
-.export print_char
         ;-----------------------------------------------------------------------
         ; write a character to the bitmap screen as if it were the text screen
         ; (automatically advances the cursor)
+.export print_char
 
         ; store current registers
+        ; (compatibility with KERNAL_CHROUT?)
         sta $35
         sty $0490
         stx $048f
@@ -10611,7 +10683,7 @@ _b1a1:
         ; is this the character code for the solid-block character?
         ; TODO: generate this index in "gfx/font.asm"?
 :       cpy # $7f                                                       ;$B1DE
-        bne _b1ed
+        bne :+
 
         ; backspace?
         dec ZP_CHROUT_COL
@@ -10621,8 +10693,8 @@ _b1a1:
         ldy # $f8
         jsr _b3b5
         beq _b210
-_b1ed:
-        inc ZP_CHROUT_COL
+
+:       inc ZP_CHROUT_COL                                               ;$B1ED
         ; this is `sta $08` if you jump in after the `bit` instruction,
         ; but it doesn't look like this actually occurs
         bit $0885
@@ -10637,6 +10709,9 @@ _b1ed:
         dey 
         bpl :-
 
+        ; lookup the character colour cell from the row/col index:
+        ; -- note that Elite has a 256-px (32-char) centred screen,
+        ;    so this table returns column 4 ($03) as the 'first' column
         ldy ZP_CHROUT_ROW
         lda menuscr_lo, y
         sta ZP_CHROUT_DRAWADDR_LO
@@ -10644,68 +10719,96 @@ _b1ed:
         sta ZP_CHROUT_DRAWADDR_HI
 
         ldy ZP_CHROUT_COL
-        lda $050c
+        lda $050c               ; colour?
         sta [ZP_CHROUT_DRAWADDR], y
-_b210:
-        ; restore registers before returning
+
+        ; exit and clean-up:
+        ;-----------------------------------------------------------------------
+_b210:  ; restore registers before returning
+        ; (compatibility with KERNAL_CHROUT?)
         ldy $0490
         ldx $048f
         lda $35
+
         clc 
         rts 
 
 ;===============================================================================
 
+; clear screen
+
 _b21a:
-        lda #< $6004
+        ; set starting position in top-left of the centred
+        ; 32-char (256px) screen Elite uses
+        lda #< (ELITE_MENUSCR_COLOR_ADDR + .scrpos( 0, 4 ))
         sta $07
-        lda #> $6004
+        lda #> (ELITE_MENUSCR_COLOR_ADDR + .scrpos( 0, 4 ))
         sta $08
-        ldx # $18
-_b224:
-        lda # $10
-        ldy # $1f
-_b228:
-        sta [$07], y
+
+        ldx # 24                ; colour 24 rows
+
+@row:   lda # .color_nybbles( WHITE, BLACK )                            ;$B224
+        ldy # 31                ; 32 columns (0-31)
+
+:       sta [$07], y                                                    ;$B228
         dey 
-        bpl _b228
-        lda $07
+        bpl :-
+
+        ; move to the next row
+        lda $07                 ; get the row lo-address
         clc 
-        adc # $28
+        adc # 40                ; add 40 chars (one screen row)
         sta $07
-        bcc _b238
-        inc $08
-_b238:
-        dex 
-        bne _b224
+        bcc :+                  ; remains under 255?
+        inc $08                 ; if not, increase the hi-address
+
+:       dex                     ; decrement remaining row count         ;$B238
+        bne @row
+
+        ;-----------------------------------------------------------------------
+        
+        ; erase $4000..$5600
+        ; (the non-HUD portion of the bitmap)
+
+        ; TODO: this should be calculated based on the size of the HUD data?
+
         ldx # $40
-_b23d:
-        jsr _b3a7
+:       jsr erase_page                                                  ;$B23D
         inx 
         cpx # $56
-        bne _b23d
+        bne :-
+
+        ; erase $5600..$567F?
         ldy # $7f
-        jsr _b3ab
+        jsr erase_bytes
         sta [$07], y
+
+        ;-----------------------------------------------------------------------
+
+        ; set cursor position to row/col 2 on Elite's screen
         lda # $01
         sta $31
         sta $33
+        
+        ;-----------------------------------------------------------------------
+
+        ; mode?
         lda $a0
-        beq _b25a
+        beq :+
         cmp # $0d
         bne _b25d
-_b25a:
-        jmp _b301
+:       jmp _b301                                                       ;$B25A
 
         ;-----------------------------------------------------------------------
 
 _b25d:
-        lda # $81
+        lda # $81               ; default value
         sta _a8db
-        lda # $c0
+        
+        lda # $c0               ; default value
         sta _a8e1
 _b267:
-        jsr _b3a7
+        jsr erase_page
         inx 
         cpx # $60
         bne _b267
@@ -10795,11 +10898,14 @@ _b2e7:
 
 _b301:
         jsr _b2b1+1
+        
         lda # $91
-        sta _a8db
+        sta _a8db               ; default value is $81
+        
         lda # $d0
-        sta _a8e1
-        lda _1d04
+        sta _a8e1               ; default value is $C0
+        
+        lda _1d04               ; is HUD visible? (main or menu screen?)
         bne _b335
         
         ; reset the HUD graphics from the copy kept in RAM
@@ -10810,7 +10916,7 @@ _b301:
         sta $5b
         lda #> __DATA_HUD_RUN__
         sta $5c
-        lda #< $5680
+        lda #< $5680            ; start of the HUD on bitmap?
         sta $07
         lda #> $5680
         sta $08
@@ -10821,8 +10927,8 @@ _b301:
         jsr _b3c5
         jsr _b341
         jsr _2ff3
-_b335:
-        jsr _b359
+
+_b335:  jsr _b359
         jsr disable_sprites
 
         lda # $ff
@@ -10886,9 +10992,9 @@ _b384:
         ldy # $00
         clc 
 _b389:
-        lda _9700, x
+        lda row_to_bitmap_lo, x
         sta $07
-        lda _9800, x
+        lda row_to_bitmap_hi, x
         sta $08
         tya 
 _b394:
@@ -10905,19 +11011,32 @@ _b394:
         sty $33
         rts 
 
-;===============================================================================
 
-_b3a7:
+erase_page:                                                             ;$B3A7
+        ;=======================================================================
+        ; erase a page (256 bytes, aligned to $00...$FF)
+        ;
+        ; X = page-number, i.e. hi-address
+        
         ldy # $00
         sty $07
-_b3ab:
+
+erase_bytes:                                                            ;$B3AB
+        ;-----------------------------------------------------------------------
+        ; erase some bytes:
+        ;
+        ; $07 = lo-address
+        ;   X = hi-address
+        ;   Y = offset
+        
         lda # $00
         stx $08
-_b3af:
-        sta [$07], y
+
+:       sta [$07], y                                                    ;$B3AF
         dey 
-        bne _b3af
-        rts
+        bne :-
+
+        rts 
 
 ;===============================================================================
 

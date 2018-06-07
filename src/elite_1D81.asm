@@ -88,8 +88,8 @@
 .import _9400:absolute
 .import _9500:absolute
 .import _9600:absolute
-.import _9700:absolute
-.import _9800:absolute
+.import row_to_bitmap_lo:absolute
+.import row_to_bitmap_hi:absolute
 
 .import _9978:absolute
 .import _99af:absolute
@@ -1758,9 +1758,9 @@ _293a:
         txa 
         and # $f8
         clc 
-        adc _9700, y
+        adc row_to_bitmap_lo, y
         sta $07
-        lda _9800, y
+        lda row_to_bitmap_hi, y
         adc # $00
         sta $08
         tya 
