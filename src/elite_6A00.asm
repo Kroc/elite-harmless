@@ -318,7 +318,7 @@ _6b1e:                                                                  ;$6b1e
         lsr 
         lsr 
         pha 
-        and # $07
+        and # %00000111
         cmp # $03
         bcs _6b2e
         adc # $e3
@@ -335,7 +335,7 @@ _6b2e:                                                                  ;$6b2e
 _6b3b:                                                                  ;$6b3b
         lda $82
         eor $80
-        and # $07
+        and # %00000111
         sta $8e
         cmp # $06
         bcs _6b4c
@@ -343,10 +343,10 @@ _6b3b:                                                                  ;$6b3b
         jsr _6a9b
 _6b4c:                                                                  ;$6b4c
         lda $84
-        and # $03
+        and # %00000011
         clc 
         adc $8e
-        and # $07
+        and # %00000111
         adc # $f2
         jsr _777e
 _6b5a:                                                                  ;$6b5a
@@ -370,7 +370,7 @@ _6b5a:                                                                  ;$6b5a
         jsr _7779
         lda $84
         ldx $82
-        and # $0f
+        and # %00001111
         clc 
         adc # $0b
         tay 
@@ -390,26 +390,26 @@ _6b5a:                                                                  ;$6b5a
 
 _6ba9:                                                                  ;$6ba9
         lda $80
-        and # $07
+        and # %00000111
         sta $0500
         lda $81
         lsr 
         lsr 
         lsr 
-        and # $07
+        and # %00000111
         sta $0501
         lsr 
         bne _6bc5
         lda $0500
-        ora # $02
+        ora # %00000010
         sta $0500
 _6bc5:                                                                  ;$6bc5
         lda $0500
-        eor # $07
+        eor # %00000111
         clc 
         sta $0502
         lda $82
-        and # $03
+        and # %00000011
         adc $0502
         sta $0502
         lda $0501
@@ -423,7 +423,7 @@ _6bc5:                                                                  ;$6bc5
         adc # $01
         sta $0503
         lda $0500
-        eor # $07
+        eor # %00000111
         adc # $03
         sta $2e
         lda $0501
@@ -466,7 +466,7 @@ _6c40:                                                                  ;$6c40
         ldx $82
         ldy $83
         tya 
-        ora # $50
+        ora # %01010000
         sta $a1
         lda $80
         lsr 
@@ -823,7 +823,7 @@ _6eea:                                                                  ;$6eea
         ldy $04ca
         jsr _2e59
         jsr _84af
-        and # $03
+        and # %00000011
         clc 
         adc # $6f
         jsr _2390
@@ -866,7 +866,7 @@ _6f3a:                                                                  ;$6f3a
         lda # $ce
         jsr _2390
         jsr _8fea
-        ora # $20
+        ora # %00100000
         cmp # $79
         beq _6f50
         lda # $6e
@@ -883,7 +883,7 @@ _6f55:                                                                  ;$6f55
         pha 
         dey 
         tya 
-        eor # $ff
+        eor # %11111111
         pha 
         jsr _b148
         jsr _6f82
@@ -988,7 +988,7 @@ _7009:                                                                  ;$7009
         sec 
         sbc $049a
         bcs _7015
-        eor # $ff
+        eor # %11111111
         adc # $01
 _7015:                                                                  ;$7015
         cmp # $14
@@ -997,7 +997,7 @@ _7015:                                                                  ;$7015
         sec 
         sbc $049b
         bcs _7025
-        eor # $ff
+        eor # %11111111
         adc # $01
 _7025:                                                                  ;$7025
         cmp # $26
@@ -1052,7 +1052,7 @@ _7070:                                                                  ;$7070
         lda $71
         sta $35
         lda $84
-        and # $01
+        and # %00000001
         adc # $02
         sta $77
         jsr _7b4f
@@ -1097,7 +1097,7 @@ _70b6:                                                                  ;$70b6
         sec 
         sbc $0509
         bcs _70c2
-        eor # $ff
+        eor # %11111111
         adc # $01
 _70c2:                                                                  ;$70c2
         lsr 
@@ -1106,7 +1106,7 @@ _70c2:                                                                  ;$70c2
         sec 
         sbc $050a
         bcs _70d1
-        eor # $ff
+        eor # %11111111
         adc # $01
 _70d1:                                                                  ;$70d1
         lsr 
@@ -1140,7 +1140,7 @@ _70f1:                                                                  ;$70f1
         sec 
         sbc $049a
         bcs _710c
-        eor # $ff
+        eor # %11111111
         adc # $01
 _710c:                                                                  ;$710c
         jsr _3988
@@ -1151,7 +1151,7 @@ _710c:                                                                  ;$710c
         sec 
         sbc $049b
         bcs _7122
-        eor # $ff
+        eor # %11111111
         adc # $01
 _7122:                                                                  ;$7122
         lsr 
@@ -1199,7 +1199,7 @@ _7165:                                                                  ;$7165
         bmi _71ca
         lda $a0
         beq _71c4
-        and # $c0
+        and # %11000000
         bne _7173
         rts 
 
@@ -1264,7 +1264,7 @@ _71ca:                                                                  ;$71ca
         ldx # $05
         inc $04a8
         lda $04a8
-        and # $f7
+        and # %11110111
         sta $04a8
 _71e8:                                                                  ;$71e8
         lda $049c, x
@@ -1387,7 +1387,7 @@ _72af:                                                                  ;$72af
         bne _72c7
 _72b8:                                                                  ;$72b8
         lda $8f
-        and # $60
+        and # %01100000
         beq _72ca
         cmp # $20
         beq _72d1
@@ -1444,7 +1444,7 @@ _7305:                                                                  ;$7305
 
 _731a:                                                                  ;$731a
         lda $8f
-        and # $1f
+        and # %00011111
         ldy $04ee
         sta $90
         clc 
@@ -1507,7 +1507,7 @@ _7384:                                                                  ;$7384
         lda # $00
 _7388:                                                                  ;$7388
         ldy $ad
-        and # $3f
+        and # %00111111
         sta $04ce, y
         iny 
         tya 
@@ -1551,7 +1551,7 @@ _73c1:                                                                  ;$73c1
         ldx # $00
         jsr _a6ba
         lda $049b
-        eor # $1f
+        eor # %00011111
         sta $049b
         rts 
 
@@ -1586,7 +1586,7 @@ _73f5:                                                                  ;$73f5
         jsr _83df
         jsr _7a9f
         lda $a0
-        and # $3f
+        and # %00111111
         bne _73dc
         jsr _a731
         lda $a0
@@ -2005,9 +2005,9 @@ _76f9:
         sty $bb
 _76fb:
         lda $84
-        and # $1f
+        and # %00011111
         beq _7706
-        ora # $80
+        ora # %10000000
         jsr _777e
 _7706:
         jsr _6a41
@@ -2158,7 +2158,7 @@ _77ca:
         bcc _77f6
         pha 
         txa 
-        ora # $40
+        ora # %01000000
         sta $34
         pla 
         bne _77c7
@@ -2178,7 +2178,7 @@ _77e7:
 _77ef:
         pha 
         txa 
-        and # $bf
+        and # %10111111
         sta $34
         pla 
 _77f6:
@@ -2187,7 +2187,7 @@ _77f6:
 _77f9:
         cmp # $a0
         bcs _7811
-        and # $7f
+        and # %01111111
         asl 
         tay 
         lda _2566, y
@@ -2228,7 +2228,7 @@ _7834:
         lda $5c
         pha 
         lda [$5b], y
-        eor # $23
+        eor # %00100011
         jsr _777e
         pla 
         sta $5c
@@ -2260,7 +2260,7 @@ _7851:
 
 _785f:
         lda $28
-        ora # $a0
+        ora # %10100000
         sta $28
         rts 
 
@@ -2268,7 +2268,7 @@ _785f:
 
 _7866:
         lda $28
-        and # $40
+        and # %01000000
         beq _786f
         jsr _78d6
 _786f:
@@ -2311,9 +2311,9 @@ _78aa:
         dey 
         sta [$2a], y
         lda $28
-        and # $bf
+        and # %10111111
         sta $28
-        and # $08
+        and # %00001000
         beq _784e
         ldy # $02
         lda [$2a], y
@@ -2325,7 +2325,7 @@ _78bc:
         cpy # $06
         bne _78bc
         lda $28
-        ora # $40
+        ora # %01000000
         sta $28
         ldy $050d
         cpy # $12
@@ -2339,13 +2339,13 @@ _78d6:
         iny 
         lda [$2a], y
         bpl _78e3
-        eor # $ff
+        eor # %11111111
 _78e3:
         lsr 
         lsr 
         lsr 
         lsr 
-        ora # $01
+        ora # %00000001
         sta $99
         iny 
         lda [$2a], y
@@ -2500,13 +2500,13 @@ _79c0:
         iny 
         lda [$2a], y
         bpl _79d9
-        eor # $ff
+        eor # %11111111
 _79d9:
         lsr 
         lsr 
         lsr 
         lsr 
-        ora # $01
+        ora # %00000001
         sta $99
         iny 
         lda [$2a], y
@@ -2543,14 +2543,14 @@ _79ed:
         cpy # $c2
         bcs _7a36
         lda VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
-        and # $fd
+        and # %11111101
         ora _79a7, x
         sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         ldx $07
         sty VIC_SPRITE1_Y
         stx VIC_SPRITE1_X
         lda VIC_SPRITE_ENABLE
-        ora # $02
+        ora # %00000010
         sta VIC_SPRITE_ENABLE
 _7a36:
         ldy # $02
@@ -2611,8 +2611,8 @@ _7a8c:
         sta $26
         sta $27
         lda $04f1
-        and # $02
-        ora # $80
+        and # %00000010
+        ora # %10000000
         jmp _7c6b
 
 ;===============================================================================
@@ -2624,9 +2624,9 @@ _7a9f:
         sta $04b0
         sta $04b6
         jsr _84af
-        and # $0f
+        and # %00001111
         adc $04c9
-        ora # $04
+        ora # %00000100
         rol 
         sta $04c9
         rol $04ca
@@ -2636,7 +2636,7 @@ _7ac2:
         lsr $04cd
         jsr _8447
         lda $80
-        and # $03
+        and # %00000011
         adc # $03
         sta $11
         ror 
@@ -2644,11 +2644,11 @@ _7ac2:
         sta $0e
         jsr _7a8c
         lda $82
-        and # $07
-        ora # $81
+        and # %00000111
+        ora # %10000001
         sta $11
         lda $84
-        and # $03
+        and # %00000011
         sta $0b
         sta $0a
         lda # $00
@@ -2663,7 +2663,7 @@ _7af7:
         ldy $050b
 _7afa:
         jsr _84af
-        ora # $08
+        ora # %00001000
         sta $06d6, y
         sta $a1
         jsr _84af
@@ -2694,7 +2694,7 @@ _7b2a:
         ldx $9d
         ldy # $1f
         lda [$59], y
-        and # $a7
+        and # %10100111
         sta [$59], y
 _7b41:
         inx 
@@ -2775,7 +2775,7 @@ _7b7d:
 _7b93:
         ldy # $ff
         txa 
-        eor # $ff
+        eor # %11111111
         tax 
         inx 
         rts 
@@ -2863,10 +2863,10 @@ _7c11:
         sta $35, x
         lda $f902, x            ;?
         tay 
-        and # $7f
+        and # %01111111
         sta $36, x
         tya 
-        and # $80
+        and # %10000000
         sta $37, x
         rts 
 
@@ -2965,7 +2965,7 @@ _7cc4:
         sta $2c
         ldy # $13
         lda [$57], y
-        and # $07
+        and # %00000111
         sta $28
         lda $bb
 _7cd4:
@@ -2985,7 +2985,7 @@ _7ce9:
 _7cec:
         ldy $bb
         lda $d041, y
-        and # $6f
+        and # %01101111
         ora $2d
         sta $2d
         ldy # $24
@@ -3001,7 +3001,7 @@ _7cf9:
 
 _7d03:
         lda $09, x
-        eor # $80
+        eor # %10000000
         sta $09, x
         inx 
         inx 
@@ -3044,7 +3044,7 @@ _7d1f:
         lda $0d
         sta $2f
         lda $0e
-        eor # $80
+        eor # %10000000
         jsr _81c9
         bcs _7d56
         lda $77
@@ -3113,7 +3113,7 @@ _7d99:
         cmp # $06
         bcc _7d98
         lda $17
-        eor # $80
+        eor # %10000000
         sta $2e
         lda $1d
         jsr _81aa
@@ -3128,7 +3128,7 @@ _7d99:
         jsr _81ba
         jsr _7e54
         lda $17
-        eor # $80
+        eor # %10000000
         sta $2e
         lda $23
         jsr _81aa
@@ -3185,10 +3185,10 @@ _7e36:
         lda $09, x
         sta $2e
         lda $0a, x
-        and # $7f
+        and # %01111111
         sta $2f
         lda $0a, x
-        and # $80
+        and # %10000000
         jsr _3bc1
         lda $77
         ldy $78
@@ -3210,7 +3210,7 @@ _7e58:
         stx $a9
 _7e5f:
         lda $ab
-        and # $1f
+        and # %00011111
         tax 
         lda _0ac0, x
         sta $9a
@@ -3228,7 +3228,7 @@ _7e5f:
         lda $ab
         clc 
         adc # $10
-        and # $1f
+        and # %00011111
         tax 
         lda _0ac0, x
         sta $9a
@@ -3240,7 +3240,7 @@ _7e5f:
         sta $2e
         lda $ab
         adc # $0f
-        and # $3f
+        and # %00111111
         cmp # $21
         lda # $00
         ror 
@@ -3254,12 +3254,12 @@ _7e5f:
         sta $bb
         bpl _7ec8
         txa 
-        eor # $ff
+        eor # %11111111
         clc 
         adc # $01
         tax 
         lda $bb
-        eor # $7f
+        eor # %01111111
         adc # $00
         sta $bb
 _7ec8:
@@ -3279,16 +3279,16 @@ _7ec8:
         lda $49
         eor $46
         jsr _3ad1
-        eor # $80
+        eor # %10000000
         sta $bb
         bpl _7efd
         txa 
-        eor # $ff
+        eor # %11111111
         clc 
         adc # $01
         tax 
         lda $bb
-        eor # $7f
+        eor # %01111111
         adc # $00
         sta $bb
 _7efd:
@@ -3300,7 +3300,7 @@ _7f06:
         lda $ab
         clc 
         adc $ac
-        and # $3f
+        and # %00111111
         sta $ab
         jmp _7e5f
 
@@ -3314,7 +3314,7 @@ _7f13:
 
 _7f16:
         txa 
-        eor # $ff
+        eor # %11111111
         clc 
         adc # $01
         tax 
@@ -3519,7 +3519,7 @@ _8065:
         ldx $aa
         cpx # $21
         bcc _8081
-        eor # $ff
+        eor # %11111111
         adc # $00
         tax 
         lda # $ff
@@ -3542,11 +3542,11 @@ _8081:
         sta $bb
         lda $aa
         adc # $0f
-        and # $3f
+        and # %00111111
         cmp # $21
         bcc _80af
         txa 
-        eor # $ff
+        eor # %11111111
         adc # $00
         tax 
         lda # $ff
@@ -3706,7 +3706,7 @@ _8189:
         ldx $99
         ldy $7a
         bpl _81a7
-        eor # $ff
+        eor # %11111111
         clc 
         adc # $01
         beq _81a7
@@ -3722,7 +3722,7 @@ _81aa:
         jsr _3c95
         ldx $17
         bmi _81b5
-        eor # $80
+        eor # %10000000
 _81b5:
         lsr 
         lsr 
@@ -3741,7 +3741,7 @@ _81ba:
 _81c9:
         jsr _3bc1
         lda $7a
-        and # $7f
+        and # %01111111
         ora $79
         bne _8187
         ldx $78
@@ -3750,11 +3750,11 @@ _81c9:
         lda $7a
         bpl _81ed
         lda $77
-        eor # $ff
+        eor # %11111111
         adc # $01
         sta $77
         txa 
-        eor # $ff
+        eor # %11111111
         adc # $00
         tax 
 _81ec:
@@ -3838,7 +3838,7 @@ _8258:
         lda # $01
         ora _8d3d
         ora _8d18
-        eor # $fe
+        eor # %11111110
 _8268:
         bit _8d4b
         bpl _826f
@@ -3939,14 +3939,14 @@ _82be:
         ldy # $20
         lda [$07], y
         bpl _82be
-        and # $7f
+        and # %01111111
         lsr 
         cmp $ad
         bcc _82be
         beq _82ed
         sbc # $01
         asl 
-        ora # $80
+        ora # %10000000
         sta [$07], y
         bne _82be
 _82ed:
@@ -3970,7 +3970,7 @@ _8305:
         cpx # $1f
         bne _831d
         lda $0499
-        ora # $02
+        ora # %00000010
         sta $0499
         inc $04e1
 _831d:
@@ -4170,7 +4170,7 @@ _8447:
         lda # $60
         sta $1b
         sta $1f
-        ora # $80
+        ora # %10000000
         sta $17
         
         rts 
@@ -4216,10 +4216,10 @@ _848d:
         jsr _8447
         jsr _84af
         sta $06
-        and # $80
+        and # %10000000
         sta $0b
         txa 
-        and # $80
+        and # %10000000
         sta $0e
         lda # $19
         sta $0a
@@ -4228,7 +4228,7 @@ _848d:
         txa 
         cmp # $f5
         rol 
-        ora # $c0
+        ora # %11000000
         sta $29
 _84ae:
         clc 
@@ -4255,18 +4255,18 @@ _84c3:
         sta $29
         sta $26
         rol $28
-        and # $1f
-        ora # $10
+        and # %00011111
+        ora # %00010000
         sta $24
         jsr _84af
         bmi _84e2
         lda $29
-        ora # $c0
+        ora # %11000000
         sta $29
         ldx # $10
         stx $2d
 _84e2:
-        and # $02
+        and # %00000010
         adc # $0b
         cmp # $0f
         beq _84ed
@@ -4298,27 +4298,27 @@ _8501:
         jsr _84af
         sta $09
         stx $0c
-        and # $80
+        and # %10000000
         sta $0b
         txa 
-        and # $80
+        and # %10000000
         sta $0e
         rol $0a
         rol $0a
         jsr _84af
         bvs _84c3
-        ora # $6f
+        ora # %01101111
         sta $26
         lda $045f
         bne _8562
         txa 
         bcs _8548
-        and # $1f
-        ora # $10
+        and # %00011111
+        ora # %00010000
         sta $24
         bcc _854c
 _8548:
-        ora # $7f
+        ora # %01111111
         sta $27
 _854c:
         jsr _84af
@@ -4329,7 +4329,7 @@ _854c:
         bne _855f
 _8559:
         cmp # $0a
-        and # $01
+        and # %00000001
         adc # $05
 _855f:
         jsr _7c6b
@@ -4361,7 +4361,7 @@ _8588:
         bpl _8567
         inc $048a
         lda $0499
-        and # $0c
+        and # %00001100
         cmp # $08
         bne _85a8
         jsr _84af
@@ -4375,7 +4375,7 @@ _85a8:
         beq _85bb
         cmp # $5a
         bcs _8567
-        and # $07
+        and # %00000111
         cmp $04f0
         bcc _8567
 _85bb:
@@ -4383,7 +4383,7 @@ _85bb:
         cmp # $64
         bcs _860b
         inc $048a
-        and # $03
+        and # %00000011
         adc # $18
         tay 
         jsr _83b4
@@ -4391,7 +4391,7 @@ _85bb:
         lda # $f9
         sta $29
         lda $0499
-        and # $03
+        and # %00000011
         lsr 
         bcc _85e0
         ora $047c
@@ -4402,7 +4402,7 @@ _85e0:
         jsr _84af
         cmp # $c8
         rol 
-        ora # $c0
+        ora # %11000000
         sta $29
         tya 
 _85ef:      ; NOTE: when accessed as $85F0, this becomes `lda # $1f`
@@ -4413,7 +4413,7 @@ _85f2:
 
 _85f8:
         lda $f906
-        and # $3e
+        and # %00111110
         bne _85a5
         lda # $12
         sta $24
@@ -4422,7 +4422,7 @@ _85f8:
         lda # $20
         bne _85f2
 _860b:
-        and # $03
+        and # %00000011
         sta $048a
         sta $a2
 _8612:
@@ -4430,7 +4430,7 @@ _8612:
         sta $bb
         jsr _84af
         and $bb
-        and # $07
+        and # %00000111
         adc # $11
         jsr _7c6b
         dec $a2
@@ -4486,14 +4486,14 @@ _8680:
         cmp $bb
         bcs _86a1
         jsr _84af
-        ora # $40
+        ora # %01000000
         tax 
         lda # $80
         ldy $0483
         cpy # $e0
         bcc _869c
         txa 
-        and # $0f
+        and # %00001111
         tax 
         lda # $f1
 _869c:
@@ -4600,14 +4600,14 @@ _872c:
         lda $a7
         beq _877d
         lda $a0
-        and # $c0
+        and # %11000000
         beq _877d
         jmp _31c6
 
 _8741:
         sta $06
         lda $a0
-        and # $c0
+        and # %11000000
         beq _875f
         lda $66
         bne _875f
@@ -4642,7 +4642,7 @@ _877d:
 _877e:
 .export _877e
         lda $a0
-        and # $c0
+        and # %11000000
         beq _877d
         jsr _7695
         sta $34
@@ -4742,18 +4742,18 @@ _87fd:
         sty $29
         dey 
         sty $a3
-        eor # $2a
+        eor # %00101010
         sta $0c
-        ora # $50
+        ora # %01010000
         sta $0f
         txa 
-        and # $8f
+        and # %10001111
         sta $26
         ldy # $40
         sty $0487
         sec 
         ror 
-        and # $87
+        and # %10000111
         sta $27
         ldx # $05
         lda VIC_SPRITE3_Y
@@ -4763,7 +4763,7 @@ _87fd:
 _8835:
         jsr _3695
         jsr _84af
-        and # $80
+        and # %10000000
         ldy # $1f
         sta [$59], y
         lda $0456
@@ -4880,14 +4880,14 @@ _88fd:
         jsr _89eb
         cmp _25ff
         bne _88fd
-        eor # $a9
+        eor # %10101001
         tax 
         lda $04a7
         cpx _25fd
         beq _8912
-        ora # $80
+        ora # %10000000
 _8912:
-        ora # $40
+        ora # %01000000
         sta $04a7
         jsr _89f9
         cmp _25fe
@@ -4979,7 +4979,7 @@ _89c6:
         ldx $06fb
         stx $0f
         lda $a3
-        and # $03
+        and # %00000011
         lda # $00
         sta $09
         sta $0c
@@ -5209,7 +5209,7 @@ _8b0f:
 _8b11:
         ;-----------------------------------------------------------------------
         lda _1d0e
-        eor # $ff
+        eor # %11111111
         sta _1d0e
         jmp _8ae7
 
@@ -5239,13 +5239,13 @@ _8b37:
         jsr _89eb
         sta _25ff
         pha 
-        ora # $80
+        ora # %10000000
         sta $77
         eor $04a7
         sta $79
         eor $04a4
         sta $78
-        eor # $5a
+        eor # %01011010
         eor $04e1
         sta $7a
         clc 
@@ -5253,7 +5253,7 @@ _8b37:
         jsr _6a8e
         jsr _6a8e
         pla 
-        eor # $a9
+        eor # %10101001
         sta _25fd
         jsr _8bc0
         lda #< _25b3
@@ -5274,7 +5274,7 @@ _8b37:
         inx 
         stx VIC_INTERRUPT_CONTROL
         lda $d011               ;vic control register 1
-        and # $7f
+        and # %01111111
         sta $d011               ;vic control register 1
         lda # $28
         sta $d012               ;raster position
@@ -5332,7 +5332,7 @@ _8bc0:
         lda # $02
         jsr _2390
         jsr _8fec
-        ora # $10
+        ora # %00010000
         jsr print_char
         pha 
         jsr _2f1f
@@ -5362,7 +5362,7 @@ _8c0d:
         inx 
         stx VIC_INTERRUPT_CONTROL
         lda $d011               ;vic control register 1
-        and # $7f
+        and # %01111111
         sta $d011               ;vic control register 1
         lda # $28
         sta $d012               ;raster position
@@ -5435,7 +5435,7 @@ _8c8a:
         lda $35
         ora $38
         ora $3b
-        ora # $01
+        ora # %00000001
         sta $3e
         lda $36
         ora $39
@@ -5577,14 +5577,14 @@ _8d53:
         jsr set_memory_layout
 
         lda VIC_SPRITE_ENABLE
-        and # $fd
+        and # %11111101
         sta VIC_SPRITE_ENABLE
         jsr _8c6d
         ldx _1d0c
         beq _8d73
         lda $dc00               ;cia1: data port register a
-        and # $1f
-        eor # $1f
+        and # %00011111
+        eor # %00011111
         bne _8db1
 _8d73:
         clc 
@@ -5787,7 +5787,7 @@ _8eba:
         cmp _1d14, y
         bne _8ed4
         lda _1d06, y
-        eor # $ff
+        eor # %11111111
         sta _1d06, y
         jsr _2fee
         tya 
@@ -5820,7 +5820,7 @@ _8ee3:
         jsr _8447
         lda # $60
         sta $17
-        ora # $80
+        ora # %10000000
         sta $1f
         sta $a5
         lda $96
@@ -6096,7 +6096,7 @@ _90e9:
 _90f4:
         tax 
         lda $6c
-        and # $60
+        and # %01100000
         beq _90e9
         lda # $02
         jsr _91b8
@@ -6121,7 +6121,7 @@ _9105:
         sta $17
         ldy # $04
         lda $6b
-        and # $60
+        and # %01100000
         beq _90f4
         ldx # $02
         lda # $00
@@ -6148,21 +6148,21 @@ _9131:
         ldx $17
         lda $1b
         jsr _3b0d
-        eor # $80
+        eor # %10000000
         sta $1f
         lda $19
         jsr _3aa8
         ldx $13
         lda $1d
         jsr _3b0d
-        eor # $80
+        eor # %10000000
         sta $21
         lda $1b
         jsr _3aa8
         ldx $15
         lda $19
         jsr _3b0d
-        eor # $80
+        eor # %10000000
         sta $23
         lda # $00
         ldx # $0e
@@ -6177,7 +6177,7 @@ _9184:
 
 _918b:
         tay 
-        and # $7f
+        and # %01111111
         cmp $9a
         bcs _91b2
         ldx # $fe
@@ -6198,14 +6198,14 @@ _919d:
         adc $bb
         sta $bb
         tya 
-        and # $80
+        and # %10000000
         ora $bb
         rts 
 
 _91b2:
         tya 
-        and # $80
-        ora # $60
+        and # %10000000
+        ora # %01100000
         rts 
 
 ;===============================================================================
@@ -6224,10 +6224,10 @@ _91b8:
         ldy $30
         ldx $13, y
         stx $9a
-        eor # $80
+        eor # %10000000
         sta $2f
         eor $9a
-        and # $80
+        and # %10000000
         sta $bb
         lda # $00
         ldx # $10
@@ -6281,7 +6281,7 @@ _9222:
         bne _9266
 _9231:
         sta _1d02
-        eor # $ff
+        eor # %11111111
         and $0480
         bmi _9222
 _923b:
@@ -6853,10 +6853,10 @@ _9a16:
 _9a1f:
         pha 
         lda $9c
-        eor # $80
+        eor # %10000000
         sta $9c
         pla 
-        eor # $ff
+        eor # %11111111
         adc # $01
         rts 
 
@@ -6927,7 +6927,7 @@ _9a86:
         bne _9ac5
         bpl _9ac5
         ora $28
-        and # $3f
+        and # %00111111
         sta $28
         lda # $00
         ldy # $1c
@@ -6953,10 +6953,10 @@ _9ac5:
         bpl _9ae6
 _9ac9:
         lda $28
-        and # $20
+        and # %00100000
         beq _9ad8
         lda $28
-        and # $f7
+        and # %11110111
         sta $28
         jmp _7866
 
@@ -7054,7 +7054,7 @@ _9b66:
         sta $44
         ldy # $0c
         lda $28
-        and # $20
+        and # %00100000
         beq _9b8b
         lda [$57], y
         lsr 
@@ -7130,7 +7130,7 @@ _9baa:
 _9bf2:
         lda [$5b], y
         sta $72
-        and # $1f
+        and # %00011111
         cmp $ad
         bcs _9c0b
         tya 
@@ -7332,13 +7332,13 @@ _9d45:
         iny 
         lda [$5b], y
         sta $bb
-        and # $1f
+        and # %00011111
         cmp $ad
         bcc _9d8e
         iny 
         lda [$5b], y
         sta $2e
-        and # $0f
+        and # %00001111
         tax 
         lda $35, x
         bne _9d91
@@ -7353,7 +7353,7 @@ _9d45:
         iny 
         lda [$5b], y
         sta $2e
-        and # $0f
+        and # %00001111
         tax 
         lda $35, x
         bne _9d91
@@ -7403,7 +7403,7 @@ _9db6:
         sbc # $00
         sta $6c
         bcs _9dd9
-        eor # $ff
+        eor # %11111111
         sta $6c
         lda # $01
         sbc $6b
@@ -7412,7 +7412,7 @@ _9db6:
         inc $6c
 _9dd3:
         lda $6d
-        eor # $80
+        eor # %10000000
         sta $6d
 _9dd9:
         lda $0e
@@ -7441,14 +7441,14 @@ _9df1:
         sbc # $00
         sta $6f
         bcs _9e16
-        eor # $ff
+        eor # %11111111
         sta $6f
         lda $6e
-        eor # $ff
+        eor # %11111111
         adc # $01
         sta $6e
         lda $70
-        eor # $80
+        eor # %10000000
         sta $70
         bcc _9e16
         inc $6f
@@ -7620,10 +7620,10 @@ _9f06:
 
 _9f1b:
         lda $28
-        and # $20
+        and # %00100000
         beq _9f2a
         lda $28
-        ora # $08
+        ora # %00001000
         sta $28
         jmp _7866
 
@@ -7646,7 +7646,7 @@ _9f35:
         bit $28
         bvc _9f9f
         lda $28
-        and # $bf
+        and # %10111111
         sta $28
         ldy # $06
         lda [$57], y
@@ -7711,7 +7711,7 @@ _9fb8:
         lda [$5b], y
         iny 
         sta $2e
-        and # $0f
+        and # %00001111
         tax 
         lda $35, x
         bne _9fd9
@@ -8158,11 +8158,11 @@ _a26c:
         bmi _a283
 _a277:
         txa 
-        eor # $ff
+        eor # %11111111
         adc # $01
         tax 
         tya 
-        eor # $ff
+        eor # %11111111
         adc # $00
         tay 
 _a283:
@@ -8181,7 +8181,7 @@ _a284:
         sta $9b
         lda $9c
         pha 
-        eor # $ff
+        eor # %11111111
         adc # $00
         sta $9c
         pla 
@@ -8194,11 +8194,11 @@ _a29d:
 _a2a0:
 .export _a2a0
         lda $28
-        and # $a0
+        and # %10100000
         bne _a2cb
         lda $a3
         eor $9d
-        and # $0f
+        and # %00001111
         bne _a2b1
         jsr _9105
 _a2b1:
@@ -8215,7 +8215,7 @@ _a2b8:
         beq _a2c8
         lda $a3
         eor $9d
-        and # $07
+        and # %00000111
         bne _a2cb
 _a2c8:
         jsr _32ad
@@ -8226,21 +8226,21 @@ _a2cb:
         asl 
         sta $9a
         lda $13
-        and # $7f
+        and # %01111111
         jsr _39ea
         sta $9b
         lda $13
         ldx # $00
         jsr _a44a
         lda $15
-        and # $7f
+        and # %01111111
         jsr _39ea
         sta $9b
         lda $15
         ldx # $03
         jsr _a44a
         lda $17
-        and # $7f
+        and # %01111111
         jsr _39ea
         sta $9b
         lda $17
@@ -8262,7 +8262,7 @@ _a315:
         sta $25
         ldx $68
         lda $09
-        eor # $ff
+        eor # %11111111
         sta $2e
         lda $0a
         jsr _3a25
@@ -8274,7 +8274,7 @@ _a315:
         sta $b5
         lda $2f
         sta $b3
-        eor # $ff
+        eor # %11111111
         sta $2e
         lda $30
         sta $b4
@@ -8288,7 +8288,7 @@ _a315:
         sta $11
         lda $2f
         sta $0f
-        eor # $ff
+        eor # %11111111
         sta $2e
         lda $30
         sta $10
@@ -8322,12 +8322,12 @@ _a37d:
         sbc $0d
         sta $0d
         lda $0e
-        eor # $80
+        eor # %10000000
         sta $0e
 _a39d:
         ldx $68
         lda $0c
-        eor # $ff
+        eor # %11111111
         sta $2e
         lda $0d
         jsr _3a25
@@ -8348,7 +8348,7 @@ _a3bf:
         ldx # $06
         jsr _a44c
         lda $a5
-        and # $81
+        and # %10000001
         cmp # $81
         bne _a3d3
         rts 
@@ -8363,10 +8363,10 @@ _a3d3:
         ldy # $15
         jsr _a4a1
         lda $27
-        and # $80
+        and # %10000000
         sta $b1
         lda $27
-        and # $7f
+        and # %01111111
         beq _a40b
         cmp # $7f
         sbc # $00
@@ -8383,10 +8383,10 @@ _a3d3:
         jsr _2dc5
 _a40b:
         lda $26
-        and # $80
+        and # %10000000
         sta $b1
         lda $26
-        and # $7f
+        and # %01111111
         beq _a434
         cmp # $7f
         sbc # $00
@@ -8403,10 +8403,10 @@ _a40b:
         jsr _2dc5
 _a434:
         lda $28
-        and # $a0
+        and # %10100000
         bne _a443
         lda $28
-        ora # $10
+        ora # %00010000
         sta $28
         jmp _b410
 
@@ -8414,14 +8414,14 @@ _a434:
 
 _a443:
         lda $28
-        and # $ef
+        and # %11101111
         sta $28
         rts 
 
 ;===============================================================================
 
 _a44a:
-        and # $80
+        and # %10000000
 _a44c:
 .export _a44c
         asl 
@@ -8455,9 +8455,9 @@ _a46f:
         sbc $9c
         sta $0a, x
         lda $0b, x
-        and # $7f
+        and # %01111111
         sbc # $00
-        ora # $80
+        ora # %10000000
         eor $bb
         sta $0b, x
         bcs _a4a0
@@ -8469,7 +8469,7 @@ _a46f:
         sta $0a, x
         lda # $00
         sbc $0b, x
-        and # $7f
+        and # %01111111
         ora $bb
         sta $0b, x
 _a4a0:
@@ -8487,7 +8487,7 @@ _a4a1:
         ldx $09, y
         stx $2e
         lda $000a, y
-        eor # $80
+        eor # %10000000
         jsr _3ace
         sta $000c, y
         stx $0b, y
@@ -8510,7 +8510,7 @@ _a4a1:
         ldx $0d, y
         stx $2e
         lda $000e, y
-        eor # $80
+        eor # %10000000
         jsr _3ace
         sta $000c, y
         stx $0b, y
@@ -8553,7 +8553,7 @@ _a51c:
         sta $30
         bcc _a52f
         tya 
-        eor # $80
+        eor # %10000000
         rts 
 
         ;-----------------------------------------------------------------------
@@ -8572,7 +8572,7 @@ _a52f:
 
 _a53d:
         lda $a6
-        eor # $80
+        eor # %10000000
         sta $9a
         lda $09
         sta $2e
@@ -8603,10 +8603,10 @@ _a53d:
         sta $10
         lda $7a
         sta $11
-        eor # $80
+        eor # %10000000
         jsr _38f8
         lda $7a
-        and # $80
+        and # %10000000
         sta $bb
         eor $b5
         bmi _a5a8
@@ -8634,10 +8634,10 @@ _a5a8:
         sbc $b4
         sta $0d
         lda $b5
-        and # $7f
+        and # %01111111
         sta $2e
         lda $7a
-        and # $7f
+        and # %01111111
         sbc $2e
         sta $2e
         bcs _a5db
@@ -8649,7 +8649,7 @@ _a5a8:
         sta $0d
         lda # $00
         sbc $2e
-        ora # $80
+        ora # %10000000
 _a5db:
         eor $bb
         sta $0e
@@ -8706,28 +8706,28 @@ _a626:
         dex 
         bne _a65f
         lda $0b
-        eor # $80
+        eor # %10000000
         sta $0b
         lda $11
-        eor # $80
+        eor # %10000000
         sta $11
         lda $13
-        eor # $80
+        eor # %10000000
         sta $13
         lda $17
-        eor # $80
+        eor # %10000000
         sta $17
         lda $19
-        eor # $80
+        eor # %10000000
         sta $19
         lda $1d
-        eor # $80
+        eor # %10000000
         sta $1d
         lda $1f
-        eor # $80
+        eor # %10000000
         sta $1f
         lda $23
-        eor # $80
+        eor # %10000000
         sta $23
 _a65e:
         rts 
@@ -8739,7 +8739,7 @@ _a65f:
         cpx # $02
         ror 
         sta $b1
-        eor # $80
+        eor # %10000000
         sta $b0
         lda $09
         ldx $0f
@@ -8823,7 +8823,7 @@ _a6f2:
 _a700:
         sta $bb
         lda $04ca
-        and # $7f
+        and # %01111111
         lsr 
         lsr 
         lsr 
@@ -8877,7 +8877,7 @@ _a75d:
         lda # $0b
         jsr _6a25
         lda $0486
-        ora # $60
+        ora # %01100000
         jsr _777e
         jsr _72c5
         lda # $af
@@ -8952,7 +8952,7 @@ _a7db:
         asl 
         asl 
         asl 
-        ora # $03
+        ora # %00000011
         ldy # $03
         ldx # $51
         jmp _a850
@@ -8981,7 +8981,7 @@ _a801:
         asl 
         asl 
         asl 
-        ora # $03
+        ora # %00000011
         ldy # $02
         ldx # $d0
         jmp _a850
@@ -9016,7 +9016,7 @@ _a827:
         dex 
         bmi _a821
         lda _aa13, x
-        and # $3f
+        and # %00111111
         cmp $6d
         bne _a827
         lda # $01
@@ -9055,7 +9055,7 @@ _a857:  ; NOTE: when accessed as $A858, this becomes `clv` (clear overlow)
         bcs _a876
 _a86a:
         lda _aa13, x
-        and # $3f
+        and # %00111111
         cmp $6d
         beq _a88b
         dex 
@@ -9073,7 +9073,7 @@ _a884:
         ldx # $02
 _a88b:
         tya 
-        and # $7f
+        and # %01111111
         tay 
         lda _aa32, y
         cmp _aa19, x
@@ -9102,7 +9102,7 @@ _a8bd:  ; NOTE: when accessed as $A8BE, this becomes `lda $6c`
         sta _aa2c, x
         iny 
         tya 
-        ora # $80
+        ora # %10000000
         sta _aa13, x
         cli 
         sec 
@@ -9144,10 +9144,10 @@ _a8ed:
         pla 
         tax 
 
-        lda CPU_CONTROL         ; [$01]
-        and # $f8
+        lda CPU_CONTROL
+        and # %11111000
         ora current_memory_layout
-        sta CPU_CONTROL         ; [$01]
+        sta CPU_CONTROL
         
         pla 
         rti 
@@ -9158,12 +9158,12 @@ _a8fa:
         pha 
         
         lda CPU_CONTROL
-        and # $f8
-        ora # $05
+        and # %11111000
+        ora # MEM_IO_ONLY
         sta CPU_CONTROL
 
         lda VIC_INTERRUPT_STATUS
-        ora # $80
+        ora # %10000000
         sta VIC_INTERRUPT_STATUS
         
         txa 
@@ -9277,14 +9277,14 @@ _a9bd:
 _a9dc:
         ldx _aa2f, y
         lda _aa23, y
-        and # $fe
+        and # %11111110
         sta $d404, x            ;voice 1: control register
         lda # $00
         sta _aa13, y
         sta _aa19, y
         beq _a9f6
 _a9f1:
-        and # $7f
+        and # %01111111
         sta _aa13, y
 _a9f6:
         dey 
@@ -9293,7 +9293,7 @@ _a9f6:
 
 _a9fc:
         lda _aa1c
-        eor # $04
+        eor # %00000100
         sta _aa1c
 _aa04:
         pla 
@@ -9302,7 +9302,7 @@ _aa04:
         tax 
 
         lda CPU_CONTROL
-        and # $f8
+        and # %11111000
         ora current_memory_layout
         sta CPU_CONTROL
 
@@ -9431,7 +9431,7 @@ _aaa2:
         stx VIC_INTERRUPT_CONTROL
         
         lda $d011               ;vic control register 1
-        and # $7f
+        and # %01111111
         sta $d011               ;vic control register 1
         
         ; set the interrupt to occur at line 40 (and 296?)
@@ -9555,7 +9555,7 @@ _ab91:
         lda $6d
         sbc $6b
         bcs _aba5
-        eor # $ff
+        eor # %11111111
         adc # $01
 _aba5:
         sta $bc
@@ -9563,7 +9563,7 @@ _aba5:
         lda $6e
         sbc $6c
         bcs _abb2
-        eor # $ff
+        eor # %11111111
         adc # $01
 _abb2:
         sta $bd
@@ -9627,7 +9627,7 @@ _ac0d:
 
 _ac19:
         lda $6b
-        and # $f8
+        and # %11111000
         clc 
         adc row_to_bitmap_lo, y
         sta $07
@@ -9635,10 +9635,10 @@ _ac19:
         adc # $00
         sta $08
         tya 
-        and # $07
+        and # %00000111
         tay 
         lda $6b
-        and # $07
+        and # %00000111
         tax 
         bit $06f4
         bmi _ac49
@@ -9861,7 +9861,7 @@ _ad8b:
         lda row_to_bitmap_hi, y
         sta $08
         lda $6b
-        and # $f8
+        and # %11111000
         adc row_to_bitmap_lo, y
         sta $07
         bcc _ad9e
@@ -9874,11 +9874,11 @@ _ad9e:
         dec $08
 _ada6:
         tya 
-        and # $07
-        eor # $f8
+        and # %00000111
+        eor # %11111000
         tay 
         lda $6b
-        and # $07
+        and # %00000111
         tax 
         bit $06f4
         bmi _adc9
@@ -10115,7 +10115,7 @@ _af08:
         tay 
 _af22:
         txa 
-        and # $f8
+        and # %11111000
         clc 
         adc row_to_bitmap_lo, y
         sta $07
@@ -10123,10 +10123,10 @@ _af22:
         adc # $00
         sta $08
         tya 
-        and # $07
+        and # %00000111
         tay 
         txa 
-        and # $07
+        and # %00000111
         tax 
         lda _ab31, x
         sta $be
@@ -10263,12 +10263,12 @@ _b00b:
         dec $6d
         lda $6c
         tay 
-        and # $07
+        and # %00000111
         sta $07
         lda row_to_bitmap_hi, y
         sta $08
         txa 
-        and # $f8
+        and # %11111000
         clc 
         adc row_to_bitmap_lo, y
         tay 
@@ -10276,10 +10276,10 @@ _b00b:
         inc $08
 _b025:
         txa 
-        and # $f8
+        and # %11111000
         sta $c0
         lda $6d
-        and # $f8
+        and # %11111000
         sec 
         sbc $c0
         beq _b073
@@ -10288,7 +10288,7 @@ _b025:
         lsr 
         sta $be
         lda $6b
-        and # $07
+        and # %00000111
         tax 
         lda _2907, x
         eor [$07], y
@@ -10318,7 +10318,7 @@ _b061:
         bne _b052
 _b064:
         lda $6d
-        and # $07
+        and # %00000111
         tax 
         lda _2900, x
         eor [$07], y
@@ -10330,12 +10330,12 @@ _b064:
 
 _b073:
         lda $6b
-        and # $07
+        and # %00000111
         tax 
         lda _2907, x
         sta $c0
         lda $6d
-        and # $07
+        and # %00000111
         tax 
         lda _2900, x
         and $c0
@@ -10368,7 +10368,7 @@ _b0b0:
 _b0b5:
         ldy $6c
         lda $6b
-        and # $f8
+        and # %11111000
         clc 
         adc row_to_bitmap_lo, y
         sta $07
@@ -10376,10 +10376,10 @@ _b0b5:
         adc # $00
         sta $08
         tya 
-        and # $07
+        and # %00000111
         tay 
         lda $6b
-        and # $07
+        and # %00000111
         tax 
         lda _ab47, x
         and $32
@@ -10411,10 +10411,10 @@ _b0f4:
         jsr _a857+1
 _b0fd:
         lda $67a3               ;?
-        eor # $e0
+        eor # %11100000
         sta $67a3               ;?
         lda $67cb
-        eor # $e0
+        eor # %11100000
         sta $67cb
         rts 
 
@@ -10422,10 +10422,10 @@ _b0fd:
 
 _b10e:
         lda $67b4
-        eor # $e0
+        eor # %11100000
         sta $67b4
         lda $67dc
-        eor # $e0
+        eor # %11100000
         sta $67dc
         rts 
 
@@ -10436,7 +10436,7 @@ _b11f:
         dex 
         txa 
         inx 
-        eor # $03
+        eor # %00000011
         sty $07
         tay 
         lda $07
@@ -10947,7 +10947,7 @@ _b343:
         jsr _3e87
         ldy # $1f
         lda [$59], y
-        and # $ef
+        and # %11101111
         sta [$59], y
 _b355:
         inx 
@@ -11122,7 +11122,7 @@ _b410:
         lda $a0
         bne _b40f
         lda $28
-        and # $10
+        and # %00010000
         beq _b40f
         ldx $a5
         bmi _b40f
@@ -11131,13 +11131,13 @@ _b410:
         lda $0a
         ora $0d
         ora $10
-        and # $c0
+        and # %11000000
         bne _b40f
         lda $0a
         clc 
         ldx $0b
         bpl _b438
-        eor # $ff
+        eor # %11111111
         adc # $01
 _b438:
         adc # $7b
@@ -11148,18 +11148,18 @@ _b438:
         clc 
         ldx $11
         bpl _b448
-        eor # $ff
+        eor # %11111111
         sec 
 _b448:
         adc # $53
-        eor # $ff
+        eor # %11111111
         sta $07
         lda $0d
         lsr 
         clc 
         ldx $0e
         bmi _b459
-        eor # $ff
+        eor # %11111111
         sec 
 _b459:
         adc $07
@@ -11270,7 +11270,7 @@ _b4dd:
         jsr _b60c
         sta $d1
 _b4eb:
-        and # $0f
+        and # %00001111
         tax 
 _b4ee:
         lda $d1

@@ -129,7 +129,7 @@ _038a:  clc
         
         lda CPU_CONTROL
         and # %11111000
-        ora # %00000110         ; KERNAL ROM on
+        ora # MEM_IO_KERNAL     ; I/O & KERNAL ROM on
         sta CPU_CONTROL
 
         sec 
