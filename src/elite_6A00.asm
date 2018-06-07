@@ -121,6 +121,10 @@
 ; from "gfx/hulls.asm"
 .import _d000:absolute
 
+
+.exportzp       ZP_CURSOR_COL   := $31
+.exportzp       ZP_CURSOR_ROW   := $33
+
 ;===============================================================================
 
 .segment        "CODE_6A00"
@@ -152,21 +156,21 @@ _6a1b:                                                                  ;$6a1b
 
 _6a25:                                                                  ;$6a25
 .export _6a25
-        sta $31
+        sta ZP_CURSOR_COL
         rts 
 
 ;===============================================================================
 
 _6a28:                                                                  ;$6a28
 .export _6a28
-        sta $33
+        sta ZP_CURSOR_ROW
         rts 
 
 ;===============================================================================
 
 _6a2b:                                                                  ;$6a2b
 .export _6a2b
-        inc $33
+        inc ZP_CURSOR_ROW
         rts 
 
 ;===============================================================================
@@ -1921,12 +1925,12 @@ _765e:
         clc 
         adc # $20
         jsr _6a9b
-        lda $33
+        lda ZP_CURSOR_ROW
         clc 
         adc # $50
         jsr _777e
         jsr _6a2b
-        ldy $33
+        ldy ZP_CURSOR_ROW
         cpy # $14
         bcc _765e
         jsr _b3d4
@@ -4953,10 +4957,12 @@ _8994:
         ldy # $00
         sty $96
         sty _1d0c
+
         lda # $0f
-        sta $33
+        sta ZP_CURSOR_ROW
         lda # $01
-        sta $31
+        sta ZP_CURSOR_COL
+        
         pla 
         jsr _2390
         lda # $03
@@ -8862,10 +8868,12 @@ _a731:
         sta $0484
         sta $048b
         sta $048c
+        
         lda # $01
-        sta $31
-        sta $33
+        sta ZP_CURSOR_COL
+        sta ZP_CURSOR_ROW
         jsr _b21a               ; clear screen -- called only here
+        
         ldx $66
         beq _a75d
         jsr _7224
@@ -8884,8 +8892,8 @@ _a75d:
         jsr _777e
 _a77b:
         ldx # $01
-        stx $31
-        stx $33
+        stx ZP_CURSOR_COL
+        stx ZP_CURSOR_ROW
         dex 
         stx $34
         rts 
@@ -10510,10 +10518,7 @@ _b14e:
 .endproc
 
 ;define the use of some zero-page variables for this routine
-.exportzp       ZP_CHROUT_COL           := $31
-.exportzp       ZP_CHROUT_ROW           := $33
 .exportzp       ZP_CHROUT_CHARADDR      := $2f  ; $2f/$30
-
 .exportzp       ZP_CHROUT_DRAWADDR      := $07  ; $07/$08
 .exportzp       ZP_CHROUT_DRAWADDR_LO   := $07
 .exportzp       ZP_CHROUT_DRAWADDR_HI   := $08
@@ -10568,13 +10573,13 @@ _b189:
 _b195:
         ; start at column 2, i.e. leave a one-char padding from the viewport
         ldx # $01               
-        stx ZP_CHROUT_COL
+        stx ZP_CURSOR_COL
 _b199:
         cmp # $0d               ; is it RETURN? although note that `chrout`
                                 ; replaces $0D codes with $0C
         beq _b176
 
-        inc ZP_CHROUT_ROW
+        inc ZP_CURSOR_ROW
         bne _b176
 
 _b1a1:
@@ -10632,14 +10637,14 @@ _b1a1:
         ; line-wrap?
         ; SPEED: this causes the character address to
         ;        have to be recalculated again!
-        lda ZP_CHROUT_COL
+        lda ZP_CURSOR_COL
         cmp # 31                ; max width of line? (32 chars = 256 px)
         bcs _b195               ; reach the end of the line, carriage-return!
         
         lda # $80
         sta ZP_CHROUT_DRAWADDR_LO
         
-        lda ZP_CHROUT_ROW
+        lda ZP_CURSOR_ROW
         cmp # 24
         bcc :+
         
@@ -10663,7 +10668,7 @@ _b1a1:
         ; taking a number and making it the high-byte of a word is just
         ; multiplying it by 256, i.e. shifting left 8 bits
         
-        adc ZP_CHROUT_ROW
+        adc ZP_CURSOR_ROW
         ; re-base to the start of the bitmap screen
 .import ELITE_BITMAP_ADDR
         adc #> ELITE_BITMAP_ADDR
@@ -10671,7 +10676,7 @@ _b1a1:
 
         ; calculte the offset of the column
         ; (each character is 8-bytes in the bitmap screen)
-        lda ZP_CHROUT_COL 
+        lda ZP_CURSOR_COL 
         asl                     ; x2
         asl                     ; x4
         asl                     ; x8
@@ -10686,7 +10691,7 @@ _b1a1:
         bne :+
 
         ; backspace?
-        dec ZP_CHROUT_COL
+        dec ZP_CURSOR_COL
         ; go back 256 pixels??
         dec ZP_CHROUT_DRAWADDR_HI
         
@@ -10694,7 +10699,7 @@ _b1a1:
         jsr _b3b5
         beq _b210
 
-:       inc ZP_CHROUT_COL                                               ;$B1ED
+:       inc ZP_CURSOR_COL                                               ;$B1ED
         ; this is `sta $08` if you jump in after the `bit` instruction,
         ; but it doesn't look like this actually occurs
         bit $0885
@@ -10712,13 +10717,13 @@ _b1a1:
         ; lookup the character colour cell from the row/col index:
         ; -- note that Elite has a 256-px (32-char) centred screen,
         ;    so this table returns column 4 ($03) as the 'first' column
-        ldy ZP_CHROUT_ROW
+        ldy ZP_CURSOR_ROW
         lda menuscr_lo, y
         sta ZP_CHROUT_DRAWADDR_LO
         lda menuscr_hi, y
         sta ZP_CHROUT_DRAWADDR_HI
 
-        ldy ZP_CHROUT_COL
+        ldy ZP_CURSOR_COL
         lda $050c               ; colour?
         sta [ZP_CHROUT_DRAWADDR], y
 
@@ -10787,8 +10792,8 @@ _b21a:
 
         ; set cursor position to row/col 2 on Elite's screen
         lda # $01
-        sta $31
-        sta $33
+        sta ZP_CURSOR_COL
+        sta ZP_CURSOR_ROW
         
         ;-----------------------------------------------------------------------
 
@@ -10816,8 +10821,8 @@ _b267:
         stx _1d01
         stx _1d04
         inx 
-        stx $31
-        stx $33
+        stx ZP_CURSOR_COL
+        stx ZP_CURSOR_ROW
         jsr _b359
         jsr _b341
         jsr disable_sprites
@@ -11007,8 +11012,8 @@ _b394:
         cmp # $c0
         bcc _b389
         iny 
-        sty $31
-        sty $33
+        sty ZP_CURSOR_COL
+        sty ZP_CURSOR_ROW
         rts 
 
 
@@ -11052,13 +11057,13 @@ _b3b7:
 
 ; unreferenced / unused?
 ;$b3bd:
-        sta $31
+        sta ZP_CURSOR_COL
         rts 
 
 ;===============================================================================
 
 _b3c0:
-        sta $33
+        sta ZP_CURSOR_ROW
         rts 
 
 ;===============================================================================
@@ -11088,9 +11093,9 @@ _b3d4:  ; NOTE: referenced by table at `_250c`
         lda #> _8015
         sta $34
         lda #< _8015
-        sta $33
+        sta ZP_CURSOR_ROW
         lda # $01
-        sta $31
+        sta ZP_CURSOR_COL
         lda #> $5a60
         sta $08
         lda #< $5a60
