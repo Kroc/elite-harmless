@@ -21,10 +21,10 @@
 
 ; from "elite_6A00.asm"
 .import _6a00:absolute
-.import _6a25:absolute
-.import _6a28:absolute
+.import set_cursor_col:absolute
+.import set_cursor_row:absolute
+.import cursor_down:absolute
 .import _6a2f:absolute
-.import _6a2b:absolute
 .import _6a3b:absolute
 .import _6a9b:absolute
 .import _6f82:absolute
@@ -120,10 +120,9 @@
 .import _b11f:absolute
 .import _b148:absolute
 .import _b179:absolute
+.import print_char:absolute
 .import _b3d4:absolute
 .import _b410:absolute
-
-.import print_char:absolute
 
 ; from "data_hulls.asm"
 .import _d000:absolute
@@ -1167,7 +1166,7 @@ _246c:
 
 _2478:  ; NOTE: this address is used in the table in _250c
         lda # $06
-        jsr _6a25
+        jsr set_cursor_col
         lda # $ff
         sta _2f19
         rts 
@@ -1176,7 +1175,7 @@ _2478:  ; NOTE: this address is used in the table in _250c
 
 _2483:  ; NOTE: this address is used in the table in _250c
         lda # $01
-        jsr _6a25
+        jsr set_cursor_col
         jmp _a72f
 
 ;===============================================================================
@@ -1679,7 +1678,7 @@ _28dc:  ; NOTE: this address is used in the table in _250c
 _28e0:
 .export _28e0
         lda # $17
-        jsr _6a2b               ; SPEED: inline this
+        jsr cursor_down
 _28e5:
 .export _28e5
         sta $6c
@@ -2239,7 +2238,7 @@ _2c9b:
         jsr _6a2f
         jsr _70ab
         lda # $07
-        jsr _6a25
+        jsr set_cursor_col
         lda # $7e
         jsr _28d9
         lda # $0f
@@ -2347,7 +2346,7 @@ _2d59:
 _2d61:
         jsr _7773
         lda # $06
-        jmp _6a25
+        jmp set_cursor_col
 
 ;===============================================================================
 
@@ -5108,7 +5107,7 @@ _3dff:                                                                  ;$3dff
         sta $a5
         jsr _7c6b
         lda # $01
-        jsr _6a25
+        jsr set_cursor_col
         sta $10
         jsr _a72f
         lda # $40
@@ -5169,7 +5168,7 @@ _3e57:  ; NOTE: this address is used in the table in _250c
 _3e59:  ; NOTE: this address is used in the table in _250c
         ; (jumps into the middle of this `bit` instruction)
         bit $06a9
-        jsr _6a28
+        jsr set_cursor_row
         jsr _250b
         jmp _248b
 _3e65:                                                                  ;$3e65

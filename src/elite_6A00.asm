@@ -152,24 +152,37 @@ _6a1b:                                                                  ;$6a1b
         pla 
         rts
 
-;===============================================================================
 
-_6a25:                                                                  ;$6a25
-.export _6a25
+.proc   set_cursor_col                                                  ;$6a25
+        ;=======================================================================
+        ; set the cursor column (where text printing occurs)
+        ;
+        ; A = column number
+        ;
+.export set_cursor_col
+
         sta ZP_CURSOR_COL
         rts 
+.endproc
 
-;===============================================================================
+.proc   set_cursor_row                                                  ;$6a28
+        ;=======================================================================
+        ; set the cursor row (where text printing occurs)
+        ;
+        ; A = row number
+        ;
+.export set_cursor_row
 
-_6a28:                                                                  ;$6a28
-.export _6a28
         sta ZP_CURSOR_ROW
         rts 
+.endproc
 
-;===============================================================================
+cursor_down:                                                            ;$6a2b
+        ;=======================================================================
+        ; move the cursor down a row (does not change column!)
+        ;
+.export cursor_down
 
-_6a2b:                                                                  ;$6a2b
-.export _6a2b
         inc ZP_CURSOR_ROW
         rts 
 
@@ -223,7 +236,7 @@ _6a68:                                                                  ;$6a68
         lda $0507
         ora $0508
         bne _6a73
-        jmp _6a2b
+        jmp cursor_down
 _6a73:                                                                  ;$6a73
         lda # $bf
         jsr _7779
@@ -235,7 +248,7 @@ _6a73:                                                                  ;$6a73
 _6a84:                                                                  ;$6a84
         jsr _777e
 _6a87:                                                                  ;$6a87
-        jsr _6a2b
+        jsr cursor_down
 _6a8a:                                                                  ;$6a8a
         lda # $80
         sta $34
@@ -263,7 +276,7 @@ _6aa1:                                                                  ;$6aa1:
         lda # $01
         jsr _6a2f
         lda # $09
-        jsr _6a25
+        jsr set_cursor_col
         lda # $a3
         jsr _28d9
         jsr _6a87
@@ -456,7 +469,7 @@ _6c1c:                                                                  ;$6c1c
         lda # $10
         jsr _6a2e
         lda # $07
-        jsr _6a25
+        jsr set_cursor_col
         jsr _70a0
         lda # $c7
         jsr _777e
@@ -661,9 +674,9 @@ _6da4:                                                                  ;$6da4
         lda $04ef
         clc 
         adc # $05
-        jsr _6a28
+        jsr set_cursor_row
         lda # $00
-        jsr _6a25
+        jsr set_cursor_col
         inc $04ef
         lda $04ef
         cmp # $11
@@ -742,7 +755,7 @@ _6e41:                                                                  ;$6e41
         lda # $04
         jsr _6a2f
         lda # $0a
-        jsr _6a25
+        jsr set_cursor_col
         lda # $cd
         jsr _777e
         lda # $ce
@@ -769,7 +782,7 @@ _6e5d:                                                                  ;$6e5d
         adc # $d0
         jsr _777e
         lda # $0e
-        jsr _6a25
+        jsr set_cursor_col
         pla 
         tax 
         sta $04ed
@@ -848,7 +861,7 @@ _6f16:                                                                  ;$6f16
         lda # $08
         jsr _6a2f
         lda # $0b
-        jsr _6a25
+        jsr set_cursor_col
         lda # $a4
         jsr _6a84
         jsr _28dc
@@ -974,7 +987,7 @@ _6fdb:                                                                  ;$6fdb
         lda # $10
         jsr _6a2e
         lda # $07
-        jsr _6a25
+        jsr set_cursor_col
         lda # $be
         jsr _28d9
         jsr _6cda
@@ -1018,7 +1031,7 @@ _7025:                                                                  ;$7025
         lsr 
         clc 
         adc # $01
-        jsr _6a25
+        jsr set_cursor_col
         lda $80
         sec 
         sbc $049b
@@ -1040,7 +1053,7 @@ _7025:                                                                  ;$7025
         bne _7070
 _705c:                                                                  ;$705c
         tya 
-        jsr _6a28
+        jsr set_cursor_row
         cpy # $03
         bcc _708d
         lda # $ff
@@ -1187,7 +1200,7 @@ _7135:                                                                  ;$7135
 _714f:                                                                  ;$714f
         jsr _b3d4
         lda # $0f
-        jsr _6a25
+        jsr set_cursor_col
         lda # $cd
         jmp _2390
 
@@ -1223,13 +1236,13 @@ _7181:                                                                  ;$7181
         dex 
         bpl _7181
         lda # $07
-        jsr _6a25
+        jsr set_cursor_col
         lda # $17
         ldy $a0
         bne _7196
         lda # $11
 _7196:                                                                  ;$7196
-        jsr _6a28
+        jsr set_cursor_row
         lda # $00
         sta $34
         lda # $bd
@@ -1306,8 +1319,8 @@ _7217:                                                                  ;$7217
 
 _7224:                                                                  ;$7224
         lda # $01
-        jsr _6a25
-        jsr _6a28
+        jsr set_cursor_col
+        jsr set_cursor_row
         ldy # $00
         clc 
         lda # $03
@@ -1343,12 +1356,12 @@ _7246:                                                                  ;$7246
         lda $0482
         bne _7244
         lda # $01
-        jsr _6a25
+        jsr set_cursor_col
         pla 
         adc # $d0
         jsr _777e
         lda # $0e
-        jsr _6a25
+        jsr set_cursor_col
         ldx $8e
         lda _90a6, x
         sta $8f
@@ -1386,7 +1399,7 @@ _728e:                                                                  ;$728e
         jmp _72b8
 _72af:                                                                  ;$72af
         lda # $19
-        jsr _6a25
+        jsr set_cursor_col
         lda # $2d
         bne _72c7
 _72b8:                                                                  ;$72b8
@@ -1416,28 +1429,28 @@ _72d6:                                                                  ;$72d6
 
 _72db:                                                                  ;$72db
         lda # $11
-        jsr _6a25
+        jsr set_cursor_col
         lda # $ff
         bne _72c7
 _72e4:                                                                  ;$72e4
         lda # $10
         jsr _6a2f
         lda # $05
-        jsr _6a25
+        jsr set_cursor_col
         lda # $a7
         jsr _28d9
         lda # $03
-        jsr _6a28
+        jsr set_cursor_row
         jsr _72db
         lda # $06
-        jsr _6a28
+        jsr set_cursor_row
         lda # $00
         sta $04ef
 _7305:                                                                  ;$7305
         ldx # $80
         stx $34
         jsr _7246
-        jsr _6a2b
+        jsr cursor_down
         inc $04ef
         lda $04ef
         cmp # $11
@@ -1694,14 +1707,14 @@ _74bb:                                                                  ;$74bb
         lda # $20
         jsr _6a2f
         lda # $0c
-        jsr _6a25
+        jsr set_cursor_col
         lda # $cf
         jsr _6a9b
         lda # $b9
         jsr _28d9
         lda # $80
         sta $34
-        jsr _6a2b
+        jsr cursor_down
         lda $04f1
         clc 
         adc # $03
@@ -1733,7 +1746,7 @@ _74f5:                                                                  ;$74f5
         jsr _763f
         sec 
         lda # $19
-        jsr _6a25
+        jsr set_cursor_col
         lda # $06
         jsr _2e59
         ldx $a2
@@ -1749,8 +1762,8 @@ _74f5:                                                                  ;$74f5
         sbc # $00
         pha 
         lda # $02
-        jsr _6a25
-        jsr _6a2b
+        jsr set_cursor_col
+        jsr cursor_down
         pla 
         pha 
         jsr _762f
@@ -1917,10 +1930,10 @@ _764c:
 _7658:
         lda # $10
         tay 
-        jsr _6a28
+        jsr set_cursor_row
 _765e:
         lda # $0c
-        jsr _6a25
+        jsr set_cursor_col
         tya 
         clc 
         adc # $20
@@ -1929,7 +1942,7 @@ _765e:
         clc 
         adc # $50
         jsr _777e
-        jsr _6a2b
+        jsr cursor_down
         ldy ZP_CURSOR_ROW
         cpy # $14
         bcc _765e
@@ -2171,7 +2184,7 @@ _77db:
         bne _7813
 _77df:
         lda # $15
-        jsr _6a25
+        jsr set_cursor_col
         jmp _777c
 
 _77e7:
@@ -4729,8 +4742,8 @@ _87d0:
         sta $4118
         jsr _7af7
         lda # $0c
-        jsr _6a28
-        jsr _6a25
+        jsr set_cursor_row
+        jsr set_cursor_col
         lda # $92
         jsr _7813
 _87fd:
@@ -4826,7 +4839,7 @@ _8882:
 _8888:
         jsr _8c6d
         lda # $03
-        jsr _6a25
+        jsr set_cursor_col
         jsr _91fe
         ldx # $0b
         lda # $06
@@ -4928,13 +4941,13 @@ _8920:
         lda $a5
         jsr _7c6b
         lda # $06
-        jsr _6a25
+        jsr set_cursor_col
         lda # $1e
         jsr _7773
         lda # $0a
         jsr _2f24
         lda # $06
-        jsr _6a25
+        jsr set_cursor_col
         lda _1d08
         beq _8978
         lda # $0d
@@ -4944,9 +4957,9 @@ _8978:
         beq _8994
         inc _87b8
         lda # $07
-        jsr _6a25
+        jsr set_cursor_col
         lda # $0a
-        jsr _6a28
+        jsr set_cursor_row
         ldy # $00
 _898c:
         jsr print_char
@@ -4966,7 +4979,7 @@ _8994:
         pla 
         jsr _2390
         lda # $03
-        jsr _6a25
+        jsr set_cursor_col
         lda # $0c
         jsr _2390
         lda # $0c
@@ -5998,7 +6011,7 @@ _9019:
         ldx # $00
         stx $34
         lda $b9
-        jsr _6a25
+        jsr set_cursor_col
         pla 
         ldy # $14
         cpx $048b
@@ -6021,7 +6034,7 @@ _9042:
         sbc _2f1c
         lsr 
         sta $b9
-        jsr _6a25
+        jsr set_cursor_col
         jsr _24a6
         lda $04e6
 _905d:
@@ -8879,11 +8892,11 @@ _a731:
         jsr _7224
 _a75d:
         lda # $01
-        jsr _6a28
+        jsr set_cursor_row
         lda $a0
         bne _a77b
         lda # $0b
-        jsr _6a25
+        jsr set_cursor_col
         lda $0486
         ora # %01100000
         jsr _777e
