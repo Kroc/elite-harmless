@@ -1165,8 +1165,9 @@ _246c:
 ;===============================================================================
 
 _2478:  ; NOTE: this address is used in the table in _250c
-        lda # $06
+        lda # 6
         jsr set_cursor_col
+
         lda # $ff
         sta _2f19
         rts 
@@ -1174,8 +1175,9 @@ _2478:  ; NOTE: this address is used in the table in _250c
 ;===============================================================================
 
 _2483:  ; NOTE: this address is used in the table in _250c
-        lda # $01
+        lda # 1
         jsr set_cursor_col
+
         jmp _a72f
 
 ;===============================================================================
@@ -2237,8 +2239,10 @@ _2c9b:
         lda # $08
         jsr _6a2f
         jsr _70ab
-        lda # $07
+
+        lda # 7
         jsr set_cursor_col
+        
         lda # $7e
         jsr _28d9
         lda # $0f
@@ -2345,7 +2349,7 @@ _2d59:
 
 _2d61:
         jsr _7773
-        lda # $06
+        lda # 6
         jmp set_cursor_col
 
 ;===============================================================================
@@ -5106,7 +5110,7 @@ _3dff:                                                                  ;$3dff
         lda # $1f
         sta $a5
         jsr _7c6b
-        lda # $01
+        lda # 1
         jsr set_cursor_col
         sta $10
         jsr _a72f
