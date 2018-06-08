@@ -2,131 +2,747 @@
 ; "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
+.linecont+
+
+; canned messages!
+
+; https://xania.org/201406/elites-crazy-string-format
 
 .segment        "DATA_0700"
 
-_0700:
+.import _AL:direct      ;=$A3 XOR 35 =128 ($80)
+.import _LE:direct      ;=$A2 XOR 35 =129 ($81)
+.import _XE:direct      ;=$A1 XOR 35 =130 ($82)
+.import _GE:direct      ;=$A0 XOR 35 =131 ($83)
+.import _ZA:direct      ;=$A7 XOR 35 =132 ($84)
+.import _CE:direct      ;=$A6 XOR 35 =133 ($85)
+.import _BI:direct      ;=$A5 XOR 35 =134 ($86)
+.import _SO:direct      ;=$A4 XOR 35 =135 ($87)
+.import _US:direct      ;=$AB XOR 35 =136 ($88)
+.import _ES:direct      ;=$AA XOR 35 =137 ($89)
+.import _AR:direct      ;=$A9 XOR 35 =138 ($8A)
+.import _MA:direct      ;=$A8 XOR 35 =139 ($8B)
+.import _IN:direct      ;=$AF XOR 35 =140 ($8C)
+.import _DI:direct      ;=$AE XOR 35 =141 ($8D)
+.import _RE:direct      ;=$AD XOR 35 =142 ($8E)
+.import _ER:direct      ;=$B3 XOR 35 =144 ($90)
+.import _AT:direct      ;=$B2 XOR 35 =145 ($91)
+.import _EN:direct      ;=$B1 XOR 35 =146 ($92)
+.import _BE:direct      ;=$B0 XOR 35 =147 ($93)
+.import _RA:direct      ;=$B7 XOR 35 =148 ($94)
+.import _LA:direct      ;=$B6 XOR 35 =149 ($95)
+.import _VE:direct      ;=$B5 XOR 35 =150 ($96)
+.import _TI:direct      ;=$B4 XOR 35 =151 ($97)
+.import _ED:direct      ;=$BB XOR 35 =152 ($98)
+.import _OR:direct      ;=$BA XOR 35 =153 ($99)
+.import _QU:direct      ;=$B9 XOR 35 =154 ($9A)
+.import _AN:direct      ;=$B8 XOR 35 =155 ($9B)
+.import _TE:direct      ;=$BF XOR 35 =156 ($9C)
+.import _IS:direct      ;=$BE XOR 35 =157 ($9D)
+.import _RI:direct      ;=$BD XOR 35 =158 ($9E)
+.import _ON:direct      ;=$BC XOR 35 =159 ($9F)
+
+.define __end           $00
+.define __              $20 ^ 35        ;=$03
+.define A_              $41 ^ 35        ;=$62
+.define B_              $42 ^ 35        ;=$61
+.define C_              $43 ^ 35        ;=$60
+.define D_              $44 ^ 35        ;=$67
+.define E_              $45 ^ 35        ;=$66
+.define F_              $46 ^ 35        ;=$65
+.define G_              $47 ^ 35        ;=$64
+.define H_              $48 ^ 35        ;=$6b
+.define I_              $49 ^ 35        ;=$6a
+.define J_              $4a ^ 35        ;=$69
+.define K_              $4b ^ 35        ;=$68
+.define L_              $4c ^ 35        ;=$6f
+.define M_              $4d ^ 35        ;=$6e
+.define N_              $4e ^ 35        ;=$6d
+.define O_              $4f ^ 35        ;=$6c
+.define P_              $50 ^ 35        ;=$73
+.define Q_              $51 ^ 35        ;=$72
+.define R_              $52 ^ 35        ;=$71
+.define S_              $53 ^ 35        ;=$70
+.define T_              $54 ^ 35        ;=$77
+.define U_              $55 ^ 35        ;=$76
+.define V_              $56 ^ 35        ;=$75
+.define W_              $57 ^ 35        ;=$74
+.define X_              $58 ^ 35        ;=$7b
+.define Y_              $59 ^ 35        ;=$7a
+.define Z_              $5a ^ 35        ;=$79
+.define _HYPHEN_        $2d ^ 35        ;=$0E
+.define _COLON_         $3a ^ 35        ;=$19
+
+_word_index     .set 0
+
+.macro  .define_word    word_id
+        
+        .local  _value
+        _value  .set 0
+
+        _word_index .set _word_index + 1
+
+        .if _word_index < 96
+                _value .set ($A0 + _word_index) ^ 35
+
+        .elseif _word_index < 128
+                _value .set _word_index ^ 35
+        .else
+                _value .set ((_word_index - $72)) ^ 35
+        .endif
+
+        .out .sprintf(": $%2x: %s", _value, word_id)
+        .ident(word_id) = _value
+.endmacro
+.define .skip_word      _word_index .set _word_index + 1
+
+;===============================================================================
+
+_0700:  ;0.                                                             ;$0700
 .export _0700
-        .byte   $4c, $32, $24, $00, $03, $60, $6b, $a9                  ;$0700
-        .byte   $77, $00, $64, $6c, $b5, $71, $6d, $6e
-        .byte   $b1, $77, $00, $67, $b2, $62, $32, $20                  ;$0710
-        .byte   $00, $af, $b5, $6d, $77, $ba, $7a, $2f
-        .byte   $00, $70, $7a, $70, $bf, $6e, $00, $73                  ;$0720
-        .byte   $bd, $a6, $00, $21, $03, $a8, $71, $68
-        .byte   $66, $77, $03, $85, $70, $00, $af, $67                  ;$0730
-        .byte   $ab, $77, $bd, $a3, $00, $62, $64, $bd
-        .byte   $60, $76, $6f, $77, $76, $b7, $6f, $00                  ;$0740
-        .byte   $bd, $60, $6b, $03, $00, $62, $b5, $b7
-        .byte   $a0, $03, $00, $73, $6c, $ba, $03, $00                  ;$0750
-        .byte   $a8, $af, $6f, $7a, $03, $00, $76, $6d
-        .byte   $6a, $77, $00, $75, $6a, $66, $74, $03                  ;$0760
-        .byte   $00, $b9, $b8, $b4, $77, $7a, $00, $b8
-        .byte   $a9, $60, $6b, $7a, $00, $65, $66, $76                  ;$0770
-        .byte   $67, $a3, $00, $6e, $76, $6f, $b4, $0e
-        .byte   $81, $00, $ae, $60, $77, $b2, $ba, $9a                  ;$0780
-        .byte   $00, $d8, $6e, $76, $6d, $be, $77, $00
-        .byte   $60, $bc, $65, $bb, $b3, $62, $60, $7a                  ;$0790
-        .byte   $00, $67, $66, $6e, $6c, $60, $b7, $60
-        .byte   $7a, $00, $60, $ba, $73, $ba, $b2, $66                  ;$07A0
-        .byte   $03, $e8, $b2, $66, $00, $70, $6b, $6a
-        .byte   $73, $00, $73, $dd, $67, $76, $60, $77                  ;$07B0
-        .byte   $00, $03, $b6, $70, $b3, $00, $6b, $76
-        .byte   $6e, $b8, $03, $60, $6c, $6f, $bc, $6a                  ;$07C0
-        .byte   $a3, $00, $6b, $7a, $73, $b3, $70, $73
-        .byte   $62, $a6, $03, $00, $70, $6b, $ba, $77                  ;$07D0
-        .byte   $03, $e9, $82, $00, $ae, $e8, $b8, $a6
-        .byte   $00, $73, $6c, $73, $76, $6f, $b2, $6a                  ;$07E0
-        .byte   $bc, $00, $64, $dd, $70, $70, $03, $99
-        .byte   $6a, $75, $6a, $77, $7a, $00, $66, $60                  ;$07F0
-        .byte   $bc, $6c, $6e, $7a, $00, $03, $6f, $6a
-        .byte   $64, $6b, $77, $03, $7a, $66, $a9, $70                  ;$0800
-        .byte   $00, $bf, $60, $6b, $0d, $a2, $b5, $6f
-        .byte   $00, $60, $62, $70, $6b, $00, $03, $a5                  ;$0810
-        .byte   $2c, $6a, $bc, $00, $59, $82, $22, $00
-        .byte   $77, $a9, $a0, $77, $03, $6f, $6c, $e8                  ;$0820
-        .byte   $00, $49, $03, $69, $62, $6e, $6e, $bb
-        .byte   $00, $71, $b8, $a0, $00, $70, $77, $00                  ;$0830
-        .byte   $93, $03, $6c, $65, $03, $00, $70, $66
-        .byte   $2c, $00, $03, $60, $a9, $64, $6c, $25                  ;$0840
-        .byte   $00, $66, $b9, $6a, $73, $00, $65, $6c
-        .byte   $6c, $67, $00, $bf, $7b, $b4, $6f, $aa                  ;$0850
-        .byte   $00, $b7, $ae, $6c, $62, $60, $b4, $b5
-        .byte   $70, $00, $70, $b6, $b5, $70, $00, $6f                  ;$0860
-        .byte   $6a, $b9, $ba, $0c, $74, $af, $aa, $00
-        .byte   $6f, $76, $7b, $76, $bd, $aa, $00, $6d                  ;$0870
-        .byte   $a9, $60, $6c, $b4, $60, $70, $00, $d8
-        .byte   $73, $76, $77, $b3, $70, $00, $a8, $60                  ;$0880
-        .byte   $6b, $af, $b3, $7a, $00, $62, $6f, $6f
-        .byte   $6c, $7a, $70, $00, $65, $6a, $ad, $a9                  ;$0890
-        .byte   $6e, $70, $00, $65, $76, $71, $70, $00
-        .byte   $6e, $af, $b3, $a3, $70, $00, $64, $6c                  ;$08A0
-        .byte   $6f, $67, $00, $73, $6f, $b2, $af, $76
-        .byte   $6e, $00, $a0, $6e, $0e, $e8, $bc, $aa                  ;$08B0
-        .byte   $00, $a3, $6a, $b1, $03, $5c, $70, $00
-        .byte   $2f, $12, $13, $23, $16, $23, $00, $03                  ;$08C0
-        .byte   $60, $71, $00, $6f, $a9, $a0, $00, $65
-        .byte   $6a, $b3, $a6, $00, $70, $a8, $2c, $00                  ;$08D0
-        .byte   $64, $ad, $b1, $00, $71, $bb, $00, $7a
-        .byte   $66, $2c, $6c, $74, $00, $61, $6f, $76                  ;$08E0
-        .byte   $66, $00, $61, $b6, $60, $68, $00, $35
-        .byte   $00, $70, $6f, $6a, $6e, $7a, $00, $61                  ;$08F0
-        .byte   $76, $64, $0e, $66, $7a, $bb, $00, $6b
-        .byte   $ba, $6d, $bb, $00, $61, $bc, $7a, $00                  ;$0900
-        .byte   $65, $b2, $00, $65, $76, $71, $71, $7a
-        .byte   $00, $dd, $67, $b1, $77, $00, $65, $dd                  ;$0910
-        .byte   $64, $00, $6f, $6a, $a7, $71, $67, $00
-        .byte   $6f, $6c, $61, $e8, $b3, $00, $a5, $71                  ;$0920
-        .byte   $67, $00, $6b, $76, $6e, $b8, $6c, $6a
-        .byte   $67, $00, $65, $66, $6f, $af, $66, $00                  ;$0930
-        .byte   $af, $70, $66, $60, $77, $00, $88, $b7
-        .byte   $ae, $ab, $00, $60, $6c, $6e, $00, $d8                  ;$0940
-        .byte   $6e, $b8, $67, $b3, $00, $03, $67, $aa
-        .byte   $77, $dd, $7a, $bb, $00, $71, $6c, $00                  ;$0950
-        .byte   $8d, $03, $03, $93, $2f, $03, $99, $03
-        .byte   $03, $03, $8d, $03, $85, $03, $65, $ba                  ;$0960
-        .byte   $03, $70, $62, $a2, $2f, $29, $00, $65
-        .byte   $71, $bc, $77, $00, $ad, $a9, $00, $a2                  ;$0970
-        .byte   $65, $77, $00, $bd, $64, $6b, $77, $00
-        .byte   $5a, $6f, $6c, $74, $24, $00, $40, $32                  ;$0980
-        .byte   $df, $02, $00, $66, $7b, $77, $b7, $03
-        .byte   $00, $73, $76, $6f, $70, $66, $98, $00                  ;$0990
-        .byte   $b0, $62, $6e, $98, $00, $65, $76, $66
-        .byte   $6f, $00, $6e, $be, $70, $6a, $a2, $00                  ;$09A0
-        .byte   $c0, $ed, $03, $61, $62, $7a, $00, $66
-        .byte   $0d, $60, $0d, $6e, $0d, $86, $00, $45                  ;$09B0
-        .byte   $44, $70, $00, $45, $4b, $70, $00, $4a
-        .byte   $03, $70, $60, $6c, $6c, $73, $70, $00                  ;$09C0
-        .byte   $aa, $60, $62, $73, $66, $03, $73, $6c
-        .byte   $67, $00, $5a, $61, $6c, $6e, $61, $00                  ;$09D0
-        .byte   $45, $5a, $8d, $00, $67, $6c, $60, $68
-        .byte   $af, $64, $03, $f4, $00, $59, $03, $9e                  ;$09E0
-        .byte   $00, $6e, $6a, $6f, $6a, $77, $a9, $7a
-        .byte   $03, $98, $00, $6e, $af, $af, $64, $03                  ;$09F0
-        .byte   $98, $00, $e6, $19, $23, $00, $af, $d8
-        .byte   $af, $64, $03, $49, $00, $b1, $b3, $64                  ;$0A00
-        .byte   $7a, $03, $00, $64, $62, $b6, $60, $b4
-        .byte   $60, $00, $50, $03, $6c, $6d, $00, $62                  ;$0A10
-        .byte   $2c, $00, $26, $a2, $64, $a3, $03, $e8
-        .byte   $b2, $ab, $19, $00, $df, $03, $27, $2f                  ;$0A20
-        .byte   $2f, $2f, $25, $3c, $03, $86, $2a, $21
-        .byte   $2f, $9e, $86, $2a, $20, $2f, $60, $bc                  ;$0A30
-        .byte   $ae, $b4, $bc, $2a, $00, $6a, $bf, $6e
-        .byte   $00, $00, $6f, $6f, $00, $b7, $b4, $6d                  ;$0A40
-        .byte   $64, $19, $00, $03, $bc, $03, $00, $2f
-        .byte   $2b, $ec, $6e, $b1, $77, $19, $25, $00                  ;$0A50
-        .byte   $60, $a2, $b8, $00, $6c, $65, $65, $b1
-        .byte   $67, $b3, $00, $65, $76, $64, $6a, $b4                  ;$0A60
-        .byte   $b5, $00, $6b, $a9, $6e, $a2, $70, $70
-        .byte   $00, $6e, $6c, $e8, $6f, $7a, $03, $35                  ;$0A70
-        .byte   $00, $8f, $00, $88, $00, $62, $61, $6c
-        .byte   $b5, $03, $88, $00, $d8, $73, $66, $77                  ;$0A80
-        .byte   $b1, $77, $00, $67, $b8, $a0, $dd, $ab
-        .byte   $00, $67, $66, $62, $67, $6f, $7a, $00                  ;$0A90
-        .byte   $0e, $0e, $0e, $0e, $03, $66, $03, $6f
-        .byte   $03, $6a, $03, $77, $03, $66, $03, $0e                  ;$0AA0
-        .byte   $0e, $0e, $0e, $00, $73, $ad, $70, $b1
-        .byte   $77, $00, $2b, $64, $62, $6e, $66, $03                  ;$0AB0
-        .byte   $6c, $b5, $71, $00, $00, $00, $00, $00
+        .byte   _FUEL_SCOOPS, _ON_, $24, __end
+
+_0704:  ;1.                                                             ;$0704
+        .byte   __, C_, H_, _AR, T_, __end
+        .define_word \
+                "_CHART"        ; $A1^35 = $82
+
+_070A:  ;2.                                                             ;$070A
+        .byte   G_, O_, _VE, R_, N_, M_, _EN, T_, __end
+        .define_word \
+                "_GOVERNMENT"   ; $A2^35 = $81
+
+_0713:  ;3.                                                             ;$0713
+        .byte   D_, _AT, A_, _ON_, $20, __end
+        .skip_word              ; $A3^35 = $80
+
+_0719:  ;4.                                                             ;$0719
+        .byte   _IN, _VE, N_, T_, _OR, Y_, $2f, __end
+        .skip_word              ; $A4^35 = $87
+
+_0721:  ;5.                                                             ;$0721
+        .byte   S_, Y_, S_, _TE, M_, __end
+        .define_word \
+                "_SYSTEM"       ; $A5^35 = $86
+
+_0727:  ;6.                                                             ;$0727
+        .byte   P_, _RI, _CE, __end
+        .define_word \
+                "_PRICE"        ; $A6^35 = $85
+
+_072b:  ;7.                                                             ;$072B
+        .byte   $21, __, _MA, R_, K_, E_, T_, __, _PRICE, S_, __end
+        .skip_word              ; $A7^35 = $84
+
+_0736:  ;8.                                                             ;$0736
+        .byte   _IN, D_, _US, T_, _RI, _AL, __end
+        .skip_word              ; $A8^35 = $8B
+
+_073d:  ;9.                                                             ;$073D
+        .byte   A_, G_, _RI, C_, U_, L_, T_, U_, _RA, L_, __end
+        .skip_word              ; $A9^35 = $8A
+
+_0748:  ;10.                                                            ;$0748
+        .byte   _RI, C_, H_, __, __end
+        .skip_word              ; $AA^35 = $89
+
+_074d:  ;11.                                                            ;$074D
+        .byte   A_, _VE, _RA, _GE, __, __end
+        .define_word \
+                "_AVERAGE"      ; $AB^35 = $88
+
+_0753:  ;12.                                                            ;$0753
+        .byte   P_, O_, _OR, __, __end
+        .define_word \
+                "_POOR"         ; $AC^35 = $8F
+        
+_0758:  ;13.                                                            ;$0758
+        .byte   _MA, _IN, L_, Y_, __, __end
+        .skip_word              ; $AD^35 = $8E
+        
+_075e:  ;14.                                                            ;$075E
+        .byte   U_, N_, I_, T_, __end
+        .define_word \
+                "_UNIT"         ; $AE^35 = $8D
+
+_0763:  ;15.                                                            ;$0763
+        .byte   V_, I_, E_, W_, __, __end
+        .skip_word              ; $AF^35 = $8C
+
+_0769:  ;16.                                                            ;$0769
+        .byte   _QU, _AN, _TI, T_, Y_, __end
+        .define_word \
+                "_QUANTITY"     ; $B0^35 = $93
+        
+_076f:  ;17.                                                            ;$076F
+        .byte   _AN, _AR, C_, H_, Y_, __end
+        .skip_word              ; $B1^35 = $92
+
+_0775:  ;18.                                                            ;$0775
+        .byte   F_, E_, U_, D_, _AL, __end
+        .skip_word              ; $B2^35 = $91
+
+_077b:  ;19.                                                            ;$077B
+        .byte   M_, U_, L_, _TI, _HYPHEN_, _GOVERNMENT, __end
+        .skip_word              ; $B3^35 = $90
+        
+_0782:  ;20.                                                            ;$0782
+        .byte   _DI, C_, T_, _AT, _OR, _SHIP, __end
+        .skip_word              ; $B4^34 = $97
+        
+_0789:  ;21.                                                            ;$0789
+        .byte   _COM, M_, U_, N_, _IS, T_, __end
+        .skip_word              ; $B5^35 = $96
+
+_0790:  ;22.                                                            ;$0790
+        .byte   C_, _ON, F_, _ED, _ER, A_, C_, Y_, __end
+        .skip_word              ; $B6^35 = $95
+
+_0799:  ;23.                                                            ;$0799
+        .byte   D_, E_, M_, O_, C_, _RA, C_, Y_, __end
+        .skip_word              ; $B7^35 = $94
+
+_07a2:  ;24.                                                            ;$07A2
+        .byte   C_, _OR, P_, _OR, _AT, E_, __, _ST, _AT, E_, __end
+        .skip_word              ; $B8^35 = $9B
+
+_07ad:  ;25.                                                            ;$07AD
+        .byte   S_, H_, I_, P_, __end
+        .define_word \
+                "_SHIP"         ; $B9^35 = $9A
+
+_07b2:  ;26.                                                            ;$07B2
+        .byte   P_, _RO, D_, U_, C_, T_, __end
+        .define_word \
+                "_PRODUCT"      ; $BA^35 = $99
+
+_07b9:  ;27.                                                            ;$07B9
+        .byte   __, _LA, S_, _ER, __end
+        .define_word \
+                "_LASER"        ; $BB^35 = $98
+
+_07be:  ;28.                                                            ;$07BE
+        .byte   H_, U_, M_, _AN, __, C_, O_, L_, _ON, I_, _AL, __end
+        .skip_word              ; $BC^35 = $9F
+
+_07ca:  ;29.                                                            ;$07CA
+        .byte   H_, Y_, P_, _ER, S_, P_, A_, _CE, __, __end
+        .define_word \
+                "_HYPERSPACE"   ; $BD^35 = $9E
+        
+_07d4:  ;30.                                                            ;$07D4
+        .byte   S_, H_, _OR, T_, __, _RANGE, _CHART, __end
+        .skip_word              ; $BE^35 = $9D
+
+_07dc:  ;31.                                                            ;$07DC
+        .byte   _DI, _ST, _AN, _CE, __end
+        .skip_word              ; $BF^35 = $9C
+
+_07e1:  ;32.                                                            ;$07E1
+        .byte   P_, O_, P_, U_, L_, _AT, I_, _ON, __end
+        .skip_word              ; $C0^35 = $E3
+
+_07ea:  ;33.                                                            ;$07EA
+        .byte   G_, _RO, S_, S_, __, _PRODUCT, I_, V_, I_, T_, Y_, __end
+        .skip_word              ; $C1^35 = $E2
+
+_07f6:  ;34.                                                            ;$07F6
+        .byte   E_, C_, _ON, O_, M_, Y_, __end
+        .skip_word              ; $C2^35 = $E1
+        
+_07fd:  ;35.                                                            ;$07FD
+        .byte   __, L_, I_, G_, H_, T_, __, Y_, E_, _AR, S_, __end
+        .skip_word              ; $C3^35 = $E0
+
+_0809:  ;36.                                                            ;$0809
+        .byte   _TE, C_, H_, $0d, _LE, _VE, L_, __end
+        .skip_word              ; $C4^35 = $E7
+        
+_0811:  ;37.                                                            ;$0811
+        .byte   C_, A_, S_, H_, __end
+        .define_word \
+                "_CASH"         ; $C5^35 = $E6
+        
+_0816:  ;38.                                                            ;$0816
+        .byte   __, _BI, _LL, I_, _ON, __end
+        .skip_word              ; $C6^35 = $E5
+
+_081c:  ;39.                                                            ;$081C
+        .byte   _GALACTIC, _CHART, $22, __end
+        .skip_word              ; $C7^35 = $E4
+        
+_0820:  ;40.                                                            ;$0820
+        .byte   T_, _AR, _GE, T_, __, L_, O_, _ST, __end
+        .skip_word              ; $C8^35 = $EB
+        
+_0829:  ;41.                                                            ;$0829
+        .byte   _MISSILE, __, J_, A_, M_, M_, _ED, __end
+        .skip_word              ; $C9^35 = $EA
+        
+_0831:   ;42.                                                           ;$0831
+        .byte   R_, _AN, _GE, __end
+        .define_word \
+                "_RANGE"        ; $CA^35 = $E9
+        
+_0835:  ;43.                                                            ;$0835
+        .byte   S_, T_, __end
+        .define_word \
+                "_ST"           ; $CB^35 = $E8
+
+_0838:  ;44.                                                            ;$0838
+        .byte   _QUANTITY, __, O_, F_, __, __end
+        .skip_word              ; $CC^35 = $EF
+
+_083e:  ;45.                                                            ;$083E
+        .byte   S_, E_, _LL, __end
+        .skip_word              ; $CD^35 = $EE
+
+_0842:  ;46.                                                            ;$0842
+        .byte   __, C_, _AR, G_, O_, $25, __end
+        .define_word \
+                "_CARGO"        ; $CE^35 = $ED
+        
+_0849:  ;47.                                                            ;$0849
+        .byte   E_, _QU, I_, P_, __end
+        .define_word \
+                "_EQUIP"        ; $CF^35 = $EC
+        
+_084e:  ;48.                                                            ;$084E
+        .byte   F_, O_, O_, D_, __end
+        .skip_word              ; $D0^35 = $F3
+        
+_0853:  ;49.                                                            ;$0853
+        .byte   _TE, X_, _TI, L_, _ES, __end
+        .skip_word              ; $D1^35 = $F2
+        
+_0859:  ;50.                                                            ;$0859
+        .byte   _RA, _DI, O_, A_, C_, _TI, _VE, S_, __end
+        .skip_word              ; $D2^35 = $F1
+        
+_0862:  ;51.                                                            ;$0862
+        .byte   S_, _LA, _VE, S_, __end
+        .skip_word              ; $D3^35 = $F0
+        
+_0867:  ;52.                                                            ;$0867
+        .byte   L_, I_, _QU, _OR, $0c, W_, _IN, _ES, __end
+        .skip_word              ; $D4^35 = $F7
+
+_0870:  ;53.                                                            ;$0870
+        .byte   L_, U_, X_, U_, _RI, _ES, __end
+        .skip_word              ; $D5^35 = $F6
+        
+_0877:  ;54.                                                            ;$0877
+        .byte   N_, _AR, C_, O_, _TI, C_, S_, __end
+        .skip_word              ; $D6^35 = $F5
+        
+_087f:  ;55.                                                            ;$087F
+        .byte   _COM, P_, U_, T_, _ER, S_, __end
+        .define_word \
+                "_COMPUTERS"    ; $D7^35 = $F4
+        
+_0886:  ;56.                                                            ;$0886
+        .byte   _MA, C_, H_, _IN, _ER, Y_, __end
+        .skip_word              ; $D8^35 = $FB
+        
+_088dc: ;57.                                                            ;$088D
+        .byte   A_, L_, L_, O_, Y_, S_, __end
+        .skip_word              ; $D9^35 = $FA
+        
+_0894:  ;58.                                                            ;$0894
+        .byte   F_, I_, _RE, _AR, M_, S_, __end
+        .skip_word              ; $DA^35 = $F9
+        
+_089b:  ;59.                                                            ;$089B
+        .byte   F_, U_, R_, S_, __end
+        .skip_word              ; $DB^35 = $F8
+        
+_08a0:  ;60.                                                            ;$08A0
+        .byte   M_, _IN, _ER, _AL, S_, __end
+        .skip_word              ; $DC^35 = $FF
+        
+_08a6:  ;61.                                                            ;$08A6
+        .byte   G_, O_, L_, D_, __end
+        .skip_word              ; $DD^35 = $FE
+        
+_08ab:  ;62.                                                            ;$08AB
+        .byte   P_, L_, _AT, _IN, U_, M_, __end
+        .skip_word              ; $DE^35 = $FD
+        
+_08b2:  ;63.                                                            ;$08B2
+        .byte   _GE, M_, _HYPHEN_, _ST, _ON, _ES, __end
+        .skip_word              ; $DF^35 = $FC
+        
+_08b9:  ;64.                                                            ;$08B9
+        .byte   _AL, I_, _EN, __, _ITEM, S_, __end
+        .skip_word              ; $E0^35 = $C3
+
+_08c0:  ;65.                                                            ;$08C0
+        .byte   $2f, $12, $13, $23, $16, $23, __end
+        .skip_word              ; $E1^35 = $C2
+        
+_08c7:  ;66.                                                            ;$08C7
+        .byte   __, C_, R_, __end
+        .skip_word              ; $E2^35 = $C1
+        
+_08cb:  ;67.                                                            ;$08CB
+        .byte   L_, _AR, _GE, __end
+        .define_word \
+                "_LARGE"        ; $E3^35 = $C0
+        
+_08d0:  ;68.                                                            ;$08D0
+        .byte   F_, I_, _ER, _CE, __end
+        .skip_word              ; $E4^35 = $C7
+
+_08d4:  ;69.                                                            ;$08D4
+        .byte   S_, _MA, _LL, __end
+        .skip_word              ; $E5^35 = $C6
+        
+_08d8:  ;70.                                                            ;$08D8
+        .byte   G_, _RE, _EN, __end
+        .skip_word              ; $E6^35 = $C5
+        
+_08dc:  ;71.                                                            ;$08DC
+        .byte   R_, _ED, __end
+        .skip_word              ; $E7^35 = $C4
+        
+_08df:  ;72.                                                            ;$08DF
+        .byte   Y_, E_, _LL, O_, W_, __end
+        .skip_word              ; $E8^35 = $CB
+        
+_08e5:  ;73.                                                            ;$08E5
+        .byte   B_, L_, U_, E_, __end
+        .skip_word              ; $E9^35 = $CA
+        
+_08ea:  ;74.                                                            ;$08EA
+        .byte   B_, _LA, C_, K_, __end
+        .skip_word              ; $EA^35 = $C9
+
+_08ef:  ;75.                                                            ;$08EF
+        .byte   $35, __end
+        .skip_word              ; $EB^35 = $C8
+        
+_08f1:  ;76.                                                            ;$08F1
+        .byte   S_, L_, I_, M_, Y_, __end
+        .skip_word              ; $EC^35 = $CF
+        
+_08f7:  ;77.                                                            ;$08F7
+        .byte   B_, U_, G_, _HYPHEN_, E_, Y_, _ED, __end
+        .skip_word              ; $ED^35 = $CE
+        
+_08ff:  ;78.                                                            ;$08FF
+        .byte   H_, _OR, N_, _ED, __end
+        .skip_word              ; $EE^35 = $CD
+
+_0904:  ;79.                                                            ;$0904
+        .byte   B_, _ON, Y_, __end
+        .skip_word              ; $EF^35 = $CC
+
+_0908:  ;80.                                                            ;$0908
+        .byte   F_, _AT, __end
+        .skip_word              ; $F0^35 = $D3
+        
+_090b:  ;81.                                                            ;$090B
+        .byte   F_, U_, R_, R_, Y_, __end
+        .skip_word              ; $F1^35 = $D2
+        
+_0911:  ;82.                                                            ;$0911
+        .byte   _RO, D_, _EN, T_, __end
+        .skip_word              ; $F2^35 = $D1
+        
+_0916:  ;83.                                                            ;$0916
+        .byte   F_, _RO, G_, __end
+        .skip_word              ; $F3^35 = $D0
+        
+_091a:  ;84.                                                            ;$091A
+        .byte   L_, I_, _ZA, R_, D_, __end
+        .skip_word              ; $F4^35 = $D7
+
+_0920:  ;85.                                                            ;$0920
+        .byte   L_, O_, B_, _ST, _ER, __end
+        .skip_word              ; $F5^35 = $D6
+        
+_0926:  ;86.                                                            ;$0926
+        .byte   _BI, R_, D_, __end
+        .skip_word              ; $F6^35 = $D5
+        
+_092a:  ;87.                                                            ;$092A
+        .byte   H_, U_, M_, _AN, O_, I_, D_, __end
+        .skip_word              ; $F7^35 = $D4
+        
+_0932:  ;88.                                                            ;$0932
+        .byte   F_, E_, L_, _IN, E_, __end
+        .skip_word              ; $F8^35 = $DB
+
+_0938:  ;89.                                                            ;$0938
+        .byte   _IN, S_, E_, C_, T_, __end
+        .skip_word              ; $F9^35 = $DA
+        
+_093e:  ;90.                                                            ;$093E
+        .byte   _AVERAGE, _RA, _DI, _US, __end
+        .skip_word              ; $FA^35 = $D9
+        
+_0943:  ;91.                                                            ;$0943
+        .byte   C_, O_, M_, __end
+        .define_word \
+                "_COM"          ; $FB^35 = $D8
+        
+_0947:  ;92.                                                            ;$0947
+        .byte   _COM, M_, _AN, D_, _ER, __end
+        .define_word \
+                "_COMMANDER"    ; $FC^35 = $DF
+
+_094d:  ;93.                                                            ;$094D
+        .byte   __, D_, _ES, T_, _RO, Y_, _ED, __end
+        .skip_word              ; $FD^35 = $DE
+        
+_0955:  ;94.                                                            ;$0955
+        .byte   R_, O_, __end
+        .define_word \
+                "_RO"           ; $FE^35 = $DD
+
+_0958:  ;95.                                                            ;$0958
+        .byte   _UNIT, __, __, _QUANTITY, $2f, __
+        .byte   _PRODUCT, __, __, __, _UNIT, __
+        .byte   _PRICE, __, F_, _OR, __, S_, A_, _LE, $2f, $29, __end
+        .skip_word              ; $FF^35 = $DC
+
+;-------------------------------------------------------------------------------
+
+_096f:  ;96.                                                            ;$096F
+        .byte   F_, R_, _ON, T_, __end
+        .skip_word              ; $60^35 = $43
+        
+_0974:  ;97.                                                            ;$0974
+        .byte   _RE, _AR, __end
+        .skip_word              ; $61^35 = $42
+        
+_0977:  ;98.                                                            ;$0977
+        .byte   _LE, F_, T_, __end
+        .skip_word              ; $62^35 = $41
+
+_097b:  ;99.                                                            ;$097B
+        .byte   _RI, G_, H_, T_, __end
+        .define_word \
+                "_RIGHT"        ; $63^35 = $40
+
+_0980:  ;100.                                                           ;$0980
+        .byte   _ENERGY, L_, O_, W_, $24, __end
+        .skip_word              ; $64^35 = $47
+        
+_0986:  ;101.                                                           ;$0986
+        .byte   _RIGHT, _ON_, _COMMANDER, $02, __end
+        .skip_word              ; $65^35 = $46
+
+_098b:  ;102.                                                           ;$098B
+        .byte   E_, X_, T_, _RA, __, __end
+        .define_word \
+                "_EXTRA"        ; $66^35 = $45
+        
+_0991:  ;103.                                                           ;$0991
+        .byte   P_, U_, L_, S_, E_, _LASER, __end
+        .define_word \
+                "_PULSE_LASER"  ; $67^35 = $44
+
+_0998:  ;104.                                                           ;$0998
+        .byte   _BE, A_, M_, _LASER, __end
+        .define_word \
+                "_BEAM_LASER"   ; $68^35 = $4B
+        
+_099d:  ;105.                                                           ;$099D
+        .byte   F_, U_, E_, L_, __end
+        .define_word \
+                "_FUEL"         ; $69^35 = $4A
+        
+_09a2:  ;106.                                                           ;$09A2
+        .byte   M_, _IS, S_, I_, _LE, __end
+        .define_word \
+                "_MISSILE"      ; $6A^35 = $49
+
+_09a8:  ;107.                                                           ;$09A8
+        .byte   _LARGE, _CARGO, __, B_, A_, Y_, __end
+        .skip_word              ; $6B^35 = $48
+        
+_09af:  ;108.                                                           ;$09AF
+        .byte   E_, $0d, C_, $0d, M_, $0d, _SYSTEM, __end
+        .skip_word              ; $6C^35 = $4F
+
+_09b7:  ;109.                                                           ;$09B7
+        .byte   _EXTRA, _PULSE_LASER, S_, __end
+        .skip_word              ; $6D^35 = $4E
+
+_09bb:  ;110.                                                           ;$09BB
+        .byte   _EXTRA, _BEAM_LASER, S_, __end
+        .skip_word              ; $6E^35 = $4D
+
+_09bf:  ;111.                                                           ;$09BF
+        .byte   _FUEL, __, S_, C_, O_, O_, P_, S_, __end
+        .define_word \
+                "_FUEL_SCOOPS"  ; $6F^35 = $4C
+
+_09c8:  ;112.                                                           ;$09C8
+        .byte   _ES, C_, A_, P_, E_, __, P_, O_, D_, __end
+        .skip_word              ; $70^35 = $53
+        
+_09d2:  ;113.                                                           ;$09D2
+        .byte   _ENERGY, B_, O_, M_, B_, __end
+        .skip_word              ; $71^35 = $52
+
+_09d8:  ;114.                                                           ;$09D8
+        .byte   _EXTRA, _ENERGY, _UNIT, __end
+        .skip_word              ; $72^35 = $51
+        
+_09dc:  ;115.                                                           ;$09dC
+        .byte   D_, O_, C_, K_, _IN, G_, __, _COMPUTERS, __end
+        .define_word \
+                "_DOCKING_COMPUTERS"    ; $73^35 = $50
+
+_09e5:  ;116.                                                           ;$09E5
+        .byte   _GALACTIC, __, _HYPERSPACE, __end
+        .skip_word              ; $74^35 = $57
+        
+_09e9:  ;117.                                                           ;$09E9
+        .byte   M_, I_, L_, I_, T_, _AR, Y_, __, _LASER, __end
+        .skip_word              ; $75^35 = $56
+        
+_09f3:  ;118.                                                           ;$09F3
+        .byte   M_, _IN, _IN, G_, __, _LASER, __end
+        .skip_word              ; $76^35 = $55
+        
+_09fa:  ;119.                                                           ;$09FA
+        .byte   _CASH, _COLON_, $23, __end
+        .skip_word              ; $77^35 = $54
+
+_09fe:  ;120.                                                           ;$09FE
+        .byte   _IN, _COM, _IN, G_, __, _MISSILE, __end
+        .skip_word              ; $78^35 = $5B
+
+_0a05:  ;121.                                                           ;$0A05
+        .byte   _EN, _ER, G_, Y_, __, __end
+        .define_word \
+                "_ENERGY"       ; $79^35 = $5A
+        
+_0a0b:  ;122.                                                           ;$0A0B
+        .byte   G_, A_, _LA, C_, _TI, C_, __end
+        .define_word \
+                "_GALACTIC"     ; $7A^35 = $59
+
+_0a12:  ;123.                                                           ;$0A12
+        .byte   _DOCKING_COMPUTERS, __, O_, N_, __end
+        .skip_word              ; $7B^35 = $58
+
+
+_0a17:  ;124.                                                           ;$0A17
+        .byte   A_, _LL, __end
+        .skip_word              ; $7C^35 = $5F
+        
+_0a1a:  ;125.                                                           ;$0A1A
+        .byte   $26, _LE, G_, _AL, __, _ST, _AT, _US, _COLON_, __end
+        .skip_word              ; $7D^35 = $5E
+
+_0a24:  ;126.                                                           ;$0A24
+        .byte   _COMMANDER, __, $27, $2f, $2f, $2f, $25
+        .byte   _PRESENT, __, _SYSTEM, $2a, $21, $2f, _HYPERSPACE
+        .byte   _SYSTEM, $2a, $20, $2f
+        .byte   C_, _ON, _DI, _TI, _ON, $2a, __end
+        .skip_word              ; $7E^35 = $5D
+        
+_0a3d:  ;127.                                                           ;$0A3D
+        .byte   I_, _TE, M_, __end
+        .define_word \
+                "_ITEM"         ; $7F^35 = $5C
+        
+;-------------------------------------------------------------------------------
+
+_0a41:  ;128.                                                          ;$0A41
+        ; this has to be skipped because its code
+        ; is the same as hyphen -- $2D
+        .byte   __end
+        .skip_word              ; $0E^35 = $2D
+        
+_0a42:  ;129.                                                          ;$0A42
+        .byte   L_, L_, __end
+        .define_word \
+                "_LL"           ; $0F^35 = $2C
+        
+_0a45:  ;130.                                                           ;$0A45
+        .byte   _RA, _TI, N_, G_, _COLON_, __end
+        .skip_word              ; $10^35 = $33
+        
+_0a4b:  ;131.                                                           ;$0A4B
+        .byte   __, _ON, __, __end
+        .define_word \
+                "_ON_"          ; $11^35 = $32
+        
+_0a4f:  ;132.                                                           ;$0A4F
+        .byte   $2f, $2b, _EQUIP, M_, _EN, T_, _COLON_, $25, __end
+        .skip_word              ; $12^35 = $31
+
+_0a58:  ;133.                                                           ;$0A58
+        .byte   C_, _LE, _AN, __end
+        .skip_word              ; $13^35 = $30
+        
+_0a5c:  ;134.                                                           ;$0A5C
+        .byte   O_, F_, F_, _EN, D_, _ER, __end
+        .skip_word              ; $14^35 = $37
+        
+_0a63:  ;135.                                                           ;$0A63
+        .byte   F_, U_, G_, I_, _TI, _VE, __end
+        .skip_word              ; $15^35 = $36
+        
+_0a6a:  ;136.                                                           ;$0A6A
+        .byte   H_, _AR, M_, _LE, S_, S_, __end
+        .define_word \
+                "_HARMLESS"     ; $16^35 = $35
+        
+_0a71:  ;137.                                                           ;$0A71
+        .byte   M_, O_, _ST, L_, Y_, __, _HARMLESS, __end
+        .skip_word              ; $17^35 = $34
+        
+_0a79:  ;138.                                                           ;$0A79
+        .byte   _POOR, __end
+        .skip_word              ; $18^35 = $3B
+        
+_0a7b:  ;139.                                                           ;$0A7B
+        .byte   _AVERAGE, __end
+        .skip_word              ; $19^35 = $3A
+        
+_0a7d:  ;140.                                                           ;$0A7D
+        .byte   A_, B_, O_, _VE, __, _AVERAGE, __end
+        .skip_word              ; $1A^35 = $39
+        
+_0a84:  ;141.                                                           ;$0A84
+        .byte   _COM, P_, E_, T_, _EN, T_, __end
+        .skip_word              ; $1B^35 = $38
+        
+_0a8b:  ;142.                                                           ;$0A8B
+        .byte   D_, _AN, _GE, _RO, _US, __end
+        .skip_word              ; $1C^35 = $3F
+        
+_0a91:  ;143.                                                           ;$0A91
+        .byte   D_, E_, A_, D_, L_, Y_, __end
+        .skip_word              ; $1D^35 = $3E
+
+_0a98:  ;144.                                                           ;$0A98
+        .byte   _HYPHEN_, _HYPHEN_, _HYPHEN_, _HYPHEN_
+        .byte   __, E_, __, L_, __, I_, __, T_, __, E_, __
+        .byte   _HYPHEN_, _HYPHEN_, _HYPHEN_, _HYPHEN_, __end
+        .skip_word              ; $1E^35 = $3D
+
+_0aac:  ;145.                                                           ;$0AAC
+        .byte   P_, _RE, S_, _EN, T_, __end
+        .define_word \
+                "_PRESENT"      ; $1F^35 = $3C
+
+_0ab2:  ;146.                                                           ;$0AB2
+        .byte   $2b, G_, A_, M_, E_, __, O_, _VE, R_, __end
+        .skip_word              ; $20^35 = $03 (same as space?)
+        
+        ; padding
+        .byte   $00, $00, $00, $00                                      ;$0ABC
+
+;===============================================================================
+
+; is this related to text at all?
 
 _0ac0:
 .export _0ac0

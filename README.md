@@ -33,6 +33,8 @@ This work was made possible by various resources available on the web, for which
 
 * [Classic BBC Elite Disk flight code](http://www.elitehomepage.org/archive/a/d4090012.txt) and [Classic BBC Elite Disk docked code](http://www.elitehomepage.org/archive/a/d4090010.txt) by Paul Brink, 2014
 
+* [Elite's crazy tokenised string routine](https://xania.org/201406/elites-crazy-string-format) by Matt Godbolt
+
 ## Legal ##
 
 "Elite" is copyright David Braben & Ian Bell, Firebird / British Telecom, 1984-1985, all rights reserved. The name "Elite" is used in this project for historical, educational and archival purposes only.

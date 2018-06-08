@@ -41,8 +41,8 @@
 .import _2390:absolute
 .import _246d:absolute
 .import _24a6:absolute
-.import _2566:absolute
-.import _2567:absolute
+.import char_pair1:absolute
+.import char_pair2:absolute
 .import _25a6:absolute
 .import _25aa:absolute
 .import _25ab:absolute
@@ -240,14 +240,14 @@ _6a68:                                                                  ;$6a68
         jmp cursor_down
 _6a73:                                                                  ;$6a73
         lda # $bf
-        jsr _7779
+        jsr print_with_colon
         ldx $0507
         ldy $0508
         sec 
         jsr _7235
         lda # $c3
 _6a84:                                                                  ;$6a84
-        jsr _777e
+        jsr print_token
 _6a87:                                                                  ;$6a87
         jsr cursor_down
 _6a8a:                                                                  ;$6a8a
@@ -255,20 +255,20 @@ _6a8a:                                                                  ;$6a8a
         sta $34
 _6a8e:                                                                  ;$6a8e
         lda # $0c
-        jmp _777e
+        jmp print_token
 
 ;===============================================================================
 
 _6a93:                                                                  ;$6a93
         lda # $ad
-        jsr _777e
+        jsr print_token
         jmp _6ad3
 
 ;===============================================================================
 
 _6a9b:                                                                  ;$6a9b
 .export _6a9b
-        jsr _777e
+        jsr print_token
         jmp _72c5
 
 ;===============================================================================
@@ -285,7 +285,7 @@ _6aa1:                                                                  ;$6aa1:
         jsr _6a87
         jsr _6a68
         lda # $c2
-        jsr _7779
+        jsr print_with_colon
         lda $0500
         clc 
         adc # $01
@@ -298,7 +298,7 @@ _6aa1:                                                                  ;$6aa1:
         clc 
 _6ace:                                                                  ;$6ace
         adc # $aa
-        jsr _777e
+        jsr print_token
 _6ad3:                                                                  ;$6ad3
         lda $0500
         lsr 
@@ -307,31 +307,34 @@ _6ad3:                                                                  ;$6ad3
         adc # $a8
         jsr _6a84
         lda # $a2
-        jsr _7779
+        jsr print_with_colon
         lda $0501
         clc 
         adc # $b1
         jsr _6a84
         lda # $c4
-        jsr _7779
+        jsr print_with_colon
         ldx $0502
         inx 
         clc 
         jsr _2e55
         jsr _6a87
         lda # $c0
-        jsr _7779
+        jsr print_with_colon
         sec 
         ldx $0503
         jsr _2e55
         lda # $c6
         jsr _6a84
+
         lda # $28
-        jsr _777e
+        jsr print_token
+        
         lda $83
         bmi _6b1e
         lda # $bc
-        jsr _777e
+        jsr print_token
+        
         jmp _6b5a
 _6b1e:                                                                  ;$6b1e
         lda $84
@@ -368,26 +371,29 @@ _6b4c:                                                                  ;$6b4c
         adc $8e
         and # %00000111
         adc # $f2
-        jsr _777e
+        jsr print_token
 _6b5a:                                                                  ;$6b5a
         lda # $53
-        jsr _777e
+        jsr print_token
+
         lda # $29
         jsr _6a84
         lda # $c1
-        jsr _7779
+        jsr print_with_colon
         ldx $0505
         ldy $0506
         jsr _7234
         jsr _72c5
         lda # $00
         sta $34
+        
         lda # $4d
-        jsr _777e
+        jsr print_token
+        
         lda # $e2
         jsr _6a84
         lda # $fa
-        jsr _7779
+        jsr print_with_colon
         lda $84
         ldx $82
         and # %00001111
@@ -476,8 +482,10 @@ _6c1c:                                                                  ;$6c1c
         jsr set_cursor_col
         
         jsr _70a0
+
         lda # $c7
-        jsr _777e
+        jsr print_token
+        
         jsr _28e0
         lda # $98
         jsr _28e5
@@ -631,17 +639,22 @@ _6d34:                                                                  ;$6d34
         jsr _7627
 _6d3e:                                                                  ;$6d3e
         jsr _b3d4
+        
         lda # $cc
-        jsr _777e
+        jsr print_token
+
         lda $04ef
         clc 
         adc # $d0
-        jsr _777e
+        jsr print_token
+        
         lda # $2f
-        jsr _777e
+        jsr print_token
+        
         jsr _72b8
         lda # $3f
-        jsr _777e
+        jsr print_token
+        
         jsr _6a8e
         ldx # $00
         stx $9b
@@ -765,7 +778,8 @@ _6e41:                                                                  ;$6e41
         jsr set_cursor_col
         
         lda # $cd
-        jsr _777e
+        jsr print_token
+
         lda # $ce
         jsr _28d9
         jsr _6a8e
@@ -787,8 +801,9 @@ _6e5d:                                                                  ;$6e5d
         jsr _6a8a
         clc 
         lda $04ef
+
         adc # $d0
-        jsr _777e
+        jsr print_token
 
         lda # 14
         jsr set_cursor_col
@@ -802,8 +817,10 @@ _6e5d:                                                                  ;$6e5d
         lda $a0
         cmp # $04
         bne _6eca
+
         lda # $cd
-        jsr _777e
+        jsr print_token
+        
         lda # $ce
         jsr _2390
         jsr _6dc9
@@ -881,8 +898,9 @@ _6f16:                                                                  ;$6f16
         lda $04af
         cmp # $1a
         bcc _6f37
+
         lda # $6b
-        jsr _777e
+        jsr print_token
 _6f37:                                                                  ;$6f37
         jmp _6e58
 
@@ -891,7 +909,7 @@ _6f37:                                                                  ;$6f37
 ; dead code?
 
 _6f3a:                                                                  ;$6f3a
-        jsr _777e
+        jsr print_token
         lda # $ce
         jsr _2390
         jsr _8fea
@@ -1265,8 +1283,10 @@ _7196:                                                                  ;$7196
         jsr set_cursor_row
         lda # $00
         sta $34
+
         lda # $bd
-        jsr _777e
+        jsr print_token
+        
         lda $0508
         bne _71af
         lda $04a6
@@ -1277,7 +1297,7 @@ _71af:                                                                  ;$71af
 
 _71b2:                                                                  ;$71b2
         lda # $2d
-        jsr _777e
+        jsr print_token
         jsr _76e9
         lda # $0f
 _71bc:                                                                  ;$71bc
@@ -1358,9 +1378,10 @@ _7235:                                                                  ;$7235
 _723a:                                                                  ;$723a
         lda # $ca
 _723c:                                                                  ;$723c
-        jsr _777e
+        jsr print_token
+
         lda # $3f
-        jmp _777e
+        jmp print_token
 
 ;===============================================================================
 
@@ -1382,7 +1403,7 @@ _7246:                                                                  ;$7246
         
         pla 
         adc # $d0
-        jsr _777e
+        jsr print_token
 
         lda # 14
         jsr set_cursor_col
@@ -1438,7 +1459,7 @@ _72b8:                                                                  ;$72b8
 _72c5:                                                                  ;$72c5
         lda # $20
 _72c7:                                                                  ;$72c7
-        jmp _777e
+        jmp print_token
 
 _72ca:                                                                  ;$72ca
         lda # $74
@@ -1773,10 +1794,12 @@ _74f5:                                                                  ;$74f5
         clc 
         jsr _2e55
         jsr _72c5
+        
         lda $a2
         clc 
         adc # $68
-        jsr _777e
+        jsr print_token
+        
         lda $a2
         jsr _763f
         sec 
@@ -1861,8 +1884,9 @@ _75a1:                                                                  ;$75a1
         jsr _7481
         lda $77
         jsr _6a9b
+        
         lda # $1f
-        jsr _777e
+        jsr print_token
 _75b3:                                                                  ;$75b3
         jsr _7627
         jmp _88e7
@@ -1981,7 +2005,7 @@ _765e:
         lda ZP_CURSOR_ROW
         clc 
         adc # $50
-        jsr _777e
+        jsr print_token
         jsr cursor_down
         ldy ZP_CURSOR_ROW
         cpy # $14
@@ -2065,7 +2089,7 @@ _76fb:
         and # %00011111
         beq _7706
         ora # %10000000
-        jsr _777e
+        jsr print_token
 _7706:
         jsr _6a41
         dec $bb
@@ -2123,14 +2147,15 @@ _7742:
 
 _774a:
         lda # $69
-        jsr _7779
+        jsr print_with_colon
         ldx $04a6
         sec 
         jsr _2e55
         lda # $c3
         jsr _7773
+        
         lda # $77
-        bne _777e
+        bne print_token
 _775f:
         ldx # $03
 _7761:
@@ -2145,161 +2170,225 @@ _7761:
         lda # $e2
 _7773:
 .export _7773
-        jsr _777e
+        jsr print_token
         jmp _6a8e
 
 ;===============================================================================
 
-_7779:
-        jsr _777e
-_777c:
-        lda # $3a
-_777e:
-.export _777e
-        tax 
-        beq _775f
-        bmi _77f9
-        dex 
-        beq _7742
-        dex 
-        beq _7727
-        dex 
-        bne _778f
-        jmp _76e9
-_778f:
-        dex 
-        beq _7717
-        dex 
-        beq _774a
-        dex 
-        bne _779d
-        lda # $80
-        sta $34
+; text-decoding routine:
+
+print_with_colon:                                                       ;$7779
+        jsr print_token
+
+print_colon:                                                            ;$777C
+        ; print a colon
+        lda # ':'
+
+print_token:                                                            ;$777E
+.export print_token
+        tax                     ; put aside token for later test
+
+        beq _775f               ; is A 0? -- print "Cash: " and credit count
+        
+        bmi _77f9               ; is bit 7 set? (i.e. is token)
+        
+        dex                     ; decrement token value
+        beq _7742               ; if now 0, it was 1 -- process 'tally'(?)
+        
+        dex                     ; decrement token value
+        beq _7727               ; if now 0, it was 2 -- current planet name
+        
+        dex                     ; decrement token value 
+        bne :+                  ; skip ahead if it isn't now zero
+        jmp _76e9               ; it was 3 -- selected planet name
+
+:       dex                     ; decrement token value                 ;$778F 
+        beq _7717               ; if now 0, it was 4 -- commander's name
+
+        dex                     ; decrement token value
+        beq _774a               ; if now 0, it was 5 -- cash value only
+        
+        dex                     ; decrement token value
+        bne :+                  ; skip ahead if not 0
+        
+        ; if now 0, it was 6 -- case swith token
+        lda # $80               ; put 128 (bit 7) into A
+        sta $34                 ; set case-switch flag
         rts 
 
-_779d:
-        dex 
-        dex 
-        bne _77a4
-        stx $34
-        rts 
+:       dex                     ; decrement token value twice more      ;$779D
+        dex                     ; i.e. if it was 8, it would be 0
+        bne :+                  ; skip ahead if token was not originally 8
+        stx $34                 ; token was 8, store the 0 in the case-switch
+        rts                     ; flag and return
 
-_77a4:
-        dex 
-        beq _77df
+:       dex                     ; decrement token again                 ;$77A4
+        beq _indent             ; if token was 9, process a tab
+
         cmp # $60
         bcs _7813
-        cmp # $0e
-        bcc _77b3
-        cmp # $20
-        bcc _77db
-_77b3:
-        ldx $34
-        beq _77f6
-        bmi _77ca
-        bit $34
-        bvs _77ef
-_77bd:
-        cmp # $41
-        bcc _77c7
-        cmp # $5b
-        bcs _77c7
-        adc # $20
-_77c7:
-        jmp _2f24
 
-_77ca:
-        bit $34
-        bvs _77e7
-        cmp # $41
-        bcc _77f6
+        cmp # $0e
+        bcc :+
+        
+        cmp # $20               ; less than 32?
+        bcc _77db               ; treat as token A+114
+
+        ; switch case?
+
+:       ldx $34                 ; check case-switch flag                ;$77B3
+        beq _77f6               ; =0, leave case as-is
+        bmi _is_captial         ; or bit 7 set, switch case
+        
+        bit $34                 ; check bits 7 & 6 (bit 7 already handled)
+        bvs _77ef               ; bit 6 set -- print char and reset bit 6
+_77bd:
+        cmp # 'a'               ; less than 'A'?
+        bcc _77c7               ; yes: print as is
+        
+        cmp # 'z'+1             ; higher than 'Z'?
+        bcs _77c7               ; yes: print as is
+
+        adc # $20               ; otherwise shift letter into lower-case
+
+_77c7:  jmp _2f24               ; just print char
+
+_is_captial:                                                            ;$77CA
+        ;-----------------------------------------------------------------------
+        bit $34                 ; bit 6 set?
+        bvs _77e7               
+
+        cmp # 'a'               ; less than 'A'?
+        bcc _77f6               ; yes: print as is
+        
         pha 
         txa 
+
+        ; set bit 6 on the case-switch flag
         ora # %01000000
         sta $34
+
         pla 
-        bne _77c7
-_77db:
-        adc # $72
+        bne _77c7               ; print character as-is, but next will be
+                                ; lower-cased (bit 6 of case-flag)
+
+_77db:  ; add 114 to the token number and print the canned message:
+        adc # 114
         bne _7813
-_77df:
+
+_indent:                                                                ;$77DF
+        ;-----------------------------------------------------------------------
+        ; set cursor to column 22
+
         lda # 21
         jsr set_cursor_col
+        jmp print_colon
 
-        jmp _777c
+        ;-----------------------------------------------------------------------
 
-_77e7:
+_77e7:  ; don't do anything if case-switch flag = %11111111
         cpx # $ff
         beq _784e
-        cmp # $41
+
+        ; if 'A' or above, print in lower-case
+        cmp # 'a'
         bcs _77bd
-_77ef:
-        pha 
+
+        ; clear bit-6 of case-switch flag
+_77ef:  pha 
         txa 
         and # %10111111
         sta $34
         pla 
-_77f6:
-        jmp _2f24
 
-_77f9:
-        cmp # $a0
-        bcs _7811
-        and # %01111111
-        asl 
+_77f6:  jmp _2f24
+
+        ;-----------------------------------------------------------------------
+
+_77f9:  
+        cmp # 160               ; is token > 160?
+        bcs _7811               ; if yes, print message A-160
+        
+        and # %01111111         ; clear token flag, leave token index
+        asl                     ; double it for a lookup-table offset
         tay 
-        lda _2566, y
-        jsr _777e
-        lda _2567, y
-        cmp # $3f
-        beq _784e
-        jmp _777e
+        lda char_pair1, y       ; read the first character,
+        jsr print_token         ; print it
+        lda char_pair2, y       ; read second character
+        cmp # $3f               ; is it 63? (some kind of continuation token)
+        beq _784e               ; yes, skip -- although not used in practice
+        jmp print_token         ; print second character
 
-_7811:
-        sbc # $a0
+        ;-----------------------------------------------------------------------
+
+_7811:  ; token messages 160+; subtract 160 for the message index
+        sbc # 160
 _7813:
+        ; put the token (message index) aside
         tax 
+
+        ; select the table of canned-messages
         lda #< _0700
         sta $5b
         lda #> _0700
         sta $5c
+
+        ; initialise loop counter
         ldy # $00
-        txa 
-        beq _7834
-_7821:
-        lda [$5b], y
-        beq _782c
-        iny 
-        bne _7821
-        inc $5c
-        bne _7821
+        
+        txa
+        ; ignore message no.0, i.e. you can't skip zero messages 
+        beq print_token_string
+
+_skip_to_end:                                                           ;$7821
+        ;-----------------------------------------------------------------------
+        lda [$5b], y            ; read a code from the compressed text
+        beq _782c               ; if zero terminator, end string
+        iny                     ; next character 
+        bne _skip_to_end        ; loop if not at 256 chars
+        inc $5c                 ; move to the next page,
+        bne _skip_to_end        ; and keep reading
+
+        ;-----------------------------------------------------------------------
+
 _782c:
         iny 
-        bne _7831
+        bne :+
         inc $5c
-_7831:
-        dex 
-        bne _7821
-_7834:
+:       dex                                                             ;$7831 
+        bne _skip_to_end
+
+print_token_string:                                                     ;$7834
+        ;-----------------------------------------------------------------------
+        ; remember the current index
+        ; (this routine can call recursively)
         tya 
         pha 
+        ; remember the current page
         lda $5c
         pha 
-        lda [$5b], y
-        eor # %00100011
-        jsr _777e
+
+        lda [$5b], y            ; read a token
+        eor # %00100011         ; 'descramble' token
+        jsr print_token         ; process it
+
+        ; restore the previous page
         pla 
         sta $5c
+        ; and index
         pla 
         tay 
-        iny 
-        bne _784a
-        inc $5c
-_784a:
-        lda [$5b], y
-        bne _7834
-_784e:
-        rts 
+        
+        iny                     ; next character
+        bne :+                  ; overflowed the page?
+        inc $5c                 ; move to the next page
+
+        ; is this the end of the string?
+        ; (check for a $00 token)
+:       lda [$5b], y                                                    ;$784A
+        bne print_token_string
+
+_784e:  rts                                                             ;$784E 
 
 ;===============================================================================
 
@@ -4063,9 +4152,9 @@ _8343:
 _834f:
         asl 
         tay 
-        lda $cffe, y            ;?
+        lda _d000-2, y
         sta $07
-        lda $cfff, y            ;?
+        lda _d000-1, y
         sta $08
         ldy # $05
         lda [$07], y
@@ -6082,8 +6171,10 @@ _9019:
         lda # $0a
 _9042:
         sta _2f1c
+        
         lda $04e6
-        jsr _777e
+        jsr print_token
+
         lda # $20
         sec 
         sbc _2f1c
@@ -6094,11 +6185,13 @@ _9042:
         jsr _24a6
         lda $04e6
 _905d:
-        jsr _777e
+        jsr print_token
+
         lsr $048c
         bcc _9001
+        
         lda # $fd
-        jmp _777e
+        jmp print_token
 
 ;===============================================================================
 
@@ -8958,10 +9051,11 @@ _a75d:
 
         lda $0486
         ora # %01100000
-        jsr _777e
+        jsr print_token
         jsr _72c5
+
         lda # $af
-        jsr _777e
+        jsr print_token
 _a77b:
         ldx # 1
         stx ZP_CURSOR_COL

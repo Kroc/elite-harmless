@@ -34,7 +34,7 @@
 .import _7481:absolute
 .import _76e9:absolute
 .import _7773:absolute
-.import _777e:absolute
+.import print_token:absolute
 .import _7b61:absolute
 .import _7b64:absolute
 .import _7b6f:absolute
@@ -1055,7 +1055,7 @@ _23cf:                                                                  ;$23cf
         lda $5c
         pha 
         txa 
-        jsr _777e
+        jsr print_token
         jmp _2438
 _23e8:                                                                  ;$23e8
         cmp # $5b
@@ -1225,8 +1225,10 @@ _24b0:  ; NOTE: this address is used in the table in _250c
         lda $34
         and # %10111111         ;=$BF
         sta $34
+
         lda # $03
-        jsr _777e
+        jsr print_token
+        
         ldx _2f1c
         lda $0647, x
         jsr _24f3
@@ -1296,8 +1298,8 @@ _250b:
 _250c:
         .addr   _246a
         .addr   _246d
-        .addr   _777e
-        .addr   _777e
+        .addr   print_token
+        .addr   print_token
         .addr   _249d
         .addr   _2496
         .addr   _2f24
@@ -1337,19 +1339,94 @@ _254e:
         .byte   $41, $42, $4f, $55, $53, $45, $49, $54
         .byte   $49, $4c, $45, $54, $53, $54, $4f, $4e
         .byte   $4c, $4f, $4e, $55, $54, $48, $4e, $4f
-_2566:
-.export _2566
-        .byte   $41
-_2567:
-.export _2567
-        .byte   $4c, $4c, $45, $58, $45, $47, $45, $5a
-        .byte   $41, $43, $45, $42, $49, $53, $4f, $55
-        .byte   $53, $45, $53, $41, $52, $4d, $41, $49
-        .byte   $4e, $44, $49, $52, $45, $41, $3f, $45
-        .byte   $52, $41, $54, $45, $4e, $42, $45, $52
-        .byte   $41, $4c, $41, $56, $45, $54, $49, $45
-        .byte   $44, $4f, $52, $51, $55, $41, $4e, $54
-        .byte   $45, $49, $53, $52, $49, $4f, $4e
+
+
+; text compression character pairs:
+;===============================================================================
+
+char_pairs:                                                             ;$2566
+.export char_pairs
+.export char_pair1      := char_pairs+0
+.export char_pair2      := char_pairs+1
+
+.enum   pairs
+        _AL              =128 ;($80)
+        _LE             ;=129  ($81)
+        _XE             ;=130  ($82)
+        _GE             ;=131  ($83)
+        _ZA             ;=132  ($84)
+        _CE             ;=133  ($85)
+        _BI             ;=134  ($86)
+        _SO             ;=135  ($87)
+        _US             ;=136  ($88)
+        _ES             ;=137  ($89)
+        _AR             ;=138  ($8A)
+        _MA             ;=139  ($8B)
+        _IN             ;=140  ($8C)
+        _DI             ;=141  ($8D)
+        _RE             ;=142  ($8E)
+        _A              ;=143  ($8F) ; note is "A?"
+        _ER             ;=144  ($90)
+        _AT             ;=145  ($91)
+        _EN             ;=146  ($92)
+        _BE             ;=147  ($93)
+        _RA             ;=148  ($94)
+        _LA             ;=149  ($95)
+        _VE             ;=150  ($96)
+        _TI             ;=151  ($97)
+        _ED             ;=152  ($98)
+        _OR             ;=153  ($99)
+        _QU             ;=154  ($9A)
+        _AN             ;=155  ($9B)
+        _TE             ;=156  ($9C)
+        _IS             ;=157  ($9D)
+        _RI             ;=158  ($9E)
+        _ON             ;=159  ($9F)
+.endenum
+
+.export _AL := pairs::_AL ^ 35  ;=$A3
+.export _LE := pairs::_LE ^ 35  ;=$A2
+.export _XE := pairs::_XE ^ 35  ;=$A1
+.export _GE := pairs::_GE ^ 35  ;=$A0
+.export _ZA := pairs::_ZA ^ 35  ;=$A7
+.export _CE := pairs::_CE ^ 35  ;=$A6
+.export _BI := pairs::_BI ^ 35  ;=$A5
+.export _SO := pairs::_SO ^ 35  ;=$A4
+.export _US := pairs::_US ^ 35  ;=$AB
+.export _ES := pairs::_ES ^ 35  ;=$AA
+.export _AR := pairs::_AR ^ 35  ;=$A9
+.export _MA := pairs::_MA ^ 35  ;=$A8
+.export _IN := pairs::_IN ^ 35  ;=$AF
+.export _DI := pairs::_DI ^ 35  ;=$AE
+.export _RE := pairs::_RE ^ 35  ;=$AD
+.export _A  := pairs::_A  ^ 35  ;=$AC
+.export _ER := pairs::_ER ^ 35  ;=$B3
+.export _AT := pairs::_AT ^ 35  ;=$B2
+.export _EN := pairs::_EN ^ 35  ;=$B1
+.export _BE := pairs::_BE ^ 35  ;=$B0
+.export _RA := pairs::_RA ^ 35  ;=$B7
+.export _LA := pairs::_LA ^ 35  ;=$B6
+.export _VE := pairs::_VE ^ 35  ;=$B5
+.export _TI := pairs::_TI ^ 35  ;=$B4
+.export _ED := pairs::_ED ^ 35  ;=$BB
+.export _OR := pairs::_OR ^ 35  ;=$BA
+.export _QU := pairs::_QU ^ 35  ;=$B9
+.export _AN := pairs::_AN ^ 35  ;=$B8
+.export _TE := pairs::_TE ^ 35  ;=$BF
+.export _IS := pairs::_IS ^ 35  ;=$BE
+.export _RI := pairs::_RI ^ 35  ;=$BD
+.export _ON := pairs::_ON ^ 35  ;=$BC
+
+        .byte   "al", "le", "xe", "ge"
+        .byte   "za", "ce", "bi", "so"
+        .byte   "us", "es", "ar", "ma"
+        .byte   "in", "di", "re", "a?"
+        .byte   "er", "at", "en", "be"
+        .byte   "ra", "la", "ve", "ti"
+        .byte   "ed", "or", "qu", "an"
+        .byte   "te", "is", "ri", "on"
+
+;===============================================================================
 
 _25a6:
 .export _25a6
@@ -1671,7 +1748,7 @@ _28d5:
 
 _28d9:
 .export _28d9
-        jsr _777e
+        jsr print_token
 
 _28dc:  ; NOTE: this address is used in the table in _250c
 .export _28dc
