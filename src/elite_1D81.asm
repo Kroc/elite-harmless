@@ -5,7 +5,7 @@
 
 .include        "c64.asm"
 
-; from "data_0700.asm"
+; from "text_data.asm"
 .import _0ac0:absolute
 .import _0ae0:absolute
 

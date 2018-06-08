@@ -8,7 +8,11 @@
 
 ; https://xania.org/201406/elites-crazy-string-format
 
-.segment        "DATA_0700"
+
+; this is the 'key' used to scramble / unscramble the text token symbols
+.export TXT_XOR := $23
+
+.segment        "TEXT_DATA"
 
 .import _AL:direct      ;=$A3 XOR 35 =128 ($80)
 .import _LE:direct      ;=$A2 XOR 35 =129 ($81)
@@ -43,35 +47,35 @@
 .import _ON:direct      ;=$BC XOR 35 =159 ($9F)
 
 .define __end           $00
-.define __              $20 ^ 35        ;=$03
-.define A_              $41 ^ 35        ;=$62
-.define B_              $42 ^ 35        ;=$61
-.define C_              $43 ^ 35        ;=$60
-.define D_              $44 ^ 35        ;=$67
-.define E_              $45 ^ 35        ;=$66
-.define F_              $46 ^ 35        ;=$65
-.define G_              $47 ^ 35        ;=$64
-.define H_              $48 ^ 35        ;=$6b
-.define I_              $49 ^ 35        ;=$6a
-.define J_              $4a ^ 35        ;=$69
-.define K_              $4b ^ 35        ;=$68
-.define L_              $4c ^ 35        ;=$6f
-.define M_              $4d ^ 35        ;=$6e
-.define N_              $4e ^ 35        ;=$6d
-.define O_              $4f ^ 35        ;=$6c
-.define P_              $50 ^ 35        ;=$73
-.define Q_              $51 ^ 35        ;=$72
-.define R_              $52 ^ 35        ;=$71
-.define S_              $53 ^ 35        ;=$70
-.define T_              $54 ^ 35        ;=$77
-.define U_              $55 ^ 35        ;=$76
-.define V_              $56 ^ 35        ;=$75
-.define W_              $57 ^ 35        ;=$74
-.define X_              $58 ^ 35        ;=$7b
-.define Y_              $59 ^ 35        ;=$7a
-.define Z_              $5a ^ 35        ;=$79
-.define _HYPHEN_        $2d ^ 35        ;=$0E
-.define _COLON_         $3a ^ 35        ;=$19
+.define __              $20 ^ TXT_XOR   ;=$03
+.define A_              $41 ^ TXT_XOR   ;=$62
+.define B_              $42 ^ TXT_XOR   ;=$61
+.define C_              $43 ^ TXT_XOR   ;=$60
+.define D_              $44 ^ TXT_XOR   ;=$67
+.define E_              $45 ^ TXT_XOR   ;=$66
+.define F_              $46 ^ TXT_XOR   ;=$65
+.define G_              $47 ^ TXT_XOR   ;=$64
+.define H_              $48 ^ TXT_XOR   ;=$6b
+.define I_              $49 ^ TXT_XOR   ;=$6a
+.define J_              $4a ^ TXT_XOR   ;=$69
+.define K_              $4b ^ TXT_XOR   ;=$68
+.define L_              $4c ^ TXT_XOR   ;=$6f
+.define M_              $4d ^ TXT_XOR   ;=$6e
+.define N_              $4e ^ TXT_XOR   ;=$6d
+.define O_              $4f ^ TXT_XOR   ;=$6c
+.define P_              $50 ^ TXT_XOR   ;=$73
+.define Q_              $51 ^ TXT_XOR   ;=$72
+.define R_              $52 ^ TXT_XOR   ;=$71
+.define S_              $53 ^ TXT_XOR   ;=$70
+.define T_              $54 ^ TXT_XOR   ;=$77
+.define U_              $55 ^ TXT_XOR   ;=$76
+.define V_              $56 ^ TXT_XOR   ;=$75
+.define W_              $57 ^ TXT_XOR   ;=$74
+.define X_              $58 ^ TXT_XOR   ;=$7b
+.define Y_              $59 ^ TXT_XOR   ;=$7a
+.define Z_              $5a ^ TXT_XOR   ;=$79
+.define _HYPHEN_        $2d ^ TXT_XOR   ;=$0E
+.define _COLON_         $3a ^ TXT_XOR   ;=$19
 
 _word_index     .set 0
 
@@ -83,12 +87,12 @@ _word_index     .set 0
         _word_index .set _word_index + 1
 
         .if _word_index < 96
-                _value .set ($A0 + _word_index) ^ 35
+                _value .set ($A0 + _word_index) ^ TXT_XOR
 
         .elseif _word_index < 128
-                _value .set _word_index ^ 35
+                _value .set _word_index ^ TXT_XOR
         .else
-                _value .set ((_word_index - $72)) ^ 35
+                _value .set ((_word_index - $72)) ^ TXT_XOR
         .endif
 
         .out .sprintf(": $%2x: %s", _value, word_id)

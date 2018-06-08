@@ -49,8 +49,8 @@ echo "- assemble 'prgheader.asm'"
 $ca65 -o build/prgheader.o      src/prgheader.asm
 echo "- assemble 'elite_consts.asm'"
 $ca65 -o build/elite_consts.o   src/elite_consts.asm
-echo "- assemble 'data_0700.asm'"
-$ca65 -o build/data_0700.o      src/data_0700.asm
+echo "- assemble 'text_data.asm'"
+$ca65 -o build/text_data.o      src/text_data.asm
 echo "- assemble 'gfx_font.asm'"
 $ca65 -o build/gfx_font.o       src/gfx/font.asm
 echo "- assemble 'data_0E00.asm'"
@@ -82,7 +82,7 @@ $ld65 \
        -o bin/elite-dx.prg \
     --obj build/prgheader.o \
     --obj build/elite_consts.o \
-    --obj build/data_0700.o \
+    --obj build/text_data.o \
     --obj build/gfx_font.o \
     --obj build/data_0E00.o \
     --obj build/data_1D00.o \
@@ -130,7 +130,7 @@ $ld65 \
     --obj build/loader/stage5.o \
     --obj build/loader/stage6.o \
     --obj build/loader/gma4_7C3A.o \
-    --obj build/data_0700.o \
+    --obj build/text_data.o \
     --obj build/data_0E00.o \
     --obj build/data_1D00.o \
     --obj build/elite_init.o \

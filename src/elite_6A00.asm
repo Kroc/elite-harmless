@@ -9,7 +9,7 @@
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
 
-; from "data_0700.asm"
+; from "text_data.asm"
 .import _0700:absolute
 .import _0ac0:absolute
 
