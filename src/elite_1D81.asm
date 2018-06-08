@@ -120,7 +120,7 @@
 .import _b11f:absolute
 .import _b148:absolute
 .import _b179:absolute
-.import print_char:absolute
+.import paint_char:absolute
 .import _b3d4:absolute
 .import _b410:absolute
 
@@ -2730,17 +2730,23 @@ _2f21:
 _2f24:  ; NOTE: this address is used in the table in _250c
 .export _2f24
         stx $07
+
         ldx # $ff
         stx _2f1e
-        cmp # $2e
+        
+        cmp # '.'
         beq _2f40
-        cmp # $3a
+        
+        cmp # ':'
         beq _2f40
-        cmp # $0a
+        
+        cmp # $0a               ;?
         beq _2f40
-        cmp # $0c
+        
+        cmp # $0c               ;?
         beq _2f40
-        cmp # $20
+        
+        cmp # ' '
         beq _2f40
         inx 
 _2f40:
@@ -2748,7 +2754,7 @@ _2f40:
         ldx $07
         bit _2f1b
         bmi _2f4d
-        jmp print_char
+        jmp paint_char
 
         ;-----------------------------------------------------------------------
 
@@ -2817,7 +2823,7 @@ _2fb0:
         ldx # $1e
         jsr _2fd4
         lda # $0c
-        jsr print_char
+        jsr paint_char
         lda _2f1c
         sbc # $1e
         sta _2f1c
@@ -2836,7 +2842,7 @@ _2fd4:
         ldy # $00
 _2fd6:
         lda $0648, y
-        jsr print_char
+        jsr paint_char
         iny 
         dex 
         bne _2fd6
@@ -2857,7 +2863,7 @@ _2fe4:
 _2fed:
 .export _2fee := _2fed+1
         bit $07a9               ; = `lda # $07`
-        jmp print_char
+        jmp paint_char
 
 ;===============================================================================
 

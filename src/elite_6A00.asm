@@ -240,7 +240,7 @@ _6a68:                                                                  ;$6a68
         jmp cursor_down
 _6a73:                                                                  ;$6a73
         lda # $bf
-        jsr print_with_colon
+        jsr print_token_with_colon
         ldx $0507
         ldy $0508
         sec 
@@ -285,7 +285,7 @@ _6aa1:                                                                  ;$6aa1:
         jsr _6a87
         jsr _6a68
         lda # $c2
-        jsr print_with_colon
+        jsr print_token_with_colon
         lda $0500
         clc 
         adc # $01
@@ -307,20 +307,20 @@ _6ad3:                                                                  ;$6ad3
         adc # $a8
         jsr _6a84
         lda # $a2
-        jsr print_with_colon
+        jsr print_token_with_colon
         lda $0501
         clc 
         adc # $b1
         jsr _6a84
         lda # $c4
-        jsr print_with_colon
+        jsr print_token_with_colon
         ldx $0502
         inx 
         clc 
         jsr _2e55
         jsr _6a87
         lda # $c0
-        jsr print_with_colon
+        jsr print_token_with_colon
         sec 
         ldx $0503
         jsr _2e55
@@ -379,7 +379,7 @@ _6b5a:                                                                  ;$6b5a
         lda # $29
         jsr _6a84
         lda # $c1
-        jsr print_with_colon
+        jsr print_token_with_colon
         ldx $0505
         ldy $0506
         jsr _7234
@@ -393,7 +393,7 @@ _6b5a:                                                                  ;$6b5a
         lda # $e2
         jsr _6a84
         lda # $fa
-        jsr print_with_colon
+        jsr print_token_with_colon
         lda $84
         ldx $82
         and # %00001111
@@ -402,10 +402,13 @@ _6b5a:                                                                  ;$6b5a
         tay 
         jsr _7235
         jsr _72c5
+
         lda # $6b
         jsr _2f24
+        
         lda # $6d
         jsr _2f24
+        
         jsr _6a87
 ;6ba5?
         jmp _3d2f
@@ -2147,7 +2150,7 @@ _7742:
 
 _774a:
         lda # $69
-        jsr print_with_colon
+        jsr print_token_with_colon
         ldx $04a6
         sec 
         jsr _2e55
@@ -2177,7 +2180,7 @@ _7773:
 
 ; text-decoding routine:
 
-print_with_colon:                                                       ;$7779
+print_token_with_colon:                                                 ;$7779
         jsr print_token
 
 print_colon:                                                            ;$777C
@@ -2244,14 +2247,15 @@ print_token:                                                            ;$777E
         bvs _77ef               ; bit 6 set -- print char and reset bit 6
 _77bd:
         cmp # 'a'               ; less than 'A'?
-        bcc _77c7               ; yes: print as is
+        bcc _goto_print_char    ; yes: print as is
         
         cmp # 'z'+1             ; higher than 'Z'?
-        bcs _77c7               ; yes: print as is
+        bcs _goto_print_char    ; yes: print as is
 
         adc # $20               ; otherwise shift letter into lower-case
 
-_77c7:  jmp _2f24               ; just print char
+_goto_print_char:                                                       ;$77C7
+        jmp _2f24               ; just print char
 
 _is_captial:                                                            ;$77CA
         ;-----------------------------------------------------------------------
@@ -2269,7 +2273,7 @@ _is_captial:                                                            ;$77CA
         sta $34
 
         pla 
-        bne _77c7               ; print character as-is, but next will be
+        bne _goto_print_char    ; print character as-is, but next will be
                                 ; lower-cased (bit 6 of case-flag)
 
 _77db:  ; add 114 to the token number and print the canned message:
@@ -2368,8 +2372,12 @@ print_token_string:                                                     ;$7834
         lda $5c
         pha 
 
+        ; get the 'key' used for de-scrambling the text
+        ; (see "text_data.asm")
+.import TXT_XOR:direct
+
         lda [$5b], y            ; read a token
-        eor # %00100011         ; 'descramble' token
+        eor # TXT_XOR           ; 'descramble' token
         jsr print_token         ; process it
 
         ; restore the previous page
@@ -4849,7 +4857,7 @@ _87b9:
         tay 
         lda # $07
 _87c5:
-        jsr print_char
+        jsr paint_char
         iny 
         lda [$fd], y
         bne _87c5
@@ -5102,7 +5110,7 @@ _8978:
         
         ldy # $00
 _898c:
-        jsr print_char
+        jsr paint_char
         iny 
         lda [$fd], y
         bne _898c
@@ -5268,14 +5276,14 @@ _8a6a:
 _8a8c:  ; NOTE: when accessed as $8A8D, appears as `lda # $07`
         bit $07a9
 _8a8f:
-        jsr print_char
+        jsr paint_char
         bcc _8a6a
 _8a94:
         sta $000e, y
         lda # $10
         sta $050c
         lda # $0c
-        jmp print_char
+        jmp paint_char
 
 _8aa1:
         lda # $10
@@ -5494,7 +5502,7 @@ _8bc0:
         jsr _2390
         jsr _8fec
         ora # %00010000
-        jsr print_char
+        jsr paint_char
         pha 
         jsr _2f1f
         pla 
@@ -6684,43 +6692,43 @@ _9600:
 ; is repeated 8 times, probably to account for scanlines-per-char(?)
 
 ; first, calculate each row address:
-.define _bmprow00 ELITE_BITMAP_ADDR + .bmppos(  0, 4 ) ;=$4020
-.define _bmprow01 ELITE_BITMAP_ADDR + .bmppos(  1, 4 ) ;=$4160
-.define _bmprow02 ELITE_BITMAP_ADDR + .bmppos(  2, 4 ) ;=$42A0
-.define _bmprow03 ELITE_BITMAP_ADDR + .bmppos(  3, 4 ) ;=$43E0
-.define _bmprow04 ELITE_BITMAP_ADDR + .bmppos(  4, 4 ) ;=$4520
-.define _bmprow05 ELITE_BITMAP_ADDR + .bmppos(  5, 4 ) ;=$4660
-.define _bmprow06 ELITE_BITMAP_ADDR + .bmppos(  6, 4 ) ;=$47A0
-.define _bmprow07 ELITE_BITMAP_ADDR + .bmppos(  7, 4 ) ;=$48E0
-.define _bmprow08 ELITE_BITMAP_ADDR + .bmppos(  8, 4 ) ;=$4A20
-.define _bmprow09 ELITE_BITMAP_ADDR + .bmppos(  9, 4 ) ;=$4B60
-.define _bmprow10 ELITE_BITMAP_ADDR + .bmppos( 10, 4 ) ;=$4CA0
-.define _bmprow11 ELITE_BITMAP_ADDR + .bmppos( 11, 4 ) ;=$4DE0
-.define _bmprow12 ELITE_BITMAP_ADDR + .bmppos( 12, 4 ) ;=$4F20
-.define _bmprow13 ELITE_BITMAP_ADDR + .bmppos( 13, 4 ) ;=$5060
-.define _bmprow14 ELITE_BITMAP_ADDR + .bmppos( 14, 4 ) ;=$51A0
-.define _bmprow15 ELITE_BITMAP_ADDR + .bmppos( 15, 4 ) ;=$52E0
-.define _bmprow16 ELITE_BITMAP_ADDR + .bmppos( 16, 4 ) ;=$5420
-.define _bmprow17 ELITE_BITMAP_ADDR + .bmppos( 17, 4 ) ;=$5560
-.define _bmprow18 ELITE_BITMAP_ADDR + .bmppos( 18, 4 ) ;=$56A0
-.define _bmprow19 ELITE_BITMAP_ADDR + .bmppos( 19, 4 ) ;=$57E0
-.define _bmprow20 ELITE_BITMAP_ADDR + .bmppos( 20, 4 ) ;=$5920
-.define _bmprow21 ELITE_BITMAP_ADDR + .bmppos( 21, 4 ) ;=$5A60
-.define _bmprow22 ELITE_BITMAP_ADDR + .bmppos( 22, 4 ) ;=$5BA0
-.define _bmprow23 ELITE_BITMAP_ADDR + .bmppos( 23, 4 ) ;=$5CE0
-.define _bmprow24 ELITE_BITMAP_ADDR + .bmppos( 24, 4 ) ;=$5E20
+_bmprow00 = ELITE_BITMAP_ADDR + .bmppos(  0, 4 ) ;=$4020
+_bmprow01 = ELITE_BITMAP_ADDR + .bmppos(  1, 4 ) ;=$4160
+_bmprow02 = ELITE_BITMAP_ADDR + .bmppos(  2, 4 ) ;=$42A0
+_bmprow03 = ELITE_BITMAP_ADDR + .bmppos(  3, 4 ) ;=$43E0
+_bmprow04 = ELITE_BITMAP_ADDR + .bmppos(  4, 4 ) ;=$4520
+_bmprow05 = ELITE_BITMAP_ADDR + .bmppos(  5, 4 ) ;=$4660
+_bmprow06 = ELITE_BITMAP_ADDR + .bmppos(  6, 4 ) ;=$47A0
+_bmprow07 = ELITE_BITMAP_ADDR + .bmppos(  7, 4 ) ;=$48E0
+_bmprow08 = ELITE_BITMAP_ADDR + .bmppos(  8, 4 ) ;=$4A20
+_bmprow09 = ELITE_BITMAP_ADDR + .bmppos(  9, 4 ) ;=$4B60
+_bmprow10 = ELITE_BITMAP_ADDR + .bmppos( 10, 4 ) ;=$4CA0
+_bmprow11 = ELITE_BITMAP_ADDR + .bmppos( 11, 4 ) ;=$4DE0
+_bmprow12 = ELITE_BITMAP_ADDR + .bmppos( 12, 4 ) ;=$4F20
+_bmprow13 = ELITE_BITMAP_ADDR + .bmppos( 13, 4 ) ;=$5060
+_bmprow14 = ELITE_BITMAP_ADDR + .bmppos( 14, 4 ) ;=$51A0
+_bmprow15 = ELITE_BITMAP_ADDR + .bmppos( 15, 4 ) ;=$52E0
+_bmprow16 = ELITE_BITMAP_ADDR + .bmppos( 16, 4 ) ;=$5420
+_bmprow17 = ELITE_BITMAP_ADDR + .bmppos( 17, 4 ) ;=$5560
+_bmprow18 = ELITE_BITMAP_ADDR + .bmppos( 18, 4 ) ;=$56A0
+_bmprow19 = ELITE_BITMAP_ADDR + .bmppos( 19, 4 ) ;=$57E0
+_bmprow20 = ELITE_BITMAP_ADDR + .bmppos( 20, 4 ) ;=$5920
+_bmprow21 = ELITE_BITMAP_ADDR + .bmppos( 21, 4 ) ;=$5A60
+_bmprow22 = ELITE_BITMAP_ADDR + .bmppos( 22, 4 ) ;=$5BA0
+_bmprow23 = ELITE_BITMAP_ADDR + .bmppos( 23, 4 ) ;=$5CE0
+_bmprow24 = ELITE_BITMAP_ADDR + .bmppos( 24, 4 ) ;=$5E20
 
 ; what is this madness!? despite the C64 screen being 25 rows, the data table
 ; just keeps going! this is purely because the lo/hi tables are indexed and it
 ; makes it faster to have these aligned a page ($00..$FF)
 
-.define _bmprow25 ELITE_BITMAP_ADDR + .bmppos( 25, 4 ) ;=$5F60
-.define _bmprow26 ELITE_BITMAP_ADDR + .bmppos( 26, 4 ) ;=$60A0
-.define _bmprow27 ELITE_BITMAP_ADDR + .bmppos( 27, 4 ) ;=$61E0
-.define _bmprow28 ELITE_BITMAP_ADDR + .bmppos( 28, 4 ) ;=$6320
-.define _bmprow29 ELITE_BITMAP_ADDR + .bmppos( 29, 4 ) ;=$6460
-.define _bmprow30 ELITE_BITMAP_ADDR + .bmppos( 30, 4 ) ;=$65A0
-.define _bmprow31 ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
+_bmprow25 = ELITE_BITMAP_ADDR + .bmppos( 25, 4 ) ;=$5F60
+_bmprow26 = ELITE_BITMAP_ADDR + .bmppos( 26, 4 ) ;=$60A0
+_bmprow27 = ELITE_BITMAP_ADDR + .bmppos( 27, 4 ) ;=$61E0
+_bmprow28 = ELITE_BITMAP_ADDR + .bmppos( 28, 4 ) ;=$6320
+_bmprow29 = ELITE_BITMAP_ADDR + .bmppos( 29, 4 ) ;=$6460
+_bmprow30 = ELITE_BITMAP_ADDR + .bmppos( 30, 4 ) ;=$65A0
+_bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
 
 ; repeat each row address 8 times:
 .define _rowtobmp \
@@ -10673,11 +10681,11 @@ _b14e:
         bcs :+                  ; if yes, skip it
         cmp # $0d               ; is code less than $0D? (RETURN)
         bcc :+                  ; if yes, skip it
-        bne print_char          ; if it's not RETURN, process it
+        bne paint_char          ; if it's not RETURN, process it
 
         ; handle the RETURN code
         lda # $0c
-        jsr print_char
+        jsr paint_char
         lda # $0d
 
 :       clc                     ; clear carry flag before returning     ;$B166 
@@ -10713,11 +10721,11 @@ _b179:  ; NOTE: called only ever by `_2c7d`!
 .export _b179
         lda # $0c
 
-print_char:                                                             ;$B17B
+paint_char:                                                             ;$B17B
         ;-----------------------------------------------------------------------
         ; write a character to the bitmap screen as if it were the text screen
         ; (automatically advances the cursor)
-.export print_char
+.export paint_char
 
         ; store current registers
         ; (compatibility with KERNAL_CHROUT?)
