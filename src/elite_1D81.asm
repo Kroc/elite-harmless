@@ -1170,6 +1170,7 @@ _2478:  ; NOTE: this address is used in the table in _250c
 
         lda # $ff
         sta _2f19
+
         rts 
 
 ;===============================================================================
@@ -1336,9 +1337,9 @@ _254c:
 _254d:
         .byte   $0a
 _254e:
-        .byte   $41, $42, $4f, $55, $53, $45, $49, $54
-        .byte   $49, $4c, $45, $54, $53, $54, $4f, $4e
-        .byte   $4c, $4f, $4e, $55, $54, $48, $4e, $4f
+        .byte   $41, $42, $4f, $55, $53, $45, $49, $54  ;="AB|OU|SE|IT"?
+        .byte   $49, $4c, $45, $54, $53, $54, $4f, $4e  ;="IL|ET|ST|ON"?
+        .byte   $4c, $4f, $4e, $55, $54, $48, $4e, $4f  ;="LO|MU|TH|NO"?
 
 
 ; text compression character pairs:
@@ -1348,6 +1349,8 @@ char_pairs:                                                             ;$2566
 .export char_pairs
 .export char_pair1      := char_pairs+0
 .export char_pair2      := char_pairs+1
+
+.import TXT_XOR:direct
 
 .enum   pairs
         _AL              =128 ;($80)
@@ -1384,38 +1387,38 @@ char_pairs:                                                             ;$2566
         _ON             ;=159  ($9F)
 .endenum
 
-.export _AL := pairs::_AL ^ 35  ;=$A3
-.export _LE := pairs::_LE ^ 35  ;=$A2
-.export _XE := pairs::_XE ^ 35  ;=$A1
-.export _GE := pairs::_GE ^ 35  ;=$A0
-.export _ZA := pairs::_ZA ^ 35  ;=$A7
-.export _CE := pairs::_CE ^ 35  ;=$A6
-.export _BI := pairs::_BI ^ 35  ;=$A5
-.export _SO := pairs::_SO ^ 35  ;=$A4
-.export _US := pairs::_US ^ 35  ;=$AB
-.export _ES := pairs::_ES ^ 35  ;=$AA
-.export _AR := pairs::_AR ^ 35  ;=$A9
-.export _MA := pairs::_MA ^ 35  ;=$A8
-.export _IN := pairs::_IN ^ 35  ;=$AF
-.export _DI := pairs::_DI ^ 35  ;=$AE
-.export _RE := pairs::_RE ^ 35  ;=$AD
-.export _A  := pairs::_A  ^ 35  ;=$AC
-.export _ER := pairs::_ER ^ 35  ;=$B3
-.export _AT := pairs::_AT ^ 35  ;=$B2
-.export _EN := pairs::_EN ^ 35  ;=$B1
-.export _BE := pairs::_BE ^ 35  ;=$B0
-.export _RA := pairs::_RA ^ 35  ;=$B7
-.export _LA := pairs::_LA ^ 35  ;=$B6
-.export _VE := pairs::_VE ^ 35  ;=$B5
-.export _TI := pairs::_TI ^ 35  ;=$B4
-.export _ED := pairs::_ED ^ 35  ;=$BB
-.export _OR := pairs::_OR ^ 35  ;=$BA
-.export _QU := pairs::_QU ^ 35  ;=$B9
-.export _AN := pairs::_AN ^ 35  ;=$B8
-.export _TE := pairs::_TE ^ 35  ;=$BF
-.export _IS := pairs::_IS ^ 35  ;=$BE
-.export _RI := pairs::_RI ^ 35  ;=$BD
-.export _ON := pairs::_ON ^ 35  ;=$BC
+.export _AL := pairs::_AL ^ TXT_XOR  ;=$A3
+.export _LE := pairs::_LE ^ TXT_XOR  ;=$A2
+.export _XE := pairs::_XE ^ TXT_XOR  ;=$A1
+.export _GE := pairs::_GE ^ TXT_XOR  ;=$A0
+.export _ZA := pairs::_ZA ^ TXT_XOR  ;=$A7
+.export _CE := pairs::_CE ^ TXT_XOR  ;=$A6
+.export _BI := pairs::_BI ^ TXT_XOR  ;=$A5
+.export _SO := pairs::_SO ^ TXT_XOR  ;=$A4
+.export _US := pairs::_US ^ TXT_XOR  ;=$AB
+.export _ES := pairs::_ES ^ TXT_XOR  ;=$AA
+.export _AR := pairs::_AR ^ TXT_XOR  ;=$A9
+.export _MA := pairs::_MA ^ TXT_XOR  ;=$A8
+.export _IN := pairs::_IN ^ TXT_XOR  ;=$AF
+.export _DI := pairs::_DI ^ TXT_XOR  ;=$AE
+.export _RE := pairs::_RE ^ TXT_XOR  ;=$AD
+.export _A  := pairs::_A  ^ TXT_XOR  ;=$AC
+.export _ER := pairs::_ER ^ TXT_XOR  ;=$B3
+.export _AT := pairs::_AT ^ TXT_XOR  ;=$B2
+.export _EN := pairs::_EN ^ TXT_XOR  ;=$B1
+.export _BE := pairs::_BE ^ TXT_XOR  ;=$B0
+.export _RA := pairs::_RA ^ TXT_XOR  ;=$B7
+.export _LA := pairs::_LA ^ TXT_XOR  ;=$B6
+.export _VE := pairs::_VE ^ TXT_XOR  ;=$B5
+.export _TI := pairs::_TI ^ TXT_XOR  ;=$B4
+.export _ED := pairs::_ED ^ TXT_XOR  ;=$BB
+.export _OR := pairs::_OR ^ TXT_XOR  ;=$BA
+.export _QU := pairs::_QU ^ TXT_XOR  ;=$B9
+.export _AN := pairs::_AN ^ TXT_XOR  ;=$B8
+.export _TE := pairs::_TE ^ TXT_XOR  ;=$BF
+.export _IS := pairs::_IS ^ TXT_XOR  ;=$BE
+.export _RI := pairs::_RI ^ TXT_XOR  ;=$BD
+.export _ON := pairs::_ON ^ TXT_XOR  ;=$BC
 
         .byte   "al", "le", "xe", "ge"
         .byte   "za", "ce", "bi", "so"
@@ -2748,12 +2751,17 @@ _2f24:  ; NOTE: this address is used in the table in _250c
         
         cmp # ' '
         beq _2f40
+
+        ; $FF for all characters except ".", ":", $0A, $0C & space,
+        ; otherwise $00 -- some kind of flag?
         inx 
-_2f40:
-        stx _2f19
+
+_2f40:  stx _2f19
         ldx $07
-        bit _2f1b
-        bmi _2f4d
+
+        bit _2f1b               ; check bit 7
+        bmi _2f4d               ; skip if bit 7 set (negative number)
+
         jmp paint_char
 
         ;-----------------------------------------------------------------------
@@ -2761,6 +2769,7 @@ _2f40:
 _2f4d:
         bit _2f1b
         bvs _2f56
+
         cmp # $0c
         beq _2f63
 _2f56:
@@ -2822,8 +2831,10 @@ _2fa6:
 _2fb0:
         ldx # $1e
         jsr _2fd4
+
         lda # $0c
         jsr paint_char
+        
         lda _2f1c
         sbc # $1e
         sta _2f1c

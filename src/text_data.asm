@@ -46,36 +46,37 @@
 .import _RI:direct      ;=$BD XOR 35 =158 ($9E)
 .import _ON:direct      ;=$BC XOR 35 =159 ($9F)
 
-.define __end           $00
-.define __              $20 ^ TXT_XOR   ;=$03
-.define A_              $41 ^ TXT_XOR   ;=$62
-.define B_              $42 ^ TXT_XOR   ;=$61
-.define C_              $43 ^ TXT_XOR   ;=$60
-.define D_              $44 ^ TXT_XOR   ;=$67
-.define E_              $45 ^ TXT_XOR   ;=$66
-.define F_              $46 ^ TXT_XOR   ;=$65
-.define G_              $47 ^ TXT_XOR   ;=$64
-.define H_              $48 ^ TXT_XOR   ;=$6b
-.define I_              $49 ^ TXT_XOR   ;=$6a
-.define J_              $4a ^ TXT_XOR   ;=$69
-.define K_              $4b ^ TXT_XOR   ;=$68
-.define L_              $4c ^ TXT_XOR   ;=$6f
-.define M_              $4d ^ TXT_XOR   ;=$6e
-.define N_              $4e ^ TXT_XOR   ;=$6d
-.define O_              $4f ^ TXT_XOR   ;=$6c
-.define P_              $50 ^ TXT_XOR   ;=$73
-.define Q_              $51 ^ TXT_XOR   ;=$72
-.define R_              $52 ^ TXT_XOR   ;=$71
-.define S_              $53 ^ TXT_XOR   ;=$70
-.define T_              $54 ^ TXT_XOR   ;=$77
-.define U_              $55 ^ TXT_XOR   ;=$76
-.define V_              $56 ^ TXT_XOR   ;=$75
-.define W_              $57 ^ TXT_XOR   ;=$74
-.define X_              $58 ^ TXT_XOR   ;=$7b
-.define Y_              $59 ^ TXT_XOR   ;=$7a
-.define Z_              $5a ^ TXT_XOR   ;=$79
-.define _HYPHEN_        $2d ^ TXT_XOR   ;=$0E
-.define _COLON_         $3a ^ TXT_XOR   ;=$19
+__end           = $00
+__              = $20 ^ TXT_XOR ;=$03
+_DOT            = $2E ^ TXT_XOR ;=$0D
+A_              = $41 ^ TXT_XOR ;=$62
+B_              = $42 ^ TXT_XOR ;=$61
+C_              = $43 ^ TXT_XOR ;=$60
+D_              = $44 ^ TXT_XOR ;=$67
+E_              = $45 ^ TXT_XOR ;=$66
+F_              = $46 ^ TXT_XOR ;=$65
+G_              = $47 ^ TXT_XOR ;=$64
+H_              = $48 ^ TXT_XOR ;=$6b
+I_              = $49 ^ TXT_XOR ;=$6a
+J_              = $4a ^ TXT_XOR ;=$69
+K_              = $4b ^ TXT_XOR ;=$68
+L_              = $4c ^ TXT_XOR ;=$6f
+M_              = $4d ^ TXT_XOR ;=$6e
+N_              = $4e ^ TXT_XOR ;=$6d
+O_              = $4f ^ TXT_XOR ;=$6c
+P_              = $50 ^ TXT_XOR ;=$73
+Q_              = $51 ^ TXT_XOR ;=$72
+R_              = $52 ^ TXT_XOR ;=$71
+S_              = $53 ^ TXT_XOR ;=$70
+T_              = $54 ^ TXT_XOR ;=$77
+U_              = $55 ^ TXT_XOR ;=$76
+V_              = $56 ^ TXT_XOR ;=$75
+W_              = $57 ^ TXT_XOR ;=$74
+X_              = $58 ^ TXT_XOR ;=$7b
+Y_              = $59 ^ TXT_XOR ;=$7a
+Z_              = $5a ^ TXT_XOR ;=$79
+_HYPHEN         = $2d ^ TXT_XOR ;=$0E
+_COLON          = $3a ^ TXT_XOR ;=$19
 
 _word_index     .set 0
 
@@ -97,6 +98,8 @@ _word_index     .set 0
 
         .out .sprintf(": $%2x: %s", _value, word_id)
         .ident(word_id) = _value
+
+        .export .ident(.concat("TXT", word_id)) = _value ^ TXT_XOR
 .endmacro
 .define .skip_word      _word_index .set _word_index + 1
 
@@ -187,7 +190,7 @@ _0775:  ;18.                                                            ;$0775
         .skip_word              ; $B2^35 = $91
 
 _077b:  ;19.                                                            ;$077B
-        .byte   M_, U_, L_, _TI, _HYPHEN_, _GOVERNMENT, __end
+        .byte   M_, U_, L_, _TI, _HYPHEN, _GOVERNMENT, __end
         .skip_word              ; $B3^35 = $90
         
 _0782:  ;20.                                                            ;$0782
@@ -259,7 +262,7 @@ _07fd:  ;35.                                                            ;$07FD
         .skip_word              ; $C3^35 = $E0
 
 _0809:  ;36.                                                            ;$0809
-        .byte   _TE, C_, H_, $0d, _LE, _VE, L_, __end
+        .byte   _TE, C_, H_, _DOT, _LE, _VE, L_, __end
         .skip_word              ; $C4^35 = $E7
         
 _0811:  ;37.                                                            ;$0811
@@ -373,7 +376,7 @@ _08ab:  ;62.                                                            ;$08AB
         .skip_word              ; $DE^35 = $FD
         
 _08b2:  ;63.                                                            ;$08B2
-        .byte   _GE, M_, _HYPHEN_, _ST, _ON, _ES, __end
+        .byte   _GE, M_, _HYPHEN, _ST, _ON, _ES, __end
         .skip_word              ; $DF^35 = $FC
         
 _08b9:  ;64.                                                            ;$08B9
@@ -386,7 +389,8 @@ _08c0:  ;65.                                                            ;$08C0
         
 _08c7:  ;66.                                                            ;$08C7
         .byte   __, C_, R_, __end
-        .skip_word              ; $E2^35 = $C1
+        .define_word \
+                "_CR"           ; $E2^35 = $C1
         
 _08cb:  ;67.                                                            ;$08CB
         .byte   L_, _AR, _GE, __end
@@ -430,7 +434,7 @@ _08f1:  ;76.                                                            ;$08F1
         .skip_word              ; $EC^35 = $CF
         
 _08f7:  ;77.                                                            ;$08F7
-        .byte   B_, U_, G_, _HYPHEN_, E_, Y_, _ED, __end
+        .byte   B_, U_, G_, _HYPHEN, E_, Y_, _ED, __end
         .skip_word              ; $ED^35 = $CE
         
 _08ff:  ;78.                                                            ;$08FF
@@ -567,7 +571,7 @@ _09a8:  ;107.                                                           ;$09A8
         .skip_word              ; $6B^35 = $48
         
 _09af:  ;108.                                                           ;$09AF
-        .byte   E_, $0d, C_, $0d, M_, $0d, _SYSTEM, __end
+        .byte   E_, _DOT, C_, _DOT, M_, _DOT, _SYSTEM, __end
         .skip_word              ; $6C^35 = $4F
 
 _09b7:  ;109.                                                           ;$09B7
@@ -598,7 +602,8 @@ _09d8:  ;114.                                                           ;$09D8
 _09dc:  ;115.                                                           ;$09dC
         .byte   D_, O_, C_, K_, _IN, G_, __, _COMPUTERS, __end
         .define_word \
-                "_DOCKING_COMPUTERS"    ; $73^35 = $50
+                "_DOCKING_COMPUTERS"
+                                ; $73^35 = $50
 
 _09e5:  ;116.                                                           ;$09E5
         .byte   _GALACTIC, __, _HYPERSPACE, __end
@@ -613,7 +618,7 @@ _09f3:  ;118.                                                           ;$09F3
         .skip_word              ; $76^35 = $55
         
 _09fa:  ;119.                                                           ;$09FA
-        .byte   _CASH, _COLON_, $23, __end
+        .byte   _CASH, _COLON, $23, __end
         .skip_word              ; $77^35 = $54
 
 _09fe:  ;120.                                                           ;$09FE
@@ -640,7 +645,7 @@ _0a17:  ;124.                                                           ;$0A17
         .skip_word              ; $7C^35 = $5F
         
 _0a1a:  ;125.                                                           ;$0A1A
-        .byte   $26, _LE, G_, _AL, __, _ST, _AT, _US, _COLON_, __end
+        .byte   $26, _LE, G_, _AL, __, _ST, _AT, _US, _COLON, __end
         .skip_word              ; $7D^35 = $5E
 
 _0a24:  ;126.                                                           ;$0A24
@@ -658,8 +663,8 @@ _0a3d:  ;127.                                                           ;$0A3D
 ;-------------------------------------------------------------------------------
 
 _0a41:  ;128.                                                          ;$0A41
-        ; this has to be skipped because its code
-        ; is the same as hyphen -- $2D
+        ; this has to be skipped because its code is the same as hyphen,
+        ; and its de-scrambled value $0E is a meta-command (switch case?)
         .byte   __end
         .skip_word              ; $0E^35 = $2D
         
@@ -669,7 +674,7 @@ _0a42:  ;129.                                                          ;$0A42
                 "_LL"           ; $0F^35 = $2C
         
 _0a45:  ;130.                                                           ;$0A45
-        .byte   _RA, _TI, N_, G_, _COLON_, __end
+        .byte   _RA, _TI, N_, G_, _COLON, __end
         .skip_word              ; $10^35 = $33
         
 _0a4b:  ;131.                                                           ;$0A4B
@@ -678,7 +683,7 @@ _0a4b:  ;131.                                                           ;$0A4B
                 "_ON_"          ; $11^35 = $32
         
 _0a4f:  ;132.                                                           ;$0A4F
-        .byte   $2f, $2b, _EQUIP, M_, _EN, T_, _COLON_, $25, __end
+        .byte   $2f, $2b, _EQUIP, M_, _EN, T_, _COLON, $25, __end
         .skip_word              ; $12^35 = $31
 
 _0a58:  ;133.                                                           ;$0A58
@@ -727,9 +732,9 @@ _0a91:  ;143.                                                           ;$0A91
         .skip_word              ; $1D^35 = $3E
 
 _0a98:  ;144.                                                           ;$0A98
-        .byte   _HYPHEN_, _HYPHEN_, _HYPHEN_, _HYPHEN_
+        .byte   _HYPHEN, _HYPHEN, _HYPHEN, _HYPHEN
         .byte   __, E_, __, L_, __, I_, __, T_, __, E_, __
-        .byte   _HYPHEN_, _HYPHEN_, _HYPHEN_, _HYPHEN_, __end
+        .byte   _HYPHEN, _HYPHEN, _HYPHEN, _HYPHEN, __end
         .skip_word              ; $1E^35 = $3D
 
 _0aac:  ;145.                                                           ;$0AAC

@@ -253,6 +253,7 @@ _6a87:                                                                  ;$6a87
 _6a8a:                                                                  ;$6a8a
         lda # $80
         sta $34
+
 _6a8e:                                                                  ;$6a8e
         lda # $0c
         jmp print_token
@@ -2149,92 +2150,169 @@ _7742:
 ;===============================================================================
 
 _774a:
-        lda # $69
+        ; BBC code says this should be "CASH" not "FUEL"??
+
+.import TXT_FUEL:direct
+
+        lda # TXT_FUEL
         jsr print_token_with_colon
+
         ldx $04a6
         sec 
         jsr _2e55
+
         lda # $c3
         jsr _7773
         
         lda # $77
         bne print_token
+
+        ; print cash value?  
 _775f:
         ldx # $03
-_7761:
-        lda $04a2, x
+
+        ; copy $04A3..$04A5 to $78..$7A?
+:       lda $04a2, x                                                    ;$7761
         sta $77, x
         dex 
-        bpl _7761
+        bpl :-
+
         lda # $09
         sta $99
-        sec 
-        jsr _2e65
-        lda # $e2
+        
+        sec                     ; set carry flag
+        jsr _2e65               ; convert value to string?
+
+        ; print "CR" ("credits") after the cash value
+.import TXT_CR:direct
+        lda # TXT_CR
 _7773:
 .export _7773
         jsr print_token
         jmp _6a8e
 
-;===============================================================================
-
-; text-decoding routine:
 
 print_token_with_colon:                                                 ;$7779
+        ;=======================================================================
+        ; prints the string token in A and appends a colon character
+        ;
+        ;    A = an already *de-scrambled* string token
+        ;
         jsr print_token
 
 print_colon:                                                            ;$777C
-        ; print a colon
+        ;=======================================================================
+        ; prints a colon, nothing else
+        ;
         lda # ':'
 
 print_token:                                                            ;$777E
+        ;=======================================================================
+        ; prints an already *de-scrambled* string token. this can be a single
+        ; letter, a variable (like cash or planet name), a string-expansion,
+        ; or a meta-command
+        ;
+        ;    A = an already *de-scrambled* string token
+        ;
+        ; brief token breakdown:
+        ;
+        ;      $00 = ?
+        ;      $01 = ?
+        ;      $02 = ?
+        ;      $03 = ?
+        ;      $04 = ?
+        ;      $05 = ?
+        ;      $06 = ?
+        ;      $07 = ?
+        ;      $08 = ?
+        ;      $09 = ?
+        ;      $0A = ?
+        ;      $0B = ?
+        ;      $0C = ?
+        ;      $0D = ?
+        ;      $0E = ?
+        ;  $0F-$20 = canned messages 129-146
+        ;  $60-$7F = canned messages  96-127
+        ;  $80-$BF = canned messages   0-95
+
 .export print_token
+
         tax                     ; put aside token for later test
 
+        ; handle variables / meta-commands:
+        ;-----------------------------------------------------------------------
+
+        ; token $00:
+        ;
         beq _775f               ; is A 0? -- print "Cash: " and credit count
         
-        bmi _77f9               ; is bit 7 set? (i.e. is token)
+        ; token $80-$FF:
+        ;
+        ; any token value 128 or higher (i.e. bit 7 set) is a canned-message,
+        ; the index of which is in the remaining 6 bits
+        ;
+        bmi print_token_message ; is bit 7 set? (i.e. is token)
         
+        ; token $01:
+        ;
         dex                     ; decrement token value
         beq _7742               ; if now 0, it was 1 -- process 'tally'(?)
         
+        ; token $02:
+        ;
         dex                     ; decrement token value
         beq _7727               ; if now 0, it was 2 -- current planet name
         
+        ; token $03:
+        ;
         dex                     ; decrement token value 
         bne :+                  ; skip ahead if it isn't now zero
         jmp _76e9               ; it was 3 -- selected planet name
 
+        ; token $04:
+        ;
 :       dex                     ; decrement token value                 ;$778F 
         beq _7717               ; if now 0, it was 4 -- commander's name
 
+        ; token $05:
         dex                     ; decrement token value
         beq _774a               ; if now 0, it was 5 -- cash value only
         
         dex                     ; decrement token value
         bne :+                  ; skip ahead if not 0
         
-        ; if now 0, it was 6 -- case swith token
+        ; token $06:
+        ;
         lda # $80               ; put 128 (bit 7) into A
         sta $34                 ; set case-switch flag
         rts 
 
+        ; NOTE: token $07 will fall through here
+        ;       and be handled later!
+
+        ; token $08:
+        ;
 :       dex                     ; decrement token value twice more      ;$779D
         dex                     ; i.e. if it was 8, it would be 0
         bne :+                  ; skip ahead if token was not originally 8
         stx $34                 ; token was 8, store the 0 in the case-switch
         rts                     ; flag and return
 
+        ; token $09:
+        ;
 :       dex                     ; decrement token again                 ;$77A4
         beq _indent             ; if token was 9, process a tab
 
-        cmp # $60
-        bcs _7813
+        ;-----------------------------------------------------------------------
 
-        cmp # $0e
-        bcc :+
+        ; tokens 96...127 are canned messages
+        cmp # $60
+        bcs print_canned_message
+
+        cmp # $0e               ; < $0E? -- i.e. only token $07
+        bcc :+                  ; skip ahead -- switch case?
         
-        cmp # $20               ; less than 32?
+        cmp # $20               ; < 32?
         bcc _77db               ; treat as token A+114
 
         ; switch case?
@@ -2278,7 +2356,7 @@ _is_captial:                                                            ;$77CA
 
 _77db:  ; add 114 to the token number and print the canned message:
         adc # 114
-        bne _7813
+        bne print_canned_message
 
 _indent:                                                                ;$77DF
         ;-----------------------------------------------------------------------
@@ -2307,29 +2385,37 @@ _77ef:  pha
 
 _77f6:  jmp _2f24
 
-        ;-----------------------------------------------------------------------
 
-_77f9:  
+print_token_message:                                                    ;$77F9
+        ;-----------------------------------------------------------------------
+        ; note that canned message tokens have bit 7 set, so really this is
+        ; asking if the message index is > 32 -- the first 32 canned messages
+        ; are letter pairs
+
         cmp # 160               ; is token > 160?
-        bcs _7811               ; if yes, print message A-160
+        bcs @canned_token       ; if yes, go to canned messages 33+ 
         
-        and # %01111111         ; clear token flag, leave token index
-        asl                     ; double it for a lookup-table offset
-        tay 
+        and # %01111111         ; clear token flag, leave message index
+        asl                     ; double it for a lookup-table offset,
+        tay                     ; this would have cleared bit 7 anyway!
         lda char_pair1, y       ; read the first character,
         jsr print_token         ; print it
         lda char_pair2, y       ; read second character
-        cmp # $3f               ; is it 63? (some kind of continuation token)
-        beq _784e               ; yes, skip -- although not used in practice
-        jmp print_token         ; print second character
+        cmp # $3f               ; is it 63? (some kind of continuation token?)
+        beq _784e               ; yes, skip -- although never seen in practice
+        jmp print_token         ; print second character (and return)
 
-        ;-----------------------------------------------------------------------
-
-_7811:  ; token messages 160+; subtract 160 for the message index
+@canned_token:                                                          ;$7811  
+        ; token messages 160+; subtract 160 for the message index
         sbc # 160
-_7813:
-        ; put the token (message index) aside
-        tax 
+
+print_canned_message:                                                   ;$7813
+        ;=======================================================================
+        ; prints a canned message from the messages table
+        ;
+        ;    A = message index 
+        
+        tax                     ; put the message index aside 
 
         ; select the table of canned-messages
         lda #< _0700
@@ -2340,27 +2426,26 @@ _7813:
         ; initialise loop counter
         ldy # $00
         
-        txa
-        ; ignore message no.0, i.e. you can't skip zero messages 
-        beq print_token_string
+        ; ignore message no.0,
+        ; i.e. you can't skip zero messages
+        txa                     ; return the original message index
+        beq print_token_string  ; not zero?
 
-_skip_to_end:                                                           ;$7821
-        ;-----------------------------------------------------------------------
+@skip_message:                                                           ;$7821
+
         lda [$5b], y            ; read a code from the compressed text
-        beq _782c               ; if zero terminator, end string
+        beq :+                  ; if zero terminator, end string
         iny                     ; next character 
-        bne _skip_to_end        ; loop if not at 256 chars
+        bne @skip_message       ; loop if not at 256 chars
         inc $5c                 ; move to the next page,
-        bne _skip_to_end        ; and keep reading
+        bne @skip_message       ; and keep reading
 
-        ;-----------------------------------------------------------------------
-
-_782c:
-        iny 
-        bne :+
-        inc $5c
-:       dex                                                             ;$7831 
-        bne _skip_to_end
+:       iny                     ; move forward over the zero            ;$782C 
+        bne :+                  ; skip if we haven't overflowed a page
+        inc $5c                 ; next page if the zero happened there
+:       dex                     ; decrement message skip counter        ;$7831 
+        bne @skip_message       ; keep looping if we haven't reached
+                                ; the desired message index yet
 
 print_token_string:                                                     ;$7834
         ;-----------------------------------------------------------------------
@@ -4885,7 +4970,7 @@ _87d0:
         jsr set_cursor_col
         
         lda # $92
-        jsr _7813
+        jsr print_canned_message
 _87fd:
         jsr _848d
         lsr 
@@ -5280,8 +5365,10 @@ _8a8f:
         bcc _8a6a
 _8a94:
         sta $000e, y
+
         lda # $10
         sta $050c
+        
         lda # $0c
         jmp paint_char
 
@@ -9030,9 +9117,11 @@ _a731:
         jsr _246d
         lda # $00
         sta $7e
+        
         lda # $80
         sta $34
         sta _2f19
+
         jsr _7b4f
         lda # $00
         sta $0484
@@ -11263,8 +11352,10 @@ _b3d4:  ; NOTE: referenced by table at `_250c`
         lda # $00
         sta $048b
         sta $048c
+
         lda # $ff
         sta _2f19
+        
         lda #> _8015
         sta $34
         lda #< _8015
