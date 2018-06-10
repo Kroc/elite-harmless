@@ -2171,7 +2171,7 @@ _774a:
 _775f:
         ldx # $03
 
-        ; copy $04A3..$04A5 to $78..$7A?
+        ; copy $04A2..$04A5 to $77..$7A?
 :       lda $04a2, x                                                    ;$7761
         sta $77, x
         dex 
@@ -2231,7 +2231,7 @@ print_token:                                                            ;$777E
         ;      $0C = ?
         ;      $0D = ?
         ;      $0E = ?
-        ;  $0F-$20 = canned messages 129-146
+        ;  $0E-$20 = canned messages 128-146
         ;  $60-$7F = canned messages  96-127
         ;  $80-$BF = canned messages   0-95
 
@@ -2256,30 +2256,30 @@ print_token:                                                            ;$777E
         ; token $01:
         ;
         dex                     ; decrement token value
-        beq _7742               ; if now 0, it was 1 -- process 'tally'(?)
+       .bze _7742               ; if now 0, it was 1 -- process 'tally'(?)
         
         ; token $02:
         ;
         dex                     ; decrement token value
-        beq _7727               ; if now 0, it was 2 -- current planet name
+       .bze _7727               ; if now 0, it was 2 -- current planet name
         
         ; token $03:
         ;
         dex                     ; decrement token value 
-        bne :+                  ; skip ahead if it isn't now zero
+       .bnz :+                  ; skip ahead if it isn't now zero
         jmp _76e9               ; it was 3 -- selected planet name
 
         ; token $04:
         ;
 :       dex                     ; decrement token value                 ;$778F 
-        beq _7717               ; if now 0, it was 4 -- commander's name
+       .bze _7717               ; if now 0, it was 4 -- commander's name
 
         ; token $05:
         dex                     ; decrement token value
-        beq _774a               ; if now 0, it was 5 -- cash value only
+       .bze _774a               ; if now 0, it was 5 -- cash value only
         
         dex                     ; decrement token value
-        bne :+                  ; skip ahead if not 0
+       .bnz :+                  ; skip ahead if not 0
         
         ; token $06:
         ;
@@ -2303,17 +2303,16 @@ print_token:                                                            ;$777E
 :       dex                     ; decrement token again                 ;$77A4
         beq _indent             ; if token was 9, process a tab
 
-        ;-----------------------------------------------------------------------
-
         ; tokens 96...127 are canned messages
+        ; (tokens 128...255 have already been checked for above)
         cmp # $60
-        bcs print_canned_message
+       .bge print_canned_message
 
         cmp # $0e               ; < $0E? -- i.e. only token $07
-        bcc :+                  ; skip ahead -- switch case?
+       .blt :+                  ; skip ahead -- switch case?
         
         cmp # $20               ; < 32?
-        bcc _77db               ; treat as token A+114
+       .blt _77db               ; treat as token A+114
 
         ; switch case?
 
@@ -2323,6 +2322,9 @@ print_token:                                                            ;$777E
         
         bit $34                 ; check bits 7 & 6 (bit 7 already handled)
         bvs _77ef               ; bit 6 set -- print char and reset bit 6
+
+        ;-----------------------------------------------------------------------
+
 _77bd:
         cmp # 'a'               ; less than 'A'?
         bcc _goto_print_char    ; yes: print as is
@@ -2392,9 +2394,11 @@ print_token_message:                                                    ;$77F9
         ; asking if the message index is > 32 -- the first 32 canned messages
         ; are letter pairs
 
-        cmp # 160               ; is token > 160?
-        bcs @canned_token       ; if yes, go to canned messages 33+ 
+        cmp # 160               ; is token >= 160?
+       .bge @canned_token       ; if yes, go to canned messages 33+ 
         
+        ; token is a character pair
+
         and # %01111111         ; clear token flag, leave message index
         asl                     ; double it for a lookup-table offset,
         tay                     ; this would have cleared bit 7 anyway!

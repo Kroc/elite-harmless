@@ -2567,139 +2567,223 @@ _2dc5:
         sta $0a, x
         rts 
 
+; convert values to strings:
+; TODO: this to be its own segment, we WILL want to replace it
 ;===============================================================================
 
-_2e51:
+.exportzp       ZP_VALUE        := $77
+.exportzp       ZP_VALUE_pt1    := $77
+.exportzp       ZP_VALUE_pt2    := $78
+.exportzp       ZP_VALUE_pt3    := $79
+.exportzp       ZP_VALUE_pt4    := $7a
+.exportzp       ZP_VALUE_OVFLW  := $9c  ; because, why not!?
+
+.exportzp       ZP_VCOPY        := $6b
+.exportzp       ZP_VCOPY_pt1    := $6b
+.exportzp       ZP_VCOPY_pt2    := $6c
+.exportzp       ZP_VCOPY_pt3    := $6d
+.exportzp       ZP_VCOPY_pt4    := $6e
+.exportzp       ZP_VCOPY_OVFLW  := $6f
+
+_max_value:                                                             ;$2E51
+        ; maximum value
+        ;
+        ; BBC source says this is "100-billion"
+        ; (what format is it?)
         .byte   $48, $76, $e8, $00
 
-        ;-----------------------------------------------------------------------
+        ;       %01001000
+        ;       %01110110
+        ;       %11101000
 
-_2e55:
+_2e55:                                                                  ;$2E55
+        ;=======================================================================
 .export _2e55
         lda # $03
-_2e57:
+_2e57:                                                                  ;$2E57
+        ;=======================================================================
 .export _2e57
         ldy # $00
-_2e59:
+
+_2e59:                                                                  ;$2E59
+        ;=======================================================================
+        ; print "0"?
+        ;
 .export _2e59
         sta $99
         lda # $00
-        sta $77
-        sta $78
-        sty $79
-        stx $7a
-_2e65:
+        sta ZP_VALUE_pt1
+        sta ZP_VALUE_pt2
+        sty ZP_VALUE_pt3
+        stx ZP_VALUE_pt4
+
+_2e65:                                                                  ;$2E65
+        ;=======================================================================
+        ; convert a numerical value to a string?
+        ;
+        ; $77-$7A = numerical value (note: big-endian)
+        ;     $99 = max. number of digits
+        ;       c = use decimal-point?
+        ;
 .export _2e65
-        ldx # $0b
+
+        ; set max. text width
+        ; TODO: get this from the ZP definitions?
+        ldx # 11
         stx $bb
+
+        ; keep a copy of the carry-flag
+        ; parameter (use decimal point)
         php 
-        bcc _2e70
-        dec $bb
-        dec $99
-_2e70:
-        lda # $0b
-        sec 
-        sta $9f
+        bcc :+                  ; skip ahead when carry = 0
+        
+        ; carry flag is set;
+        ; a decimal point will be printed
+        dec $bb                 ; one less char for the buffer
+        dec $99                 ; reduce number of digits
+
+        ; check for buffer-overflow:
+        ; does the requested number of digits fit into the max.length?
+
+:       lda # 11                ; length of text                        ;$2E70
+        sec                     ; set carry-flag, see note below
+        sta $9f                 ; put the length of text aside
+
+        ; subtract the allowed length of text from the max. number of digits,
+        ; since carry is set, this will underflow (sign-bit) if equal 
         sbc $99
         sta $99
-        inc $99
-        ldy # $00
-        sty $9c
-        jmp _2ec1
+        inc $99                 ; ?
 
-_2e82:
-        asl $7a
-        rol $79
-        rol $78
-        rol $77
-        rol $9c
-        ldx # $03
-_2e8e:
-        lda $77, x
-        sta $6b, x
-        dex 
-        bpl _2e8e
-        lda $9c
-        sta $6f
-        asl $7a
-        rol $79
-        rol $78
-        rol $77
-        rol $9c
-        asl $7a
-        rol $79
-        rol $78
-        rol $77
-        rol $9c
-        clc 
-        ldx # $03
-_2eb0:
-        lda $77, x
-        adc $6b, x
-        sta $77, x
-        dex 
-        bpl _2eb0
-        lda $6f
-        adc $9c
-        sta $9c
         ldy # $00
-_2ec1:
-        ldx # $03
-        sec 
-_2ec4:
-        lda $77, x
-        sbc _2e51, x
-        sta $6b, x
+        sty ZP_VALUE_OVFLW      ; highest byte for overflow
+        
+        jmp _2ec1               ; jump into the main loop
+        
+        
+_x10:   ; multiply by 10:                                               ;$2E82
+        ;-----------------------------------------------------------------------
+        ; since you can't 'just' multiply by 10 in binary, we first multiply
+        ; by 2 and put that aside, do a multiply by 8 and then add the two
+        ; values together
+
+        ; first, multiply by 2
+        asl ZP_VALUE_pt4
+        rol ZP_VALUE_pt3
+        rol ZP_VALUE_pt2
+        rol ZP_VALUE_pt1
+        rol ZP_VALUE_OVFLW      ; catch any overflow
+
+        ; make a copy of our 2x value
+        ldx # 3
+:       lda ZP_VALUE, x                                                 ;$2E8E
+        sta ZP_VCOPY, x
         dex 
-        bpl _2ec4
+        bpl :-
+        
+        lda ZP_VALUE_OVFLW      ; copy the overflow value
+        sta ZP_VCOPY_OVFLW      ; to the 2x value copy too
+
+        ; multiply again by 2
+        ; (i.e. 4x original value)
+        asl ZP_VALUE_pt4
+        rol ZP_VALUE_pt3
+        rol ZP_VALUE_pt2
+        rol ZP_VALUE_pt1
+        rol ZP_VALUE_OVFLW
+        ; multiply again by 2;
+        ; (i.e. 8x original value)
+        asl ZP_VALUE_pt4
+        rol ZP_VALUE_pt3
+        rol ZP_VALUE_pt2
+        rol ZP_VALUE_pt1
+        rol ZP_VALUE_OVFLW
+        clc 
+
+        ; add our x2 value to our x8 value:
+
+        ldx # 3                 ; numerical value is 4-bytes long (0..3)
+:       lda ZP_VALUE, x         ; load x2 byte                          ;$2EB0
+        adc ZP_VCOPY, x         ; add to x8 byte
+        sta ZP_VALUE, x         ; write the value back
+        dex 
+        bpl :-
+
+        ; add the overflow bytes together
+        lda ZP_VCOPY_OVFLW
+        adc ZP_VALUE_OVFLW
+        sta ZP_VALUE_OVFLW
+
+        ldy # $00
+
+_2ec1:  ; check for '100-billion' overflow
+        ;-----------------------------------------------------------------------
+        ldx # 3                 ; numerical value is 4-bytes long (0..3)
+        sec 
+
+:       lda ZP_VALUE, x         ; read a byte from the numerical value  ;$2EC4
+        sbc _max_value, x       ; subtract against '100-billion'
+        sta $6b, x              ; store this into an 'overflow' value
+        dex 
+        bpl :-
+
         lda $9c
         sbc # $17
-        sta $6f
+        sta $6f                 ;=overflow byte?
         bcc _2ee7
-        ldx # $03
-_2ed8:
+
+        ldx # 3                 ; numerical value is 4-bytes long (0..3)
+
+:       ; store remainder of 100-billion back into value?               ;$2ED8
         lda $6b, x
-        sta $77, x
+        sta ZP_VALUE, x
         dex 
-        bpl _2ed8
+        bpl :-
+
         lda $6f
         sta $9c
         iny 
         jmp _2ec1
 
+        ;-----------------------------------------------------------------------
+
 _2ee7:
         tya 
-        bne _2ef6
-        lda $bb
-        beq _2ef6
-        dec $99
-        bpl _2f00
-        lda # $20
-        bne _2efd
-_2ef6:
+        bne @ascii
+
+        lda $bb                 
+       .bze @ascii
+
+        dec $99                 ; reduce number of max. digits allowed
+        bpl _2f00               ; skip ahead if we haven't hit zero yet
+
+        lda # ' '               ; leading white-space
+        bne @print              ; skip over the next bit (always branches)
+
+@ascii: ; convert value 0-9 to ASCII/PETSCII character                  ;$2EF6
         ldy # $00
         sty $bb
         clc 
-        adc # $30
-_2efd:
-        jsr _2f24
+        adc # '0'               ; re-base as an ASCII/PETSCII numeral
+
+@print: jsr _2f24               ; print character                       ;$2EFD        
+
 _2f00:
         dec $bb
         bpl _2f06
         inc $bb
 _2f06:
         dec $9f
-        bmi _2f17
-        bne _2f14
+        bmi @rts
+        bne :+
         plp 
-        bcc _2f14
+        bcc :+
         lda # $2e
         jsr _2f24
-_2f14:
-        jmp _2e82
 
-_2f17:
-        rts 
+:       jmp _x10                                                        ;$2F14
+
+@rts:   rts                                                             ;$2F17 
 
 ;===============================================================================
 
