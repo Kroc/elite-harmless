@@ -77,7 +77,7 @@
 .import _2e55:absolute
 .import _2e57:absolute
 .import _2e59:absolute
-.import _2e65:absolute
+.import print_value:absolute
 .import _2f19:absolute
 .import _2f1b:absolute
 .import _2f1c:absolute
@@ -2181,7 +2181,7 @@ _775f:
         sta $99
         
         sec                     ; set carry flag
-        jsr _2e65               ; convert value to string?
+        jsr print_value         ; convert value to string?
 
         ; print "CR" ("credits") after the cash value
 .import TXT_CR:direct
@@ -5509,7 +5509,7 @@ _8b37:
         eor $04e1
         sta $7a
         clc 
-        jsr _2e65
+        jsr print_value
         jsr _6a8e
         jsr _6a8e
         pla 

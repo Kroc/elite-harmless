@@ -1433,28 +1433,28 @@ char_pairs:                                                             ;$2566
 
 _25a6:
 .export _25a6
-        .byte   $3a, $30, $2e,$45
+        .byte   $3a, $30, $2e,$45                       ;":0.E"?
 _25aa:
 .export _25aa
-        .byte   $2e
+        .byte   $2e                                     ;"."?
 _25ab:
 .export _25ab
-        .byte   $6a, $61, $6d, $65, $73, $6f, $6e
+        .byte   $6a, $61, $6d, $65, $73, $6f, $6e       ;"jameson"?
 _25b2:
 .export _25b2
         .byte   $0d
 _25b3:
 .export _25b3
-        .byte $00, $00, $00, $00, $00, $00, $00, $00
-        .byte $00, $00, $00, $00, $00, $00, $00, $00
-        .byte $00, $00, $00, $00, $00, $00, $00, $00
-        .byte $00, $00, $00, $00, $00, $00, $00, $00
-        .byte $00, $00, $00, $00, $00, $00, $00, $00
-        .byte $00, $00, $00, $00, $00, $00, $00, $00
-        .byte $00, $00, $00, $00, $00, $10, $0f, $11
-        .byte $00, $03, $1c, $0e, $00, $00, $0a, $00
-        .byte $11, $3a, $07, $09, $08, $00, $00, $00
-        .byte $00, $80
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $10, $0f, $11
+        .byte   $00, $03, $1c, $0e, $00, $00, $0a, $00
+        .byte   $11, $3a, $07, $09, $08, $00, $00, $00
+        .byte   $00, $80
 
 _25fd:
 .export _25fd
@@ -1466,11 +1466,11 @@ _25ff:
 .export _25ff
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $00, $3a, $30, $2e
+        .byte   $00, $00, $00, $00, $00, $3a, $30, $2e  ;":0.E."?
         .byte   $45, $2e
 _2619:
 .export _2619
-        .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d
+        .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d  ;"JAMESON"
         .byte   $00 ,$14, $ad, $4a, $5a, $48, $02, $53
         .byte   $b7 ,$00, $00, $03, $e8, $46, $00, $00
         .byte   $0f ,$00, $00, $00, $00, $00, $16, $00
@@ -1712,8 +1712,10 @@ _28a5:
 .export _28a5
         .byte   $f9, $25, $f9, $4a, $f9, $6f, $f9, $94
         .byte   $f9, $b9, $f9, $de, $f9, $03, $fa, $28
-        .byte   $fa, $4d, $fa, $72, $fa, $80, $40, $20
-        .byte   $10, $08, $04, $02, $01, $80, $40
+        .byte   $fa, $4d, $fa, $72, $fa
+        
+        .byte   $80, $40, $20, $10, $08, $04, $02, $01
+        .byte   $80, $40
 
 ; unused / unreferenced?
 ;$28c4:
@@ -2610,6 +2612,7 @@ _2e59:                                                                  ;$2E59
         ; print "0"?
         ;
 .export _2e59
+
         sta $99
         lda # $00
         sta ZP_VALUE_pt1
@@ -2617,15 +2620,16 @@ _2e59:                                                                  ;$2E59
         sty ZP_VALUE_pt3
         stx ZP_VALUE_pt4
 
-_2e65:                                                                  ;$2E65
+print_value:                                                            ;$2E65
         ;=======================================================================
-        ; convert a numerical value to a string?
+        ; convert a numerical value to a string and print it
         ;
+        ;       Y = ?
         ; $77-$7A = numerical value (note: big-endian)
         ;     $99 = max. number of digits
-        ;       c = use decimal-point?
+        ;       c = use decimal-point
         ;
-.export _2e65
+.export print_value
 
         ; set max. text width
         ; TODO: get this from the ZP definitions?
@@ -2652,11 +2656,13 @@ _2e65:                                                                  ;$2E65
         ; subtract the allowed length of text from the max. number of digits,
         ; since carry is set, this will underflow (sign-bit) if equal 
         sbc $99
-        sta $99
+        sta $99                 ; remainder?
         inc $99                 ; ?
 
+        ; clear the overflow byte used
+        ; during calculations with the value
         ldy # $00
-        sty ZP_VALUE_OVFLW      ; highest byte for overflow
+        sty ZP_VALUE_OVFLW
         
         jmp _2ec1               ; jump into the main loop
         
@@ -2675,7 +2681,7 @@ _x10:   ; multiply by 10:                                               ;$2E82
         rol ZP_VALUE_OVFLW      ; catch any overflow
 
         ; make a copy of our 2x value
-        ldx # 3
+        ldx # 3                 ; numerical value is 4-bytes long (0..3)
 :       lda ZP_VALUE, x                                                 ;$2E8E
         sta ZP_VCOPY, x
         dex 
@@ -2723,25 +2729,25 @@ _2ec1:  ; check for '100-billion' overflow
 
 :       lda ZP_VALUE, x         ; read a byte from the numerical value  ;$2EC4
         sbc _max_value, x       ; subtract against '100-billion'
-        sta $6b, x              ; store this into an 'overflow' value
+        sta ZP_VCOPY, x         ; store the result separately
         dex 
         bpl :-
 
-        lda $9c
+        lda ZP_VALUE_OVFLW
         sbc # $17
-        sta $6f                 ;=overflow byte?
-        bcc _2ee7
+        sta ZP_VCOPY_OVFLW
+        bcc _2ee7               ; less than 100-billion -- continue printing
 
         ldx # 3                 ; numerical value is 4-bytes long (0..3)
 
 :       ; store remainder of 100-billion back into value?               ;$2ED8
-        lda $6b, x
+        lda ZP_VCOPY, x
         sta ZP_VALUE, x
         dex 
         bpl :-
 
-        lda $6f
-        sta $9c
+        lda ZP_VCOPY_OVFLW
+        sta ZP_VALUE_OVFLW
         iny 
         jmp _2ec1
 
@@ -2749,7 +2755,7 @@ _2ec1:  ; check for '100-billion' overflow
 
 _2ee7:
         tya 
-        bne @ascii
+       .bnz @ascii
 
         lda $bb                 
        .bze @ascii
@@ -2778,9 +2784,12 @@ _2f06:
         bne :+
         plp 
         bcc :+
-        lda # $2e
+
+        ; print the decimal point
+        lda # '.'
         jsr _2f24
 
+        ; handle the next decimal digit...
 :       jmp _x10                                                        ;$2F14
 
 @rts:   rts                                                             ;$2F17 
