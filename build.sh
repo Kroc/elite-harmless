@@ -47,8 +47,8 @@ echo "* assemble Elite source code:"
 echo "  ==========================="
 echo "- assemble 'prgheader.asm'"
 $ca65 -o build/prgheader.o      src/prgheader.asm
-echo "- assemble 'elite_consts.asm'"
-$ca65 -o build/elite_consts.o   src/elite_consts.asm
+echo "- assemble 'elite_memory.asm'"
+$ca65 -o build/elite_memory.o   src/elite_memory.asm
 echo "- assemble 'text_data.asm'"
 $ca65 -o build/text_data.o      src/text_data.asm
 echo "- assemble 'gfx_font.asm'"
@@ -81,7 +81,7 @@ $ld65 \
        -C link/elite_dx.cfg \
        -o bin/elite-dx.prg \
     --obj build/prgheader.o \
-    --obj build/elite_consts.o \
+    --obj build/elite_memory.o \
     --obj build/text_data.o \
     --obj build/gfx_font.o \
     --obj build/data_0E00.o \
@@ -121,7 +121,7 @@ echo "  ======================="
 echo "-     link 'elite-gma86.cfg'"
 $ld65 \
        -C link/elite-gma86.cfg \
-    --obj build/elite_consts.o \
+    --obj build/elite_memory.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
     --obj build/loader/stage2.o \
