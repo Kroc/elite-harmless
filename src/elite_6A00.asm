@@ -153,7 +153,7 @@ _6a1b:                                                                  ;$6a1b
         rts
 
 
-.proc   set_cursor_col                                                  ;$6a25
+.proc   set_cursor_col                                                  ;$6A25
         ;=======================================================================
         ; set the cursor column (where text printing occurs)
         ;
@@ -165,7 +165,7 @@ _6a1b:                                                                  ;$6a1b
         rts 
 .endproc
 
-.proc   set_cursor_row                                                  ;$6a28
+.proc   set_cursor_row                                                  ;$6A28
         ;=======================================================================
         ; set the cursor row (where text printing occurs)
         ;
@@ -177,7 +177,7 @@ _6a1b:                                                                  ;$6a1b
         rts 
 .endproc
 
-.proc   cursor_down                                                     ;$6a2b
+.proc   cursor_down                                                     ;$6A2b
         ;=======================================================================
         ; move the cursor down a row (does not change column!)
         ;
@@ -239,13 +239,17 @@ _6a68:                                                                  ;$6a68
         bne _6a73
         jmp cursor_down
 _6a73:                                                                  ;$6a73
-        lda # $bf
+.import TXT_DISTANCE:direct
+        lda # TXT_DISTANCE
         jsr print_token_with_colon
+
         ldx $0507
         ldy $0508
         sec 
         jsr _7235
-        lda # $c3
+
+.import TXT_LIGHT_YEARS:direct
+        lda # TXT_LIGHT_YEARS
 _6a84:                                                                  ;$6a84
         jsr print_token
 _6a87:                                                                  ;$6a87
@@ -261,7 +265,8 @@ _6a8e:                                                                  ;$6a8e
 ;===============================================================================
 
 _6a93:                                                                  ;$6a93
-        lda # $ad
+.import TXT_MAINLY:direct
+        lda # TXT_MAINLY
         jsr print_token
         jmp _6ad3
 
@@ -281,12 +286,17 @@ _6aa1:                                                                  ;$6aa1:
         lda # 9
         jsr set_cursor_col
         
-        lda # $a3
+.import TXT_DATA_ON:direct
+        lda # TXT_DATA_ON
         jsr _28d9
+
         jsr _6a87
         jsr _6a68
-        lda # $c2
+
+.import TXT_ECONOMY:direct
+        lda # TXT_ECONOMY
         jsr print_token_with_colon
+
         lda $0500
         clc 
         adc # $01
@@ -298,7 +308,8 @@ _6aa1:                                                                  ;$6aa1:
         sbc # $05
         clc 
 _6ace:                                                                  ;$6ace
-        adc # $aa
+.import TXT_RICH:direct
+        adc # TXT_RICH
         jsr print_token
 _6ad3:                                                                  ;$6ad3
         lda $0500
@@ -307,21 +318,30 @@ _6ad3:                                                                  ;$6ad3
         clc 
         adc # $a8
         jsr _6a84
-        lda # $a2
+
+.import TXT_GOVERNMENT:direct
+        lda # TXT_GOVERNMENT
         jsr print_token_with_colon
+        
         lda $0501
         clc 
         adc # $b1
         jsr _6a84
-        lda # $c4
+
+.import TXT_TECH_LEVEL:direct
+        lda # TXT_TECH_LEVEL
         jsr print_token_with_colon
+        
         ldx $0502
         inx 
         clc 
         jsr _2e55
         jsr _6a87
-        lda # $c0
+
+.import TXT_POPULATION:direct
+        lda # TXT_POPULATION
         jsr print_token_with_colon
+        
         sec 
         ldx $0503
         jsr _2e55
@@ -333,7 +353,9 @@ _6ad3:                                                                  ;$6ad3
         
         lda $83
         bmi _6b1e
-        lda # $bc
+
+.import TXT_HUMAN_COLONIAL:direct
+        lda # TXT_HUMAN_COLONIAL
         jsr print_token
         
         jmp _6b5a
@@ -379,8 +401,11 @@ _6b5a:                                                                  ;$6b5a
 
         lda # $29
         jsr _6a84
-        lda # $c1
+
+.import TXT_GROSS_PRODUCTIVITY:direct
+        lda # TXT_GROSS_PRODUCTIVITY
         jsr print_token_with_colon
+        
         ldx $0505
         ldy $0506
         jsr _7234
@@ -393,8 +418,11 @@ _6b5a:                                                                  ;$6b5a
         
         lda # $e2
         jsr _6a84
-        lda # $fa
+
+.import TXT_AVERAGE_RADIUS:direct
+        lda # TXT_AVERAGE_RADIUS
         jsr print_token_with_colon
+        
         lda $84
         ldx $82
         and # %00001111
@@ -487,7 +515,8 @@ _6c1c:                                                                  ;$6c1c
         
         jsr _70a0
 
-        lda # $c7
+.import TXT_GALACTIC_CHART:direct
+        lda # TXT_GALACTIC_CHART
         jsr print_token
         
         jsr _28e0
@@ -644,18 +673,25 @@ _6d34:                                                                  ;$6d34
 _6d3e:                                                                  ;$6d3e
         jsr _b3d4
         
-        lda # $cc
+.import TXT_QUANTITY_OF:direct
+        lda # TXT_QUANTITY_OF
         jsr print_token
+
+        ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
+        ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
+        ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
+.import TXT_FOOD:direct
 
         lda $04ef
         clc 
-        adc # $d0
+        adc # TXT_FOOD
         jsr print_token
         
         lda # $2f
         jsr print_token
         
         jsr _72b8
+
         lda # $3f
         jsr print_token
         
@@ -769,8 +805,11 @@ _6e26:                                                                  ;$6e26
         jmp _6e13
 _6e30:                                                                  ;$6e30
         jsr _6a8e
-        lda # $b0
+
+.import TXT_QUANTITY:direct
+        lda # TXT_QUANTITY
         jsr _723c
+
         jsr _7627
         ldy $04ef
         jmp _6e5d
@@ -781,11 +820,14 @@ _6e41:                                                                  ;$6e41
         lda # 10
         jsr set_cursor_col
         
-        lda # $cd
+.import TXT_SELL:direct
+        lda # TXT_SELL
         jsr print_token
 
-        lda # $ce
+.import TXT_CARGO:direct
+        lda # TXT_CARGO
         jsr _28d9
+
         jsr _6a8e
 _6e58:                                                                  ;$6e58
         ldy # $00
@@ -803,10 +845,16 @@ _6e5d:                                                                  ;$6e5d
         txa 
         pha 
         jsr _6a8a
+        
         clc 
         lda $04ef
 
-        adc # $d0
+        ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
+        ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
+        ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
+
+.import TXT_FOOD:direct
+        adc # TXT_FOOD
         jsr print_token
 
         lda # 14
@@ -822,7 +870,8 @@ _6e5d:                                                                  ;$6e5d
         cmp # $04
         bne _6eca
 
-        lda # $cd
+.import TXT_SELl:direct
+        lda # TXT_SELL
         jsr print_token
         
         lda # $ce
@@ -903,7 +952,8 @@ _6f16:                                                                  ;$6f16
         cmp # $1a
         bcc _6f37
 
-        lda # $6b
+.import TXT_LARGE_CARGO_BAY:direct
+        lda # TXT_LARGE_CARGO_BAY
         jsr print_token
 _6f37:                                                                  ;$6f37
         jmp _6e58
@@ -914,6 +964,7 @@ _6f37:                                                                  ;$6f37
 
 _6f3a:                                                                  ;$6f3a
         jsr print_token
+
         lda # $ce
         jsr _2390
         jsr _8fea
@@ -1024,8 +1075,10 @@ _6fdb:                                                                  ;$6fdb
         lda # 7
         jsr set_cursor_col
         
-        lda # $be
+.import TXT_SHORT_RANGE_CHART:direct
+        lda # TXT_SHORT_RANGE_CHART
         jsr _28d9
+
         jsr _6cda
         jsr _6f82
         jsr _70a0
@@ -1288,7 +1341,8 @@ _7196:                                                                  ;$7196
         lda # $00
         sta $34
 
-        lda # $bd
+.import TXT_HYPERSPACE:direct
+        lda # TXT_HYPERSPACE
         jsr print_token
         
         lda $0508
@@ -1302,6 +1356,7 @@ _71af:                                                                  ;$71af
 _71b2:                                                                  ;$71b2
         lda # $2d
         jsr print_token
+
         jsr _76e9
         lda # $0f
 _71bc:                                                                  ;$71bc
@@ -1380,7 +1435,9 @@ _7235:                                                                  ;$7235
         jmp _2e59
 
 _723a:                                                                  ;$723a
-        lda # $ca
+.import TXT_RANGE:direct
+        lda # TXT_RANGE
+
 _723c:                                                                  ;$723c
         jsr print_token
 
@@ -1405,8 +1462,13 @@ _7246:                                                                  ;$7246
         lda # 1
         jsr set_cursor_col
         
+        ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
+        ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
+        ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
+.import TXT_FOOD:direct
+
         pla 
-        adc # $d0
+        adc # TXT_FOOD
         jsr print_token
 
         lda # 14
@@ -1491,7 +1553,8 @@ _72e4:                                                                  ;$72e4
         lda # 5
         jsr set_cursor_col
 
-        lda # $a7
+.import TXT_MARKET_PRICES:direct
+        lda # TXT_MARKET_PRICES
         jsr _28d9
 
         lda # 3
@@ -1770,8 +1833,11 @@ _74bb:                                                                  ;$74bb
         
         lda # $cf
         jsr _6a9b
-        lda # $b9
+
+.import TXT_SHIP:direct
+        lda # TXT_SHIP
         jsr _28d9
+        
         lda # $80
         sta $34
         jsr cursor_down
@@ -1818,8 +1884,11 @@ _74f5:                                                                  ;$74f5
         cpx $9a
         bcc _74f5
         jsr _b3d4
-        lda # $7f
+
+.import TXT_ITEM:direct
+        lda # TXT_ITEM
         jsr _723c
+
         jsr _6dc9
         beq _74b8
         bcs _74b8
@@ -1889,7 +1958,8 @@ _75a1:                                                                  ;$75a1
         lda $77
         jsr _6a9b
         
-        lda # $1f
+.import TXT_PRESENT:direct
+        lda # TXT_PRESENT       ;?
         jsr print_token
 _75b3:                                                                  ;$75b3
         jsr _7627
@@ -1968,8 +2038,11 @@ _762f:
         jsr _7642
         jsr _745a
         bcs _764b
-        lda # $c5
+
+.import TXT_CASH:direct
+        lda # TXT_CASH
         jsr _723c
+        
         jmp _75b3
 
 ;===============================================================================
@@ -2010,14 +2083,17 @@ _765e:
         clc 
         adc # $50
         jsr print_token
+        
         jsr cursor_down
         ldy ZP_CURSOR_ROW
         cpy # $14
         bcc _765e
         jsr _b3d4
 _767e:
-        lda # $af
+.import TXT_VIEW:direct
+        lda # TXT_VIEW
         jsr _723c
+
         jsr _8fea
         sec 
         sbc # $30
@@ -2161,15 +2237,17 @@ _774a:
         sec 
         jsr _2e55
 
-        lda # $c3
+.import TXT_LIGHT_YEARS:direct
+        lda # TXT_LIGHT_YEARS
         jsr _7773
         
-        lda # $77
+.import TXT_CASH_:direct
+        lda # TXT_CASH_         ; "CASH:" (colon in the string)
         bne print_token
 
         ; print cash value?  
 _775f:
-        ldx # $03
+        ldx # 3
 
         ; copy $04A2..$04A5 to $77..$7A?
 :       lda $04a2, x                                                    ;$7761
@@ -2177,11 +2255,11 @@ _775f:
         dex 
         bpl :-
 
-        lda # $09
+        lda # $09               ; align to 10 digits
         sta $99
         
-        sec                     ; set carry flag
-        jsr print_value         ; convert value to string?
+        sec                     ; set carry flag - use decimal point
+        jsr print_value         ; convert value to string
 
         ; print "CR" ("credits") after the cash value
 .import TXT_CR:direct
@@ -5175,8 +5253,10 @@ _8920:
         lda # 6
         jsr set_cursor_col
         
-        lda # $1e
+.import TXT_ELITE:direct
+        lda # TXT_ELITE
         jsr _7773
+
         lda # $0a
         jsr _2f24
 
@@ -6289,7 +6369,8 @@ _905d:
         lsr $048c
         bcc _9001
         
-        lda # $fd
+.import TXT_DESTROYED:direct
+        lda # TXT_DESTROYED
         jmp print_token
 
 ;===============================================================================
@@ -9155,7 +9236,8 @@ _a75d:
         jsr print_token
         jsr _72c5
 
-        lda # $af
+.import TXT_VIEW:direct
+        lda # TXT_VIEW
         jsr print_token
 _a77b:
         ldx # 1

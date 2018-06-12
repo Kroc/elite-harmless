@@ -121,7 +121,8 @@ _070A:  ;2.                                                             ;$070A
 
 _0713:  ;3.                                                             ;$0713
         .byte   D_, _AT, A_, _ON_, $20, __end
-        .skip_word              ; $A3^35 = $80
+        .define_word \
+                "_DATA_ON"      ; $A3^35 = $80
 
 _0719:  ;4.                                                             ;$0719
         .byte   _IN, _VE, N_, T_, _OR, Y_, $2f, __end
@@ -139,7 +140,9 @@ _0727:  ;6.                                                             ;$0727
 
 _072b:  ;7.                                                             ;$072B
         .byte   $21, __, _MA, R_, K_, E_, T_, __, _PRICE, S_, __end
-        .skip_word              ; $A7^35 = $84
+        .define_word \
+                "_MARKET_PRICES"
+                                ; $A7^35 = $84
 
 _0736:  ;8.                                                             ;$0736
         .byte   _IN, D_, _US, T_, _RI, _AL, __end
@@ -151,7 +154,8 @@ _073d:  ;9.                                                             ;$073D
 
 _0748:  ;10.                                                            ;$0748
         .byte   _RI, C_, H_, __, __end
-        .skip_word              ; $AA^35 = $89
+        .define_word \
+                "_RICH"         ; $AA^35 = $89
 
 _074d:  ;11.                                                            ;$074D
         .byte   A_, _VE, _RA, _GE, __, __end
@@ -165,7 +169,8 @@ _0753:  ;12.                                                            ;$0753
         
 _0758:  ;13.                                                            ;$0758
         .byte   _MA, _IN, L_, Y_, __, __end
-        .skip_word              ; $AD^35 = $8E
+        .define_word \
+                "_MAINLY"       ; $AD^35 = $8E
         
 _075e:  ;14.                                                            ;$075E
         .byte   U_, N_, I_, T_, __end
@@ -174,7 +179,8 @@ _075e:  ;14.                                                            ;$075E
 
 _0763:  ;15.                                                            ;$0763
         .byte   V_, I_, E_, W_, __, __end
-        .skip_word              ; $AF^35 = $8C
+        .define_word \
+                "_VIEW"         ; $AF^35 = $8C
 
 _0769:  ;16.                                                            ;$0769
         .byte   _QU, _AN, _TI, T_, Y_, __end
@@ -230,7 +236,9 @@ _07b9:  ;27.                                                            ;$07B9
 
 _07be:  ;28.                                                            ;$07BE
         .byte   H_, U_, M_, _AN, __, C_, O_, L_, _ON, I_, _AL, __end
-        .skip_word              ; $BC^35 = $9F
+        .define_word \
+                "_HUMAN_COLONIAL"
+                                ; $BC^35 = $9F
 
 _07ca:  ;29.                                                            ;$07CA
         .byte   H_, Y_, P_, _ER, S_, P_, A_, _CE, __, __end
@@ -239,31 +247,40 @@ _07ca:  ;29.                                                            ;$07CA
         
 _07d4:  ;30.                                                            ;$07D4
         .byte   S_, H_, _OR, T_, __, _RANGE, _CHART, __end
-        .skip_word              ; $BE^35 = $9D
+        .define_word \
+                "_SHORT_RANGE_CHART"
+                                ; $BE^35 = $9D
 
 _07dc:  ;31.                                                            ;$07DC
         .byte   _DI, _ST, _AN, _CE, __end
-        .skip_word              ; $BF^35 = $9C
+        .define_word \
+                "_DISTANCE"     ; $BF^35 = $9C
 
 _07e1:  ;32.                                                            ;$07E1
         .byte   P_, O_, P_, U_, L_, _AT, I_, _ON, __end
-        .skip_word              ; $C0^35 = $E3
+        .define_word \
+                "_POPULATION"   ; $C0^35 = $E3
 
 _07ea:  ;33.                                                            ;$07EA
         .byte   G_, _RO, S_, S_, __, _PRODUCT, I_, V_, I_, T_, Y_, __end
-        .skip_word              ; $C1^35 = $E2
+        .define_word \
+                "_GROSS_PRODUCTIVITY"
+                                ; $C1^35 = $E2
 
 _07f6:  ;34.                                                            ;$07F6
         .byte   E_, C_, _ON, O_, M_, Y_, __end
-        .skip_word              ; $C2^35 = $E1
+        .define_word \
+                "_ECONOMY"      ; $C2^35 = $E1
         
 _07fd:  ;35.                                                            ;$07FD
         .byte   __, L_, I_, G_, H_, T_, __, Y_, E_, _AR, S_, __end
-        .skip_word              ; $C3^35 = $E0
+        .define_word \
+                "_LIGHT_YEARS"  ; $C3^35 = $E0
 
 _0809:  ;36.                                                            ;$0809
         .byte   _TE, C_, H_, _DOT, _LE, _VE, L_, __end
-        .skip_word              ; $C4^35 = $E7
+        .define_word \
+                "_TECH_LEVEL"   ; $C4^35 = $E7
         
 _0811:  ;37.                                                            ;$0811
         .byte   C_, A_, S_, H_, __end
@@ -276,7 +293,9 @@ _0816:  ;38.                                                            ;$0816
 
 _081c:  ;39.                                                            ;$081C
         .byte   _GALACTIC, _CHART, $22, __end
-        .skip_word              ; $C7^35 = $E4
+        .define_word \
+                "_GALACTIC_CHART"
+                                ; $C7^35 = $E4
         
 _0820:  ;40.                                                            ;$0820
         .byte   T_, _AR, _GE, T_, __, L_, O_, _ST, __end
@@ -298,11 +317,13 @@ _0835:  ;43.                                                            ;$0835
 
 _0838:  ;44.                                                            ;$0838
         .byte   _QUANTITY, __, O_, F_, __, __end
-        .skip_word              ; $CC^35 = $EF
+        .define_word \
+                "_QUANTITY_OF"  ; $CC^35 = $EF
 
 _083e:  ;45.                                                            ;$083E
         .byte   S_, E_, _LL, __end
-        .skip_word              ; $CD^35 = $EE
+        .define_word \
+                "_SELL"         ; $CD^35 = $EE
 
 _0842:  ;46.                                                            ;$0842
         .byte   __, C_, _AR, G_, O_, $25, __end
@@ -316,7 +337,8 @@ _0849:  ;47.                                                            ;$0849
         
 _084e:  ;48.                                                            ;$084E
         .byte   F_, O_, O_, D_, __end
-        .skip_word              ; $D0^35 = $F3
+        .define_word \
+                "_FOOD"         ; $D0^35 = $F3
         
 _0853:  ;49.                                                            ;$0853
         .byte   _TE, X_, _TI, L_, _ES, __end
@@ -487,7 +509,9 @@ _0938:  ;89.                                                            ;$0938
         
 _093e:  ;90.                                                            ;$093E
         .byte   _AVERAGE, _RA, _DI, _US, __end
-        .skip_word              ; $FA^35 = $D9
+        .define_word \
+                "_AVERAGE_RADIUS"
+                                ; $FA^35 = $D9
         
 _0943:  ;91.                                                            ;$0943
         .byte   C_, O_, M_, __end
@@ -501,7 +525,8 @@ _0947:  ;92.                                                            ;$0947
 
 _094d:  ;93.                                                            ;$094D
         .byte   __, D_, _ES, T_, _RO, Y_, _ED, __end
-        .skip_word              ; $FD^35 = $DE
+        .define_word \
+                "_DESTROYED"    ; $FD^35 = $DE
         
 _0955:  ;94.                                                            ;$0955
         .byte   R_, O_, __end
@@ -568,7 +593,9 @@ _09a2:  ;106.                                                           ;$09A2
 
 _09a8:  ;107.                                                           ;$09A8
         .byte   _LARGE, _CARGO, __, B_, A_, Y_, __end
-        .skip_word              ; $6B^35 = $48
+        .define_word \
+                "_LARGE_CARGO_BAY"
+                                ; $6B^35 = $48
         
 _09af:  ;108.                                                           ;$09AF
         .byte   E_, _DOT, C_, _DOT, M_, _DOT, _SYSTEM, __end
@@ -576,7 +603,9 @@ _09af:  ;108.                                                           ;$09AF
 
 _09b7:  ;109.                                                           ;$09B7
         .byte   _EXTRA, _PULSE_LASER, S_, __end
-        .skip_word              ; $6D^35 = $4E
+        .define_word \
+                "_EXTRA_PULSE_LASERS"
+                                ; $6D^35 = $4E
 
 _09bb:  ;110.                                                           ;$09BB
         .byte   _EXTRA, _BEAM_LASER, S_, __end
@@ -619,7 +648,8 @@ _09f3:  ;118.                                                           ;$09F3
         
 _09fa:  ;119.                                                           ;$09FA
         .byte   _CASH, _COLON, $23, __end
-        .skip_word              ; $77^35 = $54
+        .define_word \
+                "_CASH_"        ; $77^35 = $54
 
 _09fe:  ;120.                                                           ;$09FE
         .byte   _IN, _COM, _IN, G_, __, _MISSILE, __end
@@ -735,7 +765,8 @@ _0a98:  ;144.                                                           ;$0A98
         .byte   _HYPHEN, _HYPHEN, _HYPHEN, _HYPHEN
         .byte   __, E_, __, L_, __, I_, __, T_, __, E_, __
         .byte   _HYPHEN, _HYPHEN, _HYPHEN, _HYPHEN, __end
-        .skip_word              ; $1E^35 = $3D
+        .define_word \
+                "_ELITE"        ; $1E^35 = $3D
 
 _0aac:  ;145.                                                           ;$0AAC
         .byte   P_, _RE, S_, _EN, T_, __end

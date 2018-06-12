@@ -2325,8 +2325,9 @@ _2c9b:
         lda # 7
         jsr set_cursor_col
         
-        lda # $7e
+        lda # $7e               ; txt token -- status line?
         jsr _28d9
+        
         lda # $0f
         ldy $a7
         bne _2c7d
@@ -2349,6 +2350,7 @@ _2cc7:
         adc # $01
 _2cd7:
         jsr _7773
+
         lda # $10
         jsr _6a9b
         lda $04e1
@@ -2363,9 +2365,11 @@ _2cea:
         bne _2cea
 _2cee:
         txa 
+        
         clc 
         adc # $15
         jsr _7773
+
         lda # $12
         jsr _2d61
         lda $04c7
@@ -2573,6 +2577,7 @@ _2dc5:
 ; TODO: this to be its own segment, we WILL want to replace it
 ;===============================================================================
 
+; the number to be converted:
 .exportzp       ZP_VALUE        := $77
 .exportzp       ZP_VALUE_pt1    := $77
 .exportzp       ZP_VALUE_pt2    := $78
@@ -2580,6 +2585,7 @@ _2dc5:
 .exportzp       ZP_VALUE_pt4    := $7a
 .exportzp       ZP_VALUE_OVFLW  := $9c  ; because, why not!?
 
+; working copy of the number:
 .exportzp       ZP_VCOPY        := $6b
 .exportzp       ZP_VCOPY_pt1    := $6b
 .exportzp       ZP_VCOPY_pt2    := $6c
@@ -2587,16 +2593,16 @@ _2dc5:
 .exportzp       ZP_VCOPY_pt4    := $6e
 .exportzp       ZP_VCOPY_OVFLW  := $6f
 
-_max_value:                                                             ;$2E51
-        ; maximum value
-        ;
-        ; BBC source says this is "100-billion"
-        ; (what format is it?)
-        .byte   $48, $76, $e8, $00
+.exportzp       ZP_PADDING      := $99
+.exportzp       ZP_MAXLEN       := $bb  ; maximum length of string
 
-        ;       %01001000
-        ;       %01110110
-        ;       %11101000
+_max_value:                                                             ;$2E51
+        ; maximum value:
+        ;
+        ; this is the maximum printable value: 100-billion ($17_4876_E800);
+        ; note that this lacks the first byte, $17, as that is handled directly
+        ; in the code itself
+        .byte   $48, $76, $e8, $00
 
 _2e55:                                                                  ;$2E55
         ;=======================================================================
@@ -2613,7 +2619,7 @@ _2e59:                                                                  ;$2E59
         ;
 .export _2e59
 
-        sta $99
+        sta ZP_PADDING
         lda # $00
         sta ZP_VALUE_pt1
         sta ZP_VALUE_pt2
@@ -2626,46 +2632,43 @@ print_value:                                                            ;$2E65
         ;
         ;       Y = ?
         ; $77-$7A = numerical value (note: big-endian)
-        ;     $99 = max. number of digits
-        ;       c = use decimal-point
+        ;     $99 = max. number of expected digits, i.e. left-pad the number
+        ;       c = carry set: use decimal point
         ;
 .export print_value
 
         ; set max. text width
-        ; TODO: get this from the ZP definitions?
-        ldx # 11
-        stx $bb
+        ; i.e. for "100000000000" (100-billion)
+        ldx # 11                ; 12 chars
+        stx ZP_MAXLEN
 
         ; keep a copy of the carry-flag
-        ; parameter (use decimal point)
+        ; parameter ('use decimal point')
         php 
         bcc :+                  ; skip ahead when carry = 0
         
-        ; carry flag is set;
+        ; carry flag is set:
         ; a decimal point will be printed
-        dec $bb                 ; one less char for the buffer
-        dec $99                 ; reduce number of digits
+        dec ZP_MAXLEN           ; one less char available
+        dec ZP_PADDING          ; reduce amount of left-padding
 
-        ; check for buffer-overflow:
-        ; does the requested number of digits fit into the max.length?
-
-:       lda # 11                ; length of text                        ;$2E70
+:       lda # 11                ; max length of text (12 chars)         ;$2E70
         sec                     ; set carry-flag, see note below
-        sta $9f                 ; put the length of text aside
+        sta $9f                 ; put original max.length of text aside
 
-        ; subtract the allowed length of text from the max. number of digits,
-        ; since carry is set, this will underflow (sign-bit) if equal 
-        sbc $99
-        sta $99                 ; remainder?
-        inc $99                 ; ?
+        ; subtract the max. number of digits from the max. length of text.
+        ; since carry is set, this will underflow (sign-bit) if equal
+        sbc ZP_PADDING
+        sta ZP_PADDING          ; remainder
+        inc ZP_PADDING          ; fix use of carry
 
-        ; clear the overflow byte used
-        ; during calculations with the value
+        ; clear the overflow byte used during calculations with the value.
+        ; note that this is also setting Y to zero
         ldy # $00
         sty ZP_VALUE_OVFLW
         
         jmp _2ec1               ; jump into the main loop
-        
+                                ; (below is not a direct follow-on from here)
         
 _x10:   ; multiply by 10:                                               ;$2E82
         ;-----------------------------------------------------------------------
@@ -2706,7 +2709,7 @@ _x10:   ; multiply by 10:                                               ;$2E82
         rol ZP_VALUE_OVFLW
         clc 
 
-        ; add our x2 value to our x8 value:
+        ; add our 2x value to our 8x value:
 
         ldx # 3                 ; numerical value is 4-bytes long (0..3)
 :       lda ZP_VALUE, x         ; load x2 byte                          ;$2EB0
@@ -2720,72 +2723,81 @@ _x10:   ; multiply by 10:                                               ;$2E82
         adc ZP_VALUE_OVFLW
         sta ZP_VALUE_OVFLW
 
-        ldy # $00
+        ldy # 0
 
-_2ec1:  ; check for '100-billion' overflow
+_2ec1:  ;                                                               ;$2EC1
         ;-----------------------------------------------------------------------
         ldx # 3                 ; numerical value is 4-bytes long (0..3)
-        sec 
 
+       .clb                     ; clear the borrow before subtracting
 :       lda ZP_VALUE, x         ; read a byte from the numerical value  ;$2EC4
         sbc _max_value, x       ; subtract against '100-billion'
         sta ZP_VCOPY, x         ; store the result separately
         dex 
         bpl :-
 
+        ; and then the 5th byte separately
         lda ZP_VALUE_OVFLW
-        sbc # $17
+        sbc # $17               ; this is the $17 in '$17_4876_E800',
+                                ; i.e. 100-billion decimal
         sta ZP_VCOPY_OVFLW
-        bcc _2ee7               ; less than 100-billion -- continue printing
+
+        ; no matter what I do I can't grasp what is happening with the bits
+        ; to spit out decimal digits here 
+       .bbw _print_digit
 
         ldx # 3                 ; numerical value is 4-bytes long (0..3)
-
-:       ; store remainder of 100-billion back into value?               ;$2ED8
-        lda ZP_VCOPY, x
+:       lda ZP_VCOPY, x                                                 ;$2ED8
         sta ZP_VALUE, x
         dex 
         bpl :-
 
         lda ZP_VCOPY_OVFLW
         sta ZP_VALUE_OVFLW
+
         iny 
         jmp _2ec1
 
+_print_digit:                                                           ;$2EE7 
         ;-----------------------------------------------------------------------
-
-_2ee7:
+        ; is there a digit waiting to be printed?
+        ; (when we first enter this routine, Y will be zero)
         tya 
        .bnz @ascii
-
-        lda $bb                 
+        
+        lda ZP_MAXLEN
        .bze @ascii
 
-        dec $99                 ; reduce number of max. digits allowed
-        bpl _2f00               ; skip ahead if we haven't hit zero yet
+        dec ZP_PADDING
+        bpl _2f00               
 
-        lda # ' '               ; leading white-space
+        lda # ' '               ; print leading white-space
         bne @print              ; skip over the next bit (always branches)
 
 @ascii: ; convert value 0-9 to ASCII/PETSCII character                  ;$2EF6
+        
         ldy # $00
-        sty $bb
+        sty ZP_MAXLEN
+        
         clc 
         adc # '0'               ; re-base as an ASCII/PETSCII numeral
 
 @print: jsr _2f24               ; print character                       ;$2EFD        
 
 _2f00:
-        dec $bb
+        dec ZP_MAXLEN
         bpl _2f06
-        inc $bb
+        inc ZP_MAXLEN
 _2f06:
         dec $9f
         bmi @rts
         bne :+
-        plp 
-        bcc :+
 
-        ; print the decimal point
+        ; are we printing a decimal point?
+        plp                     ; get the original carry-flag parameter
+        bcc :+                  ; carry clear skips printing decimal point
+
+        ; carry set: print the decimal point
         lda # '.'
         jsr _2f24
 

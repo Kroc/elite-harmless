@@ -45,6 +45,22 @@ L:
         beq     Arg
 .endmacro
 
+.macro .seb             ; set borrow
+        clc 
+.endmacro
+
+.macro .clb             ; clear borrow
+        sec 
+.endmacro
+
+.macro .bbw     Arg     ; branch on borrow
+        bcc     Arg
+.endmacro
+
+.macro .bnb     Arg     ; branch on no-borrow
+        bcs     Arg
+.endmacro
+
 
 ; colours
 ;===============================================================================
