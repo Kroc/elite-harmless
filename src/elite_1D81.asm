@@ -4,6 +4,7 @@
 ;===============================================================================
 
 .include        "c64.asm"
+.include        "elite_consts.asm"
 
 ; from "text_data.asm"
 .import _0ac0:absolute
@@ -1481,8 +1482,8 @@ _2619:
         .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d  ;"JAMESON"
         .byte   $00 ,$14, $ad
         
-        ; SYSTEM SEED!!!!!
-        .byte   $4a, $5a, $48, $02, $53, $B7
+        ; universe seed -- see "elite_consts.asm"
+        .byte   ELITE_SEED
         
         .byte   $00, $00, $03, $e8, $46, $00, $00
         .byte   $0f ,$00, $00, $00, $00, $00, $16, $00
@@ -3309,9 +3310,9 @@ _31f1:
         ;-----------------------------------------------------------------------
 
 _3208:
-        lda $82
+        lda ZP_SEED_pt4
         sta $0509
-        lda $80
+        lda ZP_SEED_pt2
         sta $050a
         jsr _70ab
         jsr _6f82
@@ -5249,7 +5250,7 @@ _3d6c:
 _3d6f:
         ldx # $03
 _3d71:
-        lda $81, x
+        lda ZP_SEED_pt3, x
         sta $02, x
         dex 
         bpl _3d71

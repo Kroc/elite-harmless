@@ -5,6 +5,7 @@
 .linecont+
 
 .include        "c64.asm"
+.include        "elite_consts.asm"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -207,28 +208,28 @@ _6a3b:                                                                  ;$6a3b
 _6a3e:                                                                  ;$6a3e
         jsr _6a41
 _6a41:                                                                  ;$6a41
-        lda $7f
+        lda ZP_SEED_pt1
         clc 
-        adc $81
+        adc ZP_SEED_pt3
         tax 
-        lda $80
-        adc $82
+        lda ZP_SEED_pt2
+        adc ZP_SEED_pt4
         tay 
-        lda $81
-        sta $7f
-        lda $82
-        sta $80
-        lda $84
-        sta $82
-        lda $83
-        sta $81
+        lda ZP_SEED_pt3
+        sta ZP_SEED_pt1
+        lda ZP_SEED_pt4
+        sta ZP_SEED_pt2
+        lda ZP_SEED_pt6
+        sta ZP_SEED_pt4
+        lda ZP_SEED_pt5
+        sta ZP_SEED_pt3
         clc 
         txa 
-        adc $81
-        sta $83
+        adc ZP_SEED_pt3
+        sta ZP_SEED_pt5
         tya 
-        adc $82
-        sta $84
+        adc ZP_SEED_pt4
+        sta ZP_SEED_pt6
         rts 
 
 ;===============================================================================
@@ -351,7 +352,7 @@ _6ad3:                                                                  ;$6ad3
         lda # $28
         jsr print_token
         
-        lda $83
+        lda ZP_SEED_pt5
         bmi _6b1e
 
 .import TXT_HUMAN_COLONIAL:direct
@@ -360,7 +361,7 @@ _6ad3:                                                                  ;$6ad3
         
         jmp _6b5a
 _6b1e:                                                                  ;$6b1e
-        lda $84
+        lda ZP_SEED_pt6
         lsr 
         lsr 
         pha 
@@ -379,8 +380,8 @@ _6b2e:                                                                  ;$6b2e
         adc # $e6
         jsr _6a9b
 _6b3b:                                                                  ;$6b3b
-        lda $82
-        eor $80
+        lda ZP_SEED_pt4
+        eor ZP_SEED_pt2
         and # %00000111
         sta $8e
         cmp # $06
@@ -388,7 +389,7 @@ _6b3b:                                                                  ;$6b3b
         adc # $ec
         jsr _6a9b
 _6b4c:                                                                  ;$6b4c
-        lda $84
+        lda ZP_SEED_pt6
         and # %00000011
         clc 
         adc $8e
@@ -423,8 +424,8 @@ _6b5a:                                                                  ;$6b5a
         lda # TXT_AVERAGE_RADIUS
         jsr print_token_with_colon
         
-        lda $84
-        ldx $82
+        lda ZP_SEED_pt6
+        ldx ZP_SEED_pt4
         and # %00001111
         clc 
         adc # $0b
@@ -447,10 +448,10 @@ _6b5a:                                                                  ;$6b5a
 ;===============================================================================
 
 _6ba9:                                                                  ;$6ba9
-        lda $80
+        lda ZP_SEED_pt2
         and # %00000111
         sta $0500
-        lda $81
+        lda ZP_SEED_pt3
         lsr 
         lsr 
         lsr 
@@ -466,7 +467,7 @@ _6bc5:                                                                  ;$6bc5
         eor # %00000111
         clc 
         sta $0502
-        lda $82
+        lda ZP_SEED_pt4
         and # %00000011
         adc $0502
         sta $0502
@@ -526,12 +527,12 @@ _6c1c:                                                                  ;$6c1c
         ldx # $00
 _6c40:                                                                  ;$6c40
         stx $9d
-        ldx $82
-        ldy $83
+        ldx ZP_SEED_pt4
+        ldy ZP_SEED_pt5
         tya 
         ora # %01010000
         sta $a1
-        lda $80
+        lda ZP_SEED_pt2
         lsr 
         clc 
         adc # $18
@@ -1090,7 +1091,7 @@ _7004:                                                                  ;$7004
         dex 
         bpl _7004
 _7009:                                                                  ;$7009
-        lda $82
+        lda ZP_SEED_pt4
         sec 
         sbc $049a
         bcs _7015
@@ -1099,7 +1100,7 @@ _7009:                                                                  ;$7009
 _7015:                                                                  ;$7015
         cmp # $14
         bcs _708d
-        lda $80
+        lda ZP_SEED_pt2
         sec 
         sbc $049b
         bcs _7025
@@ -1108,7 +1109,7 @@ _7015:                                                                  ;$7015
 _7025:                                                                  ;$7025
         cmp # $26
         bcs _708d
-        lda $82
+        lda ZP_SEED_pt4
         sec 
         sbc $049a
         asl 
@@ -1122,7 +1123,7 @@ _7025:                                                                  ;$7025
         adc # 1
         jsr set_cursor_col
 
-        lda $80
+        lda ZP_SEED_pt2
         sec 
         sbc $049b
         asl 
@@ -1159,7 +1160,7 @@ _7070:                                                                  ;$7070
         sta $78
         lda $71
         sta $35
-        lda $84
+        lda ZP_SEED_pt6
         and # %00000001
         adc # $02
         sta $77
@@ -1188,7 +1189,7 @@ _70a0:                                                                  ;$70a0
         ldx # 5                 ; seed is 6 bytes
 _70a2:                                                                  ;$70a2
         lda $049c, x
-        sta $7f, x              ; store at $7F..$85
+        sta ZP_SEED, x          ; store at $7F...$84
         dex 
         bpl _70a2
         rts 
@@ -1203,7 +1204,7 @@ _70ab:                                                                  ;$70ab
         lda # $00
         sta $99
 _70b6:                                                                  ;$70b6
-        lda $82
+        lda ZP_SEED_pt4
         sec 
         sbc $0509
         bcs _70c2
@@ -1212,7 +1213,7 @@ _70b6:                                                                  ;$70b6
 _70c2:                                                                  ;$70c2
         lsr 
         sta $9c
-        lda $80
+        lda ZP_SEED_pt2
         sec 
         sbc $050a
         bcs _70d1
@@ -1225,9 +1226,9 @@ _70d1:                                                                  ;$70d1
         cmp $bb
         bcs _70e8
         sta $bb
-        ldx # $05
+        ldx # 5
 _70dd:                                                                  ;$70dd
-        lda $7f, x
+        lda ZP_SEED, x
         sta $8e, x
         dex 
         bpl _70dd
@@ -1240,12 +1241,12 @@ _70e8:                                                                  ;$70e8
         ldx # $05
 _70f1:                                                                  ;$70f1
         lda $8e, x
-        sta $7f, x
+        sta ZP_SEED, x
         dex 
         bpl _70f1
-        lda $80
+        lda ZP_SEED_pt2
         sta $050a
-        lda $82
+        lda ZP_SEED_pt4
         sta $0509
         sec 
         sbc $049a
@@ -1324,9 +1325,9 @@ _7176:                                                                  ;$7176
         rts 
 
 _717f:                                                                  ;$717f
-        ldx # $05
+        ldx # 5
 _7181:                                                                  ;$7181
-        lda $7f, x
+        lda ZP_SEED, x
         sta $04fa, x
         dex 
         bpl _7181
@@ -1400,7 +1401,7 @@ _71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71f2
          jsr _70ab
          ldx # $05
 _7202:                                                                  ;$7202
-        lda $7f, x
+        lda ZP_SEED, x
         sta $04fa, x
         dex 
         bpl _7202
@@ -2156,18 +2157,18 @@ _76e9:
 .export _76e9
         ldx # $05
 _76eb:
-        lda $7f, x
+        lda ZP_SEED, x
         sta $8e, x
         dex 
         bpl _76eb
         ldy # $03
-        bit $7f
+        bit ZP_SEED_pt1
         bvs _76f9
         dey 
 _76f9:
         sty $bb
 _76fb:
-        lda $84
+        lda ZP_SEED_pt6
         and # %00011111
         beq _7706
         ora # %10000000
@@ -2179,7 +2180,7 @@ _7706:
         ldx # $05
 _770f:
         lda $8e, x
-        sta $7f, x
+        sta ZP_SEED, x
         dex 
         bpl _770f
         rts
@@ -2208,10 +2209,10 @@ _7727:
 _7732:
         ldx # $05
 _7734:
-        lda $7f, x
+        lda ZP_SEED, x
         ldy $04f4, x
         sta $04f4, x
-        sty $7f, x
+        sty ZP_SEED, x
         dex 
         bpl _7734
 _7741:
@@ -2957,7 +2958,7 @@ _7a9f:
 _7ac2:
         lsr $04cd
         jsr _8447
-        lda $80
+        lda ZP_SEED_pt2
         and # %00000011
         adc # $03
         sta $11
@@ -2965,11 +2966,11 @@ _7ac2:
         sta $0b
         sta $0e
         jsr _7a8c
-        lda $82
+        lda ZP_SEED_pt4
         and # %00000111
         ora # %10000001
         sta $11
-        lda $84
+        lda ZP_SEED_pt6
         and # %00000011
         sta $0b
         sta $0a
@@ -5173,7 +5174,7 @@ _88ac:
         jsr _7217
         ldx # $05
 _88c9:
-        lda $7f, x
+        lda ZP_SEED, x
         sta $04f4, x
         dex 
         bpl _88c9
