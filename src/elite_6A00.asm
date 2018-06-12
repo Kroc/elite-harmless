@@ -241,8 +241,8 @@ _6a41:  ; roll the RNG seed once?                                       ;$6A41
 ;===============================================================================
 
 _6a68:                                                                  ;$6a68
-        lda $0507
-        ora $0508
+        lda TSYSTEM_DISTANCE_LO
+        ora TSYSTEM_DISTANCE_HI
         bne _6a73
         jmp cursor_down
 _6a73:                                                                  ;$6a73
@@ -250,8 +250,8 @@ _6a73:                                                                  ;$6a73
         lda # TXT_DISTANCE
         jsr print_token_with_colon
 
-        ldx $0507
-        ldy $0508
+        ldx TSYSTEM_DISTANCE_LO
+        ldy TSYSTEM_DISTANCE_HI
         sec 
         jsr _7235
 
@@ -269,9 +269,11 @@ _6a8e:                                                                  ;$6a8e
         lda # $0c
         jmp print_token
 
-;===============================================================================
 
-_6a93:                                                                  ;$6a93
+_6a93:                                                                  ;$6A93
+;===============================================================================
+        ; print "MAINLY"
+        ;
 .import TXT_MAINLY:direct
         lda # TXT_MAINLY
         jsr print_token
@@ -293,6 +295,7 @@ _6aa1:                                                                  ;$6aa1:
         lda # 9
         jsr set_cursor_col
         
+        ; print "DATA ON " ...
 .import TXT_DATA_ON:direct
         lda # TXT_DATA_ON
         jsr _28d9
@@ -300,17 +303,18 @@ _6aa1:                                                                  ;$6aa1:
         jsr _6a87
         jsr _6a68
 
+        ; print "ECONOMY:"
 .import TXT_ECONOMY:direct
         lda # TXT_ECONOMY
         jsr print_token_with_colon
 
-        lda $0500
+        lda TSYSTEM_ECONOMY
         clc 
         adc # $01
         lsr 
         cmp # $02
         beq _6a93
-        lda $0500
+        lda TSYSTEM_ECONOMY
         bcc _6ace
         sbc # $05
         clc 
@@ -322,7 +326,7 @@ _6ace:                                                                  ;$6ace
         adc # TXT_RICH
         jsr print_token
 _6ad3:                                                                  ;$6ad3
-        lda $0500
+        lda TSYSTEM_ECONOMY
         lsr 
         lsr 
 
@@ -343,7 +347,7 @@ _6ad3:                                                                  ;$6ad3
         ; "ANARCHY" / "FEUDAL" / "MULTI-GOVERNMENT" / "DICTATORSHIP" /
         ; "COMMUNIST" / "CONFEDORACY" / "DEMOCRACY" / "CORPORATE STATE"
 
-        lda $0501
+        lda TSYSTEM_GOVERNMENT
         clc 
         adc # TXT_ANARCHY
         jsr _6a84
@@ -352,7 +356,7 @@ _6ad3:                                                                  ;$6ad3
         lda # TXT_TECH_LEVEL
         jsr print_token_with_colon
         
-        ldx $0502
+        ldx TSYSTEM_TECHLEVEL
         inx 
         clc 
         jsr _2e55
@@ -363,7 +367,7 @@ _6ad3:                                                                  ;$6ad3
         jsr print_token_with_colon
         
         sec 
-        ldx $0503
+        ldx TSYSTEM_POPULATION
         jsr _2e55
 
 .import TXT_BILLION:direct
@@ -374,21 +378,21 @@ _6ad3:                                                                  ;$6ad3
         jsr print_token
         
         lda ZP_SEED_pt5
-        bmi _6b1e
+        bmi :+
 
 .import TXT_HUMAN_COLONIAL:direct
         lda # TXT_HUMAN_COLONIAL
         jsr print_token
         
         jmp _6b5a
-_6b1e:                                                                  ;$6b1e
-        lda ZP_SEED_pt6
+
+:       lda ZP_SEED_pt6                                                 ;$61BE
         lsr 
         lsr 
         pha 
         and # %00000111
         cmp # $03
-        bcs _6b2e
+        bcs :+
         
 .import TXT_LARGE:direct
 
@@ -396,8 +400,7 @@ _6b1e:                                                                  ;$6b1e
         
         adc # TXT_LARGE
         jsr _6a9b
-_6b2e:                                                                  ;$6b2e
-        pla 
+:       pla                                                             ;$6B2E
         lsr 
         lsr 
         lsr 
@@ -451,8 +454,8 @@ _6b5a:                                                                  ;$6b5a
         lda # TXT_GROSS_PRODUCTIVITY
         jsr print_token_with_colon
         
-        ldx $0505
-        ldy $0506
+        ldx TSYSTEM_PRODUCTIVITY_LO
+        ldy TSYSTEM_PRODUCTIVITY_HI
         jsr _7234
         jsr _72c5
         lda # $00
@@ -495,57 +498,69 @@ _6b5a:                                                                  ;$6b5a
 _6ba9:                                                                  ;$6ba9
         lda ZP_SEED_pt2
         and # %00000111
-        sta $0500
+        sta TSYSTEM_ECONOMY
+
         lda ZP_SEED_pt3
         lsr 
         lsr 
         lsr 
         and # %00000111
-        sta $0501
+        sta TSYSTEM_GOVERNMENT
+        
         lsr 
-        bne _6bc5
-        lda $0500
+        bne :+
+        lda TSYSTEM_ECONOMY
         ora # %00000010
-        sta $0500
-_6bc5:                                                                  ;$6bc5
-        lda $0500
+        sta TSYSTEM_ECONOMY
+:       lda TSYSTEM_ECONOMY                                              ;$6BC5
         eor # %00000111
         clc 
-        sta $0502
+        sta TSYSTEM_TECHLEVEL
+
         lda ZP_SEED_pt4
         and # %00000011
-        adc $0502
-        sta $0502
-        lda $0501
+        adc TSYSTEM_TECHLEVEL
+        sta TSYSTEM_TECHLEVEL
+        
+        lda TSYSTEM_GOVERNMENT
         lsr 
-        adc $0502
-        sta $0502
+        adc TSYSTEM_TECHLEVEL
+        sta TSYSTEM_TECHLEVEL
+        
         asl 
         asl 
-        adc $0500
-        adc $0501
+        adc TSYSTEM_ECONOMY
+        adc TSYSTEM_GOVERNMENT
         adc # $01
-        sta $0503
-        lda $0500
+        sta TSYSTEM_POPULATION
+        
+        lda TSYSTEM_ECONOMY
         eor # %00000111
         adc # $03
         sta $2e
-        lda $0501
+        
+        lda TSYSTEM_GOVERNMENT
         adc # $04
         sta $9a
+        
         jsr _399b
-        lda $0503
+        
+        lda TSYSTEM_POPULATION
         sta $9a
+        
         jsr _399b
+        
         asl $2e
         rol 
         asl $2e
         rol 
         asl $2e
         rol 
-        sta $0506
+        sta TSYSTEM_PRODUCTIVITY_HI
+        
         lda $2e
-        sta $0505
+        sta TSYSTEM_PRODUCTIVITY_LO
+        
         rts 
 
 ;===============================================================================
@@ -588,9 +603,9 @@ _6c40:                                                                  ;$6c40
         ldx $9d
         inx 
         bne _6c40
-        lda $0509
+        lda TSYSTEM_POS_X
         sta $8e
-        lda $050a
+        lda TSYSTEM_POS_Y
         lsr 
         sta $8f
         lda # $04
@@ -657,20 +672,20 @@ _6cc3:                                                                  ;$6cc3
         lda # $10
         sta $90
         jsr _6c6d
-        lda $04a6
+        lda SHIP_FUEL
         sta $77
         jmp _6cfe
 
 _6cda:                                                                  ;$6cda
         lda $a0
         bmi _6cc3
-        lda $04a6
+        lda SHIP_FUEL
         lsr 
         lsr 
         sta $77
-        lda $049a
+        lda PSYSTEM_POS_X
         sta $8e
-        lda $049b
+        lda PSYSTEM_POS_Y
         lsr 
         sta $8f
         lda # $07
@@ -1040,25 +1055,25 @@ _6f55:                                                                  ;$6f55
         jsr _6f82
         pla 
         sta $91
-        lda $050a
+        lda TSYSTEM_POS_Y
         jsr _6f98
         lda $92
-        sta $050a
+        sta TSYSTEM_POS_Y
         sta $8f
         pla 
         sta $91
-        lda $0509
+        lda TSYSTEM_POS_X
         jsr _6f98
         lda $92
-        sta $0509
+        sta TSYSTEM_POS_X
         sta $8e
 _6f82:                                                                  ;$6f82
 .export _6f82
         lda $a0
         bmi _6fa9
-        lda $0509
+        lda TSYSTEM_POS_X
         sta $8e
-        lda $050a
+        lda TSYSTEM_POS_Y
         lsr 
         sta $8f
         lda # $04
@@ -1081,9 +1096,9 @@ _6fa8:                                                                  ;$6fa8
         rts 
 
 _6fa9:                                                                  ;$6fa9
-        lda $0509
+        lda TSYSTEM_POS_X
         sec 
-        sbc $049a
+        sbc PSYSTEM_POS_X
         cmp # $26
         bcc _6fb8
         cmp # $e6
@@ -1094,9 +1109,9 @@ _6fb8:                                                                  ;$6fb8
         clc 
         adc # $68
         sta $8e
-        lda $050a
+        lda TSYSTEM_POS_Y
         sec 
-        sbc $049b
+        sbc PSYSTEM_POS_Y
         cmp # $26
         bcc _6fce
         cmp # $dc
@@ -1141,7 +1156,7 @@ _7004:                                                                  ;$7004
 _7009:                                                                  ;$7009
         lda ZP_SEED_pt4
         sec 
-        sbc $049a
+        sbc PSYSTEM_POS_X
         bcs _7015
         eor # %11111111
         adc # $01
@@ -1150,7 +1165,7 @@ _7015:                                                                  ;$7015
         bcs _708d
         lda ZP_SEED_pt2
         sec 
-        sbc $049b
+        sbc PSYSTEM_POS_Y
         bcs _7025
         eor # %11111111
         adc # $01
@@ -1159,7 +1174,7 @@ _7025:                                                                  ;$7025
         bcs _708d
         lda ZP_SEED_pt4
         sec 
-        sbc $049a
+        sbc PSYSTEM_POS_X
         asl 
         asl 
         adc # $68
@@ -1173,7 +1188,7 @@ _7025:                                                                  ;$7025
 
         lda ZP_SEED_pt2
         sec 
-        sbc $049b
+        sbc PSYSTEM_POS_Y
         asl 
         adc # $5a
         sta $43
@@ -1254,7 +1269,7 @@ _70ab:                                                                  ;$70ab
 _70b6:                                                                  ;$70b6
         lda ZP_SEED_pt4
         sec 
-        sbc $0509
+        sbc TSYSTEM_POS_X
         bcs _70c2
         eor # %11111111
         adc # $01
@@ -1263,7 +1278,7 @@ _70c2:                                                                  ;$70c2
         sta $9c
         lda ZP_SEED_pt2
         sec 
-        sbc $050a
+        sbc TSYSTEM_POS_Y
         bcs _70d1
         eor # %11111111
         adc # $01
@@ -1293,11 +1308,11 @@ _70f1:                                                                  ;$70f1
         dex 
         bpl _70f1
         lda ZP_SEED_pt2
-        sta $050a
+        sta TSYSTEM_POS_Y
         lda ZP_SEED_pt4
-        sta $0509
+        sta TSYSTEM_POS_X
         sec 
-        sbc $049a
+        sbc PSYSTEM_POS_X
         bcs _710c
         eor # %11111111
         adc # $01
@@ -1306,9 +1321,9 @@ _710c:                                                                  ;$710c
         sta $78
         lda $2e
         sta $77
-        lda $050a
+        lda TSYSTEM_POS_Y
         sec 
-        sbc $049b
+        sbc PSYSTEM_POS_Y
         bcs _7122
         eor # %11111111
         adc # $01
@@ -1330,11 +1345,11 @@ _7135:                                                                  ;$7135
         lda $9a
         asl 
         ldx # $00
-        stx $0508
-        rol $0508
+        stx TSYSTEM_DISTANCE_HI
+        rol TSYSTEM_DISTANCE_HI
         asl 
-        rol $0508
-        sta $0507
+        rol TSYSTEM_DISTANCE_HI
+        sta TSYSTEM_DISTANCE_LO
         jmp _6ba9
 
 ;===============================================================================
@@ -1367,8 +1382,8 @@ _7165:                                                                  ;$7165
 _7173:                                                                  ;$7173
         jsr _7695
 _7176:                                                                  ;$7176
-        lda $0507
-        ora $0508
+        lda TSYSTEM_DISTANCE_LO
+        ora TSYSTEM_DISTANCE_HI
         bne _717f
         rts 
 
@@ -1396,10 +1411,10 @@ _7196:                                                                  ;$7196
         lda # TXT_HYPERSPACE
         jsr print_token
         
-        lda $0508
+        lda TSYSTEM_DISTANCE_HI
         bne _71af
-        lda $04a6
-        cmp $0507
+        lda SHIP_FUEL
+        cmp TSYSTEM_DISTANCE_LO
         bcs _71b2
 _71af:                                                                  ;$71af
         jmp _723a
@@ -1443,8 +1458,8 @@ _71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71f2
         lda # $60
 
 ;71f4:
-         sta $0509
-         sta $050a
+         sta TSYSTEM_POS_X
+         sta TSYSTEM_POS_Y
          jsr _741c
          jsr _70ab
          ldx # $05
@@ -1454,15 +1469,15 @@ _7202:                                                                  ;$7202
         dex 
         bpl _7202
         ldx # $00
-        stx $0507
-        stx $0508
+        stx TSYSTEM_DISTANCE_LO
+        stx TSYSTEM_DISTANCE_HI
         lda # $74
         jsr _900d
 _7217:                                                                  ;$7217
-        lda $0509
-        sta $049a
-        lda $050a
-        sta $049b
+        lda TSYSTEM_POS_X
+        sta PSYSTEM_POS_X
+        lda TSYSTEM_POS_Y
+        sta PSYSTEM_POS_Y
         rts 
 
 ;===============================================================================
@@ -1634,7 +1649,7 @@ _7305:                                                                  ;$7305
 _731a:                                                                  ;$731a
         lda $8f
         and # %00011111
-        ldy $04ee
+        ldy PSYSTEM_ECONOMY
         sta $90
         clc 
         lda # $00
@@ -1664,12 +1679,12 @@ _733c:                                                                  ;$733c
         bpl _733c
         inx 
         stx $048a
-        lda $0500
-        sta $04ee
-        lda $0502
-        sta $04f1
-        lda $0501
-        sta $04f0
+        lda TSYSTEM_ECONOMY
+        sta PSYSTEM_ECONOMY
+        lda TSYSTEM_TECHLEVEL
+        sta PSYSTEM_TECHLEVEL
+        lda TSYSTEM_GOVERNMENT
+        sta PSYSTEM_GOVERNMENT
         jsr _84af
         sta $04df
         ldx # $00
@@ -1739,9 +1754,9 @@ _73c1:                                                                  ;$73c1
         sta $050b
         ldx # $00
         jsr _a6ba
-        lda $049b
+        lda PSYSTEM_POS_Y
         eor # %00011111
-        sta $049b
+        sta PSYSTEM_POS_Y
         rts 
 
 ;===============================================================================
@@ -1753,13 +1768,13 @@ _73dc:                                                                  ;$73dc
 ;===============================================================================
 
 _73dd:                                                                  ;$73dd
-        lda $04a6
+        lda SHIP_FUEL
         sec 
-        sbc $0507
+        sbc TSYSTEM_DISTANCE_LO
         bcs _73e8
         lda # $00
 _73e8:                                                                  ;$73e8
-        sta $04a6
+        sta SHIP_FUEL
         lda $a0
         bne _73f5
         jsr _a72f
@@ -1819,20 +1834,20 @@ _745a:                                                                  ;$745A
 ;===============================================================================
 .export _745a
         stx $06
-        lda VAR_CASH_pt4
+        lda PLAYER_CASH_pt4
         sec 
         sbc $06
-        sta VAR_CASH_pt4
+        sta PLAYER_CASH_pt4
         sty $06
-        lda VAR_CASH_pt3
+        lda PLAYER_CASH_pt3
         sbc $06
-        sta VAR_CASH_pt3
-        lda VAR_CASH_pt2
+        sta PLAYER_CASH_pt3
+        lda PLAYER_CASH_pt2
         sbc # $00
-        sta VAR_CASH_pt2
-        lda VAR_CASH_pt1
+        sta PLAYER_CASH_pt2
+        lda PLAYER_CASH_pt1
         sbc # $00
-        sta VAR_CASH_pt1
+        sta PLAYER_CASH_pt1
         bcs _74a1
         
 _7481:                                                                  ;$7481
@@ -1840,17 +1855,17 @@ _7481:                                                                  ;$7481
 .export _7481
         txa 
         clc 
-        adc VAR_CASH_pt4
-        sta VAR_CASH_pt4
+        adc PLAYER_CASH_pt4
+        sta PLAYER_CASH_pt4
         tya 
-        adc VAR_CASH_pt3
-        sta VAR_CASH_pt3
-        lda VAR_CASH_pt2
+        adc PLAYER_CASH_pt3
+        sta PLAYER_CASH_pt3
+        lda PLAYER_CASH_pt2
         adc # $00
-        sta VAR_CASH_pt2
-        lda VAR_CASH_pt1
+        sta PLAYER_CASH_pt2
+        lda PLAYER_CASH_pt1
         adc # $00
-        sta VAR_CASH_pt1
+        sta PLAYER_CASH_pt1
         clc 
 _74a1:                                                                  ;$74a1
         rts 
@@ -1896,7 +1911,7 @@ _74bb:                                                                  ;$74bb
         lda # $80
         sta $34
         jsr cursor_down
-        lda $04f1
+        lda PSYSTEM_TECHLEVEL
         clc 
         adc # $03
         cmp # $0c
@@ -1908,7 +1923,7 @@ _74e2:                                                                  ;$74e2
         inc $9a
         lda # $46
         sec 
-        sbc $04a6
+        sbc SHIP_FUEL
         asl 
         sta _76cd+0
         ldx # $01
@@ -1960,7 +1975,7 @@ _74f5:                                                                  ;$74f5
         pla 
         bne _7549
         ldx # $46
-        stx $04a6
+        stx SHIP_FUEL
 _7549:                                                                  ;$7549
         cmp # $01
         bne _755f
@@ -2117,7 +2132,7 @@ _764b:
 ;===============================================================================
 
 _764c:
-        lda $04f1
+        lda PSYSTEM_TECHLEVEL
         cmp # $08
         bcc _7658
         lda # $20
@@ -2286,7 +2301,7 @@ _774a:  ; $774A
         lda # TXT_FUEL
         jsr print_token_with_colon
 
-        ldx $04a6
+        ldx SHIP_FUEL
         sec 
         jsr _2e55
 
@@ -2303,7 +2318,7 @@ _775f:  ;$775F
         ldx # 3
 
         ; copy $04A2..$04A5 to $77..$7A?
-:       lda VAR_CASH, x                                                 ;$7761
+:       lda PLAYER_CASH, x                                              ;$7761
         sta $77, x
         dex 
         bpl :-
@@ -2986,7 +3001,7 @@ _7a8c:
         lda # $7f
         sta $26
         sta $27
-        lda $04f1
+        lda PSYSTEM_TECHLEVEL
         and # %00000010
         ora # %10000000
         jmp _7c6b
@@ -3269,7 +3284,7 @@ _7c24:
         lda _8862
         sta $d003               ;I/O or ship-data?
         
-        lda $04f1
+        lda PSYSTEM_TECHLEVEL
         cmp # $0a
         bcc _7c61
         
@@ -4440,10 +4455,10 @@ _83b4:
         ldx $04a8
         dex 
         bne _83c8
-        lda $049a
+        lda PSYSTEM_POS_X
         cmp # $90
         bne _83c8
-        lda $049b
+        lda PSYSTEM_POS_Y
         cmp # $21
         beq _83c9
 _83c8:
@@ -4747,12 +4762,12 @@ _85a5:
         jsr _739b
 _85a8:
         jsr _84af
-        ldy $04f0
+        ldy PSYSTEM_GOVERNMENT
         beq _85bb
         cmp # $5a
         bcs _8567
         and # %00000111
-        cmp $04f0
+        cmp PSYSTEM_GOVERNMENT
         bcc _8567
 _85bb:
         jsr _848d
@@ -5233,12 +5248,12 @@ _88c9:
         bpl _88c9
         inx 
         stx $048a
-        lda $0500
-        sta $04ee
-        lda $0502
-        sta $04f1
-        lda $0501
-        sta $04f0
+        lda TSYSTEM_ECONOMY
+        sta PSYSTEM_ECONOMY
+        lda TSYSTEM_TECHLEVEL
+        sta PSYSTEM_TECHLEVEL
+        lda TSYSTEM_GOVERNMENT
+        sta PSYSTEM_GOVERNMENT
 _88e7:
 .export _88e7
         lda # $ff
@@ -5639,7 +5654,7 @@ _8b37:
         sta $77
         eor $04a7
         sta $79
-        eor VAR_CASH_pt3        ;?
+        eor PLAYER_CASH_pt3     ;?
         sta $78
         eor # %01011010
         eor $04e1

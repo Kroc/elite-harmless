@@ -176,10 +176,10 @@ _1dbc:                                                                  ;$1dbc
 _1dd6:                                                                  ;$1dd6
         cmp # $06
         bne _1deb
-        lda $049a
+        lda PSYSTEM_POS_X
         cmp # $d7
         bne _1e00
-        lda $049b
+        lda PSYSTEM_POS_Y
         cmp # $54
         bne _1e00
         jmp _3d8d
@@ -187,16 +187,16 @@ _1dd6:                                                                  ;$1dd6
 _1deb:                                                                  ;$1deb
         cmp # $0a
         bne _1e00
-        lda $049a
+        lda PSYSTEM_POS_X
         cmp # $3f
         bne _1e00
-        lda $049b
+        lda PSYSTEM_POS_Y
         cmp # $48
         bne _1e00
         jmp _3d9b
 
 _1e00:                                                                  ;$1e00
-        lda VAR_CASH_pt3        ;?
+        lda PLAYER_CASH_pt3     ;?
         cmp # $c4
         bcc _1e11
         lda $0499
@@ -902,12 +902,12 @@ _2303:
         beq _231c
         lda $98
         lsr 
-        adc $04a6
+        adc SHIP_FUEL
         cmp # $46
         bcc _2314
         lda # $46
 _2314:
-        sta $04a6
+        sta SHIP_FUEL
         lda # $a0
 _2319:
         jsr _900d
@@ -3079,7 +3079,7 @@ _3068:
         jsr _30cb
         lda $04e8
         jsr _30cb
-        lda $04a6
+        lda SHIP_FUEL
         jsr _30cd
         jsr _30bb
         stx $78
@@ -3268,7 +3268,7 @@ _319b:
         sta $04ca
 _31be:
         lda # $46
-        sta $04a6
+        sta SHIP_FUEL
         jmp _2101
 
 ;===============================================================================
@@ -3311,9 +3311,9 @@ _31f1:
 
 _3208:
         lda ZP_SEED_pt4
-        sta $0509
+        sta TSYSTEM_POS_X
         lda ZP_SEED_pt2
-        sta $050a
+        sta TSYSTEM_POS_Y
         jsr _70ab
         jsr _6f82
         jsr _24a6
@@ -5216,8 +5216,8 @@ _3d09:
 
 _3d2f:
 .export _3d2f
-        lda $0507
-        ora $0508
+        lda TSYSTEM_DISTANCE_LO
+        ora TSYSTEM_DISTANCE_HI
         bne _3d6f
         lda $a7
         bpl _3d6f
@@ -5427,8 +5427,8 @@ _3e95:                                                                  ;$3e95
 .export _3e95
         ldx # $01
 _3e97:                                                                  ;$3e97
-        lda $049a, x
-        sta $0509, x
+        lda PSYSTEM_POS, x
+        sta TSYSTEM_POS, x
         dex 
         bpl _3e97
         rts 
