@@ -196,7 +196,7 @@ _1deb:                                                                  ;$1deb
         jmp _3d9b
 
 _1e00:                                                                  ;$1e00
-        lda $04a4
+        lda VAR_CASH_pt3        ;?
         cmp # $c4
         bcc _1e11
         lda $0499

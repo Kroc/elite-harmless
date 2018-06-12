@@ -126,7 +126,8 @@ _0713:  ;3.                                                             ;$0713
 
 _0719:  ;4.                                                             ;$0719
         .byte   _IN, _VE, N_, T_, _OR, Y_, $2f, __end
-        .skip_word              ; $A4^35 = $87
+        .define_word \
+                "_INVENTORY"    ; $A4^35 = $87
 
 _0721:  ;5.                                                             ;$0721
         .byte   S_, Y_, S_, _TE, M_, __end
@@ -146,7 +147,8 @@ _072b:  ;7.                                                             ;$072B
 
 _0736:  ;8.                                                             ;$0736
         .byte   _IN, D_, _US, T_, _RI, _AL, __end
-        .skip_word              ; $A8^35 = $8B
+        .define_word \
+                "_INDUSTRIAL"   ; $A8^35 = $8B
 
 _073d:  ;9.                                                             ;$073D
         .byte   A_, G_, _RI, C_, U_, L_, T_, U_, _RA, L_, __end
@@ -189,7 +191,8 @@ _0769:  ;16.                                                            ;$0769
         
 _076f:  ;17.                                                            ;$076F
         .byte   _AN, _AR, C_, H_, Y_, __end
-        .skip_word              ; $B1^35 = $92
+        .define_word \
+                "_ANARCHY"      ; $B1^35 = $92
 
 _0775:  ;18.                                                            ;$0775
         .byte   F_, E_, U_, D_, _AL, __end
@@ -289,7 +292,8 @@ _0811:  ;37.                                                            ;$0811
         
 _0816:  ;38.                                                            ;$0816
         .byte   __, _BI, _LL, I_, _ON, __end
-        .skip_word              ; $C6^35 = $E5
+        .define_word \
+                "_BILLION"      ; $C6^35 = $E5
 
 _081c:  ;39.                                                            ;$081C
         .byte   _GALACTIC, _CHART, $22, __end
@@ -427,9 +431,13 @@ _08d4:  ;69.                                                            ;$08D4
         .byte   S_, _MA, _LL, __end
         .skip_word              ; $E5^35 = $C6
         
+        ; colours:
+        ;-----------------------------------------------------------------------
+
 _08d8:  ;70.                                                            ;$08D8
         .byte   G_, _RE, _EN, __end
-        .skip_word              ; $E6^35 = $C5
+        .define_word \
+                "_COLORS"       ; $E6^35 = $C5
         
 _08dc:  ;71.                                                            ;$08DC
         .byte   R_, _ED, __end
@@ -447,9 +455,13 @@ _08ea:  ;74.                                                            ;$08EA
         .byte   B_, _LA, C_, K_, __end
         .skip_word              ; $EA^35 = $C9
 
+        ; adjectives
+        ;-----------------------------------------------------------------------
+
 _08ef:  ;75.                                                            ;$08EF
-        .byte   $35, __end
-        .skip_word              ; $EB^35 = $C8
+        .byte   _HARMLESS, __end
+        .define_word \
+                "_ADJECTIVES"   ; $EB^35 = $C8
         
 _08f1:  ;76.                                                            ;$08F1
         .byte   S_, L_, I_, M_, Y_, __end
@@ -475,9 +487,13 @@ _090b:  ;81.                                                            ;$090B
         .byte   F_, U_, R_, R_, Y_, __end
         .skip_word              ; $F1^35 = $D2
         
+        ; species:
+        ;-----------------------------------------------------------------------
+
 _0911:  ;82.                                                            ;$0911
         .byte   _RO, D_, _EN, T_, __end
-        .skip_word              ; $F2^35 = $D1
+        .define_word \
+                "_SPECIES"      ; $F2^35 = $D1
         
 _0916:  ;83.                                                            ;$0916
         .byte   F_, _RO, G_, __end
@@ -507,6 +523,8 @@ _0938:  ;89.                                                            ;$0938
         .byte   _IN, S_, E_, C_, T_, __end
         .skip_word              ; $F9^35 = $DA
         
+        ;-----------------------------------------------------------------------
+
 _093e:  ;90.                                                            ;$093E
         .byte   _AVERAGE, _RA, _DI, _US, __end
         .define_word \

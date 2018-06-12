@@ -200,15 +200,20 @@ _6a2f:                                                                  ;$6a2f
         jsr _6a2e
         rts 
 
-;===============================================================================
+; RNG?
 
-_6a3b:                                                                  ;$6a3b
+_6a3b:  ; roll RNG seed four times?                                     ;$6A3b
+;===============================================================================
 .export _6a3b
-        jsr _6a3e
-_6a3e:                                                                  ;$6a3e
-        jsr _6a41
-_6a41:                                                                  ;$6a41
-        lda ZP_SEED_pt1
+
+        ; this routine calls itself 4 times to ensure
+        ; enough scrambling of the random number
+        jsr :+                  ; do this twice,                                             
+:       jsr _6a41               ; and that twice                        ;$6A3e
+
+_6a41:  ; roll the RNG seed once?                                       ;$6A41
+        ;=======================================================================
+        lda ZP_SEED_pt1                                                 
         clc 
         adc ZP_SEED_pt3
         tax 
@@ -230,6 +235,7 @@ _6a41:                                                                  ;$6a41
         tya 
         adc ZP_SEED_pt4
         sta ZP_SEED_pt6
+        
         rts 
 
 ;===============================================================================
@@ -310,23 +316,36 @@ _6aa1:                                                                  ;$6aa1:
         clc 
 _6ace:                                                                  ;$6ace
 .import TXT_RICH:direct
+        
+        ; "RICH" / "AVERAGE" / "POOR"
+        
         adc # TXT_RICH
         jsr print_token
 _6ad3:                                                                  ;$6ad3
         lda $0500
         lsr 
         lsr 
+
+.import TXT_INDUSTRIAL:direct
+
+        ; "INDUSTRIAL" / "AGRICULTURAL"
+
         clc 
-        adc # $a8
+        adc # TXT_INDUSTRIAL
         jsr _6a84
 
 .import TXT_GOVERNMENT:direct
         lda # TXT_GOVERNMENT
         jsr print_token_with_colon
         
+.import TXT_ANARCHY:direct
+
+        ; "ANARCHY" / "FEUDAL" / "MULTI-GOVERNMENT" / "DICTATORSHIP" /
+        ; "COMMUNIST" / "CONFEDORACY" / "DEMOCRACY" / "CORPORATE STATE"
+
         lda $0501
         clc 
-        adc # $b1
+        adc # TXT_ANARCHY
         jsr _6a84
 
 .import TXT_TECH_LEVEL:direct
@@ -346,10 +365,12 @@ _6ad3:                                                                  ;$6ad3
         sec 
         ldx $0503
         jsr _2e55
-        lda # $c6
+
+.import TXT_BILLION:direct
+        lda # TXT_BILLION
         jsr _6a84
 
-        lda # $28
+        lda # '('
         jsr print_token
         
         lda ZP_SEED_pt5
@@ -368,7 +389,12 @@ _6b1e:                                                                  ;$6b1e
         and # %00000111
         cmp # $03
         bcs _6b2e
-        adc # $e3
+        
+.import TXT_LARGE:direct
+
+        ; "LARGE" / "FIERCE" / "SMALL" / ?
+        
+        adc # TXT_LARGE
         jsr _6a9b
 _6b2e:                                                                  ;$6b2e
         pla 
@@ -377,7 +403,12 @@ _6b2e:                                                                  ;$6b2e
         lsr 
         cmp # $06
         bcs _6b3b
-        adc # $e6
+
+.import TXT_COLORS:direct
+
+        ; "GREEN" / "RED" / "YELLOW" / "BLUE" / "BLACK" / ?
+
+        adc # TXT_COLORS
         jsr _6a9b
 _6b3b:                                                                  ;$6b3b
         lda ZP_SEED_pt4
@@ -386,7 +417,13 @@ _6b3b:                                                                  ;$6b3b
         sta $8e
         cmp # $06
         bcs _6b4c
-        adc # $ec
+
+.import TXT_ADJECTIVES:direct
+
+        ; "HARMLESS" / "SLIMY" / "BUG-EYED" / "HORNED" /
+        ; "BONY" / "FAT" / "FURRY"
+
+        adc # TXT_ADJECTIVES+1  ; +1, because of borrow?
         jsr _6a9b
 _6b4c:                                                                  ;$6b4c
         lda ZP_SEED_pt6
@@ -394,13 +431,20 @@ _6b4c:                                                                  ;$6b4c
         clc 
         adc $8e
         and # %00000111
-        adc # $f2
+        
+.import TXT_SPECIES:direct
+
+        ; "RODENT" / "FROG" / "LIZARD" / "LOBSTER" / "BIRD" / "HUMANOID" /
+        ; "FELINE" / "INSECT"
+
+        adc # TXT_SPECIES
         jsr print_token
 _6b5a:                                                                  ;$6b5a
-        lda # $53
+        ; append an "s"
+        lda # 's'
         jsr print_token
 
-        lda # $29
+        lda # ')'
         jsr _6a84
 
 .import TXT_GROSS_PRODUCTIVITY:direct
@@ -414,10 +458,11 @@ _6b5a:                                                                  ;$6b5a
         lda # $00
         sta $34
         
-        lda # $4d
+        lda # 'm'
         jsr print_token
         
-        lda # $e2
+.import TXT_CR:direct
+        lda # TXT_CR
         jsr _6a84
 
 .import TXT_AVERAGE_RADIUS:direct
@@ -433,10 +478,10 @@ _6b5a:                                                                  ;$6b5a
         jsr _7235
         jsr _72c5
 
-        lda # $6b
+        lda # $6b               ;="K"
         jsr _2f24
         
-        lda # $6d
+        lda # $6d               ;="M"
         jsr _2f24
         
         jsr _6a87
@@ -508,6 +553,7 @@ _6bc5:                                                                  ;$6bc5
 _6c1c:                                                                  ;$6c1c
         lda # $40
         jsr _a72f
+        
         lda # $10
         jsr _6a2e
 
@@ -871,7 +917,7 @@ _6e5d:                                                                  ;$6e5d
         cmp # $04
         bne _6eca
 
-.import TXT_SELl:direct
+.import TXT_SELL:direct
         lda # TXT_SELL
         jsr print_token
         
@@ -933,7 +979,7 @@ _6eea:                                                                  ;$6eea
         dex 
         beq _6ee9
 _6f11:                                                                  ;$6f11
-        lda # $73
+        lda # $73               ;="S"
         jmp _2f24
 
 ;===============================================================================
@@ -945,8 +991,10 @@ _6f16:                                                                  ;$6f16
         lda # 11
         jsr set_cursor_col
         
-        lda # $a4
+.import TXT_INVENTORY:direct
+        lda # TXT_INVENTORY
         jsr _6a84
+
         jsr _28dc
         jsr _774a
         lda $04af
@@ -972,7 +1020,7 @@ _6f3a:                                                                  ;$6f3a
         ora # %00100000
         cmp # $79
         beq _6f50
-        lda # $6e
+        lda # $6e               ;="N"
         jmp _2f24
 _6f50:                                                                  ;$6f50
         jsr _2f24
@@ -1531,14 +1579,14 @@ _72c7:                                                                  ;$72c7
         jmp print_token
 
 _72ca:                                                                  ;$72ca
-        lda # $74
+        lda # $74               ;="T"
         jsr _2f24
         bcc _72c5
 _72d1:                                                                  ;$72d1
-        lda # $6b
+        lda # $6b               ;="K"
         jsr _2f24
 _72d6:                                                                  ;$72d6
-        lda # $67
+        lda # $67               ;="G"
         jmp _2f24
 
 ;===============================================================================
@@ -1764,41 +1812,45 @@ _7452:                                                                  ;$7452
 _7457:                                                                  ;$7457
         jmp _6fdb
 
-;===============================================================================
 
-_745a:                                                                  ;$745a
+; increase / decrease cash
+
+_745a:                                                                  ;$745A
+;===============================================================================
 .export _745a
         stx $06
-        lda $04a5
+        lda VAR_CASH_pt4
         sec 
         sbc $06
-        sta $04a5
+        sta VAR_CASH_pt4
         sty $06
-        lda $04a4
+        lda VAR_CASH_pt3
         sbc $06
-        sta $04a4
-        lda $04a3
+        sta VAR_CASH_pt3
+        lda VAR_CASH_pt2
         sbc # $00
-        sta $04a3
-        lda $04a2
+        sta VAR_CASH_pt2
+        lda VAR_CASH_pt1
         sbc # $00
-        sta $04a2
+        sta VAR_CASH_pt1
         bcs _74a1
+        
 _7481:                                                                  ;$7481
+;===============================================================================
 .export _7481
         txa 
         clc 
-        adc $04a5
-        sta $04a5
+        adc VAR_CASH_pt4
+        sta VAR_CASH_pt4
         tya 
-        adc $04a4
-        sta $04a4
-        lda $04a3
+        adc VAR_CASH_pt3
+        sta VAR_CASH_pt3
+        lda VAR_CASH_pt2
         adc # $00
-        sta $04a3
-        lda $04a2
+        sta VAR_CASH_pt2
+        lda VAR_CASH_pt1
         adc # $00
-        sta $04a2
+        sta VAR_CASH_pt1
         clc 
 _74a1:                                                                  ;$74a1
         rts 
@@ -2251,7 +2303,7 @@ _775f:  ;$775F
         ldx # 3
 
         ; copy $04A2..$04A5 to $77..$7A?
-:       lda $04a2, x                                                    ;$7761
+:       lda VAR_CASH, x                                                 ;$7761
         sta $77, x
         dex 
         bpl :-
@@ -2311,6 +2363,7 @@ print_token:                                                            ;$777E
         ;      $0D = ?
         ;      $0E = ?
         ;  $0E-$20 = canned messages 128-146
+        ;  $21-$5F = ASCII characters $21-$5F -- see "gfx/font.asm"
         ;  $60-$7F = canned messages  96-127
         ;  $80-$BF = canned messages   0-95
 
@@ -5586,7 +5639,7 @@ _8b37:
         sta $77
         eor $04a7
         sta $79
-        eor $04a4
+        eor VAR_CASH_pt3        ;?
         sta $78
         eor # %01011010
         eor $04e1

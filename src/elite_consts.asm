@@ -9,10 +9,16 @@
 
 ; TODO: ideally this would be defined structurally; `.tag`?
 
-ZP_SEED     = $7F
-ZP_SEED_pt1 = $7F
-ZP_SEED_pt2 = $80
-ZP_SEED_pt3 = $81
-ZP_SEED_pt4 = $82
-ZP_SEED_pt5 = $83
-ZP_SEED_pt6 = $84
+ZP_SEED         = $7F
+ZP_SEED_pt1     = $7F
+ZP_SEED_pt2     = $80
+ZP_SEED_pt3     = $81
+ZP_SEED_pt4     = $82
+ZP_SEED_pt5     = $83
+ZP_SEED_pt6     = $84
+
+VAR_CASH        = $04a2
+VAR_CASH_pt1    = $04a2
+VAR_CASH_pt2    = $04a3
+VAR_CASH_pt3    = $04a4
+VAR_CASH_pt4    = $04a5
