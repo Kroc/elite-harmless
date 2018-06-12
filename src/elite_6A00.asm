@@ -75,10 +75,10 @@
 .import _2c9b:absolute
 .import _2d69:absolute
 .import _2dc5:absolute
-.import _2e55:absolute
-.import _2e57:absolute
-.import _2e59:absolute
-.import print_value:absolute
+.import print_tiny_value:absolute
+.import print_small_value:absolute
+.import print_medium_value:absolute
+.import print_large_value:absolute
 .import _2f19:absolute
 .import _2f1b:absolute
 .import _2f1c:absolute
@@ -241,13 +241,16 @@ _6a41:  ; roll the RNG seed once?                                       ;$6A41
 ;===============================================================================
 
 _6a68:                                                                  ;$6a68
+        ; get the text token for "DISTANCE" 
+.import TXT_DISTANCE:direct
+
+        ; is target system distance > 0
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
-        bne _6a73
+        bne :+
         jmp cursor_down
-_6a73:                                                                  ;$6a73
-.import TXT_DISTANCE:direct
-        lda # TXT_DISTANCE
+
+:       lda # TXT_DISTANCE                                              ;$6A73
         jsr print_token_with_colon
 
         ldx TSYSTEM_DISTANCE_LO
@@ -359,7 +362,7 @@ _6ad3:                                                                  ;$6ad3
         ldx TSYSTEM_TECHLEVEL
         inx 
         clc 
-        jsr _2e55
+        jsr print_tiny_value
         jsr _6a87
 
 .import TXT_POPULATION:direct
@@ -368,7 +371,7 @@ _6ad3:                                                                  ;$6ad3
         
         sec 
         ldx TSYSTEM_POPULATION
-        jsr _2e55
+        jsr print_tiny_value
 
 .import TXT_BILLION:direct
         lda # TXT_BILLION
@@ -926,7 +929,7 @@ _6e5d:                                                                  ;$6e5d
         tax 
         sta $04ed
         clc 
-        jsr _2e55
+        jsr print_tiny_value
         jsr _72b8
         lda $a0
         cmp # $04
@@ -980,7 +983,7 @@ _6eea:                                                                  ;$6eea
         lda # $00
         ldx $04c9
         ldy $04ca
-        jsr _2e59
+        jsr print_medium_value
         jsr _84af
         and # %00000011
         clc 
@@ -1490,15 +1493,20 @@ _7224:                                                                  ;$7224
         ldy # $00
         clc 
         lda # $03
-        jmp _2e59
+        jmp print_medium_value
 
-;===============================================================================
 
 _7234:                                                                  ;$7234
+        ;=======================================================================
+        ; print 16-bit value in X/Y, without decimal point
+        ;
         clc 
 _7235:                                                                  ;$7235
-        lda # $05
-        jmp _2e59
+        ;=======================================================================
+        ; print 16-bit value in X/Y -- decimal point included if carry set
+        ;
+        lda # $05               ; max. no. digits -- is this 5 or 6?
+        jmp print_medium_value
 
 _723a:                                                                  ;$723a
 .import TXT_RANGE:direct
@@ -1573,7 +1581,7 @@ _728e:                                                                  ;$728e
         stx $04ed
         clc 
         beq _72af
-        jsr _2e57
+        jsr print_small_value
         jmp _72b8
 _72af:                                                                  ;$72af
         lda # 25
@@ -1932,7 +1940,7 @@ _74f5:                                                                  ;$74f5
         jsr _6a8e
         ldx $a2
         clc 
-        jsr _2e55
+        jsr print_tiny_value
         jsr _72c5
         
         lda $a2
@@ -1948,7 +1956,7 @@ _74f5:                                                                  ;$74f5
         jsr set_cursor_col
         
         lda # $06
-        jsr _2e59
+        jsr print_medium_value
         ldx $a2
         inx 
         cpx $9a
@@ -2291,7 +2299,7 @@ _7742:
         clc 
         ldx $04a8
         inx 
-        jmp _2e55
+        jmp print_tiny_value
 
 ;===============================================================================
 
@@ -2303,7 +2311,7 @@ _774a:  ; $774A
 
         ldx SHIP_FUEL
         sec 
-        jsr _2e55
+        jsr print_tiny_value
 
 .import TXT_LIGHT_YEARS:direct
         lda # TXT_LIGHT_YEARS
@@ -2327,7 +2335,7 @@ _775f:  ;$775F
         sta $99
         
         sec                     ; set carry flag - use decimal point
-        jsr print_value         ; convert value to string
+        jsr print_large_value   ; convert value to string
 
         ; print "CR" ("credits") after the cash value
 .import TXT_CR:direct
@@ -5660,7 +5668,7 @@ _8b37:
         eor $04e1
         sta $7a
         clc 
-        jsr print_value
+        jsr print_large_value
         jsr _6a8e
         jsr _6a8e
         pla 

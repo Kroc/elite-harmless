@@ -2617,38 +2617,60 @@ _max_value:                                                             ;$2E51
         ; in the code itself
         .byte   $48, $76, $e8, $00
 
-_2e55:                                                                  ;$2E55
+print_tiny_value:                                                       ;$2E55
         ;=======================================================================
-.export _2e55
+        ; print an 8-bit value, given in X, padded to 3 chars
+        ;
+        ;    X = value to print
+        ;
+.export print_tiny_value
+
+        ; set the padding to a max. number of digits to 3, i.e. "  0"-"255"
         lda # $03
-_2e57:                                                                  ;$2E57
+
+print_small_value:                                                      ;$2E57
         ;=======================================================================
-.export _2e57
+        ; print an 8-bit value, given in X, with A specifying the number of
+        ; characters to pad to
+        ;
+        ;    X = value to print
+        ;    A = width in chars to pad to
+        ;
+.export print_small_value
+
+        ; strip the hi-byte for what follows; only use X
         ldy # $00
 
-_2e59:                                                                  ;$2E59
+print_medium_value:                                                     ;$2E59
         ;=======================================================================
-        ; print "0"?
+        ; print a 16-bit value stored in X/Y
         ;
-.export _2e59
+        ;    A = max. no. of expected digits
+        ;    X = lo-byte of value
+        ;    Y = hi-byte of value
+        ;
+.export print_medium_value
 
         sta ZP_PADDING
+
+        ; zero out the upper-bytes of the 32-bit value to print
         lda # $00
         sta ZP_VALUE_pt1
         sta ZP_VALUE_pt2
+
+        ; insert the 16-bit value given
         sty ZP_VALUE_pt3
         stx ZP_VALUE_pt4
 
-print_value:                                                            ;$2E65
+print_large_value:                                                      ;$2E65
         ;=======================================================================
-        ; convert a numerical value to a string and print it
+        ; print a large value, up to 100-billion
         ;
-        ;       Y = ?
         ; $77-$7A = numerical value (note: big-endian)
         ;     $99 = max. number of expected digits, i.e. left-pad the number
         ;       c = carry set: use decimal point
         ;
-.export print_value
+.export print_large_value
 
         ; set max. text width
         ; i.e. for "100000000000" (100-billion)
