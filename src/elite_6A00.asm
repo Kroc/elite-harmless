@@ -985,7 +985,7 @@ _6eea:                                                                  ;$6eea
         ldx $04c9
         ldy $04ca
         jsr print_medium_value
-        jsr _84af
+        jsr get_random_number
         and # %00000011
         clc 
         adc # $6f
@@ -1695,7 +1695,7 @@ _733c:                                                                  ;$733c
         sta PSYSTEM_TECHLEVEL
         lda TSYSTEM_GOVERNMENT
         sta PSYSTEM_GOVERNMENT
-        jsr _84af
+        jsr get_random_number
         sta $04df
         ldx # $00
         stx $ad
@@ -1793,7 +1793,7 @@ _73f5:                                                                  ;$73f5
         jsr _8e92
         and _1d08
         bmi _73ac
-        jsr _84af
+        jsr get_random_number
         cmp # $fd
         bcs _73b3
         jsr _7337
@@ -3024,7 +3024,7 @@ _7a9f:
         lda # $00
         sta $04b0
         sta $04b6
-        jsr _84af
+        jsr get_random_number
         and # %00001111
         adc $04c9
         ora # %00000100
@@ -3063,14 +3063,14 @@ _7af3:
 _7af7:
         ldy $050b
 _7afa:
-        jsr _84af
+        jsr get_random_number
         ora # %00001000
         sta $06d6, y
         sta $a1
-        jsr _84af
+        jsr get_random_number
         sta $06a2, y
         sta $6b
-        jsr _84af
+        jsr get_random_number
         sta $06bc, y
         sta $6c
         jsr _2918
@@ -3801,7 +3801,7 @@ _7f8f:
         sty $6c
         jsr _9978
         ldy $6c
-        jsr _84af
+        jsr get_random_number
         and $aa
         clc 
         adc $9a
@@ -4615,7 +4615,7 @@ _8487:
 
 _848d:
         jsr _8447
-        jsr _84af
+        jsr get_random_number
         sta $06
         and # %10000000
         sta $0b
@@ -4633,9 +4633,13 @@ _848d:
         sta $29
 _84ae:
         clc 
-_84af:
-.export _84af
-        lda $02
+
+get_random_number:                                                      ;$84AF
+        ;=======================================================================
+        ; generate an 8-bit 'random' number
+        ;
+.export get_random_number
+        lda $02                 ; seed 0
         rol 
         tax 
         adc $04
@@ -4651,7 +4655,7 @@ _84af:
 ;===============================================================================
 
 _84c3:
-        jsr _84af
+        jsr get_random_number
         lsr 
         sta $29
         sta $26
@@ -4659,7 +4663,7 @@ _84c3:
         and # %00011111
         ora # %00010000
         sta $24
-        jsr _84af
+        jsr get_random_number
         bmi _84e2
         lda $29
         ora # %11000000
@@ -4687,7 +4691,7 @@ _84fe:
 _8501:
         lda $0482
         bne _84fe
-        jsr _84af
+        jsr get_random_number
         cmp # $23
         bcs _8562
         lda $047f
@@ -4696,7 +4700,7 @@ _8501:
         jsr _8447
         lda # $26
         sta $10
-        jsr _84af
+        jsr get_random_number
         sta $09
         stx $0c
         and # %10000000
@@ -4706,7 +4710,7 @@ _8501:
         sta $0e
         rol $0a
         rol $0a
-        jsr _84af
+        jsr get_random_number
         bvs _84c3
         ora # %01101111
         sta $26
@@ -4722,7 +4726,7 @@ _8548:
         ora # %01111111
         sta $27
 _854c:
-        jsr _84af
+        jsr get_random_number
         cmp # $fc
         bcc _8559
         lda # $0f
@@ -4765,13 +4769,13 @@ _8588:
         and # %00001100
         cmp # $08
         bne _85a8
-        jsr _84af
+        jsr get_random_number
         cmp # $c8
         bcc _85a8
 _85a5:
         jsr _739b
 _85a8:
-        jsr _84af
+        jsr get_random_number
         ldy PSYSTEM_GOVERNMENT
         beq _85bb
         cmp # $5a
@@ -4800,7 +4804,7 @@ _85bb:
 _85e0:
         lda # $04
         sta $2d
-        jsr _84af
+        jsr get_random_number
         cmp # $c8
         rol 
         ora # %11000000
@@ -4827,9 +4831,9 @@ _860b:
         sta $048a
         sta $a2
 _8612:
-        jsr _84af
+        jsr get_random_number
         sta $bb
-        jsr _84af
+        jsr get_random_number
         and $bb
         and # %00000111
         adc # $11
@@ -4865,7 +4869,7 @@ _8645:
 _8654:
         lda $04ca
         beq _8670
-        jsr _84af
+        jsr get_random_number
         cmp # $dc
         lda $04c9
         adc # $00
@@ -4883,10 +4887,10 @@ _8670:
         bcs _8680
         asl $bb
 _8680:
-        jsr _84af
+        jsr get_random_number
         cmp $bb
         bcs _86a1
-        jsr _84af
+        jsr get_random_number
         ora # %01000000
         tax 
         lda # $80
@@ -5167,7 +5171,7 @@ _87fd:
         dex 
 _8835:
         jsr _3695
-        jsr _84af
+        jsr get_random_number
         and # %10000000
         ldy # $1f
         sta [$59], y
@@ -6460,7 +6464,7 @@ _905d:
 ;===============================================================================
 
 _906a:
-        jsr _84af
+        jsr get_random_number
         bmi _9001
         cpx # $16
         bcs _9001
@@ -7376,7 +7380,7 @@ _9a86:
         sta [$2a], y
 _9abb:
         iny 
-        jsr _84af
+        jsr get_random_number
         sta [$2a], y
         cpy # $06
         bne _9abb

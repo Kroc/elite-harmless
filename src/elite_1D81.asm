@@ -52,7 +52,7 @@
 .import _829a:absolute
 .import _83df:absolute
 .import _8447:absolute
-.import _84af:absolute
+.import get_random_number:absolute
 .import _872f:absolute
 .import _877e:absolute
 .import _87a4:absolute
@@ -245,7 +245,7 @@ _1e41:
         lda # MEM_IO_ONLY
         jsr set_memory_layout
         
-        jsr _84af
+        jsr get_random_number
         cmp # $eb
         bcc _1e6a
         and # %00000011
@@ -254,7 +254,7 @@ _1e41:
         sta $0511, y
         lda _1e25, x
         sta $0521, y
-        jsr _84af
+        jsr get_random_number
         and # %00000011
         tax 
         lda _1e21, x
@@ -584,7 +584,7 @@ _207e:
         adc # $01
         bne _20c5
 _20c0:
-        jsr _84af
+        jsr get_random_number
         and # %00000111
 _20c5:
         jsr _6a00
@@ -699,7 +699,7 @@ _2170:
         lda $7b
         cmp # $32
         bne _2192
-        jsr _84af
+        jsr get_random_number
         ldx # $08
         and # %00000011
         jsr _2359
@@ -942,7 +942,7 @@ _2345:
 ;===============================================================================
 
 _234c:
-        jsr _84af
+        jsr get_random_number
         bpl _2366
         tya 
         tax 
@@ -1193,7 +1193,7 @@ _2441:  ; process tokens $5B..$80                                       ;$2441
         lda $5c
         pha 
 
-        jsr _84af
+        jsr get_random_number
         tax 
         lda # $00
         cpx # $33
@@ -1301,11 +1301,11 @@ _24c9:
 
 _24ce:  ; NOTE: this address is used in the table in _250c
         jsr _24ed
-        jsr _84af
+        jsr get_random_number
         and # %00000011
         tay 
 _24d7:
-        jsr _84af
+        jsr get_random_number
         and # %00111110
         tax 
 
@@ -2167,15 +2167,15 @@ _2b09:
         ;-----------------------------------------------------------------------
 
 _2b0a:
-        jsr _84af
+        jsr get_random_number
         ora # %00000100
         sta $6c
         sta $06bc, y
-        jsr _84af
+        jsr get_random_number
         ora # %00001000
         sta $6b
         sta $06a2, y
-        jsr _84af
+        jsr get_random_number
         ora # %10010000
         sta $06d6, y
         sta $a1
@@ -2285,7 +2285,7 @@ _2bf6:
         ;-----------------------------------------------------------------------
 
 _2bf7:
-        jsr _84af
+        jsr get_random_number
         and # %01111111
         adc # $0a
         sta $06d6, y
@@ -2297,7 +2297,7 @@ _2bf7:
         ror 
         sta $6b
         sta $06a2, y
-        jsr _84af
+        jsr get_random_number
         sta $6c
         sta $06bc, y
         jmp _2bed
@@ -2305,7 +2305,7 @@ _2bf7:
         ;-----------------------------------------------------------------------
 
 _2c1a:
-        jsr _84af
+        jsr get_random_number
         sta $6b
         sta $06a2, y
         lsr 
@@ -3344,7 +3344,7 @@ _319b:
         lda $04c9
         ora $04ca
         beq _31be
-        jsr _84af
+        jsr get_random_number
         and # %00000111
         ora # %00000001
         sta $04c9
@@ -3484,7 +3484,7 @@ _3298:
         ;-----------------------------------------------------------------------
 
 _3299:
-        jsr _84af
+        jsr get_random_number
         cmp # $10
         bcs _32a7
 _32a0:
@@ -3517,7 +3517,7 @@ _32ad:
         bne _32da
         lda $0467
         bne _3298
-        jsr _84af
+        jsr get_random_number
         cmp # $fd
         bcc _3298
         and # %00000001
@@ -3525,7 +3525,7 @@ _32ad:
         tax 
         bne _32ea
 _32da:
-        jsr _84af
+        jsr get_random_number
         cmp # $f0
         bcc _3298
         lda $046d
@@ -3541,7 +3541,7 @@ _32ea:
 _32ef:
         cpx # $0f
         bne _330f
-        jsr _84af
+        jsr get_random_number
         cmp # $c8
         bcc _3328
         ldx # $00
@@ -3578,7 +3578,7 @@ _3328:
         ;-----------------------------------------------------------------------
 
 _3329:
-        jsr _84af
+        jsr get_random_number
         lda $2d
         lsr 
         bcc _3335
@@ -3643,10 +3643,10 @@ _3381:
         bne _339a
 _3385:
 .export _3385
-        jsr _84af
+        jsr get_random_number
         cmp # $c8
         bcc _339a
-        jsr _84af
+        jsr get_random_number
         ldx # $17
         cmp # $64
         bcs _3397
@@ -3657,10 +3657,10 @@ _3397:
         ;-----------------------------------------------------------------------
 
 _339a:
-        jsr _84af
+        jsr get_random_number
         cmp # $fa
         bcc _33a8
-        jsr _84af
+        jsr get_random_number
         ora # %01101000
         sta $26
 _33a8:
@@ -3673,7 +3673,7 @@ _33a8:
         lsr 
         cmp $2c
         bcc _33d6
-        jsr _84af
+        jsr get_random_number
         cmp # $e6
         bcc _33d6
         ldx $a5
@@ -3695,7 +3695,7 @@ _33d6:
         and # %00000111
         beq _33fd
         sta $bb
-        jsr _84af
+        jsr get_random_number
         and # %00011111
         cmp $bb
         bcs _33fd
@@ -3755,7 +3755,7 @@ _3434:
         and # %11111110
         beq _3454
 _3442:
-        jsr _84af
+        jsr get_random_number
         ora # %10000000
         cmp $29
         bcs _3454
@@ -4263,7 +4263,7 @@ _374d:
         cmp # $04
         bcc _3770
         pha 
-        jsr _84af
+        jsr get_random_number
         asl 
         sta $27
         txa 
@@ -4476,7 +4476,7 @@ _38a3:
         ;-----------------------------------------------------------------------
 
 _38be:
-        jsr _84af
+        jsr get_random_number
         sta $6c
         sta $06bc, y
         lda # $73
@@ -4485,7 +4485,7 @@ _38be:
         sta $06a2, y
         bne _38e2
 _38d1:
-        jsr _84af
+        jsr get_random_number
         sta $6b
         sta $06a2, y
         lda # $6e
@@ -4493,7 +4493,7 @@ _38d1:
         sta $6c
         sta $06bc, y
 _38e2:
-        jsr _84af
+        jsr get_random_number
         ora # %00001000
         sta $a1
         sta $06d6, y
@@ -5258,11 +5258,11 @@ _3cda:
 ;===============================================================================
 
 _3cdb:
-        jsr _84af
+        jsr get_random_number
         and # %00000111
         adc # $44
         sta $06f1
-        jsr _84af
+        jsr get_random_number
         and # %00000111
         adc # $7c
         sta $06f0
