@@ -1193,20 +1193,28 @@ _2441:  ; process tokens $5B..$80                                       ;$2441
         lda $5c
         pha 
 
+        ; choose planet description template 0-4:
+
         jsr get_random_number
         tax 
-        lda # $00
-        cpx # $33
-        adc # $00
-        cpx # $66
-        adc # $00
-        cpx # $99
-        adc # $00
-        cpx # $cc
+        lda # $00               ; select description template 0
+        cpx # $33               ; is random number over $33?
+        adc # $00               ; select description template 1
+        cpx # $66               ; is random number over $66?
+        adc # $00               ; select description template 2
+        cpx # $99               ; is random number over $99?
+        adc # $00               ; select description template 3
+        cpx # $cc               ; is random number over $C0? note that if so,
+                                ; carry is set, to be added later
+
+        ; get back the token value and lookup another token to use
+        ; (since these tokens are $5B..$80, we index the table back $5B bytes)
         ldx $07
-        adc _3e51, x
-        jsr _2390
-        jmp _2438
+        adc _3eac - $5B, x
+
+        jsr _2390               ; print the new token
+
+        jmp _2438               ; clean up and exit
 
 ;===============================================================================
 
@@ -5460,7 +5468,6 @@ _3e46:                                                                  ;$3e46
         lda # $00
         sta $28
         lda # $01
-_3e51:                                                                  ;$3e51
         jsr _a72f
         jsr _9a86
 _3e57:  ; NOTE: this address is used in the table in _250c
@@ -5531,11 +5538,13 @@ _3ea1:                                                                  ;$3ea1
 ; unused / unreferenced?
 ;$3ea8:
 
-        .byte   $07, $07, $0d, $04, $10, $15, $1a, $1f                  ;$3EA8
-        .byte   $9b, $a0, $2e, $a5, $24, $29, $3d, $33                  ;$3EB0
-        .byte   $38, $aa, $42, $47, $4c, $51, $56, $8c                  ;$3EB8
-        .byte   $60, $65, $87, $82, $5b, $6a, $b4, $b9                  ;$3EC0
-        .byte   $be, $e1, $e6, $eb, $f0, $f5, $fa, $73                  ;$3EC8
-        .byte   $78, $7d
+        .byte   $07, $07, $0d, $04                                      ;$3EA8
+
+_3eac:
+        .byte   $10, $15, $1a, $1f, $9b, $a0, $2e, $a5
+        .byte   $24, $29, $3d, $33, $38, $aa, $42, $47
+        .byte   $4c, $51, $56, $8c, $60, $65, $87, $82
+        .byte   $5b, $6a, $b4, $b9, $be, $e1, $e6, $eb
+        .byte   $f0, $f5, $fa, $73, $78, $7d
 
 ;$3ED2
