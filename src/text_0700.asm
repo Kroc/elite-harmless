@@ -12,7 +12,7 @@
 ; this is the 'key' used to scramble / unscramble the text token symbols
 .export TXT_XOR := $23
 
-.segment        "TEXT_DATA"
+.segment        "TEXT_0700"
 
 .import _AL:direct      ;=$A3 XOR 35 =128 ($80)
 .import _LE:direct      ;=$A2 XOR 35 =129 ($81)

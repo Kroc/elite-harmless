@@ -49,12 +49,12 @@ echo "- assemble 'prgheader.asm'"
 $ca65 -o build/prgheader.o      src/prgheader.asm
 echo "- assemble 'elite_memory.asm'"
 $ca65 -o build/elite_memory.o   src/elite_memory.asm
-echo "- assemble 'text_data.asm'"
-$ca65 -o build/text_data.o      src/text_data.asm
+echo "- assemble 'text_0700.asm'"
+$ca65 -o build/text_0700.o      src/text_0700.asm
 echo "- assemble 'gfx_font.asm'"
 $ca65 -o build/gfx_font.o       src/gfx/font.asm
-echo "- assemble 'data_0E00.asm'"
-$ca65 -o build/data_0E00.o      src/data_0E00.asm
+echo "- assemble 'text_0E00.asm'"
+$ca65 -o build/text_0E00.o      src/text_0E00.asm
 echo "- assemble 'data_1D00.asm'"
 $ca65 -o build/data_1D00.o      src/data_1D00.asm
 echo "- assemble 'elite_1D81.asm'"
@@ -82,13 +82,13 @@ $ld65 \
        -o bin/elite-dx.prg \
     --obj build/prgheader.o \
     --obj build/elite_memory.o \
-    --obj build/text_data.o \
-    --obj build/gfx_font.o \
-    --obj build/data_0E00.o \
+    --obj build/text_0700.o \
+    --obj build/text_0E00.o \
     --obj build/data_1D00.o \
     --obj build/elite_1D81.o \
-    --obj build/gfx_sprites.o \
     --obj build/elite_6A00.o \
+    --obj build/gfx_font.o \
+    --obj build/gfx_sprites.o \
     --obj build/gfx_hulls.o \
     --obj build/gfx_hud.o
 
@@ -130,8 +130,8 @@ $ld65 \
     --obj build/loader/stage5.o \
     --obj build/loader/stage6.o \
     --obj build/loader/gma4_7C3A.o \
-    --obj build/text_data.o \
-    --obj build/data_0E00.o \
+    --obj build/text_0700.o \
+    --obj build/text_0E00.o \
     --obj build/data_1D00.o \
     --obj build/elite_init.o \
     --obj build/elite_1D81.o \

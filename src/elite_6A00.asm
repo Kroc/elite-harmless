@@ -10,7 +10,7 @@
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
 
-; from "text_data.asm"
+; from "text_0700.asm"
 .import _0700:absolute
 .import _0ac0:absolute
 
@@ -2617,7 +2617,7 @@ print_token_string:                                                     ;$7834
         pha 
 
         ; get the 'key' used for de-scrambling the text
-        ; (see "text_data.asm")
+        ; (see "text_0700.asm")
 .import TXT_XOR:direct
 
         lda [$5b], y            ; read a token
@@ -5199,14 +5199,13 @@ _8863:
 
         ldx # $11
         lda # $00
-
 :       sta _1d01, x                                                    ;$8867
         dex 
         bpl :-
 
-        lda VIC_SPRITE1_X
+        lda VIC_SPRITE1_X       ; this might be HULL_TABLE
         sta _8861
-        lda VIC_SPRITE1_Y
+        lda VIC_SPRITE1_Y       ; this might be HULL_TABLE
         sta _8862
         
         jsr _8a0c
@@ -5256,6 +5255,8 @@ _88c9:
         bpl _88c9
         inx 
         stx $048a
+
+        ; set the present system from the target system
         lda TSYSTEM_ECONOMY
         sta PSYSTEM_ECONOMY
         lda TSYSTEM_TECHLEVEL

@@ -6,11 +6,11 @@
 .include        "c64.asm"
 .include        "elite_consts.asm"
 
-; from "text_data.asm"
+; from "text_0700.asm"
 .import _0ac0:absolute
 .import _0ae0:absolute
 
-; from "data_0E00.asm"
+; from "text_0E00.asm"
 .import _0e00:absolute
 .import _1a27:absolute
 .import _1a41:absolute
@@ -309,11 +309,13 @@ _1ec1:
 .export _1ec1
         lda $f900
         sta $02
+
         lda $0510
         beq _1ece
+        
         jmp _1e35
 
-;===============================================================================
+        ;-----------------------------------------------------------------------
 
 _1ece:
         ldx $048d
@@ -972,6 +974,8 @@ _2367:
 
 ;===============================================================================
 
+; print message routine, for messages in 0E00
+
 _2372:  ; NOTE: this address is used in the table in _250c
         lda # $d9
         bne _2378
@@ -995,12 +999,21 @@ _237e:
         sta $5b
         lda # $1a
         bne _23a0
+
 _2390:                                                                  ;$2390
+        ;=======================================================================
+        ;       A = ?
+        ;       Y = ?
+        ; $5B/$5C = ?
+        ;
 .export _2390
-        pha 
+        pha                     ; take a copy of the given token 
         tax 
-        tya 
+        
+        tya                     ; save Y-parameter for later 
         pha 
+        
+        ; take a copy of the message address
         lda $5b
         pha 
         lda $5c
@@ -1011,10 +1024,11 @@ _2390:                                                                  ;$2390
         lda #> _0e00
 _23a0:                                                                  ;$23a0
         sta $5c
+
         ldy # $00
 _23a4:                                                                  ;$23a4
         lda [$5b], y
-        eor # %01010111         ;=$57
+        eor # %01010111         ;=$57 -- descramble token
         bne _23ad
         dex 
         beq _23b4
@@ -1029,7 +1043,7 @@ _23b4:                                                                  ;$23b4
         inc $5c
 _23b9:                                                                  ;$23b9
         lda [$5b], y
-        eor # %01010111         ;=$57
+        eor # %01010111         ;=$57 -- descramble token
         beq _23c5
         jsr _23cf
         jmp _23b4
