@@ -83,7 +83,7 @@
 .import _2f1b:absolute
 .import _2f1c:absolute
 .import _2f1f:absolute
-.import _2f24:absolute
+.import print_char:absolute
 .import _2fee:absolute
 .import _2ff3:absolute
 .import _31c6:absolute
@@ -485,10 +485,10 @@ _6b5a:                                                                  ;$6b5a
         jsr _72c5
 
         lda # $6b               ;="K"
-        jsr _2f24
+        jsr print_char
         
         lda # $6d               ;="M"
-        jsr _2f24
+        jsr print_char
         
         jsr _6a87
 ;6ba5?
@@ -850,7 +850,8 @@ _6de5:                                                                  ;$6de5
         bcs _6e13
 _6e0a:                                                                  ;$6e0a
         lda $9a
-        jsr _2f24
+        jsr print_char
+
         dec $06
         bne _6dd6
 _6e13:                                                                  ;$6e13
@@ -859,12 +860,12 @@ _6e13:                                                                  ;$6e13
         lda $9b
         rts 
 _6e1b:                                                                  ;$6e1b
-        jsr _2f24
+        jsr print_char
         lda $04ed
         sta $9b
         jmp _6e13
 _6e26:                                                                  ;$6e26
-        jsr _2f24
+        jsr print_char
         lda # $00
         sta $9b
         jmp _6e13
@@ -998,7 +999,7 @@ _6eea:                                                                  ;$6eea
         beq _6ee9
 _6f11:                                                                  ;$6f11
         lda # $73               ;="S"
-        jmp _2f24
+        jmp print_char
 
 ;===============================================================================
 
@@ -1038,10 +1039,11 @@ _6f3a:                                                                  ;$6f3a
         ora # %00100000
         cmp # $79
         beq _6f50
+
         lda # $6e               ;="N"
-        jmp _2f24
+        jmp print_char
 _6f50:                                                                  ;$6f50
-        jsr _2f24
+        jsr print_char
         sec 
         rts 
 
@@ -1603,14 +1605,14 @@ _72c7:                                                                  ;$72c7
 
 _72ca:                                                                  ;$72ca
         lda # $74               ;="T"
-        jsr _2f24
+        jsr print_char
         bcc _72c5
 _72d1:                                                                  ;$72d1
         lda # $6b               ;="K"
-        jsr _2f24
+        jsr print_char
 _72d6:                                                                  ;$72d6
         lda # $67               ;="G"
-        jmp _2f24
+        jmp print_char
 
 ;===============================================================================
 
@@ -2268,7 +2270,7 @@ _7719:
         lda $0491, y
         cmp # $0d
         beq _7726
-        jsr _2f24
+        jsr print_char
         iny 
         bne _7719
 _7726:
@@ -2490,7 +2492,7 @@ _77bd:
         adc # $20               ; otherwise shift letter into lower-case
 
 _goto_print_char:                                                       ;$77C7
-        jmp _2f24               ; just print char
+        jmp print_char          ; just print char
 
 _is_captial:                                                            ;$77CA
         ;-----------------------------------------------------------------------
@@ -2540,7 +2542,7 @@ _77ef:  pha
         sta $34
         pla 
 
-_77f6:  jmp _2f24
+_77f6:  jmp print_char
 
 
 print_token_message:                                                    ;$77F9
@@ -5048,8 +5050,10 @@ _877e:
         jsr _76e9
         lda # $80
         sta $34
+
         lda # $0c
-        jsr _2f24
+        jsr print_char
+        
         jmp _6a68
 
 ;===============================================================================
@@ -5336,7 +5340,7 @@ _8920:
         jsr _7773
 
         lda # $0a
-        jsr _2f24
+        jsr print_char
 
         lda # 6
         jsr set_cursor_col

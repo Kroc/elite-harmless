@@ -1003,8 +1003,18 @@ _237e:
 _2390:                                                                  ;$2390
         ;=======================================================================
         ;       A = ?
+        ;       X = index of message to print from message table
         ;       Y = ?
         ; $5B/$5C = ?
+        ;
+        ; tokens: (descrambled)
+        ;     $00 = invalid
+        ; $01-$1F = format token, function varies
+        ; $20-$40 = print ASCII chars $20-$40 (space, punctuation, numbers)
+        ; $41-$5A = print ASCII characters @, A-Z
+        ; $5B-$80 = ?
+        ; $81-$D6 = ?
+        ; $D7-$FF = ?
         ;
 .export _2390
         pha                     ; take a copy of the given token 
@@ -1022,33 +1032,35 @@ _2390:                                                                  ;$2390
         lda #< _0e00
         sta $5b
         lda #> _0e00
-_23a0:                                                                  ;$23a0
+_23a0:                                                                  ;$23A0
         sta $5c
 
         ldy # $00
-_23a4:                                                                  ;$23a4
+_23a4:                                                                  ;$23A4
         lda [$5b], y
         eor # %01010111         ;=$57 -- descramble token
-        bne _23ad
-        dex 
-        beq _23b4
-_23ad:                                                                  ;$23ad
-        iny 
+        bne :+                  ; keep going if not a message terminator ($00)
+        dex                     ; message has ended, decrement index
+        beq _23b4               ; if we've found our message, exit loop
+:       iny                                                             ;$23AD
         bne _23a4
         inc $5c
         bne _23a4
-_23b4:                                                                  ;$23b4
+
+_23b4:                                                                  ;$23B4
         iny 
         bne _23b9
         inc $5c
-_23b9:                                                                  ;$23b9
+
+_23b9:  ; begin printing message                                        ;$23B9
         lda [$5b], y
         eor # %01010111         ;=$57 -- descramble token
-        beq _23c5
+        beq _23c5               ; has message ended?
+
         jsr _23cf
         jmp _23b4
 
-_23c5:                                                                  ;$23c5
+_23c5:                                                                  ;$23C5
         pla 
         sta $5c
         pla 
@@ -1057,11 +1069,16 @@ _23c5:                                                                  ;$23c5
         tay 
         pla 
         rts
-_23cf:                                                                  ;$23cf
-        cmp # $20
-        bcc _241b
-        bit _2f1a
-        bpl _23e8
+
+        ;-----------------------------------------------------------------------
+
+_23cf:                                                                  ;$23Cf
+        cmp # ' '               ; tokens less than $20 (space)
+       .blt _241b               ; are format codes
+        
+        bit _2f1a               ; is bit 7 off?
+        bpl _23e8               ; if so, print character as-is
+       
         tax 
         tya 
         pha 
@@ -1071,67 +1088,91 @@ _23cf:                                                                  ;$23cf
         pha 
         txa 
         jsr print_token
+        
         jmp _2438
-_23e8:                                                                  ;$23e8
-        cmp # $5b
-        bcc _2404
-        cmp # $81
-        bcc _2441
-        cmp # $d7
-        bcc _2390
-        sbc # $d7
-        asl 
-        pha 
-        tax 
-        lda _254c, x
-        jsr _2404
-        pla 
-        tax 
-        lda _254d, x
-_2404:                                                                  ;$2404
-        cmp # $41               ; is A an `eor [$??, x]` instruction?
-        bcc _2418
-        
-        bit _2f1d
-        bmi _2412
-        
-        bit _2f19
-        bmi _2415
-_2412:                                                                  ;$2412
-        ora _2f18
-_2415:                                                                  ;$2415
-        and _2f1e
-_2418:                                                                  ;$2418
-        jmp _2f24
 
         ;-----------------------------------------------------------------------
+_23e8:                                                                  ;$23E8
+        cmp # 'z'+1             ; letters "A" to "Z"?
+       .blt _2404
 
-_241b:                                                                  ;$241b
+        cmp # $81               ; tokens $5B...$80?
+       .blt _2441
+        
+        cmp # $d7               ; tokens $81...$D6
+       .blt _2390
+        
+        ; tokens $D7 and above:
+        sbc # $d7               ; re-index as $00...$28
+        asl                     ; double, for lookup-table
+        pha                     ; (put aside)
+        tax                     ; use as index to table
+        lda _254c, x            ; read 1st character and print it
+        jsr _2404
+        pla                     ; get the offset again 
+        tax 
+        lda _254d, x            ; read 2nd character and print it
+
+_2404:  ; print a character                                             ;$2404
+        ;-----------------------------------------------------------------------
+        
+        ; print the punctuation characters ($20...$40), as is
+        
+        cmp # '@'+1
+       .blt _goto_print_char
+        
+        ; flag?
+        bit _2f1d
+        bmi _ucase
+        
+        ; flag?
+        bit _2f19
+        bmi _lcase
+
+_ucase:                                                                 ;$2412
+        ora _2f18               ; upper case (if enabled)
+_lcase:                                                                 ;$2415
+        and _2f1e               ; lower-case (if enabled)
+
+_goto_print_char:                                                       ;$2418
+        jmp print_char
+
+
+_241b:  ; format codes?                                                 ;$241B
+        ;-----------------------------------------------------------------------
+        
+        ; snapshot current state
         tax 
         tya 
         pha
-
         lda $5b
         pha 
-        
         lda $5c
         pha 
         
+        ; multiply token by two (lookup into table)
         txa 
         asl 
         tax 
 
-        ; _250c.. must be a lookup table
+        ; note that the lookup table is indexed two-bytes early, making an
+        ; index of zero land in some code -- this is why token $00 is invalid
 
-        lda _250c-2, x          ; X cannot be 0!?
-        sta _2435+1
-        lda _250c-1, x          ; X cannot be 0!?
-        sta _2435+2
+        lda _250c-2, x
+        sta @jsr + 1
+        lda _250c-1, x
+        sta @jsr + 2
+        
+        ; convert the token back to its original value
+        ; (to be used as a parameter for whatever we jump to)
         txa 
         lsr
-_2435:
-        jsr _2f24               ; this address gets overwritten
-_2438:
+
+        ; NOTE: this address gets overwritten by the code above!!
+@jsr:   jsr print_char                                                  ;$2435
+
+_2438:  ; restore state and exit                                        ;$2438
+        ;-----------------------------------------------------------------------
         pla 
         sta $5c
         pla 
@@ -1140,16 +1181,18 @@ _2438:
         tay 
         rts 
 
+_2441:  ; process tokens $5B..$80                                       ;$2441
         ;-----------------------------------------------------------------------
-
-_2441:
-        sta $07
+        sta $07                 ; put token aside
+        
+        ; put aside our current location in the text data
         tya 
-        pha 
+        pha
         lda $5b
         pha 
         lda $5c
         pha 
+
         jsr _84af
         tax 
         lda # $00
@@ -1312,39 +1355,41 @@ _250b:
 ; minus 2, so that the table begins with an index of 1?
 
 _250c:
-        .addr   _246a
-        .addr   _246d
-        .addr   print_token
-        .addr   print_token
-        .addr   _249d
-        .addr   _2496
-        .addr   _2f24
-        .addr   _2478
-        .addr   _2483
-        .addr   _2f24
-        .addr   _28dc
-        .addr   _2f24
-        .addr   _248b
-        .addr   _24a3
-        .addr   _24a6
-        .addr   _2f21+1         ; jumps into the middle of a `bit` instruction
-        .addr   _24b0
-        .addr   _24ce
-        .addr   _24ed
-        .addr   _2f24
-        .addr   _b3d4
-        .addr   _3e41
-        .addr   _3e57
-        .addr   _3e7c
-        .addr   _3e37
-        .addr   _8a5b
-        .addr   _2372
-        .addr   _2376
-        .addr   _3e59+1         ; jumps into the middle of a `bit` instruction
-        .addr   _8ab5
-        .addr   _8abe
-        .addr   _2f24
+        .addr   _246a           ; token $01
+        .addr   _246d           ; token $02
+        .addr   print_token     ; token $03
+        .addr   print_token     ; token $04
+        .addr   _249d           ; token $05
+        .addr   _2496           ; token $06
+        .addr   print_char      ; token $07
+        .addr   _2478           ; token $08
+        .addr   _2483           ; token $09
+        .addr   print_char      ; token $0A
+        .addr   _28dc           ; token $0B
+        .addr   print_char      ; token $0C
+        .addr   _248b           ; token $0D
+        .addr   _24a3           ; token $0E
+        .addr   _24a6           ; token $0F
+        .addr   _2f21+1         ; token $10
+        .addr   _24b0           ; token $11
+        .addr   _24ce           ; token $12
+        .addr   _24ed           ; token $13
+        .addr   print_char      ; token $14
+        .addr   _b3d4           ; token $15
+        .addr   _3e41           ; token $16
+        .addr   _3e57           ; token $17
+        .addr   _3e7c           ; token $18
+        .addr   _3e37           ; token $19
+        .addr   _8a5b           ; token $1A
+        .addr   _2372           ; token $1B
+        .addr   _2376           ; token $1C
+        .addr   _3e59+1         ; token $1D
+        .addr   _8ab5           ; token $1E
+        .addr   _8abe           ; token $1F
+        .addr   print_char      ; token $20: print space. this table is not
+                                ; used for this as token $20 is handled earlier
 
+; message compression character pairs:
 ;===============================================================================
 
 _254c:
@@ -1352,9 +1397,9 @@ _254c:
 _254d:
         .byte   $0a
 _254e:
-        .byte   $41, $42, $4f, $55, $53, $45, $49, $54  ;="AB|OU|SE|IT"?
-        .byte   $49, $4c, $45, $54, $53, $54, $4f, $4e  ;="IL|ET|ST|ON"?
-        .byte   $4c, $4f, $4e, $55, $54, $48, $4e, $4f  ;="LO|MU|TH|NO"?
+        .byte   "ab", "ou", "se", "it"
+        .byte   "il", "et", "st", "on"
+        .byte   "lo", "nu", "th", "no"
 
 
 ; text compression character pairs:
@@ -1383,7 +1428,7 @@ char_pairs:                                                             ;$2566
         _IN             ;=140  ($8C)
         _DI             ;=141  ($8D)
         _RE             ;=142  ($8E)
-        _A              ;=143  ($8F) ; note is "A?"
+        _A              ;=143  ($8F) note: second character is ignored
         _ER             ;=144  ($90)
         _AT             ;=145  ($91)
         _EN             ;=146  ($92)
@@ -2831,7 +2876,7 @@ _print_digit:                                                           ;$2EE7
         clc 
         adc # '0'               ; re-base as an ASCII/PETSCII numeral
 
-@print: jsr _2f24               ; print character                       ;$2EFD        
+@print: jsr print_char                                                  ;$2EFD        
 
 _2f00:
         dec ZP_MAXLEN
@@ -2848,7 +2893,7 @@ _2f06:
 
         ; carry set: print the decimal point
         lda # '.'
-        jsr _2f24
+        jsr print_char
 
         ; handle the next decimal digit...
 :       jmp _x10                                                        ;$2F14
@@ -2884,8 +2929,11 @@ _2f1f:
 _2f21:
         bit $41a9
 
-_2f24:  ; NOTE: this address is used in the table in _250c
-.export _2f24
+        ; NOTE: this address is used in the table in _250c
+print_char:                                                             ;$2F24
+        ;=======================================================================
+.export print_char
+
         stx $07
 
         ldx # $ff
