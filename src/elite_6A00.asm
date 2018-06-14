@@ -39,7 +39,7 @@
 .import _1ec1:absolute
 .import _202f:absolute
 .import _2367:absolute
-.import _2390:absolute
+.import print_msg:absolute
 .import _246d:absolute
 .import _24a6:absolute
 .import char_pair1:absolute
@@ -941,7 +941,8 @@ _6e5d:                                                                  ;$6e5d
         jsr print_token
         
         lda # $ce
-        jsr _2390
+        jsr print_msg
+
         jsr _6dc9
         beq _6eca
         bcs _6e30
@@ -989,9 +990,11 @@ _6eea:                                                                  ;$6eea
         and # %00000011
         clc 
         adc # $6f
-        jsr _2390
+        jsr print_msg
+
         lda # $c6
-        jsr _2390
+        jsr print_msg
+        
         lda $04ca
         bne _6f11
         ldx $04c9
@@ -1034,7 +1037,8 @@ _6f3a:                                                                  ;$6f3a
         jsr print_token
 
         lda # $ce
-        jsr _2390
+        jsr print_msg
+
         jsr _8fea
         ora # %00100000
         cmp # $79
@@ -1366,7 +1370,7 @@ _714f:                                                                  ;$714f
         jsr set_cursor_col
 
         lda # $cd
-        jmp _2390
+        jmp print_msg
 
 _715c:                                                                  ;$715c
         lda $a7
@@ -2751,7 +2755,7 @@ _78e3:
         iny 
         lda [$2a], y
         sta $a8
-        lda $03
+        lda ZP_GOATSOUP_pt2     ;?
         pha 
         ldy # $06
 _78f5:
@@ -2774,17 +2778,17 @@ _7903:
         ldy $99
 _7911:
         clc 
-        lda $02
+        lda ZP_GOATSOUP_pt1
         rol 
         tax 
-        adc $04
-        sta $02
-        stx $04
-        lda $03
+        adc ZP_GOATSOUP_pt3
+        sta ZP_GOATSOUP_pt1
+        stx ZP_GOATSOUP_pt3
+        lda ZP_GOATSOUP_pt2
         tax 
-        adc $05
-        sta $03
-        stx $05
+        adc ZP_GOATSOUP_pt4
+        sta ZP_GOATSOUP_pt2
+        stx ZP_GOATSOUP_pt4
         sta $a1
         lda $36
         sta $9b
@@ -2808,9 +2812,9 @@ _7948:
         cpy $a8
         bcc _78f5
         pla 
-        sta $03
+        sta ZP_GOATSOUP_pt2
         lda $f906               ;?
-        sta $05
+        sta ZP_GOATSOUP_pt4
         rts 
 
 ;===============================================================================
@@ -2822,17 +2826,17 @@ _795a:
 
 _795d:
         clc 
-        lda $02
+        lda ZP_GOATSOUP_pt1
         rol 
         tax 
-        adc $04
-        sta $02
-        stx $04
-        lda $03
+        adc ZP_GOATSOUP_pt3
+        sta ZP_GOATSOUP_pt1
+        stx ZP_GOATSOUP_pt3
+        lda ZP_GOATSOUP_pt2
         tax 
-        adc $05
-        sta $03
-        stx $05
+        adc ZP_GOATSOUP_pt4
+        sta ZP_GOATSOUP_pt2
+        stx ZP_GOATSOUP_pt4
         jmp _7948
 
 ;===============================================================================
@@ -2840,17 +2844,17 @@ _795d:
 _7974:
         sta $9c
         clc 
-        lda $02
+        lda ZP_GOATSOUP_pt1
         rol 
         tax 
-        adc $04
-        sta $02
-        stx $04
-        lda $03
+        adc ZP_GOATSOUP_pt3
+        sta ZP_GOATSOUP_pt1
+        stx ZP_GOATSOUP_pt3
+        lda ZP_GOATSOUP_pt2
         tax 
-        adc $05
-        sta $03
-        stx $05
+        adc ZP_GOATSOUP_pt4
+        sta ZP_GOATSOUP_pt2
+        stx ZP_GOATSOUP_pt4
         rol 
         bcs _7998
         jsr _39ea
@@ -2912,7 +2916,7 @@ _79d9:
         iny 
         lda [$2a], y
         sta $a8
-        lda $03
+        lda ZP_GOATSOUP_pt2
         pha 
         ldy # $06
 _79eb:
@@ -2991,13 +2995,13 @@ _7a6c:
 
 _7a78:
         pla 
-        sta $03
+        sta ZP_GOATSOUP_pt2     ;?
         
         lda # MEM_64K
         jsr set_memory_layout
 
         lda $f906
-        sta $05
+        sta ZP_GOATSOUP_pt4
         rts 
 
 _7a86:
@@ -4639,17 +4643,17 @@ get_random_number:                                                      ;$84AF
         ; generate an 8-bit 'random' number
         ;
 .export get_random_number
-        lda $02                 ; seed 0
+        lda ZP_GOATSOUP_pt1
         rol 
         tax 
-        adc $04
-        sta $02
-        stx $04
-        lda $03
+        adc ZP_GOATSOUP_pt3
+        sta ZP_GOATSOUP_pt1
+        stx ZP_GOATSOUP_pt3
+        lda ZP_GOATSOUP_pt2
         tax 
-        adc $05
-        sta $03
-        stx $05
+        adc ZP_GOATSOUP_pt4
+        sta ZP_GOATSOUP_pt2
+        stx ZP_GOATSOUP_pt4
         rts 
 
 ;===============================================================================
@@ -5351,8 +5355,9 @@ _8920:
         
         lda _1d08
         beq _8978
+
         lda # $0d
-        jsr _2390
+        jsr print_msg
 _8978:
         lda _87b8
         beq _8994
@@ -5380,13 +5385,14 @@ _8994:
         sta ZP_CURSOR_COL
         
         pla 
-        jsr _2390
+        jsr print_msg
 
         lda # 3
         jsr set_cursor_col
         
         lda # $0c
-        jsr _2390
+        jsr print_msg
+        
         lda # $0c
         sta $ab
         lda # $05
@@ -5494,8 +5500,10 @@ _8a3a:
         bpl _8a3a
         lda # $07
         sta _8ab2
+
         lda # $08
-        jsr _2390
+        jsr print_msg
+        
         jsr _8a5b
         lda # $09
         sta _8ab2
@@ -5567,14 +5575,14 @@ _8ab5:  ; NOTE: referenced by table at `_250c`
         lda # $03
         clc 
         adc _1d0e
-        jmp _2390
+        jmp print_msg
 
 _8abe:  ; NOTE: referenced by table at `_250c`
 .export _8abe
         lda # $02
         sec 
         sbc _1d0e
-        jmp _2390
+        jmp print_msg
 
 ;===============================================================================
 
@@ -5612,7 +5620,8 @@ _8ae1:
 
 _8ae7:
         lda # $01
-        jsr _2390
+        jsr print_msg
+
         jsr _8fec
         cmp # $31
         beq _8b1c
@@ -5622,8 +5631,10 @@ _8ae7:
         beq _8b11
         cmp # $34
         bne _8b0f
+        
         lda # $e0
-        jsr _2390
+        jsr print_msg
+        
         jsr _81ee
         bcc _8b0f
         jsr _8a0c
@@ -5654,8 +5665,10 @@ _8b27:
         jsr _8a38
         jsr _8a1d
         lsr $04e2
+
         lda # $04
-        jsr _2390
+        jsr print_msg
+        
         ldx # $4c
 _8b37:
         lda $0499, x
@@ -5758,7 +5771,8 @@ _8bc0:
         
         ;bug / unused code? (`jmp` instead of `jsr` above)
         lda # $02
-        jsr _2390
+        jsr print_msg
+
         jsr _8fec
         ora # %00010000
         jsr paint_char
@@ -5817,7 +5831,8 @@ _8c53:
 
 _8c55:
         lda # $09
-        jsr _2390
+        jsr print_msg
+        
         jsr _8fec
         jmp _8ae7
 
@@ -5830,7 +5845,8 @@ _8c60:
 
 _8c61:
         lda # $ff
-        jsr _2390
+        jsr print_msg
+
         jsr _8fec
         jmp _8ae7
 ;$8c6c:

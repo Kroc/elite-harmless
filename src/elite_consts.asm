@@ -17,6 +17,14 @@ ZP_SEED_pt4             = $82
 ZP_SEED_pt5             = $83
 ZP_SEED_pt6             = $84
 
+; "goat soup" is the algorithm for generating planet descriptions.
+; its seed is taken from the last four bytes of the main seed 
+ZP_GOATSOUP             = $02
+ZP_GOATSOUP_pt1         = $02
+ZP_GOATSOUP_pt2         = $03
+ZP_GOATSOUP_pt3         = $04
+ZP_GOATSOUP_pt4         = $05
+
 ; player's cash:
 PLAYER_CASH             = $04a2
 PLAYER_CASH_pt1         = $04a2

@@ -308,7 +308,7 @@ _1eb3:
 _1ec1:
 .export _1ec1
         lda $f900
-        sta $02
+        sta ZP_GOATSOUP_pt1     ;?
 
         lda $0510
         beq _1ece
@@ -974,7 +974,7 @@ _2367:
 
 ;===============================================================================
 
-; print message routine, for messages in 0E00
+; print message routine, for messages in TEXT_0E00
 
 _2372:  ; NOTE: this address is used in the table in _250c
         lda # $d9
@@ -985,7 +985,7 @@ _2376:  ; NOTE: this address is used in the table in _250c
 _2378:
         clc 
         adc $04a8
-        bne _2390
+        bne print_msg
 _237e:
         pha 
         tax 
@@ -995,17 +995,20 @@ _237e:
         pha 
         lda $5c
         pha 
-        lda # $5c
+
+.import _1a5c
+
+        lda # < _1a5c
         sta $5b
-        lda # $1a
+        lda # > _1a5c
         bne _23a0
 
-_2390:                                                                  ;$2390
+print_msg:                                                              ;$2390
         ;=======================================================================
-        ;       A = ?
+        ; prints one of the messages from TEXT_0E00, not to be confused with
+        ; the *other* text-printing routine :|
+        ;
         ;       X = index of message to print from message table
-        ;       Y = ?
-        ; $5B/$5C = ?
         ;
         ; tokens: (descrambled)
         ;     $00 = invalid
@@ -1016,46 +1019,56 @@ _2390:                                                                  ;$2390
         ; $81-$D6 = ?
         ; $D7-$FF = ?
         ;
-.export _2390
-        pha                     ; take a copy of the given token 
+.export print_msg
+        ; preserve the current state since printing messages gets recursive
+
+        pha                     ; preserve A 
         tax 
         
-        tya                     ; save Y-parameter for later 
+        ; when recursing, $5B/$5C+Y represent the
+        ; current position in the message data
+        tya 
         pha 
-        
-        ; take a copy of the message address
         lda $5b
         pha 
         lda $5c
         pha 
 
+        ; load the message table
         lda #< _0e00
         sta $5b
         lda #> _0e00
 _23a0:                                                                  ;$23A0
         sta $5c
-
         ldy # $00
-_23a4:                                                                  ;$23A4
+
+_skip_msg:                                                              ;$23A4
+        ;-----------------------------------------------------------------------
+        ; skip over the messages until we find the one we want:
+        ; -- this is insane!
+        ;
+.import MSG_XOR:direct
+
         lda [$5b], y
-        eor # %01010111         ;=$57 -- descramble token
+        eor # MSG_XOR           ;=$57 -- descramble token
         bne :+                  ; keep going if not a message terminator ($00)
         dex                     ; message has ended, decrement index
         beq _23b4               ; if we've found our message, exit loop
-:       iny                                                             ;$23AD
-        bne _23a4
-        inc $5c
-        bne _23a4
+:       iny                     ; move to next token                    ;$23AD
+        bne _skip_msg           ; if we haven't crossed the page, keep going
+        inc $5c                 ; move to the next page (256 bytes)
+        bne _skip_msg           ; and continue
 
 _23b4:                                                                  ;$23B4
-        iny 
-        bne _23b9
-        inc $5c
+        iny                     ; step over the terminator byte ($00)
+        bne _23b9               ; not another terminator?
+        inc $5c                 ; if so, move forward one more byte
 
 _23b9:  ; begin printing message                                        ;$23B9
-        lda [$5b], y
-        eor # %01010111         ;=$57 -- descramble token
-        beq _23c5               ; has message ended?
+        ;-----------------------------------------------------------------------
+        lda [$5b], y            ; read a token
+        eor # MSG_XOR           ;=$57 -- descramble token
+        beq _23c5               ; has message ended? (token $00)
 
         jsr _23cf
         jmp _23b4
@@ -1100,7 +1113,7 @@ _23e8:                                                                  ;$23E8
        .blt _2441
         
         cmp # $d7               ; tokens $81...$D6
-       .blt _2390
+       .blt print_msg
         
         ; tokens $D7 and above:
         sbc # $d7               ; re-index as $00...$28
@@ -1130,17 +1143,20 @@ _2404:  ; print a character                                             ;$2404
         bmi _lcase
 
 _ucase:                                                                 ;$2412
-        ora _2f18               ; upper case (if enabled)
+        ora msg_ucase           ; upper case (if enabled)
 _lcase:                                                                 ;$2415
-        and _2f1e               ; lower-case (if enabled)
+        and msg_lcase           ; lower-case (if enabled)
 
 _goto_print_char:                                                       ;$2418
         jmp print_char
 
 
-_241b:  ; format codes?                                                 ;$241B
+_241b:  ; format codes                                                  ;$241B
         ;-----------------------------------------------------------------------
-        
+        ; tokens $00..$1F are format codes, each has a different behaviour:
+        ;
+        ; token $13 = set lower-case
+
         ; snapshot current state
         tax 
         tya 
@@ -1158,9 +1174,11 @@ _241b:  ; format codes?                                                 ;$241B
         ; note that the lookup table is indexed two-bytes early, making an
         ; index of zero land in some code -- this is why token $00 is invalid
 
-        lda _250c-2, x
+        ; we read an address from the table and rewrite a `jsr` instruction
+        ; further down, i.e. the token is a lookup to a routine to call
+        lda _250c - 2, x
         sta @jsr + 1
-        lda _250c-1, x
+        lda _250c - 1, x
         sta @jsr + 2
         
         ; convert the token back to its original value
@@ -1204,15 +1222,17 @@ _2441:  ; process tokens $5B..$80                                       ;$2441
         adc # $00               ; select description template 2
         cpx # $99               ; is random number over $99?
         adc # $00               ; select description template 3
-        cpx # $cc               ; is random number over $C0? note that if so,
+        cpx # $cc               ; is random number over $CC? note that if so,
                                 ; carry is set, to be added later
+
+.import _3eac
 
         ; get back the token value and lookup another token to use
         ; (since these tokens are $5B..$80, we index the table back $5B bytes)
         ldx $07
         adc _3eac - $5B, x
 
-        jsr _2390               ; print the new token
+        jsr print_msg           ; print the new token
 
         jmp _2438               ; clean up and exit
 
@@ -1223,14 +1243,16 @@ _246a:  ; NOTE: this address is used in the table in _250c
 _246c:
 .export _246d := _246c+1
         bit $20a9
-        sta _2f18
+        sta msg_ucase
+
         lda # $00
         sta _2f1d
         rts
 
-;===============================================================================
+_2478:                                                                  ;$2478
+        ;=======================================================================
+        ; NOTE: this address is used in the table in _250c
 
-_2478:  ; NOTE: this address is used in the table in _250c
         lda # 6
         jsr set_cursor_col
 
@@ -1239,21 +1261,27 @@ _2478:  ; NOTE: this address is used in the table in _250c
 
         rts 
 
-;===============================================================================
-
-_2483:  ; NOTE: this address is used in the table in _250c
+_2483:                                                                  ;$2483
+        ;=======================================================================
+        ; NOTE: this address is used in the table in _250c
+        
         lda # 1
         jsr set_cursor_col
 
         jmp _a72f
 
-;===============================================================================
+_248b:                                                                  ;$248B
+        ;=======================================================================
+        ; NOTE: this address is used in the table in _250c
 
-_248b:  ; NOTE: this address is used in the table in _250c
+        ; enable the change-case flag?
         lda # $80
         sta _2f1d
-        lda # $20
-        sta _2f18
+        
+        ; enable upper-casing
+        lda # %00100000
+        sta msg_ucase
+
         rts 
 
 ;===============================================================================
@@ -1303,12 +1331,13 @@ _24b0:  ; NOTE: this address is used in the table in _250c
         dec _2f1c
 _24c9:
         lda # $99
-        jmp _2390
+        jmp print_msg
 
 ;===============================================================================
 
 _24ce:  ; NOTE: this address is used in the table in _250c
-        jsr _24ed
+        jsr msgtoken_set_lowercase
+
         jsr get_random_number
         and # %00000011
         tay 
@@ -1328,11 +1357,13 @@ _24d7:
         
         rts 
 
-;===============================================================================
+msgtoken_set_lowercase:                                                 ;$24ED
+        ;=======================================================================
+        ; NOTE: this address is used in the table in _250c
+        ;
+        lda # %11011111
+        sta msg_lcase
 
-_24ed:  ; NOTE: this address is used in the table in _250c
-        lda # $df
-        sta _2f1e
         rts 
 
 ;===============================================================================
@@ -1360,42 +1391,45 @@ _250b:
 ;===============================================================================
 
 ; some kind of lookup table. note that the caller is indexing from this address
-; minus 2, so that the table begins with an index of 1?
+; minus 2 bytes, so that the table begins with an index of 1
 
 _250c:
-        .addr   _246a           ; token $01
-        .addr   _246d           ; token $02
-        .addr   print_token     ; token $03
-        .addr   print_token     ; token $04
-        .addr   _249d           ; token $05
-        .addr   _2496           ; token $06
-        .addr   print_char      ; token $07
-        .addr   _2478           ; token $08
-        .addr   _2483           ; token $09
-        .addr   print_char      ; token $0A
-        .addr   _28dc           ; token $0B
-        .addr   print_char      ; token $0C
-        .addr   _248b           ; token $0D
-        .addr   _24a3           ; token $0E
-        .addr   _24a6           ; token $0F
-        .addr   _2f21+1         ; token $10
-        .addr   _24b0           ; token $11
-        .addr   _24ce           ; token $12
-        .addr   _24ed           ; token $13
-        .addr   print_char      ; token $14
-        .addr   _b3d4           ; token $15
-        .addr   _3e41           ; token $16
-        .addr   _3e57           ; token $17
-        .addr   _3e7c           ; token $18
-        .addr   _3e37           ; token $19
-        .addr   _8a5b           ; token $1A
-        .addr   _2372           ; token $1B
-        .addr   _2376           ; token $1C
-        .addr   _3e59+1         ; token $1D
-        .addr   _8ab5           ; token $1E
-        .addr   _8abe           ; token $1F
-        .addr   print_char      ; token $20: print space. this table is not
-                                ; used for this as token $20 is handled earlier
+        .addr   _246a                   ; msg token $01
+        .addr   _246d                   ; msg token $02
+        .addr   print_token             ; msg token $03
+        .addr   print_token             ; msg token $04
+        .addr   _249d                   ; msg token $05
+        .addr   _2496                   ; msg token $06
+        .addr   print_char              ; msg token $07
+        .addr   _2478                   ; msg token $08
+        .addr   _2483                   ; msg token $09
+        .addr   print_char              ; msg token $0A
+        .addr   _28dc                   ; msg token $0B
+        .addr   print_char              ; msg token $0C
+        .addr   _248b                   ; msg token $0D
+        .addr   _24a3                   ; msg token $0E
+        .addr   _24a6                   ; msg token $0F
+        .addr   _2f21+1                 ; msg token $10
+        .addr   _24b0                   ; msg token $11
+        .addr   _24ce                   ; msg token $12
+        .addr   msgtoken_set_lowercase  ; msg token $13
+        .addr   print_char              ; msg token $14
+        .addr   _b3d4                   ; msg token $15
+        .addr   _3e41                   ; msg token $16
+        .addr   _3e57                   ; msg token $17
+        .addr   _3e7c                   ; msg token $18
+        .addr   _3e37                   ; msg token $19
+        .addr   _8a5b                   ; msg token $1A
+        .addr   _2372                   ; msg token $1B
+        .addr   _2376                   ; msg token $1C
+        .addr   _3e59+1                 ; msg token $1D
+        .addr   _8ab5                   ; msg token $1E
+        .addr   _8abe                   ; msg token $1F
+        
+        ; msg token for print space. this table is not
+        ; used for this as token $20 is handled already
+        .addr   print_char              ; msg token $20
+
 
 ; message compression character pairs:
 ;===============================================================================
@@ -2380,7 +2414,8 @@ _2c7c:
 
 _2c7d:
         lda # $cd
-        jsr _2390
+        jsr print_msg
+
         jsr _b179
         jmp _2cc7
 
@@ -2910,8 +2945,10 @@ _2f06:
 
 ;===============================================================================
 
-_2f18:
-        .byte   $20
+msg_ucase:                                                              ;$2F18
+        ; a mask for converting a character A-Z to upper-case.
+        ; this byte gets changed to 0 to neuter the effect
+        .byte   %00100000
 _2f19:
 .export _2f19
         .byte   $ff
@@ -2928,8 +2965,12 @@ _2f1d:
 
 ;===============================================================================
 
-_2f1e:
-        .byte   $ff
+msg_lcase:                                                              ;$2F1E
+        ; this byte is used to lower-case charcters, it's ANDed with the
+        ; character value -- therefore its default value $FF does nothing.
+        ; this byte is changed to %11010000 to enable lower-casing, which
+        ; removes bit 5 ($20) from characters, e.g. $61 "A" > $41 "a"
+        .byte   %11111111
 
 _2f1f:
 .export _2f1f
@@ -2944,8 +2985,9 @@ print_char:                                                             ;$2F24
 
         stx $07
 
-        ldx # $ff
-        stx _2f1e
+        ; disable the automatic lower-case transformation
+        ldx # %11111111
+        stx msg_lcase
         
         cmp # '.'
         beq _2f40
@@ -3368,7 +3410,8 @@ _31be:
 _31c6:
 .export _31c6
         lda # $0e
-        jsr _2390
+        jsr print_msg
+
         jsr _6f82
         jsr _70a0
         lda # $00
@@ -3396,8 +3439,9 @@ _31f1:
         jsr _6f82
         ldy # $06
         jsr _a858
+
         lda # $d7
-        jmp _2390
+        jmp print_msg
 
         ;-----------------------------------------------------------------------
 
@@ -5340,15 +5384,16 @@ _3d6c:
         dey 
         bne _3d3d
 _3d6f:
+        ; copy the last four bytes of the main seed to the "goat soup" seed,
+        ; used for generating the planet descriptions
         ldx # $03
-_3d71:
-        lda ZP_SEED_pt3, x
-        sta $02, x
+:       lda ZP_SEED_pt3, x                                              ;3D71
+        sta ZP_GOATSOUP, x
         dex 
-        bpl _3d71
+        bpl :-
+
         lda # $05
-_3d7a:
-        jmp _2390
+_3d7a:  jmp print_msg
 
 ;===============================================================================
 
@@ -5358,7 +5403,7 @@ _3d7d:                                                                  ;$3d7d
         sta $0499
         lda # $0b
 _3d87:                                                                  ;$3d87
-        jsr _2390
+        jsr print_msg
 _3d8a:                                                                  ;$3d8a
         jmp _88e7
 
@@ -5393,8 +5438,10 @@ _3dc0:                                                                  ;$3dc0
         lda $0499
         ora # %00010000
         sta $0499
+
         lda # $c7
-        jsr _2390
+        jsr print_msg
+        
         jsr _81ee
         bcc _3d8a
         ldy # $c3
@@ -5414,8 +5461,10 @@ _3dff:                                                                  ;$3dff
         lda # $1f
         sta $a5
         jsr _7c6b
+
         lda # 1
         jsr set_cursor_col
+        
         sta $10
         jsr _a72f
         lda # $40
@@ -5451,9 +5500,11 @@ _3e31:                                                                  ;$3e31
         inc $10
         lda # $0a
         bne _3dbe
+        
 _3e37:  ; NOTE: this address is used in the table in _250c              ;$3e37
         lda # $d8
-        jsr _2390
+        jsr print_msg
+
         ldy # $64
         jmp _3ea1
 
@@ -5536,15 +5587,12 @@ _3ea1:                                                                  ;$3ea1
 ;===============================================================================
 
 ; unused / unreferenced?
-;$3ea8:
+
+; note that these could be a part of the planet description templates
+; in the "TEXT_PDESC" segement in "text_0E00.asm"
+
+;$3EA8:
 
         .byte   $07, $07, $0d, $04                                      ;$3EA8
 
-_3eac:
-        .byte   $10, $15, $1a, $1f, $9b, $a0, $2e, $a5
-        .byte   $24, $29, $3d, $33, $38, $aa, $42, $47
-        .byte   $4c, $51, $56, $8c, $60, $65, $87, $82
-        .byte   $5b, $6a, $b4, $b9, $be, $e1, $e6, $eb
-        .byte   $f0, $f5, $fa, $73, $78, $7d
-
-;$3ED2
+;$3EAC
