@@ -1004,26 +1004,21 @@ _237e:
         bne _23a0
 
 print_msg:                                                              ;$2390
-        ;=======================================================================
-        ; prints one of the messages from TEXT_0E00, not to be confused with
-        ; the *other* text-printing routine :|
-        ;
-        ;       X = index of message to print from message table
-        ;
-        ; tokens: (descrambled)
-        ;     $00 = invalid
-        ; $01-$1F = format token, function varies
-        ; $20-$40 = print ASCII chars $20-$40 (space, punctuation, numbers)
-        ; $41-$5A = print ASCII characters @, A-Z
-        ; $5B-$80 = ?
-        ; $81-$D6 = ?
-        ; $D7-$FF = ?
-        ;
+;===============================================================================
+; prints one of the messages from TEXT_0E00, not to be
+; confused with the *other* text-printing routine :|
+;
+;       A = index of message to print, from message table
+;
+; preserves A, Y & $5B/$5C
+; (due to recursion)
+;
 .export print_msg
+
         ; preserve the current state since printing messages gets recursive
 
         pha                     ; preserve A 
-        tax 
+        tax                     ; move message index to X
         
         ; when recursing, $5B/$5C+Y represent the
         ; current position in the message data
@@ -1053,27 +1048,38 @@ _skip_msg:                                                              ;$23A4
         eor # MSG_XOR           ;=$57 -- descramble token
         bne :+                  ; keep going if not a message terminator ($00)
         dex                     ; message has ended, decrement index
-        beq _23b4               ; if we've found our message, exit loop
+        beq _read_token         ; if we've found our message, exit loop
 :       iny                     ; move to next token                    ;$23AD
         bne _skip_msg           ; if we haven't crossed the page, keep going
         inc $5c                 ; move to the next page (256 bytes)
         bne _skip_msg           ; and continue
 
-_23b4:                                                                  ;$23B4
-        iny                     ; step over the terminator byte ($00)
-        bne _23b9               ; not another terminator?
-        inc $5c                 ; if so, move forward one more byte
-
-_23b9:  ; begin printing message                                        ;$23B9
+_read_token:                                                            ;$23B4
         ;-----------------------------------------------------------------------
+        iny                     ; step over the terminator byte ($00)
+        bne :+                  ; did we step over the page boundary?
+        inc $5c                 ; if so, move forward to next page
+
+:       ; readand descramble a token:                                   ;$23B9
+        ;
+        ; tokens: (descrambled)
+        ;     $00 = invalid
+        ; $01-$1F = format token, function varies
+        ; $20-$40 = print ASCII chars $20-$40 (space, punctuation, numbers)
+        ; $41-$5A = print ASCII characters @, A-Z
+        ; $5B-$80 = planet description tokens
+        ; $81-$D6 = ?
+        ; $D7-$FF = some pre-defined character pairs
+        ;
         lda [$5b], y            ; read a token
         eor # MSG_XOR           ;=$57 -- descramble token
-        beq _23c5               ; has message ended? (token $00)
+        beq @rts                ; has message ended? (token $00)
 
-        jsr _23cf
-        jmp _23b4
+        jsr print_msgtoken
+        jmp _read_token
 
-_23c5:                                                                  ;$23C5
+@rts:   ; finished printing, clean up and exit                          ;$23C5
+        ;-----------------------------------------------------------------------
         pla 
         sta $5c
         pla 
@@ -1083,9 +1089,8 @@ _23c5:                                                                  ;$23C5
         pla 
         rts
 
-        ;-----------------------------------------------------------------------
-
-_23cf:                                                                  ;$23Cf
+print_msgtoken:                                                         ;$23Cf
+        ;=======================================================================
         cmp # ' '               ; tokens less than $20 (space)
        .blt _241b               ; are format codes
         
@@ -1104,18 +1109,19 @@ _23cf:                                                                  ;$23Cf
         
         jmp _2438
 
-        ;-----------------------------------------------------------------------
 _23e8:                                                                  ;$23E8
+        ;-----------------------------------------------------------------------
         cmp # 'z'+1             ; letters "A" to "Z"?
-       .blt _2404
+       .blt _2404               ; print letters, handling auto-casing
 
         cmp # $81               ; tokens $5B...$80?
-       .blt _2441
+       .blt _2441               ; handle planet description tokens
         
         cmp # $d7               ; tokens $81...$D6
-       .blt print_msg
+       .blt print_msg           ; print again!??
         
         ; tokens $D7 and above:
+        ; (character pairs)
         sbc # $d7               ; re-index as $00...$28
         asl                     ; double, for lookup-table
         pha                     ; (put aside)
@@ -5394,7 +5400,7 @@ _3d3d:
         lda # $01
 _3d5e:
         bit $b0a9               ; `$A9, $B0` -- `lda # $b0`?
-        jsr _23cf
+        jsr print_msgtoken
         tya 
         jsr _237e
         lda # $b1

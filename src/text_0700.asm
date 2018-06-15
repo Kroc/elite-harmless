@@ -78,6 +78,8 @@ Z_              = $5a ^ TXT_XOR ;=$79
 _HYPHEN         = $2d ^ TXT_XOR ;=$0E
 _COLON          = $3a ^ TXT_XOR ;=$19
 
+;===============================================================================
+
 _word_index     .set 0
 
 .macro  .define_word    word_id
@@ -96,7 +98,7 @@ _word_index     .set 0
                 _value .set ((_word_index - $72)) ^ TXT_XOR
         .endif
 
-        .out .sprintf(": $%2x: %s", _value, word_id)
+        .out .sprintf(": $%2x: TXT%s", _value, word_id)
         .ident(word_id) = _value
 
         .export .ident(.concat("TXT", word_id)) = _value ^ TXT_XOR
