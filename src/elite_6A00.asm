@@ -40,8 +40,8 @@
 .import _202f:absolute
 .import _2367:absolute
 .import print_msg:absolute
-.import _246d:absolute
-.import _24a6:absolute
+.import msgtoken_02:absolute
+.import msgtoken_0F:absolute
 .import char_pair1:absolute
 .import char_pair2:absolute
 .import _25a6:absolute
@@ -60,7 +60,7 @@
 .import _28a5:absolute
 .import _28d5:absolute
 .import _28d9:absolute
-.import _28dc:absolute
+.import msgtoken_0B:absolute
 .import _28e0:absolute
 .import _28e5:absolute
 .import _28f3:absolute
@@ -736,7 +736,7 @@ _6d34:                                                                  ;$6d34
         jsr _723c
         jsr _7627
 _6d3e:                                                                  ;$6d3e
-        jsr _b3d4
+        jsr msgtoken_15
         
 .import TXT_QUANTITY_OF:direct
         lda # TXT_QUANTITY_OF
@@ -1017,7 +1017,7 @@ _6f16:                                                                  ;$6f16
         lda # TXT_INVENTORY
         jsr _6a84
 
-        jsr _28dc
+        jsr msgtoken_0B
         jsr _774a
         lda $04af
         cmp # $1a
@@ -1364,7 +1364,7 @@ _7135:                                                                  ;$7135
 ;===============================================================================
 
 _714f:                                                                  ;$714f
-        jsr _b3d4
+        jsr msgtoken_15
 
         lda # 15
         jsr set_cursor_col
@@ -1967,7 +1967,7 @@ _74f5:                                                                  ;$74f5
         inx 
         cpx $9a
         bcc _74f5
-        jsr _b3d4
+        jsr msgtoken_15
 
 .import TXT_ITEM:direct
         lda # TXT_ITEM
@@ -2172,7 +2172,7 @@ _765e:
         ldy ZP_CURSOR_ROW
         cpy # $14
         bcc _765e
-        jsr _b3d4
+        jsr msgtoken_15
 _767e:
 .import TXT_VIEW:direct
         lda # TXT_VIEW
@@ -2183,7 +2183,7 @@ _767e:
         sbc # $30
         cmp # $04
         bcc _7693
-        jsr _b3d4
+        jsr msgtoken_15
         jmp _767e
 
 _7693:
@@ -2196,7 +2196,7 @@ _7695:
         jsr _6f82
         jsr _70ab
         jsr _6f82
-        jmp _b3d4
+        jmp msgtoken_15
 
 ;===============================================================================
 
@@ -4612,7 +4612,7 @@ _8475:
         jmp _84fa
 
 _8487:
-        jsr _b3d4
+        jsr msgtoken_15
         jmp _84fa
 
 ;===============================================================================
@@ -5504,7 +5504,7 @@ _8a3a:
         lda # $08
         jsr print_msg
         
-        jsr _8a5b
+        jsr msgtoken_1A
         lda # $09
         sta _8ab2
         tya 
@@ -5512,10 +5512,10 @@ _8a3a:
         sty _8bbe
         rts 
 
-;===============================================================================
+msgtoken_1A:                                                            ;$8A5B
+        ;=======================================================================
+.export msgtoken_1A
 
-_8a5b:  ; NOTE: referenced by the table at `_250c`
-.export _8a5b
         lda # $40
         sta $050c
         ldy # $08
@@ -5570,15 +5570,19 @@ _8ab3:
 _8ab4:
         .byte   $7b
 
-_8ab5:  ; NOTE: referenced by table at `_250c`
-.export _8ab5
+msgtoken_1E:                                                            ;$8AB5
+        ;=======================================================================
+.export msgtoken_1E
+
         lda # $03
         clc 
         adc _1d0e
         jmp print_msg
 
-_8abe:  ; NOTE: referenced by table at `_250c`
-.export _8abe
+msgtoken_1F:                                                            ;$8ABE
+        ;=======================================================================
+.export msgtoken_1F
+        
         lda # $02
         sec 
         sbc _1d0e
@@ -6429,7 +6433,7 @@ _900d:
         lda # $10
         ldx $a0
         beq _9019+1
-        jsr _b3d4
+        jsr msgtoken_15
         lda # $19
 _9019:
         bit _3385
@@ -6465,7 +6469,7 @@ _9042:
         sta $b9
         jsr set_cursor_col
         
-        jsr _24a6
+        jsr msgtoken_0F
         lda $04e6
 _905d:
         jsr print_token
@@ -9303,7 +9307,7 @@ _a72f:
 .export _a72f
         sta $a0
 _a731:
-        jsr _246d
+        jsr msgtoken_02
         lda # $00
         sta $7e
         
@@ -11535,10 +11539,10 @@ _b3c5:
         bne _b3c5
         rts 
 
-;===============================================================================
-
-_b3d4:  ; NOTE: referenced by table at `_250c`
-.export _b3d4
+msgtoken_15:                                                            ;$B3D4
+        ;=======================================================================
+.export msgtoken_15
+        
         lda # $00
         sta $048b
         sta $048c

@@ -61,9 +61,9 @@
 .import _87b9:absolute
 .import _87d0:absolute
 .import _88e7:absolute
-.import _8a5b:absolute
-.import _8ab5:absolute
-.import _8abe:absolute
+.import msgtoken_1A:absolute
+.import msgtoken_1E:absolute
+.import msgtoken_1F:absolute
 .import _8c7b:absolute
 .import _8c8a:absolute
 .import _8cad:absolute
@@ -122,7 +122,7 @@
 .import _b148:absolute
 .import _b179:absolute
 .import paint_char:absolute
-.import _b3d4:absolute
+.import msgtoken_15:absolute
 .import _b410:absolute
 
 ; from "data_hulls.asm"
@@ -972,15 +972,15 @@ _2367:
 
         rts 
 
-;===============================================================================
-
 ; print message routine, for messages in TEXT_0E00
 
-_2372:  ; NOTE: this address is used in the table in _250c
+msgtoken_1B:                                                            ;$2372
+        ;=======================================================================
         lda # $d9
         bne _2378
 
-_2376:  ; NOTE: this address is used in the table in _250c
+msgtoken_1C:                                                            ;$2376
+        ;=======================================================================
         lda # $dc
 _2378:
         clc 
@@ -1155,9 +1155,41 @@ _241b:  ; format codes                                                  ;$241B
         ;-----------------------------------------------------------------------
         ; tokens $00..$1F are format codes, each has a different behaviour:
         ;
-        ; token $13 = set lower-case
+        ;    $00 = invalid
+        ;    $01 = ?
+        ;    $02 = ?
+        ;    $03 = ?
+        ;    $04 = ?
+        ;    $05 = ?
+        ;    $06 = ?
+        ;    $07 = ?
+        ;    $08 = ?
+        ;    $09 = ?
+        ;    $0A = ?
+        ;    $0B = ?
+        ;    $0C = ?
+        ;    $0D = ?
+        ;    $0E = ?
+        ;    $0F = ?
+        ;    $10 = ?
+        ;    $11 = ?
+        ;    $12 = ?
+        ;    $13 = set lower-case
+        ;    $14 = ?
+        ;    $15 = ?
+        ;    $16 = ?
+        ;    $17 = ?
+        ;    $18 = ?
+        ;    $19 = ?
+        ;    $1A = ?
+        ;    $1B = ?
+        ;    $1C = ?
+        ;    $1D = ?
+        ;    $1E = ?
+        ;    $1F = ?
 
-        ; snapshot current state
+        ; snapshot current state:
+        ; -- these format codes can get recursive
         tax 
         tya 
         pha
@@ -1236,12 +1268,13 @@ _2441:  ; process tokens $5B..$80                                       ;$2441
 
         jmp _2438               ; clean up and exit
 
-;===============================================================================
 
-_246a:  ; NOTE: this address is used in the table in _250c
+msgtoken_01:                                                            ;$246A
+        ;=======================================================================
         lda # $00
-_246c:
-.export _246d := _246c+1
+_246c:                                                                  ;$246C
+        ;=======================================================================
+.export msgtoken_02 := _246c+1
         bit $20a9
         sta msg_ucase
 
@@ -1249,10 +1282,8 @@ _246c:
         sta _2f1d
         rts
 
-_2478:                                                                  ;$2478
+msgtoken_08:                                                            ;$2478
         ;=======================================================================
-        ; NOTE: this address is used in the table in _250c
-
         lda # 6
         jsr set_cursor_col
 
@@ -1261,19 +1292,15 @@ _2478:                                                                  ;$2478
 
         rts 
 
-_2483:                                                                  ;$2483
+msgtoken_09:                                                            ;$2483
         ;=======================================================================
-        ; NOTE: this address is used in the table in _250c
-        
         lda # 1
         jsr set_cursor_col
 
         jmp _a72f
 
-_248b:                                                                  ;$248B
+msgtoken_0D:                                                            ;$248B
         ;=======================================================================
-        ; NOTE: this address is used in the table in _250c
-
         ; enable the change-case flag?
         lda # $80
         sta _2f1d
@@ -1284,28 +1311,26 @@ _248b:                                                                  ;$248B
 
         rts 
 
-;===============================================================================
-
-_2496:  ; NOTE: this address is used in the table in _250c
+msgtoken_06:                                                            ;$2496
+        ;=======================================================================
         lda # $80
         sta $34
         lda # $ff
 _249c:
 ; NOTE: this address is used in the table in _250c
-_249d = _249c + 1
+msgtoken_05 = _249c + 1
         ; WARNING: must be a 16-bit address, as this is a `lda # $00` (`A9 00`)
         ; instruction encoded on to the end of a `bit` instruction
         bit a:$00a9
         sta _2f1a
         rts 
 
-;===============================================================================
-
-_24a3:  ; NOTE: this address is used in the table in _250c
+msgtoken_0E:                                                            ;$24A3
+        ;=======================================================================
         lda # $80
 _24a5:
         ; NOTE: this address is used in the table in _250c
-.export _24a6 := _24a5+1
+.export msgtoken_0F := _24a5+1
         ; WARNING: must be a 16-bit address, as this is a `lda # $00` (`A9 00`)
         ; instruction encoded on to the end of a `bit` instruction
         bit a:$00a9
@@ -1314,9 +1339,8 @@ _24a5:
         sta _2f1c
         rts 
 
-;===============================================================================
-
-_24b0:  ; NOTE: this address is used in the table in _250c
+msgtoken_11:                                                            ;$24B0
+        ;=======================================================================
         lda $34
         and # %10111111         ;=$BF
         sta $34
@@ -1333,9 +1357,8 @@ _24c9:
         lda # $99
         jmp print_msg
 
-;===============================================================================
-
-_24ce:  ; NOTE: this address is used in the table in _250c
+msgtoken_12:                                                            ;$24CE
+        ;=======================================================================
         jsr msgtoken_set_lowercase
 
         jsr get_random_number
@@ -1359,7 +1382,7 @@ _24d7:
 
 msgtoken_set_lowercase:                                                 ;$24ED
         ;=======================================================================
-        ; NOTE: this address is used in the table in _250c
+        ; msg token $13
         ;
         lda # %11011111
         sta msg_lcase
@@ -1382,49 +1405,43 @@ _24f3:
         beq _250a
         
         clc 
-_250a:  ; NOTE: references to _250c, actually begin at _250a!
-        rts 
-
-_250b:
-        rts 
+_250a:  rts 
+_250b:  rts 
 
 ;===============================================================================
 
-; some kind of lookup table. note that the caller is indexing from this address
-; minus 2 bytes, so that the table begins with an index of 1
-
 _250c:
-        .addr   _246a                   ; msg token $01
-        .addr   _246d                   ; msg token $02
+        .addr   msgtoken_01             ; msg token $01
+        .addr   msgtoken_02             ; msg token $02
         .addr   print_token             ; msg token $03
         .addr   print_token             ; msg token $04
-        .addr   _249d                   ; msg token $05
-        .addr   _2496                   ; msg token $06
+        .addr   msgtoken_05             ; msg token $05
+        .addr   msgtoken_06             ; msg token $06
         .addr   print_char              ; msg token $07
-        .addr   _2478                   ; msg token $08
-        .addr   _2483                   ; msg token $09
+        .addr   msgtoken_08             ; msg token $08
+        .addr   msgtoken_09             ; msg token $09
         .addr   print_char              ; msg token $0A
-        .addr   _28dc                   ; msg token $0B
+        .addr   msgtoken_0B             ; msg token $0B
         .addr   print_char              ; msg token $0C
-        .addr   _248b                   ; msg token $0D
-        .addr   _24a3                   ; msg token $0E
-        .addr   _24a6                   ; msg token $0F
-        .addr   _2f21+1                 ; msg token $10
-        .addr   _24b0                   ; msg token $11
-        .addr   _24ce                   ; msg token $12
+        .addr   msgtoken_0D             ; msg token $0D
+        .addr   msgtoken_0E             ; msg token $0E
+        .addr   msgtoken_0F             ; msg token $0F
+        .addr   msgtoken_10             ; msg token $10
+        .addr   msgtoken_11             ; msg token $11
+        .addr   msgtoken_12             ; msg token $12
         .addr   msgtoken_set_lowercase  ; msg token $13
         .addr   print_char              ; msg token $14
-        .addr   _b3d4                   ; msg token $15
-        .addr   _3e41                   ; msg token $16
-        .addr   _3e57                   ; msg token $17
-        .addr   _3e7c                   ; msg token $18
-        .addr   _3e37                   ; msg token $19
-        .addr   _8a5b                   ; msg token $1A
-        .addr   _2372                   ; msg token $1B
-        .addr   _2376                   ; msg token $1C
-        .addr   _3e59+1                 ; msg token $1D
-        .addr   _8ab5                   ; msg token $1E
-        .addr   _8abe                   ; msg token $1F
+        .addr   msgtoken_15             ; msg token $15
+        .addr   msgtoken_16             ; msg token $16
+        .addr   msgtoken_17             ; msg token $17
+        .addr   msgtoken_18             ; msg token $18
+        .addr   msgtoken_19             ; msg token $19
+        .addr   msgtoken_1A             ; msg token $1A
+        .addr   msgtoken_1B             ; msg token $1B
+        .addr   msgtoken_1C             ; msg token $1C
+        .addr   msgtoken_1D             ; msg token $1D
+        .addr   msgtoken_1E             ; msg token $1E
+        .addr   msgtoken_1F             ; msg token $1F
         
         ; msg token for print space. this table is not
         ; used for this as token $20 is handled already
@@ -1869,8 +1886,9 @@ _28d9:
 .export _28d9
         jsr print_token
 
-_28dc:  ; NOTE: this address is used in the table in _250c
-.export _28dc
+msgtoken_0B:                                                            ;$28DC
+        ;=======================================================================
+.export msgtoken_0B
         lda # $13
         bne _28e5
 _28e0:
@@ -2976,6 +2994,7 @@ _2f1f:
 .export _2f1f
         lda # $0c
 _2f21:
+msgtoken_10 = _2f21+1
         bit $41a9
 
         ; NOTE: this address is used in the table in _250c
@@ -3417,7 +3436,7 @@ _31c6:
         lda # $00
         sta $ae
 _31d5:
-        jsr _24a3
+        jsr msgtoken_0E
         jsr _76e9
         ldx _2f1c
         lda $0e, x
@@ -3452,7 +3471,7 @@ _3208:
         sta TSYSTEM_POS_Y
         jsr _70ab
         jsr _6f82
-        jsr _24a6
+        jsr msgtoken_0F
         jmp _877e
 
 ;===============================================================================
@@ -5371,7 +5390,7 @@ _3d3d:
         lda $0499
         lsr 
         bcc _3d6f
-        jsr _24a3
+        jsr msgtoken_0E
         lda # $01
 _3d5e:
         bit $b0a9               ; `$A9, $B0` -- `lda # $b0`?
@@ -5456,7 +5475,7 @@ _3dff:                                                                  ;$3dff
         lsr $0499
         sec 
         rol $0499
-        jsr _3e37
+        jsr msgtoken_19
         jsr _8447
         lda # $1f
         sta $a5
@@ -5501,18 +5520,18 @@ _3e31:                                                                  ;$3e31
         lda # $0a
         bne _3dbe
         
-_3e37:  ; NOTE: this address is used in the table in _250c              ;$3e37
+msgtoken_19:                                                            ;$3E37
+        ;=======================================================================
         lda # $d8
         jsr print_msg
 
         ldy # $64
         jmp _3ea1
 
-;===============================================================================
-
-_3e41:  ; NOTE: this address is used in the table in _250c              ;$3e41
+msgtoken_16:                                                            ;$3E41
+        ;=======================================================================
         jsr _3e65
-        bne _3e41
+        bne msgtoken_16
 _3e46:                                                                  ;$3e46
         jsr _3e65
         beq _3e46
@@ -5521,14 +5540,17 @@ _3e46:                                                                  ;$3e46
         lda # $01
         jsr _a72f
         jsr _9a86
-_3e57:  ; NOTE: this address is used in the table in _250c
+
+msgtoken_17:                                                            ;$3E57  
+        ;=======================================================================
         lda # $0a
-_3e59:  ; NOTE: this address is used in the table in _250c
+_3e59:
+msgtoken_1D = _3e59+1
         ; (jumps into the middle of this `bit` instruction)
         bit $06a9
         jsr set_cursor_row
         jsr _250b
-        jmp _248b
+        jmp msgtoken_0D
 _3e65:                                                                  ;$3e65
         lda # $50
         sta $0c
@@ -5541,13 +5563,13 @@ _3e65:                                                                  ;$3e65
         jsr _a2a0
         jmp _8d53
 
-;===============================================================================
 
-_3e7c:  ; NOTE: this address is used in the table in _250c              ;$3e7c
+msgtoken_18:                                                            ;$3E7C
+        ;=======================================================================
         jsr _8d53
-        bne _3e7c
+        bne msgtoken_18
         jsr _8d53
-        beq _3e7c
+        beq msgtoken_18
         rts 
 
 ;===============================================================================
