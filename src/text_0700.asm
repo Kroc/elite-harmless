@@ -98,7 +98,7 @@ _word_index     .set 0
                 _value .set ((_word_index - $72)) ^ TXT_XOR
         .endif
 
-        .out .sprintf(": $%2x: TXT%s", _value, word_id)
+        ;;.out .sprintf(": $%0.2x: TXT%s", _value, word_id)
         .ident(word_id) = _value
 
         .export .ident(.concat("TXT", word_id)) = _value ^ TXT_XOR
