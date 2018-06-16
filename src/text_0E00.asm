@@ -101,23 +101,28 @@ _F1F_           = $1F ^ MSG_XOR ;=$48
 
 ;===============================================================================
 
-_word_index     .set 0
+_msg_index     .set 0
 
-.macro  .define_word    word_id
+.macro  .define_msg     msg_id
         
         .local  _value
         _value  .set 0
 
-        _word_index .set _word_index + 1
-
-        _value .set _word_index ^ MSG_XOR
+        _value .set _msg_index ^ MSG_XOR
         
-        .out .sprintf(": $%2x: MSG%s", _value, word_id)
-        .ident(word_id) = _value
+        .out .sprintf(": $%2x: MSG%s", _value, msg_id)
+        .ident(msg_id) = _value
 
-        .export .ident(.concat("MSG", word_id)) = _value ^ MSG_XOR
+        ; define an export for the index-number of the message;
+        ; this is how the outside world will specify the message to print
+        .export .ident(.concat("MSG", msg_id)) = _msg_index
+
+        ; move to the next index number:
+        ; doing this afterwards ensures that there is an index 0
+        _msg_index .set _msg_index + 1
 .endmacro
-.define .skip_word      _word_index .set _word_index + 1
+
+.define .skip_msg       _msg_index .set _msg_index + 1
 
 ;===============================================================================
 
@@ -127,7 +132,7 @@ _0e00:
 .export _0e00
         ; 0.
         .byte   __end
-        .skip_word
+        .skip_msg
 
         ; 1.
         .byte   _F09_, _F0B_, _F01_, _F08_, __, _F1E_, __
@@ -140,44 +145,45 @@ _0e00:
         .byte   __, _F01_, _J, _A, _M, _E, _S, _O
         .byte   _N, _F02_, $80, $62, _DOT, __, _E, _X
         .byte   _IT, $80, __end
+        .skip_msg
         
         ; 2.
         .byte   $a6, _S, _K, __end
-        .skip_word
+        .skip_msg
         
         ; 3.
         .byte   _T, _A, _P, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 4.
         .byte   _C, _O, _M, _P, _E, $ac, $ac, _ON, __, _NU, _M, _B
         .byte   $a3, _COLON, __end
-        .skip_word
+        .skip_msg
         
         ; 5.
         .byte   $e7, $3a, $9d, $39, $e6, __end
-        .skip_word
+        .skip_msg
         
         ; 6.
         .byte   __, __, $c2, __, _F01_, $7f, _Y
         .byte   $78, _N, $7e, $68, _F02_, _F0C_, _F0C_, __end
-        .skip_word
+        .skip_msg
 
         ; 7.
         .byte   _P, $a5, _S, _S, __, _S, _P, _A
         .byte   $be, __, $aa, __, _F, _I, $a5, $7b
         .byte   $cd, _DOT, _F0C_, _F0C_, __end
-        .skip_word
+        .skip_msg
         
         ; 8.
         .byte   $cd, $70, _S, $9f, __end
-        .skip_word
+        .skip_msg
         
         ; 9.
         .byte   _F0C_, _F01_, _IL, $b2, _G, $b3
         .byte   __, _E, _L, _I, _T, _E, __, _I
         .byte   _I, __, _F, _I, $b2, __end
-        .skip_word
+        .skip_msg
         
         ; 10.
         .byte   _F17_, _F0E_
@@ -225,7 +231,7 @@ _0e00:
         .byte   $3b, _F05_, $e6, _F02_, _F08_, _G, _O, _O
         .byte   _D, __, _L, _U, _C, _K, $7b, __
         .byte   $cd, $83, _F16_, __end
-        .skip_word
+        .skip_msg
         
         ; 11.
         .byte   _F19_, _F09_, _F17_, _F0E_
@@ -244,20 +250,20 @@ _0e00:
         .byte   _L, $7b, __, $e4, __, _W, _IL, _L
         .byte   __, $a0, __, _W, _E, _L, _L, __
         .byte   $a5, _W, $b9, _D, $ab, $83, _F18_, __end
-        .skip_word
+        .skip_msg
 
         ; 12.
         .byte   $7f, _F13_, _C, $7e, $92, __, $66, $6e
         .byte   $6f, $62, __end
-        .skip_word
+        .skip_msg
         
         ; 13.
         .byte   _B, _Y, $92, __end
-        .skip_word
+        .skip_msg
 
         ; 14.
         .byte   _F15_, $c6, $9f, _F1A_, __end
-        .skip_word
+        .skip_msg
 
         ; 15.
         .byte   _F19_, _F09_, _F17_, _F0E_
@@ -270,381 +276,381 @@ _0e00:
         .byte   _D, __, $b8, _Y, $a0, __, $bc, _ON
         .byte   $a3, __, _TH, $a8, __, $e4, __, _TH
         .byte   $a7, _K, _DOT, _DOT, $83, _F18_, __end
-        .skip_word
+        .skip_msg
 
         ; 16.
         .byte   _F, _AB, $b2, _D, __end
-        .skip_word
+        .skip_msg
 
         ; 17.
         .byte   _NO, _T, _AB, $b2, __end
-        .skip_word
+        .skip_msg
 
         ; 18.
         .byte   _W, _E, _L, _L, __, _K, _NO, _W, _N, __end
-        .skip_word
+        .skip_msg
 
         ; 19.
         .byte   _F, _A, _M, _O, $bb, __end
-        .skip_word
+        .skip_msg
 
         ; 20.
         .byte   _NO, _T, $ab, __end
-        .skip_word
+        .skip_msg
 
         ; 21.
         .byte   $ad, _R, _Y, __end
-        .skip_word
+        .skip_msg
 
         ; 22.
         .byte   _M, _IL, _D, _L, _Y, __end
-        .skip_word
+        .skip_msg
 
         ; 23.
         .byte   _M, _O, _ST, __end
-        .skip_word
+        .skip_msg
 
         ; 24.
         .byte   $a5, _A, _S, _ON, _AB, _L, _Y, __end
-        .skip_word
+        .skip_msg
 
         ; 25.
         .byte   __end
-        .skip_word
+        .skip_msg
         
         ; 26.
         .byte   $f2, __end
-        .skip_word
+        .skip_msg
 
         ; 27.
         .byte   $25, __end
-        .skip_word
+        .skip_msg
 
         ; 28.
         .byte   _G, $a5, $a2, __end
-        .skip_word
+        .skip_msg
         
         ; 29.
         .byte   _V, _A, _ST, __end
-        .skip_word
+        .skip_msg
 
         ; 30.
         .byte   _P, $a7, _K, __end
-        .skip_word
+        .skip_msg
         
         ; 31.
         .byte   _F02_, $20, __, $21
         .byte   _F0D_, __, $ee, _A, $ac, _ON, _S, __end
-        .skip_word
+        .skip_msg
 
         ; 32.
         .byte   $cb, _S, __end
-        .skip_word
+        .skip_msg
 
         ; 33.
         .byte   $22, __end
-        .skip_word
+        .skip_msg
         
         ; 34.
         .byte   $d7, __, _F, $aa, $ba, _T, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 35.
         .byte   _O, $be, $a8, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 36.
         .byte   _S, _H, _Y, _N, $ba, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 37.
         .byte   _S, _IL, _L, $a7, $ba, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 38.
         .byte   $b8, _T, $94, _T, $af, $a6, $ac, _ON, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 39.
         .byte   _LO, $a2, _H, $94, _O, _F, __, $33, __end
-        .skip_word
+        .skip_msg
         
         ; 40.
         .byte   _LO, $ad, __, _F, $aa, __, $33, __end
-        .skip_word
+        .skip_msg
         
         ; 41.
         .byte   _F, _O, _O, _D, __, _B, $b2, _N, _D, $a3, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 42.
         .byte   _T, _OU, _R, _I, _ST, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 43.
         .byte   _P, _O, _ET, _R, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 44.
         .byte   $a6, _S, _C, _O, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 45.
         .byte   $3b, __end
-        .skip_word
+        .skip_msg
         
         ; 46.
         .byte   _W, $b3, _K, $94, $c9, __end
-        .skip_word
+        .skip_msg
         
         ; 47.
         .byte   _C, $af, _B, __end
-        .skip_word
+        .skip_msg
         
         ; 48.
         .byte   _B, $a2, __end
-        .skip_word
+        .skip_msg
         
         ; 49.
         .byte   _LO, _B, _ST, __end
-        .skip_word
+        .skip_msg
         
         ; 50.
         .byte   _F12_, __end
-        .skip_word
+        .skip_msg
         
         ; 51.
         .byte   $a0, _S, _ET, __end
-        .skip_word
+        .skip_msg
         
         ; 52.
         .byte   _P, $ae, _G, _U, $ab, __end
-        .skip_word
+        .skip_msg
         
         ; 53.
         .byte   $af, _V, _A, _G, $ab, __end
-        .skip_word
+        .skip_msg
         
         ; 54.
         .byte   _C, _U, _R, _S, $ab, __end
-        .skip_word
+        .skip_msg
         
         ; 55.
         .byte   _S, _C, _OU, _R, _G, $ab, __end
-        .skip_word
+        .skip_msg
         
         ; 56.
         .byte   $26, __, _C, _I, _V, _IL, __, _W, $b9, __end
-        .skip_word
+        .skip_msg
         
         ; 57.
         .byte   $3f, __, $08, __, $37, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 58.
         .byte   _A, __, $3f, __, $a6, _SE, _A, _SE, __end
-        .skip_word
+        .skip_msg
         
         ; 59.
         .byte   $26, __, _E, $b9, _TH, $a9, _A, _K, $ba, __end
-        .skip_word
+        .skip_msg
         
         ; 60.
         .byte   $26, __, $bc, $ae, _R, __, _A, _C
         .byte   $ac, _V, _IT, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 61.
         .byte   $f8, $0a, __, $09, __end
-        .skip_word
+        .skip_msg
         
         ; 62.
         .byte   $c4, _F11_, __, $08, __, $37, __end
-        .skip_word
+        .skip_msg
         
         ; 63.
         .byte   $f8, $96, _S, $70, __, $35, __, $34, __end
-        .skip_word
+        .skip_msg
         
         ; 64.
         .byte   _F02_, $2d, _F0D_, __end
-        .skip_word
+        .skip_msg
         
         ; 65.
         .byte   $f8, $3c, __, $3b, __end
-        .skip_word
+        .skip_msg
         
         ; 66.
         .byte   _J, _U, _I, $be, __end
-        .skip_word
+        .skip_msg
         
         ; 67.
         .byte   _B, $af, _N, _D, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 68.
         .byte   _W, $a2, $a3, __end
-        .skip_word
+        .skip_msg
         
         ; 69.
         .byte   _B, $a5, _W, __end
-        .skip_word
+        .skip_msg
         
         ; 70.
         .byte   _G, $b9, _G, $b2, __, _B, $ae, _ST, $a3, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 71.
         .byte   _F12_, __end
-        .skip_word
+        .skip_msg
         
         ; 72.
         .byte   _F11_, __, $37, __end
-        .skip_word
+        .skip_msg
         
         ; 73.
         .byte   _F11_, __, _F12_, __end
-        .skip_word
+        .skip_msg
         
         ; 74.
         .byte   _F11_, __, $3f, __end
-        .skip_word
+        .skip_msg
         
         ; 75.
         .byte   $3f, __, _F12_, __end
-        .skip_word
+        .skip_msg
         
         ; 76.
         .byte   _F, _AB, _U, _LO, $bb, __end
-        .skip_word
+        .skip_msg
         
         ; 77.
         .byte   _E, _X, _O, $ac, _C, __end
-        .skip_word
+        .skip_msg
         
         ; 78.
         .byte   _H, _O, _O, _P, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 79.
         .byte   _U, _NU, _S, _U, $b3, __end
-        .skip_word
+        .skip_msg
         
         ; 80.
         .byte   _E, _X, _C, _IT, $a7, _G, __end
-        .skip_word
+        .skip_msg
         
         ; 81.
         .byte   _C, _U, _I, _S, $a7, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 82.
         .byte   _N, _I, _G, _H, _T, __, _L, _I, _F, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 83.
         .byte   _C, _A, _S, _I, _NO, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 84.
         .byte   _S, _IT, __, _C, _O, _M, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 85.
         .byte   _F02_, $2d, _F0D_, __end
-        .skip_word
+        .skip_msg
         
         ; 86.
         .byte   _F03_, __end
-        .skip_word
+        .skip_msg
         
         ; 87.
         .byte   $c4, $c6, __, _F03_, __end
-        .skip_word
+        .skip_msg
         
         ; 88.
         .byte   $c4, $c5, __, _F03_, __end
-        .skip_word
+        .skip_msg
         
         ; 89.
         .byte   $c3, $c6, __end
-        .skip_word
+        .skip_msg
         
         ; 90.
         .byte   $c3, $c5, __end
-        .skip_word
+        .skip_msg
         
         ; 91.
         .byte   _S, _ON, __, _O, _F, $87, _B, _IT, _C, _H, __end
-        .skip_word
+        .skip_msg
         
         ; 92.
         .byte   _S, _C, _OU, _N, _D, $a5, _L, __end
-        .skip_word
+        .skip_msg
         
         ; 93.
         .byte   _B, $ae, _C, _K, _G, _U, $b9, _D, __end
-        .skip_word
+        .skip_msg
         
         ; 94.
         .byte   _R, _O, _G, _U, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 95.
         .byte   _W, _H, $aa, $ba, _ON
         .byte   __, $a0, _ET, $b2, __, _H, _E, _A
         .byte   _D, $93, _F, $ae, _P, __, _E, $b9
         .byte   $70, _D, __, _K, _N, _A, $ad, __end
-        .skip_word
+        .skip_msg
         
         ; 96.
         .byte   _N, __, _U, _N, $a5, $b8, _R, _K
         .byte   _AB, $b2, __end
-        .skip_word
+        .skip_msg
         
         ; 97.
         .byte   __, _B, $aa, $a7, _G
         .byte   __end
-        .skip_word
+        .skip_msg
         
         ; 98.
         .byte   __, _D, _U, _L, _L, __end
-        .skip_word
+        .skip_msg
         
         ; 99.
         .byte   __, _T, _E, $a6, _O, $bb, __end
-        .skip_word
+        .skip_msg
         
         ; 100.
         .byte   __, $a5, _V, _O, _L, _T, $a7, _G, __end
-        .skip_word
+        .skip_msg
         
         ; 101.
         .byte   $c6, __end
-        .skip_word
+        .skip_msg
         
         ; 102.
         .byte   $c5, __end
-        .skip_word
+        .skip_msg
         
         ; 103.
         .byte   _P, $ae, $be, __end
-        .skip_word
+        .skip_msg
         
         ; 104.
         .byte   _L, _IT, _T, $b2, __, $c6, __end
-        .skip_word
+        .skip_msg
         
         ; 105.
         .byte   _D, _U, _M, _P, __end
-        .skip_word
+        .skip_msg
         
         ; 106.
         .byte   _I, __, _H, _E, $b9
         .byte   $87, $25, __, _LO, _O, _K, $94, $98
         .byte   __, _A, _P, _P, _E, $b9, $93, $a2
         .byte   $86, __end
-        .skip_word
+        .skip_msg
         
         ; 107.
         .byte   _Y, _E, _A, _H, $7b, __
@@ -652,374 +658,374 @@ _0e00:
         .byte   $98, __, $b2, _F, _T, $86, $87, __
         .byte   _W, _H, _I, $b2, __, _B, _A, _C
         .byte   _K, __end
-        .skip_word
+        .skip_msg
         
         ; 108.
         .byte   _G, _ET, __, $e4, _R, __
         .byte   _I, _R, _ON, __, _A, _S, _S, __
         .byte   _O, _V, $a3, __, _T, _O, $86, __end
-        .skip_word
+        .skip_msg
         
         ; 109.
         .byte   $bc, _M, _E, __, $24, $85, $98, __
         .byte   _W, _A, _S, __, _SE, $a1, __, $a2
         .byte   $86, __end
-        .skip_word
+        .skip_msg
         
         ; 110.
         .byte   _T, _R, _Y, $86, __end
-        .skip_word
+        .skip_msg
         
         ; 111.
         .byte   __, _C, _U, _D, _D, _L, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 112.
         .byte   __, _C, _U, _T, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 113.
         .byte   __, _F, _U, _R, _R, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 114.
         .byte   __, _F, _R, _I, $a1, _D, _L, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 115.
         .byte   _W, _A, _S, _P, __end
-        .skip_word
+        .skip_msg
         
         ; 116.
         .byte   _M, _O, _TH, __end
-        .skip_word
+        .skip_msg
         
         ; 117.
         .byte   _G, _R, _U, _B, __end
-        .skip_word
+        .skip_msg
         
         ; 118.
         .byte   $a8, _T, __end
-        .skip_word
+        .skip_msg
         
         ; 119.
         .byte   _F12_, __end
-        .skip_word
+        .skip_msg
         
         ; 120.
         .byte   _P, _O, _ET, __end
-        .skip_word
+        .skip_msg
         
         ; 121.
         .byte   $b9, _T, _S, __, _G, $af, _D, _U, $a2, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 122.
         .byte   _Y, _A, _K, __end
-        .skip_word
+        .skip_msg
         
         ; 123.
         .byte   _S, _N, _A, _IL, __end
-        .skip_word
+        .skip_msg
         
         ; 124.
         .byte   _S, _L, _U, _G, __end
-        .skip_word
+        .skip_msg
         
         ; 125.
         .byte   _T, _R, _O, _P, _I, _C, $b3, __end
-        .skip_word
+        .skip_msg
         
         ; 126.
         .byte   _D, $a1, _SE, __end
-        .skip_word
+        .skip_msg
         
         ; 127.
         .byte   $af, $a7, __end
-        .skip_word
+        .skip_msg
         
         ; 128.
         .byte   _I, _M, _P, $a1, _ET, $af, _B, $b2, __end
-        .skip_word
+        .skip_msg
         
         ; 129.
         .byte   _E, _X, _U, $a0, $af, _N, _T, __end
-        .skip_word
+        .skip_msg
         
         ; 130.
         .byte   _F, _U, _N, _N, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 131.
         .byte   _W, _E, _I, _R, _D, __end
-        .skip_word
+        .skip_msg
         
         ; 132.
         .byte   _U, _NU, _S, _U, $b3, __end
-        .skip_word
+        .skip_msg
         
         ; 133.
         .byte   _ST, $af, _N, $b0, __end
-        .skip_word
+        .skip_msg
         
         ; 134.
         .byte   _P, _E, _C, _U, _L, _I, $b9, __end
-        .skip_word
+        .skip_msg
         
         ; 135.
         .byte   _F, $a5, $a9, $a1, _T, __end
-        .skip_word
+        .skip_msg
         
         ; 136.
         .byte   _O, _C, _C, _A, _S, _I, _ON, $b3, __end
-        .skip_word
+        .skip_msg
         
         ; 137.
         .byte   _U, _N, _P, $a5, $a6, _C, _T, _AB, $b2, __end
-        .skip_word
+        .skip_msg
         
         ; 138.
         .byte   _D, $a5, _A, _D, _F, _U, _L, __end
-        .skip_word
+        .skip_msg
         
         ; 139.
         .byte   $fc, __end, $0b, __, $0c, __, _F, $aa, __, $32, __end
-        .skip_word
+        .skip_msg
         
         ; 140.
         .byte   $db, $e5, $32, __end
-        .skip_word
+        .skip_msg
         
         ; 141.
         .byte   $31, __, _B, _Y, __, $30, __end
-        .skip_word
+        .skip_msg
         
         ; 142.
         .byte   $db, __, _B, _U, _T, __, $d9, __end
-        .skip_word
+        .skip_msg
         
         ; 143.
         .byte   __, _A, $38, __, $27, __end
-        .skip_word
+        .skip_msg
         
         ; 144.
         .byte   _P, _L, $a8, _ET, __end
-        .skip_word
+        .skip_msg
         
         ; 145.
         .byte   _W, $aa, _L, _D, __end
-        .skip_word
+        .skip_msg
         
         ; 146.
         .byte   _TH, _E, __, __end
-        .skip_word
+        .skip_msg
         
         ; 147.
         .byte   _TH, _I, _S, __, __end
-        .skip_word
+        .skip_msg
         
         ; 148.
         .byte   _LO, _A, _D, $85, $cd, __end
-        .skip_word
+        .skip_msg
         
         ; 149.
         .byte   _F09_, _F0B_, _F01_, _F08_, __end
-        .skip_word
+        .skip_msg
         
         ; 150.
         .byte   _D, _R, _I, $ad, __end
-        .skip_word
+        .skip_msg
         
         ; 151.
         .byte   __, _C, $a2, _A, _LO, _G, _U, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 152.
         .byte   _I, $a8, __end
-        .skip_word
+        .define_msg "_TEST"
         
         ; 153.
         .byte   _F13_, _C, _O, _M, _M, $a8, _D, $a3, __end
-        .skip_word
+        .skip_msg
         
         ; 154.
         .byte   $3f, __end
-        .skip_word
+        .skip_msg
         
         ; 155.
         .byte   _M, _OU, _N, _T, _A, $a7, __end
-        .skip_word
+        .skip_msg
         
         ; 156.
         .byte   $ab, _I, _B, $b2, __end
-        .skip_word
+        .skip_msg
         
         ; 157.
         .byte   _T, $a5, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 158.
         .byte   _S, _P, _O, _T, _T, $ab, __end
-        .skip_word
+        .skip_msg
         
         ; 159.
         .byte   $2f, __end
-        .skip_word
+        .skip_msg
         
         ; 160.
         .byte   $2e, __end
-        .skip_word
+        .skip_msg
         
         ; 161.
         .byte   $36, _O, _I, _D, __end
-        .skip_word
+        .skip_msg
         
         ; 162.
         .byte   $28, __end
-        .skip_word
+        .skip_msg
         
         ; 163.
         .byte   $29, __end
-        .skip_word
+        .skip_msg
         
         ; 164.
         .byte   $a8, _C, _I, $a1, _T, __end
-        .skip_word
+        .skip_msg
         
         ; 165.
         .byte   _E, _X, $be, _P, $ac, _ON, $b3, __end
-        .skip_word
+        .skip_msg
         
         ; 166.
         .byte   _E, _C, $be, _N, _T, _R, _I, _C, __end
-        .skip_word
+        .skip_msg
         
         ; 167.
         .byte   $a7, _G, $af, $a7, $ab, __end
-        .skip_word
+        .skip_msg
         
         ; 168.
         .byte   $25, __end
-        .skip_word
+        .skip_msg
         
         ; 169.
         .byte   _K, _IL, _L, $a3, __end
-        .skip_word
+        .skip_msg
         
         ; 170.
         .byte   _D, _E, _A, _D, _L, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 171.
         .byte   _E, _V, _IL, __end
-        .skip_word
+        .skip_msg
         
         ; 172.
         .byte   $b2, _TH, $b3, __end
-        .skip_word
+        .skip_msg
         
         ; 173.
         .byte   _V, _I, _C, _I, _O, $bb, __end
-        .skip_word
+        .skip_msg
         
         ; 174.
         .byte   _IT, _S, __, __end
-        .skip_word
+        .skip_msg
         
         ; 175.
         .byte   _F0D_, _F0E_, _F13_, __end
-        .skip_word
+        .skip_msg
         
         ; 176.
         .byte   _DOT, _F0C_, _F0F_, __end
-        .skip_word
+        .skip_msg
         
         ; 177.
         .byte   __, $a8, _D, __, __end
-        .skip_word
+        .skip_msg
         
         ; 178.
         .byte   _Y, _OU, __end
-        .skip_word
+        .skip_msg
         
         ; 179.
         .byte   _P, $b9, _K, $94, _M, _ET, $a3, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 180.
         .byte   _D, $bb, _T, __, _C, _LO, _U, _D, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 181.
         .byte   _I, $be, __, $a0, _R, _G, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 182.
         .byte   _R, _O, _C, _K, __, _F, $aa, $b8
         .byte   $ac, _ON, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 183.
         .byte   _V, _O, _L, _C, _A, _NO, $ba, __end
-        .skip_word
+        .skip_msg
         
         ; 184.
         .byte   _P, _L, $a8, _T, __end
-        .skip_word
+        .skip_msg
         
         ; 185.
         .byte   _T, _U, _L, _I, _P, __end
-        .skip_word
+        .skip_msg
         
         ; 186.
         .byte   _B, $a8, $a8, _A, __end
-        .skip_word
+        .skip_msg
         
         ; 187.
         .byte   _C, $aa, _N, __end
-        .skip_word
+        .skip_msg
         
         ; 188.
         .byte   _F12_, _W, _E, $ab, __end
-        .skip_word
+        .skip_msg
         
         ; 189.
         .byte   _F12_, __end
-        .skip_word
+        .skip_msg
         
         ; 190.
         .byte   _F11_, __, _F12_, __end
-        .skip_word
+        .skip_msg
         
         ; 191.
         .byte   _F11_, __, $3f, __end
-        .skip_word
+        .skip_msg
         
         ; 192.
         .byte   $a7, _H, _A, $bd, _T, $a8, _T, __end
-        .skip_word
+        .skip_msg
         
         ; 193.
         .byte   $e8, __end
-        .skip_word
+        .skip_msg
         
         ; 194.
         .byte   $a7, _G, __, __end
-        .skip_word
+        .skip_msg
         
         ; 195.
         .byte   $ab, __, __end
-        .skip_word
+        .skip_msg
         
         ; 196.
         .byte   __, _D, _DOT, _B, $af, $a0, _N, __
         .byte   $71, __, _I, _DOT, $a0, _L, _L, __end
-        .skip_word
+        .skip_msg
         
         ; 197.
         .byte   __, _L, _IT, _T, $b2, __, _T, _R
         .byte   _U, _M, _B, $b2, __end
-        .skip_word
+        .skip_msg
         
         ; 198.
         .byte   _F19_, _F09_, _F1D_
@@ -1050,110 +1056,110 @@ _0e00:
         .byte   _A, _K, _E, __, _IT, _F01_, $7f, _Y
         .byte   $78, _N, $7e, $68, _F0C_, _F0F_, _F01_, _F08_
         .byte   __end
-        .skip_word
+        .skip_msg
         
         ; 199.
         .byte   __, _N, _A, _M, _E, $68, __
         .byte   __end
-        .skip_word
+        .skip_msg
         
         ; 200.
         .byte   __, _T, _O, __, __end
-        .skip_word
+        .skip_msg
         
         ; 201.
         .byte   __, _I, _S, __, __end
-        .skip_word
+        .skip_msg
         
         ; 202.
         .byte   _W, _A, _S, __, $ae
         .byte   _ST, __, _SE, $a1, __, $a2, __, _F13_
         .byte   __end
-        .skip_word
+        .skip_msg
         
         ; 203.
         .byte   _DOT, _F0C_, __, _F13_, __end
-        .skip_word
+        .skip_msg
         
         ; 204.
         .byte   _D, _O, _C, _K, $ab, __end
-        .skip_word
+        .skip_msg
         
         ; 205.
         .byte   _F01_, $7f, _Y, $78, _N, $7e, $68, __end
-        .skip_word
+        .skip_msg
         
         ; 206.
         .byte   _S, _H, _I, _P, __end
-        .skip_word
+        .skip_msg
         
         ; 207.
         .byte   __, _A, __, __end
-        .skip_word
+        .skip_msg
         
         ; 208.
         .byte   __, $a3, _R, _I, $bb, __end
-        .skip_word
+        .skip_msg
         
         ; 209.
         .byte   __, _N, _E, _W, __, __end
-        .skip_word
+        .skip_msg
         
         ; 210.
         .byte   _F02_, __, _H, $a3, __, $b8, _J
         .byte   $ba, _T, _Y, $70, _S, __, _S, _P
         .byte   _A, $be, __, _N, _A, _V, _Y, _F0D_
         .byte   __end
-        .skip_word
+        .skip_msg
         
         ; 211.
         .byte   $e6, _F08_, _F01_, __, __, _M, $ba
         .byte   _S, _A, $b0, __, $a1, _D, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 212.
         .byte   __, $cd, __, _F04_, $7b, __, _I, __
         .byte   _F0D_, _A, _M, _F02_, __, _C, _A, _P
         .byte   _T, _A, $a7, __, _F1B_, __, _F0D_, _O
         .byte   _F, $84, __end
-        .skip_word
+        .skip_msg
         
         ; 213.
         .byte   __end
-        .skip_word
+        .skip_msg
         
         ; 214.
         .byte   _F0F_, __, _U, _N, _K, _NO, _W, _N, __, $c6, __end
-        .skip_word
+        .skip_msg
         
         ; 215.
         .byte   _F09_, _F08_, _F17_, _F01_, __, $a7, _C, _O, _M
         .byte   $94, _M, $ba, _S, _A, $b0, __end
-        .skip_word
+        .skip_msg
         
         ; 216.
         .byte   _C, _U, _R, _R, _U, _TH, $a3, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 217.
         .byte   _F, _O, _S, _D, _Y, _K, _E, __
         .byte   _S, _M, _Y, _TH, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 218.
         .byte   _F, $aa, _T, $ba, $a9, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 219.
         .byte   $9c, $a5, $ba, $a6, $be, __end
-        .skip_word
+        .skip_msg
         
         ; 220.
         .byte   _I, _S, __, $a0, _L
         .byte   _I, _E, _V, $ab, $9e, _H, _A, $ad
         .byte   __, _J, _U, _M, _P, $ab, $9e, $c3
         .byte   _G, $b3, _A, _X, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 221.
         .byte   _F19_, _F09_
@@ -1215,7 +1221,7 @@ _0e00:
         .byte   __, __, __, _F13_, _G, _O, _O, _D
         .byte   __, _L, _U, _C, _K, __, $cd, $83
         .byte   _F18_, __end
-        .skip_word
+        .skip_msg
         
         ; 222.
         .byte   _F19_, _F09_, _F1D_, _F08_, _F0E_, _F0D_
@@ -1236,136 +1242,136 @@ _0e00:
         .byte   _Y, __, _F06_, $25, _F05_, __, _A, _S
         .byte   __, _P, _A, _Y, _M, $a1, _T, $83
         .byte   _F18_, __end
-        .skip_word
+        .skip_msg
         
         ; 223.
         .byte   _A, $a5, __, $e4, __, _S
         .byte   _U, $a5, $68, __end
-        .skip_word
+        .skip_msg
         
         ; 224.
         .byte   _S, _H, $a5, _W, __end
-        .skip_word
+        .skip_msg
         
         ; 225.
         .byte   $a0, _A, _ST, __end
-        .skip_word
+        .skip_msg
         
         ; 226.
         .byte   _B, _I, _S, _ON, __end
-        .skip_word
+        .skip_msg
         
         ; 227.
         .byte   _S, _N, _A, _K, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 228.
         .byte   _W, _O, _L, _F, __end
-        .skip_word
+        .skip_msg
         
         ; 229.
         .byte   $b2, _O, _P, $b9, _D, __end
-        .skip_word
+        .skip_msg
         
         ; 230.
         .byte   _C, $a2, __end
-        .skip_word
+        .skip_msg
         
         ; 231.
         .byte   _M, _ON, _K, _E, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 232.
         .byte   _G, _O, $a2, __end
-        .skip_word
+        .skip_msg
         
         ; 233.
         .byte   _F, _I, _S, _H, __end
-        .skip_word
+        .skip_msg
         
         ; 234.
         .byte   $3d, __, $3e, __end
-        .skip_word
+        .skip_msg
         
         ; 235.
         .byte   _F11_, __, $2f, __, $2c, __end
-        .skip_word
+        .skip_msg
         
         ; 236.
         .byte   $f8, $3c, __, $2e, __, $2c, __end
-        .skip_word
+        .skip_msg
         
         ; 237.
         .byte   $2b, __, $2a, __end
-        .skip_word
+        .skip_msg
         
         ; 238.
         .byte   $3d, __, $3e, __end
-        .skip_word
+        .skip_msg
         
         ; 239.
         .byte   _M, _E, $a2, __end
-        .skip_word
+        .skip_msg
         
         ; 240.
         .byte   _C, _U, _T, _L, _ET, __end
-        .skip_word
+        .skip_msg
         
         ; 241.
         .byte   _ST, _E, _A, _K, __end
-        .skip_word
+        .skip_msg
         
         ; 242.
         .byte   _B, _U, _R, _G, $a3, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 243.
         .byte   $bc, _U, _P, __end
-        .skip_word
+        .skip_msg
         
         ; 244.
         .byte   _I, $be, __end
-        .skip_word
+        .skip_msg
         
         ; 245.
         .byte   _M, _U, _D, __end
-        .skip_word
+        .skip_msg
         
         ; 246.
         .byte   _Z, $a3, _O, _HYPHEN, _F13_, _G, __end
-        .skip_word
+        .skip_msg
         
         ; 247.
         .byte   _V, _A, _C, _U, _U, _M, __end
-        .skip_word
+        .skip_msg
         
         ; 248.
         .byte   _F11_, __, _U, _L, _T, $af, __end
-        .skip_word
+        .skip_msg
         
         ; 249.
         .byte   _H, _O, _C, _K, _E, _Y, __end
-        .skip_word
+        .skip_msg
         
         ; 250.
         .byte   _C, _R, _I, _C, _K, _ET, __end
-        .skip_word
+        .skip_msg
         
         ; 251.
         .byte   _K, $b9, $a2, _E, __end
-        .skip_word
+        .skip_msg
         
         ; 252.
         .byte   _P, _O, _LO, __end
-        .skip_word
+        .skip_msg
         
         ; 253.
         .byte   _T, $a1, _N, _I, _S, __end
-        .skip_word
+        .skip_msg
         
         ; 254.
         .byte   _F0C_, _F1E_, __, $a3, _R, $aa
-        .skip_word
+        .skip_msg
 
 ;-------------------------------------------------------------------------------
 

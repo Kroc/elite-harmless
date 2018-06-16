@@ -977,7 +977,7 @@ msgtoken_1B:                                                            ;$2372
         ; print some message from msgtoken $D9(217)+?
         ;
         lda # $d9
-        bne _2378
+        bne _2378               ; always branches
 
 msgtoken_1C:                                                            ;$2376
         ;=======================================================================
@@ -990,7 +990,7 @@ _2378:
         bne print_msg           ; always branches
         
 
-_237e:  
+_237e:                                                                  ;$237E
         ;=======================================================================
         ; print a message from the message table at `_1a5c` rather than the
         ; standard one (`_0e00`)
