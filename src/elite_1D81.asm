@@ -972,21 +972,30 @@ _2367:
 
         rts 
 
-; print message routine, for messages in TEXT_0E00
-
 msgtoken_1B:                                                            ;$2372
         ;=======================================================================
+        ; print some message from msgtoken $D9(217)+?
+        ;
         lda # $d9
         bne _2378
 
 msgtoken_1C:                                                            ;$2376
         ;=======================================================================
+        ; print some message from msgtoken $DC(220)+?
+        ; 
         lda # $dc
 _2378:
         clc 
         adc $04a8
-        bne print_msg
-_237e:
+        bne print_msg           ; always branches
+        
+
+_237e:  
+        ;=======================================================================
+        ; print a message from the message table at `_1a5c` rather than the
+        ; standard one (`_0e00`)
+        ; 
+        ; push the current state:
         pha 
         tax 
         tya 
@@ -996,6 +1005,9 @@ _237e:
         lda $5c
         pha 
 
+        ; switch base-address of the message pool and jump into the print
+        ; routine using this new address. note that in this case, X is the
+        ; message-index to print
 .import _1a5c
 
         lda # < _1a5c
@@ -1060,7 +1072,7 @@ _read_token:                                                            ;$23B4
         bne :+                  ; did we step over the page boundary?
         inc $5c                 ; if so, move forward to next page
 
-:       ; readand descramble a token:                                   ;$23B9
+:       ; read and descramble a token:                                  ;$23B9
         ;
         ; tokens: (descrambled)
         ;     $00 = invalid
@@ -5403,6 +5415,7 @@ _3d5e:
         jsr print_msgtoken
         tya 
         jsr _237e
+
         lda # $b1
         bne _3d7a
 _3d6c:
