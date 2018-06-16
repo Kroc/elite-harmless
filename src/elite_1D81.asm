@@ -1027,9 +1027,7 @@ print_msg:                                                              ;$2390
 ;
 .export print_msg
 
-        ; preserve the current state since printing messages gets recursive
-
-        pha                     ; preserve A 
+        pha                     ; preserve A (message index)
         tax                     ; move message index to X
         
         ; when recursing, $5B/$5C+Y represent the
@@ -1106,8 +1104,8 @@ print_msgtoken:                                                         ;$23Cf
         cmp # ' '               ; tokens less than $20 (space)
        .blt _241b               ; are format codes
         
-        bit _2f1a               ; is bit 7 off?
-        bpl _23e8               ; if so, print character as-is
+        bit _2f1a               ; is bit 7 of this flag off?
+        bpl _23e8               ; if so, process token
        
         tax 
         tya 
@@ -1117,6 +1115,7 @@ print_msgtoken:                                                         ;$23Cf
         lda $5c
         pha 
         txa 
+
         jsr print_token
         
         jmp _2438
@@ -1129,8 +1128,8 @@ _23e8:                                                                  ;$23E8
         cmp # $81               ; tokens $5B...$80?
        .blt _2441               ; handle planet description tokens
         
-        cmp # $d7               ; tokens $81...$D6
-       .blt print_msg           ; print again!??
+        cmp # $d7               ; tokens $81...$D6 are expansions,
+       .blt print_msg           ; use the token as a message index
         
         ; tokens $D7 and above:
         ; (character pairs)
@@ -1249,7 +1248,7 @@ _2438:  ; restore state and exit                                        ;$2438
         tay 
         rts 
 
-_2441:  ; process tokens $5B..$80                                       ;$2441
+_2441:  ; process msg tokens $5B..$80                                   ;$2441
         ;-----------------------------------------------------------------------
         sta $07                 ; put token aside
         
