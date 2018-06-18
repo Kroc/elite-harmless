@@ -61,6 +61,27 @@ L:
         bcs     Arg
 .endmacro
 
+; an optimisation, to avoid extra branching, is to jump into the middle of an
+; instruction which is then interpretted as some other instruction. a common
+; example of this is using the `bit` instruction as a 'do nothing' instruction
+; with the option to jump over the `bit` opcode and treat the 2-byte parameter
+; as different instruction:
+;
+;     bit $00a9 ;<-- this is `lda # $00` if you skip the `bit` opcode
+;
+; this macro simply outputs the opcode for the `bit` instruction, causing the
+; next 2-byte instruction to be 'ignored'. for example:
+;
+;     do_one_thing:
+;         lda # $ff
+;        .bit           ; skip the next `lda` by making it a `bit` instruction
+;
+;     do_a_different_thing:
+;         lda # $00
+;
+.macro .bit
+        .byte   $2c
+.endmacro
 
 ; colours
 ;===============================================================================

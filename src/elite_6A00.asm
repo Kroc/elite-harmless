@@ -2724,7 +2724,7 @@ _78aa:
         lda [$2a], y
         tay 
 _78bc:
-        lda $00f9, y               ;16-bit reference?
+        lda $f9, y
         sta [$2a], y
         dey 
         cpy # $06
@@ -3395,7 +3395,7 @@ _7cec:
         sta $2d
         ldy # $24
 _7cf9:
-        lda $0009, y            ;16-bit reference?
+        lda $09, y
         sta [$59], y
         dey 
         bpl _7cf9
@@ -4804,7 +4804,7 @@ _85bb:
         lsr 
         bcc _85e0
         ora $047c
-        beq _85ef+1             ; bug or optimisation?
+        beq _85f0
 _85e0:
         lda # $04
         sta $2d
@@ -4814,8 +4814,9 @@ _85e0:
         ora # %11000000
         sta $29
         tya 
-_85ef:      ; NOTE: when accessed as $85F0, this becomes `lda # $1f`
-        bit $1fa9
+       .bit
+_85f0:
+        lda # $1f
 _85f2:
         jsr _7c6b
         jmp _8627
@@ -4984,16 +4985,17 @@ _8706:
 
 _870d:
         cmp # $3b
-        beq _871e+1             ;bug or optimisation?
+        beq _871f
         cmp # $3a
-        beq _871b+1             ;bug or optimisation?
+        beq _871c
         cmp # $3d
         bne _8724
         ldx # $03
-_871b:  ; NOTE: when called as $871c, this becomes `lda #$02`
-        bit $02a2
-_871e:  ; NOTE: when called as $871f, this becomes `lda #$01`
-        bit $01a2
+       .bit
+_871c:  ldx # $02
+       .bit
+_871f:  ldx # $01
+
         jmp _a6ba
 
 _8724:
@@ -5531,15 +5533,16 @@ _8a6a:
         cmp # $7f
         beq _8aa8
         cpy _8ab2
-        bcs _8a8c+1
+        bcs _8a8d
         cmp _8ab3
-        bcc _8a8c+1
+        bcc _8a8d
         cmp _8ab4
-        bcs _8a8c+1
+        bcs _8a8d
         sta $000e, y
-        iny 
-_8a8c:  ; NOTE: when accessed as $8A8D, appears as `lda # $07`
-        bit $07a9
+        iny
+
+       .bit 
+_8a8d:  lda # $07
 _8a8f:
         jsr paint_char
         bcc _8a6a
@@ -11160,7 +11163,8 @@ _b1a1:
 :       inc ZP_CURSOR_COL                                               ;$B1ED
         ; this is `sta $08` if you jump in after the `bit` instruction,
         ; but it doesn't look like this actually occurs
-        bit $0885
+       .bit
+        sta $08
 
         ; paint the character (8-bytes) to the screen
         ; SPEED: this could be unrolled
@@ -11308,8 +11312,9 @@ _b2a5:
         lda # $ff
         sta $5f1f
         ldx # $19
-_b2b1:
-        bit $12a2               ;? -- supposed to jump into +1; "$a2 $12"
+       .bit
+_b2b2:
+        ldx # $12
         stx $c0
         ldy # $18
         sty $07
@@ -11360,7 +11365,7 @@ _b2e7:
 ;===============================================================================
 
 _b301:
-        jsr _b2b1+1
+        jsr _b2b2
         
         lda # $91
         sta _a8db               ; default value is $81

@@ -491,7 +491,8 @@ _2014:
         beq _201a+1
         ldy # $0a
 _201a:
-        bit $0ba0               ; `ldy # $0b`?
+       .bit
+        ldy # $0b
 _201d:
         jsr _a858
         jsr _3cdb
@@ -960,9 +961,8 @@ _235d:
 _2366:
         rts 
 
-;===============================================================================
-
 _2367:
+;===============================================================================
 .export _2367
         lda # $c0
         sta _a8e0
@@ -1102,7 +1102,7 @@ _read_token:                                                            ;$23B4
 print_msgtoken:                                                         ;$23Cf
         ;=======================================================================
         cmp # ' '               ; tokens less than $20 (space)
-       .blt _241b               ; are format codes
+       .blt _format_code        ; are format codes
         
         bit _2f1a               ; is bit 7 of this flag off?
         bpl _23e8               ; if so, process token
@@ -1167,8 +1167,7 @@ _lcase:                                                                 ;$2415
 _goto_print_char:                                                       ;$2418
         jmp print_char
 
-
-_241b:  ; format codes                                                  ;$241B
+_format_code:                                                           ;$241B
         ;-----------------------------------------------------------------------
         ; tokens $00..$1F are format codes, each has a different behaviour:
         ;
@@ -1276,12 +1275,12 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 
 .import _3eac
 
-        ; get back the token value and lookup another token to use
+        ; get back the token value and lookup another message index to print
         ; (since these tokens are $5B..$80, we index the table back $5B bytes)
         ldx $07
         adc _3eac - $5B, x
 
-        jsr print_msg           ; print the new token
+        jsr print_msg           ; print the new message
 
         jmp _2438               ; clean up and exit
 
@@ -1289,10 +1288,14 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 msgtoken_01:                                                            ;$246A
         ;=======================================================================
         lda # $00
-_246c:                                                                  ;$246C
+       .bit
+
+msgtoken_02:                                                            ;$246D
         ;=======================================================================
-.export msgtoken_02 := _246c+1
-        bit $20a9
+.export msgtoken_02
+
+        lda # $20
+
         sta msg_ucase
 
         lda # $00
@@ -1333,24 +1336,24 @@ msgtoken_06:                                                            ;$2496
         lda # $80
         sta $34
         lda # $ff
-_249c:
-; NOTE: this address is used in the table in _250c
-msgtoken_05 = _249c + 1
-        ; WARNING: must be a 16-bit address, as this is a `lda # $00` (`A9 00`)
-        ; instruction encoded on to the end of a `bit` instruction
-        bit a:$00a9
+       .bit
+
+msgtoken_05:                                                            ;$249D
+        ;=======================================================================
+        lda # $00
         sta _2f1a
         rts 
 
 msgtoken_0E:                                                            ;$24A3
         ;=======================================================================
         lda # $80
-_24a5:
-        ; NOTE: this address is used in the table in _250c
-.export msgtoken_0F := _24a5+1
-        ; WARNING: must be a 16-bit address, as this is a `lda # $00` (`A9 00`)
-        ; instruction encoded on to the end of a `bit` instruction
-        bit a:$00a9
+       .bit
+
+msgtoken_0F:                                                            ;$24A6
+        ;=======================================================================
+.export msgtoken_0F
+        
+        lda # $00
         sta _2f1b
         asl 
         sta _2f1c
@@ -3010,11 +3013,12 @@ msg_lcase:                                                              ;$2F1E
 _2f1f:
 .export _2f1f
         lda # $0c
-_2f21:
-msgtoken_10 = _2f21+1
-        bit $41a9
+       .bit
 
-        ; NOTE: this address is used in the table in _250c
+msgtoken_10:                                                            ;$2F22
+        ;=======================================================================
+        lda # $41
+
 print_char:                                                             ;$2F24
         ;=======================================================================
 .export print_char
@@ -3159,9 +3163,12 @@ _2fe4:
         pla 
         tax 
         lda # $0c
-_2fed:
-.export _2fee := _2fed+1
-        bit $07a9               ; = `lda # $07`
+       .bit
+_2fee:                                                                  ;$2FEE
+        ;=======================================================================
+.export _2fee
+        
+        lda # $07
         jmp paint_char
 
 ;===============================================================================
@@ -3273,10 +3280,10 @@ _30bb:
         lda $a3
         and # %00001000
         and _1d09
-        beq _30c7+1
+        beq :+
         txa 
-_30c7:
-        bit $55a9
+       .bit 
+:       lda # $55                                                       ;$30C8
         rts 
 
 ;===============================================================================
@@ -3544,6 +3551,7 @@ _3244:
         beq _321e
         ldy # $1f
         lda [$5b], y
+        ; this might be a `ldy # $32`, but I don't see any jump into it
         bit _32a0+1             ;!?
         bne _327d
         ora # %10000000
@@ -5403,14 +5411,14 @@ _3d3d:
         cmp $04a8
         bne _3d6c
         lda _1a41, y
-        bmi _3d5e+1
+        bmi :+
         lda $0499
         lsr 
         bcc _3d6f
         jsr msgtoken_0E
         lda # $01
-_3d5e:
-        bit $b0a9               ; `$A9, $B0` -- `lda # $b0`?
+       .bit
+:       lda # $b0                                                       ;$3D5F
         jsr print_msgtoken
         tya 
         jsr _237e
@@ -5562,10 +5570,11 @@ _3e46:                                                                  ;$3e46
 msgtoken_17:                                                            ;$3E57  
         ;=======================================================================
         lda # $0a
-_3e59:
-msgtoken_1D = _3e59+1
-        ; (jumps into the middle of this `bit` instruction)
-        bit $06a9
+       .bit
+
+msgtoken_1D:                                                            ;$3E5A
+        ;=======================================================================
+        lda # $06
         jsr set_cursor_row
         jsr _250b
         jmp msgtoken_0D

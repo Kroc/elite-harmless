@@ -179,7 +179,7 @@ _msg_index     .set 0
         .export .ident(.concat("MSG", msg_id)) = _msg_index
 
         .if _msg_index >= $81 && _msg_index <= $d6
-                .out .sprintf(": $%0.2x: MSG%s", _value, msg_id)
+                ;;.out .sprintf(": $%0.2x: MSG%s", _value, msg_id)
         .endif
 
         ; move to the next index number:
