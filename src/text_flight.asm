@@ -4,15 +4,17 @@
 ;===============================================================================
 .linecont+
 
-; canned messages!
-
-; https://xania.org/201406/elites-crazy-string-format
+; this file stores the more common strings, typically used when in 'flight'
+; mode, but this also includes some of the shared menu screens that can be
+; accessed either in flight or docked, such as player status. whilst this
+; string pool does contain much of the text on the planet status screen,
+; it doesn't include the planet description strings, that's a very complex
+; system and those are stored in the 'docked' string pool
 
 
 ; this is the 'key' used to scramble / unscramble the text token symbols
+; https://xania.org/201406/elites-crazy-string-format
 .export TXT_XOR := $23
-
-.segment        "TEXT_0700"
 
 .import _AL:direct      ;=$A3 XOR 35 =128 ($80)
 .import _LE:direct      ;=$A2 XOR 35 =129 ($81)
@@ -106,6 +108,8 @@ _word_index     .set 0
 .define .skip_word      _word_index .set _word_index + 1
 
 ;===============================================================================
+
+.segment        "TEXT_FLIGHT"
 
 _0700:  ;0.                                                             ;$0700
 .export _0700

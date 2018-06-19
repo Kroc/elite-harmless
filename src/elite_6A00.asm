@@ -10,7 +10,7 @@
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
 
-; from "text_0700.asm"
+; from "text_flight.asm"
 .import _0700:absolute
 .import _0ac0:absolute
 
@@ -2623,7 +2623,7 @@ print_token_string:                                                     ;$7834
         pha 
 
         ; get the 'key' used for de-scrambling the text
-        ; (see "text_0700.asm")
+        ; (see "text_flight.asm")
 .import TXT_XOR:direct
 
         lda [$5b], y            ; read a token

@@ -3,7 +3,13 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+; this file stores the strings typically used when docked (as well as the title
+; screen), but also the planet descriptions as those are highly complex and
+; there wasn't any room left in the commonly shared 'flight' strings
+
+
 ; this is the 'key' used to scramble / unscramble the message token symbols
+; https://xania.org/201406/elites-crazy-string-format
 .export MSG_XOR := $57
 
 .enum   msg_pairs
@@ -191,7 +197,7 @@ _msg_index     .set 0
 
 ;===============================================================================
 
-.segment        "TEXT_0E00"
+.segment        "TEXT_DOCKED"
 
 _0e00:
 .export _0e00

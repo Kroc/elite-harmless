@@ -6,11 +6,11 @@
 .include        "c64.asm"
 .include        "elite_consts.asm"
 
-; from "text_0700.asm"
+; from "text_flight.asm"
 .import _0ac0:absolute
 .import _0ae0:absolute
 
-; from "text_0E00.asm"
+; from "text_docked.asm"
 .import _0e00:absolute
 .import _1a27:absolute
 .import _1a41:absolute
@@ -303,9 +303,8 @@ _1eb3:
         
         jmp _1ece
 
-;===============================================================================
-
 _1ec1:
+;===============================================================================
 .export _1ec1
         lda $f900
         sta ZP_GOATSOUP_pt1     ;?
@@ -974,14 +973,16 @@ _2367:
 
 msgtoken_1B:                                                            ;$2372
         ;=======================================================================
-        ; print some message from msgtoken $D9(217)+?
+        ; print some message from msg index $D9(217)+?
+        ;
+        ; "CURRUTHERS" / "FOSDYKE_SMYTHE" / "FORTESQUE"
         ;
         lda # $d9
         bne _2378               ; always branches
 
 msgtoken_1C:                                                            ;$2376
         ;=======================================================================
-        ; print some message from msgtoken $DC(220)+?
+        ; print some message from msg index $DC(220)+?
         ; 
         lda # $dc
 _2378:
@@ -1017,7 +1018,7 @@ _237e:                                                                  ;$237E
 
 print_msg:                                                              ;$2390
 ;===============================================================================
-; prints one of the messages from TEXT_0E00, not to be
+; prints one of the messages from TEXT_DOCKED, not to be
 ; confused with the *other* text-printing routine :|
 ;
 ;       A = index of message to print, from message table
@@ -1058,13 +1059,13 @@ _skip_msg:                                                              ;$23A4
         eor # MSG_XOR           ;=$57 -- descramble token
         bne :+                  ; keep going if not a message terminator ($00)
         dex                     ; message has ended, decrement index
-        beq _read_token         ; if we've found our message, exit loop
+        beq _read_msgtoken      ; if we've found our message, exit loop
 :       iny                     ; move to next token                    ;$23AD
         bne _skip_msg           ; if we haven't crossed the page, keep going
         inc $5c                 ; move to the next page (256 bytes)
         bne _skip_msg           ; and continue
 
-_read_token:                                                            ;$23B4
+_read_msgtoken:                                                         ;$23B4
         ;-----------------------------------------------------------------------
         iny                     ; step over the terminator byte ($00)
         bne :+                  ; did we step over the page boundary?
@@ -1086,7 +1087,7 @@ _read_token:                                                            ;$23B4
         beq @rts                ; has message ended? (token $00)
 
         jsr print_msgtoken
-        jmp _read_token
+        jmp _read_msgtoken
 
 @rts:   ; finished printing, clean up and exit                          ;$23C5
         ;-----------------------------------------------------------------------
@@ -1099,14 +1100,17 @@ _read_token:                                                            ;$23B4
         pla 
         rts
 
-print_msgtoken:                                                         ;$23Cf
+print_msgtoken:                                                         ;$23CF
         ;=======================================================================
         cmp # ' '               ; tokens less than $20 (space)
        .blt _format_code        ; are format codes
         
-        bit _2f1a               ; is bit 7 of this flag off?
-        bpl _23e8               ; if so, process token
+        
+
+        bit msg_flight_flag     ; if flight string mode is off,
+        bpl :+                  ; skip the next bit
        
+       ; save state before we recurse
         tax 
         tya 
         pha 
@@ -1116,11 +1120,12 @@ print_msgtoken:                                                         ;$23Cf
         pha 
         txa 
 
+        ; print from the commonly shared 'flight' strings
         jsr print_token
         
         jmp _2438
 
-_23e8:                                                                  ;$23E8
+:                                                                       ;$23E8
         ;-----------------------------------------------------------------------
         cmp # 'z'+1             ; letters "A" to "Z"?
        .blt _2404               ; print letters, handling auto-casing
@@ -1287,15 +1292,14 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 
 msgtoken_01:                                                            ;$246A
         ;=======================================================================
-        lda # $00
+        lda # %00000000
        .bit
 
 msgtoken_02:                                                            ;$246D
         ;=======================================================================
 .export msgtoken_02
 
-        lda # $20
-
+        lda # %00100000
         sta msg_ucase
 
         lda # $00
@@ -1340,8 +1344,9 @@ msgtoken_06:                                                            ;$2496
 
 msgtoken_05:                                                            ;$249D
         ;=======================================================================
-        lda # $00
-        sta _2f1a
+        lda # %00000000
+        sta msg_flight_flag
+
         rts 
 
 msgtoken_0E:                                                            ;$24A3
@@ -1900,23 +1905,30 @@ _28d5:
         tax 
         rts 
 
-;===============================================================================
-
 _28d9:
+;===============================================================================
 .export _28d9
+
         jsr print_token
 
 msgtoken_0B:                                                            ;$28DC
-        ;=======================================================================
+;===============================================================================
 .export msgtoken_0B
+
         lda # $13
         bne _28e5
+
 _28e0:
+;===============================================================================
 .export _28e0
+
         lda # $17
         jsr cursor_down
+
 _28e5:
+;===============================================================================
 .export _28e5
+
         sta $6c
         sta $6e
         ldx # $00
@@ -1925,10 +1937,10 @@ _28e5:
         stx $6d
         jmp _ab91
 
-;===============================================================================
-
 _28f3:
+;===============================================================================
 .export _28f3
+
         jsr _811e
         sty $6c
         lda # $00
@@ -2987,11 +2999,14 @@ msg_ucase:                                                              ;$2F18
         ; a mask for converting a character A-Z to upper-case.
         ; this byte gets changed to 0 to neuter the effect
         .byte   %00100000
+
 _2f19:
 .export _2f19
         .byte   $ff
-_2f1a:
-        .byte   $00
+
+msg_flight_flag:                                                       ;$2F1A
+        .byte   %00000000
+
 _2f1b:
 .export _2f1b
         .byte   $00
@@ -3001,16 +3016,15 @@ _2f1c:
 _2f1d:
         .byte   $00
 
-;===============================================================================
-
 msg_lcase:                                                              ;$2F1E
         ; this byte is used to lower-case charcters, it's ANDed with the
         ; character value -- therefore its default value $FF does nothing.
-        ; this byte is changed to %11010000 to enable lower-casing, which
+        ; this byte is changed to %11011111 to enable lower-casing, which
         ; removes bit 5 ($20) from characters, e.g. $61 "A" > $41 "a"
         .byte   %11111111
 
 _2f1f:
+;===============================================================================
 .export _2f1f
         lda # $0c
        .bit
@@ -5576,9 +5590,13 @@ msgtoken_1D:                                                            ;$3E5A
         ;=======================================================================
         lda # $06
         jsr set_cursor_row
+
         jsr _250b
+        
         jmp msgtoken_0D
-_3e65:                                                                  ;$3e65
+
+_3e65:                                                                  ;$3E65
+        ;-----------------------------------------------------------------------
         lda # $50
         sta $0c
         lda # $00
@@ -5595,8 +5613,10 @@ msgtoken_18:                                                            ;$3E7C
         ;=======================================================================
         jsr _8d53
         bne msgtoken_18
+
         jsr _8d53
         beq msgtoken_18
+        
         rts 
 
 ;===============================================================================
@@ -5638,7 +5658,7 @@ _3ea1:                                                                  ;$3ea1
 ; unused / unreferenced?
 
 ; note that these could be a part of the planet description templates
-; in the "TEXT_PDESC" segement in "text_0E00.asm"
+; in the "TEXT_PDESC" segement in "text_docked.asm"
 
 ;$3EA8:
 
