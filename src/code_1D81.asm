@@ -1142,6 +1142,10 @@ print_msgtoken:                                                         ;$23CF
         
         ; tokens $D7 and above:
         ; (character pairs)
+
+.import _254c
+.import _254d
+
         sbc # $d7               ; re-index as $00...$28
         asl                     ; double, for lookup-table
         pha                     ; (put aside)
@@ -1418,6 +1422,8 @@ _24d7:
         and # %00111110
         tax 
 
+.import _254e
+
         lda _254e+0, x
         jsr _2404
         
@@ -1458,46 +1464,6 @@ _24f3:
         clc 
 _250a:  rts 
 _250b:  rts 
-
-;===============================================================================
-
-.segment        "TEXT_PAIRS"
-
-; message compression character pairs:
-;-------------------------------------------------------------------------------
-
-_254c:
-.export _254c
-
-        .byte   $0c
-_254d:
-.export _254d
-
-        .byte   $0a
-_254e:
-.export _254e
-
-        .byte   "ab", "ou", "se", "it"
-        .byte   "il", "et", "st", "on"
-        .byte   "lo", "nu", "th", "no"
-
-
-; text compression character pairs:
-;-------------------------------------------------------------------------------
-
-char_pairs:                                                             ;$2566
-.export char_pairs
-.export char_pair1      := char_pairs+0
-.export char_pair2      := char_pairs+1
-
-        .byte   "al", "le", "xe", "ge"
-        .byte   "za", "ce", "bi", "so"
-        .byte   "us", "es", "ar", "ma"
-        .byte   "in", "di", "re", "a?"
-        .byte   "er", "at", "en", "be"
-        .byte   "ra", "la", "ve", "ti"
-        .byte   "ed", "or", "qu", "an"
-        .byte   "te", "is", "ri", "on"
 
 ;===============================================================================
 

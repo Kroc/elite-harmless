@@ -18,6 +18,8 @@
 ; all tokens on disk are scrambled in this way:
 .define .encrypt(value) value ^ TXT_DOCKED_XOR
 
+;-------------------------------------------------------------------------------
+
 .segment "TEXT_TOKENS"
 
 _250c:

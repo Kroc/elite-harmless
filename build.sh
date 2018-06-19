@@ -59,6 +59,8 @@ echo "- assemble 'code_1D00.asm'"
 $ca65 -o build/code_1D00.o      src/code_1D00.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 -o build/code_1D81.o      src/code_1D81.asm
+echo "- assemble 'text_pairs.asm'"
+$ca65 -o build/text_pairs.o     src/text_pairs.asm
 echo "- assemble 'elite_init.asm'"
 $ca65 -o build/elite_init.o     src/elite_init.asm
 echo "- assemble 'gfx_sprites.asm'"
@@ -82,6 +84,7 @@ $ld65 \
        -o bin/elite-dx.prg \
     --obj build/prgheader.o \
     --obj build/elite_memory.o \
+    --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
     --obj build/code_1D00.o \
@@ -130,6 +133,7 @@ $ld65 \
     --obj build/loader/stage5.o \
     --obj build/loader/stage6.o \
     --obj build/loader/gma4_7C3A.o \
+    --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
     --obj build/code_1D00.o \
