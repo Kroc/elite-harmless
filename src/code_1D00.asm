@@ -3,7 +3,7 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
-; unknown data table / scratch area
+; unknown variable space
 
 .export _1d01
 .export _1d02
@@ -27,7 +27,7 @@
 .export _1d14
 .export _1d21
 
-.segment        "DATA_1D00"
+.segment        "CODE_1D00"
 
 
 _1d00:  ; nothing appears to actually reference $1D00 itself            ;$1D00

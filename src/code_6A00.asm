@@ -14,7 +14,7 @@
 .import _0700:absolute
 .import _0ac0:absolute
 
-; from "data_1D00.asm"
+; from "code_1D00.asm"
 .import _1d01:absolute
 .import _1d02:absolute
 .import _1d03:absolute
@@ -35,7 +35,7 @@
 .import _1d14:absolute
 .import _1d21:absolute
 
-; from "elite_1D81.asm"
+; from "code_1D81.asm"
 .import _1ec1:absolute
 .import _202f:absolute
 .import _2367:absolute
@@ -12088,7 +12088,7 @@ _b70d:
 
 ;===============================================================================
 
-.segment        "DATA_6A00"
+.segment        "DATA_B70E"
 
 _b70e:                                                                  ;$b70e
         .byte   $60, $05, $0e, $17, $20, $2f, $44, $5b                  ;$b70e

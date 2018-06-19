@@ -15,12 +15,12 @@
 .import _1a27:absolute
 .import _1a41:absolute
 
-; from "data_1D00.asm"
+; from "code_1D00.asm"
 .import _1d06:absolute
 .import _1d07:absolute
 .import _1d09:absolute
 
-; from "elite_6A00.asm"
+; from "code_6A00.asm"
 .import _6a00:absolute
 .import set_cursor_col:absolute
 .import set_cursor_row:absolute
@@ -130,7 +130,7 @@
 
 ;-------------------------------------------------------------------------------
 
-.segment        "CODE_1D00"
+.segment        "CODE_1D81"
 
 _1d81:                                                                  ;$1d81
         jsr _83df

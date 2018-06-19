@@ -55,16 +55,16 @@ echo "- assemble 'gfx_font.asm'"
 $ca65 -o build/gfx_font.o       src/gfx/font.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 -o build/text_docked.o    src/text_docked.asm
-echo "- assemble 'data_1D00.asm'"
-$ca65 -o build/data_1D00.o      src/data_1D00.asm
-echo "- assemble 'elite_1D81.asm'"
-$ca65 -o build/elite_1D81.o     src/elite_1D81.asm
+echo "- assemble 'code_1D00.asm'"
+$ca65 -o build/code_1D00.o      src/code_1D00.asm
+echo "- assemble 'code_1D81.asm'"
+$ca65 -o build/code_1D81.o      src/code_1D81.asm
 echo "- assemble 'elite_init.asm'"
 $ca65 -o build/elite_init.o     src/elite_init.asm
 echo "- assemble 'gfx_sprites.asm'"
 $ca65 -o build/gfx_sprites.o    src/gfx/sprites.asm
-echo "- assemble 'elite_6A00.asm'"
-$ca65 -o build/elite_6A00.o     src/elite_6A00.asm
+echo "- assemble 'code_6A00.asm'"
+$ca65 -o build/code_6A00.o      src/code_6A00.asm
 echo "- assemble 'gfx_hulls.asm'"
 $ca65 -o build/gfx_hulls.o      src/gfx/hulls.asm
 echo "- assemble 'gfx_hud.asm'"
@@ -84,9 +84,9 @@ $ld65 \
     --obj build/elite_memory.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
-    --obj build/data_1D00.o \
-    --obj build/elite_1D81.o \
-    --obj build/elite_6A00.o \
+    --obj build/code_1D00.o \
+    --obj build/code_1D81.o \
+    --obj build/code_6A00.o \
     --obj build/gfx_font.o \
     --obj build/gfx_sprites.o \
     --obj build/gfx_hulls.o \
@@ -132,10 +132,10 @@ $ld65 \
     --obj build/loader/gma4_7C3A.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
-    --obj build/data_1D00.o \
+    --obj build/code_1D00.o \
     --obj build/elite_init.o \
-    --obj build/elite_1D81.o \
-    --obj build/elite_6A00.o \
+    --obj build/code_1D81.o \
+    --obj build/code_6A00.o \
     --obj build/gfx_font.o \
     --obj build/gfx_sprites.o \
     --obj build/gfx_hud.o \
