@@ -973,6 +973,8 @@ _2367:
 
 msgtoken_1B:                                                            ;$2372
         ;=======================================================================
+.export msgtoken_1B
+
         ; print some message from msg index $D9(217)+?
         ;
         ; "CURRUTHERS" / "FOSDYKE_SMYTHE" / "FORTESQUE"
@@ -984,6 +986,8 @@ msgtoken_1C:                                                            ;$2376
         ;=======================================================================
         ; print some message from msg index $DC(220)+?
         ; 
+.export msgtoken_1C
+
         lda # $dc
 _2378:
         clc 
@@ -1229,6 +1233,8 @@ _format_code:                                                           ;$241B
 
         ; we read an address from the table and rewrite a `jsr` instruction
         ; further down, i.e. the token is a lookup to a routine to call
+.import _250c
+
         lda _250c - 2, x
         sta @jsr + 1
         lda _250c - 1, x
@@ -1292,6 +1298,8 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 
 msgtoken_01:                                                            ;$246A
         ;=======================================================================
+.export msgtoken_01
+
         lda # %00000000
        .bit
 
@@ -1308,6 +1316,8 @@ msgtoken_02:                                                            ;$246D
 
 msgtoken_08:                                                            ;$2478
         ;=======================================================================
+.export msgtoken_08
+
         lda # 6
         jsr set_cursor_col
 
@@ -1318,6 +1328,8 @@ msgtoken_08:                                                            ;$2478
 
 msgtoken_09:                                                            ;$2483
         ;=======================================================================
+.export msgtoken_09
+
         lda # 1
         jsr set_cursor_col
 
@@ -1325,6 +1337,8 @@ msgtoken_09:                                                            ;$2483
 
 msgtoken_0D:                                                            ;$248B
         ;=======================================================================
+.export msgtoken_0D
+        
         ; enable the change-case flag?
         lda # $80
         sta _2f1d
@@ -1337,6 +1351,8 @@ msgtoken_0D:                                                            ;$248B
 
 msgtoken_06:                                                            ;$2496
         ;=======================================================================
+.export msgtoken_06
+        
         lda # $80
         sta $34
         lda # $ff
@@ -1344,6 +1360,8 @@ msgtoken_06:                                                            ;$2496
 
 msgtoken_05:                                                            ;$249D
         ;=======================================================================
+.export msgtoken_05
+
         lda # %00000000
         sta msg_flight_flag
 
@@ -1351,6 +1369,8 @@ msgtoken_05:                                                            ;$249D
 
 msgtoken_0E:                                                            ;$24A3
         ;=======================================================================
+.export msgtoken_0E
+
         lda # $80
        .bit
 
@@ -1366,6 +1386,8 @@ msgtoken_0F:                                                            ;$24A6
 
 msgtoken_11:                                                            ;$24B0
         ;=======================================================================
+.export msgtoken_11
+
         lda $34
         and # %10111111         ;=$BF
         sta $34
@@ -1384,6 +1406,8 @@ _24c9:
 
 msgtoken_12:                                                            ;$24CE
         ;=======================================================================
+.export msgtoken_12
+
         jsr msgtoken_set_lowercase
 
         jsr get_random_number
@@ -1407,6 +1431,8 @@ _24d7:
 
 msgtoken_set_lowercase:                                                 ;$24ED
         ;=======================================================================
+.export msgtoken_set_lowercase
+        
         ; msg token $13
         ;
         lda # %11011111
@@ -1434,48 +1460,6 @@ _250a:  rts
 _250b:  rts 
 
 ;===============================================================================
-
-.segment "TEXT_TOKENS"
-
-_250c:
-.export _250c
-
-        .addr   msgtoken_01             ; msg token $01
-        .addr   msgtoken_02             ; msg token $02
-        .addr   print_token             ; msg token $03
-        .addr   print_token             ; msg token $04
-        .addr   msgtoken_05             ; msg token $05
-        .addr   msgtoken_06             ; msg token $06
-        .addr   print_char              ; msg token $07
-        .addr   msgtoken_08             ; msg token $08
-        .addr   msgtoken_09             ; msg token $09
-        .addr   print_char              ; msg token $0A
-        .addr   msgtoken_0B             ; msg token $0B
-        .addr   print_char              ; msg token $0C
-        .addr   msgtoken_0D             ; msg token $0D
-        .addr   msgtoken_0E             ; msg token $0E
-        .addr   msgtoken_0F             ; msg token $0F
-        .addr   msgtoken_10             ; msg token $10
-        .addr   msgtoken_11             ; msg token $11
-        .addr   msgtoken_12             ; msg token $12
-        .addr   msgtoken_set_lowercase  ; msg token $13
-        .addr   print_char              ; msg token $14
-        .addr   msgtoken_15             ; msg token $15
-        .addr   msgtoken_16             ; msg token $16
-        .addr   msgtoken_17             ; msg token $17
-        .addr   msgtoken_18             ; msg token $18
-        .addr   msgtoken_19             ; msg token $19
-        .addr   msgtoken_1A             ; msg token $1A
-        .addr   msgtoken_1B             ; msg token $1B
-        .addr   msgtoken_1C             ; msg token $1C
-        .addr   msgtoken_1D             ; msg token $1D
-        .addr   msgtoken_1E             ; msg token $1E
-        .addr   msgtoken_1F             ; msg token $1F
-        
-        ; msg token for print space. this table is not
-        ; used for this as token $20 is handled already
-        .addr   print_char              ; msg token $20
-
 
 .segment        "TEXT_PAIRS"
 
@@ -2975,6 +2959,8 @@ _2f1f:
 
 msgtoken_10:                                                            ;$2F22
         ;=======================================================================
+.export msgtoken_10
+
         lda # $41
 
 print_char:                                                             ;$2F24
@@ -5506,6 +5492,8 @@ _3e31:                                                                  ;$3e31
         
 msgtoken_19:                                                            ;$3E37
         ;=======================================================================
+.export msgtoken_19
+
         lda # $d8
         jsr print_msg
 
@@ -5514,6 +5502,8 @@ msgtoken_19:                                                            ;$3E37
 
 msgtoken_16:                                                            ;$3E41
         ;=======================================================================
+.export msgtoken_16
+        
         jsr _3e65
         bne msgtoken_16
 _3e46:                                                                  ;$3e46
@@ -5527,11 +5517,15 @@ _3e46:                                                                  ;$3e46
 
 msgtoken_17:                                                            ;$3E57  
         ;=======================================================================
+.export msgtoken_17
+
         lda # $0a
        .bit
 
 msgtoken_1D:                                                            ;$3E5A
         ;=======================================================================
+.export msgtoken_1D
+
         lda # $06
         jsr set_cursor_row
 
@@ -5555,6 +5549,8 @@ _3e65:                                                                  ;$3E65
 
 msgtoken_18:                                                            ;$3E7C
         ;=======================================================================
+.export msgtoken_18
+        
         jsr _8d53
         bne msgtoken_18
 

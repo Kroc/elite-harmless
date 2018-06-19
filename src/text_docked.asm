@@ -18,6 +18,75 @@
 ; all tokens on disk are scrambled in this way:
 .define .encrypt(value) value ^ TXT_DOCKED_XOR
 
+.segment "TEXT_TOKENS"
+
+_250c:
+.export _250c
+        .import msgtoken_01
+        .addr   msgtoken_01             ; msg token $01
+        .import msgtoken_02
+        .addr   msgtoken_02             ; msg token $02
+        .import print_token
+        .addr   print_token             ; msg token $03
+        .addr   print_token             ; msg token $04
+        .import msgtoken_05
+        .addr   msgtoken_05             ; msg token $05
+        .import msgtoken_06
+        .addr   msgtoken_06             ; msg token $06
+        .import print_char
+        .addr   print_char              ; msg token $07
+        .import msgtoken_08
+        .addr   msgtoken_08             ; msg token $08
+        .import msgtoken_09
+        .addr   msgtoken_09             ; msg token $09
+        .addr   print_char              ; msg token $0A
+        .import msgtoken_0B
+        .addr   msgtoken_0B             ; msg token $0B
+        .addr   print_char              ; msg token $0C
+        .import msgtoken_0D
+        .addr   msgtoken_0D             ; msg token $0D
+        .import msgtoken_0E
+        .addr   msgtoken_0E             ; msg token $0E
+        .import msgtoken_0F
+        .addr   msgtoken_0F             ; msg token $0F
+        .import msgtoken_10
+        .addr   msgtoken_10             ; msg token $10
+        .import msgtoken_11
+        .addr   msgtoken_11             ; msg token $11
+        .import msgtoken_12
+        .addr   msgtoken_12             ; msg token $12
+        .import msgtoken_set_lowercase
+        .addr   msgtoken_set_lowercase  ; msg token $13
+        .addr   print_char              ; msg token $14
+        .import msgtoken_15
+        .addr   msgtoken_15             ; msg token $15
+        .import msgtoken_16
+        .addr   msgtoken_16             ; msg token $16
+        .import msgtoken_17
+        .addr   msgtoken_17             ; msg token $17
+        .import msgtoken_18
+        .addr   msgtoken_18             ; msg token $18
+        .import msgtoken_19
+        .addr   msgtoken_19             ; msg token $19
+        .import msgtoken_1A
+        .addr   msgtoken_1A             ; msg token $1A
+        .import msgtoken_1B
+        .addr   msgtoken_1B             ; msg token $1B
+        .import msgtoken_1C
+        .addr   msgtoken_1C             ; msg token $1C
+        .import msgtoken_1D
+        .addr   msgtoken_1D             ; msg token $1D
+        .import msgtoken_1E
+        .addr   msgtoken_1E             ; msg token $1E
+        .import msgtoken_1F
+        .addr   msgtoken_1F             ; msg token $1F
+        
+        ; msg token for print space. this table is not
+        ; used for this as token $20 is handled already
+        .addr   print_char              ; msg token $20
+
+;-------------------------------------------------------------------------------
+
 .enum   docked_pairs
         AB               =$D8
         OU              ;=$D9
