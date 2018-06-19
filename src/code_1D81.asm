@@ -1435,7 +1435,11 @@ _250b:  rts
 
 ;===============================================================================
 
+.segment "TEXT_TOKENS"
+
 _250c:
+.export _250c
+
         .addr   msgtoken_01             ; msg token $01
         .addr   msgtoken_02             ; msg token $02
         .addr   print_token             ; msg token $03
@@ -1473,14 +1477,22 @@ _250c:
         .addr   print_char              ; msg token $20
 
 
+.segment        "TEXT_PAIRS"
+
 ; message compression character pairs:
 ;-------------------------------------------------------------------------------
 
 _254c:
+.export _254c
+
         .byte   $0c
 _254d:
+.export _254d
+
         .byte   $0a
 _254e:
+.export _254e
+
         .byte   "ab", "ou", "se", "it"
         .byte   "il", "et", "st", "on"
         .byte   "lo", "nu", "th", "no"
@@ -1504,6 +1516,8 @@ char_pairs:                                                             ;$2566
         .byte   "te", "is", "ri", "on"
 
 ;===============================================================================
+
+.segment "CODE_25A6"
 
 _25a6:
 .export _25a6
