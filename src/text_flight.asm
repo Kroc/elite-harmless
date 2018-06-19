@@ -14,73 +14,111 @@
 
 ; this is the 'key' used to scramble / unscramble the text token symbols
 ; https://xania.org/201406/elites-crazy-string-format
-.export TXT_XOR := $23
+.export TXT_FLIGHT_XOR := $23
 
-.import _AL:direct      ;=$A3 XOR 35 =128 ($80)
-.import _LE:direct      ;=$A2 XOR 35 =129 ($81)
-.import _XE:direct      ;=$A1 XOR 35 =130 ($82)
-.import _GE:direct      ;=$A0 XOR 35 =131 ($83)
-.import _ZA:direct      ;=$A7 XOR 35 =132 ($84)
-.import _CE:direct      ;=$A6 XOR 35 =133 ($85)
-.import _BI:direct      ;=$A5 XOR 35 =134 ($86)
-.import _SO:direct      ;=$A4 XOR 35 =135 ($87)
-.import _US:direct      ;=$AB XOR 35 =136 ($88)
-.import _ES:direct      ;=$AA XOR 35 =137 ($89)
-.import _AR:direct      ;=$A9 XOR 35 =138 ($8A)
-.import _MA:direct      ;=$A8 XOR 35 =139 ($8B)
-.import _IN:direct      ;=$AF XOR 35 =140 ($8C)
-.import _DI:direct      ;=$AE XOR 35 =141 ($8D)
-.import _RE:direct      ;=$AD XOR 35 =142 ($8E)
-.import _ER:direct      ;=$B3 XOR 35 =144 ($90)
-.import _AT:direct      ;=$B2 XOR 35 =145 ($91)
-.import _EN:direct      ;=$B1 XOR 35 =146 ($92)
-.import _BE:direct      ;=$B0 XOR 35 =147 ($93)
-.import _RA:direct      ;=$B7 XOR 35 =148 ($94)
-.import _LA:direct      ;=$B6 XOR 35 =149 ($95)
-.import _VE:direct      ;=$B5 XOR 35 =150 ($96)
-.import _TI:direct      ;=$B4 XOR 35 =151 ($97)
-.import _ED:direct      ;=$BB XOR 35 =152 ($98)
-.import _OR:direct      ;=$BA XOR 35 =153 ($99)
-.import _QU:direct      ;=$B9 XOR 35 =154 ($9A)
-.import _AN:direct      ;=$B8 XOR 35 =155 ($9B)
-.import _TE:direct      ;=$BF XOR 35 =156 ($9C)
-.import _IS:direct      ;=$BE XOR 35 =157 ($9D)
-.import _RI:direct      ;=$BD XOR 35 =158 ($9E)
-.import _ON:direct      ;=$BC XOR 35 =159 ($9F)
+; all tokens on disk are scrambled in this way:
+.define .encrypt(value) value ^ TXT_FLIGHT_XOR
+
+
+.enum   pairs
+        _AL              =128 ;($80)
+        _LE             ;=129  ($81)
+        _XE             ;=130  ($82)
+        _GE             ;=131  ($83)
+        _ZA             ;=132  ($84)
+        _CE             ;=133  ($85)
+        _BI             ;=134  ($86)
+        _SO             ;=135  ($87)
+        _US             ;=136  ($88)
+        _ES             ;=137  ($89)
+        _AR             ;=138  ($8A)
+        _MA             ;=139  ($8B)
+        _IN             ;=140  ($8C)
+        _DI             ;=141  ($8D)
+        _RE             ;=142  ($8E)
+        _A              ;=143  ($8F) note: second character is ignored
+        _ER             ;=144  ($90)
+        _AT             ;=145  ($91)
+        _EN             ;=146  ($92)
+        _BE             ;=147  ($93)
+        _RA             ;=148  ($94)
+        _LA             ;=149  ($95)
+        _VE             ;=150  ($96)
+        _TI             ;=151  ($97)
+        _ED             ;=152  ($98)
+        _OR             ;=153  ($99)
+        _QU             ;=154  ($9A)
+        _AN             ;=155  ($9B)
+        _TE             ;=156  ($9C)
+        _IS             ;=157  ($9D)
+        _RI             ;=158  ($9E)
+        _ON             ;=159  ($9F)
+.endenum
+
+_AL             = .encrypt( pairs::_AL )        ;=$A3
+_LE             = .encrypt( pairs::_LE )        ;=$A2
+_XE             = .encrypt( pairs::_XE )        ;=$A1
+_GE             = .encrypt( pairs::_GE )        ;=$A0
+_ZA             = .encrypt( pairs::_ZA )        ;=$A7
+_CE             = .encrypt( pairs::_CE )        ;=$A6
+_BI             = .encrypt( pairs::_BI )        ;=$A5
+_SO             = .encrypt( pairs::_SO )        ;=$A4
+_US             = .encrypt( pairs::_US )        ;=$AB
+_ES             = .encrypt( pairs::_ES )        ;=$AA
+_AR             = .encrypt( pairs::_AR )        ;=$A9
+_MA             = .encrypt( pairs::_MA )        ;=$A8
+_IN             = .encrypt( pairs::_IN )        ;=$AF
+_DI             = .encrypt( pairs::_DI )        ;=$AE
+_RE             = .encrypt( pairs::_RE )        ;=$AD
+_A              = .encrypt( pairs::_A  )        ;=$AC
+_ER             = .encrypt( pairs::_ER )        ;=$B3
+_AT             = .encrypt( pairs::_AT )        ;=$B2
+_EN             = .encrypt( pairs::_EN )        ;=$B1
+_BE             = .encrypt( pairs::_BE )        ;=$B0
+_RA             = .encrypt( pairs::_RA )        ;=$B7
+_LA             = .encrypt( pairs::_LA )        ;=$B6
+_VE             = .encrypt( pairs::_VE )        ;=$B5
+_TI             = .encrypt( pairs::_TI )        ;=$B4
+_ED             = .encrypt( pairs::_ED )        ;=$BB
+_OR             = .encrypt( pairs::_OR )        ;=$BA
+_QU             = .encrypt( pairs::_QU )        ;=$B9
+_AN             = .encrypt( pairs::_AN )        ;=$B8
+_TE             = .encrypt( pairs::_TE )        ;=$BF
+_IS             = .encrypt( pairs::_IS )        ;=$BE
+_RI             = .encrypt( pairs::_RI )        ;=$BD
+_ON             = .encrypt( pairs::_ON )        ;=$BC
 
 __end           = $00
-__              = $20 ^ TXT_XOR ;=$03
-_DOT            = $2E ^ TXT_XOR ;=$0D
-A_              = $41 ^ TXT_XOR ;=$62
-B_              = $42 ^ TXT_XOR ;=$61
-C_              = $43 ^ TXT_XOR ;=$60
-D_              = $44 ^ TXT_XOR ;=$67
-E_              = $45 ^ TXT_XOR ;=$66
-F_              = $46 ^ TXT_XOR ;=$65
-G_              = $47 ^ TXT_XOR ;=$64
-H_              = $48 ^ TXT_XOR ;=$6b
-I_              = $49 ^ TXT_XOR ;=$6a
-J_              = $4a ^ TXT_XOR ;=$69
-K_              = $4b ^ TXT_XOR ;=$68
-L_              = $4c ^ TXT_XOR ;=$6f
-M_              = $4d ^ TXT_XOR ;=$6e
-N_              = $4e ^ TXT_XOR ;=$6d
-O_              = $4f ^ TXT_XOR ;=$6c
-P_              = $50 ^ TXT_XOR ;=$73
-Q_              = $51 ^ TXT_XOR ;=$72
-R_              = $52 ^ TXT_XOR ;=$71
-S_              = $53 ^ TXT_XOR ;=$70
-T_              = $54 ^ TXT_XOR ;=$77
-U_              = $55 ^ TXT_XOR ;=$76
-V_              = $56 ^ TXT_XOR ;=$75
-W_              = $57 ^ TXT_XOR ;=$74
-X_              = $58 ^ TXT_XOR ;=$7b
-Y_              = $59 ^ TXT_XOR ;=$7a
-Z_              = $5a ^ TXT_XOR ;=$79
-_HYPHEN         = $2d ^ TXT_XOR ;=$0E
-_COLON          = $3a ^ TXT_XOR ;=$19
-
-;===============================================================================
+__              = .encrypt ( $20 )              ;=$03
+_DOT            = .encrypt ( $2E )              ;=$0D
+A_              = .encrypt ( $41 )              ;=$62
+B_              = .encrypt ( $42 )              ;=$61
+C_              = .encrypt ( $43 )              ;=$60
+D_              = .encrypt ( $44 )              ;=$67
+E_              = .encrypt ( $45 )              ;=$66
+F_              = .encrypt ( $46 )              ;=$65
+G_              = .encrypt ( $47 )              ;=$64
+H_              = .encrypt ( $48 )              ;=$6b
+I_              = .encrypt ( $49 )              ;=$6a
+J_              = .encrypt ( $4a )              ;=$69
+K_              = .encrypt ( $4b )              ;=$68
+L_              = .encrypt ( $4c )              ;=$6f
+M_              = .encrypt ( $4d )              ;=$6e
+N_              = .encrypt ( $4e )              ;=$6d
+O_              = .encrypt ( $4f )              ;=$6c
+P_              = .encrypt ( $50 )              ;=$73
+Q_              = .encrypt ( $51 )              ;=$72
+R_              = .encrypt ( $52 )              ;=$71
+S_              = .encrypt ( $53 )              ;=$70
+T_              = .encrypt ( $54 )              ;=$77
+U_              = .encrypt ( $55 )              ;=$76
+V_              = .encrypt ( $56 )              ;=$75
+W_              = .encrypt ( $57 )              ;=$74
+X_              = .encrypt ( $58 )              ;=$7b
+Y_              = .encrypt ( $59 )              ;=$7a
+Z_              = .encrypt ( $5a )              ;=$79
+_HYPHEN         = .encrypt ( $2d )              ;=$0E
+_COLON          = .encrypt ( $3a )              ;=$19
 
 _word_index     .set 0
 
@@ -92,19 +130,20 @@ _word_index     .set 0
         _word_index .set _word_index + 1
 
         .if _word_index < 96
-                _value .set ($A0 + _word_index) ^ TXT_XOR
+                _value .set .encrypt ($A0 + _word_index )
 
         .elseif _word_index < 128
-                _value .set _word_index ^ TXT_XOR
+                _value .set .encrypt( _word_index )
         .else
-                _value .set ((_word_index - $72)) ^ TXT_XOR
+                _value .set .encrypt( _word_index - $72 )
         .endif
 
         ;;.out .sprintf(": $%0.2x: TXT%s", _value, word_id)
         .ident(word_id) = _value
 
-        .export .ident(.concat("TXT", word_id)) = _value ^ TXT_XOR
+        .export .ident(.concat("TXT", word_id)) = .encrypt( _value )
 .endmacro
+
 .define .skip_word      _word_index .set _word_index + 1
 
 ;===============================================================================

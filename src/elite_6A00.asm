@@ -2624,10 +2624,10 @@ print_token_string:                                                     ;$7834
 
         ; get the 'key' used for de-scrambling the text
         ; (see "text_flight.asm")
-.import TXT_XOR:direct
+.import TXT_FLIGHT_XOR:direct
 
         lda [$5b], y            ; read a token
-        eor # TXT_XOR           ; 'descramble' token
+        eor # TXT_FLIGHT_XOR    ; 'descramble' token
         jsr print_token         ; process it
 
         ; restore the previous page

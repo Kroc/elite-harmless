@@ -1053,10 +1053,10 @@ _skip_msg:                                                              ;$23A4
         ; skip over the messages until we find the one we want:
         ; -- this is insane!
         ;
-.import MSG_XOR:direct
+.import TXT_DOCKED_XOR:direct
 
         lda [$5b], y
-        eor # MSG_XOR           ;=$57 -- descramble token
+        eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
         bne :+                  ; keep going if not a message terminator ($00)
         dex                     ; message has ended, decrement index
         beq _read_msgtoken      ; if we've found our message, exit loop
@@ -1083,7 +1083,7 @@ _read_msgtoken:                                                         ;$23B4
         ; $D7-$FF = some pre-defined character pairs
         ;
         lda [$5b], y            ; read a token
-        eor # MSG_XOR           ;=$57 -- descramble token
+        eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
         beq @rts                ; has message ended? (token $00)
 
         jsr print_msgtoken
@@ -1493,76 +1493,6 @@ char_pairs:                                                             ;$2566
 .export char_pairs
 .export char_pair1      := char_pairs+0
 .export char_pair2      := char_pairs+1
-
-.import TXT_XOR:direct
-
-.enum   pairs
-        _AL              =128 ;($80)
-        _LE             ;=129  ($81)
-        _XE             ;=130  ($82)
-        _GE             ;=131  ($83)
-        _ZA             ;=132  ($84)
-        _CE             ;=133  ($85)
-        _BI             ;=134  ($86)
-        _SO             ;=135  ($87)
-        _US             ;=136  ($88)
-        _ES             ;=137  ($89)
-        _AR             ;=138  ($8A)
-        _MA             ;=139  ($8B)
-        _IN             ;=140  ($8C)
-        _DI             ;=141  ($8D)
-        _RE             ;=142  ($8E)
-        _A              ;=143  ($8F) note: second character is ignored
-        _ER             ;=144  ($90)
-        _AT             ;=145  ($91)
-        _EN             ;=146  ($92)
-        _BE             ;=147  ($93)
-        _RA             ;=148  ($94)
-        _LA             ;=149  ($95)
-        _VE             ;=150  ($96)
-        _TI             ;=151  ($97)
-        _ED             ;=152  ($98)
-        _OR             ;=153  ($99)
-        _QU             ;=154  ($9A)
-        _AN             ;=155  ($9B)
-        _TE             ;=156  ($9C)
-        _IS             ;=157  ($9D)
-        _RI             ;=158  ($9E)
-        _ON             ;=159  ($9F)
-.endenum
-
-.export _AL := pairs::_AL ^ TXT_XOR  ;=$A3
-.export _LE := pairs::_LE ^ TXT_XOR  ;=$A2
-.export _XE := pairs::_XE ^ TXT_XOR  ;=$A1
-.export _GE := pairs::_GE ^ TXT_XOR  ;=$A0
-.export _ZA := pairs::_ZA ^ TXT_XOR  ;=$A7
-.export _CE := pairs::_CE ^ TXT_XOR  ;=$A6
-.export _BI := pairs::_BI ^ TXT_XOR  ;=$A5
-.export _SO := pairs::_SO ^ TXT_XOR  ;=$A4
-.export _US := pairs::_US ^ TXT_XOR  ;=$AB
-.export _ES := pairs::_ES ^ TXT_XOR  ;=$AA
-.export _AR := pairs::_AR ^ TXT_XOR  ;=$A9
-.export _MA := pairs::_MA ^ TXT_XOR  ;=$A8
-.export _IN := pairs::_IN ^ TXT_XOR  ;=$AF
-.export _DI := pairs::_DI ^ TXT_XOR  ;=$AE
-.export _RE := pairs::_RE ^ TXT_XOR  ;=$AD
-.export _A  := pairs::_A  ^ TXT_XOR  ;=$AC
-.export _ER := pairs::_ER ^ TXT_XOR  ;=$B3
-.export _AT := pairs::_AT ^ TXT_XOR  ;=$B2
-.export _EN := pairs::_EN ^ TXT_XOR  ;=$B1
-.export _BE := pairs::_BE ^ TXT_XOR  ;=$B0
-.export _RA := pairs::_RA ^ TXT_XOR  ;=$B7
-.export _LA := pairs::_LA ^ TXT_XOR  ;=$B6
-.export _VE := pairs::_VE ^ TXT_XOR  ;=$B5
-.export _TI := pairs::_TI ^ TXT_XOR  ;=$B4
-.export _ED := pairs::_ED ^ TXT_XOR  ;=$BB
-.export _OR := pairs::_OR ^ TXT_XOR  ;=$BA
-.export _QU := pairs::_QU ^ TXT_XOR  ;=$B9
-.export _AN := pairs::_AN ^ TXT_XOR  ;=$B8
-.export _TE := pairs::_TE ^ TXT_XOR  ;=$BF
-.export _IS := pairs::_IS ^ TXT_XOR  ;=$BE
-.export _RI := pairs::_RI ^ TXT_XOR  ;=$BD
-.export _ON := pairs::_ON ^ TXT_XOR  ;=$BC
 
         .byte   "al", "le", "xe", "ge"
         .byte   "za", "ce", "bi", "so"

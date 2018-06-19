@@ -7,12 +7,18 @@
 ; screen), but also the planet descriptions as those are highly complex and
 ; there wasn't any room left in the commonly shared 'flight' strings
 
+; it's important to note that these strings use an entirely different set of
+; encrypted, compressed tokens than the flight strings, but can also include
+; flight strings when needed. needless to say, it's complex
 
-; this is the 'key' used to scramble / unscramble the message token symbols
+; this is the 'key' used to scramble / unscramble the docked token symbols
 ; https://xania.org/201406/elites-crazy-string-format
-.export MSG_XOR := $57
+.export TXT_DOCKED_XOR := $57
 
-.enum   msg_pairs
+; all tokens on disk are scrambled in this way:
+.define .encrypt(value) value ^ TXT_DOCKED_XOR
+
+.enum   docked_pairs
         AB               =$D8
         OU              ;=$D9
         SE              ;=$DA
@@ -54,118 +60,121 @@
         OR              ;=$FD
         QU              ;=$FE
         AN              ;=$FF
+
+        ; we run out of tokens here, even though there
+        ; are a few letter-pairs remaining in the table
         ;;TE
         ;;IS
         ;;RI
         ;;ON
 .endenum
 
-_AB             = msg_pairs::AB ^ MSG_XOR ;=$8F
-_OU             = msg_pairs::OU ^ MSG_XOR ;=$8E
-_SE             = msg_pairs::SE ^ MSG_XOR ;=$8D
-_IT             = msg_pairs::IT ^ MSG_XOR ;=$8C
-_IL             = msg_pairs::IL ^ MSG_XOR ;=$8B
-_ET             = msg_pairs::ET ^ MSG_XOR ;=$8A
-_ST             = msg_pairs::ST ^ MSG_XOR ;=$89
-_ON             = msg_pairs::ON ^ MSG_XOR ;=$88
-_LO             = msg_pairs::LO ^ MSG_XOR ;=$B7
-_NU             = msg_pairs::NU ^ MSG_XOR ;=$B6
-_TH             = msg_pairs::TH ^ MSG_XOR ;=$B5
-_NO             = msg_pairs::NO ^ MSG_XOR ;=$B4
+_AB             = .encrypt( docked_pairs::AB )  ;=$8F
+_OU             = .encrypt( docked_pairs::OU )  ;=$8E
+_SE             = .encrypt( docked_pairs::SE )  ;=$8D
+_IT             = .encrypt( docked_pairs::IT )  ;=$8C
+_IL             = .encrypt( docked_pairs::IL )  ;=$8B
+_ET             = .encrypt( docked_pairs::ET )  ;=$8A
+_ST             = .encrypt( docked_pairs::ST )  ;=$89
+_ON             = .encrypt( docked_pairs::ON )  ;=$88
+_LO             = .encrypt( docked_pairs::LO )  ;=$B7
+_NU             = .encrypt( docked_pairs::NU )  ;=$B6
+_TH             = .encrypt( docked_pairs::TH )  ;=$B5
+_NO             = .encrypt( docked_pairs::NO )  ;=$B4
 
-_AL             = msg_pairs::AL ^ MSG_XOR ;=$B3
-_LE             = msg_pairs::LE ^ MSG_XOR ;=$B2
-_XE             = msg_pairs::XE ^ MSG_XOR ;=$B1
-_GE             = msg_pairs::GE ^ MSG_XOR ;=$B0
-_ZA             = msg_pairs::ZA ^ MSG_XOR ;=$BF -- unused here
-_CE             = msg_pairs::CE ^ MSG_XOR ;=$BE
-_BI             = msg_pairs::BI ^ MSG_XOR ;=$BD
-_SO             = msg_pairs::SO ^ MSG_XOR ;=$BC
-_US             = msg_pairs::US ^ MSG_XOR ;=$BB
-_ES             = msg_pairs::ES ^ MSG_XOR ;=$BA
-_AR             = msg_pairs::AR ^ MSG_XOR ;=$B9
-_MA             = msg_pairs::MA ^ MSG_XOR ;=$B8
-_IN             = msg_pairs::IN ^ MSG_XOR ;=$A7
-_DI             = msg_pairs::DI ^ MSG_XOR ;=$A6
-_RE             = msg_pairs::RE ^ MSG_XOR ;=$A5
-__A             = msg_pairs::A_ ^ MSG_XOR ;=$A4
-_ER             = msg_pairs::ER ^ MSG_XOR ;=$A3
-_AT             = msg_pairs::AT ^ MSG_XOR ;=$A2
-_EN             = msg_pairs::EN ^ MSG_XOR ;=$A1
-_BE             = msg_pairs::BE ^ MSG_XOR ;=$A0
-_RA             = msg_pairs::RA ^ MSG_XOR ;=$AF
-_LA             = msg_pairs::LA ^ MSG_XOR ;=$AE
-_VE             = msg_pairs::VE ^ MSG_XOR ;=$AD
-_TI             = msg_pairs::TI ^ MSG_XOR ;=$AC
-_ED             = msg_pairs::ED ^ MSG_XOR ;=$AB
-_OR             = msg_pairs::OR ^ MSG_XOR ;=$AA
-_QU             = msg_pairs::QU ^ MSG_XOR ;=$A9
-_AN             = msg_pairs::AN ^ MSG_XOR ;=$A8
+_AL             = .encrypt( docked_pairs::AL )  ;=$B3
+_LE             = .encrypt( docked_pairs::LE )  ;=$B2
+_XE             = .encrypt( docked_pairs::XE )  ;=$B1
+_GE             = .encrypt( docked_pairs::GE )  ;=$B0
+_ZA             = .encrypt( docked_pairs::ZA )  ;=$BF -- unused here
+_CE             = .encrypt( docked_pairs::CE )  ;=$BE
+_BI             = .encrypt( docked_pairs::BI )  ;=$BD
+_SO             = .encrypt( docked_pairs::SO )  ;=$BC
+_US             = .encrypt( docked_pairs::US )  ;=$BB
+_ES             = .encrypt( docked_pairs::ES )  ;=$BA
+_AR             = .encrypt( docked_pairs::AR )  ;=$B9
+_MA             = .encrypt( docked_pairs::MA )  ;=$B8
+_IN             = .encrypt( docked_pairs::IN )  ;=$A7
+_DI             = .encrypt( docked_pairs::DI )  ;=$A6
+_RE             = .encrypt( docked_pairs::RE )  ;=$A5
+__A             = .encrypt( docked_pairs::A_ )  ;=$A4
+_ER             = .encrypt( docked_pairs::ER )  ;=$A3
+_AT             = .encrypt( docked_pairs::AT )  ;=$A2
+_EN             = .encrypt( docked_pairs::EN )  ;=$A1
+_BE             = .encrypt( docked_pairs::BE )  ;=$A0
+_RA             = .encrypt( docked_pairs::RA )  ;=$AF
+_LA             = .encrypt( docked_pairs::LA )  ;=$AE
+_VE             = .encrypt( docked_pairs::VE )  ;=$AD
+_TI             = .encrypt( docked_pairs::TI )  ;=$AC
+_ED             = .encrypt( docked_pairs::ED )  ;=$AB
+_OR             = .encrypt( docked_pairs::OR )  ;=$AA
+_QU             = .encrypt( docked_pairs::QU )  ;=$A9
+_AN             = .encrypt( docked_pairs::AN )  ;=$A8
 
-__end           = $00 ^ MSG_XOR ;=$57
-__              = $20 ^ MSG_XOR ;=$77
-_DOT            = $2E ^ MSG_XOR ;=$79
-_A              = $41 ^ MSG_XOR ;=$16
-_B              = $42 ^ MSG_XOR ;=$15
-_C              = $43 ^ MSG_XOR ;=$14
-_D              = $44 ^ MSG_XOR ;=$13
-_E              = $45 ^ MSG_XOR ;=$12
-_F              = $46 ^ MSG_XOR ;=$11
-_G              = $47 ^ MSG_XOR ;=$10
-_H              = $48 ^ MSG_XOR ;=$1F
-_I              = $49 ^ MSG_XOR ;=$1E
-_J              = $4a ^ MSG_XOR ;=$1D
-_K              = $4b ^ MSG_XOR ;=$1C
-_L              = $4c ^ MSG_XOR ;=$1B
-_M              = $4d ^ MSG_XOR ;=$1A
-_N              = $4e ^ MSG_XOR ;=$19
-_O              = $4f ^ MSG_XOR ;=$18
-_P              = $50 ^ MSG_XOR ;=$07
-_Q              = $51 ^ MSG_XOR ;=$06
-_R              = $52 ^ MSG_XOR ;=$05
-_S              = $53 ^ MSG_XOR ;=$04
-_T              = $54 ^ MSG_XOR ;=$03
-_U              = $55 ^ MSG_XOR ;=$02
-_V              = $56 ^ MSG_XOR ;=$01
-_W              = $57 ^ MSG_XOR ;=$00
-_X              = $58 ^ MSG_XOR ;=$0F
-_Y              = $59 ^ MSG_XOR ;=$0E
-_Z              = $5a ^ MSG_XOR ;=$0D
-_HYPHEN         = $2d ^ MSG_XOR ;=$7A
-_COLON          = $3a ^ MSG_XOR ;=$6D
+__end           = .encrypt ( $00 )              ;=$57
+__              = .encrypt ( $20 )              ;=$77
+_DOT            = .encrypt ( $2E )              ;=$79
+_A              = .encrypt ( $41 )              ;=$16
+_B              = .encrypt ( $42 )              ;=$15
+_C              = .encrypt ( $43 )              ;=$14
+_D              = .encrypt ( $44 )              ;=$13
+_E              = .encrypt ( $45 )              ;=$12
+_F              = .encrypt ( $46 )              ;=$11
+_G              = .encrypt ( $47 )              ;=$10
+_H              = .encrypt ( $48 )              ;=$1F
+_I              = .encrypt ( $49 )              ;=$1E
+_J              = .encrypt ( $4a )              ;=$1D
+_K              = .encrypt ( $4b )              ;=$1C
+_L              = .encrypt ( $4c )              ;=$1B
+_M              = .encrypt ( $4d )              ;=$1A
+_N              = .encrypt ( $4e )              ;=$19
+_O              = .encrypt ( $4f )              ;=$18
+_P              = .encrypt ( $50 )              ;=$07
+_Q              = .encrypt ( $51 )              ;=$06
+_R              = .encrypt ( $52 )              ;=$05
+_S              = .encrypt ( $53 )              ;=$04
+_T              = .encrypt ( $54 )              ;=$03
+_U              = .encrypt ( $55 )              ;=$02
+_V              = .encrypt ( $56 )              ;=$01
+_W              = .encrypt ( $57 )              ;=$00
+_X              = .encrypt ( $58 )              ;=$0F
+_Y              = .encrypt ( $59 )              ;=$0E
+_Z              = .encrypt ( $5a )              ;=$0D
+_HYPHEN         = .encrypt ( $2d )              ;=$7A
+_COLON          = .encrypt ( $3a )              ;=$6D
 
 ; format tokens -- function varies
-_F01_           = $01 ^ MSG_XOR ;=$56
-_F02_           = $02 ^ MSG_XOR ;=$55
-_F03_           = $03 ^ MSG_XOR ;=$54
-_F04_           = $04 ^ MSG_XOR ;=$53
-_F05_           = $05 ^ MSG_XOR ;=$52
-_F06_           = $06 ^ MSG_XOR ;=$51
-_F07_           = $07 ^ MSG_XOR ;=$50
-_F08_           = $08 ^ MSG_XOR ;=$5F
-_F09_           = $09 ^ MSG_XOR ;=$5E
-_F0A_           = $0A ^ MSG_XOR ;=$5D
-_F0B_           = $0B ^ MSG_XOR ;=$5C
-_F0C_           = $0C ^ MSG_XOR ;=$5B
-_F0D_           = $0D ^ MSG_XOR ;=$5A
-_F0E_           = $0E ^ MSG_XOR ;=$59
-_F0F_           = $0F ^ MSG_XOR ;=$58
-_F10_           = $10 ^ MSG_XOR ;=$47
-_F11_           = $11 ^ MSG_XOR ;=$46
-_F12_           = $12 ^ MSG_XOR ;=$45
-_F13_           = $13 ^ MSG_XOR ;=$44
-_F14_           = $14 ^ MSG_XOR ;=$43
-_F15_           = $15 ^ MSG_XOR ;=$42
-_F16_           = $16 ^ MSG_XOR ;=$41
-_F17_           = $17 ^ MSG_XOR ;=$40
-_F18_           = $18 ^ MSG_XOR ;=$4F
-_F19_           = $19 ^ MSG_XOR ;=$4E
-_F1A_           = $1A ^ MSG_XOR ;=$4D
-_F1B_           = $1B ^ MSG_XOR ;=$4C
-_F1C_           = $1C ^ MSG_XOR ;=$4B
-_F1D_           = $1D ^ MSG_XOR ;=$4A
-_F1E_           = $1E ^ MSG_XOR ;=$49
-_F1F_           = $1F ^ MSG_XOR ;=$48
+_F01_           = .encrypt ( $01 )              ;=$56
+_F02_           = .encrypt ( $02 )              ;=$55
+_F03_           = .encrypt ( $03 )              ;=$54
+_F04_           = .encrypt ( $04 )              ;=$53
+_F05_           = .encrypt ( $05 )              ;=$52
+_F06_           = .encrypt ( $06 )              ;=$51
+_F07_           = .encrypt ( $07 )              ;=$50
+_F08_           = .encrypt ( $08 )              ;=$5F
+_F09_           = .encrypt ( $09 )              ;=$5E
+_F0A_           = .encrypt ( $0A )              ;=$5D
+_F0B_           = .encrypt ( $0B )              ;=$5C
+_F0C_           = .encrypt ( $0C )              ;=$5B
+_F0D_           = .encrypt ( $0D )              ;=$5A
+_F0E_           = .encrypt ( $0E )              ;=$59
+_F0F_           = .encrypt ( $0F )              ;=$58
+_F10_           = .encrypt ( $10 )              ;=$47
+_F11_           = .encrypt ( $11 )              ;=$46
+_F12_           = .encrypt ( $12 )              ;=$45
+_F13_           = .encrypt ( $13 )              ;=$44
+_F14_           = .encrypt ( $14 )              ;=$43
+_F15_           = .encrypt ( $15 )              ;=$42
+_F16_           = .encrypt ( $16 )              ;=$41
+_F17_           = .encrypt ( $17 )              ;=$40
+_F18_           = .encrypt ( $18 )              ;=$4F
+_F19_           = .encrypt ( $19 )              ;=$4E
+_F1A_           = .encrypt ( $1A )              ;=$4D
+_F1B_           = .encrypt ( $1B )              ;=$4C
+_F1C_           = .encrypt ( $1C )              ;=$4B
+_F1D_           = .encrypt ( $1D )              ;=$4A
+_F1E_           = .encrypt ( $1E )              ;=$49
+_F1F_           = .encrypt ( $1F )              ;=$48
 
 ;===============================================================================
 
@@ -176,7 +185,7 @@ _msg_index     .set 0
         .local  _value
         _value  .set 0
 
-        _value .set _msg_index ^ MSG_XOR
+        _value .set .encrypt( _msg_index )
         
         .ident(msg_id) = _value
 
