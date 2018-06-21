@@ -39,11 +39,11 @@
 .import _1ec1:absolute
 .import _202f:absolute
 .import _2367:absolute
-.import print_msg:absolute
-.import msgtoken_02:absolute
-.import msgtoken_0F:absolute
-.import char_pair1:absolute
-.import char_pair2:absolute
+.import print_docked_str:absolute
+.import txt_docked_token02:absolute
+.import txt_docked_token0F:absolute
+.import txt_flight_pair1:absolute
+.import txt_flight_pair2:absolute
 .import _25a6:absolute
 .import _25aa:absolute
 .import _25ab:absolute
@@ -60,7 +60,7 @@
 .import _28a5:absolute
 .import _28d5:absolute
 .import _28d9:absolute
-.import msgtoken_0B:absolute
+.import txt_docked_token0B:absolute
 .import _28e0:absolute
 .import _28e5:absolute
 .import _28f3:absolute
@@ -251,7 +251,7 @@ _6a68:                                                                  ;$6a68
         jmp cursor_down
 
 :       lda # TXT_DISTANCE                                              ;$6A73
-        jsr print_token_with_colon
+        jsr print_flight_token_with_colon
 
         ldx TSYSTEM_DISTANCE_LO
         ldy TSYSTEM_DISTANCE_HI
@@ -261,7 +261,7 @@ _6a68:                                                                  ;$6a68
 .import TXT_LIGHT_YEARS:direct
         lda # TXT_LIGHT_YEARS
 _6a84:                                                                  ;$6a84
-        jsr print_token
+        jsr print_flight_token
 _6a87:                                                                  ;$6a87
         jsr cursor_down
 _6a8a:                                                                  ;$6a8a
@@ -270,7 +270,7 @@ _6a8a:                                                                  ;$6a8a
 
 _6a8e:                                                                  ;$6a8e
         lda # $0c
-        jmp print_token
+        jmp print_flight_token
 
 
 _6a93:                                                                  ;$6A93
@@ -279,14 +279,14 @@ _6a93:                                                                  ;$6A93
         ;
 .import TXT_MAINLY:direct
         lda # TXT_MAINLY
-        jsr print_token
+        jsr print_flight_token
         jmp _6ad3
 
 ;===============================================================================
 
 _6a9b:                                                                  ;$6a9b
 .export _6a9b
-        jsr print_token
+        jsr print_flight_token
         jmp _72c5
 
 ;===============================================================================
@@ -309,7 +309,7 @@ _6aa1:                                                                  ;$6aa1:
         ; print "ECONOMY:"
 .import TXT_ECONOMY:direct
         lda # TXT_ECONOMY
-        jsr print_token_with_colon
+        jsr print_flight_token_with_colon
 
         lda TSYSTEM_ECONOMY
         clc 
@@ -327,7 +327,7 @@ _6ace:                                                                  ;$6ace
         ; "RICH" / "AVERAGE" / "POOR"
         
         adc # TXT_RICH
-        jsr print_token
+        jsr print_flight_token
 _6ad3:                                                                  ;$6ad3
         lda TSYSTEM_ECONOMY
         lsr 
@@ -343,7 +343,7 @@ _6ad3:                                                                  ;$6ad3
 
 .import TXT_GOVERNMENT:direct
         lda # TXT_GOVERNMENT
-        jsr print_token_with_colon
+        jsr print_flight_token_with_colon
         
 .import TXT_ANARCHY:direct
 
@@ -357,7 +357,7 @@ _6ad3:                                                                  ;$6ad3
 
 .import TXT_TECH_LEVEL:direct
         lda # TXT_TECH_LEVEL
-        jsr print_token_with_colon
+        jsr print_flight_token_with_colon
         
         ldx TSYSTEM_TECHLEVEL
         inx 
@@ -367,7 +367,7 @@ _6ad3:                                                                  ;$6ad3
 
 .import TXT_POPULATION:direct
         lda # TXT_POPULATION
-        jsr print_token_with_colon
+        jsr print_flight_token_with_colon
         
         sec 
         ldx TSYSTEM_POPULATION
@@ -378,14 +378,14 @@ _6ad3:                                                                  ;$6ad3
         jsr _6a84
 
         lda # '('
-        jsr print_token
+        jsr print_flight_token
         
         lda ZP_SEED_pt5
         bmi :+
 
 .import TXT_HUMAN_COLONIAL:direct
         lda # TXT_HUMAN_COLONIAL
-        jsr print_token
+        jsr print_flight_token
         
         jmp _6b5a
 
@@ -444,18 +444,18 @@ _6b4c:                                                                  ;$6b4c
         ; "FELINE" / "INSECT"
 
         adc # TXT_SPECIES
-        jsr print_token
+        jsr print_flight_token
 _6b5a:                                                                  ;$6b5a
         ; append an "s"
         lda # 's'
-        jsr print_token
+        jsr print_flight_token
 
         lda # ')'
         jsr _6a84
 
 .import TXT_GROSS_PRODUCTIVITY:direct
         lda # TXT_GROSS_PRODUCTIVITY
-        jsr print_token_with_colon
+        jsr print_flight_token_with_colon
         
         ldx TSYSTEM_PRODUCTIVITY_LO
         ldy TSYSTEM_PRODUCTIVITY_HI
@@ -465,7 +465,7 @@ _6b5a:                                                                  ;$6b5a
         sta $34
         
         lda # 'm'
-        jsr print_token
+        jsr print_flight_token
         
 .import TXT_CR:direct
         lda # TXT_CR
@@ -473,7 +473,7 @@ _6b5a:                                                                  ;$6b5a
 
 .import TXT_AVERAGE_RADIUS:direct
         lda # TXT_AVERAGE_RADIUS
-        jsr print_token_with_colon
+        jsr print_flight_token_with_colon
         
         lda ZP_SEED_pt6
         ldx ZP_SEED_pt4
@@ -582,7 +582,7 @@ _6c1c:                                                                  ;$6c1c
 
 .import TXT_GALACTIC_CHART:direct
         lda # TXT_GALACTIC_CHART
-        jsr print_token
+        jsr print_flight_token
         
         jsr _28e0
         lda # $98
@@ -736,11 +736,11 @@ _6d34:                                                                  ;$6d34
         jsr _723c
         jsr _7627
 _6d3e:                                                                  ;$6d3e
-        jsr msgtoken_15
+        jsr txt_docked_token15
         
 .import TXT_QUANTITY_OF:direct
         lda # TXT_QUANTITY_OF
-        jsr print_token
+        jsr print_flight_token
 
         ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
@@ -750,15 +750,15 @@ _6d3e:                                                                  ;$6d3e
         lda $04ef
         clc 
         adc # TXT_FOOD
-        jsr print_token
+        jsr print_flight_token
         
         lda # $2f
-        jsr print_token
+        jsr print_flight_token
         
         jsr _72b8
 
         lda # $3f
-        jsr print_token
+        jsr print_flight_token
         
         jsr _6a8e
         ldx # $00
@@ -888,7 +888,7 @@ _6e41:                                                                  ;$6e41
         
 .import TXT_SELL:direct
         lda # TXT_SELL
-        jsr print_token
+        jsr print_flight_token
 
 .import TXT_CARGO:direct
         lda # TXT_CARGO
@@ -921,7 +921,7 @@ _6e5d:                                                                  ;$6e5d
 
 .import TXT_FOOD:direct
         adc # TXT_FOOD
-        jsr print_token
+        jsr print_flight_token
 
         lda # 14
         jsr set_cursor_col
@@ -938,10 +938,10 @@ _6e5d:                                                                  ;$6e5d
 
 .import TXT_SELL:direct
         lda # TXT_SELL
-        jsr print_token
+        jsr print_flight_token
         
         lda # $ce
-        jsr print_msg
+        jsr print_docked_str
 
         jsr _6dc9
         beq _6eca
@@ -990,10 +990,10 @@ _6eea:                                                                  ;$6eea
         and # %00000011
         clc 
         adc # $6f
-        jsr print_msg
+        jsr print_docked_str
 
         lda # $c6
-        jsr print_msg
+        jsr print_docked_str
         
         lda $04ca
         bne _6f11
@@ -1017,7 +1017,7 @@ _6f16:                                                                  ;$6f16
         lda # TXT_INVENTORY
         jsr _6a84
 
-        jsr msgtoken_0B
+        jsr txt_docked_token0B
         jsr _774a
         lda $04af
         cmp # $1a
@@ -1025,7 +1025,7 @@ _6f16:                                                                  ;$6f16
 
 .import TXT_LARGE_CARGO_BAY:direct
         lda # TXT_LARGE_CARGO_BAY
-        jsr print_token
+        jsr print_flight_token
 _6f37:                                                                  ;$6f37
         jmp _6e58
 
@@ -1034,10 +1034,10 @@ _6f37:                                                                  ;$6f37
 ; dead code?
 
 _6f3a:                                                                  ;$6f3a
-        jsr print_token
+        jsr print_flight_token
 
         lda # $ce
-        jsr print_msg
+        jsr print_docked_str
 
         jsr _8fea
         ora # %00100000
@@ -1364,13 +1364,13 @@ _7135:                                                                  ;$7135
 ;===============================================================================
 
 _714f:                                                                  ;$714f
-        jsr msgtoken_15
+        jsr txt_docked_token15
 
         lda # 15
         jsr set_cursor_col
 
         lda # $cd
-        jmp print_msg
+        jmp print_docked_str
 
 _715c:                                                                  ;$715c
         lda $a7
@@ -1418,7 +1418,7 @@ _7196:                                                                  ;$7196
 
 .import TXT_HYPERSPACE:direct
         lda # TXT_HYPERSPACE
-        jsr print_token
+        jsr print_flight_token
         
         lda TSYSTEM_DISTANCE_HI
         bne _71af
@@ -1430,7 +1430,7 @@ _71af:                                                                  ;$71af
 
 _71b2:                                                                  ;$71b2
         lda # $2d
-        jsr print_token
+        jsr print_flight_token
 
         jsr _76e9
         lda # $0f
@@ -1519,10 +1519,10 @@ _723a:                                                                  ;$723a
         lda # TXT_RANGE
 
 _723c:                                                                  ;$723c
-        jsr print_token
+        jsr print_flight_token
 
         lda # $3f
-        jmp print_token
+        jmp print_flight_token
 
 ;===============================================================================
 
@@ -1549,7 +1549,7 @@ _7246:                                                                  ;$7246
 
         pla 
         adc # TXT_FOOD
-        jsr print_token
+        jsr print_flight_token
 
         lda # 14
         jsr set_cursor_col
@@ -1605,7 +1605,7 @@ _72b8:                                                                  ;$72b8
 _72c5:                                                                  ;$72c5
         lda # $20
 _72c7:                                                                  ;$72c7
-        jmp print_token
+        jmp print_flight_token
 
 _72ca:                                                                  ;$72ca
         lda # $74               ;="T"
@@ -1952,7 +1952,7 @@ _74f5:                                                                  ;$74f5
         lda $a2
         clc 
         adc # $68
-        jsr print_token
+        jsr print_flight_token
         
         lda $a2
         jsr _763f
@@ -1967,7 +1967,7 @@ _74f5:                                                                  ;$74f5
         inx 
         cpx $9a
         bcc _74f5
-        jsr msgtoken_15
+        jsr txt_docked_token15
 
 .import TXT_ITEM:direct
         lda # TXT_ITEM
@@ -2044,7 +2044,7 @@ _75a1:                                                                  ;$75a1
         
 .import TXT_PRESENT:direct
         lda # TXT_PRESENT       ;?
-        jsr print_token
+        jsr print_flight_token
 _75b3:                                                                  ;$75b3
         jsr _7627
         jmp _88e7
@@ -2166,13 +2166,13 @@ _765e:
         lda ZP_CURSOR_ROW
         clc 
         adc # $50
-        jsr print_token
+        jsr print_flight_token
         
         jsr cursor_down
         ldy ZP_CURSOR_ROW
         cpy # $14
         bcc _765e
-        jsr msgtoken_15
+        jsr txt_docked_token15
 _767e:
 .import TXT_VIEW:direct
         lda # TXT_VIEW
@@ -2183,7 +2183,7 @@ _767e:
         sbc # $30
         cmp # $04
         bcc _7693
-        jsr msgtoken_15
+        jsr txt_docked_token15
         jmp _767e
 
 _7693:
@@ -2196,7 +2196,7 @@ _7695:
         jsr _6f82
         jsr _70ab
         jsr _6f82
-        jmp msgtoken_15
+        jmp txt_docked_token15
 
 ;===============================================================================
 
@@ -2253,7 +2253,7 @@ _76fb:
         and # %00011111
         beq _7706
         ora # %10000000
-        jsr print_token
+        jsr print_flight_token
 _7706:
         jsr _6a41
         dec $bb
@@ -2313,7 +2313,7 @@ _774a:  ; $774A
 .import TXT_FUEL:direct
 
         lda # TXT_FUEL
-        jsr print_token_with_colon
+        jsr print_flight_token_with_colon
 
         ldx SHIP_FUEL
         sec 
@@ -2325,7 +2325,7 @@ _774a:  ; $774A
         
 .import TXT_CASH_:direct
         lda # TXT_CASH_         ; "CASH:" (colon in the string)
-        bne print_token
+        bne print_flight_token
 
         ; print cash value?  
 _775f:  ;$775F
@@ -2348,17 +2348,17 @@ _775f:  ;$775F
         lda # TXT_CR
 _7773:
 .export _7773
-        jsr print_token
+        jsr print_flight_token
         jmp _6a8e
 
 
-print_token_with_colon:                                                 ;$7779
+print_flight_token_with_colon:                                          ;$7779
         ;=======================================================================
         ; prints the string token in A and appends a colon character
         ;
         ;    A = an already *de-scrambled* string token
         ;
-        jsr print_token
+        jsr print_flight_token
 
 print_colon:                                                            ;$777C
         ;=======================================================================
@@ -2366,7 +2366,7 @@ print_colon:                                                            ;$777C
         ;
         lda # ':'
 
-print_token:                                                            ;$777E
+print_flight_token:                                                            ;$777E
         ;=======================================================================
         ; prints an already *de-scrambled* string token. this can be a single
         ; letter, a variable (like cash or planet name), a string-expansion,
@@ -2396,7 +2396,7 @@ print_token:                                                            ;$777E
         ;  $60-$7F = canned messages  96-127
         ;  $80-$BF = canned messages   0-95
 
-.export print_token
+.export print_flight_token
 
         tax                     ; put aside token for later test
 
@@ -2412,7 +2412,7 @@ print_token:                                                            ;$777E
         ; any token value 128 or higher (i.e. bit 7 set) is a canned-message,
         ; the index of which is in the remaining 6 bits
         ;
-        bmi print_token_message ; is bit 7 set? (i.e. is token)
+        bmi _print_str          ; is bit 7 set? (i.e. is token)
         
         ; token $01:
         ;
@@ -2549,7 +2549,7 @@ _77ef:  pha
 _77f6:  jmp print_char
 
 
-print_token_message:                                                    ;$77F9
+_print_str:                                                             ;$77F9
         ;-----------------------------------------------------------------------
         ; note that canned message tokens have bit 7 set, so really this is
         ; asking if the message index is > 32 -- the first 32 canned messages
@@ -2563,12 +2563,12 @@ print_token_message:                                                    ;$77F9
         and # %01111111         ; clear token flag, leave message index
         asl                     ; double it for a lookup-table offset,
         tay                     ; this would have cleared bit 7 anyway!
-        lda char_pair1, y       ; read the first character,
-        jsr print_token         ; print it
-        lda char_pair2, y       ; read second character
+        lda txt_flight_pair1, y ; read the first character,
+        jsr print_flight_token         ; print it
+        lda txt_flight_pair2, y ; read second character
         cmp # $3f               ; is it 63? (some kind of continuation token?)
         beq _784e               ; yes, skip -- although never seen in practice
-        jmp print_token         ; print second character (and return)
+        jmp print_flight_token         ; print second character (and return)
 
 @canned_token:                                                          ;$7811  
         ; token messages 160+; subtract 160 for the message index
@@ -2594,7 +2594,7 @@ print_canned_message:                                                   ;$7813
         ; ignore message no.0,
         ; i.e. you can't skip zero messages
         txa                     ; return the original message index
-        beq print_token_string  ; not zero?
+        beq print_flight_token_string  ; not zero?
 
 @skip_message:                                                           ;$7821
 
@@ -2612,7 +2612,7 @@ print_canned_message:                                                   ;$7813
         bne @skip_message       ; keep looping if we haven't reached
                                 ; the desired message index yet
 
-print_token_string:                                                     ;$7834
+print_flight_token_string:                                                     ;$7834
         ;-----------------------------------------------------------------------
         ; remember the current index
         ; (this routine can call recursively)
@@ -2628,7 +2628,7 @@ print_token_string:                                                     ;$7834
 
         lda [$5b], y            ; read a token
         eor # TXT_FLIGHT_XOR    ; 'descramble' token
-        jsr print_token         ; process it
+        jsr print_flight_token         ; process it
 
         ; restore the previous page
         pla 
@@ -2644,7 +2644,7 @@ print_token_string:                                                     ;$7834
         ; is this the end of the string?
         ; (check for a $00 token)
 :       lda [$5b], y                                                    ;$784A
-        bne print_token_string
+        bne print_flight_token_string
 
 _784e:  rts                                                             ;$784E 
 
@@ -4612,7 +4612,7 @@ _8475:
         jmp _84fa
 
 _8487:
-        jsr msgtoken_15
+        jsr txt_docked_token15
         jmp _84fa
 
 ;===============================================================================
@@ -5359,7 +5359,7 @@ _8920:
         beq _8978
 
         lda # $0d
-        jsr print_msg
+        jsr print_docked_str
 _8978:
         lda _87b8
         beq _8994
@@ -5387,13 +5387,13 @@ _8994:
         sta ZP_CURSOR_COL
         
         pla 
-        jsr print_msg
+        jsr print_docked_str
 
         lda # 3
         jsr set_cursor_col
         
         lda # $0c
-        jsr print_msg
+        jsr print_docked_str
         
         lda # $0c
         sta $ab
@@ -5504,9 +5504,9 @@ _8a3a:
         sta _8ab2
 
         lda # $08
-        jsr print_msg
+        jsr print_docked_str
         
-        jsr msgtoken_1A
+        jsr txt_docked_token1A
         lda # $09
         sta _8ab2
         tya 
@@ -5514,9 +5514,9 @@ _8a3a:
         sty _8bbe
         rts 
 
-msgtoken_1A:                                                            ;$8A5B
+txt_docked_token1A:                                                     ;$8A5B
         ;=======================================================================
-.export msgtoken_1A
+.export txt_docked_token1A
 
         lda # $40
         sta $050c
@@ -5573,23 +5573,23 @@ _8ab3:
 _8ab4:
         .byte   $7b
 
-msgtoken_1E:                                                            ;$8AB5
+txt_docked_token1E:                                                     ;$8AB5
         ;=======================================================================
-.export msgtoken_1E
+.export txt_docked_token1E
 
         lda # $03
         clc 
         adc _1d0e
-        jmp print_msg
+        jmp print_docked_str
 
-msgtoken_1F:                                                            ;$8ABE
+txt_docked_token1F:                                                     ;$8ABE
         ;=======================================================================
-.export msgtoken_1F
+.export txt_docked_token1F
         
         lda # $02
         sec 
         sbc _1d0e
-        jmp print_msg
+        jmp print_docked_str
 
 ;===============================================================================
 
@@ -5627,7 +5627,7 @@ _8ae1:
 
 _8ae7:
         lda # $01
-        jsr print_msg
+        jsr print_docked_str
 
         jsr _8fec
         cmp # $31
@@ -5640,7 +5640,7 @@ _8ae7:
         bne _8b0f
         
         lda # $e0
-        jsr print_msg
+        jsr print_docked_str
         
         jsr _81ee
         bcc _8b0f
@@ -5674,7 +5674,7 @@ _8b27:
         lsr $04e2
 
         lda # $04
-        jsr print_msg
+        jsr print_docked_str
         
         ldx # $4c
 _8b37:
@@ -5778,7 +5778,7 @@ _8bc0:
         
         ;bug / unused code? (`jmp` instead of `jsr` above)
         lda # $02
-        jsr print_msg
+        jsr print_docked_str
 
         jsr _8fec
         ora # %00010000
@@ -5838,7 +5838,7 @@ _8c53:
 
 _8c55:
         lda # $09
-        jsr print_msg
+        jsr print_docked_str
         
         jsr _8fec
         jmp _8ae7
@@ -5852,7 +5852,7 @@ _8c60:
 
 _8c61:
         lda # $ff
-        jsr print_msg
+        jsr print_docked_str
 
         jsr _8fec
         jmp _8ae7
@@ -6436,7 +6436,7 @@ _900d:
         lda # $10
         ldx $a0
         beq _9019+1
-        jsr msgtoken_15
+        jsr txt_docked_token15
         lda # $19
 _9019:
         bit _3385
@@ -6463,7 +6463,7 @@ _9042:
         sta _2f1c
         
         lda $04e6
-        jsr print_token
+        jsr print_flight_token
 
         lda # $20
         sec 
@@ -6472,17 +6472,17 @@ _9042:
         sta $b9
         jsr set_cursor_col
         
-        jsr msgtoken_0F
+        jsr txt_docked_token0F
         lda $04e6
 _905d:
-        jsr print_token
+        jsr print_flight_token
 
         lsr $048c
         bcc _9001
         
 .import TXT_DESTROYED:direct
         lda # TXT_DESTROYED
-        jmp print_token
+        jmp print_flight_token
 
 ;===============================================================================
 
@@ -9310,7 +9310,7 @@ _a72f:
 .export _a72f
         sta $a0
 _a731:
-        jsr msgtoken_02
+        jsr txt_docked_token02
         lda # $00
         sta $7e
         
@@ -9344,12 +9344,12 @@ _a75d:
 
         lda $0486
         ora # %01100000
-        jsr print_token
+        jsr print_flight_token
         jsr _72c5
 
 .import TXT_VIEW:direct
         lda # TXT_VIEW
-        jsr print_token
+        jsr print_flight_token
 _a77b:
         ldx # 1
         stx ZP_CURSOR_COL
@@ -11544,9 +11544,9 @@ _b3c5:
         bne _b3c5
         rts 
 
-msgtoken_15:                                                            ;$B3D4
+txt_docked_token15:                                                     ;$B3D4
         ;=======================================================================
-.export msgtoken_15
+.export txt_docked_token15
         
         lda # $00
         sta $048b

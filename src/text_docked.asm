@@ -22,198 +22,6 @@
 
 .segment "TEXT_TOKENS"
 
-_250c:
-.export _250c
-        .import msgtoken_01
-        .addr   msgtoken_01             ; msg token $01
-        .import msgtoken_02
-        .addr   msgtoken_02             ; msg token $02
-        .import print_token
-        .addr   print_token             ; msg token $03
-        .addr   print_token             ; msg token $04
-        .import msgtoken_05
-        .addr   msgtoken_05             ; msg token $05
-        .import msgtoken_06
-        .addr   msgtoken_06             ; msg token $06
-        .import print_char
-        .addr   print_char              ; msg token $07
-        .import msgtoken_08
-        .addr   msgtoken_08             ; msg token $08
-        .import msgtoken_09
-        .addr   msgtoken_09             ; msg token $09
-        .addr   print_char              ; msg token $0A
-        .import msgtoken_0B
-        .addr   msgtoken_0B             ; msg token $0B
-        .addr   print_char              ; msg token $0C
-        .import msgtoken_0D
-        .addr   msgtoken_0D             ; msg token $0D
-        .import msgtoken_0E
-        .addr   msgtoken_0E             ; msg token $0E
-        .import msgtoken_0F
-        .addr   msgtoken_0F             ; msg token $0F
-        .import msgtoken_10
-        .addr   msgtoken_10             ; msg token $10
-        .import msgtoken_11
-        .addr   msgtoken_11             ; msg token $11
-        .import msgtoken_12
-        .addr   msgtoken_12             ; msg token $12
-        .import msgtoken_set_lowercase
-        .addr   msgtoken_set_lowercase  ; msg token $13
-        .addr   print_char              ; msg token $14
-        .import msgtoken_15
-        .addr   msgtoken_15             ; msg token $15
-        .import msgtoken_16
-        .addr   msgtoken_16             ; msg token $16
-        .import msgtoken_17
-        .addr   msgtoken_17             ; msg token $17
-        .import msgtoken_18
-        .addr   msgtoken_18             ; msg token $18
-        .import msgtoken_19
-        .addr   msgtoken_19             ; msg token $19
-        .import msgtoken_1A
-        .addr   msgtoken_1A             ; msg token $1A
-        .import msgtoken_1B
-        .addr   msgtoken_1B             ; msg token $1B
-        .import msgtoken_1C
-        .addr   msgtoken_1C             ; msg token $1C
-        .import msgtoken_1D
-        .addr   msgtoken_1D             ; msg token $1D
-        .import msgtoken_1E
-        .addr   msgtoken_1E             ; msg token $1E
-        .import msgtoken_1F
-        .addr   msgtoken_1F             ; msg token $1F
-        
-        ; msg token for print space. this table is not
-        ; used for this as token $20 is handled already
-        .addr   print_char              ; msg token $20
-
-;-------------------------------------------------------------------------------
-
-.enum   docked_pairs
-        AB               =$D8
-        OU              ;=$D9
-        SE              ;=$DA
-        IT              ;=$DB
-        IL              ;=$DC
-        ET              ;=$DD
-        ST              ;=$DE
-        ON              ;=$DF
-        LO              ;=$E0
-        NU              ;=$E1
-        TH              ;=$E2
-        NO              ;=$E3
-
-        AL              ;=$E4
-        LE              ;=$E5
-        XE              ;=$E6
-        GE              ;=$E7
-        ZA              ;=$E8
-        CE              ;=$E9
-        BI              ;=$EA
-        SO              ;=$EB
-        US              ;=$EC
-        ES              ;=$ED
-        AR              ;=$EE
-        MA              ;=$EF
-        IN              ;=$F0
-        DI              ;=$F1
-        RE              ;=$F2
-        A_              ;=$F3
-        ER              ;=$F4
-        AT              ;=$F5
-        EN              ;=$F6
-        BE              ;=$F7
-        RA              ;=$F8
-        LA              ;=$F9
-        VE              ;=$FA
-        TI              ;=$FB
-        ED              ;=$FC
-        OR              ;=$FD
-        QU              ;=$FE
-        AN              ;=$FF
-
-        ; we run out of tokens here, even though there
-        ; are a few letter-pairs remaining in the table
-        ;;TE
-        ;;IS
-        ;;RI
-        ;;ON
-.endenum
-
-_AB             = .encrypt( docked_pairs::AB )  ;=$8F
-_OU             = .encrypt( docked_pairs::OU )  ;=$8E
-_SE             = .encrypt( docked_pairs::SE )  ;=$8D
-_IT             = .encrypt( docked_pairs::IT )  ;=$8C
-_IL             = .encrypt( docked_pairs::IL )  ;=$8B
-_ET             = .encrypt( docked_pairs::ET )  ;=$8A
-_ST             = .encrypt( docked_pairs::ST )  ;=$89
-_ON             = .encrypt( docked_pairs::ON )  ;=$88
-_LO             = .encrypt( docked_pairs::LO )  ;=$B7
-_NU             = .encrypt( docked_pairs::NU )  ;=$B6
-_TH             = .encrypt( docked_pairs::TH )  ;=$B5
-_NO             = .encrypt( docked_pairs::NO )  ;=$B4
-
-_AL             = .encrypt( docked_pairs::AL )  ;=$B3
-_LE             = .encrypt( docked_pairs::LE )  ;=$B2
-_XE             = .encrypt( docked_pairs::XE )  ;=$B1
-_GE             = .encrypt( docked_pairs::GE )  ;=$B0
-_ZA             = .encrypt( docked_pairs::ZA )  ;=$BF -- unused here
-_CE             = .encrypt( docked_pairs::CE )  ;=$BE
-_BI             = .encrypt( docked_pairs::BI )  ;=$BD
-_SO             = .encrypt( docked_pairs::SO )  ;=$BC
-_US             = .encrypt( docked_pairs::US )  ;=$BB
-_ES             = .encrypt( docked_pairs::ES )  ;=$BA
-_AR             = .encrypt( docked_pairs::AR )  ;=$B9
-_MA             = .encrypt( docked_pairs::MA )  ;=$B8
-_IN             = .encrypt( docked_pairs::IN )  ;=$A7
-_DI             = .encrypt( docked_pairs::DI )  ;=$A6
-_RE             = .encrypt( docked_pairs::RE )  ;=$A5
-__A             = .encrypt( docked_pairs::A_ )  ;=$A4
-_ER             = .encrypt( docked_pairs::ER )  ;=$A3
-_AT             = .encrypt( docked_pairs::AT )  ;=$A2
-_EN             = .encrypt( docked_pairs::EN )  ;=$A1
-_BE             = .encrypt( docked_pairs::BE )  ;=$A0
-_RA             = .encrypt( docked_pairs::RA )  ;=$AF
-_LA             = .encrypt( docked_pairs::LA )  ;=$AE
-_VE             = .encrypt( docked_pairs::VE )  ;=$AD
-_TI             = .encrypt( docked_pairs::TI )  ;=$AC
-_ED             = .encrypt( docked_pairs::ED )  ;=$AB
-_OR             = .encrypt( docked_pairs::OR )  ;=$AA
-_QU             = .encrypt( docked_pairs::QU )  ;=$A9
-_AN             = .encrypt( docked_pairs::AN )  ;=$A8
-
-__end           = .encrypt ( $00 )              ;=$57
-__              = .encrypt ( $20 )              ;=$77
-_DOT            = .encrypt ( $2E )              ;=$79
-_A              = .encrypt ( $41 )              ;=$16
-_B              = .encrypt ( $42 )              ;=$15
-_C              = .encrypt ( $43 )              ;=$14
-_D              = .encrypt ( $44 )              ;=$13
-_E              = .encrypt ( $45 )              ;=$12
-_F              = .encrypt ( $46 )              ;=$11
-_G              = .encrypt ( $47 )              ;=$10
-_H              = .encrypt ( $48 )              ;=$1F
-_I              = .encrypt ( $49 )              ;=$1E
-_J              = .encrypt ( $4a )              ;=$1D
-_K              = .encrypt ( $4b )              ;=$1C
-_L              = .encrypt ( $4c )              ;=$1B
-_M              = .encrypt ( $4d )              ;=$1A
-_N              = .encrypt ( $4e )              ;=$19
-_O              = .encrypt ( $4f )              ;=$18
-_P              = .encrypt ( $50 )              ;=$07
-_Q              = .encrypt ( $51 )              ;=$06
-_R              = .encrypt ( $52 )              ;=$05
-_S              = .encrypt ( $53 )              ;=$04
-_T              = .encrypt ( $54 )              ;=$03
-_U              = .encrypt ( $55 )              ;=$02
-_V              = .encrypt ( $56 )              ;=$01
-_W              = .encrypt ( $57 )              ;=$00
-_X              = .encrypt ( $58 )              ;=$0F
-_Y              = .encrypt ( $59 )              ;=$0E
-_Z              = .encrypt ( $5a )              ;=$0D
-_HYPHEN         = .encrypt ( $2d )              ;=$7A
-_COLON          = .encrypt ( $3a )              ;=$6D
-
 ; format tokens -- function varies
 _F01_           = .encrypt ( $01 )              ;=$56
 _F02_           = .encrypt ( $02 )              ;=$55
@@ -247,6 +55,193 @@ _F1D_           = .encrypt ( $1D )              ;=$4A
 _F1E_           = .encrypt ( $1E )              ;=$49
 _F1F_           = .encrypt ( $1F )              ;=$48
 
+_250c:
+.export _250c
+        .import txt_docked_token01
+        .addr   txt_docked_token01              ; msg token $01
+        .import txt_docked_token02
+        .addr   txt_docked_token02              ; msg token $02
+        .import print_flight_token
+        .addr   print_flight_token              ; msg token $03
+        .addr   print_flight_token              ; msg token $04
+        .import txt_docked_token05
+        .addr   txt_docked_token05              ; msg token $05
+        .import txt_docked_token06
+        .addr   txt_docked_token06              ; msg token $06
+        .import print_char
+        .addr   print_char                      ; msg token $07
+        .import txt_docked_token08
+        .addr   txt_docked_token08              ; msg token $08
+        .import txt_docked_token09
+        .addr   txt_docked_token09              ; msg token $09
+        .addr   print_char                      ; msg token $0A
+        .import txt_docked_token0B
+        .addr   txt_docked_token0B              ; msg token $0B
+        .addr   print_char                      ; msg token $0C
+        .import txt_docked_token0D
+        .addr   txt_docked_token0D              ; msg token $0D
+        .import txt_docked_token0E
+        .addr   txt_docked_token0E              ; msg token $0E
+        .import txt_docked_token0F
+        .addr   txt_docked_token0F              ; msg token $0F
+        .import txt_docked_token10
+        .addr   txt_docked_token10              ; msg token $10
+        .import txt_docked_token11
+        .addr   txt_docked_token11              ; msg token $11
+        .import txt_docked_token12
+        .addr   txt_docked_token12              ; msg token $12
+        .import txt_docked_token_set_lowercase
+        .addr   txt_docked_token_set_lowercase  ; msg token $13
+        .addr   print_char                      ; msg token $14
+        .import txt_docked_token15
+        .addr   txt_docked_token15              ; msg token $15
+        .import txt_docked_token16
+        .addr   txt_docked_token16              ; msg token $16
+        .import txt_docked_token17
+        .addr   txt_docked_token17              ; msg token $17
+        .import txt_docked_token18
+        .addr   txt_docked_token18              ; msg token $18
+        .import txt_docked_token19
+        .addr   txt_docked_token19              ; msg token $19
+        .import txt_docked_token1A
+        .addr   txt_docked_token1A              ; msg token $1A
+        .import txt_docked_token1B
+        .addr   txt_docked_token1B              ; msg token $1B
+        .import txt_docked_token1C
+        .addr   txt_docked_token1C              ; msg token $1C
+        .import txt_docked_token1D
+        .addr   txt_docked_token1D              ; msg token $1D
+        .import txt_docked_token1E
+        .addr   txt_docked_token1E              ; msg token $1E
+        .import txt_docked_token1F
+        .addr   txt_docked_token1F              ; msg token $1F
+        
+        ; msg token for print space. this table is not
+        ; used for this as token $20 is handled already
+        .addr   print_char                      ; msg token $20
+
+;===============================================================================
+
+.segment        "TEXT_DOCKED"
+
+; import the token numbers for the common charcter pairs used by docked
+; strings ("txt_pairs.asm"). these come unencrypted; we encrypt them for
+; the on-disk format
+
+.import txt_docked_ab:direct
+_AB     = .encrypt( txt_docked_ab )     ;=$8F
+.import txt_docked_ou:direct
+_OU     = .encrypt( txt_docked_ou )     ;=$8E
+.import txt_docked_se:direct
+_SE     = .encrypt( txt_docked_se )     ;=$8D
+.import txt_docked_it:direct
+_IT     = .encrypt( txt_docked_it )     ;=$8C
+.import txt_docked_il:direct
+_IL     = .encrypt( txt_docked_il )     ;=$8B
+.import txt_docked_et:direct
+_ET     = .encrypt( txt_docked_et )     ;=$8A
+.import txt_docked_st:direct
+_ST     = .encrypt( txt_docked_st )     ;=$89
+.import txt_docked_on:direct
+_ON     = .encrypt( txt_docked_on )     ;=$88
+.import txt_docked_lo:direct
+_LO     = .encrypt( txt_docked_lo )     ;=$B7
+.import txt_docked_nu:direct
+_NU     = .encrypt( txt_docked_nu )     ;=$B6
+.import txt_docked_th:direct
+_TH     = .encrypt( txt_docked_th )     ;=$B5
+.import txt_docked_no:direct
+_NO     = .encrypt( txt_docked_no )     ;=$B4
+.import txt_docked_al:direct
+_AL     = .encrypt( txt_docked_al )     ;=$B3
+.import txt_docked_le:direct
+_LE     = .encrypt( txt_docked_le )     ;=$B2
+.import txt_docked_xe:direct
+_XE     = .encrypt( txt_docked_xe )     ;=$B1
+.import txt_docked_ge:direct
+_GE     = .encrypt( txt_docked_ge )     ;=$B0
+.import txt_docked_za:direct
+_ZA     = .encrypt( txt_docked_za )     ;=$BF -- unused here
+.import txt_docked_ce:direct
+_CE     = .encrypt( txt_docked_ce )     ;=$BE
+.import txt_docked_bi:direct
+_BI     = .encrypt( txt_docked_bi )     ;=$BD
+.import txt_docked_so:direct
+_SO     = .encrypt( txt_docked_so )     ;=$BC
+.import txt_docked_us:direct
+_US     = .encrypt( txt_docked_us )     ;=$BB
+.import txt_docked_es:direct
+_ES     = .encrypt( txt_docked_es )     ;=$BA
+.import txt_docked_ar:direct
+_AR     = .encrypt( txt_docked_ar )     ;=$B9
+.import txt_docked_ma:direct
+_MA     = .encrypt( txt_docked_ma )     ;=$B8
+.import txt_docked_in:direct
+_IN     = .encrypt( txt_docked_in )     ;=$A7
+.import txt_docked_di:direct
+_DI     = .encrypt( txt_docked_di )     ;=$A6
+.import txt_docked_re:direct
+_RE     = .encrypt( txt_docked_re )     ;=$A5
+.import txt_docked_a_:direct
+__A     = .encrypt( txt_docked_a_ )     ;=$A4
+.import txt_docked_er:direct
+_ER     = .encrypt( txt_docked_er )     ;=$A3
+.import txt_docked_at:direct
+_AT     = .encrypt( txt_docked_at )     ;=$A2
+.import txt_docked_en:direct
+_EN     = .encrypt( txt_docked_en )     ;=$A1
+.import txt_docked_be:direct
+_BE     = .encrypt( txt_docked_be )     ;=$A0
+.import txt_docked_ra:direct
+_RA     = .encrypt( txt_docked_ra )     ;=$AF
+.import txt_docked_la:direct
+_LA     = .encrypt( txt_docked_la )     ;=$AE
+.import txt_docked_ve:direct
+_VE     = .encrypt( txt_docked_ve )     ;=$AD
+.import txt_docked_ti:direct
+_TI     = .encrypt( txt_docked_ti )     ;=$AC
+.import txt_docked_ed:direct
+_ED     = .encrypt( txt_docked_ed )     ;=$AB
+.import txt_docked_or:direct
+_OR     = .encrypt( txt_docked_or )     ;=$AA
+.import txt_docked_qu:direct
+_QU     = .encrypt( txt_docked_qu )     ;=$A9
+.import txt_docked_an:direct
+_AN     = .encrypt( txt_docked_an )     ;=$A8
+
+
+__end   = .encrypt ( $00 )              ;=$57
+__      = .encrypt ( $20 )              ;=$77
+_DOT    = .encrypt ( $2E )              ;=$79
+_A      = .encrypt ( $41 )              ;=$16
+_B      = .encrypt ( $42 )              ;=$15
+_C      = .encrypt ( $43 )              ;=$14
+_D      = .encrypt ( $44 )              ;=$13
+_E      = .encrypt ( $45 )              ;=$12
+_F      = .encrypt ( $46 )              ;=$11
+_G      = .encrypt ( $47 )              ;=$10
+_H      = .encrypt ( $48 )              ;=$1F
+_I      = .encrypt ( $49 )              ;=$1E
+_J      = .encrypt ( $4a )              ;=$1D
+_K      = .encrypt ( $4b )              ;=$1C
+_L      = .encrypt ( $4c )              ;=$1B
+_M      = .encrypt ( $4d )              ;=$1A
+_N      = .encrypt ( $4e )              ;=$19
+_O      = .encrypt ( $4f )              ;=$18
+_P      = .encrypt ( $50 )              ;=$07
+_Q      = .encrypt ( $51 )              ;=$06
+_R      = .encrypt ( $52 )              ;=$05
+_S      = .encrypt ( $53 )              ;=$04
+_T      = .encrypt ( $54 )              ;=$03
+_U      = .encrypt ( $55 )              ;=$02
+_V      = .encrypt ( $56 )              ;=$01
+_W      = .encrypt ( $57 )              ;=$00
+_X      = .encrypt ( $58 )              ;=$0F
+_Y      = .encrypt ( $59 )              ;=$0E
+_Z      = .encrypt ( $5a )              ;=$0D
+_HYPHEN = .encrypt ( $2d )              ;=$7A
+_COLON  = .encrypt ( $3a )              ;=$6D
+
 ;===============================================================================
 
 _msg_index     .set 0
@@ -276,8 +271,6 @@ _msg_index     .set 0
 .define .skip_msg       _msg_index .set _msg_index + 1
 
 ;===============================================================================
-
-.segment        "TEXT_DOCKED"
 
 _0e00:
 .export _0e00

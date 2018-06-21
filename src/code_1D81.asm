@@ -35,7 +35,7 @@
 .import _7481:absolute
 .import _76e9:absolute
 .import _7773:absolute
-.import print_token:absolute
+.import print_flight_token:absolute
 .import _7b61:absolute
 .import _7b64:absolute
 .import _7b6f:absolute
@@ -61,9 +61,9 @@
 .import _87b9:absolute
 .import _87d0:absolute
 .import _88e7:absolute
-.import msgtoken_1A:absolute
-.import msgtoken_1E:absolute
-.import msgtoken_1F:absolute
+.import txt_docked_token1A:absolute
+.import txt_docked_token1E:absolute
+.import txt_docked_token1F:absolute
 .import _8c7b:absolute
 .import _8c8a:absolute
 .import _8cad:absolute
@@ -122,7 +122,7 @@
 .import _b148:absolute
 .import _b179:absolute
 .import paint_char:absolute
-.import msgtoken_15:absolute
+.import txt_docked_token15:absolute
 .import _b410:absolute
 
 ; from "data_hulls.asm"
@@ -971,9 +971,9 @@ _2367:
 
         rts 
 
-msgtoken_1B:                                                            ;$2372
+txt_docked_token1B:                                                     ;$2372
         ;=======================================================================
-.export msgtoken_1B
+.export txt_docked_token1B
 
         ; print some message from msg index $D9(217)+?
         ;
@@ -982,17 +982,17 @@ msgtoken_1B:                                                            ;$2372
         lda # $d9
         bne _2378               ; always branches
 
-msgtoken_1C:                                                            ;$2376
+txt_docked_token1C:                                                     ;$2376
         ;=======================================================================
         ; print some message from msg index $DC(220)+?
         ; 
-.export msgtoken_1C
+.export txt_docked_token1C
 
         lda # $dc
 _2378:
         clc 
         adc $04a8
-        bne print_msg           ; always branches
+        bne print_docked_str    ; always branches
         
 
 _237e:                                                                  ;$237E
@@ -1020,7 +1020,7 @@ _237e:                                                                  ;$237E
         lda # > _1a5c
         bne _23a0
 
-print_msg:                                                              ;$2390
+print_docked_str:                                                       ;$2390
 ;===============================================================================
 ; prints one of the messages from TEXT_DOCKED, not to be
 ; confused with the *other* text-printing routine :|
@@ -1030,7 +1030,7 @@ print_msg:                                                              ;$2390
 ; preserves A, Y & $5B/$5C
 ; (due to recursion)
 ;
-.export print_msg
+.export print_docked_str
 
         pha                     ; preserve A (message index)
         tax                     ; move message index to X
@@ -1052,7 +1052,7 @@ _23a0:                                                                  ;$23A0
         sta $5c
         ldy # $00
 
-_skip_msg:                                                              ;$23A4
+@skip_str:                                                              ;$23A4
         ;-----------------------------------------------------------------------
         ; skip over the messages until we find the one we want:
         ; -- this is insane!
@@ -1063,13 +1063,13 @@ _skip_msg:                                                              ;$23A4
         eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
         bne :+                  ; keep going if not a message terminator ($00)
         dex                     ; message has ended, decrement index
-        beq _read_msgtoken      ; if we've found our message, exit loop
+        beq @read_token         ; if we've found our message, exit loop
 :       iny                     ; move to next token                    ;$23AD
-        bne _skip_msg           ; if we haven't crossed the page, keep going
+        bne @skip_str           ; if we haven't crossed the page, keep going
         inc $5c                 ; move to the next page (256 bytes)
-        bne _skip_msg           ; and continue
+        bne @skip_str           ; and continue
 
-_read_msgtoken:                                                         ;$23B4
+@read_token:                                                            ;$23B4
         ;-----------------------------------------------------------------------
         iny                     ; step over the terminator byte ($00)
         bne :+                  ; did we step over the page boundary?
@@ -1090,8 +1090,8 @@ _read_msgtoken:                                                         ;$23B4
         eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
         beq @rts                ; has message ended? (token $00)
 
-        jsr print_msgtoken
-        jmp _read_msgtoken
+        jsr print_docked_token
+        jmp @read_token
 
 @rts:   ; finished printing, clean up and exit                          ;$23C5
         ;-----------------------------------------------------------------------
@@ -1104,7 +1104,7 @@ _read_msgtoken:                                                         ;$23B4
         pla 
         rts
 
-print_msgtoken:                                                         ;$23CF
+print_docked_token:                                                     ;$23CF
         ;=======================================================================
         cmp # ' '               ; tokens less than $20 (space)
        .blt _format_code        ; are format codes
@@ -1125,7 +1125,7 @@ print_msgtoken:                                                         ;$23CF
         txa 
 
         ; print from the commonly shared 'flight' strings
-        jsr print_token
+        jsr print_flight_token
         
         jmp _2438
 
@@ -1138,23 +1138,25 @@ print_msgtoken:                                                         ;$23CF
        .blt _2441               ; handle planet description tokens
         
         cmp # $d7               ; tokens $81...$D6 are expansions,
-       .blt print_msg           ; use the token as a message index
+       .blt print_docked_str    ; use the token as a message index
         
         ; tokens $D7 and above:
         ; (character pairs)
 
-.import _254c
-.import _254d
+.import txt_docked_pair1
+.import txt_docked_pair2
 
         sbc # $d7               ; re-index as $00...$28
         asl                     ; double, for lookup-table
         pha                     ; (put aside)
         tax                     ; use as index to table
-        lda _254c, x            ; read 1st character and print it
+        lda txt_docked_pair1, x ; read 1st character and print it
+
         jsr _2404
+        
         pla                     ; get the offset again 
         tax 
-        lda _254d, x            ; read 2nd character and print it
+        lda txt_docked_pair2, x ; read 2nd character and print it
 
 _2404:  ; print a character                                             ;$2404
         ;-----------------------------------------------------------------------
@@ -1295,21 +1297,21 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
         ldx $07
         adc _3eac - $5B, x
 
-        jsr print_msg           ; print the new message
+        jsr print_docked_str    ; print the new message
 
         jmp _2438               ; clean up and exit
 
 
-msgtoken_01:                                                            ;$246A
+txt_docked_token01:                                                     ;$246A
         ;=======================================================================
-.export msgtoken_01
+.export txt_docked_token01
 
         lda # %00000000
        .bit
 
-msgtoken_02:                                                            ;$246D
+txt_docked_token02:                                                     ;$246D
         ;=======================================================================
-.export msgtoken_02
+.export txt_docked_token02
 
         lda # %00100000
         sta msg_ucase
@@ -1318,9 +1320,9 @@ msgtoken_02:                                                            ;$246D
         sta _2f1d
         rts
 
-msgtoken_08:                                                            ;$2478
+txt_docked_token08:                                                     ;$2478
         ;=======================================================================
-.export msgtoken_08
+.export txt_docked_token08
 
         lda # 6
         jsr set_cursor_col
@@ -1330,18 +1332,18 @@ msgtoken_08:                                                            ;$2478
 
         rts 
 
-msgtoken_09:                                                            ;$2483
+txt_docked_token09:                                                     ;$2483
         ;=======================================================================
-.export msgtoken_09
+.export txt_docked_token09
 
         lda # 1
         jsr set_cursor_col
 
         jmp _a72f
 
-msgtoken_0D:                                                            ;$248B
+txt_docked_token0D:                                                     ;$248B
         ;=======================================================================
-.export msgtoken_0D
+.export txt_docked_token0D
         
         ; enable the change-case flag?
         lda # $80
@@ -1353,34 +1355,34 @@ msgtoken_0D:                                                            ;$248B
 
         rts 
 
-msgtoken_06:                                                            ;$2496
+txt_docked_token06:                                                     ;$2496
         ;=======================================================================
-.export msgtoken_06
+.export txt_docked_token06
         
         lda # $80
         sta $34
         lda # $ff
        .bit
 
-msgtoken_05:                                                            ;$249D
+txt_docked_token05:                                                     ;$249D
         ;=======================================================================
-.export msgtoken_05
+.export txt_docked_token05
 
         lda # %00000000
         sta msg_flight_flag
 
         rts 
 
-msgtoken_0E:                                                            ;$24A3
+txt_docked_token0E:                                                     ;$24A3
         ;=======================================================================
-.export msgtoken_0E
+.export txt_docked_token0E
 
         lda # $80
        .bit
 
-msgtoken_0F:                                                            ;$24A6
+txt_docked_token0F:                                                     ;$24A6
         ;=======================================================================
-.export msgtoken_0F
+.export txt_docked_token0F
         
         lda # $00
         sta _2f1b
@@ -1388,16 +1390,16 @@ msgtoken_0F:                                                            ;$24A6
         sta _2f1c
         rts 
 
-msgtoken_11:                                                            ;$24B0
+txt_docked_token11:                                                     ;$24B0
         ;=======================================================================
-.export msgtoken_11
+.export txt_docked_token11
 
         lda $34
         and # %10111111         ;=$BF
         sta $34
 
         lda # $03
-        jsr print_token
+        jsr print_flight_token
         
         ldx _2f1c
         lda $0647, x
@@ -1406,13 +1408,13 @@ msgtoken_11:                                                            ;$24B0
         dec _2f1c
 _24c9:
         lda # $99
-        jmp print_msg
+        jmp print_docked_str
 
-msgtoken_12:                                                            ;$24CE
+txt_docked_token12:                                                     ;$24CE
         ;=======================================================================
-.export msgtoken_12
+.export txt_docked_token12
 
-        jsr msgtoken_set_lowercase
+        jsr txt_docked_token_set_lowercase
 
         jsr get_random_number
         and # %00000011
@@ -1435,9 +1437,9 @@ _24d7:
         
         rts 
 
-msgtoken_set_lowercase:                                                 ;$24ED
+txt_docked_token_set_lowercase:                                         ;$24ED
         ;=======================================================================
-.export msgtoken_set_lowercase
+.export txt_docked_token_set_lowercase
         
         ; msg token $13
         ;
@@ -1803,11 +1805,11 @@ _28d9:
 ;===============================================================================
 .export _28d9
 
-        jsr print_token
+        jsr print_flight_token
 
-msgtoken_0B:                                                            ;$28DC
+txt_docked_token0B:                                                     ;$28DC
 ;===============================================================================
-.export msgtoken_0B
+.export txt_docked_token0B
 
         lda # $13
         bne _28e5
@@ -2358,7 +2360,7 @@ _2c7c:
 
 _2c7d:
         lda # $cd
-        jsr print_msg
+        jsr print_docked_str
 
         jsr _b179
         jmp _2cc7
@@ -2923,9 +2925,9 @@ _2f1f:
         lda # $0c
        .bit
 
-msgtoken_10:                                                            ;$2F22
+txt_docked_token10:                                                     ;$2F22
         ;=======================================================================
-.export msgtoken_10
+.export txt_docked_token10
 
         lda # $41
 
@@ -3363,14 +3365,14 @@ _31be:
 _31c6:
 .export _31c6
         lda # $0e
-        jsr print_msg
+        jsr print_docked_str
 
         jsr _6f82
         jsr _70a0
         lda # $00
         sta $ae
 _31d5:
-        jsr msgtoken_0E
+        jsr txt_docked_token0E
         jsr _76e9
         ldx _2f1c
         lda $0e, x
@@ -3394,7 +3396,7 @@ _31f1:
         jsr _a858
 
         lda # $d7
-        jmp print_msg
+        jmp print_docked_str
 
         ;-----------------------------------------------------------------------
 
@@ -3405,7 +3407,7 @@ _3208:
         sta TSYSTEM_POS_Y
         jsr _70ab
         jsr _6f82
-        jsr msgtoken_0F
+        jsr txt_docked_token0F
         jmp _877e
 
 ;===============================================================================
@@ -5325,11 +5327,14 @@ _3d3d:
         lda $0499
         lsr 
         bcc _3d6f
-        jsr msgtoken_0E
+        jsr txt_docked_token0E
+        
         lda # $01
        .bit
+
 :       lda # $b0                                                       ;$3D5F
-        jsr print_msgtoken
+        jsr print_docked_token
+        
         tya 
         jsr _237e
 
@@ -5348,7 +5353,7 @@ _3d6f:
         bpl :-
 
         lda # $05
-_3d7a:  jmp print_msg
+_3d7a:  jmp print_docked_str
 
 ;===============================================================================
 
@@ -5358,7 +5363,7 @@ _3d7d:                                                                  ;$3d7d
         sta $0499
         lda # $0b
 _3d87:                                                                  ;$3d87
-        jsr print_msg
+        jsr print_docked_str
 _3d8a:                                                                  ;$3d8a
         jmp _88e7
 
@@ -5395,7 +5400,7 @@ _3dc0:                                                                  ;$3dc0
         sta $0499
 
         lda # $c7
-        jsr print_msg
+        jsr print_docked_str
         
         jsr _81ee
         bcc _3d8a
@@ -5411,7 +5416,7 @@ _3dff:                                                                  ;$3dff
         lsr $0499
         sec 
         rol $0499
-        jsr msgtoken_19
+        jsr txt_docked_token19
         jsr _8447
         lda # $1f
         sta $a5
@@ -5456,22 +5461,22 @@ _3e31:                                                                  ;$3e31
         lda # $0a
         bne _3dbe
         
-msgtoken_19:                                                            ;$3E37
+txt_docked_token19:                                                     ;$3E37
         ;=======================================================================
-.export msgtoken_19
+.export txt_docked_token19
 
         lda # $d8
-        jsr print_msg
+        jsr print_docked_str
 
         ldy # $64
         jmp _3ea1
 
-msgtoken_16:                                                            ;$3E41
+txt_docked_token16:                                                     ;$3E41
         ;=======================================================================
-.export msgtoken_16
+.export txt_docked_token16
         
         jsr _3e65
-        bne msgtoken_16
+        bne txt_docked_token16
 _3e46:                                                                  ;$3e46
         jsr _3e65
         beq _3e46
@@ -5481,23 +5486,23 @@ _3e46:                                                                  ;$3e46
         jsr _a72f
         jsr _9a86
 
-msgtoken_17:                                                            ;$3E57  
+txt_docked_token17:                                                     ;$3E57  
         ;=======================================================================
-.export msgtoken_17
+.export txt_docked_token17
 
         lda # $0a
        .bit
 
-msgtoken_1D:                                                            ;$3E5A
+txt_docked_token1D:                                                     ;$3E5A
         ;=======================================================================
-.export msgtoken_1D
+.export txt_docked_token1D
 
         lda # $06
         jsr set_cursor_row
 
         jsr _250b
         
-        jmp msgtoken_0D
+        jmp txt_docked_token0D
 
 _3e65:                                                                  ;$3E65
         ;-----------------------------------------------------------------------
@@ -5513,15 +5518,15 @@ _3e65:                                                                  ;$3E65
         jmp _8d53
 
 
-msgtoken_18:                                                            ;$3E7C
+txt_docked_token18:                                                     ;$3E7C
         ;=======================================================================
-.export msgtoken_18
+.export txt_docked_token18
         
         jsr _8d53
-        bne msgtoken_18
+        bne txt_docked_token18
 
         jsr _8d53
-        beq msgtoken_18
+        beq txt_docked_token18
         
         rts 
 

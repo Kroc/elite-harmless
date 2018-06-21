@@ -20,73 +20,70 @@
 .define .encrypt(value) value ^ TXT_FLIGHT_XOR
 
 
-.enum   pairs
-        _AL              =128 ;($80)
-        _LE             ;=129  ($81)
-        _XE             ;=130  ($82)
-        _GE             ;=131  ($83)
-        _ZA             ;=132  ($84)
-        _CE             ;=133  ($85)
-        _BI             ;=134  ($86)
-        _SO             ;=135  ($87)
-        _US             ;=136  ($88)
-        _ES             ;=137  ($89)
-        _AR             ;=138  ($8A)
-        _MA             ;=139  ($8B)
-        _IN             ;=140  ($8C)
-        _DI             ;=141  ($8D)
-        _RE             ;=142  ($8E)
-        _A              ;=143  ($8F) note: second character is ignored
-        _ER             ;=144  ($90)
-        _AT             ;=145  ($91)
-        _EN             ;=146  ($92)
-        _BE             ;=147  ($93)
-        _RA             ;=148  ($94)
-        _LA             ;=149  ($95)
-        _VE             ;=150  ($96)
-        _TI             ;=151  ($97)
-        _ED             ;=152  ($98)
-        _OR             ;=153  ($99)
-        _QU             ;=154  ($9A)
-        _AN             ;=155  ($9B)
-        _TE             ;=156  ($9C)
-        _IS             ;=157  ($9D)
-        _RI             ;=158  ($9E)
-        _ON             ;=159  ($9F)
-.endenum
-
-_AL             = .encrypt( pairs::_AL )        ;=$A3
-_LE             = .encrypt( pairs::_LE )        ;=$A2
-_XE             = .encrypt( pairs::_XE )        ;=$A1
-_GE             = .encrypt( pairs::_GE )        ;=$A0
-_ZA             = .encrypt( pairs::_ZA )        ;=$A7
-_CE             = .encrypt( pairs::_CE )        ;=$A6
-_BI             = .encrypt( pairs::_BI )        ;=$A5
-_SO             = .encrypt( pairs::_SO )        ;=$A4
-_US             = .encrypt( pairs::_US )        ;=$AB
-_ES             = .encrypt( pairs::_ES )        ;=$AA
-_AR             = .encrypt( pairs::_AR )        ;=$A9
-_MA             = .encrypt( pairs::_MA )        ;=$A8
-_IN             = .encrypt( pairs::_IN )        ;=$AF
-_DI             = .encrypt( pairs::_DI )        ;=$AE
-_RE             = .encrypt( pairs::_RE )        ;=$AD
-_A              = .encrypt( pairs::_A  )        ;=$AC
-_ER             = .encrypt( pairs::_ER )        ;=$B3
-_AT             = .encrypt( pairs::_AT )        ;=$B2
-_EN             = .encrypt( pairs::_EN )        ;=$B1
-_BE             = .encrypt( pairs::_BE )        ;=$B0
-_RA             = .encrypt( pairs::_RA )        ;=$B7
-_LA             = .encrypt( pairs::_LA )        ;=$B6
-_VE             = .encrypt( pairs::_VE )        ;=$B5
-_TI             = .encrypt( pairs::_TI )        ;=$B4
-_ED             = .encrypt( pairs::_ED )        ;=$BB
-_OR             = .encrypt( pairs::_OR )        ;=$BA
-_QU             = .encrypt( pairs::_QU )        ;=$B9
-_AN             = .encrypt( pairs::_AN )        ;=$B8
-_TE             = .encrypt( pairs::_TE )        ;=$BF
-_IS             = .encrypt( pairs::_IS )        ;=$BE
-_RI             = .encrypt( pairs::_RI )        ;=$BD
-_ON             = .encrypt( pairs::_ON )        ;=$BC
+.import txt_flight_al:direct
+_AL     = .encrypt( txt_flight_al )        ;=$A3
+.import txt_flight_le:direct
+_LE     = .encrypt( txt_flight_le )        ;=$A2
+.import txt_flight_xe:direct
+_XE     = .encrypt( txt_flight_xe )        ;=$A1
+.import txt_flight_ge:direct
+_GE     = .encrypt( txt_flight_ge )        ;=$A0
+.import txt_flight_za:direct
+_ZA     = .encrypt( txt_flight_za )        ;=$A7
+.import txt_flight_ce:direct
+_CE     = .encrypt( txt_flight_ce )        ;=$A6
+.import txt_flight_bi:direct
+_BI     = .encrypt( txt_flight_bi )        ;=$A5
+.import txt_flight_so:direct
+_SO     = .encrypt( txt_flight_so )        ;=$A4
+.import txt_flight_us:direct
+_US     = .encrypt( txt_flight_us )        ;=$AB
+.import txt_flight_es:direct
+_ES     = .encrypt( txt_flight_es )        ;=$AA
+.import txt_flight_ar:direct
+_AR     = .encrypt( txt_flight_ar )        ;=$A9
+.import txt_flight_ma:direct
+_MA     = .encrypt( txt_flight_ma )        ;=$A8
+.import txt_flight_in:direct
+_IN     = .encrypt( txt_flight_in )        ;=$AF
+.import txt_flight_di:direct
+_DI     = .encrypt( txt_flight_di )        ;=$AE
+.import txt_flight_re:direct
+_RE     = .encrypt( txt_flight_re )        ;=$AD
+.import txt_flight_a_:direct
+_A      = .encrypt( txt_flight_a_ )        ;=$AC
+.import txt_flight_er:direct
+_ER     = .encrypt( txt_flight_er )        ;=$B3
+.import txt_flight_at:direct
+_AT     = .encrypt( txt_flight_at )        ;=$B2
+.import txt_flight_en:direct
+_EN     = .encrypt( txt_flight_en )        ;=$B1
+.import txt_flight_be:direct
+_BE     = .encrypt( txt_flight_be )        ;=$B0
+.import txt_flight_ra:direct
+_RA     = .encrypt( txt_flight_ra )        ;=$B7
+.import txt_flight_la:direct
+_LA     = .encrypt( txt_flight_la )        ;=$B6
+.import txt_flight_ve:direct
+_VE     = .encrypt( txt_flight_ve )        ;=$B5
+.import txt_flight_ti:direct
+_TI     = .encrypt( txt_flight_ti )        ;=$B4
+.import txt_flight_ed:direct
+_ED     = .encrypt( txt_flight_ed )        ;=$BB
+.import txt_flight_or:direct
+_OR     = .encrypt( txt_flight_or )        ;=$BA
+.import txt_flight_qu:direct
+_QU     = .encrypt( txt_flight_qu )        ;=$B9
+.import txt_flight_an:direct
+_AN     = .encrypt( txt_flight_an )        ;=$B8
+.import txt_flight_te:direct
+_TE     = .encrypt( txt_flight_te )        ;=$BF
+.import txt_flight_is:direct
+_IS     = .encrypt( txt_flight_is )        ;=$BE
+.import txt_flight_ri:direct
+_RI     = .encrypt( txt_flight_ri )        ;=$BD
+.import txt_flight_on:direct
+_ON     = .encrypt( txt_flight_on )        ;=$BC
 
 __end           = $00
 __              = .encrypt ( $20 )              ;=$03
