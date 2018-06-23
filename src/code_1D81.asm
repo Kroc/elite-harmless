@@ -490,6 +490,8 @@ _2014:
         beq _201a+1
         ldy # $0a
 _201a:
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
         ldy # $0b
 _201d:
@@ -972,22 +974,19 @@ _2367:
         rts 
 
 txt_docked_token1B:                                                     ;$2372
-        ;=======================================================================
+;===============================================================================
 .export txt_docked_token1B
 
         ; print some message from msg index $D9(217)+?
-        ;
-        ; "CURRUTHERS" / "FOSDYKE_SMYTHE" / "FORTESQUE"
-        ;
+        ; ("CURRUTHERS" / "FOSDYKE_SMYTHE" / "FORTESQUE")
         lda # $d9
         bne _2378               ; always branches
 
 txt_docked_token1C:                                                     ;$2376
-        ;=======================================================================
-        ; print some message from msg index $DC(220)+?
-        ; 
+;===============================================================================
 .export txt_docked_token1C
 
+        ; print some message from msg index $DC(220)+?
         lda # $dc
 _2378:
         clc 
@@ -1003,8 +1002,7 @@ _237e:                                                                  ;$237E
         ; push the current state:
         pha 
         tax 
-        tya 
-        pha 
+       .phy                     ; push Y to stack (via A)
         lda $5b
         pha 
         lda $5c
@@ -1020,12 +1018,12 @@ _237e:                                                                  ;$237E
         lda # > _1a5c
         bne _23a0
 
+
 print_docked_str:                                                       ;$2390
 ;===============================================================================
-; prints one of the messages from TEXT_DOCKED, not to be
-; confused with the *other* text-printing routine :|
+; prints one of the strings from "text_docked.asm"
 ;
-;       A = index of message to print, from message table
+;       A = index of string to print
 ;
 ; preserves A, Y & $5B/$5C
 ; (due to recursion)
@@ -1037,8 +1035,7 @@ print_docked_str:                                                       ;$2390
         
         ; when recursing, $5B/$5C+Y represent the
         ; current position in the message data
-        tya 
-        pha 
+       .phy                     ; push Y to stack (via A)
         lda $5b
         pha 
         lda $5c
@@ -1084,7 +1081,7 @@ _23a0:                                                                  ;$23A0
         ; $41-$5A = print ASCII characters @, A-Z
         ; $5B-$80 = planet description tokens
         ; $81-$D6 = ?
-        ; $D7-$FF = some pre-defined character pairs
+        ; $D7-$FF = some pre-defined character pairs ("text_pairs.asm")
         ;
         lda [$5b], y            ; read a token
         eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
@@ -1108,16 +1105,13 @@ print_docked_token:                                                     ;$23CF
         ;=======================================================================
         cmp # ' '               ; tokens less than $20 (space)
        .blt _format_code        ; are format codes
-        
-        
 
-        bit msg_flight_flag     ; if flight string mode is off,
+        bit txt_flight_flag     ; if flight string mode is off,
         bpl :+                  ; skip the next bit
        
        ; save state before we recurse
         tax 
-        tya 
-        pha 
+       .phy                     ; push Y to stack (via A) 
         lda $5b
         pha 
         lda $5c
@@ -1162,28 +1156,34 @@ _2404:  ; print a character                                             ;$2404
         ;-----------------------------------------------------------------------
         
         ; print the punctuation characters ($20...$40), as is
-        
+
         cmp # '@'+1
-       .blt _goto_print_char
+       .blt @print
         
-        ; flag?
-        bit _2f1d
-        bmi _ucase
+        ; shall we change the letter case?
         
-        ; flag?
-        bit _2f19
-        bmi _lcase
+        ; check for the upper-case flag: -- note that this will have no effect
+        ; if the upper-case mask is not set or if the lower-case mask is set
+        ; which takes precedence
 
-_ucase:                                                                 ;$2412
-        ora msg_ucase           ; upper case (if enabled)
-_lcase:                                                                 ;$2415
-        and msg_lcase           ; lower-case (if enabled)
+        bit txt_ucase_flag      ; check if bit 7 is set
+        bmi @ucase              ; if so, skip ahead
+        
+        ; check for the lower-case flag: -- this will only have an effect if
+        ; the lower-case mask is set to remove bit 5
 
-_goto_print_char:                                                       ;$2418
-        jmp print_char
+        bit txt_lcase_flag      ; check if bit 7 is set
+        bmi @lcase              ; if so, skip ahead
+
+@ucase: ora txt_ucase_mask      ; upper case (if enabled)               ;$2412
+        
+@lcase: and txt_lcase_mask      ; lower-case (if enabled)               ;$2415
+
+@print: jmp print_char                                                  ;$2418
+
 
 _format_code:                                                           ;$241B
-        ;-----------------------------------------------------------------------
+        ;=======================================================================
         ; tokens $00..$1F are format codes, each has a different behaviour:
         ;
         ;    $00 = invalid
@@ -1222,8 +1222,7 @@ _format_code:                                                           ;$241B
         ; snapshot current state:
         ; -- these format codes can get recursive
         tax 
-        tya 
-        pha
+       .phy                     ; push Y to stack (via A)
         lda $5b
         pha 
         lda $5c
@@ -1269,8 +1268,7 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
         sta $07                 ; put token aside
         
         ; put aside our current location in the text data
-        tya 
-        pha
+       .phy                     ; push Y to stack (via A)
         lda $5b
         pha 
         lda $5c
@@ -1307,6 +1305,9 @@ txt_docked_token01:                                                     ;$246A
 .export txt_docked_token01
 
         lda # %00000000
+
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 
 txt_docked_token02:                                                     ;$246D
@@ -1314,10 +1315,11 @@ txt_docked_token02:                                                     ;$246D
 .export txt_docked_token02
 
         lda # %00100000
-        sta msg_ucase
+        sta txt_ucase_mask
 
-        lda # $00
-        sta _2f1d
+        lda # %00000000
+        sta txt_ucase_flag
+
         rts
 
 txt_docked_token08:                                                     ;$2478
@@ -1327,8 +1329,8 @@ txt_docked_token08:                                                     ;$2478
         lda # 6
         jsr set_cursor_col
 
-        lda # $ff
-        sta _2f19
+        lda # %11111111
+        sta txt_lcase_flag
 
         rts 
 
@@ -1346,12 +1348,12 @@ txt_docked_token0D:                                                     ;$248B
 .export txt_docked_token0D
         
         ; enable the change-case flag?
-        lda # $80
-        sta _2f1d
+        lda # %10000000
+        sta txt_ucase_flag
         
         ; enable upper-casing
         lda # %00100000
-        sta msg_ucase
+        sta txt_ucase_mask
 
         rts 
 
@@ -1362,6 +1364,9 @@ txt_docked_token06:                                                     ;$2496
         lda # $80
         sta $34
         lda # $ff
+
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 
 txt_docked_token05:                                                     ;$249D
@@ -1369,7 +1374,7 @@ txt_docked_token05:                                                     ;$249D
 .export txt_docked_token05
 
         lda # %00000000
-        sta msg_flight_flag
+        sta txt_flight_flag
 
         rts 
 
@@ -1378,6 +1383,9 @@ txt_docked_token0E:                                                     ;$24A3
 .export txt_docked_token0E
 
         lda # $80
+
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 
 txt_docked_token0F:                                                     ;$24A6
@@ -1385,9 +1393,9 @@ txt_docked_token0F:                                                     ;$24A6
 .export txt_docked_token0F
         
         lda # $00
-        sta _2f1b
+        sta txt_buffer_flag
         asl 
-        sta _2f1c
+        sta txt_buffer_index
         rts 
 
 txt_docked_token11:                                                     ;$24B0
@@ -1401,11 +1409,11 @@ txt_docked_token11:                                                     ;$24B0
         lda # $03
         jsr print_flight_token
         
-        ldx _2f1c
+        ldx txt_buffer_index
         lda $0647, x
         jsr _24f3
         bcc _24c9
-        dec _2f1c
+        dec txt_buffer_index
 _24c9:
         lda # $99
         jmp print_docked_str
@@ -1444,7 +1452,7 @@ txt_docked_token_set_lowercase:                                         ;$24ED
         ; msg token $13
         ;
         lda # %11011111
-        sta msg_lcase
+        sta txt_lcase_mask
 
         rts 
 
@@ -2890,192 +2898,261 @@ _2f06:
 @rts:   rts                                                             ;$2F17 
 
 ;===============================================================================
+; a block of text-printing related flags and variables
 
-msg_ucase:                                                              ;$2F18
+txt_ucase_mask:                                                         ;$2F18
         ; a mask for converting a character A-Z to upper-case.
         ; this byte gets changed to 0 to neuter the effect
         .byte   %00100000
 
-_2f19:
-.export _2f19
-        .byte   $ff
+txt_lcase_flag:                                                         ;$2F19
+.export txt_lcase_flag
+        
+        .byte   %11111111
 
-msg_flight_flag:                                                       ;$2F1A
+txt_flight_flag:                                                        ;$2F1A
         .byte   %00000000
 
-_2f1b:
-.export _2f1b
-        .byte   $00
-_2f1c:
-.export _2f1c
-        .byte   $00
-_2f1d:
+txt_buffer_flag:                                                        ;$2F1B
+.export txt_buffer_flag
+
+        .byte   %00000000
+
+txt_buffer_index:                                                       ;$2F1C
+.export txt_buffer_index
+        
         .byte   $00
 
-msg_lcase:                                                              ;$2F1E
+txt_ucase_flag:                                                         ;$2F1D
+        .byte   %00000000
+
+txt_lcase_mask:                                                         ;$2F1E
         ; this byte is used to lower-case charcters, it's ANDed with the
         ; character value -- therefore its default value $FF does nothing.
         ; this byte is changed to %11011111 to enable lower-casing, which
         ; removes bit 5 ($20) from characters, e.g. $61 "A" > $41 "a"
         .byte   %11111111
 
-_2f1f:
+
+print_crlf:                                                             ;$2F1F
 ;===============================================================================
-.export _2f1f
+; 'print' a new-line character. i.e. move to the next row, starting column
+;
+.export print_crlf
+
         lda # $0c
+
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 
 txt_docked_token10:                                                     ;$2F22
-        ;=======================================================================
+;===============================================================================
 .export txt_docked_token10
 
         lda # $41
 
+
 print_char:                                                             ;$2F24
-        ;=======================================================================
+;===============================================================================
+; prints an ASCII character to screen (eventually). note that this routine can
+; buffer output to produce effects like right-alignment. the actual routine
+; that copies pixels to screen is `paint_char`, but this routine is the one
+; the text-handling works with
+;
+;       A = ASCII code
+;
 .export print_char
 
+; TODO: this to be defined structurally at some point
+TXT_BUFFER = $0648
+
+        ; put X parameter aside,
+        ; we need the X register for now
         stx $07
 
         ; disable the automatic lower-case transformation
         ldx # %11111111
-        stx msg_lcase
+        stx txt_lcase_mask
         
+        ; check for characters that aren't cased
+
         cmp # '.'
-        beq _2f40
+        beq :+
         
         cmp # ':'
-        beq _2f40
+        beq :+
         
         cmp # $0a               ;?
-        beq _2f40
+        beq :+
         
         cmp # $0c               ;?
-        beq _2f40
+        beq :+
         
         cmp # ' '
-        beq _2f40
+        beq :+
 
-        ; $FF for all characters except ".", ":", $0A, $0C & space,
+        ; X is $FF for all characters, except ".", ":", $0A, $0C & space,
         ; otherwise $00 -- some kind of flag?
         inx 
 
-_2f40:  stx _2f19
+:       stx txt_lcase_flag                                              ;$24F0
+
+        ; get back the original X value
         ldx $07
 
-        bit _2f1b               ; check bit 7
-        bmi _2f4d               ; skip if bit 7 set (negative number)
+        ; check 'use buffer' flag
+        bit txt_buffer_flag     ; check if bit 7 is set
+        bmi @add_to_buffer      ; yes? switch to buffered printing
 
+        ; no buffer, print character as-is
         jmp paint_char
+        
 
-        ;-----------------------------------------------------------------------
+@add_to_buffer:                                                         ;$2F4D
+        ;=======================================================================
+        ; a flag to ignore line-breaks? (could be right-alignment flag?)
+        bit txt_buffer_flag     ; check bit 6
+        bvs :+                  ; skip if bit 6 set
 
-_2f4d:
-        bit _2f1b
-        bvs _2f56
+        cmp # $0c               ; new-line character?
+        beq @flush              ; flush buffer
 
-        cmp # $0c
-        beq _2f63
-_2f56:
-        ldx _2f1c
-        sta $0648, x
+:       ldx txt_buffer_index                                            ;$2F56
+        sta TXT_BUFFER, x       ; add the character to the buffer
+        
         ldx $07
-        inc _2f1c
+        inc txt_buffer_index
+
         clc 
         rts 
 
+@flush:                                                                 ;$2F63
         ;-----------------------------------------------------------------------
+        ; flush the text buffer to screen
+        ;
+        
+        ; backup X & Y registers:
+       .phx                     ; push X to stack (via A)
+       .phy                     ; push Y to stack (via A)
 
-_2f63:
-        txa 
-        pha 
-        tya 
-        pha 
 _2f67:
-        ldx _2f1c
-        beq _2fe4
-        cpx # $1f
-        bcc _2fe1
-        lsr $08
-_2f72:
+        ldx txt_buffer_index    ; get current buffer index
+       .bze _exit               ; if buffer is empty, exit
+
+        ; does the buffer need to be word-wrapped?
+
+        cpx # 31                ; is the line <= 30 chars?
+       .blt _print_all          ; if so, the line fits, print as-is
+
+        lsr $08                 ; decrement line-count; note that this is a
+                                ; 'walking bit' that shifts down, rather than
+                                ; a numerical counter
+
+_2f72:                                                                  ;$2F72
         lda $08
-        bmi _2f7a
-        lda # $40
+        bmi :+
+
+        lda # %01000000         ; reset line-counter to 6 lines (6th bit)
         sta $08
-_2f7a:
-        ldy # $1d
+
+:       ldy # 29                ; line-length - 1                       ;$2F7A
 _2f7c:
-        lda $0666
-        cmp # $20
-        beq _2fb0
-_2f83:
-        dey 
-        bmi _2f72
-        beq _2f72
-        lda $0648, y
-        cmp # $20
-        bne _2f83
-        asl $08
-        bmi _2f83
+        ; if the line ends with a space, we don't actually need to
+        ; word-wrap, just go ahead and print the line we have
+        lda TXT_BUFFER+30       ; check the last char in the line
+        cmp # ' '               ; is it a space?
+        beq @print30            ; if so, skip ahead to printing the line
+
+        ; search for a word-break:
+        ; -- i.e. the last space in the buffer
+
+:       dey                     ; step back through the line-length     ;$2F83
+        bmi _2f72               ; increment line-count if negative
+        beq _2f72               ; increment line-count if zero
+
+        lda TXT_BUFFER, y       ; read character from buffer
+        cmp # ' '               ; is it a space?
+        bne :-                  ; not a space, keep going
+        
+        ; space found:
+
+        asl $08                 ;?
+        bmi :-
         sty $07
-        ldy _2f1c
-_2f98:
-        lda $0648, y
-        sta $0649, y
+
+        ; shift the text in the buffer up 1 character
+        ldy txt_buffer_index
+:       lda TXT_BUFFER, y                                               ;$2F98
+        sta TXT_BUFFER+1, y
         dey 
         cpy $07
-        bcs _2f98
-        inc _2f1c
-_2fa6:
-        cmp $0648, y
+        bcs :-
+
+        inc txt_buffer_index
+:       cmp TXT_BUFFER, y                                               ;$2FA6
         bne _2f7c
         dey 
-        bpl _2fa6
+        bpl :-
         bmi _2f72
-_2fb0:
-        ldx # $1e
-        jsr _2fd4
 
+@print30:                                                               ;$2FB0
+        ; print 30 characters
+        ldx # 30
+        jsr _print_some
+
+        ; move to the next line
         lda # $0c
         jsr paint_char
         
-        lda _2f1c
-        sbc # $1e
-        sta _2f1c
+        lda txt_buffer_index
+        sbc # 30
+        sta txt_buffer_index
         tax 
-        beq _2fe4
+        beq _exit
         ldy # $00
         inx 
-_2fc8:
-        lda $0667, y
-        sta $0648, y
+
+:       lda TXT_BUFFER + 30 + 1, y                                      ;$2FC8
+        sta TXT_BUFFER, y
         iny 
         dex 
-        bne _2fc8
+        bne :-
         beq _2f67
-_2fd4:
-        ldy # $00
-_2fd6:
-        lda $0648, y
-        jsr paint_char
-        iny 
-        dex 
-        bne _2fd6
-_2fe0:
-        rts
 
+_print_some:                                                            ;$2FD4
         ;-----------------------------------------------------------------------
+        ; print X number of characters in the buffer to the screen
+        ;
+        ;       X = length of string to print from the buffer
+        ;
+        ldy # $00               ; begin at index 0
+:       lda TXT_BUFFER, y       ; read a character from the buffer      ;$2FD6
+        jsr paint_char          ; paint it to screen
+        iny                     ; move to the next character
+        dex                     ; reduce number of remaining characters
+        bne :-                  ; keep looping if some remain
 
-_2fe1:
-        jsr _2fd4
-_2fe4:
-        stx _2f1c
+_2fe0:  rts                                                             ;$2FE0
+
+_print_all:                                                             ;$2FE1
+        ;=======================================================================
+        jsr _print_some
+
+_exit:  stx txt_buffer_index    ; save remaining buffer length          ;$2FE4
+
+        ; restore state
         pla 
         tay 
         pla 
         tax 
+
+        ; 'paint' a carriage return, which will move the cursor accordingly
         lda # $0c
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
+
 _2fee:                                                                  ;$2FEE
         ;=======================================================================
 .export _2fee
@@ -3194,6 +3271,9 @@ _30bb:
         and _1d09
         beq :+
         txa 
+
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit 
 :       lda # $55                                                       ;$30C8
         rts 
@@ -3374,7 +3454,7 @@ _31c6:
 _31d5:
         jsr txt_docked_token0E
         jsr _76e9
-        ldx _2f1c
+        ldx txt_buffer_index
         lda $0e, x
         cmp # $0d
         bne _31f1
@@ -4224,8 +4304,7 @@ _3708:
         lda # $fe
 _370a:
         sta $06
-        txa 
-        pha 
+       .phx                     ; push X to stack (via A)
         lda $57
         pha 
         lda $58
@@ -4245,8 +4324,7 @@ _371c:
         lda $a5
         cmp # $02
         bne _374d
-        txa 
-        pha 
+       .phx                     ; push X to stack (via A)
         lda # $20
         sta $24
         ldx # $00
@@ -5330,6 +5408,8 @@ _3d3d:
         jsr txt_docked_token0E
         
         lda # $01
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 
 :       lda # $b0                                                       ;$3D5F
@@ -5491,6 +5571,8 @@ txt_docked_token17:                                                     ;$3E57
 .export txt_docked_token17
 
         lda # $0a
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 
 txt_docked_token1D:                                                     ;$3E5A

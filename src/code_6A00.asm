@@ -79,10 +79,10 @@
 .import print_small_value:absolute
 .import print_medium_value:absolute
 .import print_large_value:absolute
-.import _2f19:absolute
-.import _2f1b:absolute
-.import _2f1c:absolute
-.import _2f1f:absolute
+.import txt_lcase_flag:absolute
+.import txt_buffer_flag:absolute
+.import txt_buffer_index:absolute
+.import print_crlf:absolute
 .import print_char:absolute
 .import _2fee:absolute
 .import _2ff3:absolute
@@ -908,8 +908,7 @@ _6e5d:                                                                  ;$6e5d
         tay 
         lda _90a6, y
         sta $8f
-        txa 
-        pha 
+       .phx                     ; push X to stack (via A)
         jsr _6a8a
         
         clc 
@@ -1054,8 +1053,7 @@ _6f50:                                                                  ;$6f50
 ;===============================================================================
 
 _6f55:                                                                  ;$6f55
-        txa 
-        pha 
+       .phx                     ; push X to stack (via A)
         dey 
         tya 
         eor # %11111111
@@ -2594,7 +2592,7 @@ print_canned_message:                                                   ;$7813
         ; ignore message no.0,
         ; i.e. you can't skip zero messages
         txa                     ; return the original message index
-        beq print_flight_token_string  ; not zero?
+        beq print_flight_token_string
 
 @skip_message:                                                           ;$7821
 
@@ -2616,8 +2614,7 @@ print_flight_token_string:                                                     ;
         ;-----------------------------------------------------------------------
         ; remember the current index
         ; (this routine can call recursively)
-        tya 
-        pha 
+       .phy                     ; push Y to stack (via A)
         ; remember the current page
         lda $5c
         pha 
@@ -4814,6 +4811,8 @@ _85e0:
         ora # %11000000
         sta $29
         tya 
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 _85f0:
         lda # $1f
@@ -4991,8 +4990,12 @@ _870d:
         cmp # $3d
         bne _8724
         ldx # $03
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 _871c:  ldx # $02
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 _871f:  ldx # $01
 
@@ -5539,8 +5542,9 @@ _8a6a:
         cmp _8ab4
         bcs _8a8d
         sta $000e, y
-        iny
-
+        iny 
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit 
 _8a8d:  lda # $07
 _8a8f:
@@ -5784,7 +5788,7 @@ _8bc0:
         ora # %00010000
         jsr paint_char
         pha 
-        jsr _2f1f
+        jsr print_crlf
         pla 
         cmp # $30
         bcc _8c53
@@ -6021,8 +6025,7 @@ _8d4b:
 
 _8d53:
 .export _8d53
-        tya 
-        pha 
+       .phy                     ; push Y to stack (via A)
         
         lda # MEM_IO_ONLY
         jsr set_memory_layout
@@ -6241,8 +6244,7 @@ _8eba:
         eor # %11111111
         sta _1d06, y
         jsr _2fee
-        tya 
-        pha 
+       .phy                     ; push Y to stack (via A) 
         ldy # $14
         jsr _3ea1
         pla 
@@ -6453,21 +6455,21 @@ _9019:
         sty $048b
         sta $04e6
         lda # $c0
-        sta _2f1b
+        sta txt_buffer_flag
         lda $048c
         lsr 
         lda # $00
         bcc _9042
         lda # $0a
 _9042:
-        sta _2f1c
+        sta txt_buffer_index
         
         lda $04e6
         jsr print_flight_token
 
         lda # $20
         sec 
-        sbc _2f1c
+        sbc txt_buffer_index
         lsr 
         sta $b9
         jsr set_cursor_col
@@ -8025,8 +8027,7 @@ _9ead:
         adc # $00
         sta $0100, x
 _9ec3:
-        txa 
-        pha 
+       .phx                     ; push X to stack (via A)
         lda # $00
         sta $99
         lda $bb
@@ -8287,8 +8288,7 @@ _a04e:
         ora $73
         bpl _a04a
 _a081:
-        tya 
-        pha 
+       .phy                     ; push Y to stack (via A)
         lda $6f
         sec 
         sbc $6b
@@ -9314,9 +9314,9 @@ _a731:
         lda # $00
         sta $7e
         
-        lda # $80
+        lda # %10000000
         sta $34
-        sta _2f19
+        sta txt_lcase_flag
 
         jsr _7b4f
         lda # $00
@@ -9635,8 +9635,7 @@ _a8fa:
         ora # %10000000
         sta VIC_INTERRUPT_STATUS
         
-        txa 
-        pha 
+       .phx                     ; push X to stack (via A)
         
         ldx _a8d9
 
@@ -9664,8 +9663,7 @@ _a8fa:
         lda _a8dc, x
         sta _a8d9
         bne _a8ed
-        tya 
-        pha 
+       .phy                     ; push Y to stack (via A)
         bit _1d03
         bpl _a956
         jsr _b4d2
@@ -11008,9 +11006,10 @@ _b179:  ; NOTE: called only ever by `_2c7d`!
         lda # $0c
 
 paint_char:                                                             ;$B17B
-        ;-----------------------------------------------------------------------
-        ; write a character to the bitmap screen as if it were the text screen
-        ; (automatically advances the cursor)
+;===============================================================================
+; draws a character on the bitmap screen as if it were the text screen
+; (automatically advances the cursor)
+;
 .export paint_char
 
         ; store current registers
@@ -11312,6 +11311,8 @@ _b2a5:
         lda # $ff
         sta $5f1f
         ldx # $19
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
        .bit
 _b2b2:
         ldx # $12
@@ -11552,8 +11553,8 @@ txt_docked_token15:                                                     ;$B3D4
         sta $048b
         sta $048c
 
-        lda # $ff
-        sta _2f19
+        lda # %11111111
+        sta txt_lcase_flag
         
         lda #> _8015
         sta $34
