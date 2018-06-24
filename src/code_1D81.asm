@@ -1879,7 +1879,7 @@ _290f:
         jsr _3ad1
         sta $60
         txa 
-        sta $06c9, y
+        sta $06c9, y            ; "dust y-lo"
 _2918:
 .export _2918
         lda $6b
@@ -2956,7 +2956,7 @@ txt_docked_token10:                                                     ;$2F22
 print_char:                                                             ;$2F24
 ;===============================================================================
 ; prints an ASCII character to screen (eventually). note that this routine can
-; buffer output to produce effects like right-alignment. the actual routine
+; buffer output to produce effects like text-justification. the actual routine
 ; that copies pixels to screen is `paint_char`, but this routine is the one
 ; the text-handling works with
 ;
@@ -2965,7 +2965,7 @@ print_char:                                                             ;$2F24
 .export print_char
 
 ; TODO: this to be defined structurally at some point
-TXT_BUFFER = $0648
+TXT_BUFFER = $0648              ; $0648..$06A2? -- 3 lines
 
         ; put X parameter aside,
         ; we need the X register for now
@@ -3003,20 +3003,20 @@ TXT_BUFFER = $0648
 
         ; check 'use buffer' flag
         bit txt_buffer_flag     ; check if bit 7 is set
-        bmi @add_to_buffer      ; yes? switch to buffered printing
+        bmi _add_to_buffer      ; yes? switch to buffered printing
 
         ; no buffer, print character as-is
         jmp paint_char
         
 
-@add_to_buffer:                                                         ;$2F4D
+_add_to_buffer:                                                         ;$2F4D
         ;=======================================================================
-        ; a flag to ignore line-breaks? (could be right-alignment flag?)
+        ; a flag to ignore line-breaks?
         bit txt_buffer_flag     ; check bit 6
         bvs :+                  ; skip if bit 6 set
 
         cmp # $0c               ; new-line character?
-        beq @flush              ; flush buffer
+        beq _flush_buffer       ; flush buffer
 
 :       ldx txt_buffer_index                                            ;$2F56
         sta TXT_BUFFER, x       ; add the character to the buffer
@@ -3027,8 +3027,8 @@ TXT_BUFFER = $0648
         clc 
         rts 
 
-@flush:                                                                 ;$2F63
-        ;-----------------------------------------------------------------------
+_flush_buffer:                                                          ;$2F63
+        ;=======================================================================
         ; flush the text buffer to screen
         ;
         
@@ -3036,52 +3036,78 @@ TXT_BUFFER = $0648
        .phx                     ; push X to stack (via A)
        .phy                     ; push Y to stack (via A)
 
-_2f67:
+_flush_line:                                                            ;$2F67
+        ;-----------------------------------------------------------------------
         ldx txt_buffer_index    ; get current buffer index
        .bze _exit               ; if buffer is empty, exit
 
-        ; does the buffer need to be word-wrapped?
+        ; does the buffer need to be justified?
 
-        cpx # 31                ; is the line <= 30 chars?
-       .blt _print_all          ; if so, the line fits, print as-is
+        cpx # 31                ; is the buffer <= 30 chars?
+       .blt _print_all          ; if so, the buffer is one line, print as-is
 
-        lsr $08                 ; decrement line-count; note that this is a
-                                ; 'walking bit' that shifts down, rather than
-                                ; a numerical counter
+        ; there is more than one line to print, ergo all but the last line
+        ; must be justified -- insert extra spaces until the text reaches
+        ; the full length of the line
 
-_2f72:                                                                  ;$2F72
-        lda $08
-        bmi :+
+        ; since we must insert spaces evenly between words, a 'space-counter'
+        ; is used to ensure that we ignore an increasing number of spaces
+        ; so that new spaces are added further and further down the line,
+        ; providing even distribution
 
-        lda # %01000000         ; reset line-counter to 6 lines (6th bit)
-        sta $08
+        ; for speed optimisation, the space-counter is implemented as
+        ; a 'walking bit', a single bit in a byte that is shifted along
+        ; at each step. when the bit falls off the end it gets reset
 
-:       ldy # 29                ; line-length - 1                       ;$2F7A
-_2f7c:
-        ; if the line ends with a space, we don't actually need to
-        ; word-wrap, just go ahead and print the line we have
-        lda TXT_BUFFER+30       ; check the last char in the line
+        ; the space-counter begins at bit 6; this is so that the first
+        ; space encountered triggers justification
+
+        ; note that whatever the value of $08 prior to calling this routine,
+        ; shifting it right once will ensure that the 'minus' check below will
+        ; always fail, so $08 will be 'reset' to %01000000 for this routine
+        lsr $08
+
+_justify_line:                                                          ;$2F72
+        ;-----------------------------------------------------------------------
+        lda $08                 ; check the space-counter
+        bmi :+                  
+
+        lda # %01000000         ; reset space-counter
+        sta $08                 ; to its starting position
+
+        ; begin at the end of the line and walk backwards through it:
+:       ldy # 29                                                        ;$2F7A
+
+@justify:                                                               ;$2F7C
+        ;-----------------------------------------------------------------------
+        ; if the line ends with a space, we don't actually need to justify,
+        ; just go ahead and print the line we have. this is because adding
+        ; spaces to justify the text will always result in a line exactly
+        ; 30 chars or 1-less based on the length of the text in the line
+
+        lda TXT_BUFFER + 30     ; check the last char in the first line
         cmp # ' '               ; is it a space?
-        beq @print30            ; if so, skip ahead to printing the line
+        beq @print_line         ; if so, skip ahead to printing the line
 
-        ; search for a word-break:
-        ; -- i.e. the last space in the buffer
-
-:       dey                     ; step back through the line-length     ;$2F83
-        bmi _2f72               ; increment line-count if negative
-        beq _2f72               ; increment line-count if zero
+@find_spc:                                                              ;$2F83
+        dey                     ; step back through the line-length     
+        bmi _justify_line       ; catch underflow? max buffer length is 90
+        beq _justify_line       ; hit the start of the line, go again
 
         lda TXT_BUFFER, y       ; read character from buffer
         cmp # ' '               ; is it a space?
-        bne :-                  ; not a space, keep going
+        bne @find_spc           ; not a space, keep going
         
         ; space found:
-
-        asl $08                 ;?
-        bmi :-
+        asl $08                 ; ignore the first space we come across??
+        bmi @find_spc
+        
+        ; remember the current position,
+        ; i.e. where the space is
         sty $07
 
-        ; shift the text in the buffer up 1 character
+        ; insert another space, pushing everything forward
+        ; (increase the spacing between two words)
         ldy txt_buffer_index
 :       lda TXT_BUFFER, y                                               ;$2F98
         sta TXT_BUFFER+1, y
@@ -3089,17 +3115,21 @@ _2f7c:
         cpy $07
         bcs :-
 
+        ; given the space we added, increase the text-buffer length by 1
         inc txt_buffer_index
+
+        ; Y will have landed on the 
 :       cmp TXT_BUFFER, y                                               ;$2FA6
-        bne _2f7c
+        bne @justify
         dey 
         bpl :-
-        bmi _2f72
+        bmi _justify_line
 
-@print30:                                                               ;$2FB0
-        ; print 30 characters
+@print_line:                                                            ;$2FB0
+        ; a line is already 30-chars long, or has
+        ; been justified to the same, print it
         ldx # 30
-        jsr _print_some
+        jsr _print_chars
 
         ; move to the next line
         lda # $0c
@@ -3113,15 +3143,20 @@ _2f7c:
         ldy # $00
         inx 
 
+        ; downshift the buffer, moving lines 2+, down to line 1 since the 
+        ; routine here only works with the start of the buffer
+
 :       lda TXT_BUFFER + 30 + 1, y                                      ;$2FC8
         sta TXT_BUFFER, y
         iny 
         dex 
-        bne :-
-        beq _2f67
+       .bnz :-
 
-_print_some:                                                            ;$2FD4
-        ;-----------------------------------------------------------------------
+        ; go back and process the remaining buffer
+       .bze _flush_line         ; always branches!
+
+_print_chars:                                                           ;$2FD4
+        ;=======================================================================
         ; print X number of characters in the buffer to the screen
         ;
         ;       X = length of string to print from the buffer
@@ -3137,7 +3172,7 @@ _2fe0:  rts                                                             ;$2FE0
 
 _print_all:                                                             ;$2FE1
         ;=======================================================================
-        jsr _print_some
+        jsr _print_chars
 
 _exit:  stx txt_buffer_index    ; save remaining buffer length          ;$2FE4
 
