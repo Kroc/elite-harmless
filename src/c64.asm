@@ -22,52 +22,52 @@
 ; http://www.6502.org/tutorials/compare_instructions.html
 ;
 ; the set of macros below provide more visibly recognisable names.
-; these macros are already defined in generic.mac, but this is pretty
+; these macros are already defined in CC65's "generic.mac", but this is pretty
 ; non-obvious, even to a CC65 user and I'd prefer to place them somewhere
 ; visible. (in these, a leading dot is included in the names, to make it
 ; obvious that they are macros, and not original instructions)
 
-.macro .bge     Arg     ; branch on greater-than or equal
+.macro .bge     Arg     ; "branch on greater-than or equal"
         bcs     Arg
 .endmacro
 
-.macro .blt     Arg     ; branch on less-than
+.macro .blt     Arg     ; "branch on less-than"
         bcc     Arg
 .endmacro
 
-.macro .bgt     Arg     ; branch on greater-than
+.macro .bgt     Arg     ; "branch on greater-than"
         .local  L
         beq     L
         bcs     Arg
 L:
 .endmacro
 
-.macro .ble     Arg     ; branch on less-than or equal
+.macro .ble     Arg     ; "branch on less-than or equal"
         beq     Arg
         bcc     Arg
 .endmacro
 
-.macro .bnz     Arg     ; branch on not zero
+.macro .bnz     Arg     ; "branch on not zero"
         bne     Arg
 .endmacro
 
-.macro .bze     Arg     ; branch on zero
+.macro .bze     Arg     ; "branch on zero"
         beq     Arg
 .endmacro
 
-.macro .seb             ; set borrow
+.macro .seb             ; "set borrow"
         clc 
 .endmacro
 
-.macro .clb             ; clear borrow
+.macro .clb             ; "clear borrow"
         sec 
 .endmacro
 
-.macro .bbw     Arg     ; branch on borrow
+.macro .bbw     Arg     ; "branch on borrow"
         bcc     Arg
 .endmacro
 
-.macro .bnb     Arg     ; branch on no-borrow
+.macro .bnb     Arg     ; "branch on no-borrow"
         bcs     Arg
 .endmacro
 

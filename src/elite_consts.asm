@@ -32,7 +32,14 @@ PLAYER_CASH_pt2         = $04a3
 PLAYER_CASH_pt3         = $04a4
 PLAYER_CASH_pt4         = $04a5
 
-SHIP_FUEL               = $04a6
+PLAYER_FUEL             = $04a6
+
+PLAYER_SHIELD_FRONT     = $04e7
+PLAYER_SHIELD_REAR      = $04e8
+PLAYER_ENERGY           = $04e9
+
+PLAYER_TEMP_LASER       = $0488 ; laser temperature
+PLAYER_TEMP_CABIN       = $0483 ; cabin temperature
 
 ; target system:
 TSYSTEM_DATA            = $0500

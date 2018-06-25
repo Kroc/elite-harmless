@@ -675,14 +675,14 @@ _6cc3:                                                                  ;$6cc3
         lda # $10
         sta $90
         jsr _6c6d
-        lda SHIP_FUEL
+        lda PLAYER_FUEL
         sta $77
         jmp _6cfe
 
 _6cda:                                                                  ;$6cda
         lda $a0
         bmi _6cc3
-        lda SHIP_FUEL
+        lda PLAYER_FUEL
         lsr 
         lsr 
         sta $77
@@ -1420,7 +1420,7 @@ _7196:                                                                  ;$7196
         
         lda TSYSTEM_DISTANCE_HI
         bne _71af
-        lda SHIP_FUEL
+        lda PLAYER_FUEL
         cmp TSYSTEM_DISTANCE_LO
         bcs _71b2
 _71af:                                                                  ;$71af
@@ -1780,13 +1780,13 @@ _73dc:                                                                  ;$73dc
 ;===============================================================================
 
 _73dd:                                                                  ;$73dd
-        lda SHIP_FUEL
+        lda PLAYER_FUEL
         sec 
         sbc TSYSTEM_DISTANCE_LO
         bcs _73e8
         lda # $00
 _73e8:                                                                  ;$73e8
-        sta SHIP_FUEL
+        sta PLAYER_FUEL
         lda $a0
         bne _73f5
         jsr _a72f
@@ -1821,7 +1821,7 @@ _741c:                                                                  ;$741c
         inc $10
         jsr _7c24
         lda # $0c
-        sta $96
+        sta $96                 ; player's ship speed?
         jsr _8798
         ora $04cd
         sta $04cd
@@ -1935,7 +1935,7 @@ _74e2:                                                                  ;$74e2
         inc $9a
         lda # $46
         sec 
-        sbc SHIP_FUEL
+        sbc PLAYER_FUEL
         asl 
         sta _76cd+0
         ldx # $01
@@ -1987,7 +1987,7 @@ _74f5:                                                                  ;$74f5
         pla 
         bne _7549
         ldx # $46
-        stx SHIP_FUEL
+        stx PLAYER_FUEL
 _7549:                                                                  ;$7549
         cmp # $01
         bne _755f
@@ -2313,7 +2313,7 @@ _774a:  ; $774A
         lda # TXT_FUEL
         jsr print_flight_token_with_colon
 
-        ldx SHIP_FUEL
+        ldx PLAYER_FUEL
         sec 
         jsr print_tiny_value
 
@@ -3135,10 +3135,10 @@ _7b61:
         beq _7b5f
 _7b64:
 .export _7b64
-        dec $04e9
+        dec PLAYER_ENERGY
         php 
         bne _7b6d
-        inc $04e9
+        inc PLAYER_ENERGY
 _7b6d:
         plp 
         rts 
@@ -3226,29 +3226,32 @@ _7bd2:
         ldy # $08
         lda [$59], y
         bmi _7bee
-        lda $04e7
+
+        lda PLAYER_SHIELD_FRONT
         sbc $bb
         bcc _7be7
-        sta $04e7
+        sta PLAYER_SHIELD_FRONT
+        
         rts 
 
 _7be7:
         ldx # $00
-        stx $04e7
+        stx PLAYER_SHIELD_FRONT
         bcc _7bfe
 _7bee:
-        lda $04e8
+        lda PLAYER_SHIELD_REAR
         sbc $bb
         bcc _7bf9
-        sta $04e8
+        sta PLAYER_SHIELD_REAR
+
         rts 
 
 _7bf9:
         ldx # $00
-        stx $04e8
+        stx PLAYER_SHIELD_REAR
 _7bfe:
-        adc $04e9
-        sta $04e9
+        adc PLAYER_ENERGY
+        sta PLAYER_ENERGY
         beq _7c08
         bcs _7c0b
 _7c08:
@@ -4531,7 +4534,7 @@ _83ed:
         sta $0510
 
         lda # $03
-        sta $96
+        sta $96                 ; player's ship speed?
         sta $a6
         sta $68
         
@@ -4847,9 +4850,9 @@ _8612:
 _8627:
         ldx # $ff
         txs 
-        ldx $0488
+        ldx PLAYER_TEMP_LASER
         beq _8632
-        dec $0488
+        dec PLAYER_TEMP_LASER
 _8632:
         ldx $0487
         beq _863e
@@ -4886,7 +4889,7 @@ _8670:
         lda $04ca
         beq _86a1
         sta $bb
-        lda $0483
+        lda PLAYER_TEMP_CABIN
         cmp # $e0
         bcs _8680
         asl $bb
@@ -4898,7 +4901,7 @@ _8680:
         ora # %01000000
         tax 
         lda # $80
-        ldy $0483
+        ldy PLAYER_TEMP_CABIN
         cpy # $e0
         bcc _869c
         txa 
@@ -5116,7 +5119,7 @@ _87b9:
         txs 
         jsr _8c60
         tay 
-        lda # $07
+        lda # $07               ; BEEP?
 _87c5:
         jsr paint_char
         iny 
@@ -5130,8 +5133,8 @@ _87d0:
 .export _87d0
         jsr _a813
         jsr _83df
-        asl $96
-        asl $96
+        asl $96                 ; player's ship speed?
+        asl $96                 ; player's ship speed?
         ldx # $18
         jsr _7b5e
         jsr _a72f
@@ -5187,7 +5190,7 @@ _8835:
         lda $0456
         beq _87fd
         jsr _8ed5
-        sta $96
+        sta $96                 ; player's ship speed?
         jsr _1ec1
         jsr disable_sprites
 _8851:
@@ -5381,7 +5384,7 @@ _898c:
         bne _898c
 _8994:
         ldy # $00
-        sty $96
+        sty $96                 ; player's ship speed?
         sty _1d0c
 
         lda # 15
@@ -5546,7 +5549,7 @@ _8a6a:
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit 
-_8a8d:  lda # $07
+_8a8d:  lda # $07               ; BEEP?
 _8a8f:
         jsr paint_char
         bcc _8a6a
@@ -6186,7 +6189,7 @@ _8e52:
 
 _8e7c:
         ldy # $06
-        jmp _a857+1
+        jmp _a858
 ; $8e81
         rts 
 
@@ -6243,7 +6246,7 @@ _8eba:
         lda _1d06, y
         eor # %11111111
         sta _1d06, y
-        jsr _2fee
+        jsr _2fee               ; BEEP?
        .phy                     ; push Y to stack (via A) 
         ldy # $14
         jsr _3ea1
@@ -6276,7 +6279,7 @@ _8ee3:
         ora # %10000000
         sta $1f
         sta $a5
-        lda $96
+        lda $96                 ; player's ship speed?
         sta $24
         jsr _34bc
 _8eff:
@@ -6286,7 +6289,7 @@ _8f01:
         bcc _8f07
         lda # $16
 _8f07:
-        sta $96
+        sta $96                 ; player's ship speed?
         lda # $ff
         ldx # $09
         ldy $25
@@ -8801,7 +8804,7 @@ _a39d:
         lda $2f
         sta $09
 _a3bf:
-        lda $96
+        lda $96                 ; player's ship speed?
         sta $9b
         lda # $80
         ldx # $06
@@ -9383,7 +9386,7 @@ _a795:
         lda # $78
         jsr _900d
         ldy # $04
-        jmp _a857+1
+        jmp _a858
 
 ;===============================================================================
 
@@ -9455,17 +9458,21 @@ _a801:
         ldx # $d0
         jmp _a850
 
-;===============================================================================
 
 _a80f:
+;===============================================================================
 .export _a80f
         ldy # $05
-        bne _a857+1
+        bne _a858               ; always branches
+
 _a813:
+;===============================================================================
 .export _a813
         ldy # $03
-        bne _a857+1
+        bne _a858               ; always branches
+
 _a817:
+;===============================================================================
         ldy # $03
         lda # $01
 _a81b:
@@ -9492,27 +9499,38 @@ _a827:
         sta _aa16, x
         rts 
 
-;===============================================================================
 
-_a839:
+_a839:                                                                  ;$A839
+;===============================================================================
 .export _a839
         ldy # $07
         lda # $f5
         ldx # $f0
         jsr _a850
+
         ldy # $04
-        jsr _a857+1
+        jsr _a858
+
         ldy # $01
         jsr _3ea1
+
         ldy # $87
-        bne _a857+1
+        bne _a858               ; awlays branches
+
 _a850:
+        ;-----------------------------------------------------------------------
         bit _a821
+
         sta $6b
         stx $6c
-_a857:  ; NOTE: when accessed as $A858, this becomes `clv` (clear overlow)
-.export _a858 := _a857 + 1
-        .byte   $50, $b8        ;=`bvc $a811`
+        ; this causes the `clv` below to become a `branch on overflow clear`
+        ; to $A811 -- the address is defined by the opcode of `clv` ($B8)
+        .byte   $50
+
+_a858:
+.export _a858
+        clv 
+        
         lda _1d05
         bne _a821
         ldx # $02
@@ -10875,7 +10893,7 @@ _b0f4:
         lda # $20
         sta $67
         ldy # $09
-        jsr _a857+1
+        jsr _a858
 _b0fd:
         lda $67a3               ;?
         eor # %11100000
@@ -10977,14 +10995,14 @@ _b14e:
 .endproc
 
 ;define the use of some zero-page variables for this routine
-.exportzp       ZP_CHROUT_CHARADDR      := $2f  ; $2f/$30
+.exportzp       ZP_CHROUT_CHARADDR      := $2f  ; $2F/$30
 .exportzp       ZP_CHROUT_DRAWADDR      := $07  ; $07/$08
 .exportzp       ZP_CHROUT_DRAWADDR_LO   := $07
 .exportzp       ZP_CHROUT_DRAWADDR_HI   := $08
 
 _b168:
-        jsr _a80f
-        jmp _b210
+        jsr _a80f               ; BEEP?
+        jmp _b210               ; restore state and exit
 
         ;-----------------------------------------------------------------------
 

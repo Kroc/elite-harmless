@@ -136,13 +136,15 @@ _1d81:                                                                  ;$1d81
         jsr _83df
         jsr _379e
         lda # $00
-        sta $96
-        sta $0488
+        sta $96                 ; player's ship speed?
+        sta PLAYER_TEMP_LASER
         sta $66
+
         lda # $ff
-        sta $04e7
-        sta $04e8
-        sta $04e9
+        sta PLAYER_SHIELD_FRONT
+        sta PLAYER_SHIELD_REAR
+        sta PLAYER_ENERGY
+        
         ldy # $2c
         jsr _3ea1
         lda $0499
@@ -371,16 +373,16 @@ _1f20:
         sta $63
         lda _8d10
         beq _1f33
-        lda $96
+        lda $96                 ; player's ship speed?
         cmp # $28
         bcs _1f33
-        inc $96
+        inc $96                 ; player's ship speed?
 _1f33:
         lda _8d15
         beq _1f3e
-        dec $96
+        dec $96                 ; player's ship speed?
         bne _1f3e
-        inc $96
+        inc $96                 ; player's ship speed?
 _1f3e:
         lda _8d2e
         and $04cc
@@ -456,7 +458,7 @@ _1fd5:
         lda # $00
         sta $7b
         sta $97
-        lda $96
+        lda $96                 ; player's ship speed?
         lsr 
         ror $97
         lsr 
@@ -466,7 +468,7 @@ _1fd5:
         bne _202d
         lda _8d42
         beq _202d
-        lda $0488
+        lda PLAYER_TEMP_LASER
         cmp # $f2
         bcs _202d
         ldx $0486
@@ -628,7 +630,7 @@ _2101:
         ;-----------------------------------------------------------------------
 
 _2107:
-        lda $96
+        lda $96                 ; player's ship speed?
         cmp # $05
         bcc _211a
         jmp _87d0
@@ -643,7 +645,7 @@ _2110:
         bne _2131
 _211a:
         lda # $01
-        sta $96
+        sta $96                 ; player's ship speed?
         lda # $05
         bne _212b
 _2122:
@@ -776,20 +778,22 @@ _2207:
         lda $a3
         and # %00000111
         bne _227a
-        ldx $04e9
+        ldx PLAYER_ENERGY
         bpl _2224
-        ldx $04e8
+        
+        ldx PLAYER_SHIELD_REAR
         jsr _7b61
-        stx $04e8
-        ldx $04e7
+        stx PLAYER_SHIELD_REAR
+
+        ldx PLAYER_SHIELD_FRONT
         jsr _7b61
-        stx $04e7
+        stx PLAYER_SHIELD_FRONT
 _2224:
         sec 
         lda $04c4
-        adc $04e9
+        adc PLAYER_ENERGY
         bcs _2230
-        sta $04e9
+        sta PLAYER_ENERGY
 _2230:
         lda $0482
         bne _2277
@@ -838,7 +842,7 @@ _2283:
         cmp # $0a
         bne _22b5
         lda # $32
-        cmp $04e9
+        cmp PLAYER_ENERGY
         bcc _2292
         asl 
         jsr _900d
@@ -873,7 +877,7 @@ _22c2:
         cmp # $14
         bne _231c
         lda # $1e
-        sta $0483
+        sta PLAYER_TEMP_CABIN
         lda $045f
         bne _231c
         ldy # $25
@@ -882,7 +886,7 @@ _22c2:
         jsr _2c5c
         eor # %11111111
         adc # $1e
-        sta $0483
+        sta PLAYER_TEMP_CABIN
         bcs _22b2
         cmp # $e0
         bcc _231c
@@ -906,12 +910,12 @@ _2303:
         beq _231c
         lda $98
         lsr 
-        adc SHIP_FUEL
+        adc PLAYER_FUEL
         cmp # $46
         bcc _2314
         lda # $46
 _2314:
-        sta SHIP_FUEL
+        sta PLAYER_FUEL
         lda # $a0
 _2319:
         jsr _900d
@@ -2404,7 +2408,7 @@ _2c9b:
         ldy $047f
         ldx $0454, y
         beq _2cc4
-        ldy $04e9
+        ldy PLAYER_ENERGY
         cpy # $80
         adc # $01
 _2cc4:
@@ -3080,27 +3084,24 @@ _justify_line:                                                          ;$2F72
 
 @justify:                                                               ;$2F7C
         ;-----------------------------------------------------------------------
-        ; if the line ends with a space, we don't actually need to justify,
-        ; just go ahead and print the line we have. this is because adding
-        ; spaces to justify the text will always result in a line exactly
-        ; 30 chars or 1-less based on the length of the text in the line
-
-        lda TXT_BUFFER + 30     ; check the last char in the first line
+        ; is the justification complete?
+        lda TXT_BUFFER + 30     ; check the last char in the line
         cmp # ' '               ; is it a space?
         beq @print_line         ; if so, skip ahead to printing the line
 
 @find_spc:                                                              ;$2F83
         dey                     ; step back through the line-length     
         bmi _justify_line       ; catch underflow? max buffer length is 90
-        beq _justify_line       ; hit the start of the line, go again
+        beq _justify_line       ; hit the start of the line? go again
 
         lda TXT_BUFFER, y       ; read character from buffer
         cmp # ' '               ; is it a space?
         bne @find_spc           ; not a space, keep going
         
         ; space found:
-        asl $08                 ; ignore the first space we come across??
-        bmi @find_spc
+        asl $08                 ; move the space-counter along
+        bmi @find_spc           ; if it's hit the end, we ignore this space
+                                ; and look for the next one
         
         ; remember the current position,
         ; i.e. where the space is
@@ -3113,12 +3114,11 @@ _justify_line:                                                          ;$2F72
         sta TXT_BUFFER+1, y
         dey 
         cpy $07
-        bcs :-
+       .bge :-
 
         ; given the space we added, increase the text-buffer length by 1
         inc txt_buffer_index
 
-        ; Y will have landed on the 
 :       cmp TXT_BUFFER, y                                               ;$2FA6
         bne @justify
         dey 
@@ -3190,12 +3190,14 @@ _exit:  stx txt_buffer_index    ; save remaining buffer length          ;$2FE4
 
 _2fee:                                                                  ;$2FEE
         ;=======================================================================
+        ; the BBC code says that char 7 is a beep
 .export _2fee
         
-        lda # $07
+        lda # $07               ; BEEP?
         jmp paint_char
 
 ;===============================================================================
+; BBC code says this is "update displayed dials"
 
 _2ff3:
 .export _2ff3
@@ -3204,17 +3206,23 @@ _2ff3:
         lda #> $5770
         sta $08
         jsr _30bb
+
         stx $78
         sta $77
+        
         lda # $0e
         sta $06
-        lda $96
+        
+        lda $96                 ; player's ship speed?
         jsr _30ce
+        
         lda # $00
         sta $9b
         sta $2e
+        
         lda # $08
         sta $9c
+        
         lda $68
         lsr 
         lsr 
@@ -3236,14 +3244,16 @@ _302b:
         jsr _30bb
         stx $77
         sta $78
-        ldx # $03
+
+        ldx # $03               ; 4 energy banks
         stx $06
 _3044:
         sty $71, x
         dex 
         bpl _3044
+
         ldx # $03
-        lda $04e9
+        lda PLAYER_ENERGY
         lsr 
         lsr 
         sta $9a
@@ -3276,21 +3286,27 @@ _3068:
         lda # $aa
         sta $77
         sta $78
-        lda $04e7
+
+        lda PLAYER_SHIELD_FRONT
         jsr _30cb
-        lda $04e8
+        
+        lda PLAYER_SHIELD_REAR
         jsr _30cb
-        lda SHIP_FUEL
+
+        lda PLAYER_FUEL
         jsr _30cd
         jsr _30bb
         stx $78
         sta $77
         ldx # $0b
         stx $06
-        lda $0483
+
+        lda PLAYER_TEMP_CABIN
         jsr _30cb
-        lda $0488
+        
+        lda PLAYER_TEMP_LASER
         jsr _30cb
+
         lda # $f0
         sta $06
         lda $06f3
@@ -3472,7 +3488,7 @@ _319b:
         sta $04ca
 _31be:
         lda # $46
-        sta SHIP_FUEL
+        sta PLAYER_FUEL
         jmp _2101
 
 ;===============================================================================
@@ -4264,9 +4280,11 @@ _3695:
         sta $17
         ora # %10000000
         sta $1f
-        lda $96
+
+        lda $96                 ; player's ship speed?
         rol 
         sta $24
+        
         txa 
         jmp _7c6b
 
@@ -5065,7 +5083,7 @@ _3b30:
         lda $06d6, y
 _3b33:
         sta $9a
-        lda $96
+        lda $96                 ; player's ship speed?
 _3b37:
 .export _3b37
         asl 
@@ -5387,9 +5405,9 @@ _3cdb:
         and # %00000111
         adc # $7c
         sta $06f0
-        lda $0488
+        lda PLAYER_TEMP_LASER
         adc # $08
-        sta $0488
+        sta PLAYER_TEMP_LASER
         jsr _7b64
 _3cfa:
         lda $a0
