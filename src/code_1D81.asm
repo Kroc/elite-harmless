@@ -132,14 +132,19 @@
 
 .segment        "CODE_1D81"
 
-_1d81:                                                                  ;$1d81
+; I think this is when the player has docked,
+; it checks for potential mission offers
+
+_1d81:                                                                  ;$1D81
         jsr _83df
         jsr _379e
+
         lda # $00
         sta $96                 ; player's ship speed?
         sta PLAYER_TEMP_LASER
-        sta $66
+        sta $66                 ; reset hyperspace countdown?
 
+        ; set shields to maximum:
         lda # $ff
         sta PLAYER_SHIELD_FRONT
         sta PLAYER_SHIELD_REAR
@@ -147,46 +152,66 @@ _1d81:                                                                  ;$1d81
         
         ldy # $2c
         jsr _3ea1
-        lda $0499
+
+        lda MISSION_FLAGS
         and # %00000011
         bne _1db5
-        lda $04e1
-        beq _1e00
-        lda $04a8
+        
+        lda PLAYER_KILLS
+        beq _1e00               ; kills less than 256?
+
+        lda PLAYER_GALAXY
         lsr 
         bne _1e00
+        
         jmp _3dff
 
-_1db5:                                                                  ;$1db5
+_1db5:                                                                  ;$1DB5
         cmp # $03
         bne _1dbc
         jmp _3daf
 
-_1dbc:                                                                  ;$1dbc
-        lda $04a8
+_1dbc:                                                                  ;$1DBC
+        ;-----------------------------------------------------------------------
+        ; check eligibility for second mission?
+
+        ; is the player in the third galaxy?
+        lda PLAYER_GALAXY
         cmp # $02
         bne _1e00
-        lda $0499
+
+        ; player is in the third galaxy; has the player
+        ; completed the first mission already?
+        lda MISSION_FLAGS
         and # %00001111
-        cmp # $02
-        bne _1dd6
-        lda $04e1
-        cmp # $05
-        bcc _1e00
+        cmp # %00000010         ; bit 0 = mission started, bit 1 = complete
+        bne _1dd6               ; skip if mission complete
+        
+        ; has the player at least 1280 kills? (halfway to deadly)
+        lda PLAYER_KILLS
+        cmp #> 1280
+       .blt _1e00               ; skip ahead if not enough
+
+        ; second mission?
         jmp _3d7d
 
-_1dd6:                                                                  ;$1dd6
+_1dd6:                                                                  ;$1DD6
         cmp # $06
         bne _1deb
+
+        ; check certain planet?
+
         lda PSYSTEM_POS_X
         cmp # $d7
         bne _1e00
+        
         lda PSYSTEM_POS_Y
         cmp # $54
         bne _1e00
+        
         jmp _3d8d
 
-_1deb:                                                                  ;$1deb
+_1deb:                                                                  ;$1DEB
         cmp # $0a
         bne _1e00
         lda PSYSTEM_POS_X
@@ -197,20 +222,29 @@ _1deb:                                                                  ;$1deb
         bne _1e00
         jmp _3d9b
 
-_1e00:                                                                  ;$1e00
-        lda PLAYER_CASH_pt3     ;?
-        cmp # $c4
-        bcc _1e11
-        lda $0499
+_1e00:                                                                  ;$1E00
+        ;=======================================================================
+        ; check for Trumbles™ mission
+        
+        ; at least 6'553.5 cash?
+        lda PLAYER_CASH_pt3
+        cmp # $c4               ; not sure how this works?
+       .blt _1e11
+
+        ; has the mission already been done?
+        lda MISSION_FLAGS
         and # %00010000
         bne _1e11
+
+        ; initiate Trumbles™ mission
         jmp _3dc0
-_1e11:                                                                  ;$1e11
+
+_1e11:                                                                  ;$1E11
         jmp _88e7
 
 ;===============================================================================
 
-_1e14:                                                                  ;$1e14
+_1e14:                                                                  ;$1E14
         lda #< _87b9
         sei 
         sta $0316               ; vector for BRK routine 
@@ -221,13 +255,13 @@ _1e14:                                                                  ;$1e14
 
 ;===============================================================================
 
-_1e21:                                                                  ;$1e21
+_1e21:                                                                  ;$1E21
         .byte   $00, $01, $ff, $00
-_1e25:                                                                  ;$1e25
+_1e25:                                                                  ;$1E25
         .byte   $00, $00, $ff, $00
-_1e29:                                                                  ;$1e29
+_1e29:                                                                  ;$1E29
         .byte   $fb
-_1e2a:                                                                  ;$1e2a
+_1e2a:                                                                  ;$1E2a
         .byte   $04, $f7, $08, $ef, $10, $df, $20, $bf
         .byte   $40, $7f, $80
 
@@ -994,7 +1028,7 @@ txt_docked_token1C:                                                     ;$2376
         lda # $dc
 _2378:
         clc 
-        adc $04a8
+        adc PLAYER_GALAXY
         bne print_docked_str    ; always branches
         
 
@@ -2378,16 +2412,19 @@ _2c7d:
         jmp _2cc7
 
 _2c88:
-        ldx # $09
-        cmp # $19
-        bcs _2cee
-        dex 
-        cmp # $0a
-        bcs _2cee
-        dex 
-        cmp # $02
-        bcs _2cee
-        dex 
+        ldx # $09               ; "Elite" status
+        cmp #> 6400             ; 25*256 = 6400 kills
+       .bge _2cee
+
+        dex                     ; "Deadly" status
+        cmp #> 2560             ; 10*256 = 2560 kills
+       .bge _2cee
+
+        dex                     ; "Dangerous" status
+        cmp #> 512              ; 2*256 = 512 kills
+       .bge _2cee
+
+        dex                     ; "Competent" status or below
         bne _2cee
 _2c9b:
 .export _2c9b
@@ -2426,8 +2463,10 @@ _2cd7:
 
         lda # $10
         jsr _6a9b
-        lda $04e1
+
+        lda PLAYER_KILLS
         bne _2c88
+        
         tax 
         lda $04e0
         lsr 
@@ -3205,16 +3244,16 @@ _2ff3:
         sta $07
         lda #> $5770
         sta $08
+        
         jsr _30bb
-
         stx $78
         sta $77
         
-        lda # $0e
+        lda # $0e               ; threshold to change colour?
         sta $06
         
         lda $96                 ; player's ship speed?
-        jsr _30ce
+        jsr hud_drawbar_32
         
         lda # $00
         sta $9b
@@ -3274,7 +3313,7 @@ _3064:
 _3068:
         lda $0071, y
         sty $2e
-        jsr _30cf
+        jsr hud_drawbar
         ldy $2e
         iny 
         cpy # $04
@@ -3288,13 +3327,14 @@ _3068:
         sta $78
 
         lda PLAYER_SHIELD_FRONT
-        jsr _30cb
+        jsr hud_drawbar_128
         
         lda PLAYER_SHIELD_REAR
-        jsr _30cb
+        jsr hud_drawbar_128
 
         lda PLAYER_FUEL
-        jsr _30cd
+        jsr hud_drawbar_64
+
         jsr _30bb
         stx $78
         sta $77
@@ -3302,21 +3342,24 @@ _3068:
         stx $06
 
         lda PLAYER_TEMP_CABIN
-        jsr _30cb
+        jsr hud_drawbar_128
         
         lda PLAYER_TEMP_LASER
-        jsr _30cb
+        jsr hud_drawbar_128
 
         lda # $f0
         sta $06
+
         lda $06f3
-        jsr _30cb
+        jsr hud_drawbar_128
+        
         jmp _7b6f
 
 ;===============================================================================
 
 _30bb:
         ldx # $aa
+
         lda $a3
         and # %00001000
         and _1d09
@@ -3331,34 +3374,65 @@ _30bb:
 
 ;===============================================================================
 
-_30cb:
+hud_drawbar_128:                                                        ;$30CB
+        ;-----------------------------------------------------------------------
+        ; divide value by 8 before drawing the bar:
+        ; (accounting for the `lsr`s below)
+        ;
+        ;       A = value to represent on the bar, 0-127
+        ;
         lsr 
         lsr 
-_30cd:
+
+hud_drawbar_64:                                                         ;$3C0D
+        ;-----------------------------------------------------------------------
+        ; divide value by 4 before drawing the bar:
+        ; (accounting for the `lsr` below)
+        ;
+        ;       A = value to represent on the bar, 0-63
+        lsr
+
+hud_drawbar_32:                                                         ;$30CE
+        ;-----------------------------------------------------------------------
+        ; divide balue by 2 before drawing the bar:
+        ; 
+        ;       A = value to represent on the bar, 0-31
+        ;
         lsr 
-_30ce:
-        lsr 
-_30cf:
-        sta $9a
-        ldx # $ff
+
+hud_drawbar:                                                            ;$30CF
+        ;-----------------------------------------------------------------------
+        ;
+        ;       A = value to represent on the bar, 0-15
+        ;
+        sta $9a                 ; "bar value 1-15"
+
+        ldx # %11111111         ; mask?
         stx $9b
-        cmp $06
-        bcs _30dd
+        cmp $06                 ; "threshold to change colour"
+        bcs :+
+        
         lda $78
-        bne _30df
-_30dd:
-        lda $77
-_30df:
-        sta $32
-        ldy # $02
-        ldx # $03
+        bne :++                 ;SPEED: could use `.bit` here?
+
+:       lda $77                                                         ;$30DD
+
+:       sta $32                 ; colour to use                         ;$30DF
+
+        ldy # $02               ; "height offset"
+        ldx # $03               ; "height of bar - 1"
+
 _30e5:
-        lda $9a
+        lda $9a                 ; get bar value 0-15
+        
+        ; subtract 4 if >= 4?
         cmp # $04
-        bcc _3109
+       .blt _3109
+
         sbc # $04
         sta $9a
-        lda $9b
+
+        lda $9b                 ; mask
 _30f1:
         and $32
         sta [$07], y
@@ -3374,7 +3448,7 @@ _30f1:
 _3103:
         tay 
         dex 
-        bmi _3122
+        bmi _next_row
         bpl _30e5
 _3109:
         eor # %00000011
@@ -3393,16 +3467,21 @@ _310f:
         pla 
         jmp _30f1
 
+        
+_next_row:                                                              ;$3122
         ;-----------------------------------------------------------------------
+        ; move to the next row in the bitmap:
+        ; -- i.e. add 320-px to the bitmap pointer
 
-_3122:
         lda $07
         clc 
-        adc # $40
+        adc #< 320
         sta $07
+
         lda $08
-        adc # $01
+        adc #> 320
         sta $08
+        
         rts 
 
 ;===============================================================================
@@ -5451,13 +5530,15 @@ _3d3d:
         bne _3d6c
         lda _1a41, y
         and # %01111111
-        cmp $04a8
+        cmp PLAYER_GALAXY
         bne _3d6c
         lda _1a41, y
         bmi :+
-        lda $0499
+
+        lda MISSION_FLAGS
         lsr 
         bcc _3d6f
+        
         jsr txt_docked_token0E
         
         lda # $01
@@ -5491,9 +5572,9 @@ _3d7a:  jmp print_docked_str
 ;===============================================================================
 
 _3d7d:                                                                  ;$3d7d
-        lda $0499
+        lda MISSION_FLAGS
         ora # %00000100
-        sta $0499
+        sta MISSION_FLAGS
         lda # $0b
 _3d87:                                                                  ;$3d87
         jsr print_docked_str
@@ -5503,52 +5584,68 @@ _3d8a:                                                                  ;$3d8a
 ;===============================================================================
 
 _3d8d:                                                                  ;$3d8d
-        lda $0499
+        lda MISSION_FLAGS
         and # %11110000
         ora # %00001010
-        sta $0499
+        sta MISSION_FLAGS
+
         lda # $de
         bne _3d87
 _3d9b:                                                                  ;$3d9b
-        lda $0499
+        lda MISSION_FLAGS
         ora # %00000100
-        sta $0499
+        sta MISSION_FLAGS
+
         lda # $02
         sta $04c4
-        inc $04e1
+
+        inc PLAYER_KILLS
+        
         lda # $df
         bne _3d87
 _3daf:                                                                  ;$3daf
-        lsr $0499
-        asl $0499
+        lsr MISSION_FLAGS
+        asl MISSION_FLAGS
+        
         ldx # $50
         ldy # $c3
         jsr _7481
+        
         lda # $0f
 _3dbe:                                                                  ;$3dbe
         bne _3d87
-_3dc0:                                                                  ;$3dc0
-        lda $0499
-        ora # %00010000
-        sta $0499
 
+_3dc0:                                                                  ;$3DC0
+        ;=======================================================================
+        ; begin Trumbles™ mission
+        ;
+
+        ;set the mission bit:
+        lda MISSION_FLAGS
+        ora # %00010000
+        sta MISSION_FLAGS
+
+        ; display the Trumbles™ mission text
         lda # $c7
         jsr print_docked_str
         
         jsr _81ee
         bcc _3d8a
+
         ldy # $c3
         ldx # $50
         jsr _745a
+        
         inc $04c9
         jmp _88e7
 
 ;===============================================================================
 
 _3dff:                                                                  ;$3dff
-        lsr $0499
+        lsr MISSION_FLAGS
         sec 
-        rol $0499
+        rol MISSION_FLAGS
+
         jsr txt_docked_token19
         jsr _8447
         lda # $1f

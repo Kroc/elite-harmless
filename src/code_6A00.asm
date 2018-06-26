@@ -1451,10 +1451,10 @@ _71ca:                                                                  ;$71ca
         lda # $02
         jsr _71bc
         ldx # $05
-        inc $04a8
-        lda $04a8
+        inc PLAYER_GALAXY
+        lda PLAYER_GALAXY
         and # %11110111
-        sta $04a8
+        sta PLAYER_GALAXY
 _71e8:                                                                  ;$71e8
         lda $049c, x
         asl 
@@ -2301,7 +2301,7 @@ _7741:
 
 _7742:
         clc 
-        ldx $04a8
+        ldx PLAYER_GALAXY
         inx 
         jmp print_tiny_value
 
@@ -4374,10 +4374,12 @@ _8305:
         beq _82a4
         cpx # $1f
         bne _831d
-        lda $0499
+
+        lda MISSION_FLAGS
         ora # %00000010
-        sta $0499
-        inc $04e1
+        sta MISSION_FLAGS
+        
+        inc PLAYER_KILLS
 _831d:
         cpx # $0f
         beq _8329
@@ -4466,7 +4468,7 @@ _83aa:
         bne _83aa
         beq _8343
 _83b4:
-        ldx $04a8
+        ldx PLAYER_GALAXY
         dex 
         bne _83c8
         lda PSYSTEM_POS_X
@@ -4769,7 +4771,7 @@ _8588:
         dec $048a
         bpl _8567
         inc $048a
-        lda $0499
+        lda MISSION_FLAGS
         and # %00001100
         cmp # $08
         bne _85a8
@@ -4799,10 +4801,12 @@ _85bb:
         bcc _85e0
         lda # $f9
         sta $29
-        lda $0499
+
+        lda MISSION_FLAGS
         and # %00000011
         lsr 
         bcc _85e0
+        
         ora $047c
         beq _85f0
 _85e0:
@@ -5685,7 +5689,7 @@ _8b27:
         
         ldx # $4c
 _8b37:
-        lda $0499, x
+        lda $0499, x            ; $0500+?
         sta _25b3, x
         dex 
         bpl _8b37
@@ -5701,7 +5705,7 @@ _8b37:
         eor PLAYER_CASH_pt3     ;?
         sta $78
         eor # %01011010
-        eor $04e1
+        eor PLAYER_KILLS
         sta $7a
         clc 
         jsr print_large_value
@@ -9400,7 +9404,9 @@ _a7a6:
         adc $d083, x
         sta $04e0
         bcc _a7c3
-        inc $04e1
+
+        inc PLAYER_KILLS
+        
         lda # $65
         jsr _900d
 _a7c3:

@@ -25,6 +25,8 @@ ZP_GOATSOUP_pt2         = $03
 ZP_GOATSOUP_pt3         = $04
 ZP_GOATSOUP_pt4         = $05
 
+MISSION_FLAGS           = $0499
+
 ; player's cash:
 PLAYER_CASH             = $04a2
 PLAYER_CASH_pt1         = $04a2
@@ -33,6 +35,10 @@ PLAYER_CASH_pt3         = $04a4
 PLAYER_CASH_pt4         = $04a5
 
 PLAYER_FUEL             = $04a6
+
+PLAYER_GALAXY           = $04a8 ; current galaxy number
+
+PLAYER_KILLS            = $04e1 ; number of kills (hi byte?)
 
 PLAYER_SHIELD_FRONT     = $04e7
 PLAYER_SHIELD_REAR      = $04e8
