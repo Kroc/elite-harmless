@@ -57,7 +57,6 @@
 .import _26a4:absolute
 .import _27a4:absolute
 .import _28a4:absolute
-.import _28a5:absolute
 .import _28d5:absolute
 .import _28d9:absolute
 .import txt_docked_token0B:absolute
@@ -117,7 +116,7 @@
 .import _3e08:absolute
 .import _3e87:absolute
 .import _3e95:absolute
-.import _3ea1:absolute
+.import wait_frames:absolute
 
 ; from "gfx/hulls.asm"
 .import _d000:absolute
@@ -141,7 +140,7 @@ _6a05:  pha                                                             ;$6a05
 _6a0d:  adc $04b0, x                                                    ;$6a0d
         dex 
         bpl _6a0d
-        adc $04ca
+        adc PLAYER_TRUMBLES_HI
         cmp $04af
         pla 
         rts
@@ -686,14 +685,19 @@ _6cda:                                                                  ;$6cda
         lsr 
         lsr 
         sta $77
+
         lda PSYSTEM_POS_X
         sta $8e
+        
         lda PSYSTEM_POS_Y
         lsr 
         sta $8f
+        
         lda # $07
         sta $90
+        
         jsr _6c6d
+        
         lda $8f
         clc 
         adc # $18
@@ -974,29 +978,40 @@ _6eca:                                                                  ;$6eca
         jmp _6dbf
 _6ede:                                                                  ;$6ede
         jsr _6a8a
-        lda $04c9
-        ora $04ca
+        lda PLAYER_TRUMBLES_LO
+        ora PLAYER_TRUMBLES_HI
         bne _6eea
 _6ee9:                                                                  ;$6ee9
         rts 
+
 _6eea:                                                                  ;$6eea
-        clc 
-        lda # $00
-        ldx $04c9
-        ldy $04ca
+        ;-----------------------------------------------------------------------
+        ; have you got Trumbles™ in your hold?
+
+        clc                     ; "no decimal point"
+        lda # $00               ; "no padding"
+        ldx PLAYER_TRUMBLES_LO
+        ldy PLAYER_TRUMBLES_HI
         jsr print_medium_value
+
+        ; get a 'random' number between 0 & 3
         jsr get_random_number
         and # %00000011
-        clc 
-        adc # $6f
-        jsr print_docked_str
 
-        lda # $c6
+        ; print "CUDDLY" / "CUTE" / "FURRY" or "FRIENDLY"
+.import TXT_DOCKED_CUDDLY:direct
+
+        clc 
+        adc # TXT_DOCKED_CUDDLY
         jsr print_docked_str
         
-        lda $04ca
+.import TXT_DOCKED_LITTLE_TRUMBLE:direct
+        lda # TXT_DOCKED_LITTLE_TRUMBLE
+        jsr print_docked_str
+        
+        lda PLAYER_TRUMBLES_HI
         bne _6f11
-        ldx $04c9
+        ldx PLAYER_TRUMBLES_LO
         dex 
         beq _6ee9
 _6f11:                                                                  ;$6f11
@@ -1058,19 +1073,24 @@ _6f55:                                                                  ;$6f55
         tya 
         eor # %11111111
         pha 
-        jsr _b148
+        jsr wait_for_frame
         jsr _6f82
         pla 
         sta $91
+
         lda TSYSTEM_POS_Y
         jsr _6f98
+        
         lda $92
         sta TSYSTEM_POS_Y
         sta $8f
+        
         pla 
         sta $91
+        
         lda TSYSTEM_POS_X
         jsr _6f98
+        
         lda $92
         sta TSYSTEM_POS_X
         sta $8e
@@ -1314,18 +1334,22 @@ _70f1:                                                                  ;$70f1
         sta ZP_SEED, x
         dex 
         bpl _70f1
+
+        ; select a random planet?
+
         lda ZP_SEED_pt2
         sta TSYSTEM_POS_Y
         lda ZP_SEED_pt4
         sta TSYSTEM_POS_X
+        
         sec 
         sbc PSYSTEM_POS_X
-        bcs _710c
+        bcs :+
         eor # %11111111
         adc # $01
-_710c:                                                                  ;$710c
-        jsr _3988
+:       jsr _3988                                                       ;$710C
         sta $78
+
         lda $2e
         sta $77
         lda TSYSTEM_POS_Y
@@ -1367,14 +1391,18 @@ _714f:                                                                  ;$714f
         lda # 15
         jsr set_cursor_col
 
-        lda # $cd
+        ; print "DOCKED"...
+.import TXT_DOCKED_DOCKED:direct
+        lda # TXT_DOCKED_DOCKED
         jmp print_docked_str
 
 _715c:                                                                  ;$715c
         lda $a7
         bne _714f
-        lda $66
+
+        lda $66                 ; hyperspace countdown (outer)?
         beq _7165
+        
         rts 
 
 _7165:                                                                  ;$7165
@@ -1433,8 +1461,8 @@ _71b2:                                                                  ;$71b2
         jsr _76e9
         lda # $0f
 _71bc:                                                                  ;$71bc
-        sta $66
-        sta $65
+        sta $66                 ; hyperspace countdown -- outer
+        sta $65                 ; hyperspace countdown -- inner
         tax 
         jmp _7224
 
@@ -1443,11 +1471,11 @@ _71c4:                                                                  ;$71c4
         jmp _7176
 
 _71ca:                                                                  ;$71ca
-        ldx $04c6
+        ldx PLAYER_GDRIVE
         beq _71f2 + 1              ; bug or optimisation?
         inx 
-        stx $04c6
-        stx $04cd
+        stx PLAYER_GDRIVE
+        stx PLAYER_LEGAL
         lda # $02
         jsr _71bc
         ldx # $05
@@ -1749,9 +1777,9 @@ _739b:                                                                  ;$739b
 ;===============================================================================
 
 _73ac:                                                                  ;$73ac
-        lsr $04a7
+        lsr PLAYER_COMPETITION
         sec 
-        rol $04a7
+        rol PLAYER_COMPETITION
 _73b3:                                                                  ;$73b3
         lda # $03
         jsr _a72f
@@ -1823,8 +1851,8 @@ _741c:                                                                  ;$741c
         lda # $0c
         sta $96                 ; player's ship speed?
         jsr _8798
-        ora $04cd
-        sta $04cd
+        ora PLAYER_LEGAL
+        sta PLAYER_LEGAL
         lda # $ff
         sta $a0
         jsr _37b2
@@ -1991,12 +2019,14 @@ _74f5:                                                                  ;$74f5
 _7549:                                                                  ;$7549
         cmp # $01
         bne _755f
-        ldx $04cc
+        ldx PLAYER_MISSILES
         inx 
         ldy # $7c
         cpx # $05
         bcs _75a1
-        stx $04cc
+
+        stx PLAYER_MISSILES
+        
         jsr _845c
         lda # $01
 _755f:                                                                  ;$755f
@@ -2070,9 +2100,9 @@ _75d8:                                                                  ;$75d8
         iny 
         cmp # $09
         bne _75e5
-        ldx $04c4
+        ldx $04c4               ; energy charge rate?
         bne _75a1
-        inc $04c4
+        inc $04c4               ; energy charge rate?
 _75e5:
         iny 
         cmp # $0a
@@ -2084,9 +2114,9 @@ _75f2:
         iny 
         cmp # $0b
         bne _75ff
-        ldx $04c6
+        ldx PLAYER_GDRIVE
         bne _75a1
-        dec $04c6
+        dec PLAYER_GDRIVE
 _75ff:
         iny 
         cmp # $0c
@@ -2111,8 +2141,9 @@ _761f:
         jsr _6a9b
 _7627:
         jsr _a80f
-        ldy # $32
-        jmp _3ea1
+
+        ldy # 50
+        jmp wait_frames
 
 ;===============================================================================
 
@@ -2200,7 +2231,7 @@ _7695:
 
 _76a1:
         sta $06
-        lda $04a9, x
+        lda PLAYER_LASERS, x
         beq _76c7
         ldy # $04
         cmp # $0f
@@ -2220,7 +2251,7 @@ _76bc:
         ldx $a1
 _76c7:
         lda $06
-        sta $04a9, x
+        sta PLAYER_LASERS, x
         rts 
 
 ;===============================================================================
@@ -3020,22 +3051,23 @@ _7a8c:
 ;===============================================================================
 
 _7a9f:
-        lda $04c9
+        lda PLAYER_TRUMBLES_LO
         beq _7ac2
+
         lda # $00
         sta $04b0
         sta $04b6
         jsr get_random_number
         and # %00001111
-        adc $04c9
+        adc PLAYER_TRUMBLES_LO
         ora # %00000100
         rol 
-        sta $04c9
-        rol $04ca
+        sta PLAYER_TRUMBLES_LO
+        rol PLAYER_TRUMBLES_HI
         bpl _7ac2
-        ror $04ca
+        ror PLAYER_TRUMBLES_HI
 _7ac2:
-        lsr $04cd
+        lsr PLAYER_LEGAL
         jsr _8447
         lda ZP_SEED_pt2
         and # %00000011
@@ -3080,11 +3112,13 @@ _7afa:
 _7b1a:
         ldx # $00
 _7b1c:
-        lda $0452, x
+        lda $0452, x            ; ship slots?
         beq _7b44
         bmi _7b41
         sta $a5
+        
         jsr _3e87
+
         ldy # $1f
 _7b2a:
         lda [$59], y
@@ -3317,7 +3351,7 @@ _7c6b:
         sta $bb
         ldx # $00
 _7c6f:
-        lda $0452, x
+        lda $0452, x            ; ship slots?
         beq _7c7b
         inx 
         cpx # $0a
@@ -3329,6 +3363,7 @@ _7c7a:
 
 _7c7b:
         jsr _3e87
+
         lda $bb
         bmi _7cd4
         asl 
@@ -3374,7 +3409,7 @@ _7cc4:
         sta $28
         lda $bb
 _7cd4:
-        sta $0452, x
+        sta $0452, x            ; ship slots?
         tax 
         bmi _7cec
         cpx # $0f
@@ -3420,9 +3455,11 @@ _7d0c:
 _7d0e:
 .export _7d0e
         stx $7c
-        ldx $04cc
+        ldx PLAYER_MISSILES
         jsr _b11f
-        sty $0485
+        
+        sty PLAYER_MISSILE_ARMED
+
         rts 
 
 ;===============================================================================
@@ -4330,16 +4367,16 @@ _82bc:
         ldx # $ff
 _82be:
         inx 
-        lda $0452, x
+        lda $0452, x            ; ship slots?
         beq _828f
         cmp # $01
         bne _82be
         txa 
         asl 
         tay 
-        lda _28a4, y
+        lda _28a4 + 0, y
         sta $07
-        lda _28a5, y
+        lda _28a4 + 1, y
         sta $08
         ldy # $20
         lda [$07], y
@@ -4369,14 +4406,15 @@ _82f3:
         jsr _900d
 _8305:
         ldy $ad
-        ldx $0452, y
+        ldx $0452, y            ; ship slots?
         cpx # $02
         beq _82a4
         cpx # $1f
         bne _831d
 
+        ; set the Constrictor mission complete
         lda MISSION_FLAGS
-        ora # %00000010
+        ora # missions::constrictor_complete
         sta MISSION_FLAGS
         
         inc PLAYER_KILLS
@@ -4403,6 +4441,7 @@ _832c:
         adc # $00
         sta $2f
 _8343:
+        ; move the ship slots down?
         inx 
         lda $0452, x
         sta $0451, x
@@ -4416,6 +4455,7 @@ _834f:
         sta $07
         lda _d000-1, y
         sta $08
+        
         ldy # $05
         lda [$07], y
         sta $bb
@@ -4429,10 +4469,11 @@ _834f:
         txa 
         asl 
         tay 
-        lda _28a4, y
+        lda _28a4 + 0, y
         sta $07
-        lda _28a5, y
+        lda _28a4 + 1, y
         sta $08
+
         ldy # $24
         lda [$07], y
         sta [$59], y
@@ -4468,14 +4509,18 @@ _83aa:
         bne _83aa
         beq _8343
 _83b4:
+        ; is the player in Galaxy 2?
         ldx PLAYER_GALAXY
         dex 
         bne _83c8
+
+        ; is the player at Orarra?
+
         lda PSYSTEM_POS_X
-        cmp # $90
+        cmp # 144
         bne _83c8
         lda PSYSTEM_POS_Y
-        cmp # $21
+        cmp # 33
         beq _83c9
 _83c8:
         clc 
@@ -4587,8 +4632,9 @@ _8447:
 _845c:
         ldx # $04
 _845e:
-        cpx $04cc
+        cpx PLAYER_MISSILES
         beq _846c
+
         ldy # $b7
         jsr _b11f
         dex 
@@ -4755,7 +4801,7 @@ _856a:
         asl 
         ldx $046d
         beq _8576
-        ora $04cd
+        ora PLAYER_LEGAL
 _8576:
         sta $bb
         jsr _848d
@@ -4803,7 +4849,7 @@ _85bb:
         sta $29
 
         lda MISSION_FLAGS
-        and # %00000011
+        and # missions::constrictor
         lsr 
         bcc _85e0
         
@@ -4875,22 +4921,23 @@ _8645:
         and _1d08
         lsr 
         bcs _8654
-        ldy # $02
-        jsr _3ea1
+        
+        ldy # 2
+        jsr wait_frames
 _8654:
-        lda $04ca
+        lda PLAYER_TRUMBLES_HI
         beq _8670
         jsr get_random_number
         cmp # $dc
-        lda $04c9
+        lda PLAYER_TRUMBLES_LO
         adc # $00
-        sta $04c9
+        sta PLAYER_TRUMBLES_LO
         bcc _8670
-        inc $04ca
+        inc PLAYER_TRUMBLES_HI
         bpl _8670
-        dec $04ca
+        dec PLAYER_TRUMBLES_HI
 _8670:
-        lda $04ca
+        lda PLAYER_TRUMBLES_HI
         beq _86a1
         sta $bb
         lda PLAYER_TEMP_CABIN
@@ -5030,7 +5077,7 @@ _8741:
         lda $a0
         and # %11000000
         beq _875f
-        lda $66
+        lda $66                 ; hyperspace countdown (outer)?
         bne _875f
         lda $06
         cmp # $1a
@@ -5042,18 +5089,18 @@ _8741:
 _875c:
         jsr _6f55
 _875f:
-        lda $66
+        lda $66                 ; hyperspace countdown (outer)?
         beq _877d
-        dec $65
+        dec $65                 ; hyperspace countdown (inner)?
         bne _877d
-        ldx $66
+        ldx $66                 ; hyperspace countdown (outer)?
         dex 
         jsr _7224
         lda # $05
-        sta $65
-        ldx $66
+        sta $65                 ; hyperspace countdown (inner)?
+        ldx $66                 ; hyperspace countdown (outer)?
         jsr _7224
-        dec $66
+        dec $66                 ; hyperspace countdown (outer)?
         bne _877d
         jmp _73dd
 
@@ -5310,13 +5357,13 @@ _88fd:
         bne _88fd
         eor # %10101001
         tax 
-        lda $04a7
+        lda PLAYER_COMPETITION
         cpx _25fd
         beq _8912
         ora # %10000000
 _8912:
         ora # %01000000
-        sta $04a7
+        sta PLAYER_COMPETITION
         jsr _89f9
         cmp _25fe
         bne _88fd
@@ -5530,8 +5577,10 @@ txt_docked_token1A:                                                     ;$8A5B
 
         lda # $40
         sta $050c
-        ldy # $08
-        jsr _3ea1
+
+        ldy # 8
+        jsr wait_frames
+
         jsr _28d5
         ldy # $00
 _8a6a:
@@ -5700,7 +5749,7 @@ _8b37:
         pha 
         ora # %10000000
         sta $77
-        eor $04a7
+        eor PLAYER_COMPETITION
         sta $79
         eor PLAYER_CASH_pt3     ;?
         sta $78
@@ -6252,8 +6301,10 @@ _8eba:
         sta _1d06, y
         jsr _2fee               ; BEEP?
        .phy                     ; push Y to stack (via A) 
-        ldy # $14
-        jsr _3ea1
+        
+        ldy # 20
+        jsr wait_frames
+
         pla 
         tay 
 _8ed4:
@@ -6373,7 +6424,7 @@ _8f9d:
         cpx # $40
         bne _8fe9
 _8fa6:
-        jsr _b148
+        jsr wait_for_frame
         jsr _8d53
         cpx # $02
         bne _8fb3
@@ -6418,8 +6469,9 @@ _8fe9:
 _8fea:
         sty $9e
 _8fec:
-        ldy # $02
-        jsr _3ea1
+        ldy # 2
+        jsr wait_frames
+
         jsr _8d53
         bne _8fec
 _8ff6:
@@ -9255,11 +9307,14 @@ _a6ae:
 _a6ba:
         lda # $00
         jsr _6a2e
+
         ldy $a0
         bne _a6ae
+        
         cpx $0486
         beq _a6ad
         stx $0486
+        
         jsr _a72f
         jsr _2a12
         jsr _7b1a
@@ -9268,7 +9323,7 @@ _a6d4:
         jsr set_memory_layout
 
         ldy $0486
-        lda $04a9, y
+        lda PLAYER_LASERS, y
         beq _a700
         ldy # $a0
         cmp # $0f
@@ -9288,7 +9343,7 @@ _a6f2:
         lda # $01
 _a700:
         sta $bb
-        lda $04ca
+        lda PLAYER_TRUMBLES_HI
         and # %01111111
         lsr 
         lsr 
@@ -9336,7 +9391,7 @@ _a731:
         sta ZP_CURSOR_ROW
         jsr _b21a               ; clear screen -- called only here
         
-        ldx $66
+        ldx $66                 ; hyperspace countdown (outer)?
         beq _a75d
         jsr _7224
 _a75d:
@@ -9407,7 +9462,7 @@ _a7a6:
 
         inc PLAYER_KILLS
         
-        lda # $65
+        lda # $65                 ; hyperspace countdown (inner)?
         jsr _900d
 _a7c3:
         lda $10
@@ -9517,8 +9572,10 @@ _a839:                                                                  ;$A839
         ldy # $04
         jsr _a858
 
-        ldy # $01
-        jsr _3ea1
+        ; wait until the next frame:
+        ;SPEED: could just call `wait_for_frame` instead
+        ldy # 1
+        jsr wait_frames
 
         ldy # $87
         bne _a858               ; awlays branches
@@ -10960,18 +11017,25 @@ _b146:
         clc 
         rts 
 
-;===============================================================================
 
-_b148:
-.export _b148
-        pha 
-_b149:
-        lda _a8d9
-        beq _b149
-_b14e:
-        lda _a8d9
-        bne _b14e
-        pla 
+
+wait_for_frame:                                                         ;$B148
+        ;=======================================================================
+        ; I think this function waits for a frame to complete
+        ;
+.export wait_for_frame
+
+        pha                     ; preserve A
+
+        ; wait for non-zero in the frame status?
+:       lda _a8d9                                                       ;$B149
+
+        ; and then wait for it to return to zero?
+        beq :-
+:       lda _a8d9                                                       ;$B14E
+        bne :-
+
+        pla                     ; restore A 
         rts 
 
 
@@ -11434,10 +11498,12 @@ _b335:  jsr _b359
 _b341:
         ldx # $00
 _b343:
-        lda $0452, x
+        lda $0452, x            ; ship slots?
         beq _b358
         bmi _b355
+
         jsr _3e87
+        
         ldy # $1f
         lda [$59], y
         and # %11101111

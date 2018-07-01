@@ -25,7 +25,32 @@ ZP_GOATSOUP_pt2         = $03
 ZP_GOATSOUP_pt3         = $04
 ZP_GOATSOUP_pt4         = $05
 
+;-------------------------------------------------------------------------------
+
 MISSION_FLAGS           = $0499
+
+.enum   missions
+        constrictor_begin       = %00000001
+        constrictor_complete    = %00000010
+        constrictor             = constrictor_begin | constrictor_complete
+
+        blueprints_begin        = %00000100
+        blueprints_birera       = %00001000
+        blueprints              = blueprints_begin | blueprints_birera
+
+        trumbles                = %00010000
+.endenum
+
+; got Trumbles™?
+.ifndef OPTION_NOTRUMBLES
+
+PLAYER_TRUMBLES         = $04c9 ; number of Trumbles™ in the player's hold
+PLAYER_TRUMBLES_LO      = $04c9
+PLAYER_TRUMBLES_HI      = $04ca
+
+.endif
+
+;-------------------------------------------------------------------------------
 
 ; player's cash:
 PLAYER_CASH             = $04a2
@@ -36,7 +61,22 @@ PLAYER_CASH_pt4         = $04a5
 
 PLAYER_FUEL             = $04a6
 
+PLAYER_COMPETITION      = $04a7 ; status byte for competition requirements?
+
 PLAYER_GALAXY           = $04a8 ; current galaxy number
+
+PLAYER_LASERS           = $04a9 ; which laser is mounted to each view
+PLAYER_LASER_FRONT      = $04a9 ; front laser type
+PLAYER_LASER_2          = $04aa ; is this left, right, or rear?
+PLAYER_LASER_3          = $04ab ; is this left, right, or rear?
+PLAYER_LASER_4          = $04ac ; is this left, right, or rear?
+
+PLAYER_GDRIVE           = $04c6 ; player has a galactic hyper-drive?
+
+PLAYER_MISSILES         = $04cc ; number of missiles the player has
+PLAYER_MISSILE_ARMED    = $0485 ; armed state of missile
+
+PLAYER_LEGAL            = $04cd ; player's legal status
 
 PLAYER_KILLS            = $04e1 ; number of kills (hi byte?)
 
@@ -46,6 +86,8 @@ PLAYER_ENERGY           = $04e9
 
 PLAYER_TEMP_LASER       = $0488 ; laser temperature
 PLAYER_TEMP_CABIN       = $0483 ; cabin temperature
+
+;-------------------------------------------------------------------------------
 
 ; target system:
 TSYSTEM_DATA            = $0500

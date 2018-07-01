@@ -23,102 +23,102 @@
 .segment "TEXT_TOKENS"
 
 ; format tokens -- function varies
-_F01_           = .encrypt ( $01 )              ;=$56
-_F02_           = .encrypt ( $02 )              ;=$55
-_F03_           = .encrypt ( $03 )              ;=$54
-_F04_           = .encrypt ( $04 )              ;=$53
-_F05_           = .encrypt ( $05 )              ;=$52
-_F06_           = .encrypt ( $06 )              ;=$51
-_F07_           = .encrypt ( $07 )              ;=$50
-_F08_           = .encrypt ( $08 )              ;=$5F
-_F09_           = .encrypt ( $09 )              ;=$5E
-_F0A_           = .encrypt ( $0A )              ;=$5D
-_F0B_           = .encrypt ( $0B )              ;=$5C
-_F0C_           = .encrypt ( $0C )              ;=$5B
-_F0D_           = .encrypt ( $0D )              ;=$5A
-_F0E_           = .encrypt ( $0E )              ;=$59
-_F0F_           = .encrypt ( $0F )              ;=$58
-_F10_           = .encrypt ( $10 )              ;=$47
-_F11_           = .encrypt ( $11 )              ;=$46
-_F12_           = .encrypt ( $12 )              ;=$45
-_F13_           = .encrypt ( $13 )              ;=$44
-_F14_           = .encrypt ( $14 )              ;=$43
-_F15_           = .encrypt ( $15 )              ;=$42
-_F16_           = .encrypt ( $16 )              ;=$41
-_F17_           = .encrypt ( $17 )              ;=$40
-_F18_           = .encrypt ( $18 )              ;=$4F
-_F19_           = .encrypt ( $19 )              ;=$4E
-_F1A_           = .encrypt ( $1A )              ;=$4D
-_F1B_           = .encrypt ( $1B )              ;=$4C
-_F1C_           = .encrypt ( $1C )              ;=$4B
-_F1D_           = .encrypt ( $1D )              ;=$4A
-_F1E_           = .encrypt ( $1E )              ;=$49
-_F1F_           = .encrypt ( $1F )              ;=$48
+_F01_                   = .encrypt ( $01 )      ;=$56
+_F02_                   = .encrypt ( $02 )      ;=$55
+_F03_                   = .encrypt ( $03 )      ;=$54
+_F04_                   = .encrypt ( $04 )      ;=$53
+_F05_                   = .encrypt ( $05 )      ;=$52
+_F06_                   = .encrypt ( $06 )      ;=$51
+_F07_                   = .encrypt ( $07 )      ;=$50
+_F08_                   = .encrypt ( $08 )      ;=$5F
+_F09_                   = .encrypt ( $09 )      ;=$5E
+_F0A_                   = .encrypt ( $0A )      ;=$5D
+_F0B_                   = .encrypt ( $0B )      ;=$5C
+_F0C_                   = .encrypt ( $0C )      ;=$5B
+_F0D_                   = .encrypt ( $0D )      ;=$5A
+_F0E_                   = .encrypt ( $0E )      ;=$59
+_F0F_                   = .encrypt ( $0F )      ;=$58
+_F10_                   = .encrypt ( $10 )      ;=$47
+_F11_                   = .encrypt ( $11 )      ;=$46
+_F12_                   = .encrypt ( $12 )      ;=$45
+_F13_                   = .encrypt ( $13 )      ;=$44
+_F14_                   = .encrypt ( $14 )      ;=$43
+_F15_                   = .encrypt ( $15 )      ;=$42
+_F16_                   = .encrypt ( $16 )      ;=$41
+_F17_                   = .encrypt ( $17 )      ;=$40
+_F18_                   = .encrypt ( $18 )      ;=$4F
+.INCOMING_MESSAGE       = .encrypt ( $19 )      ;=$4E
+_F1A_                   = .encrypt ( $1A )      ;=$4D
+_F1B_                   = .encrypt ( $1B )      ;=$4C
+_F1C_                   = .encrypt ( $1C )      ;=$4B
+_F1D_                   = .encrypt ( $1D )      ;=$4A
+_F1E_                   = .encrypt ( $1E )      ;=$49
+_F1F_                   = .encrypt ( $1F )      ;=$48
 
 _250c:
 .export _250c
         .import txt_docked_token01
-        .addr   txt_docked_token01              ; msg token $01
+        .addr   txt_docked_token01              ; docked token $01
         .import txt_docked_token02
-        .addr   txt_docked_token02              ; msg token $02
+        .addr   txt_docked_token02              ; docked token $02
         .import print_flight_token
-        .addr   print_flight_token              ; msg token $03
-        .addr   print_flight_token              ; msg token $04
+        .addr   print_flight_token              ; docked token $03
+        .addr   print_flight_token              ; docked token $04
         .import txt_docked_token05
-        .addr   txt_docked_token05              ; msg token $05
+        .addr   txt_docked_token05              ; docked token $05
         .import txt_docked_token06
-        .addr   txt_docked_token06              ; msg token $06
+        .addr   txt_docked_token06              ; docked token $06
         .import print_char
-        .addr   print_char                      ; msg token $07
+        .addr   print_char                      ; docked token $07
         .import txt_docked_token08
-        .addr   txt_docked_token08              ; msg token $08
+        .addr   txt_docked_token08              ; docked token $08
         .import txt_docked_token09
-        .addr   txt_docked_token09              ; msg token $09
-        .addr   print_char                      ; msg token $0A
+        .addr   txt_docked_token09              ; docked token $09
+        .addr   print_char                      ; docked token $0A
         .import txt_docked_token0B
-        .addr   txt_docked_token0B              ; msg token $0B
-        .addr   print_char                      ; msg token $0C
+        .addr   txt_docked_token0B              ; docked token $0B
+        .addr   print_char                      ; docked token $0C
         .import txt_docked_token0D
-        .addr   txt_docked_token0D              ; msg token $0D
+        .addr   txt_docked_token0D              ; docked token $0D
         .import txt_docked_token0E
-        .addr   txt_docked_token0E              ; msg token $0E
+        .addr   txt_docked_token0E              ; docked token $0E
         .import txt_docked_token0F
-        .addr   txt_docked_token0F              ; msg token $0F
+        .addr   txt_docked_token0F              ; docked token $0F
         .import txt_docked_token10
-        .addr   txt_docked_token10              ; msg token $10
+        .addr   txt_docked_token10              ; docked token $10
         .import txt_docked_token11
-        .addr   txt_docked_token11              ; msg token $11
+        .addr   txt_docked_token11              ; docked token $11
         .import txt_docked_token12
-        .addr   txt_docked_token12              ; msg token $12
+        .addr   txt_docked_token12              ; docked token $12
         .import txt_docked_token_set_lowercase
-        .addr   txt_docked_token_set_lowercase  ; msg token $13
-        .addr   print_char                      ; msg token $14
+        .addr   txt_docked_token_set_lowercase  ; docked token $13
+        .addr   print_char                      ; docked token $14
         .import txt_docked_token15
-        .addr   txt_docked_token15              ; msg token $15
+        .addr   txt_docked_token15              ; docked token $15
         .import txt_docked_token16
-        .addr   txt_docked_token16              ; msg token $16
+        .addr   txt_docked_token16              ; docked token $16
         .import txt_docked_token17
-        .addr   txt_docked_token17              ; msg token $17
+        .addr   txt_docked_token17              ; docked token $17
         .import txt_docked_token18
-        .addr   txt_docked_token18              ; msg token $18
-        .import txt_docked_token19
-        .addr   txt_docked_token19              ; msg token $19
+        .addr   txt_docked_token18              ; docked token $18
+        .import txt_docked_incoming_message
+        .addr   txt_docked_incoming_message     ; docked token $19
         .import txt_docked_token1A
-        .addr   txt_docked_token1A              ; msg token $1A
+        .addr   txt_docked_token1A              ; docked token $1A
         .import txt_docked_token1B
-        .addr   txt_docked_token1B              ; msg token $1B
+        .addr   txt_docked_token1B              ; docked token $1B
         .import txt_docked_token1C
-        .addr   txt_docked_token1C              ; msg token $1C
+        .addr   txt_docked_token1C              ; docked token $1C
         .import txt_docked_token1D
-        .addr   txt_docked_token1D              ; msg token $1D
+        .addr   txt_docked_token1D              ; docked token $1D
         .import txt_docked_token1E
-        .addr   txt_docked_token1E              ; msg token $1E
+        .addr   txt_docked_token1E              ; docked token $1E
         .import txt_docked_token1F
-        .addr   txt_docked_token1F              ; msg token $1F
+        .addr   txt_docked_token1F              ; docked token $1F
         
-        ; msg token for print space. this table is not
+        ; docked token for print space. this table is not
         ; used for this as token $20 is handled already
-        .addr   print_char                      ; msg token $20
+        .addr   print_char                      ; docked token $20
 
 ;===============================================================================
 
@@ -257,7 +257,7 @@ _msg_index     .set 0
 
         ; define an export for the index-number of the message;
         ; this is how the outside world will specify the message to print
-        .export .ident(.concat("MSG", msg_id)) = _msg_index
+        .export .ident(.concat("TXT_DOCKED", msg_id)) = _msg_index
 
         .if _msg_index >= $81 && _msg_index <= $d6
                 ;;.out .sprintf(": $%0.2x: MSG%s", _value, msg_id)
@@ -378,7 +378,7 @@ _0e00:
         .define_msg "_0A"
         
         ; 11.
-        .byte   _F19_, _F09_, _F17_, _F0E_
+        .byte   .INCOMING_MESSAGE, _F09_, _F17_, _F0E_
         .byte   _F02_, __, __, _AT, _T, _EN, _TI, _ON
         .byte   $82, _DOT, __, _F13_, _W, _E, __, _H
         .byte   _A, _VE, __, _N, _E, _ED_, _O, _F
@@ -410,7 +410,7 @@ _0e00:
         .define_msg "_0E"
 
         ; 15.
-        .byte   _F19_, _F09_, _F17_, _F0E_
+        .byte   .INCOMING_MESSAGE, _F09_, _F17_, _F0E_
         .byte   _F02_, __, __, _C, _ON, _G, _RA, _T
         .byte   _U, _LA, _TI, _ON, _S, __, _COMMANDER, $76
         .byte   _F0C_, _F0C_, _TH, _ER, _E, _F0D_, __, _W
@@ -820,6 +820,8 @@ _0e00:
         .byte   _T, _R, _Y, _ERRIUS, __end
         .define_msg "_6E"
         
+        ;-----------------------------------------------------------------------
+
         ; 111.
         .byte   __, _C, _U, _D, _D, _L, _Y, __end
         .define_msg "_CUDDLY"
@@ -836,6 +838,8 @@ _0e00:
         .byte   __, _F, _R, _I, _EN, _D, _L, _Y, __end
         .define_msg "_FRIENDLY"
         
+        ;-----------------------------------------------------------------------
+
         ; 115.
         .byte   _W, _A, _S, _P, __end
         .define_msg "_WASP"
@@ -1178,7 +1182,7 @@ _0e00:
         .define_msg "_LITTLE_TRUMBLE"
         
         ; 199.
-        .byte   _F19_, _F09_, _F1D_
+        .byte   .INCOMING_MESSAGE, _F09_, _F1D_
         .byte   _F0E_, _F13_, _G, _O, _O, _D, _F0D_, __
         .byte   _D, _A, _Y, __, _COMMANDER, __, _F04_, $7b
         .byte   __, _AL, _LO, _W, __, _M, _E, _TO
@@ -1206,7 +1210,7 @@ _0e00:
         .byte   _A, _K, _E, __, _IT, _F01_, $7f, _Y
         .byte   $78, _N, $7e, $68, _F0C_, _F0F_, _F01_, _F08_
         .byte   __end
-        .define_msg "_C7"
+        .define_msg "_TRUMBLES"
         
         ; 200.
         .byte   __, _N, _A, _M, _E, $68, __
@@ -1287,7 +1291,7 @@ _0e00:
         ; 216.
         .byte   _F09_, _F08_, _F17_, _F01_, __, _IN, _C, _O, _M
         .byte   _ING_, _M, _ES, _S, _A, _GE, __end
-        .define_msg "_D8"
+        .define_msg "_INCOMING_MESSAGE"
         
         ; 217.
         .byte   _C, _U, _R, _R, _U, _TH, _ER, _S, __end
@@ -1314,7 +1318,7 @@ _0e00:
         .define_msg "_DD"
         
         ; 222.
-        .byte   _F19_, _F09_
+        .byte   .INCOMING_MESSAGE, _F09_
         .byte   _F1D_, _F0E_, _F02_, _G, _O, _O, _D, __
         .byte   _D, _A, _Y, __, _COMMANDER, __, _F04_, _CC
         .byte   _I, _F0D_, __, _A, _M, __, _F13_, _A
@@ -1376,7 +1380,7 @@ _0e00:
         .define_msg "_DE"
         
         ; 223.
-        .byte   _F19_, _F09_, _F1D_, _F08_, _F0E_, _F0D_
+        .byte   .INCOMING_MESSAGE, _F09_, _F1D_, _F08_, _F0E_, _F0D_
         .byte   _F13_, _W, _E, _L, _L, __, _D, _ON
         .byte   _E, __, _COMMANDER, _CC, _YOU, __, _H, _A
         .byte   _VE, __, _SE, _R, _V, _ED_, _U, _S

@@ -119,7 +119,7 @@
 .import _affa:absolute
 .import _b0f4:absolute
 .import _b11f:absolute
-.import _b148:absolute
+.import wait_for_frame:absolute
 .import _b179:absolute
 .import paint_char:absolute
 .import txt_docked_token15:absolute
@@ -150,81 +150,117 @@ _1d81:                                                                  ;$1D81
         sta PLAYER_SHIELD_REAR
         sta PLAYER_ENERGY
         
-        ldy # $2c
-        jsr _3ea1
+        ldy # 44
+        jsr wait_frames
 
+        ; if the galaxy is not using the original Elite seed, then the missions
+        ; will not function as they rely on specific planet name / placement
+        ;
+.ifndef OPTION_CUSTOMSEED
+
+        ; check eligibility for the Constrictor mission:
+        ;-----------------------------------------------------------------------
+        ; available on the first galaxy after 256 or more kills. your job is
+        ; to hunt down the prototype Constrictor ship starting at Reesdice
+
+        ; is the mission already underway or complete?
         lda MISSION_FLAGS
-        and # %00000011
-        bne _1db5
+        and # missions::constrictor
+       .bnz :+                  ; mission is underway/complete, ignore it
         
         lda PLAYER_KILLS
-        beq _1e00               ; kills less than 256?
+        beq _1e00               ; ignore mission if kills less than 256
 
-        lda PLAYER_GALAXY
-        lsr 
-        bne _1e00
+        ; is the player in the first galaxy?
+
+        lda PLAYER_GALAXY       ; if bit 0 is set, shifting right will cause
+        lsr                     ; it to fall off the end, leaving zero;
+       .bnz _1e00               ; if not first galaxy, ignore mission
         
+        ; start the Constrictor mission
         jmp _3dff
 
-_1db5:                                                                  ;$1DB5
-        cmp # $03
-        bne _1dbc
+        ; is the mission complete? (both bits set)
+:       cmp # missions::constrictor                                     ;$1DB5
+       .bnz _1dbc
+
+        ; you've docked at a station, set up the 'tip' that will display in
+        ; the planet info for where to find the Constrictor next
         jmp _3daf
 
-_1dbc:                                                                  ;$1DBC
+_1dbc:  ; check eligibility for Thargoid Blueprints mission             ;$1DBC
         ;-----------------------------------------------------------------------
-        ; check eligibility for second mission?
-
+        ; once you've met the criteria for this mission (3rd galaxy, have
+        ; completed the first mission, >=1280 kills) you're presented with
+        ; a message to fly to Ceerdi. Once there, you're given some
+        ; top-secret blueprints which you have to get to Birera
+        
         ; is the player in the third galaxy?
         lda PLAYER_GALAXY
-        cmp # $02
-        bne _1e00
+        cmp # 2
+        bne _1e00               ; no; ignore mission
 
-        ; player is in the third galaxy; has the player
-        ; completed the first mission already?
+        ; player is in the third galaxy; has the player completed the
+        ; Constrictor mission already? (and hasn't started blueprints mission)
         lda MISSION_FLAGS
-        and # %00001111
-        cmp # %00000010         ; bit 0 = mission started, bit 1 = complete
-        bne _1dd6               ; skip if mission complete
+        and # missions::constrictor | missions::blueprints
+        cmp # missions::constrictor_complete
+        bne _1dd6
         
-        ; has the player at least 1280 kills? (halfway to deadly)
+        ; has the player at least 1280 kills? (halfway to Deadly)
         lda PLAYER_KILLS
         cmp #> 1280
-       .blt _1e00               ; skip ahead if not enough
+       .blt _1e00               ; no; skip ahead if not enough
 
-        ; second mission?
-        jmp _3d7d
+        ; 'start' the mission: the player has to fly
+        ; to Ceerdi to actually get the blueprints
+        jmp mission_blueprints_begin
 
 _1dd6:                                                                  ;$1DD6
-        cmp # $06
+        ; has the player started the blueprints mission?
+        ; (and by association, completed the Constrictor mission)
+        cmp # missions::constrictor_complete | missions::blueprints_begin
         bne _1deb
 
-        ; check certain planet?
+        ; is the player at Ceerdi?
+        ;SPEED: couldn't we use the planet index number
+        ;       instead of checking co-ordinates?
 
         lda PSYSTEM_POS_X
-        cmp # $d7
+        cmp # 215
         bne _1e00
         
         lda PSYSTEM_POS_Y
-        cmp # $54
+        cmp # 84
         bne _1e00
         
-        jmp _3d8d
+        jmp mission_blueprints_ceerdi
 
 _1deb:                                                                  ;$1DEB
-        cmp # $0a
+        cmp # %00001010
         bne _1e00
+
+        ; is the player at Birera?
+        ;SPEED: couldn't we use the planet index number
+        ;       instead of checking co-ordinates?
+
         lda PSYSTEM_POS_X
-        cmp # $3f
+        cmp # 63
         bne _1e00
+        
         lda PSYSTEM_POS_Y
-        cmp # $48
+        cmp # 72
         bne _1e00
-        jmp _3d9b
+        
+        jmp mission_blueprints_birera
+
+.endif
 
 _1e00:                                                                  ;$1E00
         ;=======================================================================
         ; check for Trumbles™ mission
+        ;
+.ifndef OPTION_NOTRUMBLES
         
         ; at least 6'553.5 cash?
         lda PLAYER_CASH_pt3
@@ -233,11 +269,12 @@ _1e00:                                                                  ;$1E00
 
         ; has the mission already been done?
         lda MISSION_FLAGS
-        and # %00010000
+        and # missions::trumbles
         bne _1e11
 
         ; initiate Trumbles™ mission
-        jmp _3dc0
+        jmp mission_trumbles
+.endif
 
 _1e11:                                                                  ;$1E11
         jmp _88e7
@@ -419,22 +456,27 @@ _1f33:
         inc $96                 ; player's ship speed?
 _1f3e:
         lda _8d2e
-        and $04cc
+        and PLAYER_MISSILES
         beq _1f55
+
         ldy # $57
         jsr _7d0c
         ldy # $06
         jsr _a858
+
         lda # $00
-        sta $0485
+        sta PLAYER_MISSILE_ARMED
 _1f55:
         lda $7c
         bpl _1f6b
         lda _8d36
         beq _1f6b
-        ldx $04cc
+
+        ldx PLAYER_MISSILES
         beq _1f6b
-        sta $0485
+
+        sta PLAYER_MISSILE_ARMED
+
         ldy # $87
         jsr _b11f
 _1f6b:
@@ -506,7 +548,7 @@ _1fd5:
         cmp # $f2
         bcs _202d
         ldx $0486
-        lda $04a9, x
+        lda PLAYER_LASERS, x
         beq _202d
         pha 
         and # %01111111
@@ -544,15 +586,18 @@ _202d:
 _202f:
 .export _202f
         stx $9d
-        lda $0452, x
+        lda $0452, x            ; ship slots?
         bne _2039
+
         jmp _21fa
 
         ;-----------------------------------------------------------------------
 
 _2039:
         sta $a5
+
         jsr _3e87
+        
         ldy # $24
 _2040:
         lda [$59], y
@@ -702,8 +747,10 @@ _2138:
         jsr _a626
         jsr _363f
         bcc _21a8
-        lda $0485
+
+        lda PLAYER_MISSILE_ARMED
         beq _2153
+        
         jsr _a80f
         ldx $9d
         ldy # $27
@@ -767,8 +814,8 @@ _21ab:
         beq _21e5
         lda $2d
         and # %01000000
-        ora $04cd
-        sta $04cd
+        ora PLAYER_LEGAL
+        sta PLAYER_LEGAL
         lda $048b
         ora $0482
         bne _21e2
@@ -803,7 +850,7 @@ _21ee:
         ;-----------------------------------------------------------------------
 
 _21fa:
-        lda $04c3
+        lda $04c3               ; energy bomb?
         bpl _2207
         asl $04c3
         bmi _2207
@@ -824,7 +871,7 @@ _2207:
         stx PLAYER_SHIELD_FRONT
 _2224:
         sec 
-        lda $04c4
+        lda $04c4               ; energy charge rate?
         adc PLAYER_ENERGY
         bcs _2230
         sta PLAYER_ENERGY
@@ -937,8 +984,13 @@ _22c2:
         lda # MEM_64K
         jsr set_memory_layout
         
-        lsr $04ca
-        ror $04c9
+.ifndef OPTION_NOTRUMBLES
+
+        ; divide number of Trumbles™ by 2
+        lsr PLAYER_TRUMBLES_HI
+        ror PLAYER_TRUMBLES_LO
+.endif
+
 _2303:
         lda $04c2
         beq _231c
@@ -984,6 +1036,7 @@ _2345:
 _234c:
         jsr get_random_number
         bpl _2366
+
         tya 
         tax 
         ldy # $00
@@ -1420,7 +1473,7 @@ txt_docked_token0E:                                                     ;$24A3
         ;=======================================================================
 .export txt_docked_token0E
 
-        lda # $80
+        lda # %10000000
 
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
@@ -1430,7 +1483,7 @@ txt_docked_token0F:                                                     ;$24A6
         ;=======================================================================
 .export txt_docked_token0F
         
-        lda # $00
+        lda # %00000000
         sta txt_buffer_flag
         asl 
         sta txt_buffer_index
@@ -1449,7 +1502,7 @@ txt_docked_token11:                                                     ;$24B0
         
         ldx txt_buffer_index
         lda $0647, x
-        jsr _24f3
+        jsr is_vowel
         bcc _24c9
         dec txt_buffer_index
 _24c9:
@@ -1494,23 +1547,25 @@ txt_docked_token_set_lowercase:                                         ;$24ED
 
         rts 
 
-;===============================================================================
-
-_24f3:
+is_vowel:                                                               ;$24F3
+        ;=======================================================================
         ora # %00100000
-        cmp # $61
+        cmp # $61               ; 'A'?
         beq _250a
-        cmp # $65
+        cmp # $65               ; 'E'?
         beq _250a
-        cmp # $69
+        cmp # $69               ; 'I'?
         beq _250a
-        cmp # $6f
+        cmp # $6f               ; 'O'?
         beq _250a
-        cmp # $75
+        cmp # $75               ; 'U'?
         beq _250a
         
         clc 
 _250a:  rts 
+
+;===============================================================================
+
 _250b:  rts 
 
 ;===============================================================================
@@ -1801,22 +1856,38 @@ _2883:  bmi _2883               ; infinite loop, why??
         sbc $99
         sta $0100, x
 _28a2:
-.export _28a4 := _28a2 + 2
-        jmp $0061
+        .byte   $4c             ;=`jmp`
+        .byte   $61             ;=$??61
 
 ;===============================================================================
+
+;TODO: what is at these addresses???
+
+; note that these blocks are each 36 bytes
+; that means that $FA97 should be the next address
+
+_28a4:
+.export _28a4
+        .word   $f900
+        .word   $f925
+        .word   $f94a
+        .word   $f96f
+        .word   $f994
+        .word   $f9b9
+        .word   $f9de
+        .word   $fa03
+        .word   $fa28
+        .word   $fa4d
+        .word   $fa72
         
-_28a5:
-.export _28a5
-        .byte   $f9, $25, $f9, $4a, $f9, $6f, $f9, $94
-        .byte   $f9, $b9, $f9, $de, $f9, $03, $fa, $28
-        .byte   $fa, $4d, $fa, $72, $fa
-        
-        .byte   $80, $40, $20, $10, $08, $04, $02, $01
-        .byte   $80, $40
+; unused / unreferenced?
+;$28BA:
+
+        .byte             $80, $40, $20, $10, $08, $04
+        .byte   $02, $01, $80, $40
 
 ; unused / unreferenced?
-;$28c4:
+;$28C4:
         .byte   %11000000       ;=$C0
         .byte   %00110000       ;=$30
         .byte   %00001100       ;=$0C
@@ -2205,14 +2276,17 @@ _2b0a:
         ora # %00000100
         sta $6c
         sta $06bc, y
+
         jsr get_random_number
         ora # %00001000
         sta $6b
         sta $06a2, y
+        
         jsr get_random_number
         ora # %10010000
         sta $06d6, y
         sta $a1
+        
         lda $6c
         jmp _2b00
 
@@ -2405,7 +2479,8 @@ _2c7c:
 ;===============================================================================
 
 _2c7d:
-        lda # $cd
+.import TXT_DOCKED_DOCKED:direct
+        lda # TXT_DOCKED_DOCKED
         jsr print_docked_str
 
         jsr _b179
@@ -2454,7 +2529,7 @@ _2cc7:
         lda # $7d
         jsr _6a9b
         lda # $13
-        ldy $04cd
+        ldy PLAYER_LEGAL
         beq _2cd7
         cpy # $32
         adc # $01
@@ -2503,7 +2578,7 @@ _2d18:
         sta $ad
 _2d1c:
         tay 
-        ldx $0452, y
+        ldx $04c3 - $71, y      ; equipment slots?
         beq _2d25
         jsr _2d61
 _2d25:
@@ -2514,7 +2589,7 @@ _2d25:
         ldx # $00
 _2d2f:
         stx $aa
-        ldy $04a9, x
+        ldy PLAYER_LASERS, x
         beq _2d59
         txa 
         clc 
@@ -2522,7 +2597,7 @@ _2d2f:
         jsr _6a9b
         lda # $67
         ldx $aa
-        ldy $04a9, x
+        ldy PLAYER_LASERS, x
         cpy # $8f
         bne _2d4a
         lda # $68
@@ -2991,9 +3066,11 @@ print_crlf:                                                             ;$2F1F
 
 txt_docked_token10:                                                     ;$2F22
 ;===============================================================================
+; print "A"!?
+;
 .export txt_docked_token10
 
-        lda # $41
+        lda # 'a'
 
 
 print_char:                                                             ;$2F24
@@ -3364,6 +3441,7 @@ _30bb:
         and # %00001000
         and _1d09
         beq :+
+
         txa 
 
         ; this causes the next instruction to become a meaningless `bit`
@@ -3554,17 +3632,25 @@ _319b:
         sta $04b0, x
         dex 
         bpl _319b
-        sta $04cd
+        sta PLAYER_LEGAL
         sta $04c7
-        lda $04c9
-        ora $04ca
-        beq _31be
+        
+.ifndef OPTION_NOTRUMBLES
+
+        ; does the player have any Trumbles™?
+        lda PLAYER_TRUMBLES_LO
+        ora PLAYER_TRUMBLES_HI
+        beq _31be               ; no Trumbles™; skip
+        
+        ; cull the number of Trumbles™
         jsr get_random_number
-        and # %00000111
-        ora # %00000001
-        sta $04c9
+        and # %00000111         ; select a range of 0-7
+        ora # %00000001         ; restrict to 1, 3, 5 or 7
+        sta PLAYER_TRUMBLES_LO
         lda # $00
-        sta $04ca
+        sta PLAYER_TRUMBLES_HI
+.endif
+
 _31be:
         lda # $46
         sta PLAYER_FUEL
@@ -3656,10 +3742,11 @@ _3244:
         bmi _322f
         lsr 
         tax 
-        lda _28a4, x
+        lda _28a4 + 0, x
         sta $5b
-        lda _28a5, x
+        lda _28a4 + 1, x
         jsr _3581
+
         lda $37
         ora $3a
         ora $3d
@@ -3805,7 +3892,7 @@ _3329:
 _3335:
         lsr 
         bcc _3347
-        ldx $04cd
+        ldx PLAYER_LEGAL
         cpx # $28
         bcc _3347
         lda $2d
@@ -4373,13 +4460,18 @@ _36a6:
         ldx # $01
         jsr _3680
         bcc _3701
-        ldx $7c
+        
+        ldx $7c                 ; missile target?
         jsr _3e87
-        lda $0452, x
+
+        lda $0452, x            ; ship slots?
         jsr _36c5
+
         ldy # $b7
         jsr _7d0c
-        dec $04cc
+        
+        dec PLAYER_MISSILES
+        
         ldy # $04
         jmp _a858
 
@@ -5480,10 +5572,12 @@ _3cdb:
         and # %00000111
         adc # $44
         sta $06f1
+
         jsr get_random_number
         and # %00000111
         adc # $7c
         sta $06f0
+        
         lda PLAYER_TEMP_LASER
         adc # $08
         sta PLAYER_TEMP_LASER
@@ -5569,21 +5663,27 @@ _3d6f:
         lda # $05
 _3d7a:  jmp print_docked_str
 
-;===============================================================================
 
-_3d7d:                                                                  ;$3d7d
+mission_blueprints_begin:                                               ;$3D7D
+        ;=======================================================================
+        ; begin the Thargoid Blueprints mission:
+        ;
         lda MISSION_FLAGS
-        ora # %00000100
+        ora # missions::blueprints_begin
         sta MISSION_FLAGS
-        lda # $0b
+
+        ; display "go to Ceerdi" mission text
+.import TXT_DOCKED_0B:direct
+        lda # TXT_DOCKED_0B
+
 _3d87:                                                                  ;$3d87
         jsr print_docked_str
 _3d8a:                                                                  ;$3d8a
         jmp _88e7
 
-;===============================================================================
 
-_3d8d:                                                                  ;$3d8d
+mission_blueprints_ceerdi:                                              ;$3D8D
+        ;=======================================================================
         lda MISSION_FLAGS
         and # %11110000
         ora # %00001010
@@ -5591,19 +5691,24 @@ _3d8d:                                                                  ;$3d8d
 
         lda # $de
         bne _3d87
-_3d9b:                                                                  ;$3d9b
+
+mission_blueprints_birera:                                              ;$3D9B
+        ;=======================================================================
         lda MISSION_FLAGS
         ora # %00000100
         sta MISSION_FLAGS
 
-        lda # $02
-        sta $04c4
+        ; give the player the military energy unit?
+        lda # 2
+        sta $04c4               ; energy charge rate?
 
         inc PLAYER_KILLS
         
         lda # $df
-        bne _3d87
+        bne _3d87               ; always branches
+
 _3daf:                                                                  ;$3daf
+        ;=======================================================================
         lsr MISSION_FLAGS
         asl MISSION_FLAGS
         
@@ -5613,20 +5718,23 @@ _3daf:                                                                  ;$3daf
         
         lda # $0f
 _3dbe:                                                                  ;$3dbe
-        bne _3d87
+        bne _3d87               ; always branches
 
-_3dc0:                                                                  ;$3DC0
+.ifndef OPTION_NOTRUMBLES
+
+mission_trumbles:                                                       ;$3DC0
         ;=======================================================================
         ; begin Trumbles™ mission
         ;
 
         ;set the mission bit:
         lda MISSION_FLAGS
-        ora # %00010000
+        ora # missions::trumbles
         sta MISSION_FLAGS
 
         ; display the Trumbles™ mission text
-        lda # $c7
+.import TXT_DOCKED_TRUMBLES:direct
+        lda # TXT_DOCKED_TRUMBLES
         jsr print_docked_str
         
         jsr _81ee
@@ -5636,18 +5744,26 @@ _3dc0:                                                                  ;$3DC0
         ldx # $50
         jsr _745a
         
-        inc $04c9
+        ;put a Trumble™ in the hold...
+        inc PLAYER_TRUMBLES_LO
+
+        ; start the normal docked screen?
         jmp _88e7
+
+.endif
 
 ;===============================================================================
 
 _3dff:                                                                  ;$3dff
-        lsr MISSION_FLAGS
-        sec 
-        rol MISSION_FLAGS
+        ; and this is how you set bit 0, without using registers!
 
-        jsr txt_docked_token19
+        lsr MISSION_FLAGS       ; push bit 0 into the bit-bucket
+        sec                     ; put a 1 into the carry
+        rol MISSION_FLAGS       ; push the carry into bit 0
+
+        jsr txt_docked_incoming_message
         jsr _8447
+        
         lda # $1f
         sta $a5
         jsr _7c6b
@@ -5689,17 +5805,23 @@ _3e24:                                                                  ;$3e24
 _3e31:                                                                  ;$3e31
         inc $10
         lda # $0a
-        bne _3dbe
-        
-txt_docked_token19:                                                     ;$3E37
-        ;=======================================================================
-.export txt_docked_token19
+        bne _3dbe               ; always branches
 
-        lda # $d8
+
+txt_docked_incoming_message:                                            ;$3E37
+        ;=======================================================================
+        ; print "INCOMING MESSAGE" on screen and wait a bit
+        ;
+.export txt_docked_incoming_message
+
+        ; print "INCOMING MESSAGE" on screen
+
+.import TXT_DOCKED_INCOMING_MESSAGE:direct
+        lda # TXT_DOCKED_INCOMING_MESSAGE
         jsr print_docked_str
 
-        ldy # $64
-        jmp _3ea1
+        ldy # 100
+        jmp wait_frames
 
 txt_docked_token16:                                                     ;$3E41
         ;=======================================================================
@@ -5710,8 +5832,10 @@ txt_docked_token16:                                                     ;$3E41
 _3e46:                                                                  ;$3e46
         jsr _3e65
         beq _3e46
+        
         lda # $00
         sta $28
+        
         lda # $01
         jsr _a72f
         jsr _9a86
@@ -5720,7 +5844,7 @@ txt_docked_token17:                                                     ;$3E57
         ;=======================================================================
 .export txt_docked_token17
 
-        lda # $0a
+        lda # 10
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
@@ -5729,9 +5853,10 @@ txt_docked_token1D:                                                     ;$3E5A
         ;=======================================================================
 .export txt_docked_token1D
 
-        lda # $06
+        lda # 6
         jsr set_cursor_row
 
+        ;SPEED: dummy code -- it just returns!
         jsr _250b
         
         jmp txt_docked_token0D
@@ -5740,15 +5865,18 @@ _3e65:                                                                  ;$3E65
         ;-----------------------------------------------------------------------
         lda # $50
         sta $0c
+
         lda # $00
         sta $09
         sta $0f
+        
         lda # $02
         sta $10
+        
         jsr _9a86
         jsr _a2a0
+        
         jmp _8d53
-
 
 txt_docked_token18:                                                     ;$3E7C
         ;=======================================================================
@@ -5762,38 +5890,51 @@ txt_docked_token18:                                                     ;$3E7C
         
         rts 
 
+_3e87:                                                                  ;$3E87
 ;===============================================================================
-
-_3e87:                                                                  ;$3e87
+; get an address from $F900..$FA72 (in 36 byte increments) based on an index
+;
+;       X = index
+;
+; returns address in $59/$5A
+;
 .export _3e87
+
         txa 
-        asl 
+        asl                     ; multiply by 2 (for 2-byte table-lookup)
         tay 
-        lda _28a4, y
+        lda _28a4 + 0, y
         sta $59
-        lda _28a5, y
+        lda _28a4 + 1, y
         sta $5a
+        
         rts 
 
+_3e95:                                                                  ;$3E95
 ;===============================================================================
-
-_3e95:                                                                  ;$3e95
+; copy present system co-ordinates to target system co-ordinates
+;
 .export _3e95
-        ldx # $01
-_3e97:                                                                  ;$3e97
-        lda PSYSTEM_POS, x
+
+        ldx # 1
+:       lda PSYSTEM_POS, x                                              ;$3E97
         sta TSYSTEM_POS, x
         dex 
-        bpl _3e97
+        bpl :-
+        
         rts 
 
+wait_frames:                                                            ;$3EA1
 ;===============================================================================
+; wait for a given number of frames to complete
+;
+;       Y = number of frames to wait
+;
+.export wait_frames
 
-_3ea1:                                                                  ;$3ea1
-.export _3ea1
-        jsr _b148
+        jsr wait_for_frame
         dey 
-        bne _3ea1
+        bne wait_frames
         rts 
 
 ;===============================================================================
