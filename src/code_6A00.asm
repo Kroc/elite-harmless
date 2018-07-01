@@ -5,7 +5,7 @@
 .linecont+
 
 .include        "c64.asm"
-.include        "elite_consts.asm"
+.include        "elite_vars.asm"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others

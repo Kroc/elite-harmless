@@ -4,7 +4,7 @@
 ;===============================================================================
 
 .include        "c64.asm"
-.include        "elite_consts.asm"
+.include        "elite_vars.asm"
 
 ; from "text_flight.asm"
 .import _0ac0:absolute
@@ -1994,18 +1994,23 @@ _290f:
         sta $06c9, y            ; "dust y-lo"
 _2918:
 .export _2918
+
         lda VAR_X
-        bpl _2921
+        bpl :+
+        
+        ; swap negative number to positive?
         eor # %01111111
         clc 
         adc # $01
-_2921:
-        eor # %10000000
+
+:       eor # %10000000                                                 ;$2921
         tax 
+        
         lda VAR_Y
         and # %01111111
         cmp # $48
         bcs _2976
+
         lda VAR_Y
         bpl _2934
         eor # %01111111
