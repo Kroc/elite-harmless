@@ -93,6 +93,13 @@ L:
         .byte   $2c
 .endmacro
 
+; this does the same thing,
+; but using a `cmp` instruction
+
+.macro .cmp
+        .byte   $cd
+.endmacro
+
 ; colours
 ;===============================================================================
 

@@ -3,6 +3,13 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+
+VAR_X                   = $6b   ; a common "X" variable
+VAR_Y                   = $6c   ; a common "Y" variable
+VAR_Z                   = $a1   ; a common "Z" variable
+
+;-------------------------------------------------------------------------------
+
 ; can't 'export' macros?
 
 .define ELITE_SEED      $4a, $5a, $48, $02, $53, $B7
@@ -51,6 +58,8 @@ PLAYER_TRUMBLES_HI      = $04ca
 .endif
 
 ;-------------------------------------------------------------------------------
+
+PLAYER_SPEED            = $96
 
 ; player's cash:
 PLAYER_CASH             = $04a2
@@ -112,3 +121,14 @@ PSYSTEM_TECHLEVEL       = $04f1
 PSYSTEM_POS             = $049a
 PSYSTEM_POS_X           = $049a
 PSYSTEM_POS_Y           = $049b
+
+;-------------------------------------------------------------------------------
+
+; NOTE: there are up-to 25 dust-particles at a time
+; TODO: define the arrays below based on this
+DUST_MAX                = 25
+
+DUST_COUNT              = $050b ; number of dust particles
+DUST_X                  = $06a2 ; X-positions of dust-particles
+DUST_Y                  = $06bc ; Y-positions of dust-particles
+DUST_Z                  = $06d6 ; Z-positions of dust-particles

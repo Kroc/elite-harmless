@@ -305,7 +305,7 @@ _1e2a:                                                                  ;$1E2a
 ;===============================================================================
 
 _1e35:
-        lda $a3
+        lda $a3                 ; move counter?
         and # %00000111
         cmp $0510
         bcc _1e41
@@ -321,19 +321,22 @@ _1e41:
         jsr get_random_number
         cmp # $eb
         bcc _1e6a
-        and # %00000011
+
+        and # %00000011         ; modulo 4 (0-3)
         tax 
         lda _1e21, x
         sta $0511, y
+
         lda _1e25, x
         sta $0521, y
+
         jsr get_random_number
-        and # %00000011
+        and # %00000011         ; modulo 4 (0-3)
         tax 
         lda _1e21, x
         sta $0512, y
-_1e6a:
-        lda _1e29, y
+
+_1e6a:  lda _1e29, y                                                    ;$1E6A
         and VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         lda VIC_SPRITE2_Y, y
@@ -856,7 +859,7 @@ _21fa:
         bmi _2207
         jsr _2367
 _2207:
-        lda $a3
+        lda $a3                 ; move counter?
         and # %00000111
         bne _227a
         ldx PLAYER_ENERGY
@@ -878,7 +881,7 @@ _2224:
 _2230:
         lda $0482
         bne _2277
-        lda $a3
+        lda $a3                 ; move counter?
         and # %00011111
         bne _2283
         lda $045f
@@ -917,7 +920,7 @@ _2277:
 _227a:
         lda $0482
         bne _2277
-        lda $a3
+        lda $a3                 ; move counter?
         and # %00011111
 _2283:
         cmp # $0a
@@ -1719,7 +1722,7 @@ _27cd:  bne _27cd               ; infinite loop, why?
 ; unreferenced / unused?
 ;$27D2:
         lda $bb
-        sta $6c
+        sta VAR_Y
         asl 
         sta $6e
         asl 
@@ -1733,10 +1736,10 @@ _27e5:
         clc 
         lda $71
         adc $09
-        sta $6b
+        sta VAR_X
         lda $0a
         adc # $00
-        sta $6c
+        sta VAR_Y
         jmp _9db3               ; SPEED: jump to a jump (`_9dd9`)
 
 ;===============================================================================
@@ -1746,18 +1749,18 @@ _27e5:
         lda $09
         sec 
         sbc $71
-        sta $6b
+        sta VAR_X
         lda $0a
         sbc # $00
-        sta $6c
+        sta VAR_Y
 _2804:  bcs _2804               ; infinite loop, why??
         eor # %11111111
-        sta $6c
+        sta VAR_Y
         lda # $01
-        sbc $6b
-        sta $6b
+        sbc VAR_X
+        sta VAR_X
         bcc _2814
-        inc $6c
+        inc VAR_Y
 _2814:
         lda $6d
         eor # %10000000
@@ -1942,10 +1945,10 @@ _28e5:
 ;===============================================================================
 .export _28e5
 
-        sta $6c
+        sta VAR_Y
         sta $6e
         ldx # $00
-        stx $6b
+        stx VAR_X
         dex 
         stx $6d
         jmp _ab91
@@ -1955,7 +1958,7 @@ _28f3:
 .export _28f3
 
         jsr _811e
-        sty $6c
+        sty VAR_Y
         lda # $00
         sta $0580, y
         jmp _affa
@@ -1991,7 +1994,7 @@ _290f:
         sta $06c9, y            ; "dust y-lo"
 _2918:
 .export _2918
-        lda $6b
+        lda VAR_X
         bpl _2921
         eor # %01111111
         clc 
@@ -1999,11 +2002,11 @@ _2918:
 _2921:
         eor # %10000000
         tax 
-        lda $6c
+        lda VAR_Y
         and # %01111111
         cmp # $48
         bcs _2976
-        lda $6c
+        lda VAR_Y
         bpl _2934
         eor # %01111111
         adc # $01
@@ -2029,13 +2032,13 @@ _293a:
         txa 
         and # %00000111
         tax 
-        lda $a1
+        lda VAR_Z
         cmp # $90
         bcs _296d
         lda _28c8, x
         eor [$07], y
         sta [$07], y
-        lda $a1
+        lda VAR_Z
         cmp # $50
         bcs _2974
         dey 
@@ -2073,9 +2076,9 @@ _2988:
         bne _29fa
 _2998:
         lda $85
-        sta $6b
+        sta VAR_X
         lda $86
-        sta $6c
+        sta VAR_Y
         lda $87
         sta $6d
         lda $88
@@ -2092,22 +2095,22 @@ _2998:
         bcs _2988
         lda $06f4
         beq _29d2
-        lda $6b
+        lda VAR_X
         ldy $6d
         sta $6d
-        sty $6b
-        lda $6c
+        sty VAR_X
+        lda VAR_Y
         ldy $6e
         sta $6e
-        sty $6c
+        sty VAR_Y
 _29d2:
         ldy $7e
         lda _27a3, y
         cmp # $ff
         bne _29e6
-        lda $6b
+        lda VAR_X
         sta _26a4, y
-        lda $6c
+        lda VAR_Y
         sta _27a4, y            ; writing to code??
         iny 
 _29e6:
@@ -2135,24 +2138,27 @@ _29fa:
         sta $aa
         rts 
 
+dust_swap_xy:                                                           ;$2A12
 ;===============================================================================
+.export dust_swap_xy
 
-_2a12:
-.export _2a12
-        ldy $050b
-_2a15:
-        ldx $06bc, y
-        lda $06a2, y
-        sta $6c
-        sta $06bc, y
-        txa 
-        sta $6b
-        sta $06a2, y
-        lda $06d6, y
-        sta $a1
+        ldy DUST_COUNT          ; get number of dust particles
+
+:       ldx DUST_Y, y           ; get dust-particle Y-position          ;$2A15
+        lda DUST_X, y           ; get dust-particle X-position
+        sta VAR_Y               ; (put aside X-position)
+        sta DUST_Y, y           ; save the Y-value to the X-position
+        txa                     ; move the Y-position into A
+        sta VAR_X               ; (put aside Y-value)
+        sta DUST_X, y           ; write the X-value to the Y-position
+        lda DUST_Z, y           ; get dust z-position
+        sta VAR_Z               ; (put aside Z-position)
+        
         jsr _2918
+
         dey 
-        bne _2a15
+        bne :-
+
         rts 
 
 ;===============================================================================
@@ -2172,7 +2178,7 @@ _2a3d:
         ;-----------------------------------------------------------------------
 
 _2a40:
-        ldy $050b
+        ldy DUST_COUNT          ; number of dust particles
 _2a43:
         jsr _3b30
         lda $9b
@@ -2185,28 +2191,28 @@ _2a43:
         lda $06e3, y
         sbc $97
         sta $06e3, y
-        lda $06d6, y
-        sta $a1
+        lda DUST_Z, y
+        sta VAR_Z
         sbc $98
-        sta $06d6, y
+        sta DUST_Z, y
         jsr _3992
         sta $60
         lda $2e
         adc $06c9, y
         sta $5f
         sta $9b
-        lda $6c
+        lda VAR_Y
         adc $60
         sta $60
         sta $9c
-        lda $06a2, y
-        sta $6b
+        lda DUST_X, y
+        sta VAR_X
         jsr _3997
         sta $5e
         lda $2e
         adc $06af, y
         sta $5d
-        lda $6b
+        lda VAR_X
         adc $5e
         sta $5e
         eor $6a
@@ -2245,21 +2251,21 @@ _2a43:
         eor # %10000000
         jsr _290f
         lda $5e
-        sta $6b
-        sta $06a2, y
+        sta VAR_X
+        sta DUST_X, y
         and # %01111111
         cmp # $78
         bcs _2b0a
         lda $60
-        sta $06bc, y
-        sta $6c
+        sta DUST_Y, y
+        sta VAR_Y
         and # %01111111
         cmp # $78
         bcs _2b0a
-        lda $06d6, y
+        lda DUST_Z, y
         cmp # $10
         bcc _2b0a
-        sta $a1
+        sta VAR_Z
 _2b00:
         jsr _2918
         dey 
@@ -2274,26 +2280,26 @@ _2b09:
 _2b0a:
         jsr get_random_number
         ora # %00000100
-        sta $6c
-        sta $06bc, y
+        sta VAR_Y
+        sta DUST_Y, y
 
         jsr get_random_number
         ora # %00001000
-        sta $6b
-        sta $06a2, y
+        sta VAR_X
+        sta DUST_X, y
         
         jsr get_random_number
         ora # %10010000
-        sta $06d6, y
-        sta $a1
+        sta DUST_Z, y
+        sta VAR_Z
         
-        lda $6c
+        lda VAR_Y
         jmp _2b00
 
 ;===============================================================================
 
 _2b2d:
-        ldy $050b
+        ldy DUST_COUNT          ; number of dust particles
 _2b30:
         jsr _3b30
         lda $9b
@@ -2303,14 +2309,14 @@ _2b30:
         ror 
         ora # %00000001
         sta $9a
-        lda $06a2, y
-        sta $6b
+        lda DUST_X, y
+        sta VAR_X
         jsr _3997
         sta $5e
         lda $06af, y
         sbc $2e
         sta $5d
-        lda $6b
+        lda VAR_X
         sbc $5e
         sta $5e
         jsr _3992
@@ -2319,17 +2325,17 @@ _2b30:
         sbc $2e
         sta $5f
         sta $9b
-        lda $6c
+        lda VAR_Y
         sbc $60
         sta $60
         sta $9c
         lda $06e3, y
         adc $97
         sta $06e3, y
-        lda $06d6, y
-        sta $a1
+        lda DUST_Z, y
+        sta VAR_Z
         adc $98
-        sta $06d6, y
+        sta DUST_Z, y
         lda $5e
         eor $69
         jsr _393c
@@ -2369,18 +2375,18 @@ _2b30:
         lda $63
         jsr _290f
         lda $5e
-        sta $6b
-        sta $06a2, y
+        sta VAR_X
+        sta DUST_X, y
         lda $60
-        sta $06bc, y
-        sta $6c
+        sta DUST_Y, y
+        sta VAR_Y
         and # %01111111
         cmp # $6e
         bcs _2bf7
-        lda $06d6, y
+        lda DUST_Z, y
         cmp # $a0
         bcs _2bf7
-        sta $a1
+        sta VAR_Z
 _2bed:
         jsr _2918
         dey 
@@ -2396,31 +2402,31 @@ _2bf7:
         jsr get_random_number
         and # %01111111
         adc # $0a
-        sta $06d6, y
-        sta $a1
+        sta DUST_Z, y
+        sta VAR_Z
         lsr 
         bcs _2c1a
         lsr 
         lda # $fc
         ror 
-        sta $6b
-        sta $06a2, y
+        sta VAR_X
+        sta DUST_X, y
         jsr get_random_number
-        sta $6c
-        sta $06bc, y
+        sta VAR_Y
+        sta DUST_Y, y
         jmp _2bed
 
         ;-----------------------------------------------------------------------
 
 _2c1a:
         jsr get_random_number
-        sta $6b
-        sta $06a2, y
+        sta VAR_X
+        sta DUST_X, y
         lsr 
         lda # $e6
         ror 
-        sta $6c
-        sta $06bc, y
+        sta VAR_Y
+        sta DUST_Y, y
         bne _2bed
 _2c2d:
         lda $0009, y
@@ -2571,7 +2577,7 @@ _2d04:
 _2d0e:
         lda $04c1
         beq _2d18
-        lda # $6c
+        lda # VAR_Y
         jsr _2d61
 _2d18:
         lda # $71
@@ -3353,7 +3359,7 @@ _2ff3:
 _302b:
         jsr _3ad1
         jsr _3130
-        lda $a3
+        lda $a3                 ; move counter?
         and # %00000011
         bne _2fe0
         ldy # $00
@@ -3437,7 +3443,7 @@ _3068:
 _30bb:
         ldx # $aa
 
-        lda $a3
+        lda $a3                 ; move counter?
         and # %00001000
         and _1d09
         beq :+
@@ -4036,7 +4042,7 @@ _33fd:
         lda $28
         ora # %01000000
         sta $28
-        cpx # $a3
+        cpx # $a3                 ; move counter?
         bcc _3434
         lda [$57], y
         lsr 
@@ -4216,31 +4222,31 @@ _352c:
         stx $27
         lda $a5
         bpl _3556
-        eor $6b
-        eor $6c
+        eor VAR_X
+        eor VAR_Y
         asl 
         lda # $02
         ror 
         sta $26
-        lda $6b
+        lda VAR_X
         asl 
         cmp # $0c
         bcs _350a
-        lda $6c
+        lda VAR_Y
         asl 
         lda # $02
         ror 
         sta $27
-        lda $6c
+        lda VAR_Y
         asl 
         cmp # $0c
         bcs _350a
 _3556:
         stx $26
         lda $1f
-        sta $6b
+        sta VAR_X
         lda $21
-        sta $6c
+        sta VAR_Y
         lda $23
         sta $6d
         ldy # $10
@@ -4302,11 +4308,11 @@ _358f:
 _35b3:
         ldx $f925, y
         stx $9a
-        lda $6b
+        lda VAR_X
         jsr _3aa8
         ldx $f927, y
         stx $9a
-        lda $6c
+        lda VAR_Y
         jsr _3ace
         sta $9c
         stx $9b
@@ -4318,12 +4324,12 @@ _35b3:
 ;===============================================================================
 
 _35d5:
-        lda $6b
+        lda VAR_X
         eor # %10000000
-        sta $6b
-        lda $6c
+        sta VAR_X
+        lda VAR_Y
         eor # %10000000
-        sta $6c
+        sta VAR_Y
         lda $6d
         eor # %10000000
         sta $6d
@@ -4682,10 +4688,10 @@ _37e9:
         eor # %10000000
         sta $b1
         jsr _38a3
-        ldy $050b
+        ldy DUST_COUNT          ; number of dust particles
 _37fa:
-        lda $06d6, y
-        sta $a1
+        lda DUST_Z, y
+        sta VAR_Z
         lsr 
         lsr 
         lsr 
@@ -4696,13 +4702,13 @@ _37fa:
         sta $9c
         lda $06af, y
         sta $2e
-        lda $06a2, y
-        sta $6b
+        lda DUST_X, y
+        sta VAR_X
         jsr _3ad1
         sta $9c
         stx $9b
-        lda $06bc, y
-        sta $6c
+        lda DUST_Y, y
+        sta VAR_Y
         eor $94
         ldx $64
         jsr _393e
@@ -4711,7 +4717,7 @@ _37fa:
         sta $5e
         ldx $06c9, y
         stx $9b
-        ldx $6c
+        ldx VAR_Y
         stx $9c
         ldx $64
         eor $95
@@ -4744,16 +4750,16 @@ _37fa:
         lda $a6
         jsr _290f
         lda $5e
-        sta $06a2, y
-        sta $6b
+        sta DUST_X, y
+        sta VAR_X
         and # %01111111
         eor # %01111111
         cmp $ba
         bcc _38be
         beq _38be
         lda $60
-        sta $06bc, y
-        sta $6c
+        sta DUST_Y, y
+        sta VAR_Y
         and # %01111111
 _3895:
 .export _3895
@@ -4787,26 +4793,26 @@ _38a3:
 
 _38be:
         jsr get_random_number
-        sta $6c
-        sta $06bc, y
+        sta VAR_Y
+        sta DUST_Y, y
         lda # $73
         ora $b0
-        sta $6b
-        sta $06a2, y
+        sta VAR_X
+        sta DUST_X, y
         bne _38e2
 _38d1:
         jsr get_random_number
-        sta $6b
-        sta $06a2, y
+        sta VAR_X
+        sta DUST_X, y
         lda # $6e
         ora $6a
-        sta $6c
-        sta $06bc, y
+        sta VAR_Y
+        sta DUST_Y, y
 _38e2:
         jsr get_random_number
         ora # %00001000
-        sta $a1
-        sta $06d6, y
+        sta VAR_Z
+        sta DUST_Z, y
         bne _389a
 _38ee:
         sta $77
@@ -4938,8 +4944,8 @@ _398d:
         ;-----------------------------------------------------------------------
 
 _3992:
-        lda $06bc, y
-        sta $6c
+        lda DUST_Y, y
+        sta VAR_Y
 _3997:
         and # %01111111
         sta $2e
@@ -5166,11 +5172,11 @@ _3aa8:
 _3ab2:
         ldx $09, y
         stx $9a
-        lda $6b
+        lda VAR_X
         jsr _3aa8
         ldx $0b, y
         stx $9a
-        lda $6c
+        lda VAR_Y
         jsr _3ace
         sta $9c
         stx $9b
@@ -5251,18 +5257,21 @@ _3b27:
 ;===============================================================================
 
 _3b30:
-        lda $06d6, y
+        lda DUST_Z, y
 _3b33:
         sta $9a
+
         lda $96                 ; player's ship speed?
 _3b37:
 .export _3b37
         asl 
         sta $2e
+        
         lda # $00
         rol 
         cmp $9a
         bcc _3b43
+        
         sbc $9a
 _3b43:
         rol $2e
@@ -5593,16 +5602,16 @@ _3cfa:
 _3d09:
         sta $6d
         lda $06f0
-        sta $6b
+        sta VAR_X
         lda $06f1
-        sta $6c
+        sta VAR_Y
         lda # $8f
         sta $6e
         jsr _ab91
         lda $06f0
-        sta $6b
+        sta VAR_X
         lda $06f1
-        sta $6c
+        sta VAR_Y
         sty $6d
         lda # $8f
         sta $6e
@@ -5614,13 +5623,14 @@ _3d2f:
 .export _3d2f
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
-        bne _3d6f
+       .bnz _3d6f
+       
         lda $a7
         bpl _3d6f
         ldy # $00
 _3d3d:
         lda _1a27, y
-        cmp $a1
+        cmp VAR_Z
         bne _3d6c
         lda _1a41, y
         and # %01111111
@@ -5774,7 +5784,7 @@ _3dff:                                                                  ;$3dff
         sta $10
         jsr _a72f
         lda # $40
-        sta $a3
+        sta $a3                 ; move counter?
 _3e01:                                                                  ;$3e01
         ldx # $7f
         stx $26
@@ -5783,7 +5793,7 @@ _3e07:
 .export _3e08 := _3e07+1
         jsr _9a86
         jsr _a2a0
-        dec $a3
+        dec $a3                 ; move counter?
         bne _3e01
 _3e11:                                                                  ;$3e11
         lsr $09
@@ -5800,7 +5810,7 @@ _3e24:                                                                  ;$3e24
         stx $0c
         jsr _9a86
         jsr _a2a0
-        dec $a3
+        dec $a3                 ; move counter?
         jmp _3e11
 _3e31:                                                                  ;$3e31
         inc $10

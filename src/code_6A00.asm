@@ -68,7 +68,7 @@
 .import _2918:absolute
 .import _293a:absolute
 .import _2977:absolute
-.import _2a12:absolute
+.import dust_swap_xy:absolute
 .import _2c4e:absolute
 .import _2c50:absolute
 .import _2c9b:absolute
@@ -240,14 +240,17 @@ _6a41:  ; roll the RNG seed once?                                       ;$6A41
 ;===============================================================================
 
 _6a68:                                                                  ;$6a68
-        ; get the text token for "DISTANCE" 
-.import TXT_DISTANCE:direct
-
         ; is target system distance > 0
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
-        bne :+
+       .bnz :+
+
         jmp cursor_down
+
+        ;-----------------------------------------------------------------------
+        ; print "DISTANCE:"
+
+.import TXT_DISTANCE:direct
 
 :       lda # TXT_DISTANCE                                              ;$6A73
         jsr print_flight_token_with_colon
@@ -259,7 +262,9 @@ _6a68:                                                                  ;$6a68
 
 .import TXT_LIGHT_YEARS:direct
         lda # TXT_LIGHT_YEARS
-_6a84:                                                                  ;$6a84
+
+_6a84:                                                                  ;$6A84
+        ;-----------------------------------------------------------------------
         jsr print_flight_token
 _6a87:                                                                  ;$6a87
         jsr cursor_down
@@ -594,12 +599,12 @@ _6c40:                                                                  ;$6c40
         ldy ZP_SEED_pt5
         tya 
         ora # %01010000
-        sta $a1
+        sta VAR_Z
         lda ZP_SEED_pt2
         lsr 
         clc 
         adc # $18
-        sta $6c
+        sta VAR_Y
         jsr _293a
         jsr _6a3b
         ldx $9d
@@ -625,7 +630,7 @@ _6c75:                                                                  ;$6c75
         bcs _6c80
         lda # $00
 _6c80:                                                                  ;$6c80
-        sta $6b
+        sta VAR_X
         lda $8e
         clc 
         adc $90
@@ -636,7 +641,7 @@ _6c8b:                                                                  ;$6c8b
         lda $8f
         clc 
         adc $93
-        sta $6c
+        sta VAR_Y
         sta $6e
         jsr _ab91
         lda $8f
@@ -647,7 +652,7 @@ _6c8b:                                                                  ;$6c8b
 _6ca2:                                                                  ;$6ca2
         clc 
         adc $93
-        sta $6c
+        sta VAR_Y
         lda $8f
         clc 
         adc $90
@@ -660,7 +665,7 @@ _6ca2:                                                                  ;$6ca2
 _6cb8:                                                                  ;$6cb8
         sta $6e
         lda $8e
-        sta $6b
+        sta VAR_X
         sta $6d
         jmp _ab91
 
@@ -1323,7 +1328,7 @@ _70dd:                                                                  ;$70dd
         dex 
         bpl _70dd
         lda $99
-        sta $a1
+        sta VAR_Z
 _70e8:                                                                  ;$70e8
         jsr _6a3b
         inc $99
@@ -1791,7 +1796,8 @@ _73c1:                                                                  ;$73c1
         lda # $03
         cmp $047a
         bcs _73c1
-        sta $050b
+        sta DUST_COUNT          ; number of dust particles
+
         ldx # $00
         jsr _a6ba
         lda PSYSTEM_POS_Y
@@ -2030,7 +2036,7 @@ _7549:                                                                  ;$7549
         jsr _845c
         lda # $01
 _755f:                                                                  ;$755f
-        ldy # $6b
+        ldy # VAR_X
         cmp # $02
         bne _756f
         ldx # $25
@@ -2244,11 +2250,11 @@ _76a1:
         beq _76bc
         ldy # $0d
 _76bc:
-        stx $a1
+        stx VAR_Z
         tya 
         jsr _7642
         jsr _7481
-        ldx $a1
+        ldx VAR_Z
 _76c7:
         lda $06
         sta PLAYER_LASERS, x
@@ -2817,7 +2823,7 @@ _7911:
         adc ZP_GOATSOUP_pt4
         sta ZP_GOATSOUP_pt2
         stx ZP_GOATSOUP_pt4
-        sta $a1
+        sta VAR_Z
         lda $36
         sta $9b
         lda $35
@@ -2825,13 +2831,13 @@ _7911:
         bne _795d
         cpx # $8f
         bcs _795d
-        stx $6c
+        stx VAR_Y
         lda $38
         sta $9b
         lda $37
         jsr _7974
         bne _7948
-        lda $6c
+        lda VAR_Y
         jsr _293a
 _7948:
         dey 
@@ -2997,7 +3003,7 @@ _7a38:
         ldy $99
 _7a46:
         jsr _84ae
-        sta $a1
+        sta VAR_Z
         lda $36
         sta $9b
         lda $35
@@ -3005,13 +3011,13 @@ _7a46:
         bne _7a86
         cpx # $8f
         bcs _7a86
-        stx $6c
+        stx VAR_Y
         lda $38
         sta $9b
         lda $37
         jsr _7974
         bne _7a6c
-        lda $6c
+        lda VAR_Y
         jsr _293a
 _7a6c:
         dey 
@@ -3094,18 +3100,18 @@ _7af3:
         lda $a0
         bne _7b1a
 _7af7:
-        ldy $050b
+        ldy DUST_COUNT          ; number of dust particles
 _7afa:
         jsr get_random_number
         ora # %00001000
-        sta $06d6, y
-        sta $a1
+        sta DUST_Z, y
+        sta VAR_Z
         jsr get_random_number
-        sta $06a2, y
-        sta $6b
+        sta DUST_X, y
+        sta VAR_X
         jsr get_random_number
-        sta $06bc, y
-        sta $6c
+        sta DUST_Y, y
+        sta VAR_Y
         jsr _2918
         dey 
         bne _7afa
@@ -3232,12 +3238,12 @@ _7b9d:
 _7ba8:
         jsr _7b9b
 _7bab:
-        lda $6b
+        lda VAR_X
         jsr _7b7d
         txa 
         adc # $c3
         sta $04ea
-        lda $6c
+        lda VAR_Y
         jsr _7b7d
         stx $bb
         lda # $9c
@@ -3839,9 +3845,9 @@ _7f8f:
         lda $b3
         sbc $bb
         sta $9b
-        sty $6c
+        sty VAR_Y
         jsr _9978
-        ldy $6c
+        ldy VAR_Y
         jsr get_random_number
         and $aa
         clc 
@@ -3858,7 +3864,7 @@ _7fb6:
         sta $60
         txa 
         jsr _811e
-        lda $6b
+        lda VAR_X
         sta $5d
         lda $6d
         sta $5e
@@ -3876,7 +3882,7 @@ _7fb6:
         jsr _affa
 _7fed:
         lda $5d
-        sta $6b
+        sta VAR_X
         lda $5e
         sta $6d
 _7ff5:
@@ -4022,17 +4028,17 @@ _80c0:
         lda $06f4
         bne _80c0
         lda $6d
-        sta $6b
+        sta VAR_X
         lda $6e
-        sta $6c
+        sta VAR_Y
         jmp _80c0
 
 _80e6:
         iny 
         lda _26a4, y
-        sta $6b
+        sta VAR_X
         lda _27a4, y            ; write to code??
-        sta $6c
+        sta VAR_Y
         iny 
         jmp _80c0
 
@@ -4080,7 +4086,7 @@ _8131:
         lda $5f
         sec 
         sbc $bb
-        sta $6b
+        sta VAR_X
         lda $60
         sbc # $00
         bne _8140
@@ -4090,7 +4096,7 @@ _8131:
 _8140:
         bpl _8148
         lda # $00
-        sta $6b
+        sta VAR_X
         clc 
         rts 
 
@@ -4560,7 +4566,7 @@ _83df:
         sta $04c3
 _83ed:
         lda # $0c
-        sta $050b
+        sta DUST_COUNT          ; number of dust particles
 
         ldx # $ff
         stx _26a4
@@ -4577,7 +4583,7 @@ _83ed:
         sta $64
         sta $6a
         sta $95
-        sta $a3
+        sta $a3                 ; move counter?
         sta $0510
 
         lda # $03
@@ -4735,7 +4741,7 @@ _84ed:
         bpl _84fa
         inc $048b
 _84fa:
-        dec $a3
+        dec $a3                 ; move counter?
         beq _8501
 _84fe:
         jmp _8627
@@ -5213,7 +5219,7 @@ _87fd:
         sty $10
         sty $29
         dey 
-        sty $a3
+        sty $a3                 ; move counter?
         eor # %00101010
         sta $0c
         ora # %01010000
@@ -5455,7 +5461,7 @@ _8994:
         lda # $0c
         sta $ab
         lda # $05
-        sta $a3
+        sta $a3                 ; move counter?
         lda # $ff
         sta _1d0c
 _89be:
@@ -5467,14 +5473,14 @@ _89c6:
         jsr _a2a0
         ldx $06fb
         stx $0f
-        lda $a3
+        lda $a3                 ; move counter?
         and # %00000011
         lda # $00
         sta $09
         sta $0c
         jsr _9a86
         jsr _8d53
-        dec $a3
+        dec $a3                 ; move counter?
         bit _8d42
         bmi _89ea
         bcc _89be
@@ -5967,22 +5973,22 @@ _8cad:
         lda $36
         lsr 
         ora $37
-        sta $6b
+        sta VAR_X
         lda $39
         lsr 
         ora $3a
-        sta $6c
+        sta VAR_Y
         lda $3c
         lsr 
         ora $3d
         sta $6d
 _8cc2:
-        lda $6b
+        lda VAR_X
         jsr _3986
         sta $9b
         lda $2e
         sta $9a
-        lda $6c
+        lda VAR_Y
         jsr _3986
         sta $bb
         lda $2e
@@ -6001,12 +6007,12 @@ _8cc2:
         adc $9b
         sta $9b
         jsr _9978
-        lda $6b
+        lda VAR_X
         jsr _918b
-        sta $6b
-        lda $6c
+        sta VAR_X
+        lda VAR_Y
         jsr _918b
-        sta $6c
+        sta VAR_Y
         lda $6d
         jsr _918b
         sta $6d
@@ -6234,7 +6240,7 @@ _8e52:
         sta $f92d
         lda # $01
         sta $a0
-        sta $a3
+        sta $a3                 ; move counter?
         lsr 
         sta $048a
         ldx $0486
@@ -6574,7 +6580,7 @@ _908f:
         jmp _900d
 
 _909b:
-        lda # $6c
+        lda # VAR_Y
         jmp _900d
 
 _90a0:
@@ -6615,7 +6621,7 @@ _90e9:
 
 _90f4:
         tax 
-        lda $6c
+        lda VAR_Y
         and # %01100000
         beq _90e9
         lda # $02
@@ -6627,20 +6633,20 @@ _90f4:
 
 _9105:
         lda $13
-        sta $6b
+        sta VAR_X
         lda $15
-        sta $6c
+        sta VAR_Y
         lda $17
         sta $6d
         jsr _8cc2
-        lda $6b
+        lda VAR_X
         sta $13
-        lda $6c
+        lda VAR_Y
         sta $15
         lda $6d
         sta $17
         ldy # $04
-        lda $6b
+        lda VAR_X
         and # %01100000
         beq _90f4
         ldx # $02
@@ -6649,15 +6655,15 @@ _9105:
         sta $19
 _9131:
         lda $19
-        sta $6b
+        sta VAR_X
         lda $1b
-        sta $6c
+        sta VAR_Y
         lda $1d
         sta $6d
         jsr _8cc2
-        lda $6b
+        lda VAR_X
         sta $19
-        lda $6c
+        lda VAR_Y
         sta $1b
         lda $6d
         sta $1d
@@ -7387,12 +7393,12 @@ _9a2c:
         ldx # $00
         ldy # $00
 _9a30:
-        lda $6b
+        lda VAR_X
         sta $9a
         lda $45, x
         jsr _39ea
         sta $bb
-        lda $6c
+        lda VAR_Y
         eor $46, x
         sta $9c
         lda $6d
@@ -7615,9 +7621,9 @@ _9baa:
         lda $8d
         sta $70
         lda $85
-        sta $6b
+        sta VAR_X
         lda $87
-        sta $6c
+        sta VAR_Y
         lda $88
         sta $6d
         lda $8a
@@ -7683,9 +7689,9 @@ _9c0b:
         cpx # $04
         bcc _9c4b
         lda $85
-        sta $6b
+        sta VAR_X
         lda $87
-        sta $6c
+        sta VAR_Y
         lda $88
         sta $6d
         lda $8a
@@ -7705,14 +7711,14 @@ _9c43:
         ldx # $01
 _9c4b:
         lda $71
-        sta $6b
+        sta VAR_X
         lda $73
         sta $6d
         lda $75
         dex 
         bmi _9c60
 _9c58:
-        lsr $6b
+        lsr VAR_X
         lsr $6d
         lsr 
         dex 
@@ -7729,7 +7735,7 @@ _9c60:
         sta $6f
         lda $9c
         sta $70
-        lda $6b
+        lda VAR_X
         sta $9b
         lda $72
         sta $9c
@@ -7738,9 +7744,9 @@ _9c60:
         lda $87
         jsr _9a0c
         bcs _9c43
-        sta $6b
+        sta VAR_X
         lda $9c
-        sta $6c
+        sta VAR_Y
         lda $6d
         sta $9b
         lda $74
@@ -7756,11 +7762,11 @@ _9c60:
 _9ca9:
         lda $71
         sta $9a
-        lda $6b
+        lda VAR_X
         jsr _39ea
         sta $bb
         lda $72
-        eor $6c
+        eor VAR_Y
         sta $9c
         lda $73
         sta $9a
@@ -7842,7 +7848,7 @@ _9cfe:
 _9d45:
         sty $9f
         lda [$5b], y
-        sta $6b
+        sta VAR_X
         iny 
         lda [$5b], y
         sta $6d
@@ -7893,7 +7899,7 @@ _9d8e:
 
 _9d91:
         lda $bb
-        sta $6c
+        sta VAR_Y
         asl 
         sta $6e
         asl 
@@ -7906,10 +7912,10 @@ _9d91:
         clc 
         lda $71
         adc $09
-        sta $6b
+        sta VAR_X
         lda $0a
         adc # $00
-        sta $6c
+        sta VAR_Y
 _9db3:
 .export _9db3
         jmp _9dd9
@@ -7918,18 +7924,18 @@ _9db6:
         lda $09
         sec 
         sbc $71
-        sta $6b
+        sta VAR_X
         lda $0a
         sbc # $00
-        sta $6c
+        sta VAR_Y
         bcs _9dd9
         eor # %11111111
-        sta $6c
+        sta VAR_Y
         lda # $01
-        sbc $6b
-        sta $6b
+        sbc VAR_X
+        sta VAR_X
         bcc _9dd3
-        inc $6c
+        inc VAR_Y
 _9dd3:
         lda $6d
         eor # %10000000
@@ -8051,11 +8057,11 @@ _9e7b:
         sta $bb
 _9e83:
         lda $99
-        ora $6c
+        ora VAR_Y
         ora $6f
         beq _9e9a
-        lsr $6c
-        ror $6b
+        lsr VAR_Y
+        ror VAR_X
         lsr $6f
         ror $6e
         lsr $99
@@ -8065,7 +8071,7 @@ _9e83:
 _9e9a:
         lda $bb
         sta $9a
-        lda $6b
+        lda VAR_X
         cmp $9a
         bcc _9eaa
         jsr _9e2a
@@ -8171,11 +8177,11 @@ _9f35:
         lda [$57], y
         tay 
         ldx $0100, y
-        stx $6b
+        stx VAR_X
         inx 
         beq _9f9f
         ldx $0101, y
-        stx $6c
+        stx VAR_Y
         inx 
         beq _9f9f
         ldx $0102, y
@@ -8195,10 +8201,10 @@ _9f82:
         jsr _a013
         bcs _9f9f
         ldy $99
-        lda $6b
+        lda VAR_X
         sta [$2a], y
         iny 
-        lda $6c
+        lda VAR_Y
         sta [$2a], y
         iny 
         lda $6d
@@ -8252,9 +8258,9 @@ _9fd9:
         lda [$5b], y
         sta $9a
         lda $0101, x
-        sta $6c
+        sta VAR_Y
         lda $0100, x
-        sta $6b
+        sta VAR_X
         lda $0102, x
         sta $6d
         lda $0103, x
@@ -8290,7 +8296,7 @@ _a01a:
         ldx # $00
 _a02a:
         stx $a2
-        lda $6c
+        lda VAR_Y
         ora $6e
         bne _a04e
         lda # $8f
@@ -8300,7 +8306,7 @@ _a02a:
         bne _a04c
 _a03c:
         lda $6d
-        sta $6c
+        sta VAR_Y
         lda $6f
         sta $6d
         lda $71
@@ -8321,13 +8327,13 @@ _a04c:
 _a04e:
         lda $a2
         bpl _a081
-        lda $6c
+        lda VAR_Y
         and $70
         bmi _a04a
         lda $6e
         and $72
         bmi _a04a
-        ldx $6c
+        ldx VAR_Y
         dex 
         txa 
         ldx $70
@@ -8350,10 +8356,10 @@ _a081:
        .phy                     ; push Y to stack (via A)
         lda $6f
         sec 
-        sbc $6b
+        sbc VAR_X
         sta $73
         lda $70
-        sbc $6c
+        sbc VAR_Y
         sta $74
         lda $71
         sec 
@@ -8424,21 +8430,21 @@ _a0fd:
         jsr _a19f
         lda $a2
         bpl _a136
-        lda $6c
+        lda VAR_Y
         ora $6e
         bne _a13b
         lda $6d
         cmp # $90
         bcs _a13b
 _a110:
-        ldx $6b
+        ldx VAR_X
         lda $6f
-        sta $6b
+        sta VAR_X
         stx $6f
         lda $70
-        ldx $6c
+        ldx VAR_Y
         stx $70
-        sta $6c
+        sta VAR_Y
         ldx $6d
         lda $71
         sta $6d
@@ -8466,10 +8472,10 @@ _a13b:
 
 _a13f:
         ldy $99
-        lda $6b
+        lda VAR_X
         sta [$2a], y
         iny 
-        lda $6c
+        lda VAR_Y
         sta [$2a], y
         iny 
         lda $6d
@@ -8511,10 +8517,10 @@ _a178:
         iny 
 _a183:
         lda [$2a], y
-        sta $6b
+        sta VAR_X
         iny 
         lda [$2a], y
-        sta $6c
+        sta VAR_Y
         iny 
         lda [$2a], y
         sta $6d
@@ -8531,7 +8537,7 @@ _a19e:
 ;===============================================================================
 
 _a19f:
-        lda $6c
+        lda VAR_Y
         bpl _a1ba
         sta $9c
         jsr _a219
@@ -8543,8 +8549,8 @@ _a19f:
         adc $6e
         sta $6e
         lda # $00
-        sta $6b
-        sta $6c
+        sta VAR_X
+        sta VAR_Y
         tax 
 _a1ba:
         beq _a1d5
@@ -8559,9 +8565,9 @@ _a1ba:
         adc $6e
         sta $6e
         ldx # $ff
-        stx $6b
+        stx VAR_X
         inx 
-        stx $6c
+        stx VAR_Y
 _a1d5:
         lda $6e
         bpl _a1f3
@@ -8571,11 +8577,11 @@ _a1d5:
         jsr _a248
         txa 
         clc 
-        adc $6b
-        sta $6b
+        adc VAR_X
+        sta VAR_X
         tya 
-        adc $6c
-        sta $6c
+        adc VAR_Y
+        sta VAR_Y
         lda # $00
         sta $6d
         sta $6e
@@ -8591,11 +8597,11 @@ _a1f3:
         jsr _a248
         txa 
         clc 
-        adc $6b
-        sta $6b
+        adc VAR_X
+        sta VAR_X
         tya 
-        adc $6c
-        sta $6c
+        adc VAR_Y
+        sta VAR_Y
         lda # $8f
         sta $6d
         lda # $00
@@ -8606,7 +8612,7 @@ _a218:
 ;===============================================================================
 
 _a219:
-        lda $6b
+        lda VAR_X
         sta $9b
         jsr _a284
         pha 
@@ -8714,7 +8720,7 @@ _a2a0:
         lda $28
         and # %10100000
         bne _a2cb
-        lda $a3
+        lda $a3                 ; move counter?
         eor $9d
         and # %00001111
         bne _a2b1
@@ -8731,7 +8737,7 @@ _a2b8:
         bpl _a2cb
         cpx # $01
         beq _a2c8
-        lda $a3
+        lda $a3                 ; move counter?
         eor $9d
         and # %00000111
         bne _a2cb
@@ -9316,7 +9322,7 @@ _a6ba:
         stx $0486
         
         jsr _a72f
-        jsr _2a12
+        jsr dust_swap_xy
         jsr _7b1a
 _a6d4:
         lda # MEM_IO_ONLY
@@ -9584,8 +9590,8 @@ _a850:
         ;-----------------------------------------------------------------------
         bit _a821
 
-        sta $6b
-        stx $6c
+        sta VAR_X
+        stx VAR_Y
         ; this causes the `clv` below to become a `branch on overflow clear`
         ; to $A811 -- the address is defined by the opcode of `clv` ($B8)
         .byte   $50
@@ -9632,8 +9638,9 @@ _a88b:
         sta _aa19, x
         bvs _a8a0+1
         lda _aa82, y
-_a8a0:  ; NOTE: when accessed as $A8A1, this becomes `lda $6b`
-        cmp $6ba5
+_a8a0:
+       .cmp
+        lda VAR_X
         sta _aa29, x
         lda _aa42, y
         sta _aa16, x
@@ -9643,8 +9650,9 @@ _a8a0:  ; NOTE: when accessed as $A8A1, this becomes `lda $6b`
         sta _aa23, x
         bvs _a8bd+1
         lda _aa52, y
-_a8bd:  ; NOTE: when accessed as $A8BE, this becomes `lda $6c`
-        cmp $6ca5
+_a8bd:
+       .cmp
+        lda VAR_Y
         sta _aa20, x
         lda _aa72, y
         sta _aa26, x
@@ -10101,7 +10109,7 @@ _ab91:
         asl 
         sta $06f4
         lda $6d
-        sbc $6b
+        sbc VAR_X
         bcs _aba5
         eor # %11111111
         adc # $01
@@ -10109,7 +10117,7 @@ _aba5:
         sta $bc
         sec 
         lda $6e
-        sbc $6c
+        sbc VAR_Y
         bcs _abb2
         eor # %11111111
         adc # $01
@@ -10120,17 +10128,17 @@ _abb2:
         jmp _af08
 
 _abbb:
-        ldx $6b
+        ldx VAR_X
         cpx $6d
         bcc _abd3
         dec $06f4
         lda $6d
-        sta $6b
+        sta VAR_X
         stx $6d
         tax 
         lda $6e
-        ldy $6c
-        sta $6c
+        ldy VAR_Y
+        sta VAR_Y
         sty $6e
 _abd3:
         ldx $bd
@@ -10166,7 +10174,7 @@ _abfd:
 _ac0d:
         sta $bd
         clc 
-        ldy $6c
+        ldy VAR_Y
         cpy $6e
         bcs _ac19
         jmp _ad8b
@@ -10174,7 +10182,7 @@ _ac0d:
         ;-----------------------------------------------------------------------
 
 _ac19:
-        lda $6b
+        lda VAR_X
         and # %11111000
         clc 
         adc row_to_bitmap_lo, y
@@ -10185,7 +10193,7 @@ _ac19:
         tya 
         and # %00000111
         tay 
-        lda $6b
+        lda VAR_X
         and # %00000111
         tax 
         bit $06f4
@@ -10408,7 +10416,7 @@ _ad88:
 _ad8b:
         lda row_to_bitmap_hi, y
         sta $08
-        lda $6b
+        lda VAR_X
         and # %11111000
         adc row_to_bitmap_lo, y
         sta $07
@@ -10425,7 +10433,7 @@ _ada6:
         and # %00000111
         eor # %11111000
         tay 
-        lda $6b
+        lda VAR_X
         and # %00000111
         tax 
         bit $06f4
@@ -10647,18 +10655,18 @@ _af05:
 ;===============================================================================
 
 _af08:
-        ldy $6c
+        ldy VAR_Y
         tya 
-        ldx $6b
+        ldx VAR_X
         cpy $6e
         bcs _af22
         dec $06f4
         lda $6d
-        sta $6b
+        sta VAR_X
         stx $6d
         tax 
         lda $6e
-        sta $6c
+        sta VAR_Y
         sty $6e
         tay 
 _af22:
@@ -10712,7 +10720,7 @@ _af77:
         ldx $bd
         inx 
         lda $6d
-        sbc $6b
+        sbc VAR_X
         bcc _afbe
         clc 
         lda $06f4
@@ -10799,17 +10807,17 @@ _aff9:
 _affa:
 .export _affa
         sty $9e
-        ldx $6b
+        ldx VAR_X
         cpx $6d
         beq _aff9
         bcc _b00b
         lda $6d
-        sta $6b
+        sta VAR_X
         stx $6d
         tax 
 _b00b:
         dec $6d
-        lda $6c
+        lda VAR_Y
         tay 
         and # %00000111
         sta $07
@@ -10835,7 +10843,7 @@ _b025:
         lsr 
         lsr 
         sta $be
-        lda $6b
+        lda VAR_X
         and # %00000111
         tax 
         lda _2907, x
@@ -10877,7 +10885,7 @@ _b064:
         ;-----------------------------------------------------------------------
 
 _b073:
-        lda $6b
+        lda VAR_X
         and # %00000111
         tax 
         lda _2907, x
@@ -10903,19 +10911,19 @@ _b073:
 
 _b09d:
         lda $04eb
-        sta $6c
+        sta VAR_Y
         lda $04ea
-        sta $6b
+        sta VAR_X
         lda _1d01
         sta $32
         cmp # $aa
         bne _b0b5
 _b0b0:
         jsr _b0b5
-        dec $6c
+        dec VAR_Y
 _b0b5:
-        ldy $6c
-        lda $6b
+        ldy VAR_Y
+        lda VAR_X
         and # %11111000
         clc 
         adc row_to_bitmap_lo, y
@@ -10926,7 +10934,7 @@ _b0b5:
         tya 
         and # %00000111
         tay 
-        lda $6b
+        lda VAR_X
         and # %00000111
         tax 
         lda _ab47, x
@@ -11420,9 +11428,9 @@ _b2b2:
         sta $4118
         ldx # $00
 _b2d5:
-        stx $6c
+        stx VAR_Y
         ldx # $00
-        stx $6b
+        stx VAR_X
         dex 
         stx $6d
         jmp _affa
@@ -11702,7 +11710,7 @@ _b410:
         adc # $01
 _b438:
         adc # $7b
-        sta $6b
+        sta VAR_X
         lda $10
         lsr 
         lsr 
@@ -11732,7 +11740,7 @@ _b461:
         bcc _b467
         lda # $c6
 _b467:
-        sta $6c
+        sta VAR_Y
         sec 
         sbc $07
         php 
@@ -11740,7 +11748,7 @@ _b467:
         jsr _b0b0
         lda _ab49, x
         and $32
-        sta $6b
+        sta VAR_X
         pla 
         plp 
         tax 
@@ -11758,7 +11766,7 @@ _b47f:
         sbc # $01
         sta $08
 _b491:
-        lda $6b
+        lda VAR_X
         eor [$07], y
         sta [$07], y
         dex 
@@ -11791,7 +11799,7 @@ _b4ae:
         adc # $01
         sta $08
 _b4c1:
-        lda $6b
+        lda VAR_X
         eor [$07], y
         sta [$07], y
         inx 
