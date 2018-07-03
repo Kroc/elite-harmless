@@ -71,6 +71,8 @@ echo "- assemble 'gfx_hulls.asm'"
 $ca65 -o build/gfx_hulls.o      src/gfx/hulls.asm
 echo "- assemble 'gfx_hud.asm'"
 $ca65 -o build/gfx_hud.o        src/gfx/hud.asm
+echo "- assemble 'var_polyobj.asm'"
+$ca65 -o build/var_polyobj.o    src/var_polyobj.asm
 
 #===============================================================================
 
@@ -93,7 +95,8 @@ $ld65 \
     --obj build/gfx_font.o \
     --obj build/gfx_sprites.o \
     --obj build/gfx_hulls.o \
-    --obj build/gfx_hud.o
+    --obj build/gfx_hud.o \
+    --obj build/var_polyobj.o 
 
 #===============================================================================
 
@@ -143,7 +146,8 @@ $ld65 \
     --obj build/gfx_font.o \
     --obj build/gfx_sprites.o \
     --obj build/gfx_hud.o \
-    --obj build/gfx_hulls.o
+    --obj build/gfx_hulls.o \
+    --obj build/var_polyobj.o
 
 # encrypt GMA4.PRG:
 #-------------------------------------------------------------------------------

@@ -14,7 +14,7 @@
 
 _d000:
 .export _d000
-        ; pointers?
+        
         .addr   _d0a5           ; missile                               ;$D000
         .addr   _d1a3           ; space station (coreolis)
         .addr   _d2bf           ; escape capsule

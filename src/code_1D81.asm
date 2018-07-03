@@ -303,24 +303,27 @@ _1e2a:                                                                  ;$1E2a
         .byte   $40, $7f, $80
 
 ;===============================================================================
+; move Trumbles™ around screen?
 
 _1e35:
-        lda $a3                 ; move counter?
+        lda $a3                 ; "move counter"?
         and # %00000111
         cmp $0510
-        bcc _1e41
+       .blt :+
+
         jmp _1ece
 
-_1e41:
-        asl 
+:       asl                                                             ;$1E41
         tay 
 
         lda # MEM_IO_ONLY
         jsr set_memory_layout
         
-        jsr get_random_number
-        cmp # $eb
-        bcc _1e6a
+        ; should the Trumbles™ change direction?
+
+        jsr get_random_number   ; select a random number
+        cmp # 235               ; is it > 234 (about 8% probability)
+       .blt _1e6a               ; no, just keep moving
 
         and # %00000011         ; modulo 4 (0-3)
         tax 
@@ -339,19 +342,24 @@ _1e41:
 _1e6a:  lda _1e29, y                                                    ;$1E6A
         and VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
+        
         lda VIC_SPRITE2_Y, y
         clc 
         adc $0512, y
         sta VIC_SPRITE2_Y, y
+        
         clc 
         lda VIC_SPRITE2_X, y
         adc $0511, y
         sta $bb
+        
         lda $0531, y
         adc $0521, y
         bpl _1e94
+        
         lda # $48
         sta $bb
+        
         lda # $01
 _1e94:
         and # %00000001
@@ -382,7 +390,9 @@ _1eb3:
 _1ec1:
 ;===============================================================================
 .export _1ec1
-        lda $f900
+
+.import POLYOBJ_00
+        lda POLYOBJ_00          ;=$F900?
         sta ZP_GOATSOUP_pt1     ;?
 
         lda $0510
@@ -568,12 +578,13 @@ _2012:
         bne _201d
 _2014:
         cmp # $97
-        beq _201a+1
+        beq _201b
         ldy # $0a
-_201a:
+
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
+_201b:
         ldy # $0b
 _201d:
         jsr _a858
@@ -615,6 +626,7 @@ _2040:
         sta $57
         lda _d000 - 1, y        ; HULL_TABLE?
         sta $58
+        
         lda $04c3
         bpl _2079
         cpy # $04
@@ -891,7 +903,7 @@ _2230:
         bne _2277
         ldx # $1c
 _2248:
-        lda $f900, x
+        lda POLYOBJ_00, x       ;=$F900
         sta $09, x
         dex 
         bpl _2248
@@ -1864,24 +1876,33 @@ _28a2:
 
 ;===============================================================================
 
-;TODO: what is at these addresses???
-
 ; note that these blocks are each 36 bytes
-; that means that $FA97 should be the next address
+; that means that $FA97 should be the next logical address
 
 _28a4:
 .export _28a4
-        .word   $f900
-        .word   $f925
-        .word   $f94a
-        .word   $f96f
-        .word   $f994
-        .word   $f9b9
-        .word   $f9de
-        .word   $fa03
-        .word   $fa28
-        .word   $fa4d
-        .word   $fa72
+.import POLYOBJ_00
+        .word   POLYOBJ_00
+.import POLYOBJ_01
+        .word   POLYOBJ_01
+.import POLYOBJ_02
+        .word   POLYOBJ_02
+.import POLYOBJ_03
+        .word   POLYOBJ_03
+.import POLYOBJ_04
+        .word   POLYOBJ_04
+.import POLYOBJ_05
+        .word   POLYOBJ_05
+.import POLYOBJ_06
+        .word   POLYOBJ_06
+.import POLYOBJ_07
+        .word   POLYOBJ_07
+.import POLYOBJ_08
+        .word   POLYOBJ_08
+.import POLYOBJ_09
+        .word   POLYOBJ_09
+.import POLYOBJ_10
+        .word   POLYOBJ_10
         
 ; unused / unreferenced?
 ;$28BA:
@@ -1896,7 +1917,7 @@ _28a4:
         .byte   %00001100       ;=$0C
         .byte   %00000011       ;=$03
 
-_28c8:  ; pixel pairs, in single step (for drawing stars?)
+_28c8:  ; pixel pairs, in single step (for drawing dust)
         .byte   %11000000       ;=$C0
         .byte   %11000000       ;=$C0
         .byte   %01100000       ;=$60
@@ -1992,7 +2013,14 @@ _290f:
         sta $60
         txa 
         sta $06c9, y            ; "dust y-lo"
+
 _2918:
+;===============================================================================
+;
+;       Y = ?
+;   VAR_X = ?
+;   VAR_Y = ?
+;
 .export _2918
 
         lda VAR_X
@@ -2008,53 +2036,83 @@ _2918:
         
         lda VAR_Y
         and # %01111111
-        cmp # $48
-        bcs _2976
+        cmp # ELITE_VIEWPORT_HEIGHT / 2
+       .bge _2976
 
         lda VAR_Y
-        bpl _2934
+        bpl :+
+        
+        ; flip pos/neg sign
         eor # %01111111
         adc # $01
-_2934:
-        sta $bb
-        lda # $49
+
+:       sta $bb                                                         ;$2934
+        lda # (ELITE_VIEWPORT_HEIGHT / 2) + 1
         sbc $bb
+
 _293a:
+;===============================================================================
+;
+;       A = Y-position (px)
+;       X = X-position (px)
+;   VAR_Z = pixel Z-distance
+;
+; preserves Y
+;
 .export _293a
-        sty $06
+
+        sty $06                 ; preserve Y through this ordeal
+
         tay 
         txa 
+        
+        ; get a bitmap address for a char row:
+        
+        ; reduce the X-position to a multiple of 8, i.e. a character column
         and # %11111000
+
+        ; add this to the bitmap address for the given row
         clc 
         adc row_to_bitmap_lo, y
         sta $07
         lda row_to_bitmap_hi, y
         adc # $00
         sta $08
+
+        ; get the row within the character cell
         tya 
-        and # %00000111
+        and # %00000111         ; modulo 8 (0-7)
         tay 
+
+        ; get the pixel within that row
         txa 
-        and # %00000111
+        and # %00000111         ; modulo 8 (0-7)
         tax 
+        
         lda VAR_Z
-        cmp # $90
-        bcs _296d
-        lda _28c8, x
+        cmp # 144               ; is the dust-particle >= 144 Z-distance?
+       .bge _296d               
+        
+        lda _28c8, x            ; get mask for desired pixel-position
         eor [$07], y
         sta [$07], y
+        
         lda VAR_Z
-        cmp # $50
-        bcs _2974
-        dey 
-        bpl _296d
+        cmp # 80                ; is the dust-particle >= 80 Z-distance?
+       .bge _2974
+        
+        dey                     ; move up a pixel-row 
+        bpl _296d               ; didn't go off the top of the char?
+        
         ldy # $01
+
 _296d:
         lda _28c8, x
         eor [$07], y
         sta [$07], y
+
 _2974:
-        ldy $06
+        ldy $06                 ; restore Y
 _2976:
         rts 
 
@@ -2461,24 +2519,29 @@ _2c4e:
         lda # $00
 _2c50:
 .export _2c50
-        ora $f902, y
-        ora $f905, y
-        ora $f908, y
+.import POLYOBJ_00, PolyObject
+
+        ora POLYOBJ_00 + PolyObject::xpos + 2, y
+        ora POLYOBJ_00 + PolyObject::ypos + 2, y
+        ora POLYOBJ_00 + PolyObject::zpos + 2, y
         and # %01111111
+
         rts 
 
 ;===============================================================================
 
 _2c5c:
-        lda $f901, y
+        lda POLYOBJ_00 + PolyObject::xpos + 1, y        ;=$F901
         jsr _3988
         sta $9b
-        lda $f904, y
+
+        lda POLYOBJ_00 + PolyObject::ypos + 1, y        ;=$F904
         jsr _3988
         adc $9b
         bcs _2c7a
         sta $9b
-        lda $f907, y
+        
+        lda POLYOBJ_00 + PolyObject::zpos + 1, y        ;=$F907
         jsr _3988
         adc $9b
         bcc _2c7c

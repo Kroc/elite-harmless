@@ -2847,7 +2847,10 @@ _7948:
         bcc _78f5
         pla 
         sta ZP_GOATSOUP_pt2
-        lda $f906               ;?
+
+.import POLYOBJ_00
+
+        lda POLYOBJ_00 + PolyObject::zpos       ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
 
@@ -3034,7 +3037,7 @@ _7a78:
         lda # MEM_64K
         jsr set_memory_layout
 
-        lda $f906
+        lda POLYOBJ_00 + PolyObject::zpos       ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
 
@@ -3304,9 +3307,9 @@ _7c0b:
 ;===============================================================================
 
 _7c11:
-        lda $f901, x            ;?
+        lda POLYOBJ_00 + PolyObject::xpos + 1, x        ;=$F901
         sta $35, x
-        lda $f902, x            ;?
+        lda POLYOBJ_00 + PolyObject::xpos + 2, x        ;=$F902
         tay 
         and # %01111111
         sta $36, x
@@ -4575,10 +4578,10 @@ _83ed:
 
         lda # $80
         sta $048e
-        
         sta $69
         sta $94
-        asl 
+
+        asl                     ;=0
         sta $63
         sta $64
         sta $6a
@@ -4880,7 +4883,7 @@ _85f2:
         jmp _8627
 
 _85f8:
-        lda $f906
+        lda POLYOBJ_00 + PolyObject::zpos       ;=$F906
         and # %00111110
         bne _85a5
         lda # $12
@@ -4931,14 +4934,18 @@ _8645:
         ldy # 2
         jsr wait_frames
 _8654:
+        ; does the player have more than 256 Trumbles™?
         lda PLAYER_TRUMBLES_HI
-        beq _8670
+       .bze _8670
+
         jsr get_random_number
         cmp # $dc
+
         lda PLAYER_TRUMBLES_LO
         adc # $00
         sta PLAYER_TRUMBLES_LO
-        bcc _8670
+       .bbw _8670
+        
         inc PLAYER_TRUMBLES_HI
         bpl _8670
         dec PLAYER_TRUMBLES_HI
@@ -6214,7 +6221,7 @@ _8e29:
         ora $045f
         ora $0482
         bne _8e7c
-        ldy $f908
+        ldy POLYOBJ_00 + PolyObject::zpos + 2   ;=$F908
         bmi _8e44
         tay 
         jsr _2c50
@@ -6232,9 +6239,9 @@ _8e52:
         sta $9c
         sta $9b
         sta $2e
-        lda $f908
+        lda POLYOBJ_00 + PolyObject::zpos + 2   ;=$F908
         jsr _3ad1
-        sta $f908
+        sta POLYOBJ_00 + PolyObject::zpos + 2   ;=$F908
         lda $f92d
         jsr _3ad1
         sta $f92d
@@ -10224,7 +10231,7 @@ _ac5d:
 ;===============================================================================
 
 _ac60:
-        lda # $80
+        lda # %10000000
         eor [$07], y
         sta [$07], y
         dex 
@@ -10904,8 +10911,22 @@ _b073:
 
 ; unused / unreferenced?
 ;$b08e:
-        .byte   $80, $c0, $e0, $f0, $f8, $fc, $fe, $ff
-        .byte   $7f, $3f, $1f, $0f, $07, $03, $01
+        .byte   %10000000
+        .byte   %11000000
+        .byte   %11100000
+        .byte   %11110000
+        .byte   %11111000
+        .byte   %11111100
+        .byte   %11111110
+        .byte   %11111111
+
+        .byte   %01111111
+        .byte   %00111111
+        .byte   %00011111
+        .byte   %00001111
+        .byte   %00000111
+        .byte   %00000011
+        .byte   %00000001
 
 ;===============================================================================
 
@@ -11510,7 +11531,7 @@ _b343:
         beq _b358
         bmi _b355
 
-        jsr _3e87
+        jsr _3e87               ; get address of ship-slot
         
         ldy # $1f
         lda [$59], y
@@ -11563,19 +11584,23 @@ _b389:
         sta $07
         lda row_to_bitmap_hi, x
         sta $08
+        
         tya 
-_b394:
-        sta [$07], y
+
+:       sta [$07], y                                                    ;$B394
         dey 
-        bne _b394
+        bne :-
+
         txa 
         adc # $08
         tax 
         cmp # $c0
         bcc _b389
+        
         iny 
         sty ZP_CURSOR_COL
         sty ZP_CURSOR_ROW
+
         rts 
 
 
@@ -11583,8 +11608,8 @@ erase_page:                                                             ;$B3A7
         ;=======================================================================
         ; erase a page (256 bytes, aligned to $00...$FF)
         ;
-        ; X = page-number, i.e. hi-address
-        
+        ;       X = page-number, i.e. hi-address
+        ;
         ldy # $00
         sty $07
 
@@ -11592,10 +11617,10 @@ erase_bytes:                                                            ;$B3AB
         ;-----------------------------------------------------------------------
         ; erase some bytes:
         ;
-        ; $07 = lo-address
-        ;   X = hi-address
-        ;   Y = offset
-        
+        ;     $07 = lo-address
+        ;       X = hi-address
+        ;       Y = offset
+        ;
         lda # $00
         stx $08
 
@@ -11605,14 +11630,13 @@ erase_bytes:                                                            ;$B3AB
 
         rts 
 
-;===============================================================================
-
 _b3b5:
+        ;=======================================================================
         lda # $00
-_b3b7:
-        sta [$07], y
+:       sta [$07], y                                                    ;$B3B7
         iny 
-        bne _b3b7
+        bne :-
+
         rts 
 
 ;===============================================================================
