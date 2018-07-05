@@ -188,9 +188,9 @@ _6a1b:                                                                  ;$6A1B
 
 ;===============================================================================
 
-_6a2e:                                                                  ;$62ae
+_6a2e:                                                                  ;$62AE
         rts 
-_6a2f:                                                                  ;$6a2f
+_6a2f:                                                                  ;$6A2F
 .export _6a2f
         jsr _a72f
         jsr _28d5
@@ -200,14 +200,15 @@ _6a2f:                                                                  ;$6a2f
 
 ; RNG?
 
-_6a3b:  ; roll RNG seed four times?                                     ;$6A3b
+_6a3b:  ; roll RNG seed four times?                                     ;$6A3B
 ;===============================================================================
 .export _6a3b
 
         ; this routine calls itself 4 times to ensure
         ; enough scrambling of the random number
+
         jsr :+                  ; do this twice,                                             
-:       jsr _6a41               ; and that twice                        ;$6A3e
+:       jsr _6a41               ; and that twice                        ;$6A3E
 
 _6a41:  ; roll the RNG seed once?                                       ;$6A41
         ;=======================================================================
@@ -238,7 +239,7 @@ _6a41:  ; roll the RNG seed once?                                       ;$6A41
 
 ;===============================================================================
 
-_6a68:                                                                  ;$6a68
+_6a68:                                                                  ;$6A68
         ; is target system distance > 0
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
@@ -265,13 +266,13 @@ _6a68:                                                                  ;$6a68
 _6a84:                                                                  ;$6A84
         ;-----------------------------------------------------------------------
         jsr print_flight_token
-_6a87:                                                                  ;$6a87
+_6a87:                                                                  ;$6A87
         jsr cursor_down
-_6a8a:                                                                  ;$6a8a
+_6a8a:                                                                  ;$6A8A
         lda # %10000000
         sta $34
 
-_6a8e:                                                                  ;$6a8e
+_6a8e:                                                                  ;$6A8E
         lda # $0c
         jmp print_flight_token
 
@@ -294,7 +295,7 @@ _6a9b:                                                                  ;$6A9B
 
 ;===============================================================================
 
-_6aa1:                                                                  ;$6AA1:
+_6aa1:                                                                  ;$6AA1
         lda # $01
         jsr _6a2f
 
@@ -324,14 +325,14 @@ _6aa1:                                                                  ;$6AA1:
         bcc _6ace
         sbc # $05
         clc 
-_6ace:                                                                  ;$6ace
+_6ace:                                                                  ;$6ACE
 .import TXT_RICH:direct
         
         ; "RICH" / "AVERAGE" / "POOR"
         
         adc # TXT_RICH
         jsr print_flight_token
-_6ad3:                                                                  ;$6ad3
+_6ad3:                                                                  ;$6AD3
         lda TSYSTEM_ECONOMY
         lsr 
         lsr 
@@ -419,7 +420,7 @@ _6ad3:                                                                  ;$6ad3
 
         adc # TXT_COLORS
         jsr _6a9b
-_6b3b:                                                                  ;$6b3b
+_6b3b:                                                                  ;$6B3B
         lda ZP_SEED_pt4
         eor ZP_SEED_pt2
         and # %00000111
@@ -434,7 +435,7 @@ _6b3b:                                                                  ;$6b3b
 
         adc # TXT_ADJECTIVES+1  ; +1, because of borrow?
         jsr _6a9b
-_6b4c:                                                                  ;$6b4c
+_6b4c:                                                                  ;$6B4C
         lda ZP_SEED_pt6
         and # %00000011
         clc 
@@ -448,7 +449,7 @@ _6b4c:                                                                  ;$6b4c
 
         adc # TXT_SPECIES
         jsr print_flight_token
-_6b5a:                                                                  ;$6b5a
+_6b5a:                                                                  ;$6B5A
         ; append an "s"
         lda # 's'
         jsr print_flight_token
@@ -501,7 +502,7 @@ _6b5a:                                                                  ;$6b5a
 
 ;===============================================================================
 
-_6ba9:                                                                  ;$6ba9
+_6ba9:                                                                  ;$6BA9
         lda ZP_SEED_pt2
         and # %00000111
         sta TSYSTEM_ECONOMY
@@ -571,7 +572,7 @@ _6ba9:                                                                  ;$6ba9
 
 ;===============================================================================
 
-_6c1c:                                                                  ;$6c1c
+_6c1c:                                                                  ;$6C1C
         lda # $40
         jsr _a72f
         
@@ -592,7 +593,7 @@ _6c1c:                                                                  ;$6c1c
         jsr _28e5
         jsr _6cda
         ldx # $00
-_6c40:                                                                  ;$6c40
+_6c40:                                                                  ;$6C40
         stx $9d
         ldx ZP_SEED_pt4
         ldy ZP_SEED_pt5
@@ -616,26 +617,26 @@ _6c40:                                                                  ;$6c40
         sta $8f
         lda # $04
         sta $90
-_6c6d:                                                                  ;$6c6d
+_6c6d:                                                                  ;$6C6D
         lda # $18
         ldx $a0
         bpl _6c75
         lda # $00
-_6c75:                                                                  ;$6c75
+_6c75:                                                                  ;$6C75
         sta $93
         lda $8e
         sec 
         sbc $90
         bcs _6c80
         lda # $00
-_6c80:                                                                  ;$6c80
+_6c80:                                                                  ;$6C80
         sta ZP_VAR_X
         lda $8e
         clc 
         adc $90
         bcc _6c8b
         lda # $ff
-_6c8b:                                                                  ;$6c8b
+_6c8b:                                                                  ;$6C8B
         sta ZP_VAR_X2
         lda $8f
         clc 
@@ -648,7 +649,7 @@ _6c8b:                                                                  ;$6c8b
         sbc $90
         bcs _6ca2
         lda # $00
-_6ca2:                                                                  ;$6ca2
+_6ca2:                                                                  ;$6CA2
         clc 
         adc $93
         sta ZP_VAR_Y
@@ -661,7 +662,7 @@ _6ca2:                                                                  ;$6ca2
         ldx $a0
         bmi _6cb8
         lda # $97
-_6cb8:                                                                  ;$6cb8
+_6cb8:                                                                  ;$6CB8
         sta ZP_VAR_Y2
         lda $8e
         sta ZP_VAR_X
@@ -670,7 +671,7 @@ _6cb8:                                                                  ;$6cb8
 
 ;===============================================================================
 
-_6cc3:                                                                  ;$6cc3
+_6cc3:                                                                  ;$6CC3
         lda #< $5a68
         sta $8e
         lda #> $5a68
@@ -682,7 +683,7 @@ _6cc3:                                                                  ;$6cc3
         sta $77
         jmp _6cfe
 
-_6cda:                                                                  ;$6cda
+_6cda:                                                                  ;$6CDA
         lda $a0
         bmi _6cc3
         lda PLAYER_FUEL
@@ -706,7 +707,7 @@ _6cda:                                                                  ;$6cda
         clc 
         adc # $18
         sta $8f
-_6cfe:                                                                  ;$6cfe
+_6cfe:                                                                  ;$6CFE
         lda $8e
         sta ZP_POLYOBJ01_XPOS_pt1
         
@@ -727,7 +728,7 @@ _6cfe:                                                                  ;$6cfe
 
 ;===============================================================================
 
-_6d16:                                                                  ;$6d16
+_6d16:                                                                  ;$6D16
         lda # $02
         jsr _6a2f
         jsr _72db
@@ -735,20 +736,20 @@ _6d16:                                                                  ;$6d16
         sta $34
         lda # $00
         sta $04ef               ; item index?
-_6d27:                                                                  ;$6d27
+_6d27:                                                                  ;$6D27
         jsr _7246
         lda $04ed
         bne _6d3e
         jmp _6da4
 
-_6d32:                                                                  ;$6d32
+_6d32:                                                                  ;$6D32
         ldy # $b0
-_6d34:                                                                  ;$6d34
+_6d34:                                                                  ;$6D34
         jsr _72c5
         tya 
         jsr _723c
         jsr _7627
-_6d3e:                                                                  ;$6d3e
+_6d3e:                                                                  ;$6D3E
         jsr txt_docked_token15
         
 .import TXT_QUANTITY_OF:direct
@@ -786,7 +787,7 @@ _6d3e:                                                                  ;$6d3e
         lda $9b
         beq _6d79
         bcs _6d34
-_6d79:                                                                  ;$6d79
+_6d79:                                                                  ;$6D79
         lda $04ec
         sta $9a
         jsr _74a2
@@ -806,7 +807,7 @@ _6d79:                                                                  ;$6d79
         pla 
         beq _6da4
         jsr _761f
-_6da4:                                                                  ;$6da4
+_6da4:                                                                  ;$6DA4
         lda $04ef               ; item index?
         clc 
         adc # 5
@@ -819,20 +820,20 @@ _6da4:                                                                  ;$6da4
         cmp # $11
         bcs _6dbf
         jmp _6d27
-_6dbf:                                                                  ;$6dbf
+_6dbf:                                                                  ;$6DBF
         lda # $10
         sta $050c
         lda # $20
         jmp _86a4
 
-_6dc9:                                                                  ;$6dc9
+_6dc9:                                                                  ;$6DC9
         lda # $40
         sta $050c
         ldx # $00
         stx $9b
         ldx # $0c
         stx ZP_TEMP_VAR
-_6dd6:                                                                  ;$6dd6
+_6dd6:                                                                  ;$6DD6
         jsr _8fea
         ldx $9b
         bne _6de5
@@ -840,7 +841,7 @@ _6dd6:                                                                  ;$6dd6
         beq _6e1b
         cmp # $4e
         beq _6e26
-_6de5:                                                                  ;$6de5
+_6de5:                                                                  ;$6DE5
         sta $9a
         sec 
         sbc # $30
@@ -861,28 +862,28 @@ _6de5:                                                                  ;$6de5
         cmp $04ed
         beq _6e0a
         bcs _6e13
-_6e0a:                                                                  ;$6e0a
+_6e0a:                                                                  ;$6E0A
         lda $9a
         jsr print_char
 
         dec ZP_TEMP_VAR
         bne _6dd6
-_6e13:                                                                  ;$6e13
+_6e13:                                                                  ;$6E13
         lda # $10
         sta $050c
         lda $9b
         rts 
-_6e1b:                                                                  ;$6e1b
+_6e1b:                                                                  ;$6E1b
         jsr print_char
         lda $04ed
         sta $9b
         jmp _6e13
-_6e26:                                                                  ;$6e26
+_6e26:                                                                  ;$6E26
         jsr print_char
         lda # $00
         sta $9b
         jmp _6e13
-_6e30:                                                                  ;$6e30
+_6e30:                                                                  ;$6E30
         jsr _6a8e
 
 .import TXT_QUANTITY:direct
@@ -892,7 +893,7 @@ _6e30:                                                                  ;$6e30
         jsr _7627
         ldy $04ef               ; item index?
         jmp _6e5d
-_6e41:                                                                  ;$6e41
+_6e41:                                                                  ;$6E41
         lda # $04
         jsr _6a2f
 
@@ -908,11 +909,11 @@ _6e41:                                                                  ;$6e41
         jsr _28d9
 
         jsr _6a8e
-_6e58:                                                                  ;$6e58
+_6e58:                                                                  ;$6E58
         ldy # $00
-_6e5a:                                                                  ;$6e5a
+_6e5a:                                                                  ;$6E5a
         sty $04ef               ; item index?
-_6e5d:                                                                  ;$6e5d
+_6e5d:                                                                  ;$6E5d
         ldx $04b0, y            ; cargo qty?
         beq _6eca
         tya 
@@ -975,7 +976,7 @@ _6e5d:                                                                  ;$6e5d
         jsr _7481
         lda # $00
         sta $34
-_6eca:                                                                  ;$6eca
+_6eca:                                                                  ;$6ECA
         ldy $04ef               ; item index?
         iny 
         cpy # $11
@@ -985,15 +986,15 @@ _6eca:                                                                  ;$6eca
         bne _6ede
         jsr _7627
         jmp _6dbf
-_6ede:                                                                  ;$6ede
+_6ede:                                                                  ;$6EDE
         jsr _6a8a
         lda PLAYER_TRUMBLES_LO
         ora PLAYER_TRUMBLES_HI
         bne _6eea
-_6ee9:                                                                  ;$6ee9
+_6ee9:                                                                  ;$6EE9
         rts 
 
-_6eea:                                                                  ;$6eea
+_6eea:                                                                  ;$6EEA
         ;-----------------------------------------------------------------------
         ; have you got Trumbles™ in your hold?
 
@@ -1023,13 +1024,13 @@ _6eea:                                                                  ;$6eea
         ldx PLAYER_TRUMBLES_LO
         dex 
         beq _6ee9
-_6f11:                                                                  ;$6f11
+_6f11:                                                                  ;$6F11
         lda # $73               ;="S"
         jmp print_char
 
 ;===============================================================================
 
-_6f16:                                                                  ;$6f16
+_6f16:                                                                  ;$6F16
         lda # $08
         jsr _6a2f
 
@@ -1049,14 +1050,14 @@ _6f16:                                                                  ;$6f16
 .import TXT_LARGE_CARGO_BAY:direct
         lda # TXT_LARGE_CARGO_BAY
         jsr print_flight_token
-_6f37:                                                                  ;$6f37
+_6f37:                                                                  ;$6F37
         jmp _6e58
 
 ;===============================================================================
 
 ; dead code?
 
-_6f3a:                                                                  ;$6f3a
+_6f3a:                                                                  ;$6F3a
         jsr print_flight_token
 
         lda # $ce
@@ -1069,14 +1070,14 @@ _6f3a:                                                                  ;$6f3a
 
         lda # $6e               ;="N"
         jmp print_char
-_6f50:                                                                  ;$6f50
+_6f50:                                                                  ;$6F50
         jsr print_char
         sec 
         rts 
 
 ;===============================================================================
 
-_6f55:                                                                  ;$6f55
+_6f55:                                                                  ;$6F55
        .phx                     ; push X to stack (via A)
         dey 
         tya 
@@ -1103,7 +1104,7 @@ _6f55:                                                                  ;$6f55
         lda $92
         sta TSYSTEM_POS_X
         sta $8e
-_6f82:                                                                  ;$6f82
+_6f82:                                                                  ;$6F82
 .export _6f82
         lda $a0
         bmi _6fa9
@@ -1115,7 +1116,7 @@ _6f82:                                                                  ;$6f82
         lda # $04
         sta $90
         jmp _6c6d
-_6f98:                                                                  ;$6f98
+_6f98:                                                                  ;$6F98
         sta $92
         clc 
         adc $91
@@ -1124,14 +1125,14 @@ _6f98:                                                                  ;$6f98
         bcc _6fa6
         rts 
 
-_6fa4:                                                                  ;$6fa4
+_6fa4:                                                                  ;$6FA4
         bcc _6fa8
-_6fa6:                                                                  ;$6fa6
+_6fa6:                                                                  ;$6FA6
         sta $92
-_6fa8:                                                                  ;$6fa8
+_6fa8:                                                                  ;$6FA8
         rts 
 
-_6fa9:                                                                  ;$6fa9
+_6fa9:                                                                  ;$6FA9
         lda TSYSTEM_POS_X
         sec 
         sbc PSYSTEM_POS_X
@@ -1139,7 +1140,7 @@ _6fa9:                                                                  ;$6fa9
         bcc _6fb8
         cmp # $e6
         bcc _6fa8
-_6fb8:                                                                  ;$6fb8
+_6fb8:                                                                  ;$6FB8
         asl 
         asl 
         clc 
@@ -1152,7 +1153,7 @@ _6fb8:                                                                  ;$6fb8
         bcc _6fce
         cmp # $dc
         bcc _6fa8
-_6fce:                                                                  ;$6fce
+_6fce:                                                                  ;$6FCE
         asl 
         clc 
         adc # $5a
@@ -1163,7 +1164,7 @@ _6fce:                                                                  ;$6fce
 
 ;===============================================================================
 
-_6fdb:                                                                  ;$6fdb
+_6fdb:                                                                  ;$6FDB
         lda # $c7
         sta $b8
         sta $b7
@@ -1242,7 +1243,7 @@ _7025:                                                                  ;$7025
         dey 
         ldx ZP_POLYOBJ_XPOS_pt1, y
         bne _7070
-_705c:                                                                  ;$705c
+_705c:                                                                  ;$705C
         tya 
         jsr set_cursor_row
 
@@ -1268,7 +1269,7 @@ _7070:                                                                  ;$7070
         jsr _7b4f
         jsr _7f22
         jsr _7b4f
-_708d:                                                                  ;$708d
+_708d:                                                                  ;$708D
         jsr _6a3b
         inc $ae
         beq _7097
@@ -1285,10 +1286,10 @@ _7097:                                                                  ;$7097
 
 ; to do with the seed
 
-_70a0:                                                                  ;$70a0
+_70a0:                                                                  ;$70A0
 .export _70a0
         ldx # 5                 ; seed is 6 bytes
-_70a2:                                                                  ;$70a2
+_70a2:                                                                  ;$70A2
         lda $049c, x
         sta ZP_SEED, x          ; store at $7F...$84
         dex 
@@ -1297,21 +1298,21 @@ _70a2:                                                                  ;$70a2
 
 ;===============================================================================
 
-_70ab:                                                                  ;$70ab
+_70ab:                                                                  ;$70AB
 .export _70ab
         jsr _70a0
         ldy # $7f
         sty $bb
         lda # $00
         sta $99
-_70b6:                                                                  ;$70b6
+_70b6:                                                                  ;$70B6
         lda ZP_SEED_pt4
         sec 
         sbc TSYSTEM_POS_X
         bcs _70c2
         eor # %11111111
         adc # $01
-_70c2:                                                                  ;$70c2
+_70c2:                                                                  ;$70C2
         lsr 
         sta $9c
         lda ZP_SEED_pt2
@@ -1320,7 +1321,7 @@ _70c2:                                                                  ;$70c2
         bcs _70d1
         eor # %11111111
         adc # $01
-_70d1:                                                                  ;$70d1
+_70d1:                                                                  ;$70D1
         lsr 
         clc 
         adc $9c
@@ -1328,19 +1329,19 @@ _70d1:                                                                  ;$70d1
         bcs _70e8
         sta $bb
         ldx # 5
-_70dd:                                                                  ;$70dd
+_70dd:                                                                  ;$70DD
         lda ZP_SEED, x
         sta $8e, x
         dex 
         bpl _70dd
         lda $99
         sta VAR_Z
-_70e8:                                                                  ;$70e8
+_70e8:                                                                  ;$70E8
         jsr _6a3b
         inc $99
         bne _70b6
         ldx # $05
-_70f1:                                                                  ;$70f1
+_70f1:                                                                  ;$70F1
         lda $8e, x
         sta ZP_SEED, x
         dex 
@@ -1396,7 +1397,7 @@ _7135:                                                                  ;$7135
 
 ;===============================================================================
 
-_714f:                                                                  ;$714f
+_714f:                                                                  ;$714F
         jsr txt_docked_token15
 
         lda # 15
@@ -1407,7 +1408,7 @@ _714f:                                                                  ;$714f
         lda # TXT_DOCKED_DOCKED
         jmp print_docked_str
 
-_715c:                                                                  ;$715c
+_715c:                                                                  ;$715C
         lda $a7
         bne _714f
 
@@ -1433,7 +1434,7 @@ _7176:                                                                  ;$7176
         bne _717f
         rts 
 
-_717f:                                                                  ;$717f
+_717f:                                                                  ;$717F
         ldx # 5
 _7181:                                                                  ;$7181
         lda ZP_SEED, x
@@ -1462,26 +1463,26 @@ _7196:                                                                  ;$7196
         lda PLAYER_FUEL
         cmp TSYSTEM_DISTANCE_LO
         bcs _71b2
-_71af:                                                                  ;$71af
+_71af:                                                                  ;$71AF
         jmp _723a
 
-_71b2:                                                                  ;$71b2
+_71b2:                                                                  ;$71B2
         lda # $2d
         jsr print_flight_token
 
         jsr _76e9
         lda # $0f
-_71bc:                                                                  ;$71bc
+_71bc:                                                                  ;$71BC
         sta $66                 ; hyperspace countdown -- outer
         sta $65                 ; hyperspace countdown -- inner
         tax 
         jmp _7224
 
-_71c4:                                                                  ;$71c4
+_71c4:                                                                  ;$71C4
         jsr _70ab
         jmp _7176
 
-_71ca:                                                                  ;$71ca
+_71ca:                                                                  ;$71CA
         ldx PLAYER_GDRIVE
         beq _71f2 + 1              ; bug or optimisation?
         inx 
@@ -1494,13 +1495,13 @@ _71ca:                                                                  ;$71ca
         lda PLAYER_GALAXY
         and # %11110111
         sta PLAYER_GALAXY
-_71e8:                                                                  ;$71e8
+_71e8:                                                                  ;$71E8
         lda $049c, x
         asl 
         rol $049c, x
         dex 
         bpl _71e8
-_71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71f2
+_71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71F2
         lda # $60
 
 ;71f4:
@@ -1551,11 +1552,11 @@ _7235:                                                                  ;$7235
         lda # $05               ; max. no. digits -- is this 5 or 6?
         jmp print_medium_value
 
-_723a:                                                                  ;$723a
+_723a:                                                                  ;$723A
 .import TXT_RANGE:direct
         lda # TXT_RANGE
 
-_723c:                                                                  ;$723c
+_723c:                                                                  ;$723C
         jsr print_flight_token
 
         lda # $3f
@@ -1611,7 +1612,7 @@ _7288:                                                                  ;$7288
         lda $04ec
         sec 
         sbc $91
-_728e:                                                                  ;$728e
+_728e:                                                                  ;$728E
         sta $04ec
         sta ZP_VAR_P1
         lda # $00
@@ -1626,44 +1627,44 @@ _728e:                                                                  ;$728e
         beq _72af
         jsr print_small_value
         jmp _72b8
-_72af:                                                                  ;$72af
+_72af:                                                                  ;$72AF
         lda # 25
         jsr set_cursor_col
 
         lda # $2d
         bne _72c7
-_72b8:                                                                  ;$72b8
+_72b8:                                                                  ;$72B8
         lda $8f
         and # %01100000
         beq _72ca
         cmp # $20
         beq _72d1
         jsr _72d6
-_72c5:                                                                  ;$72c5
+_72c5:                                                                  ;$72C5
         lda # $20
-_72c7:                                                                  ;$72c7
+_72c7:                                                                  ;$72C7
         jmp print_flight_token
 
-_72ca:                                                                  ;$72ca
+_72ca:                                                                  ;$72CA
         lda # $74               ;="T"
         jsr print_char
         bcc _72c5
-_72d1:                                                                  ;$72d1
+_72d1:                                                                  ;$72D1
         lda # $6b               ;="K"
         jsr print_char
-_72d6:                                                                  ;$72d6
+_72d6:                                                                  ;$72D6
         lda # $67               ;="G"
         jmp print_char
 
 ;===============================================================================
 
-_72db:                                                                  ;$72db
+_72db:                                                                  ;$72DB
         lda # 17
         jsr set_cursor_col
 
         lda # $ff
         bne _72c7
-_72e4:                                                                  ;$72e4
+_72e4:                                                                  ;$72E4
         lda # $10
         jsr _6a2f
 
@@ -1697,7 +1698,7 @@ _7305:                                                                  ;$7305
 
 ;===============================================================================
 
-_731a:                                                                  ;$731a
+_731a:                                                                  ;$731A
         lda $8f
         and # %00011111
         ldy PSYSTEM_ECONOMY
@@ -1723,7 +1724,7 @@ _7331:                                                                  ;$7331
 _7337:                                                                  ;$7337
         jsr _7217
         ldx # $05
-_733c:                                                                  ;$733c
+_733c:                                                                  ;$733C
         lda $04fa, x
         sta $04f4, x
         dex 
@@ -1776,7 +1777,7 @@ _7388:                                                                  ;$7388
 
 ;===============================================================================
 
-_739b:                                                                  ;$739b
+_739b:                                                                  ;$739B
         jsr _848d
         lda # $ff
         sta $29
@@ -1787,17 +1788,17 @@ _739b:                                                                  ;$739b
 
 ;===============================================================================
 
-_73ac:                                                                  ;$73ac
+_73ac:                                                                  ;$73AC
         lsr PLAYER_COMPETITION
         sec 
         rol PLAYER_COMPETITION
-_73b3:                                                                  ;$73b3
+_73b3:                                                                  ;$73B3
         lda # $03
         jsr _a72f
         jsr _3795
         jsr _83df
         sty $0482
-_73c1:                                                                  ;$73c1
+_73c1:                                                                  ;$73C1
         jsr _739b
         lda # $03
         cmp $047a
@@ -1814,24 +1815,24 @@ _73c1:                                                                  ;$73c1
 ;===============================================================================
 
         ; seriously!?
-_73dc:                                                                  ;$73dc
+_73dc:                                                                  ;$73DC
         rts 
 
 ;===============================================================================
 
-_73dd:                                                                  ;$73dd
+_73dd:                                                                  ;$73DD
         lda PLAYER_FUEL
         sec 
         sbc TSYSTEM_DISTANCE_LO
         bcs _73e8
         lda # $00
-_73e8:                                                                  ;$73e8
+_73e8:                                                                  ;$73E8
         sta PLAYER_FUEL
         lda $a0
         bne _73f5
         jsr _a72f
         jsr _3795
-_73f5:                                                                  ;$73f5
+_73f5:                                                                  ;$73F5
         jsr _8e92
         and _1d08
         bmi _73ac
@@ -1848,7 +1849,7 @@ _73f5:                                                                  ;$73f5
         lda $a0
         bne _7452
         inc $a0
-_741c:                                                                  ;$741c
+_741c:                                                                  ;$741C
         ldx $a7
         beq _744b
         jsr _379e
@@ -1868,7 +1869,7 @@ _741c:                                                                  ;$741c
         lda # $ff
         sta $a0
         jsr _37b2
-_744b:                                                                  ;$744b
+_744b:                                                                  ;$744B
         ldx # $00
         stx $a7
         jmp _a6ba
@@ -1919,14 +1920,14 @@ _7481:                                                                  ;$7481
         adc # $00
         sta PLAYER_CASH_pt1
         clc 
-_74a1:                                                                  ;$74a1
+_74a1:                                                                  ;$74A1
         rts 
 
 ;===============================================================================
 
-_74a2:                                                                  ;$74a2
+_74a2:                                                                  ;$74A2
         jsr _399b
-_74a5:                                                                  ;$74a5
+_74a5:                                                                  ;$74A5
         asl ZP_VAR_P1
         rol 
         asl ZP_VAR_P1
@@ -1944,9 +1945,9 @@ _74a5:                                                                  ;$74a5
 
 ;-------------------------------------------------------------------------------
 
-_74b8:   jmp _88e7                                                      ;$74b8
+_74b8:   jmp _88e7                                                      ;$74B8
 
-_74bb:                                                                  ;$74bb
+_74bb:                                                                  ;$74BB
         lda # $20
         jsr _6a2f
 
@@ -1969,7 +1970,7 @@ _74bb:                                                                  ;$74bb
         cmp # $0c
         bcc _74e2
         lda # $0e
-_74e2:                                                                  ;$74e2
+_74e2:                                                                  ;$74E2
         sta $9a
         sta $04ed
         inc $9a
@@ -1979,7 +1980,7 @@ _74e2:                                                                  ;$74e2
         asl 
         sta _76cd+0
         ldx # $01
-_74f5:                                                                  ;$74f5
+_74f5:                                                                  ;$74F5
         stx $a2
         jsr _6a8e
         ldx $a2
@@ -2041,7 +2042,7 @@ _7549:                                                                  ;$7549
         
         jsr _845c
         lda # $01
-_755f:                                                                  ;$755f
+_755f:                                                                  ;$755F
         ldy # ZP_VAR_X
         cmp # $02
         bne _756f
@@ -2049,21 +2050,21 @@ _755f:                                                                  ;$755f
         cpx $04af
         beq _75a1
         stx $04af
-_756f:                                                                  ;$756f
+_756f:                                                                  ;$756F
         cmp # $03
         bne _757c
         iny 
         ldx $04c1
         bne _75a1
         dec $04c1
-_757c:                                                                  ;$757c
+_757c:                                                                  ;$757C
         cmp # $04
         bne _758a
         jsr _764c
         lda # $0f
         jsr _76a1
         lda # $04
-_758a:                                                                  ;$758a
+_758a:                                                                  ;$758A
         cmp # $05
         bne _7596
         jsr _764c
@@ -2075,7 +2076,7 @@ _7596:                                                                  ;$7596
         bne _75bc
         ldx $04c2
         beq _75b9
-_75a1:                                                                  ;$75a1
+_75a1:                                                                  ;$75A1
         sty $77
         jsr _7642
         jsr _7481
@@ -2085,22 +2086,22 @@ _75a1:                                                                  ;$75a1
 .import TXT_PRESENT:direct
         lda # TXT_PRESENT       ;?
         jsr print_flight_token
-_75b3:                                                                  ;$75b3
+_75b3:                                                                  ;$75B3
         jsr _7627
         jmp _88e7
 
 ;===============================================================================
 
-_75b9:                                                                  ;$75b9
+_75b9:                                                                  ;$75B9
         dec $04c2
-_75bc:                                                                  ;$75bc
+_75bc:                                                                  ;$75BC
         iny 
         cmp # $07
         bne _75c9
         ldx $04c7
         bne _75a1
         dec $04c7
-_75c9:                                                                  ;$75c9
+_75c9:                                                                  ;$75C9
         iny 
         cmp # $08
         bne _75d8
@@ -2108,50 +2109,50 @@ _75c9:                                                                  ;$75c9
         bne _75a1
         ldx # $7f
         stx $04c3
-_75d8:                                                                  ;$75d8
+_75d8:                                                                  ;$75D8
         iny 
         cmp # $09
         bne _75e5
         ldx $04c4               ; energy charge rate?
         bne _75a1
         inc $04c4               ; energy charge rate?
-_75e5:
+_75e5:                                                                  ;$75E5
         iny 
         cmp # $0a
         bne _75f2
         ldx $04c5
         bne _75a1
         dec $04c5
-_75f2:
+_75f2:                                                                  ;$75F2
         iny 
         cmp # $0b
         bne _75ff
         ldx PLAYER_GDRIVE
         bne _75a1
         dec PLAYER_GDRIVE
-_75ff:
+_75ff:                                                                  ;$75FF
         iny 
         cmp # $0c
         bne _760c
         jsr _764c
         lda # $97
         jsr _76a1
-_760c:
+_760c:                                                                  ;$760C
         iny 
         cmp # $0d
         bne _7619
         jsr _764c
         lda # $32
         jsr _76a1
-_7619:
+_7619:                                                                  ;$7619
         jsr _761f
         jmp _74bb
 
-_761f:
+_761f:                                                                  ;$761F
         jsr _72c5
         lda # $77
         jsr _6a9b
-_7627:
+_7627:                                                                  ;$7627
         jsr _a80f
 
         ldy # 50
@@ -2159,7 +2160,7 @@ _7627:
 
 ;===============================================================================
 
-_762f:
+_762f:                                                                  ;$762F
         jsr _7642
         jsr _745a
         bcs _764b
@@ -2172,31 +2173,31 @@ _762f:
 
 ;===============================================================================
 
-_763f:
+_763f:                                                                  ;$763F
         sec 
         sbc # $01
-_7642:
+_7642:                                                                  ;$7642
         asl 
         tay 
         ldx _76cd+0, y
         lda _76cd+1, y
         tay 
-_764b:
+_764b:                                                                  ;$764B
         rts 
 
 ;===============================================================================
 
-_764c:
+_764c:                                                                  ;$764C
         lda PSYSTEM_TECHLEVEL
         cmp # $08
         bcc _7658
         lda # $20
         jsr _a72f
-_7658:
+_7658:                                                                  ;$7658
         lda # 16
         tay 
         jsr set_cursor_row
-_765e:
+_765e:                                                                  ;$765E
         lda # 12
         jsr set_cursor_col
 
@@ -2214,7 +2215,7 @@ _765e:
         cpy # $14
         bcc _765e
         jsr txt_docked_token15
-_767e:
+_767e:                                                                  ;$767E
 .import TXT_VIEW:direct
         lda # TXT_VIEW
         jsr _723c
@@ -2227,13 +2228,13 @@ _767e:
         jsr txt_docked_token15
         jmp _767e
 
-_7693:
+_7693:                                                                  ;$7693
         tax 
         rts 
 
 ;===============================================================================
 
-_7695:
+_7695:                                                                  ;$7695
         jsr _6f82
         jsr _70ab
         jsr _6f82
@@ -2241,7 +2242,7 @@ _7695:
 
 ;===============================================================================
 
-_76a1:
+_76a1:                                                                  ;$76A1
         sta ZP_TEMP_VAR
         lda PLAYER_LASERS, x
         beq _76c7
@@ -2255,30 +2256,30 @@ _76a1:
         cmp # $97
         beq _76bc
         ldy # $0d
-_76bc:
+_76bc:                                                                  ;$76BC
         stx VAR_Z
         tya 
         jsr _7642
         jsr _7481
         ldx VAR_Z
-_76c7:
+_76c7:                                                                  ;$76C7
         lda ZP_TEMP_VAR
         sta PLAYER_LASERS, x
         rts 
 
 ;===============================================================================
 
-_76cd:
+_76cd:                                                                  ;$76CD
         .word   $0001, $012c, $0fa0, $1770, $0fa0
         .word   $2710, $1482, $2710, $2328, $3a98
         .word   $2710, $c350, $ea60, $1f40
 
 ;===============================================================================
 
-_76e9:
+_76e9:                                                                  ;$76E9
 .export _76e9
         ldx # $05
-_76eb:
+_76eb:                                                                  ;$76EB
         lda ZP_SEED, x
         sta $8e, x
         dex 
@@ -2287,20 +2288,20 @@ _76eb:
         bit ZP_SEED_pt1
         bvs _76f9
         dey 
-_76f9:
+_76f9:                                                                  ;$76F9
         sty $bb
-_76fb:
+_76fb:                                                                  ;$76FB
         lda ZP_SEED_pt6
         and # %00011111
         beq _7706
         ora # %10000000
         jsr print_flight_token
-_7706:
+_7706:                                                                  ;$7706
         jsr _6a41
         dec $bb
         bpl _76fb
         ldx # $05
-_770f:
+_770f:                                                                  ;$770F
         lda $8e, x
         sta ZP_SEED, x
         dex 
@@ -2309,40 +2310,40 @@ _770f:
 
 ;===============================================================================
 
-_7717:
+_7717:                                                                  ;$7717
         ldy # $00
-_7719:
+_7719:                                                                  ;$7719
         lda $0491, y
         cmp # $0d
         beq _7726
         jsr print_char
         iny 
         bne _7719
-_7726:
+_7726:                                                                  ;$7726
         rts 
 
 ;===============================================================================
 
-_7727:
+_7727:                                                                  ;$7727
         bit $0482
         bmi _7741
         jsr _7732
         jsr _76e9
-_7732:
+_7732:                                                                  ;$7732
         ldx # $05
-_7734:
+_7734:                                                                  ;$7734
         lda ZP_SEED, x
         ldy $04f4, x
         sta $04f4, x
         sty ZP_SEED, x
         dex 
         bpl _7734
-_7741:
+_7741:                                                                  ;$7741
         rts 
 
 ;===============================================================================
 
-_7742:
+_7742:                                                                  ;$7742
         clc 
         ldx PLAYER_GALAXY
         inx 
@@ -2350,7 +2351,7 @@ _7742:
 
 ;===============================================================================
 
-_774a:  ; $774A
+_774a:                                                                  ;$774A
 .import TXT_FUEL:direct
 
         lda # TXT_FUEL
@@ -2369,7 +2370,7 @@ _774a:  ; $774A
         bne print_flight_token
 
         ; print cash value?  
-_775f:  ;$775F
+_775f:                                                                  ;$775F
         ldx # 3
 
         ; copy $04A2..$04A5 to $77..$7A?
@@ -2387,7 +2388,7 @@ _775f:  ;$775F
         ; print "CR" ("credits") after the cash value
 .import TXT_CR:direct
         lda # TXT_CR
-_7773:
+_7773:                                                                  ;$7773
 .export _7773
         jsr print_flight_token
         jmp _6a8e
@@ -2407,7 +2408,7 @@ print_colon:                                                            ;$777C
         ;
         lda # ':'
 
-print_flight_token:                                                            ;$777E
+print_flight_token:                                                     ;$777E
         ;=======================================================================
         ; prints an already *de-scrambled* string token. this can be a single
         ; letter, a variable (like cash or planet name), a string-expansion,
@@ -2527,7 +2528,7 @@ print_flight_token:                                                            ;
 
         ;-----------------------------------------------------------------------
 
-_77bd:
+_77bd:                                                                  ;$77BD
         cmp # 'a'               ; less than 'A'?
         bcc _goto_print_char    ; yes: print as is
         
@@ -2558,7 +2559,7 @@ _is_captial:                                                            ;$77CA
         bne _goto_print_char    ; print character as-is, but next will be
                                 ; lower-cased (bit 6 of case-flag)
 
-_77db:  ; add 114 to the token number and print the canned message:
+_77db:  ; add 114 to the token number and print the canned message:     ;$77DB
         adc # 114
         bne print_canned_message
 
@@ -2572,7 +2573,7 @@ _indent:                                                                ;$77DF
 
         ;-----------------------------------------------------------------------
 
-_77e7:  ; don't do anything if case-switch flag = %11111111
+_77e7:  ; don't do anything if case-switch flag = %11111111             ;$77E7
         cpx # $ff
         beq _784e
 
@@ -2581,13 +2582,13 @@ _77e7:  ; don't do anything if case-switch flag = %11111111
         bcs _77bd
 
         ; clear bit-6 of case-switch flag
-_77ef:  pha 
+_77ef:  pha                                                             ;$77EF
         txa 
         and # %10111111
         sta $34
         pla 
 
-_77f6:  jmp print_char
+_77f6:  jmp print_char                                                  ;$77F6
 
 
 _print_str:                                                             ;$77F9
@@ -2690,9 +2691,9 @@ _784e:  rts                                                             ;$784E
 
 ;===============================================================================
 
-_784f:
+_784f:                                                                  ;$784F
         ldx # $36
-_7851:
+_7851:                                                                  ;$7851
         lda $00, x
         ldy $ce00, x
         sta $ce00, x
@@ -2703,7 +2704,7 @@ _7851:
 
 ;===============================================================================
 
-_785f:
+_785f:                                                                  ;$785F
         lda $28
         ora # %10100000
         sta $28
@@ -2711,12 +2712,12 @@ _785f:
 
 ;===============================================================================
 
-_7866:
+_7866:                                                                  ;$7866
         lda $28
         and # %01000000
         beq _786f
         jsr _78d6
-_786f:
+_786f:                                                                  ;$786F
         lda ZP_POLYOBJ_ZPOS_pt1
         sta $bb
         lda ZP_POLYOBJ_ZPOS_pt2
@@ -2724,14 +2725,14 @@ _786f:
         bcc _787d
         lda # $fe
         bne _7885
-_787d:
+_787d:                                                                  ;$787D
         asl $bb
         rol 
         asl $bb
         rol 
         sec 
         rol 
-_7885:
+_7885:                                                                  ;$7885
         sta $9a
         ldy # $01
         lda [ZP_TEMP_ADDR2], y
@@ -2745,14 +2746,14 @@ _7885:
         bcc _78a1
         lda # $fe
         bne _78aa
-_78a1:
+_78a1:                                                                  ;$78A1
         asl $9b
         rol 
         asl $9b
         rol 
         asl $9b
         rol 
-_78aa:
+_78aa:                                                                  ;$78AA
         dey 
         sta [ZP_TEMP_ADDR2], y
         lda $28
@@ -2763,7 +2764,7 @@ _78aa:
         ldy # $02
         lda [ZP_TEMP_ADDR2], y
         tay 
-_78bc:
+_78bc:                                                                  ;$78BC
         lda $f9, y
         sta [ZP_TEMP_ADDR2], y
         dey 
@@ -2777,7 +2778,7 @@ _78bc:
         bne _78d6
         jmp _795a
 
-_78d6:
+_78d6:                                                                  ;$78D6
         ldy # $00
         lda [ZP_TEMP_ADDR2], y
         sta $9a
@@ -2785,7 +2786,7 @@ _78d6:
         lda [ZP_TEMP_ADDR2], y
         bpl _78e3
         eor # %11111111
-_78e3:
+_78e3:                                                                  ;$78E3
         lsr 
         lsr 
         lsr 
@@ -2798,9 +2799,9 @@ _78e3:
         lda ZP_GOATSOUP_pt2     ;?
         pha 
         ldy # $06
-_78f5:
+_78f5:                                                                  ;$78F5
         ldx # $03
-_78f7:
+_78f7:                                                                  ;$78F7
         iny 
         lda [ZP_TEMP_ADDR2], y
         sta ZP_POLYOBJ01_XPOS_pt1, x
@@ -2808,7 +2809,7 @@ _78f7:
         bpl _78f7
         sty $aa
         ldy # $02
-_7903:
+_7903:                                                                  ;$7903
         iny 
         lda [ZP_TEMP_ADDR2], y
         eor $aa
@@ -2816,7 +2817,7 @@ _7903:
         cpy # $06
         bne _7903
         ldy $99
-_7911:
+_7911:                                                                  ;$7911
         clc 
         lda ZP_GOATSOUP_pt1
         rol 
@@ -2845,7 +2846,7 @@ _7911:
         bne _7948
         lda ZP_VAR_Y
         jsr _293a
-_7948:
+_7948:                                                                  ;$7948
         dey 
         bpl _7911
         ldy $aa
@@ -2862,12 +2863,12 @@ _7948:
 
 ;===============================================================================
 
-_795a:
+_795a:                                                                  ;$795A
         jmp _79a9
 
 ;===============================================================================
 
-_795d:
+_795d:                                                                  ;$795D
         clc 
         lda ZP_GOATSOUP_pt1
         rol 
@@ -2884,7 +2885,7 @@ _795d:
 
 ;===============================================================================
 
-_7974:
+_7974:                                                                  ;$7974
         sta $9c
         clc 
         lda ZP_GOATSOUP_pt1
@@ -2907,7 +2908,7 @@ _7974:
         adc # $00
         rts 
 
-_7998:
+_7998:                                                                  ;$7998
         jsr _39ea
         sta $bb
         lda $9b
@@ -2919,12 +2920,12 @@ _7998:
 
 ;===============================================================================
 
-_79a7:
+_79a7:                                                                  ;$79A7
         .byte   $00, $02
 
 ;===============================================================================
 
-_79a9:
+_79a9:                                                                  ;$79A9
         lda # MEM_IO_ONLY
         jsr set_memory_layout
 
@@ -2937,7 +2938,7 @@ _79a9:
         lda # $ff
         ldx # $20
         ldy # $1e
-_79c0:
+_79c0:                                                                  ;$79C0
         sta VIC_SPRITE_DBLHEIGHT
         sta VIC_SPRITE_DBLWIDTH
         stx $050e
@@ -2949,7 +2950,7 @@ _79c0:
         lda [ZP_TEMP_ADDR2], y
         bpl _79d9
         eor # %11111111
-_79d9:
+_79d9:                                                                  ;$79D9
         lsr 
         lsr 
         lsr 
@@ -2962,9 +2963,9 @@ _79d9:
         lda ZP_GOATSOUP_pt2
         pha 
         ldy # $06
-_79eb:
+_79eb:                                                                  ;$79EB
         ldx # $03
-_79ed:
+_79ed:                                                                  ;$79ED
         iny 
         lda [ZP_TEMP_ADDR2], y
         sta ZP_POLYOBJ01_XPOS_pt1, x
@@ -3000,9 +3001,9 @@ _79ed:
         lda VIC_SPRITE_ENABLE
         ora # %00000010
         sta VIC_SPRITE_ENABLE
-_7a36:
+_7a36:                                                                  ;$7A36
         ldy # $02
-_7a38:
+_7a38:                                                                  ;$7A38
         iny 
         lda [ZP_TEMP_ADDR2], y
         eor $aa
@@ -3010,7 +3011,7 @@ _7a38:
         cpy # $06
         bne _7a38
         ldy $99
-_7a46:
+_7a46:                                                                  ;$7A46
         jsr _84ae
         sta VAR_Z
         lda ZP_POLYOBJ01_XPOS_pt2
@@ -3028,7 +3029,7 @@ _7a46:
         bne _7a6c
         lda ZP_VAR_Y
         jsr _293a
-_7a6c:
+_7a6c:                                                                  ;$7A6C
         dey 
         bpl _7a46
         ldy $aa
@@ -3036,7 +3037,7 @@ _7a6c:
         bcs _7a78
         jmp _79eb
 
-_7a78:
+_7a78:                                                                  ;$7A78
         pla 
         sta ZP_GOATSOUP_pt2     ;?
         
@@ -3047,13 +3048,13 @@ _7a78:
         sta ZP_GOATSOUP_pt4
         rts 
 
-_7a86:
+_7a86:                                                                  ;$7A86
         jsr _84ae
         jmp _7a6c
 
 ;===============================================================================
 
-_7a8c:
+_7a8c:                                                                  ;$7A8C
         jsr _845c
         lda # $7f
         sta $26
@@ -3066,7 +3067,7 @@ _7a8c:
 
 ;===============================================================================
 
-_7a9f:
+_7a9f:                                                                  ;$7A9F
         lda PLAYER_TRUMBLES_LO
         beq _7ac2
 
@@ -3082,7 +3083,7 @@ _7a9f:
         rol PLAYER_TRUMBLES_HI
         bpl _7ac2
         ror PLAYER_TRUMBLES_HI
-_7ac2:
+_7ac2:                                                                  ;$7AC2
         lsr PLAYER_LEGAL
         jsr _8447
         lda ZP_SEED_pt2
@@ -3108,12 +3109,12 @@ _7ac2:
         
         lda # $81
         jsr _7c6b
-_7af3:
+_7af3:                                                                  ;$7AF3
         lda $a0
         bne _7b1a
-_7af7:
+_7af7:                                                                  ;$7AF7
         ldy DUST_COUNT          ; number of dust particles
-_7afa:
+_7afa:                                                                  ;$7AFA
         jsr get_random_number
         ora # %00001000
         sta DUST_Z, y
@@ -3127,9 +3128,9 @@ _7afa:
         jsr _2918
         dey 
         bne _7afa
-_7b1a:
+_7b1a:                                                                  ;$7B1A
         ldx # $00
-_7b1c:
+_7b1c:                                                                  ;$7B1C
         lda $0452, x            ; ship slots?
         beq _7b44
         bmi _7b41
@@ -3138,7 +3139,7 @@ _7b1c:
         jsr _3e87
 
         ldy # $1f
-_7b2a:
+_7b2a:                                                                  ;$7B2A
         lda [ZP_POLYOBJ_ADDR], y
         sta ZP_POLYOBJ_XPOS_pt1, y
         dey 
@@ -3150,19 +3151,19 @@ _7b2a:
         lda [ZP_POLYOBJ_ADDR], y
         and # %10100111
         sta [ZP_POLYOBJ_ADDR], y
-_7b41:
+_7b41:                                                                  ;$7B41
         inx 
         bne _7b1c
-_7b44:
+_7b44:                                                                  ;$7B44
         ldx # $00
         stx $7e
         dex 
         stx _26a4
         stx _27a4               ; write to code??
-_7b4f:
+_7b4f:                                                                  ;$7B4F
         ldy # $c7
         lda # $00
-_7b53:
+_7b53:                                                                  ;$7B53
         sta $0580, y
         dey 
         bne _7b53
@@ -3173,31 +3174,31 @@ _7b53:
 ;===============================================================================
 
         ; dummied-out code
-_7b5e:  rts
+_7b5e:  rts                                                             ;$75BE
 
 ;===============================================================================
 
-_7b5f:
+_7b5f:                                                                  ;$7B5F
         dex 
         rts 
 
-_7b61:
+_7b61:                                                                  ;$7B61
 .export _7b61
         inx 
         beq _7b5f
-_7b64:
+_7b64:                                                                  ;$7B64
 .export _7b64
         dec PLAYER_ENERGY
         php 
         bne _7b6d
         inc PLAYER_ENERGY
-_7b6d:
+_7b6d:                                                                  ;$7B6D
         plp 
         rts 
 
 ;===============================================================================
 
-_7b6f:
+_7b6f:                                                                  ;$7B6F
 .export _7b6f
         jsr _b09d
 
@@ -3210,7 +3211,7 @@ _7b6f:
 
 ;===============================================================================
 
-_7b7d:
+_7b7d:                                                                  ;$7B7D
         asl 
         tax 
         lda # $00
@@ -3226,7 +3227,7 @@ _7b7d:
         ldy # $00
         rts 
 
-_7b93:
+_7b93:                                                                  ;$7B93
         ldy # $ff
         txa 
         eor # %11111111
@@ -3235,7 +3236,7 @@ _7b93:
         rts 
 
 
-_7b9b:
+_7b9b:                                                                  ;$7B9B
         ;=======================================================================
         ; copy the X/Y/Z-position of `POLYOBJ_01` to the zero page
         ;
@@ -3251,9 +3252,9 @@ _7b9b:
 
 ;===============================================================================
 
-_7ba8:
+_7ba8:                                                                  ;$7BA8
         jsr _7b9b
-_7bab:
+_7bab:                                                                  ;$7BAB
         lda ZP_VAR_X
         jsr _7b7d
         txa 
@@ -3269,13 +3270,13 @@ _7bab:
         ldx ZP_VAR_X2
         bpl _7bcc
         lda # $ff
-_7bcc:
+_7bcc:                                                                  ;$7BCC
         sta _1d01
         jmp _b09d
 
 ;===============================================================================
 
-_7bd2:
+_7bd2:                                                                  ;$7BD2
 .export _7bd2
         sta $bb
         ldx # $00
@@ -3290,11 +3291,11 @@ _7bd2:
         
         rts 
 
-_7be7:
+_7be7:                                                                  ;$7BE7
         ldx # $00
         stx PLAYER_SHIELD_FRONT
         bcc _7bfe
-_7bee:
+_7bee:                                                                  ;$7BEE
         lda PLAYER_SHIELD_REAR
         sbc $bb
         bcc _7bf9
@@ -3302,24 +3303,24 @@ _7bee:
 
         rts 
 
-_7bf9:
+_7bf9:                                                                  ;$7BF9
         ldx # $00
         stx PLAYER_SHIELD_REAR
-_7bfe:
+_7bfe:                                                                  ;$7BFE
         adc PLAYER_ENERGY
         sta PLAYER_ENERGY
         beq _7c08
         bcs _7c0b
-_7c08:
+_7c08:                                                                  ;$7C08
         jmp _87d0
 
-_7c0b:
+_7c0b:                                                                  ;$7C0B
         jsr _a813
         jmp _906a
 
 ;===============================================================================
 
-_7c11:
+_7c11:                                                                  ;$7C11
         lda POLYOBJ_00 + PolyObject::xpos + 1, x        ;=$F901
         sta ZP_POLYOBJ01_XPOS_pt1, x
         lda POLYOBJ_00 + PolyObject::xpos + 2, x        ;=$F902
@@ -3333,7 +3334,7 @@ _7c11:
 
 ;===============================================================================
 
-_7c24:
+_7c24:                                                                  ;$7C24
 .export _7c24
         jsr _b10e
         ldx # $81
@@ -3362,28 +3363,28 @@ _7c24:
         sta $d002
         lda $d041               ;I/O or ship-data?
         sta $d003
-_7c61:
+_7c61:                                                                  ;$7C61
         lda #< $0580
         sta ZP_TEMP_ADDR2_LO
         lda #> $0580
         sta ZP_TEMP_ADDR2_HI
         lda # $02
-_7c6b:
+_7c6b:                                                                  ;$7C6B
 .export _7c6b
         sta $bb
         ldx # $00
-_7c6f:
+_7c6f:                                                                  ;$7C6F
         lda $0452, x            ; ship slots?
        .bze _7c7b
         inx 
         cpx # $0a
         bcc _7c6f
-_7c79:
+_7c79:                                                                  ;$7C79
         clc 
-_7c7a:
+_7c7a:                                                                  ;$7C7A
         rts 
 
-_7c7b:
+_7c7b:                                                                  ;$7C7B
         jsr _3e87
 
         lda $bb
@@ -3416,12 +3417,12 @@ _7c7b:
         bne _7cba
         cpy # $25
         bcc _7c7a
-_7cba:
+_7cba:                                                                  ;$7CBA
         lda ZP_TEMP_ADDR2_LO
         sta $04f2
         lda ZP_TEMP_ADDR2_HI
         sta $04f3
-_7cc4:
+_7cc4:                                                                  ;$7CC4
         ldy # $0e
         lda [ZP_HULL_ADDR], y
         sta $2c
@@ -3430,7 +3431,7 @@ _7cc4:
         and # %00000111
         sta $28
         lda $bb
-_7cd4:
+_7cd4:                                                                  ;$7CD4
         sta $0452, x            ; ship slots?
         tax 
         bmi _7cec
@@ -3440,18 +3441,18 @@ _7cd4:
         bcc _7ce9
         cpx # $0b
         bcs _7ce9
-_7ce6:
+_7ce6:                                                                  ;$7CE6
         inc $047f
-_7ce9:
+_7ce9:                                                                  ;$7CE9
         inc $045d, x
-_7cec:
+_7cec:                                                                  ;$7CEC
         ldy $bb
         lda $d041, y
         and # %01101111
         ora $2d
         sta $2d
         ldy # $24
-_7cf9:
+_7cf9:                                                                  ;$7CF9
         lda ZP_POLYOBJ_XPOS_pt1, y
         sta [ZP_POLYOBJ_ADDR], y
         dey 
@@ -3461,7 +3462,7 @@ _7cf9:
 
 ;-------------------------------------------------------------------------------
 
-_7d03:
+_7d03:                                                                  ;$7D03
         lda ZP_POLYOBJ_XPOS_pt1, x
         eor # %10000000
         sta ZP_POLYOBJ_XPOS_pt1, x
@@ -3471,10 +3472,10 @@ _7d03:
 
 ;===============================================================================
 
-_7d0c:
+_7d0c:                                                                  ;$7D0C
 .export _7d0c
         ldx # $ff
-_7d0e:
+_7d0e:                                                                  ;$7D0E
 .export _7d0e
         stx $7c
         ldx PLAYER_MISSILES
@@ -3489,7 +3490,7 @@ _7d0e:
 ;$7d1a:
         .byte   $04, $00, $00, $00, $00
 
-_7d1f:
+_7d1f:                                                                  ;$7D1F
         lda ZP_POLYOBJ_XPOS_pt1
         sta ZP_VAR_P1
         lda ZP_POLYOBJ_XPOS_pt2
@@ -3521,24 +3522,24 @@ _7d1f:
         sta $44
         
         clc 
-_7d56:
+_7d56:                                                                  ;$7D56
         rts 
 
 
 ;===============================================================================
 
-_7d57:
+_7d57:                                                                  ;$7D57
         lda $a5
         lsr 
         bcs _7d5f
         jmp _80bb
 
-_7d5f:
+_7d5f:                                                                  ;$7D5F
         jmp _80ff
 
 ;===============================================================================
 
-_7d62:
+_7d62:                                                                  ;$7D62
         lda ZP_POLYOBJ_ZPOS_pt3
         cmp # $30
         bcs _7d57
@@ -3555,22 +3556,22 @@ _7d62:
         beq _7d84
         lda # $f8
         sta $77
-_7d84:
+_7d84:                                                                  ;$7D84
         lda $a5
         lsr 
         bcc _7d8c
         jmp _7f22
 
-_7d8c:
+_7d8c:                                                                  ;$7D8C
         jsr _80bb
         jsr _8044
         bcs _7d98
         lda $78
         beq _7d99
-_7d98:
+_7d98:                                                                  ;$7D98
         rts 
 
-_7d99:
+_7d99:                                                                  ;$7D99
         lda _1d0f
         beq _7d98
         lda $a5
@@ -3603,7 +3604,7 @@ _7d99:
         jsr _81ba
         jmp _7e54
 
-_7de0:
+_7de0:                                                                  ;$7DE0
         lda ZP_POLYOBJ_M1x2_HI
         bmi _7d98
         ldx # $0f
@@ -3652,7 +3653,7 @@ _7de0:
         sta $ab
         jmp _7e58
 
-_7e36:
+_7e36:                                                                  ;$7E36
         lda ZP_POLYOBJ_XPOS_pt1, x
         sta ZP_VAR_P1
         lda ZP_POLYOBJ_XPOS_pt2, x
@@ -3665,21 +3666,21 @@ _7e36:
         ldy $78
         beq _7e4f
         lda # $fe
-_7e4f:
+_7e4f:                                                                  ;$7E4F
         ldy $7a
         inx 
         inx 
         rts 
 
-_7e54:
+_7e54:                                                                  ;$7E54
         lda # $1f
         sta $a8
-_7e58:
+_7e58:                                                                  ;$7E58
         ldx # $00
         stx $aa
         dex 
         stx $a9
-_7e5f:
+_7e5f:                                                                  ;$7E5F
         lda $ab
         and # %00011111
         tax 
@@ -3733,7 +3734,7 @@ _7e5f:
         eor # %01111111
         adc # $00
         sta $bb
-_7ec8:
+_7ec8:                                                                  ;$7EC8
         txa 
         adc ZP_POLYOBJ01_XPOS_pt1
         sta $89
@@ -3762,12 +3763,12 @@ _7ec8:
         eor # %01111111
         adc # $00
         sta $bb
-_7efd:
+_7efd:                                                                  ;$7EFD
         jsr _2977
         cmp $a8
         beq _7f06
         bcs _7f12
-_7f06:
+_7f06:                                                                  ;$7F06
         lda $ab
         clc 
         adc $ac
@@ -3775,27 +3776,27 @@ _7f06:
         sta $ab
         jmp _7e5f
 
-_7f12:
+_7f12:                                                                  ;$7F12
         rts 
 
 ;===============================================================================
 
-_7f13:
+_7f13:                                                                  ;$7F13
         jmp _80ff
 
-_7f16:
+_7f16:                                                                  ;$7F16
         txa 
         eor # %11111111
         clc 
         adc # $01
         tax 
-_7f1d:
+_7f1d:                                                                  ;$7F1D
         lda # $ff
         jmp _7f67
 
 ;-------------------------------------------------------------------------------
 
-_7f22:
+_7f22:                                                                  ;$7F22
         lda # $01
         sta $0580
         jsr _814f
@@ -3817,7 +3818,7 @@ _7f22:
         lda ZP_VAR_P2
         bne _7f4b
         lda # $01
-_7f4b:
+_7f4b:                                                                  ;$7F4B
         sta $a8
         
         lda $b8
@@ -3835,10 +3836,10 @@ _7f4b:
         beq _7f1d
         cpx $77
         bcc _7f67
-_7f63:
+_7f63:                                                                  ;$7F63
         ldx $77
         lda # $00
-_7f67:
+_7f67:                                                                  ;$7F67
         stx ZP_TEMP_ADDR3_LO
         sta ZP_TEMP_ADDR3_HI
         lda $77
@@ -3851,16 +3852,16 @@ _7f67:
         sta $5f
         lda $62
         sta $60
-_7f80:
+_7f80:                                                                  ;$7F80
         cpy $a8
         beq _7f8f
         lda $0580, y
         beq _7f8c
         jsr _28f3
-_7f8c:
+_7f8c:                                                                  ;$7F8C
         dey 
         bne _7f80
-_7f8f:
+_7f8f:                                                                  ;$7F8F
         lda ZP_TEMP_ADDR3_LO
         jsr _3988
         sta $bb
@@ -3880,7 +3881,7 @@ _7f8f:
         adc $9a
         bcc _7fb6
         lda # $ff
-_7fb6:
+_7fb6:                                                                  ;$7FB6
         ldx $0580, y
         sta $0580, y
         beq _8008
@@ -3906,14 +3907,14 @@ _7fb6:
         stx ZP_VAR_X2
         sta $5d
         jsr _affa
-_7fed:
+_7fed:                                                                  ;$7FED
         lda $5d
         sta ZP_VAR_X
         lda $5e
         sta ZP_VAR_X2
-_7ff5:
+_7ff5:                                                                  ;$7FF5
         jsr _affa
-_7ff8:
+_7ff8:                                                                  ;$7FF8
         dey 
         beq _803a
         lda ZP_TEMP_ADDR3_HI
@@ -3921,10 +3922,10 @@ _7ff8:
         dec ZP_TEMP_ADDR3_LO
         bne _7f8f
         dec ZP_TEMP_ADDR3_HI
-_8005:
+_8005:                                                                  ;$8005
         jmp _7f8f
 
-_8008:
+_8008:                                                                  ;$8008
         ldx ZP_POLYOBJ01_XPOS_pt1
         stx $5f
         ldx ZP_POLYOBJ01_XPOS_pt2
@@ -3934,7 +3935,7 @@ _8008:
         lda # $00
         sta $0580, y
         beq _7ff8
-_801c:
+_801c:                                                                  ;$801C
         ldx ZP_TEMP_ADDR3_LO
         inx 
         stx ZP_TEMP_ADDR3_LO
@@ -3945,25 +3946,25 @@ _801c:
         sta $5f
         lda $62
         sta $60
-_802f:
+_802f:                                                                  ;$02F
         lda $0580, y
         beq _8037
         jsr _28f3
-_8037:
+_8037:                                                                  ;$8037
         dey 
         bne _802f
-_803a:
+_803a:                                                                  ;$803A
         clc 
         lda ZP_POLYOBJ01_XPOS_pt1
         sta $61
         lda ZP_POLYOBJ01_XPOS_pt2
         sta $62
-_8043:
+_8043:                                                                  ;$8043
         rts 
 
 ;===============================================================================
 
-_8044:
+_8044:                                                                  ;$8044
         jsr _814f
         bcs _8043
         lda # $00
@@ -3976,15 +3977,15 @@ _8044:
         cpx # $3c
         bcc _805c
         lsr 
-_805c:
+_805c:                                                                  ;$805C
         sta $ac
-_805e:
+_805e:                                                                  ;$805E
 .export _805e
         ldx # $ff
         stx $a9
         inx 
         stx $aa
-_8065:
+_8065:                                                                  ;$8065
         lda $aa
         jsr _39e0
         ldx # $00
@@ -4000,7 +4001,7 @@ _8065:
         sta $bb
         txa 
         clc 
-_8081:
+_8081:                                                                  ;$8081
         adc ZP_POLYOBJ01_XPOS_pt1
         sta $89
         lda ZP_POLYOBJ01_XPOS_pt2
@@ -4026,20 +4027,20 @@ _8081:
         adc # $00
         sta $bb
         clc 
-_80af:
+_80af:                                                                  ;$80AF
         jsr _2977
         cmp # $41
         bcs _80b9
         jmp _8065
 
-_80b9:
+_80b9:                                                                  ;$80B9
         clc 
         rts 
 
-_80bb:
+_80bb:                                                                  ;$80BB
         ldy _26a4
         bne _80f5
-_80c0:
+_80c0:                                                                  ;$80C0
         cpy $7e
         bcs _80f5
         lda _27a4, y            ; write to code??
@@ -4058,7 +4059,7 @@ _80c0:
         sta ZP_VAR_Y
         jmp _80c0
 
-_80e6:
+_80e6:                                                                  ;$80E6
         iny 
         lda _26a4, y
         sta ZP_VAR_X
@@ -4067,15 +4068,15 @@ _80e6:
         iny 
         jmp _80c0
 
-_80f5:
+_80f5:                                                                  ;$80F5
         lda # $01
         sta $7e
         lda # $ff
         sta _26a4
-_80fe:
+_80fe:                                                                  ;$80FE
         rts 
 
-_80ff:
+_80ff:                                                                  ;$80FF
 .export _80ff
         lda $0580
         bmi _80fe
@@ -4084,18 +4085,18 @@ _80ff:
         lda $62
         sta $60
         ldy # $8f
-_810e:
+_810e:                                                                  ;$810E
         lda $0580, y
         beq _8116
         jsr _28f3
-_8116:
+_8116:                                                                  ;$8116
         dey 
         bne _810e
         dey 
         sty $0580
         rts 
 
-_811e:
+_811e:                                                                  ;$811E
 .export _811e
         sta $bb
         clc 
@@ -4107,7 +4108,7 @@ _811e:
         beq _8131
         lda # $ff
         sta ZP_VAR_X2
-_8131:
+_8131:                                                                  ;$8131
         lda $5f
         sec 
         sbc $bb
@@ -4118,20 +4119,20 @@ _8131:
         clc 
         rts 
 
-_8140:
+_8140:                                                                  ;$8140
         bpl _8148
         lda # $00
         sta ZP_VAR_X
         clc 
         rts 
 
-_8148:
+_8148:                                                                  ;$8148
         lda # $00
         sta $0580, y
         sec 
         rts 
 
-_814f:
+_814f:                                                                  ;$814F
         lda ZP_POLYOBJ01_XPOS_pt1
         clc 
         adc $77
@@ -4145,7 +4146,7 @@ _814f:
         sbc # $00
         bmi _8167
         bne _8187
-_8167:
+_8167:                                                                  ;$8167
         lda $43
         clc 
         adc $77
@@ -4168,11 +4169,11 @@ _8167:
         cpx $b8
         rts 
 
-_8187:
+_8187:                                                                  ;$8187
         sec 
         rts 
 
-_8189:
+_8189:                                                                  ;$8189
         jsr _7e36
         sta ZP_VAR_P1
         lda # $de
@@ -4189,23 +4190,23 @@ _8189:
         ldy # $ff
         rts 
 
-_81a7:
+_81a7:                                                                  ;$81A7
         ldy # $00
         rts 
 
-_81aa:
+_81aa:                                                                  ;$81AA
         sta $9a
         jsr _3c95
         ldx ZP_POLYOBJ_M0x2_HI
         bmi _81b5
         eor # %10000000
-_81b5:
+_81b5:                                                                  ;$81B5
         lsr 
         lsr 
         sta $ab
         rts 
 
-_81ba:
+_81ba:                                                                  ;$81BA
         jsr _7e36
         sta $b4
         sty ZP_TEMPOBJ_M2x1_LO
@@ -4214,7 +4215,7 @@ _81ba:
         sty ZP_TEMPOBJ_M2x1_HI
         rts 
 
-_81c9:
+_81c9:                                                                  ;$81C9
         jsr _3bc1
         lda $7a
         and # %01111111
@@ -4233,14 +4234,14 @@ _81c9:
         eor # %11111111
         adc # $00
         tax 
-_81ec:
+_81ec:                                                                  ;$81EC
         clc 
-_81ed:
+_81ed:                                                                  ;$81ED
         rts 
 
 ;===============================================================================
 
-_81ee:
+_81ee:                                                                  ;$81EE
 .export _81ee
         jsr _8fec
         cmp # $59
@@ -4252,14 +4253,14 @@ _81ee:
 
 ;===============================================================================
 
-_81fb:
+_81fb:                                                                  ;$81FB
         lda $a0
         bne _8204
         jsr _8ee3
         txa 
         rts 
 
-_8204:
+_8204:                                                                  ;$8204
         jsr _8ee3
         lda _1d0c
         beq _8244
@@ -4267,23 +4268,23 @@ _8204:
         bit _8d20
         bpl _8216
         lda # $01
-_8216:
+_8216:                                                                  ;$8216
         bit _8d42
         bpl _821d
         asl 
         asl 
-_821d:
+_821d:                                                                  ;$821D
         tax 
         lda _8d35
         bit _8d3f
         bpl _8228
         lda # $01
-_8228:
+_8228:                                                                  ;$8228
         bit _8d42
         bpl _822f
         asl 
         asl 
-_822f:
+_822f:                                                                  ;$822F
         tay 
         lda # $00
         sta _8d1d
@@ -4296,18 +4297,18 @@ _822f:
 
 ;===============================================================================
 
-_8244:
+_8244:                                                                  ;$8244
         lda _8d4a
         beq _8251
         lda # $01
         ora _8d3d
         ora _8d18
-_8251:
+_8251:                                                                  ;$8251
         bit _8d4b
         bpl _8258
         asl 
         asl 
-_8258:
+_8258:                                                                  ;$8258
         tax 
         lda _8d45
         beq _8268
@@ -4315,12 +4316,12 @@ _8258:
         ora _8d3d
         ora _8d18
         eor # %11111110
-_8268:
+_8268:                                                                  ;$8268
         bit _8d4b
         bpl _826f
         asl 
         asl 
-_826f:
+_826f:                                                                  ;$826F
         tay 
         lda $7d
         rts 
@@ -4342,7 +4343,7 @@ disable_sprites:                                                        ;$8273
         ; switch back to 64K RAM layout
         lda # MEM_64K
 
-set_memory_layout:                                                      ;$827f
+set_memory_layout:                                                      ;$827F
         ;=======================================================================
 .export set_memory_layout
 
@@ -4361,12 +4362,12 @@ set_memory_layout:                                                      ;$827f
         cli                     ; enable interrupts
         rts 
 
-current_memory_layout:                                                  ;$828e
+current_memory_layout:                                                  ;$828E
         .byte   MEM_64K
 
 ;===============================================================================
 
-_828f:
+_828f:                                                                  ;$828F
         lda ZP_VAR_P1
         sta $04f2               ; "ship lines pointer lo"?
         lda ZP_VAR_P2
@@ -4376,7 +4377,7 @@ _828f:
 
 ;===============================================================================
 
-_829a:
+_829a:                                                                  ;$829A
 .export _829a
         ldx $9d
         jsr _82f3
@@ -4385,7 +4386,7 @@ _829a:
 
 ;===============================================================================
 
-_82a4:
+_82a4:                                                                  ;$82A4
         jsr _8447
         jsr _7b4f
         sta $0453
@@ -4398,9 +4399,9 @@ _82a4:
 
 ;===============================================================================
 
-_82bc:
+_82bc:                                                                  ;$82BC
         ldx # $ff
-_82be:
+_82be:                                                                  ;$82BE
         inx                     ; move to the next slot
         lda $0452, x            ; ship slots?
        .bze _828f               ; nothing in that slot?
@@ -4434,12 +4435,12 @@ _82be:
         sta [ZP_TEMP_ADDR1], y  ; update the roll value
         bne _82be               ; if not zero, check next ship slot
 
-_82ed:
+_82ed:                                                                  ;$82ED
         lda # PolyObject::xpos  ;=$00
         sta [ZP_TEMP_ADDR1], y
         beq _82be               ; if zero, check the next ship slot
 
-_82f3:
+_82f3:                                                                  ;$82F3
         stx $ad
         lda $7c
         cmp $ad
@@ -4450,7 +4451,7 @@ _82f3:
 
         lda # $c8
         jsr _900d
-_8305:
+_8305:                                                                  ;$8305
         ldy $ad
         ldx $0452, y            ; ship slots?
         cpx # $02               ; is space station (coreolis)?
@@ -4466,16 +4467,16 @@ _8305:
         
         inc PLAYER_KILLS
 
-_831d:
+_831d:                                                                  ;$831D
         cpx # $0f               ; is asteroid?
         beq _8329
         cpx # $03               ; is escape capsule?
         bcc _832c
         cpx # $0b               ; is cobra mk-III? (trader)
         bcs _832c
-_8329:
+_8329:                                                                  ;$8329
         dec $047f
-_832c:
+_832c:                                                                  ;$832C
         dec $045d, x
 
         ldx $ad
@@ -4491,7 +4492,7 @@ _832c:
         lda [ZP_POLYOBJ_ADDR], y
         adc # $00
         sta ZP_VAR_P2
-_8343:
+_8343:                                                                  ;$8343
         ; move the ship slots down?
         inx 
         lda $0452, x
@@ -4499,7 +4500,7 @@ _8343:
         bne _834f
         jmp _82bc               ; search again from the top
 
-_834f:
+_834f:                                                                  ;$834F
         asl 
         tay 
         lda _d000-2, y
@@ -4542,7 +4543,7 @@ _834f:
         lda ZP_VAR_P1
         sta [ZP_POLYOBJ_ADDR], y
         dey 
-_8399:
+_8399:                                                                  ;$8399
         lda [ZP_TEMP_ADDR1], y
         sta [ZP_POLYOBJ_ADDR], y
         dey 
@@ -4552,14 +4553,14 @@ _8399:
         lda ZP_TEMP_ADDR1_HI
         sta ZP_POLYOBJ_ADDR_HI
         ldy $bb
-_83aa:
+_83aa:                                                                  ;$83AA
         dey 
         lda [$77], y
         sta [$2e], y
         tya 
         bne _83aa
         beq _8343
-_83b4:
+_83b4:                                                                  ;$83B4
         ; is the player in Galaxy 2?
         ldx PLAYER_GALAXY
         dex 
@@ -4573,14 +4574,14 @@ _83b4:
         lda PSYSTEM_POS_Y
         cmp # 33
         beq _83c9
-_83c8:
+_83c8:                                                                  ;$83C8
         clc 
-_83c9:
+_83c9:                                                                  ;$83C9
         rts 
 
 ;===============================================================================
 
-_83ca:
+_83ca:                                                                  ;$83CA
         jsr _8ac7               ; erase $0452...$048C
 
         ; erase $63...$69
@@ -4600,7 +4601,7 @@ _83ca:
         dex 
         bpl :-
 
-_83df:
+_83df:                                                                  ;$83DF
 .export _83df
         jsr _923b
 
@@ -4609,7 +4610,7 @@ _83df:
 
         jsr _2367
         sta $04c3
-_83ed:
+_83ed:                                                                  ;$83ED
         lda # $0c
         sta DUST_COUNT          ; number of dust particles
 
@@ -4647,11 +4648,11 @@ _83ed:
         lda $045f
         beq _8430
         jsr _b10e
-_8430:
+_8430:                                                                  ;$8430
         lda $67
         beq _8437
         jsr _a786
-_8437:
+_8437:                                                                  ;$8437
         jsr _7b1a
         jsr _8ac7
         
@@ -4659,14 +4660,14 @@ _8437:
         sta $04f2
         lda #> $ffc0            ;=KERNAL_OPEN?
         sta $04f3
-_8447:
+_8447:                                                                  ;$8447
 .export _8447
 
         ; erase $09...$2D:
 
         ldy # $24
         lda # $00
-:       sta ZP_POLYOBJ_XPOS_pt1, y                                                      ;$844B
+:       sta ZP_POLYOBJ_XPOS_pt1, y                                      ;$844B                                                   ;$844B
         dey 
         bpl :-
 
@@ -4680,9 +4681,9 @@ _8447:
 
 ;===============================================================================
 
-_845c:
+_845c:                                                                  ;$845C
         ldx # $04
-_845e:
+_845e:                                                                  ;$845E
         cpx PLAYER_MISSILES
         beq _846c
 
@@ -4692,7 +4693,7 @@ _845e:
         bne _845e
         rts 
 
-_846c:
+_846c:                                                                  ;$846C
         ldy # $57
         jsr _b11f
         dex 
@@ -4701,7 +4702,7 @@ _846c:
 
 ;===============================================================================
 
-_8475:
+_8475:                                                                  ;$8475
         lda $a0
         bne _8487
         lda $04e6
@@ -4710,13 +4711,13 @@ _8475:
         sta $048b
         jmp _84fa
 
-_8487:
+_8487:                                                                  ;$8487
         jsr txt_docked_token15
         jmp _84fa
 
 ;===============================================================================
 
-_848d:
+_848d:                                                                  ;$848D
         jsr _8447
         jsr get_random_number
         sta ZP_TEMP_VAR
@@ -4734,7 +4735,7 @@ _848d:
         rol 
         ora # %11000000
         sta $29
-_84ae:
+_84ae:                                                                  ;$84AE
         clc 
 
 get_random_number:                                                      ;$84AF
@@ -4757,7 +4758,7 @@ get_random_number:                                                      ;$84AF
 
 ;===============================================================================
 
-_84c3:
+_84c3:                                                                  ;$84C3
         jsr get_random_number
         lsr 
         sta $29
@@ -4773,25 +4774,25 @@ _84c3:
         sta $29
         ldx # $10
         stx $2d
-_84e2:
+_84e2:                                                                  ;$84E2
         and # %00000010
         adc # $0b
         cmp # $0f
         beq _84ed
         jsr _7c6b
-_84ed:
+_84ed:                                                                  ;$84ED
         jsr _1ec1
         dec $048b
         beq _8475
         bpl _84fa
         inc $048b
-_84fa:
+_84fa:                                                                  ;$84FA
         dec $a3                 ; move counter?
         beq _8501
-_84fe:
+_84fe:                                                                  ;$84FE
         jmp _8627
 
-_8501:
+_8501:                                                                  ;$8501
         lda $0482
         bne _84fe
         jsr get_random_number
@@ -4825,35 +4826,35 @@ _8501:
         ora # %00010000
         sta ZP_POLYOBJ_VERTX_LO
         bcc _854c
-_8548:
+_8548:                                                                  ;$8548
         ora # %01111111
         sta $27
-_854c:
+_854c:                                                                  ;$854C
         jsr get_random_number
         cmp # $fc
         bcc _8559
         lda # $0f
         sta $29
         bne _855f
-_8559:
+_8559:                                                                  ;$8559
         cmp # $0a
         and # %00000001
         adc # $05
-_855f:
+_855f:                                                                  ;$855F
         jsr _7c6b
-_8562:
+_8562:                                                                  ;$8562
         lda $045f
         beq _856a
-_8567:
+_8567:                                                                  ;$8567
         jmp _8627
 
-_856a:
+_856a:                                                                  ;$856A
         jsr _8798
         asl 
         ldx $046d
         beq _8576
         ora PLAYER_LEGAL
-_8576:
+_8576:                                                                  ;$8576
         sta $bb
         jsr _848d
         cmp # $88
@@ -4862,7 +4863,7 @@ _8576:
         bcs _8588
         lda # $10
         jsr _7c6b
-_8588:
+_8588:                                                                  ;$8588
         lda $046d
         bne _8567
         dec $048a
@@ -4875,9 +4876,9 @@ _8588:
         jsr get_random_number
         cmp # $c8
         bcc _85a8
-_85a5:
+_85a5:                                                                  ;$85A5
         jsr _739b
-_85a8:
+_85a8:                                                                  ;$85A8
         jsr get_random_number
         ldy PSYSTEM_GOVERNMENT
         beq _85bb
@@ -4886,7 +4887,7 @@ _85a8:
         and # %00000111
         cmp PSYSTEM_GOVERNMENT
         bcc _8567
-_85bb:
+_85bb:                                                                  ;$85BB
         jsr _848d
         cmp # $64
         bcs _860b
@@ -4906,7 +4907,7 @@ _85bb:
         
         ora $047c
         beq _85f0
-_85e0:
+_85e0:                                                                  ;$85E0
         lda # $04
         sta $2d
         jsr get_random_number
@@ -4918,13 +4919,13 @@ _85e0:
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
-_85f0:
+_85f0:                                                                  ;$85F0
         lda # $1f
-_85f2:
+_85f2:                                                                  ;$85F2
         jsr _7c6b
         jmp _8627
 
-_85f8:
+_85f8:                                                                  ;$85F8
         lda POLYOBJ_00 + PolyObject::zpos       ;=$F906
         and # %00111110
         bne _85a5
@@ -4934,11 +4935,11 @@ _85f8:
         sta $29
         lda # $20
         bne _85f2
-_860b:
+_860b:                                                                  ;$860B
         and # %00000011
         sta $048a
         sta $a2
-_8612:
+_8612:                                                                  ;$8612
         jsr get_random_number
         sta $bb
         jsr get_random_number
@@ -4948,25 +4949,25 @@ _8612:
         jsr _7c6b
         dec $a2
         bpl _8612
-_8627:
+_8627:                                                                  ;$8627
         ldx # $ff
         txs 
         ldx PLAYER_TEMP_LASER
         beq _8632
         dec PLAYER_TEMP_LASER
-_8632:
+_8632:                                                                  ;$8632
         ldx $0487
         beq _863e
         dex 
         beq _863b
         dex 
-_863b:
+_863b:                                                                  ;$863B
         stx $0487
-_863e:
+_863e:                                                                  ;$863E
         lda $a0
         bne _8645
         jsr _2ff3
-_8645:
+_8645:                                                                  ;$8645
         lda $a0
         beq _8654
         and _1d08
@@ -4975,7 +4976,7 @@ _8645:
         
         ldy # 2
         jsr wait_frames
-_8654:
+_8654:                                                                  ;$8654
         ; does the player have more than 256 Trumbles™?
         lda PLAYER_TRUMBLES_HI
        .bze _8670
@@ -4991,7 +4992,7 @@ _8654:
         inc PLAYER_TRUMBLES_HI
         bpl _8670
         dec PLAYER_TRUMBLES_HI
-_8670:
+_8670:                                                                  ;$8670
         lda PLAYER_TRUMBLES_HI
         beq _86a1
         sta $bb
@@ -4999,7 +5000,7 @@ _8670:
         cmp # $e0
         bcs _8680
         asl $bb
-_8680:
+_8680:                                                                  ;$8680
         jsr get_random_number
         cmp $bb
         bcs _86a1
@@ -5014,84 +5015,84 @@ _8680:
         and # %00001111
         tax 
         lda # $f1
-_869c:
+_869c:                                                                  ;$869C
         ldy # $0e
         jsr _a850
-_86a1:
+_86a1:                                                                  ;$86A1
         jsr _81fb
-_86a4:
+_86a4:                                                                  ;$86A4
         jsr _86b1
         lda $a7
         beq _86ae
         jmp _8627
 
-_86ae:
+_86ae:                                                                  ;$86AE
         jmp _84ed
 
-_86b1:
+_86b1:                                                                  ;$86B1
         cmp # $25
         bne _86b8
         jmp _2c9b
 
-_86b8:
+_86b8:                                                                  ;$86B8
         cmp # $35
         bne _86bf
         jmp _6c1c
 
-_86bf:
+_86bf:                                                                  ;$86BF
         cmp # $30
         bne _86c6
         jmp _6fdb
 
-_86c6:
+_86c6:                                                                  ;$86C6
         cmp # $2d
         bne _86d0
         jsr _70ab
         jmp _6aa1
 
-_86d0:
+_86d0:                                                                  ;$68D0
         cmp # $20
         bne _86d7
         jmp _6f16
 
-_86d7:
+_86d7:                                                                  ;$86D7
         cmp # $28
         bne _86de
         jmp _72e4
 
-_86de:
+_86de:                                                                  ;$86DE
         cmp # $3c
         bne _86e5
         jmp _741c
 
-_86e5:
+_86e5:                                                                  ;$86E5
         bit $a7
         bpl _870d
         cmp # $38
         bne _86f0
         jmp _74bb
 
-_86f0:
+_86f0:                                                                  ;$86F0
         cmp # $08
         bne _86f7
         jmp _6d16
 
-_86f7:
+_86f7:                                                                  ;$86F7
         cmp # $12
         bne _8706
         jsr _8ae7
         bcc _8703
         jmp _88ac
 
-_8703:
+_8703:                                                                  ;$8703
         jmp _88e7
 
-_8706:
+_8706:                                                                  ;$8706
         cmp # $05
         bne _8724
         jmp _6e41
 
-_870d:
+_870d:                                                                  ;$870D
         cmp # $3b
         beq _871f
         cmp # $3a
@@ -5102,20 +5103,20 @@ _870d:
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
-_871c:  ldx # $02
+_871c:  ldx # $02                                                       ;$871C
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
-_871f:  ldx # $01
+_871f:  ldx # $01                                                       ;$871F
 
         jmp _a6ba
 
-_8724:
+_8724:                                                                  ;$872F
         bit _8d2f
         bpl _872c
         jmp _715c
 
-_872c:
+_872c:                                                                  ;$872C
         cmp # $2e
         beq _877e
         cmp # $2b
@@ -5127,7 +5128,7 @@ _872c:
         beq _877d
         jmp _31c6
 
-_8741:
+_8741:                                                                  ;$8741
         sta ZP_TEMP_VAR
         lda $a0
         and # %11000000
@@ -5141,9 +5142,9 @@ _8741:
         jsr _3e95
         jmp _6f82
 
-_875c:
+_875c:                                                                  ;$875C
         jsr _6f55
-_875f:
+_875f:                                                                  ;$875F
         lda $66                 ; hyperspace countdown (outer)?
         beq _877d
         dec $65                 ; hyperspace countdown (inner)?
@@ -5159,10 +5160,10 @@ _875f:
         bne _877d
         jmp _73dd
 
-_877d:
+_877d:                                                                  ;$877D
         rts 
 
-_877e:
+_877e:                                                                  ;$877E
 .export _877e
         lda $a0
         and # %11000000
@@ -5180,7 +5181,7 @@ _877e:
 
 ;===============================================================================
 
-_8798:
+_8798:                                                                  ;$8798
         lda $04b3
         clc 
         adc $04b6
@@ -5190,22 +5191,22 @@ _8798:
 
 ;===============================================================================
 
-_87a4:
+_87a4:                                                                  ;$87A4
 .export _87a4
         lda # $e0
-_87a6:
+_87a6:                                                                  ;$87A6
 .export _87a6
         cmp ZP_POLYOBJ_XPOS_pt2
         bcc _87b0
         cmp ZP_POLYOBJ_YPOS_pt2
         bcc _87b0
         cmp ZP_POLYOBJ_ZPOS_pt2
-_87b0:
+_87b0:                                                                  ;$87B0
         rts 
 
 ;===============================================================================
 
-_87b1:
+_87b1:                                                                  ;$87B1
 .export _87b1
          ora ZP_POLYOBJ_XPOS_pt2
          ora ZP_POLYOBJ_YPOS_pt2
@@ -5214,11 +5215,11 @@ _87b1:
 
 ;===============================================================================
 
-_87b8:
+_87b8:                                                                  ;$87B8
         .byte   $00
 
 ; BRK routine, set up by `_1e14`
-_87b9:
+_87b9:                                                                  ;$87B9
 .export _87b9
         dec _87b8
         ldx # $ff
@@ -5226,7 +5227,7 @@ _87b9:
         jsr _8c60
         tay 
         lda # $07               ; BEEP?
-_87c5:
+_87c5:                                                                  ;$87C5
         jsr paint_char
         iny 
         lda [$fd], y
@@ -5235,7 +5236,7 @@ _87c5:
 
 ;===============================================================================
 
-_87d0:
+_87d0:                                                                  ;$87D0
 .export _87d0
         jsr _a813
         jsr _83df
@@ -5256,7 +5257,7 @@ _87d0:
         
         lda # $92
         jsr print_canned_message
-_87fd:
+_87fd:                                                                  ;$87FD
         jsr _848d
         lsr 
         lsr 
@@ -5287,7 +5288,7 @@ _87fd:
         beq _8835
         bcc _8835
         dex 
-_8835:
+_8835:                                                                  ;$8835
         jsr _3695
         jsr get_random_number
         and # %10000000
@@ -5299,7 +5300,7 @@ _8835:
         sta $96                 ; player's ship speed?
         jsr _1ec1
         jsr disable_sprites
-_8851:
+_8851:                                                                  ;$8851
         jsr _1ec1
         dec $0487
         bne _8851
@@ -5309,16 +5310,16 @@ _8851:
 
 ;===============================================================================
 
-_8861:
+_8861:                                                                  ;$8861
         .byte   $88
-_8862:
+_8862:                                                                  ;$8862
         .byte   $88
 
 ;===============================================================================
 
 ; LOADER JUMPS HERE! -- THIS IS THE ENTRY POINT
 
-_8863:
+_8863:                                                                  ;$8863
 .export _8863
 
         ; erase $1D12..$1D01
@@ -5340,12 +5341,12 @@ _8863:
         txs 
 
         jsr _83ca
-_8882:
+_8882:                                                                  ;$8882
         ldx # $ff
         txs 
 
         jsr _83df
-_8888:
+_8888:                                                                  ;$8888
         jsr _8c6d
         
         lda # 3
@@ -5362,7 +5363,7 @@ _8888:
         jsr _88f0
         jsr _8ae7
         jsr _91fe
-_88ac:
+_88ac:                                                                  ;$88AC
         jsr _88f0
         jsr _845c
         lda # $07
@@ -5374,7 +5375,7 @@ _88ac:
         jsr _70ab
         jsr _7217
         ldx # $05
-_88c9:
+_88c9:                                                                  ;$88C9
         lda ZP_SEED, x
         sta $04f4, x
         dex 
@@ -5389,7 +5390,7 @@ _88c9:
         sta PSYSTEM_TECHLEVEL
         lda TSYSTEM_GOVERNMENT
         sta PSYSTEM_GOVERNMENT
-_88e7:
+_88e7:                                                                  ;$88E7
 .export _88e7
         lda # $ff
         sta $a7
@@ -5398,7 +5399,7 @@ _88e7:
 
 ;===============================================================================
 
-_88f0:
+_88f0:                                                                  ;$88F0
         ldx # 84                ; size of new-game data?
 :       lda _25aa, x                                                    ;$88F2
         sta $0490, x            ; seed goes in $049C+
@@ -5406,7 +5407,7 @@ _88f0:
         bne :-
 
         stx $a0
-_88fd:
+_88fd:                                                                  ;$88FD
         jsr _89eb
         cmp _25ff
         bne _88fd
@@ -5416,7 +5417,7 @@ _88fd:
         cpx _25fd
         beq _8912
         ora # %10000000
-_8912:
+_8912:                                                                  ;$8912
         ora # %01000000
         sta PLAYER_COMPETITION
         jsr _89f9
@@ -5426,7 +5427,7 @@ _8912:
 
 ;===============================================================================
 
-_8920:
+_8920:                                                                  ;$8920
         sty $06fb
         pha 
         stx $a5
@@ -5472,7 +5473,7 @@ _8920:
 
         lda # $0d
         jsr print_docked_str
-_8978:
+_8978:                                                                  ;$8978
         lda _87b8
         beq _8994
         inc _87b8
@@ -5483,12 +5484,12 @@ _8978:
         jsr set_cursor_row
         
         ldy # $00
-_898c:
+_898c:                                                                  ;$898C
         jsr paint_char
         iny 
         lda [$fd], y
         bne _898c
-_8994:
+_8994:                                                                  ;$8994
         ldy # $00
         sty $96                 ; player's ship speed?
         sty _1d0c
@@ -5513,12 +5514,12 @@ _8994:
         sta $a3                 ; move counter?
         lda # $ff
         sta _1d0c
-_89be:
+_89be:                                                                  ;$89BE
         lda ZP_POLYOBJ_ZPOS_pt2
         cmp # $01
         beq _89c6
         dec ZP_POLYOBJ_ZPOS_pt2
-_89c6:
+_89c6:                                                                  ;$89C6
         jsr _a2a0
         ldx $06fb
         stx ZP_POLYOBJ_ZPOS_pt1
@@ -5534,18 +5535,18 @@ _89c6:
         bmi _89ea
         bcc _89be
         inc _1d0c
-_89ea:
+_89ea:                                                                  ;$89EA
         rts 
 
 ;===============================================================================
 
 ; checksum file data?
 
-_89eb:
+_89eb:                                                                  ;$89EB
         ldx # 73
         clc 
         txa 
-_89ef:
+_89ef:                                                                  ;$89EF
         adc _25b2, x
         eor _25b3, x
         dex 
@@ -5554,11 +5555,11 @@ _89ef:
 
 ;===============================================================================
 
-_89f9:
+_89f9:                                                                  ;$89F9
         ldx # 73
         clc 
         txa 
-_89fd:
+_89fd:                                                                  ;$89FD
         stx $bb
         eor $bb
         ror 
@@ -5570,7 +5571,7 @@ _89fd:
 
 ;===============================================================================
 
-_8a0c:
+_8a0c:                                                                  ;$8A0C
         ; copy $2619..$267A to $25AB..$260C
 
         ldy # $61
@@ -5587,27 +5588,27 @@ _8a0c:
 
 ;===============================================================================
 
-_8a1d:
+_8a1d:                                                                  ;$8A1D
         ldx # $07
         lda _8bbe
         sta _8bbf
-_8a25:
+_8a25:                                                                  ;$8A25
         lda ZP_POLYOBJ_YPOS_pt3, x
         sta _25ab, x
         dex 
         bpl _8a25
-_8a2d:
+_8a2d:                                                                  ;$8A2D
         ldx # $07
-_8a2f:
+_8a2f:                                                                  ;$8A2F
         lda _25ab, x
         sta ZP_POLYOBJ_YPOS_pt3, x
         dex 
         bpl _8a2f
         rts 
 
-_8a38:
+_8a38:                                                                  ;$8A38
         ldx # $04
-_8a3a:
+_8a3a:                                                                  ;$8A3A
         lda _25a6, x
         sta ZP_POLYOBJ_XPOS_pt1, x
         dex 
@@ -5638,7 +5639,7 @@ txt_docked_token1A:                                                     ;$8A5B
 
         jsr _28d5
         ldy # $00
-_8a6a:
+_8a6a:                                                                  ;$8A6A
         jsr _8fea
         cmp # $0d
         beq _8a94
@@ -5657,11 +5658,11 @@ _8a6a:
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit 
-_8a8d:  lda # $07               ; BEEP?
-_8a8f:
+_8a8d:  lda # $07               ; BEEP?                                 ;$8A8D
+_8a8f:                                                                  ;$8A8F
         jsr paint_char
         bcc _8a6a
-_8a94:
+_8a94:                                                                  ;$8A94
         sta ZP_POLYOBJ_YPOS_pt3, y      ;?
 
         lda # $10
@@ -5670,7 +5671,7 @@ _8a94:
         lda # $0c
         jmp paint_char
 
-_8aa1:
+_8aa1:                                                                  ;$8AA1
         lda # $10
         sta $050c
         sec 
@@ -5678,14 +5679,14 @@ _8aa1:
 
 ;===============================================================================
 
-_8aa8:
+_8aa8:                                                                  ;$8AA8
         .byte   $98, $f0, $e2, $88, $a9, $7f, $d0, $df
         .byte   $0e, $00
-_8ab2:
+_8ab2:                                                                  ;$8AB2
         .byte   $09
-_8ab3:
+_8ab3:                                                                  ;$8AB3
         .byte   $21
-_8ab4:
+_8ab4:                                                                  ;$8AB4
         .byte   $7b
 
 txt_docked_token1E:                                                     ;$8AB5
@@ -5710,7 +5711,7 @@ txt_docked_token1F:                                                     ;$8ABE
 
 ; erase $0452...$048C
 
-_8ac7:  
+_8ac7:                                                                  ;$8AC7
         ldx # $3a
         lda # $00
 
@@ -5727,12 +5728,12 @@ _8ac7:
         ldx # $0c
         jsr _8ad9
         dex 
-_8ad9:
+_8ad9:                                                                  ;$8AD9
         ldy # $00
         sty ZP_TEMP_ADDR1_LO
         lda # $00
         stx ZP_TEMP_ADDR1_HI
-_8ae1:
+_8ae1:                                                                  ;$8AE1
         sta [ZP_TEMP_ADDR1], y
         iny 
         bne _8ae1
@@ -5740,7 +5741,7 @@ _8ae1:
 
 ;===============================================================================
 
-_8ae7:
+_8ae7:                                                                  ;$8AE7
         lda # $01
         jsr print_docked_str
 
@@ -5762,19 +5763,19 @@ _8ae7:
         jsr _8a0c
         jmp _88f0
 
-_8b0f:
+_8b0f:                                                                  ;$8B0F
         ;-----------------------------------------------------------------------
         clc 
         rts 
 
-_8b11:
+_8b11:                                                                  ;$8B11
         ;-----------------------------------------------------------------------
         lda _1d0e
         eor # %11111111
         sta _1d0e
         jmp _8ae7
 
-_8b1c:
+_8b1c:                                                                  ;$8B1C
         ;-----------------------------------------------------------------------
         jsr _8a38
         jsr _8c0d
@@ -5782,7 +5783,7 @@ _8b1c:
         sec 
         rts 
 
-_8b27:
+_8b27:                                                                  ;$8B27
         ;-----------------------------------------------------------------------
         jsr _8a38
         jsr _8a1d
@@ -5792,7 +5793,7 @@ _8b27:
         jsr print_docked_str
         
         ldx # $4c
-_8b37:
+_8b37:                                                                  ;$8B37
         lda $0499, x            ; $0500+?
         sta _25b3, x
         dex 
@@ -5855,17 +5856,17 @@ _8b37:
         clc 
         rts 
 
-_8bbb:
+_8bbb:                                                                  ;$8BBB
         jmp _8c61
 
 ;===============================================================================
 
-_8bbe:
+_8bbe:                                                                  ;$8BBE
         .byte   $07
-_8bbf:
+_8bbf:                                                                  ;$8BBF
         .byte   $07
 
-_8bc0:
+_8bc0:                                                                  ;$8BC0
         jsr _784f
         
         lda # MEM_IO_KERNAL
@@ -5906,12 +5907,12 @@ _8bc0:
         cmp # $34
         rts 
 
-_8c0b:
+_8c0b:                                                                  ;$8C0B
         .byte   $08, $01
 
 ;===============================================================================
 
-_8c0d:
+_8c0d:                                                                  ;$8C0D
         jsr _8bc0
         lda # $00
         ldx # $00
@@ -5942,16 +5943,16 @@ _8c0d:
         lda $cf00               ;?
         bmi _8c55
         ldy # $4c
-_8c4a:
+_8c4a:                                                                  ;$8C4A
         lda $cf00, y            ;?
         sta _25b3, y
         dey 
         bpl _8c4a
-_8c53:
+_8c53:                                                                  ;$8C53
         sec 
         rts 
 
-_8c55:
+_8c55:                                                                  ;$8C55
         lda # $09
         jsr print_docked_str
         
@@ -5960,12 +5961,12 @@ _8c55:
 
 ;===============================================================================
 
-_8c60:
+_8c60:                                                                  ;$8C60
         rts 
 
 ;===============================================================================
 
-_8c61:
+_8c61:                                                                  ;$8C61
         lda # $ff
         jsr print_docked_str
 
@@ -5974,11 +5975,11 @@ _8c61:
 ;$8c6c:
         rts 
 
-_8c6d:
+_8c6d:                                                                  ;$8C6D
         ldx # $40
         lda # $00
         sta $7d
-_8c73:
+_8c73:                                                                  ;$8C73
         sta _8d0c, x
         dex 
         bpl _8c73
@@ -5988,7 +5989,7 @@ _8c73:
 
 ;===============================================================================
 
-_8c7b:
+_8c7b:                                                                  ;$8C7B
 .export _8c7b
         ldx # $00
         jsr _7c11
@@ -5998,7 +5999,7 @@ _8c7b:
 
         ldx # $06
         jsr _7c11
-_8c8a:
+_8c8a:                                                                  ;$8C8A
 .export _8c8a
         lda ZP_POLYOBJ01_XPOS_pt1
         ora ZP_POLYOBJ01_YPOS_pt1
@@ -6009,7 +6010,7 @@ _8c8a:
         lda ZP_POLYOBJ01_XPOS_pt2
         ora ZP_POLYOBJ01_YPOS_pt2
         ora ZP_POLYOBJ01_ZPOS_pt2
-_8c9a:
+_8c9a:                                                                  ;$8C9A
         asl ZP_POLYOBJ01_POS
         rol 
         bcs _8cad
@@ -6021,7 +6022,7 @@ _8c9a:
         asl ZP_POLYOBJ01_ZPOS_pt1
         rol ZP_POLYOBJ01_ZPOS_pt2
         bcc _8c9a
-_8cad:
+_8cad:                                                                  ;$8CAD
 .export _8cad
         lda ZP_POLYOBJ01_XPOS_pt2
         lsr 
@@ -6035,7 +6036,7 @@ _8cad:
         lsr 
         ora ZP_POLYOBJ01_ZPOS_pt3
         sta ZP_VAR_X2
-_8cc2:
+_8cc2:                                                                  ;$8CC2
         lda ZP_VAR_X
         jsr _3986
         sta $9b
@@ -6076,70 +6077,70 @@ _8cc2:
 ; perhaps this is a text-buffer?
 ; all these labels would just be offsets
 
-_8d0c:
+_8d0c:                                                                  ;$8D0C
         .byte   $31, $32, $33                   ; '1', '2', '3'?
-_8d0f:
+_8d0f:                                                                  ;$8D0F
 .export _8d0f
         .byte   $34                             ; '4'?
-_8d10:
+_8d10:                                                                  ;$8D10
 .export _8d10
         .byte   $35, $36, $37                   ; '5', '6', '7'?
-_8d13:
+_8d13:                                                                  ;$8D13
 .export _8d13
         .byte   $38, $39                        ; '8', '9'?
-_8d15:
+_8d15:                                                                  ;$8D15
 .export _8d15
         .byte   $41, $42, $43                   ; 'A', 'B', 'C'?
-_8d18:
+_8d18:                                                                  ;$8D18
         .byte   $44, $45, $46, $30, $31         ; 'D', 'E', 'F', '0', '1'?
-_8d1d:
+_8d1d:                                                                  ;$8D1D
         .byte   $32, $33, $34                   ; '2', '3', '4'?
-_8d20:
+_8d20:                                                                  ;$8D20
         .byte   $35, $36, $37                   ; '5', '6', '7'?
-_8d23:
+_8d23:                                                                  ;$8D23
 .export _8d23
         .byte   $38, $39, $41, $42, $43         ; '8', '9', 'A', 'B', 'C'?
-_8d28:
+_8d28:                                                                  ;$8D28
 .export _8d28
         .byte   $44, $45                        ; 'D', 'E'?
-_8d2a:
+_8d2a:                                                                  ;$8D2A
 .export _8d2a
         .byte   $46, $30, $31, $32              ; 'F', '0', '1', '2'?
-_8d2e:
+_8d2e:                                                                  ;$8D2E
 .export _8d2e
         .byte   $33                             ; '3'?
-_8d2f:
+_8d2f:                                                                  ;$8D2F
         .byte   $34, $35, $36, $37, $38, $39    ; '4', '5', '6', '7', '8', '9'?
-_8d35:
+_8d35:                                                                  ;$8D35
 .export _8d35
         .byte   $41                             ; 'A'?
-_8d36:
+_8d36:                                                                  ;$8D36
 .export _8d36
         .byte   $42, $43                        ; 'B', 'C'?
-_8d38:
+_8d38:                                                                  ;$8D38
 .export _8d38
         .byte   $44, $45, $46, $30, $31         ; 'D', 'E', 'F', '0', '1'?
-_8d3d:
+_8d3d:                                                                  ;$8D3D
         .byte   $32                             ; '2'?
-_8d3e:
+_8d3e:                                                                  ;$8D3E
 .export _8d3e
         .byte   $33                             ; '3'?
-_8d3f:
+_8d3f:                                                                  ;$8D3F
         .byte   $34, $35, $36                   ; '4', '5', '6'?
-_8d42:
+_8d42:                                                                  ;$8D4F
 .export _8d42
         .byte   $37, $38, $39                   ; '7', '8', '9'?
-_8d45:
+_8d45:                                                                  ;$8D45
         .byte   $41, $42, $43, $44, $45         ; 'A', 'B', 'C', 'D', 'E'?
-_8d4a:
+_8d4a:                                                                  ;$8D4A
         .byte   $46                             ; 'F'?
-_8d4b:
+_8d4b:                                                                  ;$8D4B
         .byte   $30, $31, $32, $33              ; '0', '1', '2', '3'?
         .byte   $34, $35, $36, $37              ; '4', '5', '6', '7'?
 
 ;===============================================================================
 
-_8d53:
+_8d53:                                                                  ;$8D53
 .export _8d53
        .phy                     ; push Y to stack (via A)
         
@@ -6156,7 +6157,7 @@ _8d53:
         and # %00011111
         eor # %00011111
         bne _8db1
-_8d73:
+_8d73:                                                                  ;$8D73
         clc 
         ldx # $00
         sei 
@@ -6167,23 +6168,23 @@ _8d73:
         beq _8daa
         ldx # $40
         lda # $fe
-_8d85:
+_8d85:                                                                  ;$8D85
         sei 
         sta $dc00               ;cia1: data port register a
         pha 
         ldy # $08
-_8d8c:
+_8d8c:                                                                  ;$8D8C
         lda $dc01               ;cia1: data port register b
         cmp $dc01               ;cia1: data port register b
         bne _8d8c
         cli 
-_8d95:
+_8d95:                                                                  ;$8D95
         lsr 
         bcs _8d9e
         dec _8d0c, x
         stx $7d
         sec 
-_8d9e:
+_8d9e:                                                                  ;$8D9E
         dex 
         bmi _8da8
         dey 
@@ -6191,41 +6192,41 @@ _8d9e:
         pla 
         rol 
         bne _8d85
-_8da8:
+_8da8:                                                                  ;$8DA8
         pla 
         sec 
-_8daa:
+_8daa:                                                                  ;$8DAA
         lda # $7f
         sta $dc00               ;cia1: data port register a
         bne _8dfd
-_8db1:
+_8db1:                                                                  ;$8DB1
         lsr 
         bcc _8db7
         stx _8d3f
-_8db7:
+_8db7:                                                                  ;$8DB7
         lsr 
         bcc _8dbd
         stx _8d35
-_8dbd:
+_8dbd:                                                                  ;$8DBD
         lsr 
         bcc _8dc3
         stx _8d1d
-_8dc3:
+_8dc3:                                                                  ;$8DC3
         lsr 
         bcc _8dc9
         stx _8d20
-_8dc9:
+_8dc9:                                                                  ;$8DC9
         lsr 
         bcc _8dcf
         stx _8d42
-_8dcf:
+_8dcf:                                                                  ;$8DCF
         lda _1d0a
         beq _8de0
         lda _8d35
         ldx _8d3f
         sta _8d3f
         stx _8d35
-_8de0:
+_8de0:                                                                  ;$8DE0
         lda _1d0b
         beq _8dfd
         lda _8d35
@@ -6236,7 +6237,7 @@ _8de0:
         ldx _8d20
         sta _8d20
         stx _8d1d
-_8dfd:
+_8dfd:                                                                  ;$8DFD
         lda $a0
         beq _8e1e
         lda # $00
@@ -6249,7 +6250,7 @@ _8dfd:
         sta _8d2a
         sta _8d38
         sta _8d23
-_8e1e:
+_8e1e:                                                                  ;$8E1E
         lda # MEM_64K
         jsr set_memory_layout
 
@@ -6261,7 +6262,7 @@ _8e1e:
 
 ;===============================================================================
 
-_8e29:
+_8e29:                                                                  ;$8E29
 .export _8e29
         ldx $047f
         lda $0454, x
@@ -6274,14 +6275,14 @@ _8e29:
         jsr _2c50
         cmp # $02
         bcc _8e7c
-_8e44:
+_8e44:                                                                  ;$8E44
         ldy $f92d
         bmi _8e52
         ldy # $25
         jsr _2c4e
         cmp # $02
         bcc _8e7c
-_8e52:
+_8e52:                                                                  ;$8E52
         lda # $81
         sta $9c
         sta $9b
@@ -6303,7 +6304,7 @@ _8e52:
         ldx $0486
         jmp _a6ba
 
-_8e7c:
+_8e7c:                                                                  ;$8E7C
         ldy # $06
         jmp _a858
 ; $8e81
@@ -6316,7 +6317,7 @@ _8e7c:
         .byte   $e8, $e2, $e6, $e7, $c2, $d1, $c1, $60
         .byte   $70, $23, $35, $65, $22, $45, $52, $37
 
-_8e92:
+_8e92:                                                                  ;$8E92
         ldx # $06
         lda _8d0c, x
         tax 
@@ -6336,7 +6337,7 @@ _8e92:
         inx 
         beq _8eab
         ldx # $ff
-_8eab:
+_8eab:                                                                  ;$8EAB
         lda # MEM_64K
         jsr set_memory_layout
 
@@ -6355,7 +6356,7 @@ _8eab:
 
 ;===============================================================================
 
-_8eba:
+_8eba:                                                                  ;$8EBA
         txa 
         cmp _1d14, y
         bne _8ed4
@@ -6370,15 +6371,15 @@ _8eba:
 
         pla 
         tay 
-_8ed4:
+_8ed4:                                                                  ;$8ED4
         rts 
 
 ;===============================================================================
 
-_8ed5:
+_8ed5:                                                                  ;$8ED5
         lda # $00
         ldy # $38
-_8ed9:
+_8ed9:                                                                  ;$8ED9
         sta _8d0c, y
         dey 
         bne _8ed9
@@ -6387,7 +6388,7 @@ _8ed9:
 
 ;===============================================================================
 
-_8ee3:
+_8ee3:                                                                  ;$8EE3
         jsr _8d53
         lda $0480
         beq _8f4d
@@ -6400,13 +6401,13 @@ _8ee3:
         lda $96                 ; player's ship speed?
         sta ZP_POLYOBJ_VERTX_LO
         jsr _34bc
-_8eff:
+_8eff:                                                                  ;$8EFF
         lda ZP_POLYOBJ_VERTX_LO
-_8f01:
+_8f01:                                                                  ;$8F01
         cmp # $16
         bcc _8f07
         lda # $16
-_8f07:
+_8f07:                                                                  ;$8F07
         sta $96                 ; player's ship speed?
         lda # $ff
         ldx # $09
@@ -6414,25 +6415,25 @@ _8f07:
         beq _8f18
         bmi _8f15
         ldx # $04
-_8f15:
+_8f15:                                                                  ;$8F15
         sta _8d0c, x
-_8f18:
+_8f18:                                                                  ;$8F18
         lda # $80
         ldx # $11
         asl $26
         beq _8f35
         bcc _8f24
         ldx # $14
-_8f24:
+_8f24:                                                                  ;$8F24
         bit $26
         bpl _8f2f
         lda # $40
         sta $048d
         lda # $00
-_8f2f:
+_8f2f:                                                                  ;$8F2F
         sta _8d0c, x
         lda $048d
-_8f35:
+_8f35:                                                                  ;$8F35
         sta $048d
         lda # $80
         ldx # $29
@@ -6440,32 +6441,32 @@ _8f35:
         beq _8f4a
         bcs _8f44
         ldx # $33
-_8f44:
+_8f44:                                                                  ;$8F44
         sta _8d0c, x
         lda $048e
-_8f4a:
+_8f4a:                                                                  ;$8F4A
         sta $048e
-_8f4d:
+_8f4d:                                                                  ;$8F4D
         ldx $048d
         lda # $0e
         ldy _8d1d
         beq _8f5a
         jsr _3c6f
-_8f5a:
+_8f5a:                                                                  ;$8F5A
         ldy _8d20
         beq _8f62
         jsr _3c7f
-_8f62:
+_8f62:                                                                  ;$8F62
         stx $048d
         ldx $048e
         ldy _8d35
         beq _8f70
         jsr _3c7f
-_8f70:
+_8f70:                                                                  ;$8F70
         ldy _8d3f
         beq _8f78
         jsr _3c6f
-_8f78:
+_8f78:                                                                  ;$8F78
         stx $048e
         lda _1d0c
         beq _8f9d
@@ -6476,85 +6477,85 @@ _8f78:
         ora _8d20
         bne _8f92
         stx $048d
-_8f92:
+_8f92:                                                                  ;$8F92
         lda _8d35
         ora _8d3f
         bne _8f9d
         stx $048e
-_8f9d:
+_8f9d:                                                                  ;$8F9D
         ldx $7d
         stx $0441
         cpx # $40
         bne _8fe9
-_8fa6:
+_8fa6:                                                                  ;$8FA6
         jsr wait_for_frame
         jsr _8d53
         cpx # $02
         bne _8fb3
         stx _1d05
-_8fb3:
+_8fb3:                                                                  ;$8FB3
         ldy # $00
-_8fb5:
+_8fb5:                                                                  ;$8FB5
         jsr _8eba
         iny 
         cpy # $0a
         bne _8fb5
         bit _1d08
         bpl _8fca
-_8fc2:
+_8fc2:                                                                  ;$8FC2
         jsr _8eba
         iny 
         cpy # $0d
         bne _8fc2
-_8fca:
+_8fca:                                                                  ;$8FCA
         lda _1d0d
         cmp _1d02
         beq _8fd5
         jsr _9231
-_8fd5:
+_8fd5:                                                                  ;$8FD5
         cpx # $33
         bne _8fde
         lda # $00
         sta _1d05
-_8fde:
+_8fde:                                                                  ;$8FDE
         cpx # $07
         bne _8fe5
         jmp _8882
 
-_8fe5:
+_8fe5:                                                                  ;$8FE5
         cpx # $0d
         bne _8fa6
-_8fe9:
+_8fe9:                                                                  ;$8FE9
         rts 
 
 ;===============================================================================
 
-_8fea:
+_8fea:                                                                  ;$8FEA
         sty $9e
-_8fec:
+_8fec:                                                                  ;$8FEC
         ldy # 2
         jsr wait_frames
 
         jsr _8d53
         bne _8fec
-_8ff6:
+_8ff6:                                                                  ;$8FF6
         jsr _8d53
         beq _8ff6
         lda _927e, x
         ldy $9e
         tax 
-_9001:
+_9001:                                                                  ;$9001
         rts 
 
 ;===============================================================================
 
-_9002:
+_9002:                                                                  ;$9002
         stx $048b
         pha 
         lda $04e6
         jsr _905d
         pla 
-_900d:
+_900d:                                                                  ;$900D
 .export _900d
         pha 
         lda # $10
@@ -6562,7 +6563,7 @@ _900d:
         beq _9019+1
         jsr txt_docked_token15
         lda # $19
-_9019:
+_9019:                                                                  ;$9019
         bit _3385
         ldx # $00
         stx $34
@@ -6583,7 +6584,7 @@ _9019:
         lda # $00
         bcc _9042
         lda # $0a
-_9042:
+_9042:                                                                  ;$9042
         sta txt_buffer_index
         
         lda $04e6
@@ -6598,7 +6599,7 @@ _9042:
         
         jsr txt_docked_token0F
         lda $04e6
-_905d:
+_905d:                                                                  ;$905D
         jsr print_flight_token
 
         lsr $048c
@@ -6610,7 +6611,7 @@ _905d:
 
 ;===============================================================================
 
-_906a:
+_906a:                                                                  ;$906A
         jsr get_random_number
         bmi _9001
         cpx # $16
@@ -6628,7 +6629,7 @@ _906a:
         adc # $d0
         jmp _900d
 
-_908f:
+_908f:                                                                  ;$908F
         beq _909b
         cpx # $12
         beq _90a0
@@ -6636,23 +6637,23 @@ _908f:
         adc # $5d
         jmp _900d
 
-_909b:
+_909b:                                                                  ;$909B
         lda # ZP_VAR_Y
         jmp _900d
 
-_90a0:
+_90a0:                                                                  ;$90A0
         lda # $6f
         jmp _900d
 
 ;===============================================================================
 
-_90a5:
+_90a5:                                                                  ;$90A5
         .byte   $13
-_90a6:
+_90a6:                                                                  ;$90A6
         .byte   $82
-_90a7:
+_90a7:                                                                  ;$90A7
         .byte   $06
-_90a8:
+_90a8:                                                                  ;$90A8
         .byte   $01, $14, $81, $0a, $03, $41, $83, $02
         .byte   $07, $28, $85, $e2, $1f, $53, $85, $fb
         .byte   $0f, $c4, $08, $36, $03, $eb, $1d, $08
@@ -6667,7 +6668,7 @@ _90a8:
         and ZP_POLYOBJ_ZPOS_pt1, x
         cpy # $07
 
-_90e9:
+_90e9:                                                                  ;$90E9
         tya 
         ldy # $02
         jsr _91b8
@@ -6676,7 +6677,7 @@ _90e9:
 
 ;===============================================================================
 
-_90f4:
+_90f4:                                                                  ;$90F4
         tax 
         lda ZP_VAR_Y
         and # %01100000
@@ -6688,7 +6689,7 @@ _90f4:
 
 ;===============================================================================
 
-_9105:
+_9105:                                                                  ;$9105
         lda ZP_POLYOBJ_M0x0_HI
         sta ZP_VAR_X
         lda ZP_POLYOBJ_M0x1_HI
@@ -6710,7 +6711,7 @@ _9105:
         lda # $00
         jsr _91b8
         sta ZP_POLYOBJ_M1x0_HI
-_9131:
+_9131:                                                                  ;$9131
         lda ZP_POLYOBJ_M1x0_HI
         sta ZP_VAR_X
         lda ZP_POLYOBJ_M1x1_HI
@@ -6749,7 +6750,7 @@ _9131:
         sta ZP_POLYOBJ_M2x2_HI
         lda # $00
         ldx # $0e
-_9184:
+_9184:                                                                  ;$9184
         sta ZP_POLYOBJ_M0x0_LO, x
         dex 
         dex 
@@ -6758,19 +6759,19 @@ _9184:
 
 ;===============================================================================
 
-_918b:
+_918b:                                                                  ;$918B
         tay 
         and # %01111111
         cmp $9a
         bcs _91b2
         ldx # $fe
         stx $bb
-_9196:
+_9196:                                                                  ;$9196
         asl 
         cmp $9a
         bcc _919d
         sbc $9a
-_919d:
+_919d:                                                                  ;$919D
         rol $bb
         bcs _9196
         lda $bb
@@ -6785,7 +6786,7 @@ _919d:
         ora $bb
         rts 
 
-_91b2:
+_91b2:                                                                  ;$91B2
         tya 
         and # %10000000
         ora # %01100000
@@ -6793,7 +6794,7 @@ _91b2:
 
 ;===============================================================================
 
-_91b8:
+_91b8:                                                                  ;$91B8
         sta ZP_VAR_P3
         lda ZP_POLYOBJ_M0x0_HI, x
         sta $9a
@@ -6818,34 +6819,34 @@ _91b8:
         rol ZP_VAR_P2
         asl $9a
         lsr $9a
-_91eb:
+_91eb:                                                                  ;$91EB
         rol 
         cmp $9a
         bcc _91f2
         sbc $9a
-_91f2:
+_91f2:                                                                  ;$91F2
         rol ZP_VAR_P1
         rol ZP_VAR_P2
         dex 
         bne _91eb
         lda ZP_VAR_P1
         ora $bb
-_91fd:
+_91fd:                                                                  ;$91FD
         rts 
 
 ;===============================================================================
 
-_91fe:
+_91fe:                                                                  ;$91FE
         lda # $63
         ldx # $c1
         bne _920d
-_9204:
+_9204:                                                                  ;$9204
 .export _9204
         bit _1d11
         bmi _91fe
         lda # $2c
         ldx # $b7
-_920d:
+_920d:                                                                  ;$920D
         sta _b4d0
         stx _b4d1
         bit _1d03
@@ -6854,7 +6855,7 @@ _920d:
         bmi _9222
         bit _1d0d
         bmi _91fd
-_9222:
+_9222:                                                                  ;$9222
         lda # MEM_IO_ONLY
         jsr set_memory_layout
 
@@ -6862,18 +6863,18 @@ _9222:
         lda # $ff
         sta _1d03
         bne _9266
-_9231:
+_9231:                                                                  ;$9231
         sta _1d02
         eor # %11111111
         and $0480
         bmi _9222
-_923b:
+_923b:                                                                  ;$923B
 .export _923b
         bit _1d13
         bmi _91fd               ; negative value?
         bit _1d10
         bmi _9204               ; negative value?
-_9245:
+_9245:                                                                  ;$9245
         bit _1d03
         bpl _91fd               ; positive value? (bit 7 is off)
 
@@ -6886,14 +6887,14 @@ _9245:
         sta _1d03
         ldx # $18
         sei 
-_925a:
+_925a:                                                                  ;$925A
         sta $d400, x            ;voice 1: frequency control - low-byte
         dex 
         bpl _925a
         lda # $0f
         sta $d418               ;select filter mode and volume
         cli 
-_9266:
+_9266:                                                                  ;$9266
         lda # MEM_64K
         jmp set_memory_layout
 
@@ -6903,31 +6904,31 @@ _9266:
 ;$926b:
         .byte   $02, $0f, $31, $32, $33, $34, $35, $36
         .byte   $37
-_9274:
+_9274:                                                                  ;$9274
         .byte   $38, $39, $30, $31, $32, $33, $34, $35
         .byte   $36, $37
-_927e:
-        .byte   $00, $01, $51, $02 ,$20, $32, $03, $1b                  ;$927e
+_927e:                                                                  ;$927E
+        .byte   $00, $01, $51, $02 ,$20, $32, $03, $1b                  ;$927E
         .byte   $31, $2f, $5e, $3d ,$05, $06, $3b, $2a                  ;$9286
-        .byte   $60, $2c, $40, $3a ,$2e, $2d, $4c, $50                  ;$928e
+        .byte   $60, $2c, $40, $3a ,$2e, $2d, $4c, $50                  ;$928E
         .byte   $2b, $4e, $4f, $4b ,$4d, $30, $4a, $49                  ;$9296
-        .byte   $39, $56, $55, $48 ,$42, $38, $47, $59                  ;$929e
-        .byte   $37, $58, $54, $46 ,$43, $36, $44, $52                  ;$92a6
-        .byte   $35, $07, $45, $53 ,$5a, $34, $41, $57                  ;$92ae
-        .byte   $33, $08, $09, $0a ,$0b, $0c, $0e, $0d                  ;$92b6
-        .byte   $7f, $a9, $05, $20 ,$7f, $82, $a9, $00                  ;$92be
-        .byte   $8d, $15, $d0, $a9 ,$04, $78, $8d, $8e                  ;$92c6
-        .byte   $82, $a5, $01, $29 ,$f8, $0d, $8e, $82                  ;$92ce
-        .byte   $85, $01, $58, $60 ,$04, $a5, $2e, $8d                  ;$92d6
-        .byte   $f2, $04, $a5, $2f ,$8d, $f3, $04, $60                  ;$92de
-        .byte   $a6, $9d, $20, $f3 ,$82, $a6, $9d, $4c                  ;$92e6
-        .byte   $2f, $20, $20, $47 ,$84, $20, $4f, $7b                  ;$92ee
-        .byte   $8d, $53, $04, $8d ,$5f, $04, $20, $0e                  ;$92f6
-        .byte   $b1, $a9                                                ;$92fe
+        .byte   $39, $56, $55, $48 ,$42, $38, $47, $59                  ;$929E
+        .byte   $37, $58, $54, $46 ,$43, $36, $44, $52                  ;$92A6
+        .byte   $35, $07, $45, $53 ,$5a, $34, $41, $57                  ;$92AE
+        .byte   $33, $08, $09, $0a ,$0b, $0c, $0e, $0d                  ;$92B6
+        .byte   $7f, $a9, $05, $20 ,$7f, $82, $a9, $00                  ;$92BE
+        .byte   $8d, $15, $d0, $a9 ,$04, $78, $8d, $8e                  ;$92C6
+        .byte   $82, $a5, $01, $29 ,$f8, $0d, $8e, $82                  ;$92CE
+        .byte   $85, $01, $58, $60 ,$04, $a5, $2e, $8d                  ;$92D6
+        .byte   $f2, $04, $a5, $2f ,$8d, $f3, $04, $60                  ;$92DE
+        .byte   $a6, $9d, $20, $f3 ,$82, $a6, $9d, $4c                  ;$92E6
+        .byte   $2f, $20, $20, $47 ,$84, $20, $4f, $7b                  ;$92EE
+        .byte   $8d, $53, $04, $8d ,$5f, $04, $20, $0e                  ;$92F6
+        .byte   $b1, $a9                                                ;$92FE
 
 ;===============================================================================
 
-_9300:
+_9300:                                                                  ;$9300
 .export _9300
         .byte   $06, $00, $20, $32, $40, $4a, $52, $59                  ;$9300
         .byte   $5f, $65, $6a, $6e, $72, $76, $79, $7d                  ;$9308
@@ -6949,23 +6950,23 @@ _9300:
         .byte   $e2, $e3, $e3, $e3, $e4, $e4, $e4, $e5                  ;$9388
         .byte   $e5, $e5, $e6, $e6, $e6, $e7, $e7, $e7                  ;$9390
         .byte   $e7, $e8, $e8, $e8, $e9, $e9, $e9, $ea                  ;$9398
-        .byte   $ea, $ea, $ea, $eb, $eb, $eb, $ec, $ec                  ;$93a0
-        .byte   $ec, $ec, $ed, $ed, $ed, $ed, $ee, $ee                  ;$93a8
-        .byte   $ee, $ee, $ef, $ef, $ef, $ef, $f0, $f0                  ;$93b0
-        .byte   $f0, $f1, $f1, $f1, $f1, $f1, $f2, $f2                  ;$93b8
-        .byte   $f2, $f2, $f3, $f3, $f3, $f3, $f4, $f4                  ;$93c0
-        .byte   $f4, $f4, $f5, $f5, $f5, $f5, $f5, $f6                  ;$93c8
-        .byte   $f6, $f6, $f6, $f7, $f7, $f7, $f7, $f7                  ;$93d0
-        .byte   $f8, $f8, $f8, $f8, $f9, $f9, $f9, $f9                  ;$93d8
-        .byte   $f9, $fa, $fa, $fa, $fa, $fa, $fb, $fb                  ;$93e0
-        .byte   $fb, $fb, $fb, $fc, $fc, $fc, $fc, $fc                  ;$93e8
-        .byte   $fd, $fd, $fd, $fd, $fd, $fd, $fe, $fe                  ;$93f0
-        .byte   $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff                  ;$93f8
+        .byte   $ea, $ea, $ea, $eb, $eb, $eb, $ec, $ec                  ;$93A0
+        .byte   $ec, $ec, $ed, $ed, $ed, $ed, $ee, $ee                  ;$93A8
+        .byte   $ee, $ee, $ef, $ef, $ef, $ef, $f0, $f0                  ;$93B0
+        .byte   $f0, $f1, $f1, $f1, $f1, $f1, $f2, $f2                  ;$93B8
+        .byte   $f2, $f2, $f3, $f3, $f3, $f3, $f4, $f4                  ;$93C0
+        .byte   $f4, $f4, $f5, $f5, $f5, $f5, $f5, $f6                  ;$93C8
+        .byte   $f6, $f6, $f6, $f7, $f7, $f7, $f7, $f7                  ;$93D0
+        .byte   $f8, $f8, $f8, $f8, $f9, $f9, $f9, $f9                  ;$93D8
+        .byte   $f9, $fa, $fa, $fa, $fa, $fa, $fb, $fb                  ;$93E0
+        .byte   $fb, $fb, $fb, $fc, $fc, $fc, $fc, $fc                  ;$93E8
+        .byte   $fd, $fd, $fd, $fd, $fd, $fd, $fe, $fe                  ;$93F0
+        .byte   $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff                  ;$93F8
 
 
 ;===============================================================================
 
-_9400:
+_9400:                                                                  ;$9400
 .export _9400
         .byte   $ae, $00, $00, $b8, $00, $4d, $b8, $d5                  ;$9400
         .byte   $ff, $70, $4d, $b3, $b8, $6a, $d5, $05                  ;$9408
@@ -6987,22 +6988,22 @@ _9400:
         .byte   $cc, $23, $79, $ce, $23, $77, $ca, $1d                  ;$9488
         .byte   $70, $c1, $13, $63, $b3, $03, $52, $a1                  ;$9490
         .byte   $ef, $3c, $89, $d6, $22, $6d, $b8, $03                  ;$9498
-        .byte   $4d, $96, $e0, $28, $71, $b8, $00, $47                  ;$94a0
-        .byte   $8d, $d4, $19, $5f, $a3, $e8, $2c, $70                  ;$94a8
-        .byte   $b3, $f6, $39, $7b, $bd, $fe, $3f, $80                  ;$94b0
-        .byte   $c1, $01, $40, $80, $bf, $fd, $3c, $7a                  ;$94b8
-        .byte   $b8, $f5, $32, $6f, $ab, $e7, $23, $5f                  ;$94c0
-        .byte   $9a, $d5, $10, $4a, $84, $be, $f7, $31                  ;$94c8
-        .byte   $6a, $a2, $db, $13, $4b, $82, $ba, $f1                  ;$94d0
-        .byte   $28, $5e, $94, $cb, $00, $36, $6b, $a0                  ;$94d8
-        .byte   $d5, $0a, $3e, $73, $a7, $da, $0e, $41                  ;$94e0
-        .byte   $74, $a7, $da, $0c, $3e, $70, $a2, $d3                  ;$94e8
-        .byte   $05, $36, $67, $98, $c8, $f8, $29, $59                  ;$94f0
-        .byte   $88, $b8, $e7, $16, $45, $74, $a3, $d1                  ;$94f8
+        .byte   $4d, $96, $e0, $28, $71, $b8, $00, $47                  ;$94A0
+        .byte   $8d, $d4, $19, $5f, $a3, $e8, $2c, $70                  ;$94A8
+        .byte   $b3, $f6, $39, $7b, $bd, $fe, $3f, $80                  ;$94B0
+        .byte   $c1, $01, $40, $80, $bf, $fd, $3c, $7a                  ;$94B8
+        .byte   $b8, $f5, $32, $6f, $ab, $e7, $23, $5f                  ;$94C0
+        .byte   $9a, $d5, $10, $4a, $84, $be, $f7, $31                  ;$94C8
+        .byte   $6a, $a2, $db, $13, $4b, $82, $ba, $f1                  ;$94D0
+        .byte   $28, $5e, $94, $cb, $00, $36, $6b, $a0                  ;$94D8
+        .byte   $d5, $0a, $3e, $73, $a7, $da, $0e, $41                  ;$94E0
+        .byte   $74, $a7, $da, $0c, $3e, $70, $a2, $d3                  ;$94E8
+        .byte   $05, $36, $67, $98, $c8, $f8, $29, $59                  ;$94F0
+        .byte   $88, $b8, $e7, $16, $45, $74, $a3, $d1                  ;$94F8
 
 ;===============================================================================
 
-_9500:
+_9500:                                                                  ;$9500
 .export _9500
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9500
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9508
@@ -7024,22 +7025,22 @@ _9500:
         .byte   $13, $13, $13, $14, $14, $15, $15, $16                  ;$9588
         .byte   $16, $17, $17, $18, $18, $19, $19, $1a                  ;$9590
         .byte   $1a, $1b, $1c, $1c, $1d, $1d, $1e, $1f                  ;$9598
-        .byte   $20, $20, $21, $22, $22, $23, $24, $25                  ;$95a0
-        .byte   $26, $26, $27, $28, $29, $2a, $2b, $2c                  ;$95a8
-        .byte   $2d, $2e, $2f, $30, $31, $32, $33, $34                  ;$95b0
-        .byte   $35, $36, $38, $39, $3a, $3b, $3d, $3e                  ;$95b8
-        .byte   $40, $41, $42, $44, $45, $47, $48, $4a                  ;$95c0
-        .byte   $4c, $4d, $4f, $51, $52, $54, $56, $58                  ;$95c8
-        .byte   $5a, $5c, $5e, $60, $62, $64, $67, $69                  ;$95d0
-        .byte   $6b, $6d, $70, $72, $75, $77, $7a, $7d                  ;$95d8
-        .byte   $80, $82, $85, $88, $8b, $8e, $91, $94                  ;$95e0
-        .byte   $98, $9b, $9e, $a2, $a5, $a9, $ad, $b1                  ;$95e8
-        .byte   $b5, $b8, $bd, $c1, $c5, $c9, $ce, $d2                  ;$95f0
-        .byte   $d7, $db, $e0, $e5, $ea, $ef, $f5, $fa                  ;$95f8
+        .byte   $20, $20, $21, $22, $22, $23, $24, $25                  ;$95A0
+        .byte   $26, $26, $27, $28, $29, $2a, $2b, $2c                  ;$95A8
+        .byte   $2d, $2e, $2f, $30, $31, $32, $33, $34                  ;$95B0
+        .byte   $35, $36, $38, $39, $3a, $3b, $3d, $3e                  ;$95B8
+        .byte   $40, $41, $42, $44, $45, $47, $48, $4a                  ;$95C0
+        .byte   $4c, $4d, $4f, $51, $52, $54, $56, $58                  ;$95C8
+        .byte   $5a, $5c, $5e, $60, $62, $64, $67, $69                  ;$95D0
+        .byte   $6b, $6d, $70, $72, $75, $77, $7a, $7d                  ;$95D8
+        .byte   $80, $82, $85, $88, $8b, $8e, $91, $94                  ;$95E0
+        .byte   $98, $9b, $9e, $a2, $a5, $a9, $ad, $b1                  ;$95E8
+        .byte   $b5, $b8, $bd, $c1, $c5, $c9, $ce, $d2                  ;$95F0
+        .byte   $d7, $db, $e0, $e5, $ea, $ef, $f5, $fa                  ;$95F8
 
 ;===============================================================================
 
-_9600:
+_9600:                                                                  ;$9600
 .export _9600
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9600
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9608
@@ -7061,18 +7062,18 @@ _9600:
         .byte   $13, $13, $14, $14, $14, $15, $15, $16                  ;$9688
         .byte   $16, $17, $17, $18, $18, $19, $1a, $1a                  ;$9690
         .byte   $1b, $1b, $1c, $1d, $1d, $1e, $1e, $1f                  ;$9698
-        .byte   $20, $21, $21, $22, $23, $24, $24, $25                  ;$96a0
-        .byte   $26, $27, $28, $29, $29, $2a, $2b, $2c                  ;$96a8
-        .byte   $2d, $2e, $2f, $30, $31, $32, $34, $35                  ;$96b0
-        .byte   $36, $37, $38, $3a, $3b, $3c, $3d, $3f                  ;$96b8
-        .byte   $40, $42, $43, $45, $46, $48, $49, $4b                  ;$96c0
-        .byte   $4c, $4e, $50, $52, $53, $55, $57, $59                  ;$96c8
-        .byte   $5b, $5d, $5f, $61, $63, $65, $68, $6a                  ;$96d0
-        .byte   $6c, $6f, $71, $74, $76, $79, $7b, $7e                  ;$96d8
-        .byte   $81, $84, $87, $8a, $8d, $90, $93, $96                  ;$96e0
-        .byte   $99, $9d, $a0, $a4, $a7, $ab, $af, $b3                  ;$96e8
-        .byte   $b6, $ba, $bf, $c3, $c7, $cb, $d0, $d4                  ;$96f0
-        .byte   $d9, $de, $e3, $e8, $ed, $f2, $f7, $fd                  ;$96f8
+        .byte   $20, $21, $21, $22, $23, $24, $24, $25                  ;$96A0
+        .byte   $26, $27, $28, $29, $29, $2a, $2b, $2c                  ;$96A8
+        .byte   $2d, $2e, $2f, $30, $31, $32, $34, $35                  ;$96B0
+        .byte   $36, $37, $38, $3a, $3b, $3c, $3d, $3f                  ;$96B8
+        .byte   $40, $42, $43, $45, $46, $48, $49, $4b                  ;$96C0
+        .byte   $4c, $4e, $50, $52, $53, $55, $57, $59                  ;$96C8
+        .byte   $5b, $5d, $5f, $61, $63, $65, $68, $6a                  ;$96D0
+        .byte   $6c, $6f, $71, $74, $76, $79, $7b, $7e                  ;$96D8
+        .byte   $81, $84, $87, $8a, $8d, $90, $93, $96                  ;$96E0
+        .byte   $99, $9d, $a0, $a4, $a7, $ab, $af, $b3                  ;$96E8
+        .byte   $b6, $ba, $bf, $c3, $c7, $cb, $d0, $d4                  ;$96F0
+        .byte   $d9, $de, $e3, $e8, $ed, $f2, $f7, $fd                  ;$96F8
 
 
 ;===============================================================================
@@ -7258,7 +7259,7 @@ menuscr_hi:                                                             ;$9919
 
 ;===============================================================================
 
-_9932:
+_9932:                                                                  ;$9932
         jsr _9ad8
         jsr _7d1f
         ora ZP_POLYOBJ01_XPOS_pt2
@@ -7283,10 +7284,10 @@ _9932:
         lda # $08
         jmp _a174
 
-_995b:
+_995b:                                                                  ;$995B
         pla 
         pla 
-_995d:
+_995d:                                                                  ;$995D
         lda # $f7
         and $28
         sta $28
@@ -7294,7 +7295,7 @@ _995d:
 
 ;===============================================================================
 
-_9964:
+_9964:                                                                  ;$9964
         sta [ZP_TEMP_ADDR2], y
         iny 
         iny 
@@ -7311,7 +7312,7 @@ _9964:
 
 ;===============================================================================
 
-_9978:
+_9978:                                                                  ;$9978
 .export _9978
         ldy $9b
         lda $9a
@@ -7320,20 +7321,20 @@ _9978:
         stx $9a
         lda # $08
         sta $bb
-_9986:
+_9986:                                                                  ;$9986
         cpx $9a
         bcc _9998
         bne _9990
         cpy # $40
         bcc _9998
-_9990:
+_9990:                                                                  ;$9990
         tya 
         sbc # $40
         tay 
         txa 
         sbc $9a
         tax 
-_9998:
+_9998:                                                                  ;$9998
         rol $9a
         asl $9c
         tya 
@@ -7355,7 +7356,7 @@ _9998:
 
 ;===============================================================================
 
-_99af:
+_99af:                                                                  ;$99AF
 .export _99af
         cmp $9a
         bcs _9a07
@@ -7374,11 +7375,11 @@ _99af:
         bcs _9a07
         tax 
         lda _9500, x
-_99d3:
+_99d3:                                                                  ;$99D3
         sta $9b
         rts 
 
-_99d6:
+_99d6:                                                                  ;$99D6
         ldx $b6
         lda _9300, x
         ldx $9a
@@ -7396,18 +7397,18 @@ _99d6:
         bcs _9a07
         ldx # $fe
         stx $9b
-_99ef:
+_99ef:                                                                  ;$99EF
         asl 
         bcs _99fd
         cmp $9a
         bcc _99f8
         sbc $9a
-_99f8:
+_99f8:                                                                  ;$99F8
         rol $9b
         bcs _99ef
         rts 
 
-_99fd:
+_99fd:                                                                  ;$99FD
         sbc $9a
         sec 
         rol $9b
@@ -7415,14 +7416,14 @@ _99fd:
         lda $9b
         rts 
 
-_9a07:
+_9a07:                                                                  ;$9A07
         lda # $ff
         sta $9b
         rts 
 
 ;===============================================================================
 
-_9a0c:
+_9a0c:                                                                  ;$9A0C
         eor $9c
         bmi _9a16
         lda $9a
@@ -7430,7 +7431,7 @@ _9a0c:
         adc $9b
         rts 
 
-_9a16:
+_9a16:                                                                  ;$9A16
         lda $9b
         sec 
         sbc $9a
@@ -7438,7 +7439,7 @@ _9a16:
         clc 
         rts 
 
-_9a1f:
+_9a1f:                                                                  ;$9A1F
         pha 
         lda $9c
         eor # %10000000
@@ -7450,11 +7451,11 @@ _9a1f:
 
 ;===============================================================================
 
-_9a2c:
+_9a2c:                                                                  ;$9A2C
 .export _9a2c
         ldx # $00
         ldy # $00
-_9a30:
+_9a30:                                                                  ;$9A30
         lda ZP_VAR_X
         sta $9a
         lda $45, x
@@ -7499,10 +7500,10 @@ _9a30:
 
 ;===============================================================================
 
-_9a83:
+_9a83:                                                                  ;$9A83
         jmp _7d62
 
-_9a86:
+_9a86:                                                                  ;$9A86
 .export _9a86
         lda $a5
         bmi _9a83
@@ -7530,16 +7531,16 @@ _9a86:
         lda [ZP_HULL_ADDR], y
         ldy # $02
         sta [ZP_TEMP_ADDR2], y
-_9abb:
+_9abb:                                                                  ;$9ABB
         iny 
         jsr get_random_number
         sta [ZP_TEMP_ADDR2], y
         cpy # $06
         bne _9abb
-_9ac5:
+_9ac5:                                                                  ;$9AC5
         lda ZP_POLYOBJ_ZPOS_pt3
         bpl _9ae6
-_9ac9:
+_9ac9:                                                                  ;$9AC9
         lda $28
         and # %00100000
         beq _9ad8
@@ -7548,7 +7549,7 @@ _9ac9:
         sta $28
         jmp _7866
 
-_9ad8:
+_9ad8:                                                                  ;$9AD8
         lda # $08
         bit $28
         beq _9ae5
@@ -7556,10 +7557,10 @@ _9ad8:
         sta $28
         jmp _a178
 
-_9ae5:
+_9ae5:                                                                  ;$9AE5
         rts 
 
-_9ae6:
+_9ae6:                                                                  ;$9AE6
         lda ZP_POLYOBJ_ZPOS_pt2
         cmp # $c0
         bcs _9ac9
@@ -7597,7 +7598,7 @@ _9ae6:
         lsr 
         sta $ad
         bpl _9b3a
-_9b29:
+_9b29:                                                                  ;$9B29
         ldy # $0d
         lda [ZP_HULL_ADDR], y
         cmp ZP_POLYOBJ_ZPOS_pt2
@@ -7607,7 +7608,7 @@ _9b29:
         bne _9b3a
         jmp _9932
 
-_9b3a:
+_9b3a:                                                                  ;$9B3A
         ldx # $05               ; 6-byte counter
 
         ; take a copy of matrix 2x0, 2x1 & 2x2
@@ -7625,7 +7626,7 @@ _9b3a:
         lda # $c5
         sta $9a
         ldy # $10
-_9b51:
+_9b51:                                                                  ;$9B51
         lda $0045, y
         asl 
         lda $0046, y
@@ -7637,7 +7638,7 @@ _9b51:
         dey 
         bpl _9b51
         ldx # $08
-_9b66:
+_9b66:                                                                  ;$9B66
         lda ZP_POLYOBJ_XPOS_pt1, x
         sta $85, x
         dex 
@@ -7655,16 +7656,16 @@ _9b66:
         lsr 
         tax 
         lda # $ff
-_9b80:
+_9b80:                                                                  ;$9B80
         sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _9b80
         inx 
         stx $ad
-_9b88:
+_9b88:                                                                  ;$9B88
         jmp _9cfe
 
-_9b8b:
+_9b8b:                                                                  ;$9B8B
         lda [ZP_HULL_ADDR], y
         beq _9b88
         sta $ae
@@ -7674,7 +7675,7 @@ _9b8b:
         lda $8c
         tay 
         beq _9baa
-_9b9b:
+_9b9b:                                                                  ;$9B9B
         inx 
         lsr $89
         ror $88
@@ -7684,7 +7685,7 @@ _9b9b:
         ror $8b
         tay 
         bne _9b9b
-_9baa:
+_9baa:                                                                  ;$9BAA
         stx $9f
         lda $8d
         sta $70
@@ -7721,7 +7722,7 @@ _9baa:
         adc ZP_HULL_ADDR_HI
         sta ZP_TEMP_ADDR3_HI
         ldy # $00
-_9bf2:
+_9bf2:                                                                  ;$9BF2
         lda [ZP_TEMP_ADDR3], y
         sta $72
         and # %00011111
@@ -7738,7 +7739,7 @@ _9bf2:
         tay 
         jmp _9cf7
 
-_9c0b:
+_9c0b:                                                                  ;$9C0B
         lda $72
         asl 
         sta $74
@@ -7772,12 +7773,12 @@ _9c0b:
 
 ;===============================================================================
 
-_9c43:
+_9c43:                                                                  ;$9C43
         lsr $85
         lsr $8b
         lsr $88
         ldx # $01
-_9c4b:
+_9c4b:                                                                  ;$9C4B
         lda $71
         sta ZP_VAR_X
         lda $73
@@ -7785,13 +7786,13 @@ _9c4b:
         lda $75
         dex 
         bmi _9c60
-_9c58:
+_9c58:                                                                  ;$9C58
         lsr ZP_VAR_X
         lsr ZP_VAR_X2
         lsr 
         dex 
         bpl _9c58
-_9c60:
+_9c60:                                                                  ;$9C60
         sta $9b
         lda $76
         sta $9c
@@ -7827,7 +7828,7 @@ _9c60:
         sta ZP_VAR_X2
         lda $9c
         sta ZP_VAR_Y2
-_9ca9:
+_9ca9:                                                                  ;$9CA9
         lda $71
         sta $9a
         lda ZP_VAR_X
@@ -7866,17 +7867,17 @@ _9ca9:
         bit $9c
         bmi _9cf4
         lda # $00
-_9cf4:
+_9cf4:                                                                  ;$9CF4
         sta ZP_POLYOBJ01_XPOS_pt1, x
         iny 
-_9cf7:
+_9cf7:                                                                  ;$9CF7
         cpy $ae
         bcs _9cfe
         jmp _9bf2
 
         ;-----------------------------------------------------------------------
 
-_9cfe:
+_9cfe:                                                                  ;$9CFE
         ldy ZP_TEMPOBJ_M2x1_LO
         ldx ZP_TEMPOBJ_M2x1_HI
         lda ZP_TEMPOBJ_M1x0_LO
@@ -7913,7 +7914,7 @@ _9cfe:
         sta ZP_TEMP_ADDR3_HI
         ldy # $00
         sty $aa
-_9d45:
+_9d45:                                                                  ;$9D45
         sty $9f
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VAR_X
@@ -7959,13 +7960,13 @@ _9d45:
         tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
-_9d8e:
+_9d8e:                                                                  ;$9D8E
 .export _9d8e
         jmp _9f06
 
         ;-----------------------------------------------------------------------
 
-_9d91:
+_9d91:                                                                  ;$9D91
         lda $bb
         sta ZP_VAR_Y
         asl 
@@ -7984,11 +7985,11 @@ _9d91:
         lda ZP_POLYOBJ_XPOS_pt2
         adc # $00
         sta ZP_VAR_Y
-_9db3:
+_9db3:                                                                  ;$9DB3
 .export _9db3
         jmp _9dd9
 
-_9db6:
+_9db6:                                                                  ;$9DB6
         lda ZP_POLYOBJ_XPOS_pt1
         sec 
         sbc $71
@@ -8004,11 +8005,11 @@ _9db6:
         sta ZP_VAR_X
         bcc _9dd3
         inc ZP_VAR_Y
-_9dd3:
+_9dd3:                                                                  ;$9DD3
         lda ZP_VAR_X2
         eor # %10000000
         sta ZP_VAR_X2
-_9dd9:
+_9dd9:                                                                  ;$9DD9
         lda ZP_POLYOBJ_YPOS_pt3
         sta $70
         eor $74
@@ -8020,13 +8021,13 @@ _9dd9:
         lda ZP_POLYOBJ_YPOS_pt2
         adc # $00
         sta $6f
-_9dee:
+_9dee:                                                                  ;$9DEE
 .export _9dee
         jmp _9e16
 
         ;-----------------------------------------------------------------------
 
-_9df1:
+_9df1:                                                                  ;$9DF1
         lda ZP_POLYOBJ_YPOS_pt1
         sec 
         sbc $73
@@ -8046,7 +8047,7 @@ _9df1:
         sta $70
         bcc _9e16
         inc $6f
-_9e16:
+_9e16:                                                                  ;$9E16
         lda $76
         bmi _9e64
         lda $75
@@ -8056,17 +8057,17 @@ _9e16:
         lda ZP_POLYOBJ_ZPOS_pt2
         adc # $00
         sta $99
-_9e27:
+_9e27:                                                                  ;$9E27
 .export _9e27
         jmp _9e83
 
 ;===============================================================================
 
-_9e2a:
+_9e2a:                                                                  ;$9E2A
         ldx $9a
         beq _9e4a
         ldx # $00
-_9e30:
+_9e30:                                                                  ;$9E30
         lsr 
         inx 
         cmp $9a
@@ -8075,7 +8076,7 @@ _9e30:
         jsr _99af
         ldx $9c
         lda $9b
-_9e3f:
+_9e3f:                                                                  ;$9E3F
         asl 
         rol $99
         bmi _9e4a
@@ -8084,7 +8085,7 @@ _9e3f:
         sta $9b
         rts 
 
-_9e4a:
+_9e4a:                                                                  ;$9E4A
         lda # $32
         sta $9b
         sta $99
@@ -8092,7 +8093,7 @@ _9e4a:
 
 ;===============================================================================
 
-_9e51:
+_9e51:                                                                  ;$9E51
         lda # $80
         sec 
         sbc $9b
@@ -8105,7 +8106,7 @@ _9e51:
 
 ;===============================================================================
 
-_9e64:
+_9e64:                                                                  ;$9E64
         lda ZP_POLYOBJ_ZPOS_pt1
         sec 
         sbc $75
@@ -8118,12 +8119,12 @@ _9e64:
         lda $bb
         cmp # $04
         bcs _9e83
-_9e7b:
+_9e7b:                                                                  ;$9E7B
         lda # $00
         sta $99
         lda # $04
         sta $bb
-_9e83:
+_9e83:                                                                  ;$9E83
         lda $99
         ora ZP_VAR_Y
         ora $6f
@@ -8136,7 +8137,7 @@ _9e83:
         ror $bb
         jmp _9e83
 
-_9e9a:
+_9e9a:                                                                  ;$9E9A
         lda $bb
         sta $9a
         lda ZP_VAR_X
@@ -8145,9 +8146,9 @@ _9e9a:
         jsr _9e2a
         jmp _9ead
 
-_9eaa:
+_9eaa:                                                                  ;$9EAA
         jsr _99af
-_9ead:
+_9ead:                                                                  ;$9EAD
         ldx $aa
         lda ZP_VAR_X2
         bmi _9e51
@@ -8159,7 +8160,7 @@ _9ead:
         lda $99
         adc # $00
         sta $0100, x
-_9ec3:
+_9ec3:                                                                  ;$9EC3
        .phx                     ; push X to stack (via A)
         lda # $00
         sta $99
@@ -8171,7 +8172,7 @@ _9ec3:
         jsr _9e2a
         jmp _9eef
 
-_9ed9:
+_9ed9:                                                                  ;$9ED9
         lda # $48
         clc 
         adc $9b
@@ -8182,9 +8183,9 @@ _9ed9:
         sta $0100, x
         jmp _9f06
 
-_9eec:
+_9eec:                                                                  ;$9EEC
         jsr _99af
-_9eef:
+_9eef:                                                                  ;$9EEF
         pla 
         tax 
         inx 
@@ -8198,7 +8199,7 @@ _9eef:
         lda # $00
         sbc $99
         sta $0100, x
-_9f06:
+_9f06:                                                                  ;$9F06
         clc 
         lda $aa
         adc # $04
@@ -8211,7 +8212,7 @@ _9f06:
         bcs _9f1b
         jmp _9d45
 
-_9f1b:
+_9f1b:                                                                  ;$9F1B
         lda $28
         and # %00100000
         beq _9f2a
@@ -8220,13 +8221,13 @@ _9f1b:
         sta $28
         jmp _7866
 
-_9f2a:
+_9f2a:                                                                  ;$9F2A
         lda # $08
         bit $28
         beq _9f35
         jsr _a178
         lda # $08
-_9f35:
+_9f35:                                                                  ;$9F35
         ora $28
         sta $28
         ldy # $09
@@ -8265,7 +8266,7 @@ _9f35:
         lda ZP_POLYOBJ_XPOS_pt3
         bpl _9f82
         dec $6f
-_9f82:
+_9f82:                                                                  ;$9F82
         jsr _a013
         bcs _9f9f
         ldy $99
@@ -8282,7 +8283,7 @@ _9f82:
         sta [ZP_TEMP_ADDR2], y
         iny 
         sty $99
-_9f9f:
+_9f9f:                                                                  ;$9F9F
         ldy # $03
         clc 
         lda [ZP_HULL_ADDR], y
@@ -8296,7 +8297,7 @@ _9f9f:
         lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
         ldy $9f
-_9fb8:
+_9fb8:                                                                  ;$9FB8
         lda [ZP_TEMP_ADDR3], y
         cmp $ad
         bcc _9fd6
@@ -8316,10 +8317,10 @@ _9fb8:
         tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9fd9
-_9fd6:
+_9fd6:                                                                  ;$9FD6
         jmp _a15b
 
-_9fd9:
+_9fd9:                                                                  ;$9FD9
         lda [ZP_TEMP_ADDR3], y
         tax 
         iny 
@@ -8348,12 +8349,12 @@ _9fd9:
 
 ;===============================================================================
 
-_a013:
+_a013:                                                                  ;$A013
 .export _a013
         lda # $00
         sta $06f4
         lda $70
-_a01a:
+_a01a:                                                                  ;$A01A
         bit $b7
         bmi _a03c
         ldx # $8f
@@ -8362,7 +8363,7 @@ _a01a:
         cpx $71
         bcc _a02a
         ldx # $00
-_a02a:
+_a02a:                                                                  ;$A02A
         stx $a2
         lda ZP_VAR_Y
         ora ZP_VAR_Y2
@@ -8372,7 +8373,7 @@ _a02a:
         bcc _a04e
         lda $a2
         bne _a04c
-_a03c:
+_a03c:                                                                  ;$A03C
         lda ZP_VAR_X2
         sta ZP_VAR_Y
         lda $6f
@@ -8384,15 +8385,15 @@ _a03c:
 
 ;===============================================================================
 
-_a04a:
+_a04a:                                                                  ;$A04A
         sec 
         rts 
 
 ;===============================================================================
 
-_a04c:
+_a04c:                                                                  ;$A04C
         lsr $a2
-_a04e:
+_a04e:                                                                  ;$A04E
         lda $a2
         bpl _a081
         lda ZP_VAR_Y
@@ -8420,7 +8421,7 @@ _a04e:
         sbc # $00
         ora $73
         bpl _a04a
-_a081:
+_a081:                                                                  ;$A081
        .phy                     ; push Y to stack (via A)
         lda $6f
         sec 
@@ -8447,7 +8448,7 @@ _a081:
         lda # $00
         sbc $76
         sta $76
-_a0b2:
+_a0b2:                                                                  ;$A0B2
         lda $74
         bpl _a0c1
         sec 
@@ -8456,12 +8457,12 @@ _a0b2:
         sta $73
         lda # $00
         sbc $74
-_a0c1:
+_a0c1:                                                                  ;$A0C1
         tax 
         bne _a0c8
         ldx $76
         beq _a0d2
-_a0c8:
+_a0c8:                                                                  ;$A0C8
         lsr 
         ror $73
         lsr $76
@@ -8470,7 +8471,7 @@ _a0c8:
 
         ;-----------------------------------------------------------------------
 
-_a0d2:
+_a0d2:                                                                  ;$A0D2
         stx $bb
         lda $73
         cmp $75
@@ -8480,13 +8481,13 @@ _a0d2:
         jsr _99af
         jmp _a0ef
 
-_a0e4:
+_a0e4:                                                                  ;$A0E4
         lda $75
         sta $9a
         lda $73
         jsr _99af
         dec $bb
-_a0ef:
+_a0ef:                                                                  ;$A0EF
         lda $9b
         sta $73
         lda $9c
@@ -8494,7 +8495,7 @@ _a0ef:
         lda $a2
         beq _a0fd
         bpl _a110
-_a0fd:
+_a0fd:                                                                  ;$A0FD
         jsr _a19f
         lda $a2
         bpl _a136
@@ -8504,7 +8505,7 @@ _a0fd:
         lda ZP_VAR_X2
         cmp # $90
         bcs _a13b
-_a110:
+_a110:                                                                  ;$A110
         ldx ZP_VAR_X
         lda $6f
         sta ZP_VAR_X
@@ -8523,14 +8524,14 @@ _a110:
         sta ZP_VAR_Y2
         jsr _a19f
         dec $06f4
-_a136:
+_a136:                                                                  ;$A136
         pla 
         tay 
         jmp _a03c
 
         ;-----------------------------------------------------------------------
 
-_a13b:
+_a13b:                                                                  ;$A13B
         pla 
         tay 
         sec 
@@ -8538,7 +8539,7 @@ _a13b:
 
 ;===============================================================================
 
-_a13f:
+_a13f:                                                                  ;$A13F
         ldy $99
         lda ZP_VAR_X
         sta [ZP_TEMP_ADDR2], y
@@ -8555,7 +8556,7 @@ _a13f:
         sty $99
         cpy ZP_TEMP_VAR
         bcs _a172
-_a15b:
+_a15b:                                                                  ;$A15B
         inc $9f
         ldy $9f
         cpy $ae
@@ -8566,24 +8567,24 @@ _a15b:
         sta ZP_TEMP_ADDR3_LO
         bcc _a16f
         inc ZP_TEMP_ADDR3_HI
-_a16f:
+_a16f:                                                                  ;$A16F
         jmp _9fb8
 
         ;-----------------------------------------------------------------------
 
-_a172:
+_a172:                                                                  ;$A172
         lda $99
-_a174:
+_a174:                                                                  ;$A174
         ldy # $00
         sta [ZP_TEMP_ADDR2], y
-_a178:
+_a178:                                                                  ;$A178
         ldy # $00
         lda [ZP_TEMP_ADDR2], y
         sta $ae
         cmp # $04
         bcc _a19e
         iny 
-_a183:
+_a183:                                                                  ;$A183
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_X
         iny 
@@ -8599,12 +8600,12 @@ _a183:
         iny 
         cpy $ae
         bcc _a183
-_a19e:
+_a19e:                                                                  ;$A19E
         rts 
 
 ;===============================================================================
 
-_a19f:
+_a19f:                                                                  ;$A19F
         lda ZP_VAR_Y
         bpl _a1ba
         sta $9c
@@ -8620,7 +8621,7 @@ _a19f:
         sta ZP_VAR_X
         sta ZP_VAR_Y
         tax 
-_a1ba:
+_a1ba:                                                                  ;$A1BA
         beq _a1d5
         sta $9c
         dec $9c
@@ -8636,7 +8637,7 @@ _a1ba:
         stx ZP_VAR_X
         inx 
         stx ZP_VAR_Y
-_a1d5:
+_a1d5:                                                                  ;$A1D5
         lda ZP_VAR_Y2
         bpl _a1f3
         sta $9c
@@ -8653,7 +8654,7 @@ _a1d5:
         lda # $00
         sta ZP_VAR_X2
         sta ZP_VAR_Y2
-_a1f3:
+_a1f3:                                                                  ;$A1F3
         lda ZP_VAR_X2
         sec 
         sbc # $90
@@ -8674,19 +8675,19 @@ _a1f3:
         sta ZP_VAR_X2
         lda # $00
         sta ZP_VAR_Y2
-_a218:
+_a218:                                                                  ;$A218
         rts 
 
 ;===============================================================================
 
-_a219:
+_a219:                                                                  ;$A219
         lda ZP_VAR_X
         sta $9b
         jsr _a284
         pha 
         ldx $bb
         bne _a250
-_a225:
+_a225:                                                                  ;$A225
         lda # $00
         tax 
         tay 
@@ -8694,7 +8695,7 @@ _a225:
         ror $9b
         asl $9a
         bcc _a23a
-_a231:
+_a231:                                                                  ;$A231
         txa 
         clc 
         adc $9b
@@ -8702,7 +8703,7 @@ _a231:
         tya 
         adc $9c
         tay 
-_a23a:
+_a23a:                                                                  ;$A23A
         lsr $9c
         ror $9b
         asl $9a
@@ -8714,31 +8715,31 @@ _a23a:
 
 ;===============================================================================
 
-_a248:
+_a248:                                                                  ;$A248
         jsr _a284
         pha 
         ldx $bb
         bne _a225
-_a250:
+_a250:                                                                  ;$A250
         lda # $ff
         tay 
         asl 
         tax 
-_a255:
+_a255:                                                                  ;$A255
         asl $9b
         rol $9c
         lda $9c
         bcs _a261
         cmp $9a
         bcc _a26c
-_a261:
+_a261:                                                                  ;$A261
         sbc $9a
         sta $9c
         lda $9b
         sbc # $00
         sta $9b
         sec 
-_a26c:
+_a26c:                                                                  ;$A26C
         txa 
         rol 
         tax 
@@ -8748,7 +8749,7 @@ _a26c:
         bcs _a255
         pla 
         bmi _a283
-_a277:
+_a277:                                                                  ;$A277
         txa 
         eor # %11111111
         adc # $01
@@ -8757,12 +8758,12 @@ _a277:
         eor # %11111111
         adc # $00
         tay 
-_a283:
+_a283:                                                                  ;$A283
         rts 
 
 ;===============================================================================
 
-_a284:
+_a284:                                                                  ;$A284
         ldx $73
         stx $9a
         lda $9c
@@ -8777,13 +8778,13 @@ _a284:
         adc # $00
         sta $9c
         pla 
-_a29d:
+_a29d:                                                                  ;$A29D
         eor $74
         rts 
 
 ;===============================================================================
 
-_a2a0:
+_a2a0:                                                                  ;$A2A0
 .export _a2a0
         lda $28
         and # %10100000
@@ -8793,14 +8794,14 @@ _a2a0:
         and # %00001111
         bne _a2b1
         jsr _9105
-_a2b1:
+_a2b1:                                                                  ;$A2B1
         ldx $a5
         bpl _a2b8
         jmp _a53d
 
         ;-----------------------------------------------------------------------
 
-_a2b8:
+_a2b8:                                                                  ;$A2B8
         lda $29
         bpl _a2cb
         cpx # $01
@@ -8809,9 +8810,9 @@ _a2b8:
         eor $9d
         and # %00000111
         bne _a2cb
-_a2c8:
+_a2c8:                                                                  ;$A2C8
         jsr _32ad
-_a2cb:
+_a2cb:                                                                  ;$A2CB
         jsr _b410
         lda ZP_POLYOBJ_VERTX_LO
         asl 
@@ -8843,12 +8844,12 @@ _a2cb:
         adc ZP_POLYOBJ_VERTX_HI
         bpl _a30d
         lda # $00
-_a30d:
+_a30d:                                                                  ;$A30D
         ldy # $0f
         cmp [ZP_HULL_ADDR], y
         bcc _a315
         lda [ZP_HULL_ADDR], y
-_a315:
+_a315:                                                                  ;$A315
         sta ZP_POLYOBJ_VERTX_LO
 
         lda # $00
@@ -8914,7 +8915,7 @@ _a315:
         
         jmp _a39d
 
-_a37d:
+_a37d:                                                                  ;$A37D
         lda $b3
         sbc ZP_VAR_P2
         sta ZP_POLYOBJ_YPOS_pt1
@@ -8931,7 +8932,7 @@ _a37d:
         lda ZP_POLYOBJ_YPOS_pt3
         eor # %10000000
         sta ZP_POLYOBJ_YPOS_pt3
-_a39d:
+_a39d:                                                                  ;$A39D
         ldx $68
         lda ZP_POLYOBJ_YPOS_pt1
         eor # %11111111
@@ -8948,7 +8949,7 @@ _a39d:
         sta ZP_POLYOBJ_XPOS_pt2
         lda ZP_VAR_P2
         sta ZP_POLYOBJ_XPOS_pt1
-_a3bf:
+_a3bf:                                                                  ;$A3BF
         lda $96                 ; player's ship speed?
         sta $9b
         lda # $80
@@ -8962,7 +8963,7 @@ _a3bf:
 
         ;-----------------------------------------------------------------------
 
-_a3d3:
+_a3d3:                                                                  ;$A3D3
         ldy # $09
         jsr _a4a1
         ldy # $0f
@@ -8988,7 +8989,7 @@ _a3d3:
         ldx # $13
         ldy # $0d
         jsr _2dc5
-_a40b:
+_a40b:                                                                  ;$A40B
         lda $26
         and # %10000000
         sta $b1
@@ -9008,7 +9009,7 @@ _a40b:
         ldx # $13
         ldy # $19
         jsr _2dc5
-_a434:
+_a434:                                                                  ;$A434
         lda $28
         and # %10100000
         bne _a443
@@ -9019,7 +9020,7 @@ _a434:
 
         ;-----------------------------------------------------------------------
 
-_a443:
+_a443:                                                                  ;$A443
         lda $28
         and # %11101111
         sta $28
@@ -9027,9 +9028,9 @@ _a443:
 
 ;===============================================================================
 
-_a44a:
+_a44a:                                                                  ;$A44A
         and # %10000000
-_a44c:
+_a44c:                                                                  ;$A44C
 .export _a44c
         asl 
         sta $9c
@@ -9053,7 +9054,7 @@ _a44c:
 
         ;-----------------------------------------------------------------------
 
-_a46f:
+_a46f:                                                                  ;$A46F
         lda ZP_POLYOBJ_XPOS_pt1, x
         sec 
         sbc $9b
@@ -9079,12 +9080,12 @@ _a46f:
         and # %01111111
         ora $bb
         sta ZP_POLYOBJ_XPOS_pt3, x
-_a4a0:
+_a4a0:                                                                  ;$A4A0
         rts 
 
 ;===============================================================================
 
-_a4a1:
+_a4a1:                                                                  ;$A4A1
         lda $a6
         sta $9a
 
@@ -9151,7 +9152,7 @@ _a4a1:
 
 ;===============================================================================
 
-_a508:
+_a508:                                                                  ;$A508
         tay 
         eor ZP_POLYOBJ_XPOS_pt3, x
         bmi _a51c
@@ -9167,7 +9168,7 @@ _a508:
         
         ;-----------------------------------------------------------------------
 
-_a51c:
+_a51c:                                                                  ;$A51C
         lda ZP_POLYOBJ_XPOS_pt1, x
         sec 
         sbc ZP_VAR_P2
@@ -9182,7 +9183,7 @@ _a51c:
 
         ;-----------------------------------------------------------------------
 
-_a52f:
+_a52f:                                                                  ;$A52F
         lda # $01
         sbc ZP_VAR_P2
         sta ZP_VAR_P2
@@ -9194,7 +9195,7 @@ _a52f:
 
 ;===============================================================================
 
-_a53d:
+_a53d:                                                                  ;$A53D
         lda $a6
         eor # %10000000
         sta $9a
@@ -9266,7 +9267,7 @@ _a53d:
         
         jmp _a5db
 
-_a5a8:
+_a5a8:                                                                  ;$A5A8
         lda $77
         sec 
         sbc $b2
@@ -9293,7 +9294,7 @@ _a5a8:
         lda # $00
         sbc ZP_VAR_P1
         ora # %10000000
-_a5db:
+_a5db:                                                                  ;$A5DB
         eor $bb
         sta ZP_POLYOBJ_YPOS_pt3
         lda $a6
@@ -9318,14 +9319,14 @@ _a5db:
 
 ; what calls in to this, where?
 
-_a604:
+_a604:                                                                  ;$A604
         sec 
         ldy # $00
         sty ZP_TEMP_ADDR3_LO
         ldx # $10
         lda [ZP_TEMP_ADDR1], y
         txa 
-_a60e:
+_a60e:                                                                  ;$A60E
         stx ZP_TEMP_ADDR3_HI
         sty $bb
         adc [ZP_TEMP_ADDR3], y
@@ -9342,7 +9343,7 @@ _a60e:
 
 ;===============================================================================
 
-_a626:
+_a626:                                                                  ;$A626
 .export _a626
         ldx $0486
         beq _a65e
@@ -9372,12 +9373,12 @@ _a626:
         lda ZP_POLYOBJ_M2x2_HI
         eor # %10000000
         sta ZP_POLYOBJ_M2x2_HI
-_a65e:
+_a65e:                                                                  ;$A65E
         rts 
 
         ;-----------------------------------------------------------------------
 
-_a65f:
+_a65f:                                                                  ;$A65F
         lda # $00
         cpx # $02
         ror 
@@ -9404,7 +9405,7 @@ _a65f:
         ldy # $0f
         jsr _a693
         ldy # $15
-_a693:
+_a693:                                                                  ;$A693
         lda ZP_POLYOBJ_XPOS_pt1, y
         ldx ZP_POLYOBJ_YPOS_pt2, y
         sta ZP_POLYOBJ_YPOS_pt2, y
@@ -9416,12 +9417,12 @@ _a693:
         eor $b1
         sta ZP_POLYOBJ_XPOS_pt2, y
         stx ZP_POLYOBJ_YPOS_pt3, y
-_a6ad:
+_a6ad:                                                                  ;$A6AD
         rts 
 
 ;===============================================================================
 
-_a6ae:
+_a6ae:                                                                  ;$A6AE
         stx $0486
         jsr _a72f
         jsr _a6d4
@@ -9429,7 +9430,7 @@ _a6ae:
 
 ;===============================================================================
 
-_a6ba:
+_a6ba:                                                                  ;$A6BA
         lda # $00
         jsr _6a2e
 
@@ -9443,7 +9444,7 @@ _a6ba:
         jsr _a72f
         jsr dust_swap_xy
         jsr _7b1a
-_a6d4:
+_a6d4:                                                                  ;$A6D4
         lda # MEM_IO_ONLY
         jsr set_memory_layout
 
@@ -9460,13 +9461,13 @@ _a6d4:
         cmp # $97
         beq _a6f2
         iny 
-_a6f2:
+_a6f2:                                                                  ;$A6F2
         sty $63f8               ;?
         sty $67f8               ;?
         lda _3e08, y            ;!?
         sta $d027               ;sprite 0 color? (or ship model table)
         lda # $01
-_a700:
+_a700:                                                                  ;$A700
         sta $bb
         lda PLAYER_TRUMBLES_HI
         and # %01111111
@@ -9486,17 +9487,17 @@ _a700:
 
 ;===============================================================================
 
-_a71f:
+_a71f:                                                                  ;$A71F
         .byte   $00, $01, $02, $03, $04, $05, $06, $06
-_a727:
+_a727:                                                                  ;$A727
         .byte   $00, $04, $0c, $1c, $3c, $7c, $fc, $fc
 
 ;===============================================================================
 
-_a72f:
+_a72f:                                                                  ;$A72F
 .export _a72f
         sta $a0
-_a731:
+_a731:                                                                  ;$A731
         jsr txt_docked_token02
         lda # $00
         sta $7e
@@ -9519,7 +9520,7 @@ _a731:
         ldx $66                 ; hyperspace countdown (outer)?
         beq _a75d
         jsr _7224
-_a75d:
+_a75d:                                                                  ;$A75D
         lda # 1
         jsr set_cursor_row
         
@@ -9537,7 +9538,7 @@ _a75d:
 .import TXT_VIEW:direct
         lda # TXT_VIEW
         jsr print_flight_token
-_a77b:
+_a77b:                                                                  ;$A77B
         ldx # 1
         stx ZP_CURSOR_COL
         stx ZP_CURSOR_ROW
@@ -9548,10 +9549,10 @@ _a77b:
 
 ;===============================================================================
 
-_a785:
+_a785:                                                                  ;$A785
         rts 
 
-_a786:
+_a786:                                                                  ;$A786
 .export _a786
         lda # $00
         sta $67
@@ -9562,7 +9563,7 @@ _a786:
 
 ;===============================================================================
 
-_a795:
+_a795:                                                                  ;$A795
 .export _a795
         ldx # $01
         jsr _3708
@@ -9572,7 +9573,7 @@ _a795:
         ldy # $04
         jmp _a858
 
-_a7a6:
+_a7a6:                                                                  ;$A7A6
 ;===============================================================================
 ; kill a PolyObject?
 ;
@@ -9593,7 +9594,7 @@ _a7a6:
         
         lda # $65
         jsr _900d
-_a7c3:
+_a7c3:                                                                  ;$A7C3
         lda ZP_POLYOBJ_ZPOS_pt2
         ldx # $0b
         cmp # $10
@@ -9608,7 +9609,7 @@ _a7c3:
         cmp # $03
         bcs _a7db
         inx 
-_a7db:
+_a7db:                                                                  ;$A7DB
         txa 
         asl 
         asl 
@@ -9621,7 +9622,7 @@ _a7db:
 
 ;===============================================================================
 
-_a7e9:
+_a7e9:                                                                  ;$A7E9
 .export _a7e9
         lda ZP_POLYOBJ_ZPOS_pt2
         ldx # $0b
@@ -9637,7 +9638,7 @@ _a7e9:
         cmp # $02
         bcs _a801
         inx 
-_a801:
+_a801:                                                                  ;$A801
         txa 
         asl 
         asl 
@@ -9649,36 +9650,36 @@ _a801:
         jmp _a850
 
 
-_a80f:
+_a80f:                                                                  ;$A80F
 ;===============================================================================
 .export _a80f
         ldy # $05
         bne _a858               ; always branches
 
-_a813:
+_a813:                                                                  ;$A813
 ;===============================================================================
 .export _a813
         ldy # $03
         bne _a858               ; always branches
 
-_a817:
+_a817:                                                                  ;$A817
 ;===============================================================================
         ldy # $03
         lda # $01
-_a81b:
+_a81b:                                                                  ;$A81B
         sta _aa15, y
         dey 
         bne _a81b
-_a821:
+_a821:                                                                  ;$A821
         rts 
 
 ;===============================================================================
 
-_a822:
+_a822:                                                                  ;$A822
         ldx # $03
         iny 
         sty ZP_VAR_X2
-_a827:
+_a827:                                                                  ;$A827
         dex 
         bmi _a821
         lda _aa13, x
@@ -9709,7 +9710,7 @@ _a839:                                                                  ;$A839
         ldy # $87
         bne _a858               ; awlays branches
 
-_a850:
+_a850:                                                                  ;$A850
         ;-----------------------------------------------------------------------
         bit _a821
 
@@ -9719,7 +9720,7 @@ _a850:
         ; to $A811 -- the address is defined by the opcode of `clv` ($B8)
         .byte   $50
 
-_a858:
+_a858:                                                                  ;$A858
 .export _a858
         clv 
         
@@ -9732,25 +9733,25 @@ _a858:
         lda _aa32, y
         lsr 
         bcs _a876
-_a86a:
+_a86a:                                                                  ;$A86A
         lda _aa13, x
         and # %00111111
         cmp ZP_VAR_X2
         beq _a88b
         dex 
         bpl _a86a
-_a876:
+_a876:                                                                  ;$A876
         ldx # $00
         lda _aa19
         cmp _aa1a
         bcc _a884
         inx 
         lda _aa1a
-_a884:
+_a884:                                                                  ;$A884
         cmp _aa1b
         bcc _a88b
         ldx # $02
-_a88b:
+_a88b:                                                                  ;$A88B
         tya 
         and # %01111111
         tay 
@@ -9761,7 +9762,7 @@ _a88b:
         sta _aa19, x
         bvs _a8a0+1
         lda _aa82, y
-_a8a0:
+_a8a0:                                                                  ;$A8A0
        .cmp
         lda ZP_VAR_X
         sta _aa29, x
@@ -9773,7 +9774,7 @@ _a8a0:
         sta _aa23, x
         bvs _a8bd+1
         lda _aa52, y
-_a8bd:
+_a8bd:                                                                  ;$A8BD
        .cmp
         lda ZP_VAR_Y
         sta _aa20, x
@@ -9791,37 +9792,37 @@ _a8bd:
 
 ;===============================================================================
 
-_a8d9:
+_a8d9:                                                                  ;$A8D9
         .byte   $00
-_a8da:
+_a8da:                                                                  ;$A8DA
         .byte   $81
-_a8db:
+_a8db:                                                                  ;$A8DB
         .byte   $81
-_a8dc:
+_a8dc:                                                                  ;$A8DC
         .byte   $01, $00
-_a8de:
+_a8de:                                                                  ;$A8DE
         .byte   $c2, $33
-_a8e0:
+_a8e0:                                                                  ;$A8E0
 .export _a8e0
         .byte   $c0
-_a8e1:
+_a8e1:                                                                  ;$A8E1
         .byte   $c0
-_a8e2:
+_a8e2:                                                                  ;$A8E2
         .byte   $fe, $fc
-_a8e4:
+_a8e4:                                                                  ;$A8E4
         .byte   $02, $00
-_a8e6:
+_a8e6:                                                                  ;$A8E6
 .export _a8e6
         .byte   $00, $00
 
 ;===============================================================================
 
-_a8e8:
+_a8e8:                                                                  ;$A8E8
         dey 
         bpl _a958
         pla 
         tay 
-_a8ed:
+_a8ed:                                                                  ;$A8ED
         pla 
         tax 
 
@@ -9835,7 +9836,7 @@ _a8ed:
 
         ;-----------------------------------------------------------------------
 
-_a8fa:
+_a8fa:                                                                  ;$A8FA
         pha 
         
         lda CPU_CONTROL
@@ -9885,9 +9886,9 @@ _a8fa:
 
         ;-----------------------------------------------------------------------
 
-_a956:
+_a956:                                                                  ;$A956
         ldy # $02
-_a958:
+_a958:                                                                  ;$A958
         lda _aa13, y
         beq _a8e8
         bmi _a969
@@ -9895,12 +9896,12 @@ _a958:
         lda _aa1d, y
         beq _a9ae
         bne _a990
-_a969:
+_a969:                                                                  ;$A969
         lda _aa2f, y
         sta _a973+1             ;low-byte, i.e. $d4xx
         lda # $00
         ldx # $06
-_a973:
+_a973:                                                                  ;$A973
         sta $d400, x            ;voice 1: frequency control - low-byte
         dex 
         bpl _a973
@@ -9912,7 +9913,7 @@ _a973:
         lda _aa29, y
         sta $d406, x            ;voice 1: sustain / release cycle control
         lda # $00
-_a990:
+_a990:                                                                  ;$A990
         clc 
         cld 
         adc _aa20, y
@@ -9931,7 +9932,7 @@ _a990:
         sta $d400, x            ;voice 1: frequency control - low-byte
         lda _aa1c
         sta $d403, x            ;voice 1: pulse waveform width - high-nybble
-_a9ae:
+_a9ae:                                                                  ;$A9AE
         lda _aa13, y
         bmi _a9f1
         tya 
@@ -9939,7 +9940,7 @@ _a9ae:
         dec _aa19, x
         bne _a9bd
         inc _aa19, x
-_a9bd:
+_a9bd:                                                                  ;$A9BD
         dec _aa16, x
         beq _a9dc
         lda _aa16, x
@@ -9953,7 +9954,7 @@ _a9bd:
         sta $d406, x            ;voice 1: sustain / release cycle control
         jmp _a9f6
 
-_a9dc:
+_a9dc:                                                                  ;$A9DC
         ldx _aa2f, y
         lda _aa23, y
         and # %11111110
@@ -9962,19 +9963,19 @@ _a9dc:
         sta _aa13, y
         sta _aa19, y
         beq _a9f6
-_a9f1:
+_a9f1:                                                                  ;$A9F1
         and # %01111111
         sta _aa13, y
-_a9f6:
+_a9f6:                                                                  ;$A9F6
         dey 
         bmi _a9fc
         jmp _a958
 
-_a9fc:
+_a9fc:                                                                  ;$A9FC
         lda _aa1c
         eor # %00000100
         sta _aa1c
-_aa04:
+_aa04:                                                                  ;$AA04
         pla 
         tay 
         pla 
@@ -9990,56 +9991,56 @@ _aa04:
 
 ;===============================================================================
 
-_aa13:
+_aa13:                                                                  ;$AA13
         .byte   $00, $00
-_aa15:
+_aa15:                                                                  ;$AA15
         .byte   $00
-_aa16:
+_aa16:                                                                  ;$AA16
         .byte   $00, $00, $00
-_aa19:
+_aa19:                                                                  ;$AA19
         .byte   $00
-_aa1a:
+_aa1a:                                                                  ;$AA1A
         .byte   $00
-_aa1b:
+_aa1b:                                                                  ;$AA1B
         .byte   $00
-_aa1c:
+_aa1c:                                                                  ;$AA1C
         .byte   $02
-_aa1d:
+_aa1d:                                                                  ;$AA1D
         .byte   $00, $00, $00
-_aa20:
+_aa20:                                                                  ;$AA20
         .byte   $00, $00, $00
-_aa23:
+_aa23:                                                                  ;$AA23
         .byte   $00, $00, $00
-_aa26:
+_aa26:                                                                  ;$AA26
         .byte   $00, $00, $00
-_aa29:
+_aa29:                                                                  ;$AA29
         .byte   $00, $00, $00
-_aa2c:
+_aa2c:                                                                  ;$AA2C
         .byte   $00, $00, $00
-_aa2f:
+_aa2f:                                                                  ;$AA2F
         .byte   $00, $07, $0e
-_aa32:
+_aa32:                                                                  ;$AA32
         .byte   $72, $70, $74, $77, $73, $68, $60, $f0
         .byte   $30, $fe, $72, $72, $92, $e1, $51, $02
-_aa42:
+_aa42:                                                                  ;$AA42
         .byte   $14, $0e, $0c, $50, $3f, $05, $18, $80
         .byte   $30, $ff, $10, $10, $70, $40, $0f, $0e
-_aa52:
+_aa52:                                                                  ;$AA52
         .byte   $45, $48, $d0, $51, $40, $f0, $40, $80
         .byte   $10, $50, $34, $33, $60, $55, $80, $40
-_aa62:
+_aa62:                                                                  ;$AA62
         .byte   $41, $11, $81, $81, $81, $11, $11, $41
         .byte   $21, $41, $21, $21, $11, $81, $11, $21
-_aa72:
+_aa72:                                                                  ;$AA72
         .byte   $01, $09, $20, $08, $0c, $00, $63, $18
         .byte   $44, $11, $00, $00, $44, $11, $18, $09
-_aa82:
+_aa82:                                                                  ;$AA82
         .byte   $d1, $f1, $e5, $fb, $dc, $f0, $f3, $d8
         .byte   $00, $e1, $e1, $f1, $f4, $e3, $b0, $a1
-_aa92:
+_aa92:                                                                  ;$AA92
         .byte   $fe, $fe, $f3, $ff, $00, $00, $00, $44
         .byte   $00, $55, $fe, $ff, $ef, $77, $7b, $fe
-_aaa2:
+_aaa2:                                                                  ;$AAA2
         .byte   $03, $03, $03, $0f, $0f, $ff, $ff, $1f
         .byte   $ff, $ff, $03, $03, $0f, $ff, $ff, $03
 
@@ -10174,7 +10175,7 @@ _aaa2:
 
 ;===============================================================================
 
-_ab31:
+_ab31:                                                                  ;$AB31
         .byte   %10000000
         .byte   %01000000
         .byte   %00100000
@@ -10201,30 +10202,30 @@ _ab31:
         .byte   %00000110
         .byte   %00000011
 
-_ab47:
+_ab47:                                                                  ;$AB47
         .byte   $c0, $c0
-_ab49:
+_ab49:                                                                  ;$AB49
         .byte   $30, $30, $0c, $0c, $03, $03, $c0, $c0
-_ab51:
+_ab51:                                                                  ;$AB51
         .byte   $60, $83, $a6, $c9, $ec, $0f, $32, $55
-_ab59:
+_ab59:                                                                  ;$AB59
         .byte   $ac, $ac, $ac, $ac, $ac, $ad, $ad, $ad
-_ab61:
+_ab61:                                                                  ;$AB61
         .byte   $66, $89, $ac, $cf, $f2, $15, $38, $5b
-_ab69:
+_ab69:                                                                  ;$AB69
         .byte   $ac, $ac, $ac, $ac, $ac, $ad, $ad, $ad
-_ab71:
+_ab71:                                                                  ;$AB71
         .byte   $e0, $03, $26, $49, $6c, $8f, $b2, $d5
-_ab79:
+_ab79:                                                                  ;$AB79
         .byte   $ad, $ae, $ae, $ae, $ae, $ae, $ae, $ae
-_ab81:
+_ab81:                                                                  ;$AB81
         .byte   $e6, $09, $2c, $4f, $72, $95, $b8, $db
-_ab89:
+_ab89:                                                                  ;$AB89
         .byte   $ad, $ae, $ae, $ae, $ae, $ae, $ae, $ae
 
 ;===============================================================================
 
-_ab91:
+_ab91:                                                                  ;$AB91
 .export _ab91
         sty $9e
         lda # $80
@@ -10236,7 +10237,7 @@ _ab91:
         bcs _aba5
         eor # %11111111
         adc # $01
-_aba5:
+_aba5:                                                                  ;$ABA5
         sta $bc
         sec 
         lda ZP_VAR_Y2
@@ -10244,13 +10245,13 @@ _aba5:
         bcs _abb2
         eor # %11111111
         adc # $01
-_abb2:
+_abb2:                                                                  ;$ABB2
         sta $bd
         cmp $bc
         bcc _abbb
         jmp _af08
 
-_abbb:
+_abbb:                                                                  ;$ABBB
         ldx ZP_VAR_X
         cpx ZP_VAR_X2
         bcc _abd3
@@ -10263,7 +10264,7 @@ _abbb:
         ldy ZP_VAR_Y
         sta ZP_VAR_Y
         sty ZP_VAR_Y2
-_abd3:
+_abd3:                                                                  ;$ABD3
         ldx $bd
         beq _abf9
         lda _9400, x
@@ -10280,13 +10281,13 @@ _abd3:
         lda _9500, x
         jmp _ac0d
 
-_abf5:
+_abf5:                                                                  ;$ABF5
         lda # $ff
         bne _ac0d
-_abf9:
+_abf9:                                                                  ;$ABF9
         lda # $00
         beq _ac0d
-_abfd:
+_abfd:                                                                  ;$ABFD
         ldx $bd
         lda _9300, x
         ldx $bc
@@ -10294,7 +10295,7 @@ _abfd:
         bcs _abf5
         tax 
         lda _9600, x
-_ac0d:
+_ac0d:                                                                  ;$AC0D
         sta $bd
         clc 
         ldy ZP_VAR_Y
@@ -10304,7 +10305,7 @@ _ac0d:
 
         ;-----------------------------------------------------------------------
 
-_ac19:
+_ac19:                                                                  ;$AC19
         lda ZP_VAR_X
         and # %11111000
         clc 
@@ -10326,10 +10327,10 @@ _ac19:
         lda _ab59, x
         sta _ac46+2
         ldx $bc
-_ac46:
+_ac46:                                                                  ;$AC46
         jmp _8888               ; is this address ever actually used?
 
-_ac49:
+_ac49:                                                                  ;$AC49
         lda _ab61, x
         sta _ac5a+1
         lda _ab69, x
@@ -10337,16 +10338,16 @@ _ac49:
         ldx $bc
         inx 
         beq _ac5d
-_ac5a:
+_ac5a:                                                                  ;$AC5A
         jmp _8888               ; is this address ever actually used?
 
-_ac5d:
+_ac5d:                                                                  ;$AC5D
         ldy $9e
         rts 
 
 ;===============================================================================
 
-_ac60:
+_ac60:                                                                  ;$AC60
         lda # %10000000
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10365,9 +10366,9 @@ _ac60:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_ac82:
+_ac82:                                                                  ;$AC82
         clc 
-_ac83:
+_ac83:                                                                  ;$AC83
         lda # $40
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10386,9 +10387,9 @@ _ac83:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_aca5:
+_aca5:                                                                  ;$ACA5
         clc 
-_aca6:
+_aca6:                                                                  ;$ACA6
         lda # $20
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10407,9 +10408,9 @@ _aca6:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_acc8:
+_acc8:                                                                  ;$ACC8
         clc 
-_acc9:
+_acc9:                                                                  ;$ACC9
         lda # $10
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10428,9 +10429,9 @@ _acc9:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_aceb:
+_aceb:                                                                  ;$ACEB
         clc 
-_acec:
+_acec:                                                                  ;$ACEC
         lda # $08
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10449,9 +10450,9 @@ _acec:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_ad0e:
+_ad0e:                                                                  ;$AD0E
         clc 
-_ad0f:
+_ad0f:                                                                  ;$AD0F
         lda # $04
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10470,14 +10471,14 @@ _ad0f:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_ad31:
+_ad31:                                                                  ;$AD31
         clc 
-_ad32:
+_ad32:                                                                  ;$AD32
         lda # $02
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
         dex 
-_ad39:
+_ad39:                                                                  ;$AD39
         beq _ad88
         lda $bf
         adc $bd
@@ -10492,9 +10493,9 @@ _ad39:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_ad54:
+_ad54:                                                                  ;$AD54
         clc 
-_ad55:
+_ad55:                                                                  ;$AD55
         lda # $01
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10513,9 +10514,9 @@ _ad55:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_ad77:
+_ad77:                                                                  ;$AD77
         clc 
-_ad78:
+_ad78:                                                                  ;$AD78
         lda ZP_TEMP_ADDR1_LO
         adc # $08
         sta ZP_TEMP_ADDR1_LO
@@ -10524,19 +10525,19 @@ _ad78:
 
         ;-----------------------------------------------------------------------
 
-_ad83:
+_ad83:                                                                  ;$AD83
         inc ZP_TEMP_ADDR1_HI
         jmp _ac60
 
         ;-----------------------------------------------------------------------
 
-_ad88:
+_ad88:                                                                  ;$AD88
         ldy $9e
         rts 
 
 ;===============================================================================
 
-_ad8b:
+_ad8b:                                                                  ;$AD8B
         lda row_to_bitmap_hi, y
         sta ZP_TEMP_ADDR1_HI
         lda ZP_VAR_X
@@ -10546,12 +10547,12 @@ _ad8b:
         bcc _ad9e
         inc ZP_TEMP_ADDR1_HI
         clc 
-_ad9e:
+_ad9e:                                                                  ;$AD9E
         sbc # $f7
         sta ZP_TEMP_ADDR1_LO
         bcs _ada6
         dec ZP_TEMP_ADDR1_HI
-_ada6:
+_ada6:                                                                  ;$ADA6
         tya 
         and # %00000111
         eor # %11111000
@@ -10567,12 +10568,12 @@ _ada6:
         sta _adc6+2
         ldx $bc
         beq _ad88
-_adc6:
+_adc6:                                                                  ;$ADC6
         jmp _8888
 
         ;-----------------------------------------------------------------------
 
-_adc9:
+_adc9:                                                                  ;$ADC9
         lda _ab81, x
         sta _adda+1
         lda _ab89, x
@@ -10580,18 +10581,18 @@ _adc9:
         ldx $bc
         inx 
         beq _ad88
-_adda:
+_adda:                                                                  ;$ADDA
         jmp _8888
 
 ;===============================================================================
 
-_addd:
+_addd:                                                                  ;$ADDD
         ldy $9e
         rts 
 
         ;-----------------------------------------------------------------------
 
-_ade0:
+_ade0:                                                                  ;$ADE0
         lda # $80
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10610,9 +10611,9 @@ _ade0:
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $f8
-_ae02:
+_ae02:                                                                  ;$AE02
         clc 
-_ae03:
+_ae03:                                                                  ;$AE03
         lda # $40
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10631,9 +10632,9 @@ _ae03:
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $f8
-_ae25:
+_ae25:                                                                  ;$AE25
         clc 
-_ae26:
+_ae26:                                                                  ;$AE26
         lda # $20
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10652,9 +10653,9 @@ _ae26:
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $f8
-_ae48:
+_ae48:                                                                  ;$AE48
         clc 
-_ae49:
+_ae49:                                                                  ;$AE49
         lda # $10
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10673,9 +10674,9 @@ _ae49:
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $f8
-_ae6b:
+_ae6b:                                                                  ;$AE6B
         clc 
-_ae6c:
+_ae6c:                                                                  ;$AE6C
         lda # $08
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10694,9 +10695,9 @@ _ae6c:
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $f8
-_ae8e:
+_ae8e:                                                                  ;$AE8E
         clc 
-_ae8f:
+_ae8f:                                                                  ;$AE8F
         lda # $04
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10715,14 +10716,14 @@ _ae8f:
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $f8
-_aeb1:
+_aeb1:                                                                  ;$AEB1
         clc 
-_aeb2:
+_aeb2:                                                                  ;$AEB2
         lda # $02
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
         dex 
-_aeb9:
+_aeb9:                                                                  ;$AEB9
         beq _af05
         lda $bf
         adc $bd
@@ -10737,9 +10738,9 @@ _aeb9:
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $f8
-_aed4:
+_aed4:                                                                  ;$AED4
         clc 
-_aed5:
+_aed5:                                                                  ;$AED5
         lda # $01
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10758,26 +10759,26 @@ _aed5:
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $f8
-_aef7:
+_aef7:                                                                  ;$AEF7
         clc 
-_aef8:
+_aef8:                                                                  ;$AEF8
         lda ZP_TEMP_ADDR1_LO
         adc # $08
         sta ZP_TEMP_ADDR1_LO
         bcc _af02
         inc ZP_TEMP_ADDR1_HI
-_af02:
+_af02:                                                                  ;$AF02
         jmp _ade0
 
         ;-----------------------------------------------------------------------
 
-_af05:
+_af05:                                                                  ;$AF05
         ldy $9e
         rts 
 
 ;===============================================================================
 
-_af08:
+_af08:                                                                  ;$AF08
         ldy ZP_VAR_Y
         tya 
         ldx ZP_VAR_X
@@ -10792,7 +10793,7 @@ _af08:
         sta ZP_VAR_Y
         sty ZP_VAR_Y2
         tay 
-_af22:
+_af22:                                                                  ;$AF22
         txa 
         and # %11111000
         clc 
@@ -10825,10 +10826,10 @@ _af22:
         lda _9500, x
         jmp _af75
 
-_af61:
+_af61:                                                                  ;$AF61
         lda # $ff
         bne _af75
-_af65:
+_af65:                                                                  ;$AF65
         ldx $bc
         lda _9300, x
         ldx $bd
@@ -10836,9 +10837,9 @@ _af65:
         bcs _af61
         tax 
         lda _9600, x
-_af75:
+_af75:                                                                  ;$AF75
         sta $bc
-_af77:
+_af77:                                                                  ;$AF77
         sec 
         ldx $bd
         inx 
@@ -10849,11 +10850,11 @@ _af77:
         lda $06f4
         beq _af8e
         dex 
-_af88:
+_af88:                                                                  ;$AF88
         lda $be
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-_af8e:
+_af8e:                                                                  ;$AF8E
         dey 
         bpl _af9f
         lda ZP_TEMP_ADDR1_LO
@@ -10863,7 +10864,7 @@ _af8e:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_af9f:
+_af9f:                                                                  ;$AF9F
         lda $bf
         adc $bc
         sta $bf
@@ -10877,7 +10878,7 @@ _af9f:
         bcc _afb8
         inc ZP_TEMP_ADDR1_HI
         clc 
-_afb8:
+_afb8:                                                                  ;$AFB8
         dex 
         bne _af88
         ldy $9e
@@ -10885,15 +10886,15 @@ _afb8:
 
         ;-----------------------------------------------------------------------
 
-_afbe:
+_afbe:                                                                  ;$AFBE
         lda $06f4
         beq _afca
         dex 
-_afc4:
+_afc4:                                                                  ;$AFC4
         lda $be
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-_afca:
+_afca:                                                                  ;$AFCA
         dey 
         bpl _afdb
         lda ZP_TEMP_ADDR1_LO
@@ -10903,7 +10904,7 @@ _afca:
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
         ldy # $07
-_afdb:
+_afdb:                                                                  ;$AFDB
         lda $bf
         adc $bc
         sta $bf
@@ -10916,18 +10917,18 @@ _afdb:
         sta ZP_TEMP_ADDR1_LO
         bcs _aff3
         dec ZP_TEMP_ADDR1_HI
-_aff3:
+_aff3:                                                                  ;$AFF3
         clc 
-_aff4:
+_aff4:                                                                  ;$AFF4
         dex 
         bne _afc4
         ldy $9e
-_aff9:
+_aff9:                                                                  ;$AFF9
         rts 
 
 ;===============================================================================
 
-_affa:
+_affa:                                                                  ;$AFFA
 .export _affa
         sty $9e
         ldx ZP_VAR_X
@@ -10938,7 +10939,7 @@ _affa:
         sta ZP_VAR_X
         stx ZP_VAR_X2
         tax 
-_b00b:
+_b00b:                                                                  ;$B00B
         dec ZP_VAR_X2
         lda ZP_VAR_Y
         tay 
@@ -10953,7 +10954,7 @@ _b00b:
         tay 
         bcc _b025
         inc ZP_TEMP_ADDR1_HI
-_b025:
+_b025:                                                                  ;$B025
         txa 
         and # %11111000
         sta $c0
@@ -10977,12 +10978,12 @@ _b025:
         tay 
         bcc _b04c
         inc ZP_TEMP_ADDR1_HI
-_b04c:
+_b04c:                                                                  ;$B04C
         ldx $be
         dex 
         beq _b064
         clc 
-_b052:
+_b052:                                                                  ;$B052
         lda # $ff
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -10992,10 +10993,10 @@ _b052:
         bcc _b061
         inc ZP_TEMP_ADDR1_HI
         clc 
-_b061:
+_b061:                                                                  ;$B061
         dex 
         bne _b052
-_b064:
+_b064:                                                                  ;$B064
         lda ZP_VAR_X2
         and # %00000111
         tax 
@@ -11007,7 +11008,7 @@ _b064:
 
         ;-----------------------------------------------------------------------
 
-_b073:
+_b073:                                                                  ;$B073
         lda ZP_VAR_X
         and # %00000111
         tax 
@@ -11046,7 +11047,7 @@ _b073:
 
 ;===============================================================================
 
-_b09d:
+_b09d:                                                                  ;$B09D
         lda $04eb
         sta ZP_VAR_Y
         lda $04ea
@@ -11055,10 +11056,10 @@ _b09d:
         sta $32
         cmp # $aa
         bne _b0b5
-_b0b0:
+_b0b0:                                                                  ;$B0B0
         jsr _b0b5
         dec ZP_VAR_Y
-_b0b5:
+_b0b5:                                                                  ;$B0B5
         ldy ZP_VAR_Y
         lda ZP_VAR_X
         and # %11111000
@@ -11086,9 +11087,9 @@ _b0b5:
         sta ZP_TEMP_ADDR1_LO
         bcc _b0ea
         inc ZP_TEMP_ADDR1_HI
-_b0ea:
+_b0ea:                                                                  ;$B0EA
         lda _ab49, x
-_b0ed:
+_b0ed:                                                                  ;$B0ED
         and $32
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -11096,13 +11097,13 @@ _b0ed:
 
 ;===============================================================================
 
-_b0f4:
+_b0f4:                                                                  ;$B0F4
 .export _b0f4
         lda # $20
         sta $67
         ldy # $09
         jsr _a858
-_b0fd:
+_b0fd:                                                                  ;$B0FD
         lda $67a3               ;?
         eor # %11100000
         sta $67a3               ;?
@@ -11113,7 +11114,7 @@ _b0fd:
 
 ;===============================================================================
 
-_b10e:
+_b10e:                                                                  ;$B10E
         lda $67b4
         eor # %11100000
         sta $67b4
@@ -11124,7 +11125,7 @@ _b10e:
 
 ;===============================================================================
 
-_b11f:
+_b11f:                                                                  ;$B11F
 .export _b11f
         dex 
         txa 
@@ -11144,21 +11145,21 @@ _b11f:
         jsr $ffff               ;irq
         cmp # $80
         bcc _b13a
-_b136:
+_b136:                                                                  ;$B136
         lda # $07
         clc 
         rts 
         
         ;-----------------------------------------------------------------------
 
-_b13a:
+_b13a:                                                                  ;$B13A
         cmp # $20
         bcs _b146
         cmp # $0d
         beq _b146
         cmp # $15
         bne _b136
-_b146:
+_b146:                                                                  ;$B146
         clc 
         rts 
 
@@ -11215,26 +11216,27 @@ wait_for_frame:                                                         ;$B148
 .exportzp       ZP_CHROUT_DRAWADDR_LO   := $07
 .exportzp       ZP_CHROUT_DRAWADDR_HI   := $08
 
-_b168:
+_b168:                                                                  ;$B168
         jsr _a80f               ; BEEP?
         jmp _b210               ; restore state and exit
 
         ;-----------------------------------------------------------------------
 
-_b16e:
+_b16e:                                                                  ;$B16E
         jsr _b384
         lda ZP_POLYOBJ01_XPOS_pt1
         jmp _b189
 
         ;-----------------------------------------------------------------------
 
-_b176:  ; this is a trampoline to account for a branch range limitation below
+        ; this is a trampoline to account for a branch range limitation below
         ; TODO: this could be combined with the one at `_b168` to save 3 bytes
-        jmp _b210
+        ;
+_B176:  jmp _b210                                                       ;B176
 
         ;-----------------------------------------------------------------------
 
-_b179:  ; NOTE: called only ever by `_2c7d`!
+_b179:  ; NOTE: called only ever by `_2c7d`!                            ;$B179
 .export _b179
         lda # $0c
 
@@ -11256,18 +11258,18 @@ paint_char:                                                             ;$B17B
         ldy $34
         cpy # $ff
         beq _b176
-_b189:
+_b189:                                                                  ;$B189
         cmp # $07               ; code $07? (unspecified in PETSCII)
         beq _b168
         cmp # $20               ; is it SPC or above? (i.e. printable)
         bcs _b1a1
         cmp # $0a               ; is it $0A? (unspecified in PETSCII)
         beq _b199
-_b195:
+_b195:                                                                  ;$B195
         ; start at column 2, i.e. leave a one-char padding from the viewport
         ldx # 1
         stx ZP_CURSOR_COL
-_b199:
+_b199:                                                                  ;$B199
         cmp # $0d               ; is it RETURN? although note that `chrout`
                                 ; replaces $0D codes with $0C
         beq _b176
@@ -11275,7 +11277,7 @@ _b199:
         inc ZP_CURSOR_ROW
         bne _b176
 
-_b1a1:
+_b1a1:                                                                  ;$B1A1
         ;-----------------------------------------------------------------------
         ; convert the PETSCII code to an address in the char gfx (font):
         ; note that the font is ASCII so a few characters appear different
@@ -11423,7 +11425,7 @@ _b1a1:
 
         ; exit and clean-up:
         ;-----------------------------------------------------------------------
-_b210:  ; restore registers before returning
+_b210:  ; restore registers before returning                            ;$B210
         ; (compatibility with KERNAL_CHROUT?)
         ldy $0490
         ldx $048f
@@ -11436,7 +11438,7 @@ _b210:  ; restore registers before returning
 
 ; clear screen
 
-_b21a:
+_b21a:                                                                  ;$B21A
         ; set starting position in top-left of the centred
         ; 32-char (256px) screen Elite uses
         lda #< (ELITE_MENUSCR_COLOR_ADDR + .scrpos( 0, 4 ))
@@ -11500,13 +11502,13 @@ _b21a:
 
         ;-----------------------------------------------------------------------
 
-_b25d:
+_b25d:                                                                  ;$B25D
         lda # $81               ; default value
         sta _a8db
         
         lda # $c0               ; default value
         sta _a8e1
-_b267:
+_b267:                                                                  ;$B267
         jsr erase_page
         inx 
         cpx # $60
@@ -11522,7 +11524,7 @@ _b267:
         jsr disable_sprites
         ldy # $1f
         lda # $70
-_b289:
+_b289:                                                                  ;$B289
         sta $6004, y
         dey 
         bpl _b289
@@ -11534,11 +11536,11 @@ _b289:
         cpx # $80
         beq _b2a5
         ldy # $1f
-_b29f:
+_b29f:                                                                  ;$B29F
         sta $6054, y
         dey 
         bpl _b29f
-_b2a5:
+_b2a5:                                                                  ;$B2A5
         ldx # $c7
         jsr _b2d5
         lda # $ff
@@ -11547,7 +11549,7 @@ _b2a5:
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
-_b2b2:
+_b2b2:                                                                  ;$B2B2
         ldx # $12
         stx $c0
         ldy # $18
@@ -11564,7 +11566,7 @@ _b2b2:
         lda # $01
         sta $4118
         ldx # $00
-_b2d5:
+_b2d5:                                                                  ;$B2D5
         stx ZP_VAR_Y
         ldx # $00
         stx ZP_VAR_X
@@ -11574,12 +11576,12 @@ _b2d5:
 
 ;===============================================================================
 
-_b2e1:
+_b2e1:                                                                  ;$B2E1
         sta $be
         sty ZP_TEMP_ADDR1_HI
-_b2e5:
+_b2e5:                                                                  ;$B2E5
         ldy # $07
-_b2e7:
+_b2e7:                                                                  ;$B2E7
         lda $be
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -11598,7 +11600,7 @@ _b2e7:
 
 ;===============================================================================
 
-_b301:
+_b301:                                                                  ;$B301
         jsr _b2b2
         
         lda # $91
@@ -11630,7 +11632,7 @@ _b301:
         jsr _b341
         jsr _2ff3
 
-_b335:  jsr _b359
+_b335:  jsr _b359                                                       ;$B335
         jsr disable_sprites
 
         lda # $ff
@@ -11640,9 +11642,9 @@ _b335:  jsr _b359
 
 ;===============================================================================
 
-_b341:
+_b341:                                                                  ;$B341
         ldx # $00
-_b343:
+_b343:                                                                  ;$B343
         lda $0452, x            ; ship slots?
         beq _b358
         bmi _b355
@@ -11653,27 +11655,27 @@ _b343:
         lda [ZP_POLYOBJ_ADDR], y
         and # %11101111
         sta [ZP_POLYOBJ_ADDR], y
-_b355:
+_b355:                                                                  ;$B355
         inx 
         bne _b343
-_b358:
+_b358:                                                                  ;$B358
         rts 
 
 ;===============================================================================
 
-_b359:
+_b359:                                                                  ;$B359
         ldx # $00
         ldy # $40
         jsr _b364
         ldx #< $4128
         ldy #> $4128
-_b364:
+_b364:                                                                  ;$B364
         stx ZP_TEMP_ADDR1_LO
         sty ZP_TEMP_ADDR1_HI
         ldx # $12
-_b36a:
+_b36a:                                                                  ;$B36A
         ldy # $17
-_b36c:
+_b36c:                                                                  ;$B36C
         lda # $ff
         sta [ZP_TEMP_ADDR1], y
         dey 
@@ -11691,11 +11693,11 @@ _b36c:
 
 ;===============================================================================
 
-_b384:
+_b384:                                                                  ;$B384
         ldx # $08
         ldy # $00
         clc 
-_b389:
+_b389:                                                                  ;$B389
         lda row_to_bitmap_lo, x
         sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, x
@@ -11746,7 +11748,7 @@ erase_bytes:                                                            ;$B3AB
 
         rts 
 
-_b3b5:
+_b3b5:                                                                  ;$B3B5
         ;=======================================================================
         lda # $00
 :       sta [ZP_TEMP_ADDR1], y                                          ;$B3B7
@@ -11764,15 +11766,15 @@ _b3b5:
 
 ;===============================================================================
 
-_b3c0:
+_b3c0:                                                                  ;$B3C0
         sta ZP_CURSOR_ROW
         rts 
 
 ;===============================================================================
 
-_b3c3:
+_b3c3:                                                                  ;$B3C3
         ldy # $00
-_b3c5:
+_b3c5:                                                                  ;$B3C5
         lda [ZP_TEMP_ADDR3], y
         sta [ZP_TEMP_ADDR1], y
         dey 
@@ -11807,10 +11809,10 @@ txt_docked_token15:                                                     ;$B3D4
         lda #< $5a60
         sta ZP_TEMP_ADDR1_LO
         ldx # $03
-_b3f7:
+_b3f7:                                                                  ;$B3F7
         lda # $00
         tay 
-_b3fa:
+_b3fa:                                                                  ;$B3FA
         sta [ZP_TEMP_ADDR1], y
         dey 
         bne _b3fa
@@ -11823,12 +11825,12 @@ _b3fa:
         sta ZP_TEMP_ADDR1_HI
         dex 
         bne _b3f7
-_b40f:
+_b40f:                                                                  ;$B40F
         rts 
 
 ;===============================================================================
 
-_b410:
+_b410:                                                                  ;$B410
 .export _b410
         lda $a0
         bne _b40f
@@ -11850,7 +11852,7 @@ _b410:
         bpl _b438
         eor # %11111111
         adc # $01
-_b438:
+_b438:                                                                  ;$B438
         adc # $7b
         sta ZP_VAR_X
         lda ZP_POLYOBJ_ZPOS_pt2
@@ -11861,7 +11863,7 @@ _b438:
         bpl _b448
         eor # %11111111
         sec 
-_b448:
+_b448:                                                                  ;$B448
         adc # $53
         eor # %11111111
         sta ZP_TEMP_ADDR1_LO
@@ -11872,16 +11874,16 @@ _b448:
         bmi _b459
         eor # %11111111
         sec 
-_b459:
+_b459:                                                                  ;$B459
         adc ZP_TEMP_ADDR1_LO
         cmp # $92
         bcs _b461
         lda # $92
-_b461:
+_b461:                                                                  ;$B461
         cmp # $c7
         bcc _b467
         lda # $c6
-_b467:
+_b467:                                                                  ;$B467
         sta ZP_VAR_Y
         sec 
         sbc ZP_TEMP_ADDR1_LO
@@ -11896,7 +11898,7 @@ _b467:
         tax 
         beq _b49a
         bcc _b49b
-_b47f:
+_b47f:                                                                  ;$B47F
         dey 
         bpl _b491
         ldy # $07
@@ -11907,18 +11909,18 @@ _b47f:
         lda ZP_TEMP_ADDR1_HI
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
-_b491:
+_b491:                                                                  ;$B491
         lda ZP_VAR_X
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
         dex 
         bne _b47f
-_b49a:
+_b49a:                                                                  ;$B49A
         rts 
 
         ;-----------------------------------------------------------------------
 
-_b49b:
+_b49b:                                                                  ;$B49B
         iny 
         cpy # $08
         bne _b4ae
@@ -11929,7 +11931,7 @@ _b49b:
         lda ZP_TEMP_ADDR1_HI
         adc # $01
         sta ZP_TEMP_ADDR1_HI
-_b4ae:
+_b4ae:                                                                  ;$B4AE
         iny 
         cpy # $08
         bne _b4c1
@@ -11940,7 +11942,7 @@ _b4ae:
         lda ZP_TEMP_ADDR1_HI
         adc # $01
         sta ZP_TEMP_ADDR1_HI
-_b4c1:
+_b4c1:                                                                  ;$B4C1
         lda ZP_VAR_X
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -11950,20 +11952,20 @@ _b4c1:
 
 ;===============================================================================
 
-_b4cb:
+_b4cb:                                                                  ;$B4CB
         .byte   $00, $00
-_b4cd:
+_b4cd:                                                                  ;$B4CD
         .byte   $00, $00
-_b4cf:
+_b4cf:                                                                  ;$B4CF
         .byte   $00
-_b4d0:
+_b4d0:                                                                  ;$B4D0
         .byte   $88
-_b4d1:
+_b4d1:                                                                  ;$B4D1
         .byte   $88
 
 ;===============================================================================
 
-_b4d2:
+_b4d2:                                                                  ;$B4D2
         ldy # $00
         cpy $c6
         beq _b4dd
@@ -11972,7 +11974,7 @@ _b4d2:
 
         ;-----------------------------------------------------------------------
 
-_b4dd:
+_b4dd:                                                                  ;$B4DD
         lda $d1
         cmp # $10
         bcs _b4eb
@@ -11980,10 +11982,10 @@ _b4dd:
         bne _b4ee
         jsr _b60c
         sta $d1
-_b4eb:
+_b4eb:                                                                  ;$B4EB
         and # %00001111
         tax 
-_b4ee:
+_b4ee:                                                                  ;$B4EE
         lda $d1
         lsr 
         lsr 
@@ -11994,7 +11996,7 @@ _b4ee:
         sta _b502+1
         lda _b71d, x
         sta _b502+2
-_b502:
+_b502:                                                                  ;$B502
         jmp _b4dd
 
 ;===============================================================================
@@ -12078,7 +12080,7 @@ _b502:
 
 ;===============================================================================
 
-_b582:
+_b582:                                                                  ;$B582
         lda # $00
         sta $d1
         lda $c4
@@ -12141,7 +12143,7 @@ _b582:
 
 ;===============================================================================
 
-_b5ee:
+_b5ee:                                                                  ;$B5EE
         lda _b4cb+1
         sty $d404               ;voice 1: control register
         sta $d404               ;voice 1: control register
@@ -12149,7 +12151,7 @@ _b5ee:
 
 ;===============================================================================
 
-_b5f8:
+_b5f8:                                                                  ;$B5F8
         lda _b4cd+0
         sty $d40b               ;voice 2: control register
         sta $d40b               ;voice 2: control register
@@ -12157,7 +12159,7 @@ _b5f8:
 
 ;===============================================================================
 
-_b602:
+_b602:                                                                  ;$B602
         lda _b4cd+1
         sty $d412               ;voice 3: control register
         sta $d412               ;voice 3: control register
@@ -12165,17 +12167,17 @@ _b602:
 
 ;===============================================================================
 
-_b60c:
+_b60c:                                                                  ;$B60C
         inc $c2
         bne _b612
         inc $c3
-_b612:
+_b612:                                                                  ;$B612
         lda [$c2], y
         rts 
 
 ;===============================================================================
 
-_b615:
+_b615:                                                                  ;$B615
         jsr _b60c
         sta $d401               ;voice 1: frequency control - high-byte
         jsr _b60c
@@ -12184,7 +12186,7 @@ _b615:
 
 ;===============================================================================
 
-_b622:
+_b622:                                                                  ;$B622
         jsr _b60c
         sta $d408               ;voice 2: frequency control - high-byte
         sta $c9
@@ -12200,12 +12202,12 @@ _b622:
         sta $cc
         bcc _b642
         inc $cb
-_b642:
+_b642:                                                                  ;$B642
         rts 
 
 ;===============================================================================
 
-_b643:
+_b643:                                                                  ;$B643
         jsr _b60c
         sta $d40f               ;voice 3: frequency control - high-byte
         sta $cd
@@ -12221,19 +12223,19 @@ _b643:
         sta $d0
         bcc _b663
         inc $cf
-_b663:
+_b663:                                                                  ;$B663
         rts 
 
 ;===============================================================================
 
-_b664:
+_b664:                                                                  ;$B664
         lda # $00
         sta $d1
         sta $c6
         sta $c7
         sta $c8
         ldx # $18
-_b670:
+_b670:                                                                  ;$B670
         sta $d400, x            ;voice 1: frequency control - low-byte
         dex 
         bne _b670
@@ -12262,7 +12264,7 @@ _b670:
 
 ;===============================================================================
 
-_b6a0:
+_b6a0:                                                                  ;$B6A0
         lda # $00
         sta $c7
         lda # $98
@@ -12288,7 +12290,7 @@ _b6a0:
 
         ;-----------------------------------------------------------------------
 
-_b6cc:
+_b6cc:                                                                  ;$B6CC
         lda # $00
         sta $c8
         lda # $cc
@@ -12300,18 +12302,18 @@ _b6cc:
         jmp _b6f2
 
         ;-----------------------------------------------------------------------
-_b6e2:
+_b6e2:                                                                  ;$B6E2
         inc $c8
         lda # $05
         cmp $c8
-_b6e8:
+_b6e8:                                                                  ;$B6E8
         beq _b6cc
         inc $c7
         lda # $04
         cmp $c7
-_b6f0:
+_b6f0:                                                                  ;$B6F0
         beq _b6a0
-_b6f2:
+_b6f2:                                                                  ;$B6F2
         ldx $c6
         cpx # $00
         bne _b70d
@@ -12324,713 +12326,713 @@ _b6f2:
         ldx _b4cd+1
         dex 
         stx $d412               ;voice 3: control register
-_b70d:
+_b70d:                                                                  ;$B70D
         rts 
 
 ;===============================================================================
 
 .segment        "DATA_B70E"
 
-_b70e:                                                                  ;$b70e
-        .byte   $60, $05, $0e, $17, $20, $2f, $44, $5b                  ;$b70e
-        .byte   $53, $82, $91, $b8, $bb, $c4, $d9                       ;$b716
+_b70e:                                                                  ;$B70E
+        .byte   $60, $05, $0e, $17, $20, $2f, $44, $5b                  ;$B70E
+        .byte   $53, $82, $91, $b8, $bb, $c4, $d9                       ;$B716
         
 _b71d:
-        .byte   $4a, $b5, $b5, $b5, $b5, $b5, $b5, $b5                  ;$b71d
-        .byte   $b5, $b5, $b5, $b5, $b5, $b5, $b5, $b5                  ;$b725
-        .byte   $a7, $26, $26, $48, $29, $29, $aa, $00                  ;$b72d
-        .byte   $06, $00, $05, $00, $06, $ed, $21, $21                  ;$b735
-        .byte   $41, $1f, $f4, $70, $5c, $07, $0e, $ef                  ;$b73d
-        .byte   $12, $d1, $1d, $df, $5f, $0e, $ef, $12                  ;$b745
-        .byte   $d1, $1d, $df, $38, $1c, $31, $58, $0e                  ;$b74d
-        .byte   $ef, $1a, $9c, $1d, $df, $5f, $0e, $ef                  ;$b755
-        .byte   $13, $ef, $21, $87, $5f, $0e, $ef, $13                  ;$b75d
-        .byte   $ef, $21, $87, $38, $1f, $a5, $58, $0e                  ;$b765
-        .byte   $ef, $19, $1e, $21, $87, $5f, $0e, $ef                  ;$b76d
-        .byte   $16, $60, $25, $a2, $5f, $0e, $ef, $16                  ;$b775
-        .byte   $60, $25, $a2, $38, $21, $87, $58, $0e                  ;$b77d
-        .byte   $ef, $1a, $9c, $25, $a2, $5f, $0e, $ef                  ;$b785
-        .byte   $19, $1e, $27, $df, $5f, $0e, $ef, $16                  ;$b78d
-        .byte   $60, $2c, $31, $5f, $0e, $ef, $13, $ef                  ;$b795
-        .byte   $32, $3c, $7f, $08, $06, $29, $2a, $6a                  ;$b79d
-        .byte   $b8, $f1, $07, $77, $85, $0e, $ef, $12                  ;$b7a5
-        .byte   $d1, $2c, $31, $83, $2a, $3e, $f5, $0e                  ;$b7ad
-        .byte   $ef, $12, $d1, $2c, $c1, $f1, $07, $77                  ;$b7b5
-        .byte   $85, $0e, $ef, $13, $ef, $32, $3c, $83                  ;$b7bd
-        .byte   $2f, $6b, $f5, $0e, $ef, $13, $ef, $32                  ;$b7c5
-        .byte   $3c, $f1, $07, $77, $85, $0e, $ef, $15                  ;$b7cd
-        .byte   $1f, $32, $3c, $83, $2f, $6b, $f5, $0e                  ;$b7d5
-        .byte   $ef, $15, $1f, $32, $3c, $5c, $08, $07                  ;$b7dd
-        .byte   $77, $16, $60, $35, $39, $3f, $3b, $be                  ;$b7e5
-        .byte   $3f, $43, $0f, $ff, $c8, $09, $7e, $3f                  ;$b7ed
-        .byte   $a4, $60, $06, $06, $99, $1a, $1a, $8c                  ;$b7f5
-        .byte   $83, $35, $3a, $83, $3b, $be, $83, $43                  ;$b7fd
-        .byte   $0f, $83, $1d, $df, $f3, $35, $39, $f4                  ;$b805
-        .byte   $07, $77, $12, $d1, $f4, $07, $77, $12                  ;$b80d
-        .byte   $d1, $f4, $07, $77, $12, $d1, $3d, $21                  ;$b815
-        .byte   $11, $21, $35, $39, $38, $3b, $be, $38                  ;$b81d
-        .byte   $43, $0f, $38, $1d, $df, $38, $32, $3c                  ;$b825
-        .byte   $4f, $07, $77, $13, $ef, $4f, $07, $77                  ;$b82d
-        .byte   $13, $ef, $4f, $07, $77, $13, $ef, $ef                  ;$b835
-        .byte   $1f, $a4, $65, $83, $32, $3c, $83, $35                  ;$b83d
-        .byte   $39, $83, $3b, $be, $83, $1d, $df, $57                  ;$b845
-        .byte   $44, $48, $48, $2f, $8f, $89, $07, $77                  ;$b84d
-        .byte   $12, $d1, $2c, $c1, $3f, $1a, $9c, $3f                  ;$b855
-        .byte   $1d, $df, $5f, $07, $77, $10, $c3, $27                  ;$b85d
-        .byte   $df, $3f, $1a, $9c, $3f, $1d, $df, $5f                  ;$b865
-        .byte   $07, $77, $0e, $ef, $25, $a2, $3f, $1a                  ;$b86d
-        .byte   $9c, $3f, $1d, $df, $5f, $07, $77, $1a                  ;$b875
-        .byte   $9c, $21, $87, $3f, $16, $60, $3f, $1a                  ;$b87d
-        .byte   $9c, $5f, $07, $77, $19, $1e, $1d, $df                  ;$b885
-        .byte   $3f, $13, $ef, $3f, $19, $1e, $cf, $0b                  ;$b88d
-        .byte   $f5, $07, $77, $16, $60, $1a, $9c, $f3                  ;$b895
-        .byte   $12, $d1, $f3, $16, $60, $7d, $11, $11                  ;$b89d
-        .byte   $11, $27, $27, $27, $1b, $1b, $1b, $f5                  ;$b8a5
-        .byte   $07, $77, $07, $7a, $0e, $ef, $ff, $f5                  ;$b8ad
-        .byte   $06, $a7, $0d, $4e, $1a, $9c, $ff, $f5                  ;$b8b5
-        .byte   $05, $98, $0b, $30, $16, $60, $ff, $78                  ;$b8bd
-        .byte   $04, $69, $66, $1b, $ab, $9b, $de, $3f                  ;$b8c5
-        .byte   $f2, $60, $21, $11, $11, $21, $09, $f7                  ;$b8cd
-        .byte   $13, $ef, $ff, $1f, $0c, $8f, $f2, $19                  ;$b8d5
-        .byte   $1e, $ff, $21, $0e, $ef, $1d, $df, $ff                  ;$b8dd
-        .byte   $ff, $c7, $44, $46, $08, $2a, $99, $8a                  ;$b8e5
-        .byte   $0a, $f5, $04, $fb, $0c, $8f, $1d, $df                  ;$b8ed
-        .byte   $f4, $09, $f7, $0c, $8f, $f5, $09, $f7                  ;$b8f5
-        .byte   $32, $3c, $3b, $be, $f5, $04, $fb, $32                  ;$b8fd
-        .byte   $3c, $3b, $be, $f4, $09, $f7, $0c, $8f                  ;$b905
-        .byte   $f5, $09, $f7, $27, $df, $32, $3c, $f5                  ;$b90d
-        .byte   $04, $fb, $27, $df, $32, $3c, $f4, $09                  ;$b915
-        .byte   $f7, $0c, $8f, $47, $42, $69, $66, $1b                  ;$b91d
-        .byte   $ab, $9b, $09, $f7, $13, $ef, $4f, $09                  ;$b925
-        .byte   $f7, $13, $ef, $4f, $0c, $8f, $19, $1e                  ;$b92d
-        .byte   $4f, $0e, $ef, $1d, $df, $7f, $44, $46                  ;$b935
-        .byte   $08, $2a, $99, $8a, $f5, $05, $98, $09                  ;$b93d
-        .byte   $68, $1d, $df, $f4, $0d, $4e, $0e, $ef                  ;$b945
-        .byte   $f5, $12, $d2, $2c, $c1, $3b, $be, $f5                  ;$b94d
-        .byte   $07, $77, $2c, $c1, $3b, $be, $f4, $0e                  ;$b955
-        .byte   $ef, $12, $d1, $f5, $12, $d1, $2c, $c1                  ;$b95d
-        .byte   $35, $39, $f5, $03, $bb, $2c, $31, $35                  ;$b965
-        .byte   $39, $f4, $0d, $4e, $0e, $ef, $47, $42                  ;$b96d
-        .byte   $69, $66, $1b, $ab, $9b, $09, $68, $12                  ;$b975
-        .byte   $d1, $4f, $09, $68, $12, $d1, $4f, $0b                  ;$b97d
-        .byte   $30, $16, $60, $4f, $10, $c0, $21, $87                  ;$b985
-        .byte   $7f, $44, $44, $08, $2a, $59, $5a, $f5                  ;$b98d
-        .byte   $07, $77, $12, $d1, $21, $87, $f4, $0e                  ;$b995
-        .byte   $ef, $12, $d1, $f5, $12, $d1, $35, $39                  ;$b99d
-        .byte   $43, $0f, $f5, $03, $bb, $35, $39, $43                  ;$b9a5
-        .byte   $0f, $f4, $0e, $ef, $12, $d1, $f5, $12                  ;$b9ad
-        .byte   $d1, $2c, $c1, $35, $39, $f5, $07, $77                  ;$b9b5
-        .byte   $2c, $c1, $35, $39, $f4, $0d, $4e, $0e                  ;$b9bd
-        .byte   $ef, $47, $42, $69, $46, $1b, $ab, $ab                  ;$b9c5
-        .byte   $09, $68, $12, $d1, $4f, $09, $68, $12                  ;$b9cd
-        .byte   $d1, $4f, $0b, $30, $16, $60, $4f, $10                  ;$b9d5
-        .byte   $c3, $21, $87, $7f, $44, $44, $08, $2a                  ;$b9dd
-        .byte   $59, $5a, $f5, $04, $fb, $0c, $8f, $21                  ;$b9e5
-        .byte   $87, $f4, $0c, $8f, $0e, $ef, $f5, $13                  ;$b9ed
-        .byte   $ef, $32, $3c, $43, $0f, $f5, $07, $77                  ;$b9f5
-        .byte   $32, $3c, $43, $0f, $f4, $0c, $8f, $0e                  ;$b9fd
-        .byte   $ef, $f5, $13, $ef, $27, $df, $32, $3c                  ;$ba05
-        .byte   $f5, $04, $fb, $27, $df, $32, $3c, $f4                  ;$ba0d
-        .byte   $0c, $8f, $0e, $ef, $dc, $0b, $21, $21                  ;$ba15
-        .byte   $21, $e7, $04, $04, $44, $5b, $5b, $5b                  ;$ba1d
-        .byte   $6f, $f4, $65, $f4, $09, $f7, $13, $ef                  ;$ba25
-        .byte   $f4, $09, $f7, $13, $ef, $f4, $0c, $8f                  ;$ba2d
-        .byte   $19, $1e, $f4, $0e, $ef, $1d, $df, $c7                  ;$ba35
-        .byte   $44, $44, $48, $39, $49, $aa, $09, $f5                  ;$ba3d
-        .byte   $06, $47, $0c, $8f, $27, $df, $84, $09                  ;$ba45
-        .byte   $f7, $0c, $8f, $83, $4f, $bf, $f5, $0c                  ;$ba4d
-        .byte   $8f, $3b, $be, $4f, $bf, $f5, $06, $47                  ;$ba55
-        .byte   $32, $3c, $4f, $bf, $84, $0c, $8f, $0e                  ;$ba5d
-        .byte   $ef, $83, $3b, $be, $f5, $13, $ef, $32                  ;$ba65
-        .byte   $3c, $3b, $be, $f5, $04, $fb, $32, $3c                  ;$ba6d
-        .byte   $3b, $be, $f4, $09, $f7, $0c, $8f, $47                  ;$ba75
-        .byte   $06, $46, $46, $7b, $7b, $7b, $09, $f7                  ;$ba7d
-        .byte   $13, $ef, $4f, $09, $f7, $13, $ef, $4f                  ;$ba85
-        .byte   $0c, $8f, $19, $1e, $4f, $0e, $ef, $1d                  ;$ba8d
-        .byte   $df, $7f, $46, $46, $49, $59, $69, $aa                  ;$ba95
-        .byte   $f5, $06, $a7, $06, $af, $27, $df, $84                  ;$ba9d
-        .byte   $0d, $4e, $10, $c3, $83, $4f, $bf, $f5                  ;$baa5
-        .byte   $0d, $4e, $10, $c3, $4f, $bf, $f5, $04                  ;$baad
-        .byte   $fb, $43, $0f, $4f, $bf, $84, $0d, $4e                  ;$bab5
-        .byte   $10, $c3, $83, $43, $0f, $f5, $06, $a7                  ;$babd
-        .byte   $35, $39, $43, $0f, $f5, $03, $53, $27                  ;$bac5
-        .byte   $df, $43, $0f, $df, $21, $21, $41, $c7                  ;$bacd
-        .byte   $28, $28, $28, $9b, $9b, $9b, $0c, $f4                  ;$bad5
-        .byte   $0b, $30, $16, $60, $f4, $0b, $30, $16                  ;$badd
-        .byte   $60, $f4, $0d, $4e, $1a, $9c, $f4, $10                  ;$bae5
-        .byte   $c3, $21, $87, $c8, $08, $57, $46, $46                  ;$baed
-        .byte   $49, $59, $59, $ca, $03, $bb, $03, $bb                  ;$baf5
-        .byte   $21, $87, $4f, $0e, $ef, $12, $d1, $4f                  ;$bafd
-        .byte   $12, $d1, $16, $60, $1f, $06, $a7, $5f                  ;$bb05
-        .byte   $0e, $ef, $12, $d1, $1c, $31, $5f, $12                  ;$bb0d
-        .byte   $d1, $16, $60, $1d, $df, $5f, $06, $47                  ;$bb15
-        .byte   $06, $4a, $32, $3c, $4f, $0e, $ef, $13                  ;$bb1d
-        .byte   $ef, $4f, $13, $ef, $19, $1e, $1f, $04                  ;$bb25
-        .byte   $fb, $5f, $0c, $8f, $0e, $ef, $27, $df                  ;$bb2d
-        .byte   $5f, $0e, $ef, $13, $ef, $19, $1e, $5f                  ;$bb35
-        .byte   $06, $a7, $06, $aa, $19, $1e, $4f, $0d                  ;$bb3d
-        .byte   $4e, $10, $c3, $5f, $0d, $4e, $10, $c3                  ;$bb45
-        .byte   $16, $60, $5f, $03, $bb, $03, $bd, $21                  ;$bb4d
-        .byte   $87, $4f, $0d, $4e, $12, $d1, $5f, $12                  ;$bb55
-        .byte   $d1, $16, $60, $1d, $df, $5f, $09, $f7                  ;$bb5d
-        .byte   $0c, $8f, $13, $ef, $8f, $57, $08, $08                  ;$bb65
-        .byte   $08, $88, $88, $88, $02, $7d, $04, $fc                  ;$bb6d
-        .byte   $09, $f9, $58, $02, $7d, $04, $fc, $09                  ;$bb75
-        .byte   $f9, $ff, $7d, $11, $11, $11, $28, $24                  ;$bb7d
-        .byte   $44, $39, $2b, $7b, $ec, $10, $6f, $a4                  ;$bb85
-        .byte   $65, $32, $32, $3c, $4f, $bf, $28, $2c                  ;$bb8d
-        .byte   $c1, $83, $4b, $45, $85, $05, $98, $2c                  ;$bb95
-        .byte   $c1, $4b, $45, $85, $0b, $30, $27, $df                  ;$bb9d
-        .byte   $43, $0f, $85, $0e, $18, $27, $df, $43                  ;$bba5
-        .byte   $0f, $81, $05, $98, $85, $0b, $30, $27                  ;$bbad
-        .byte   $df, $43, $0f, $85, $0e, $18, $25, $a2                  ;$bbb5
-        .byte   $3f, $4b, $85, $05, $98, $25, $a2, $3f                  ;$bbbd
-        .byte   $4b, $85, $0b, $30, $27, $df, $43, $0f                  ;$bbc5
-        .byte   $85, $0e, $18, $27, $df, $43, $0f, $81                  ;$bbcd
-        .byte   $05, $98, $85, $0e, $18, $13, $ef, $16                  ;$bbd5
-        .byte   $60, $85, $10, $c3, $13, $ef, $16, $60                  ;$bbdd
-        .byte   $85, $07, $77, $12, $d1, $19, $1e, $81                  ;$bbe5
-        .byte   $0b, $30, $85, $0e, $ef, $12, $d1, $16                  ;$bbed
-        .byte   $60, $81, $05, $98, $85, $0b, $30, $12                  ;$bbf5
-        .byte   $d1, $16, $60, $85, $0e, $18, $12, $d1                  ;$bbfd
-        .byte   $16, $60, $85, $07, $77, $12, $d1, $21                  ;$bc05
-        .byte   $87, $81, $0b, $30, $85, $0e, $ef, $12                  ;$bc0d
-        .byte   $d1, $1d, $df, $81, $05, $98, $32, $32                  ;$bc15
-        .byte   $3c, $4f, $bf, $28, $2c, $c1, $83, $4b                  ;$bc1d
-        .byte   $45, $85, $05, $98, $2c, $c1, $4b, $45                  ;$bc25
-        .byte   $85, $0b, $30, $27, $df, $43, $0f, $85                  ;$bc2d
-        .byte   $0e, $18, $27, $df, $43, $0f, $81, $05                  ;$bc35
-        .byte   $98, $85, $0b, $30, $27, $df, $43, $0f                  ;$bc3d
-        .byte   $85, $0d, $4e, $2c, $c1, $4b, $45, $85                  ;$bc45
-        .byte   $05, $98, $38, $63, $59, $83, $85, $0b                  ;$bc4d
-        .byte   $30, $32, $3c, $4f, $bf, $85, $0e, $18                  ;$bc55
-        .byte   $32, $3c, $4f, $bf, $81, $05, $98, $5d                  ;$bc5d
-        .byte   $21, $21, $21, $0b, $30, $13, $ef, $1c                  ;$bc65
-        .byte   $31, $58, $0b, $da, $13, $ef, $21, $87                  ;$bc6d
-        .byte   $58, $0c, $8f, $12, $d1, $21, $87, $5f                  ;$bc75
-        .byte   $06, $47, $12, $d1, $1d, $df, $58, $09                  ;$bc7d
-        .byte   $f7, $16, $60, $1c, $31, $5f, $04, $fb                  ;$bc85
-        .byte   $13, $ef, $19, $1e, $c8, $08, $57, $08                  ;$bc8d
-        .byte   $08, $08, $89, $89, $89, $0b, $30, $13                  ;$bc95
-        .byte   $ef, $19, $1e, $58, $0b, $30, $13, $ef                  ;$bc9d
-        .byte   $19, $1e, $58, $0b, $30, $13, $ef, $19                  ;$bca5
-        .byte   $1e, $5f, $05, $98, $0e, $18, $16, $60                  ;$bcad
-        .byte   $5f, $03, $bb, $07, $77, $0e, $ef, $ff                  ;$bcb5
-        .byte   $7d, $21, $11, $21, $06, $46, $68, $1b                  ;$bcbd
-        .byte   $69, $99, $f3, $1d, $df, $85, $03, $bb                  ;$bcc5
-        .byte   $0d, $4e, $1a, $9c, $82, $0e, $ef, $84                  ;$bccd
-        .byte   $07, $77, $12, $d1, $82, $16, $60, $85                  ;$bcd5
-        .byte   $07, $77, $1a, $9c, $1d, $df, $82, $1d                  ;$bcdd
-        .byte   $ef, $85, $03, $bb, $0d, $4e, $1a, $9c                  ;$bce5
-        .byte   $82, $0e, $ef, $84, $07, $77, $12, $d1                  ;$bced
-        .byte   $82, $16, $60, $85, $07, $77, $1a, $9c                  ;$bcf5
-        .byte   $1d, $df, $82, $1d, $ef, $57, $06, $46                  ;$bcfd
-        .byte   $89, $1b, $69, $ac, $03, $bb, $0d, $4e                  ;$bd05
-        .byte   $32, $3c, $28, $0e, $ef, $48, $07, $77                  ;$bd0d
-        .byte   $12, $d1, $28, $16, $60, $48, $07, $77                  ;$bd15
-        .byte   $1a, $9c, $28, $1d, $df, $48, $03, $bb                  ;$bd1d
-        .byte   $0d, $4e, $28, $0e, $ef, $58, $07, $77                  ;$bd25
-        .byte   $12, $d1, $2c, $c1, $28, $16, $60, $58                  ;$bd2d
-        .byte   $07, $77, $1a, $9c, $1d, $df, $28, $1d                  ;$bd35
-        .byte   $ef, $78, $06, $46, $68, $1b, $69, $99                  ;$bd3d
-        .byte   $85, $04, $fb, $0c, $8f, $19, $1e, $82                  ;$bd45
-        .byte   $0e, $ef, $84, $09, $f7, $13, $ef, $82                  ;$bd4d
-        .byte   $19, $1e, $85, $09, $f7, $1d, $ef, $1d                  ;$bd55
-        .byte   $df, $82, $27, $df, $85, $04, $fb, $0c                  ;$bd5d
-        .byte   $8f, $19, $1e, $82, $0e, $ef, $84, $09                  ;$bd65
-        .byte   $f7, $13, $ef, $82, $19, $1e, $85, $09                  ;$bd6d
-        .byte   $f7, $1d, $ef, $1d, $df, $82, $27, $df                  ;$bd75
-        .byte   $57, $06, $46, $89, $1b, $69, $ac, $04                  ;$bd7d
-        .byte   $fb, $0c, $8f, $2c, $c1, $28, $0e, $ef                  ;$bd85
-        .byte   $48, $09, $f7, $13, $ef, $28, $19, $1e                  ;$bd8d
-        .byte   $48, $09, $f7, $1d, $df, $28, $27, $df                  ;$bd95
-        .byte   $48, $02, $7d, $0c, $8f, $28, $0e, $ef                  ;$bd9d
-        .byte   $58, $09, $f7, $13, $ef, $27, $df, $48                  ;$bda5
-        .byte   $09, $f7, $19, $1e, $58, $09, $f7, $1d                  ;$bdad
-        .byte   $ef, $1d, $df, $28, $27, $df, $78, $06                  ;$bdb5
-        .byte   $46, $68, $1b, $69, $a9, $85, $03, $bb                  ;$bdbd
-        .byte   $0d, $4e, $1a, $9c, $82, $0e, $ef, $84                  ;$bdc5
-        .byte   $07, $77, $12, $d1, $82, $16, $60, $85                  ;$bdcd
-        .byte   $07, $77, $1a, $9c, $1d, $df, $82, $1d                  ;$bdd5
-        .byte   $ef, $85, $03, $bb, $0d, $4e, $1a, $9c                  ;$bddd
-        .byte   $82, $0e, $ef, $84, $07, $77, $12, $d1                  ;$bde5
-        .byte   $82, $16, $60, $85, $07, $77, $1a, $9c                  ;$bded
-        .byte   $1d, $df, $82, $1d, $ef, $57, $06, $46                  ;$bdf5
-        .byte   $89, $1b, $69, $ac, $03, $bb, $0d, $4e                  ;$bdfd
-        .byte   $32, $3c, $28, $0e, $ef, $48, $07, $77                  ;$be05
-        .byte   $12, $d1, $28, $16, $60, $48, $07, $77                  ;$be0d
-        .byte   $1a, $9c, $28, $1d, $df, $48, $03, $bb                  ;$be15
-        .byte   $0d, $4e, $28, $0e, $ef, $58, $07, $77                  ;$be1d
-        .byte   $12, $d1, $2c, $c1, $28, $16, $60, $58                  ;$be25
-        .byte   $07, $77, $1a, $9c, $1d, $df, $28, $1d                  ;$be2d
-        .byte   $ef, $d8, $21, $21, $21, $f5, $09, $f7                  ;$be35
-        .byte   $19, $1e, $27, $df, $f5, $12, $d1, $1a                  ;$be3d
-        .byte   $9c, $2c, $c1, $f5, $11, $c3, $1d, $df                  ;$be45
-        .byte   $32, $3c, $f5, $06, $a7, $2a, $3e, $3b                  ;$be4d
-        .byte   $be, $f1, $03, $53, $f5, $10, $c3, $2c                  ;$be55
-        .byte   $c1, $35, $39, $57, $08, $08, $08, $99                  ;$be5d
-        .byte   $99, $c9, $07, $77, $27, $df, $32, $3c                  ;$be65
-        .byte   $58, $07, $77, $27, $df, $32, $3c, $58                  ;$be6d
-        .byte   $07, $77, $25, $a2, $32, $3c, $5f, $03                  ;$be75
-        .byte   $bb, $1a, $9c, $2c, $c1, $5f, $02, $7d                  ;$be7d
-        .byte   $19, $1e, $27, $df, $ff, $7c, $11, $27                  ;$be85
-        .byte   $27, $48, $19, $19, $ba, $83, $27, $df                  ;$be8d
-        .byte   $81, $07, $e9, $84, $0f, $d2, $13, $ef                  ;$be95
-        .byte   $84, $0f, $d2, $13, $ef, $81, $07, $e9                  ;$be9d
-        .byte   $85, $0f, $d2, $11, $c3, $2a, $3e, $85                  ;$bea5
-        .byte   $0f, $d2, $13, $ef, $27, $df, $31, $05                  ;$bead
-        .byte   $47, $23, $86, $58, $0a, $8f, $0d, $4e                  ;$beb5
-        .byte   $1f, $a5, $58, $0a, $8f, $0e, $ef, $1d                  ;$bebd
-        .byte   $df, $58, $0a, $8f, $0f, $d2, $1a, $9c                  ;$bec5
-        .byte   $3f, $1a, $9c, $18, $07, $77, $83, $23                  ;$becd
-        .byte   $86, $84, $0e, $ef, $11, $c3, $85, $0e                  ;$bed5
-        .byte   $ef, $11, $c3, $23, $86, $81, $05, $ed                  ;$bedd
-        .byte   $85, $0e, $ef, $15, $1f, $1a, $9c, $85                  ;$bee5
-        .byte   $0e, $ef, $15, $1f, $17, $b5, $31, $07                  ;$beed
-        .byte   $e9, $17, $b5, $48, $0f, $d2, $13, $ef                  ;$bef5
-        .byte   $48, $0f, $d2, $13, $ef, $48, $0b, $da                  ;$befd
-        .byte   $15, $1f, $28, $13, $ef, $58, $07, $77                  ;$bf05
-        .byte   $11, $c3, $17, $b5, $18, $07, $e9, $83                  ;$bf0d
-        .byte   $27, $df, $84, $0f, $d2, $13, $ef, $84                  ;$bf15
-        .byte   $0f, $d2, $13, $ef, $81, $07, $e9, $85                  ;$bf1d
-        .byte   $0f, $d2, $11, $c3, $2a, $3e, $85, $0f                  ;$bf25
-        .byte   $d2, $13, $ef, $27, $df, $31, $05, $47                  ;$bf2d
-        .byte   $23, $86, $58, $0a, $8f, $0d, $4e, $1f                  ;$bf35
-        .byte   $a5, $58, $0a, $8f, $0e, $ef, $1d, $df                  ;$bf3d
-        .byte   $58, $0b, $30, $12, $d1, $1a, $9c, $5f                  ;$bf45
-        .byte   $07, $77, $12, $d1, $1a, $9c, $18, $09                  ;$bf4d
-        .byte   $f7, $83, $19, $1e, $84, $0e, $ef, $13                  ;$bf55
-        .byte   $ef, $85, $0e, $ef, $13, $ef, $19, $1e                  ;$bf5d
-        .byte   $81, $09, $f7, $85, $0f, $d2, $12, $d1                  ;$bf65
-        .byte   $1a, $9c, $85, $0f, $d2, $12, $d1, $1f                  ;$bf6d
-        .byte   $a5, $85, $09, $f7, $19, $1e, $1d, $df                  ;$bf75
-        .byte   $84, $07, $77, $0e, $ef, $84, $07, $77                  ;$bf7d
-        .byte   $0e, $ef, $84, $07, $77, $0e, $ef, $84                  ;$bf85
-        .byte   $07, $77, $0e, $ef, $dc, $08, $21, $11                  ;$bf8d
-        .byte   $21, $37, $06, $46, $68, $1b, $69, $99                  ;$bf95
-        .byte   $1d, $df, $5f, $03, $bb, $0d, $4e, $1a                  ;$bf9d
-        .byte   $9c, $28, $0e, $ef, $48, $07, $77, $12                  ;$bfa5
-        .byte   $d1, $28, $16, $60, $58, $07, $77, $1a                  ;$bfad
-        .byte   $9c, $1d, $df, $28, $1d, $ef, $58, $03                  ;$bfb5
-        .byte   $bb, $0d, $4e, $1a, $9c, $28, $0e, $ef                  ;$bfbd
-        .byte   $48, $07, $77, $12, $d1, $28, $16, $60                  ;$bfc5
-        .byte   $58, $07, $77, $1a, $9c, $1d, $df, $28                  ;$bfcd
-        .byte   $1d, $ef, $78, $06, $46, $89, $1b, $69                  ;$bfd5
-        .byte   $ac, $85, $03, $bb, $0d, $4e, $32, $3c                  ;$bfdd
-        .byte   $82, $0e, $ef, $84, $07, $77, $12, $d1                  ;$bfe5
-        .byte   $82, $16, $60, $84, $07, $77, $1a, $9c                  ;$bfed
-        .byte   $82, $1d, $df, $84, $03, $bb, $0d, $4e                  ;$bff5
-        .byte   $82, $0e, $ef, $85, $07, $77, $12, $d1                  ;$bffd
-        .byte   $2c, $c1, $82, $16, $60, $85, $07, $77                  ;$c005
-        .byte   $1a, $9c, $1d, $df, $82, $1d, $ef, $57                  ;$c00d
-        .byte   $06, $46, $68, $1b, $69, $99, $04, $fb                  ;$c015
-        .byte   $0c, $8f, $19, $1e, $28, $0e, $ef, $48                  ;$c01d
-        .byte   $09, $f7, $13, $ef, $28, $19, $1e, $58                  ;$c025
-        .byte   $09, $f7, $1d, $ef, $1d, $df, $28, $27                  ;$c02d
-        .byte   $df, $58, $04, $fb, $0c, $8f, $19, $1e                  ;$c035
-        .byte   $28, $0e, $ef, $48, $09, $f7, $13, $ef                  ;$c03d
-        .byte   $28, $19, $1e, $58, $09, $f7, $1d, $ef                  ;$c045
-        .byte   $1d, $df, $28, $27, $df, $78, $06, $46                  ;$c04d
-        .byte   $89, $1b, $69, $ac, $85, $04, $fb, $0c                  ;$c055
-        .byte   $8f, $2c, $c1, $82, $0e, $ef, $84, $09                  ;$c05d
-        .byte   $f7, $13, $ef, $82, $19, $1e, $84, $09                  ;$c065
-        .byte   $f7, $1d, $df, $82, $27, $df, $84, $02                  ;$c06d
-        .byte   $7d, $0c, $8f, $82, $0e, $ef, $85, $09                  ;$c075
-        .byte   $f7, $13, $ef, $27, $df, $84, $09, $f7                  ;$c07d
-        .byte   $19, $1e, $85, $09, $f7, $1d, $ef, $1d                  ;$c085
-        .byte   $df, $82, $27, $df, $57, $06, $46, $69                  ;$c08d
-        .byte   $1a, $88, $a9, $03, $bb, $0d, $4e, $1a                  ;$c095
-        .byte   $9c, $28, $0e, $ef, $48, $07, $77, $12                  ;$c09d
-        .byte   $d1, $28, $16, $60, $58, $07, $77, $1a                  ;$c0a5
-        .byte   $9c, $1d, $df, $28, $1d, $ef, $58, $03                  ;$c0ad
-        .byte   $bb, $0d, $4e, $1a, $9c, $28, $0e, $ef                  ;$c0b5
-        .byte   $48, $07, $77, $12, $d1, $28, $16, $60                  ;$c0bd
-        .byte   $58, $07, $77, $1a, $9c, $1d, $df, $28                  ;$c0c5
-        .byte   $1d, $ef, $78, $06, $46, $89, $1b, $69                  ;$c0cd
-        .byte   $ac, $85, $03, $bb, $0d, $4e, $32, $3c                  ;$c0d5
-        .byte   $82, $0e, $ef, $84, $07, $77, $12, $d1                  ;$c0dd
-        .byte   $82, $16, $60, $84, $07, $77, $1a, $9c                  ;$c0e5
-        .byte   $82, $1d, $df, $84, $03, $bb, $0d, $4e                  ;$c0ed
-        .byte   $82, $0e, $ef, $85, $07, $77, $12, $d1                  ;$c0f5
-        .byte   $2c, $c1, $82, $16, $60, $85, $07, $77                  ;$c0fd
-        .byte   $1a, $9c, $1d, $df, $82, $1d, $ef, $5d                  ;$c105
-        .byte   $21, $21, $21, $09, $f7, $19, $1e, $27                  ;$c10d
-        .byte   $df, $5f, $12, $d1, $1a, $9c, $2c, $c1                  ;$c115
-        .byte   $5f, $11, $c3, $1d, $df, $32, $3c, $5f                  ;$c11d
-        .byte   $06, $a7, $2a, $3e, $3b, $be, $1f, $03                  ;$c125
-        .byte   $53, $5f, $10, $c3, $2c, $c1, $35, $39                  ;$c12d
-        .byte   $7f, $08, $08, $08, $99, $99, $c9, $85                  ;$c135
-        .byte   $07, $77, $27, $df, $32, $3c, $85, $07                  ;$c13d
-        .byte   $77, $27, $df, $32, $3c, $f5, $07, $77                  ;$c145
-        .byte   $25, $a2, $32, $3c, $f5, $03, $bb, $1a                  ;$c14d
-        .byte   $9c, $2c, $c1, $85, $02, $7d, $19, $1e                  ;$c155
-        .byte   $27, $df, $8c, $2f, $9c, $08, $ff, $a7                  ;$c15d
-        .byte   $05, $05, $0a, $17, $17, $fa, $00, $06                  ;$c165
-        .byte   $00, $04, $00, $01, $ec, $05, $7f, $f4                  ;$c16d
-        .byte   $50, $4d, $21, $21, $41, $10, $c3, $19                  ;$c175
-        .byte   $1e, $4f, $10, $c3, $19, $1e, $4f, $10                  ;$c17d
-        .byte   $c3, $19, $1e, $4f, $10, $c3, $19, $1e                  ;$c185
-        .byte   $4f, $10, $c3, $19, $1e, $4f, $10, $c3                  ;$c18d
-        .byte   $19, $1e, $4f, $10, $c3, $19, $1e, $4f                  ;$c195
-        .byte   $10, $c3, $19, $1e, $5f, $10, $c3, $19                  ;$c19d
-        .byte   $1e, $02, $f6, $38, $03, $23, $58, $10                  ;$c1a5
-        .byte   $c3, $19, $1e, $04, $30, $38, $05, $47                  ;$c1ad
-        .byte   $58, $10, $c3, $19, $1e, $07, $0c, $38                  ;$c1b5
-        .byte   $06, $47, $58, $10, $c3, $19, $1e, $09                  ;$c1bd
-        .byte   $68, $38, $0a, $8f, $58, $10, $c3, $19                  ;$c1c5
-        .byte   $1e, $0e, $18, $38, $0c, $8f, $58, $10                  ;$c1cd
-        .byte   $c3, $19, $1e, $12, $d1, $38, $15, $1f                  ;$c1d5
-        .byte   $58, $10, $c3, $19, $1f, $1c, $31, $38                  ;$c1dd
-        .byte   $17, $b5, $58, $10, $c3, $15, $1f, $19                  ;$c1e5
-        .byte   $1e, $38, $2a, $3e, $48, $10, $c3, $19                  ;$c1ed
-        .byte   $1e, $4f, $10, $c3, $19, $1e, $4f, $10                  ;$c1f5
-        .byte   $c3, $19, $1e, $4f, $10, $c3, $19, $1e                  ;$c1fd
-        .byte   $7f, $05, $05, $25, $17, $17, $a8, $4e                  ;$c205
-        .byte   $3f, $f4, $63, $0e, $18, $16, $60, $5f                  ;$c20d
-        .byte   $0e, $18, $16, $60, $19, $1e, $38, $19                  ;$c215
-        .byte   $1e, $58, $0e, $18, $16, $60, $21, $87                  ;$c21d
-        .byte   $5f, $0e, $18, $16, $60, $2a, $3e, $7f                  ;$c225
-        .byte   $04, $04, $29, $17, $17, $ab, $f5, $0c                  ;$c22d
-        .byte   $8f, $16, $60, $32, $3c, $f4, $0c, $8f                  ;$c235
-        .byte   $16, $60, $f4, $0c, $8f, $16, $60, $f4                  ;$c23d
-        .byte   $0c, $8f, $16, $60, $f5, $0c, $8f, $16                  ;$c245
-        .byte   $60, $1f, $a5, $f4, $0c, $8f, $16, $60                  ;$c24d
-        .byte   $f4, $0c, $8f, $16, $60, $f4, $0c, $8f                  ;$c255
-        .byte   $16, $60, $73, $00, $00, $31, $31, $04                  ;$c25d
-        .byte   $19, $19, $5b, $ed, $21, $41, $41, $3f                  ;$c265
-        .byte   $f4, $70, $4a, $00, $0a, $00, $0a, $00                  ;$c26d
-        .byte   $0a, $04, $30, $04, $35, $5f, $10, $c3                  ;$c275
-        .byte   $15, $1f, $19, $1e, $38, $19, $1e, $58                  ;$c27d
-        .byte   $10, $c3, $15, $1f, $21, $87, $5f, $04                  ;$c285
-        .byte   $30, $04, $35, $2a, $3e, $5f, $10, $c3                  ;$c28d
-        .byte   $15, $1f, $32, $3c, $4f, $10, $c3, $15                  ;$c295
-        .byte   $1f, $4f, $04, $30, $04, $35, $4f, $10                  ;$c29d
-        .byte   $c3, $15, $1f, $4f, $03, $23, $03, $24                  ;$c2a5
-        .byte   $5f, $10, $c3, $16, $60, $25, $a2, $38                  ;$c2ad
-        .byte   $25, $a2, $58, $10, $c3, $16, $60, $2c                  ;$c2b5
-        .byte   $c1, $5f, $03, $23, $03, $24, $32, $3c                  ;$c2bd
-        .byte   $5f, $10, $c3, $16, $60, $38, $63, $5f                  ;$c2c5
-        .byte   $10, $c3, $16, $60, $32, $3c, $5f, $03                  ;$c2cd
-        .byte   $23, $03, $24, $2a, $3e, $5f, $10, $c3                  ;$c2d5
-        .byte   $16, $60, $25, $a2, $5f, $04, $30, $04                  ;$c2dd
-        .byte   $35, $2a, $3e, $5f, $10, $c3, $15, $1f                  ;$c2e5
-        .byte   $21, $87, $5f, $10, $c3, $15, $1f, $19                  ;$c2ed
-        .byte   $1e, $5f, $04, $30, $04, $35, $19, $1e                  ;$c2f5
-        .byte   $4f, $10, $c3, $15, $1f, $4f, $10, $c3                  ;$c2fd
-        .byte   $15, $1f, $5f, $04, $30, $04, $35, $03                  ;$c305
-        .byte   $23, $38, $04, $39, $58, $10, $c3, $15                  ;$c30d
-        .byte   $1f, $06, $47, $38, $08, $61, $48, $03                  ;$c315
-        .byte   $23, $03, $24, $4f, $10, $c3, $16, $60                  ;$c31d
-        .byte   $4f, $10, $c3, $16, $60, $4f, $03, $23                  ;$c325
-        .byte   $03, $24, $4f, $10, $c3, $16, $60, $4f                  ;$c32d
-        .byte   $10, $c3, $16, $60, $5f, $03, $23, $03                  ;$c335
-        .byte   $24, $03, $25, $38, $04, $b4, $58, $10                  ;$c33d
-        .byte   $c3, $16, $60, $06, $47, $38, $09, $68                  ;$c345
-        .byte   $48, $04, $30, $04, $35, $5f, $10, $c3                  ;$c34d
-        .byte   $15, $1f, $19, $1e, $38, $19, $1e, $58                  ;$c355
-        .byte   $10, $c3, $15, $1f, $21, $87, $5f, $04                  ;$c35d
-        .byte   $30, $04, $35, $2a, $3e, $5f, $10, $c3                  ;$c365
-        .byte   $15, $1f, $32, $3c, $4f, $10, $c3, $15                  ;$c36d
-        .byte   $1f, $4f, $04, $30, $04, $35, $5f, $10                  ;$c375
-        .byte   $c3, $15, $1f, $32, $3c, $38, $38, $63                  ;$c37d
-        .byte   $58, $05, $98, $05, $9f, $3b, $be, $5f                  ;$c385
-        .byte   $0b, $30, $0e, $18, $38, $63, $4f, $0b                  ;$c38d
-        .byte   $30, $0e, $18, $5f, $05, $47, $05, $4f                  ;$c395
-        .byte   $32, $3c, $4f, $0a, $8f, $0c, $8f, $5f                  ;$c39d
-        .byte   $0a, $8f, $0c, $8f, $2a, $3e, $5f, $05                  ;$c3a5
-        .byte   $47, $05, $4d, $32, $3c, $5f, $0a, $8f                  ;$c3ad
-        .byte   $0c, $8f, $38, $63, $5f, $09, $68, $09                  ;$c3b5
-        .byte   $6f, $25, $a2, $4f, $12, $d1, $16, $60                  ;$c3bd
-        .byte   $4f, $12, $d1, $16, $60, $5f, $12, $d1                  ;$c3c5
-        .byte   $16, $60, $08, $61, $4f, $12, $d1, $16                  ;$c3cd
-        .byte   $60, $5f, $12, $d1, $16, $60, $07, $e9                  ;$c3d5
-        .byte   $4f, $12, $d1, $16, $60, $5f, $12, $d1                  ;$c3dd
-        .byte   $16, $60, $07, $0c, $5f, $0c, $8f, $0f                  ;$c3e5
-        .byte   $d2, $06, $47, $4f, $0c, $8f, $0f, $d2                  ;$c3ed
-        .byte   $4f, $0c, $8f, $0f, $d2, $5f, $0c, $8f                  ;$c3f5
-        .byte   $0f, $d2, $05, $98, $4f, $0c, $8f, $0f                  ;$c3fd
-        .byte   $d2, $5f, $0e, $18, $10, $c3, $05, $47                  ;$c405
-        .byte   $4f, $0e, $18, $10, $c3, $5f, $0f, $d2                  ;$c40d
-        .byte   $12, $d1, $04, $b4, $4f, $04, $30, $04                  ;$c415
-        .byte   $35, $5f, $10, $c3, $15, $1f, $19, $1e                  ;$c41d
-        .byte   $38, $19, $1e, $58, $10, $c3, $15, $1f                  ;$c425
-        .byte   $21, $87, $5f, $04, $30, $04, $35, $2a                  ;$c42d
-        .byte   $3e, $5f, $10, $c3, $15, $1f, $32, $3c                  ;$c435
-        .byte   $4f, $10, $c3, $15, $1f, $4f, $04, $30                  ;$c43d
-        .byte   $04, $35, $4f, $10, $c3, $15, $1f, $4f                  ;$c445
-        .byte   $03, $23, $03, $24, $5f, $10, $c3, $16                  ;$c44d
-        .byte   $60, $25, $a2, $38, $25, $a2, $58, $10                  ;$c455
-        .byte   $c3, $16, $60, $2c, $c1, $5f, $03, $23                  ;$c45d
-        .byte   $03, $24, $32, $3c, $5f, $10, $c3, $16                  ;$c465
-        .byte   $60, $38, $63, $5f, $10, $c3, $16, $60                  ;$c46d
-        .byte   $32, $3c, $5f, $03, $23, $03, $24, $2a                  ;$c475
-        .byte   $3e, $5f, $10, $c3, $16, $60, $25, $a2                  ;$c47d
-        .byte   $5f, $04, $30, $04, $35, $2a, $3e, $5f                  ;$c485
-        .byte   $10, $c3, $15, $1f, $21, $87, $5f, $10                  ;$c48d
-        .byte   $c3, $15, $1f, $19, $1e, $5f, $04, $30                  ;$c495
-        .byte   $04, $35, $38, $63, $4f, $10, $c3, $15                  ;$c49d
-        .byte   $1f, $4f, $10, $c3, $15, $1f, $4f, $04                  ;$c4a5
-        .byte   $30, $04, $35, $4f, $10, $c3, $15, $1f                  ;$c4ad
-        .byte   $5f, $04, $b4, $04, $b8, $25, $a2, $4f                  ;$c4b5
-        .byte   $12, $d1, $16, $60, $4f, $12, $d1, $16                  ;$c4bd
-        .byte   $60, $4f, $09, $68, $09, $6a, $4f, $12                  ;$c4c5
-        .byte   $d1, $16, $60, $4f, $12, $d1, $16, $60                  ;$c4cd
-        .byte   $4f, $04, $b4, $04, $b8, $7f, $04, $04                  ;$c4d5
-        .byte   $06, $28, $28, $8b, $85, $12, $d1, $16                  ;$c4dd
-        .byte   $60, $25, $a2, $83, $2a, $3e, $f5, $06                  ;$c4e5
-        .byte   $47, $06, $4f, $2c, $c1, $f5, $10, $c3                  ;$c4ed
-        .byte   $16, $60, $2a, $3e, $f4, $10, $c3, $16                  ;$c4f5
-        .byte   $60, $f5, $06, $47, $06, $4f, $21, $87                  ;$c4fd
-        .byte   $f5, $10, $c3, $1c, $31, $2c, $c1, $f5                  ;$c505
-        .byte   $10, $c3, $1c, $c1, $2a, $3e, $f4, $06                  ;$c50d
-        .byte   $47, $06, $4f, $f5, $0e, $18, $16, $60                  ;$c515
-        .byte   $21, $87, $f5, $0c, $8f, $16, $60, $32                  ;$c51d
-        .byte   $3c, $85, $0c, $8f, $16, $60, $32, $3c                  ;$c525
-        .byte   $83, $32, $3c, $f5, $0c, $8f, $16, $60                  ;$c52d
-        .byte   $32, $3c, $ff, $7f, $06, $06, $48, $48                  ;$c535
-        .byte   $48, $8a, $f5, $06, $47, $16, $60, $32                  ;$c53d
-        .byte   $3c, $5f, $04, $30, $15, $1f, $43, $0f                  ;$c545
-        .byte   $4f, $10, $c3, $15, $1f, $4f, $10, $c3                  ;$c54d
-        .byte   $15, $1f, $4f, $04, $30, $04, $35, $4f                  ;$c555
-        .byte   $10, $c3, $15, $1f, $4f, $10, $c3, $15                  ;$c55d
-        .byte   $1f, $4f, $03, $23, $03, $24, $4f, $10                  ;$c565
-        .byte   $c3, $16, $60, $7f, $06, $06, $06, $28                  ;$c56d
-        .byte   $28, $28, $f5, $02, $18, $10, $c3, $15                  ;$c575
-        .byte   $1f, $f5, $02, $18, $10, $c3, $15, $1f                  ;$c57d
-        .byte   $f5, $04, $30, $10, $c3, $15, $1f, $f5                  ;$c585
-        .byte   $02, $18, $10, $c3, $15, $1f, $ff, $f3                  ;$c58d
-        .byte   $08, $61, $f3, $07, $e9, $7d, $11, $11                  ;$c595
-        .byte   $41, $04, $08, $04, $68, $6c, $48, $f3                  ;$c59d
-        .byte   $07, $77, $84, $0b, $30, $0e, $ef, $84                  ;$c5a5
-        .byte   $0b, $30, $0e, $ef, $f4, $0e, $ef, $12                  ;$c5ad
-        .byte   $d1, $f5, $12, $d1, $16, $60, $07, $77                  ;$c5b5
-        .byte   $f4, $16, $60, $1d, $df, $f1, $12, $d1                  ;$c5bd
-        .byte   $31, $0e, $ef, $09, $68, $1f, $0b, $30                  ;$c5c5
-        .byte   $3f, $07, $77, $1f, $09, $68, $18, $0b                  ;$c5cd
-        .byte   $30, $18, $0e, $ef, $1f, $12, $d1, $f3                  ;$c5d5
-        .byte   $07, $77, $f1, $16, $60, $f1, $12, $d1                  ;$c5dd
-        .byte   $f5, $0e, $ef, $1d, $df, $07, $77, $f1                  ;$c5e5
-        .byte   $0b, $30, $32, $21, $87, $07, $0c, $1f                  ;$c5ed
-        .byte   $0a, $8f, $18, $0e, $18, $18, $10, $c3                  ;$c5f5
-        .byte   $5f, $15, $1f, $1c, $31, $07, $0c, $4f                  ;$c5fd
-        .byte   $1c, $31, $21, $87, $1f, $15, $1f, $7f                  ;$c605
-        .byte   $04, $04, $a0, $88, $09, $0b, $31, $10                  ;$c60d
-        .byte   $c3, $05, $47, $1f, $0e, $18, $1f, $0a                  ;$c615
-        .byte   $8f, $83, $03, $86, $81, $0e, $18, $81                  ;$c61d
-        .byte   $10, $c3, $81, $15, $1f, $31, $1c, $31                  ;$c625
-        .byte   $04, $30, $18, $21, $87, $18, $2a, $3e                  ;$c62d
-        .byte   $18, $38, $63, $18, $43, $0f, $83, $05                  ;$c635
-        .byte   $47, $81, $38, $63, $81, $2a, $3e, $81                  ;$c63d
-        .byte   $21, $87, $31, $1c, $31, $07, $0c, $18                  ;$c645
-        .byte   $15, $1f, $18, $10, $c3, $18, $0e, $18                  ;$c64d
-        .byte   $78, $04, $08, $04, $68, $6c, $48, $f3                  ;$c655
-        .byte   $07, $77, $84, $0b, $30, $0e, $ef, $84                  ;$c65d
-        .byte   $0b, $30, $0e, $ef, $f4, $0e, $ef, $12                  ;$c665
-        .byte   $d1, $f5, $12, $d1, $16, $60, $07, $77                  ;$c66d
-        .byte   $f4, $16, $60, $1d, $df, $f1, $12, $d1                  ;$c675
-        .byte   $31, $0e, $ef, $09, $68, $1f, $0b, $30                  ;$c67d
-        .byte   $3f, $07, $77, $1f, $09, $68, $18, $0b                  ;$c685
-        .byte   $30, $18, $0e, $ef, $1f, $12, $d1, $f3                  ;$c68d
-        .byte   $07, $77, $f4, $16, $60, $1c, $31, $f1                  ;$c695
-        .byte   $12, $d1, $f5, $0e, $ef, $1d, $df, $09                  ;$c69d
-        .byte   $68, $f1, $0b, $30, $32, $23, $86, $07                  ;$c6a5
-        .byte   $0c, $1f, $0a, $8f, $18, $0e, $18, $18                  ;$c6ad
-        .byte   $11, $c3, $1f, $15, $1f, $f3, $08, $e1                  ;$c6b5
-        .byte   $f1, $1c, $31, $f1, $15, $1f, $31, $11                  ;$c6bd
-        .byte   $c3, $0a, $8f, $1f, $0e, $18, $7f, $06                  ;$c6c5
-        .byte   $06, $a0, $88, $6b, $0b, $31, $0a, $8f                  ;$c6cd
-        .byte   $03, $86, $18, $0e, $18, $18, $11, $c3                  ;$c6d5
-        .byte   $18, $15, $1f, $18, $1c, $31, $83, $04                  ;$c6dd
-        .byte   $70, $81, $23, $86, $81, $2a, $3e, $81                  ;$c6e5
-        .byte   $38, $63, $31, $47, $0c, $05, $47, $18                  ;$c6ed
-        .byte   $38, $63, $18, $2a, $3e, $18, $23, $86                  ;$c6f5
-        .byte   $d8, $11, $21, $41, $85, $1c, $31, $23                  ;$c6fd
-        .byte   $86, $07, $0c, $81, $15, $1f, $81, $11                  ;$c705
-        .byte   $c3, $81, $0e, $18, $27, $06, $06, $06                  ;$c70d
-        .byte   $48, $6b, $48, $25, $a2, $f3, $09, $68                  ;$c715
-        .byte   $13, $12, $d1, $17, $b5, $3f, $12, $d1                  ;$c71d
-        .byte   $f1, $17, $b5, $f3, $09, $68, $f5, $17                  ;$c725
-        .byte   $b5, $1c, $31, $12, $d1, $13, $12, $d1                  ;$c72d
-        .byte   $17, $b5, $3f, $09, $68, $3f, $12, $d1                  ;$c735
-        .byte   $f1, $17, $b5, $13, $09, $68, $17, $b5                  ;$c73d
-        .byte   $3f, $12, $d1, $f1, $17, $b5, $13, $12                  ;$c745
-        .byte   $d1, $17, $b5, $3f, $09, $68, $f1, $17                  ;$c74d
-        .byte   $b5, $13, $12, $d1, $17, $b5, $3f, $12                  ;$c755
-        .byte   $d1, $f1, $17, $b5, $f5, $17, $b5, $1c                  ;$c75d
-        .byte   $31, $09, $68, $f5, $17, $b5, $25, $a2                  ;$c765
-        .byte   $12, $d1, $f5, $17, $b5, $27, $df, $09                  ;$c76d
-        .byte   $f7, $13, $13, $ef, $17, $b5, $3f, $13                  ;$c775
-        .byte   $ef, $f1, $17, $b5, $f3, $09, $f7, $f5                  ;$c77d
-        .byte   $17, $b5, $1d, $df, $13, $ef, $13, $13                  ;$c785
-        .byte   $ef, $17, $b5, $3f, $09, $f7, $3f, $13                  ;$c78d
-        .byte   $ef, $f1, $17, $b5, $13, $09, $f7, $17                  ;$c795
-        .byte   $b5, $3f, $13, $ef, $f1, $17, $b5, $13                  ;$c79d
-        .byte   $13, $ef, $17, $b5, $3f, $09, $f7, $f1                  ;$c7a5
-        .byte   $17, $b5, $7d, $21, $41, $41, $06, $06                  ;$c7ad
-        .byte   $06, $28, $6b, $28, $f5, $17, $b5, $1d                  ;$c7b5
-        .byte   $df, $13, $ef, $13, $13, $ef, $17, $b5                  ;$c7bd
-        .byte   $5f, $17, $b5, $27, $df, $09, $f7, $3f                  ;$c7c5
-        .byte   $17, $b5, $f1, $17, $b5, $32, $2a, $3e                  ;$c7cd
-        .byte   $09, $68, $3f, $0e, $18, $f1, $15, $1f                  ;$c7d5
-        .byte   $13, $12, $d1, $17, $b5, $3f, $09, $68                  ;$c7dd
-        .byte   $5f, $15, $1f, $1f, $a5, $0e, $18, $3f                  ;$c7e5
-        .byte   $12, $d1, $f1, $17, $b5, $f3, $09, $68                  ;$c7ed
-        .byte   $13, $0e, $18, $15, $1f, $3f, $12, $d1                  ;$c7f5
-        .byte   $f1, $17, $b5, $f3, $09, $68, $13, $0e                  ;$c7fd
-        .byte   $18, $15, $1f, $3f, $12, $d1, $f1, $17                  ;$c805
-        .byte   $b5, $32, $1f, $a5, $09, $68, $3f, $0e                  ;$c80d
-        .byte   $18, $81, $15, $1f, $82, $2a, $3e, $13                  ;$c815
-        .byte   $12, $d1, $17, $b5, $7f, $06, $06, $06                  ;$c81d
-        .byte   $48, $48, $9b, $f5, $17, $b5, $21, $87                  ;$c825
-        .byte   $09, $68, $85, $04, $b4, $05, $98, $2c                  ;$c82d
-        .byte   $c1, $84, $05, $47, $06, $47, $84, $05                  ;$c835
-        .byte   $98, $07, $0c, $84, $06, $47, $07, $e9                  ;$c83d
-        .byte   $84, $07, $c0, $08, $61, $84, $07, $e9                  ;$c845
-        .byte   $09, $68, $84, $08, $61, $0a, $8f, $84                  ;$c84d
-        .byte   $09, $68, $0b, $30, $84, $0a, $8f, $0c                  ;$c855
-        .byte   $8f, $84, $0b, $30, $0e, $18, $84, $0c                  ;$c85d
-        .byte   $8f, $0f, $d2, $84, $0e, $18, $10, $c3                  ;$c865
-        .byte   $85, $0f, $d2, $12, $d1, $2a, $3e, $84                  ;$c86d
-        .byte   $10, $c3, $15, $1f, $85, $12, $d1, $16                  ;$c875
-        .byte   $60, $2c, $c1, $84, $1c, $31, $21, $87                  ;$c87d
-        .byte   $57, $03, $03, $06, $29, $29, $9c, $19                  ;$c885
-        .byte   $1e, $1f, $a5, $32, $3c, $48, $12, $d1                  ;$c88d
-        .byte   $19, $1e, $48, $0f, $d2, $12, $d1, $48                  ;$c895
-        .byte   $0c, $8f, $0f, $d2, $48, $16, $60, $1c                  ;$c89d
-        .byte   $31, $48, $10, $c3, $16, $60, $48, $0e                  ;$c8a5
-        .byte   $18, $10, $c3, $48, $0b, $30, $0e, $18                  ;$c8ad
-        .byte   $58, $15, $1f, $19, $1e, $19, $23, $48                  ;$c8b5
-        .byte   $0f, $d2, $15, $1f, $48, $0c, $8f, $0f                  ;$c8bd
-        .byte   $d2, $48, $0a, $8f, $0c, $8f, $48, $0f                  ;$c8c5
-        .byte   $d2, $16, $60, $48, $0c, $8f, $12, $d1                  ;$c8cd
-        .byte   $48, $09, $68, $0f, $d2, $48, $06, $47                  ;$c8d5
-        .byte   $09, $68, $78, $30, $30, $06, $39, $39                  ;$c8dd
-        .byte   $4b, $f4, $04, $30, $04, $35, $85, $10                  ;$c8e5
-        .byte   $c3, $15, $1f, $19, $1e, $83, $19, $1e                  ;$c8ed
-        .byte   $f5, $10, $c3, $15, $1f, $21, $87, $f5                  ;$c8f5
-        .byte   $04, $30, $04, $35, $2a, $3e, $f5, $10                  ;$c8fd
-        .byte   $c3, $15, $1f, $32, $3c, $f4, $10, $c3                  ;$c905
-        .byte   $15, $1f, $f4, $04, $30, $04, $35, $f4                  ;$c90d
-        .byte   $10, $c3, $15, $1f, $f4, $03, $23, $03                  ;$c915
-        .byte   $24, $85, $10, $c3, $16, $60, $25, $a2                  ;$c91d
-        .byte   $83, $25, $a2, $f5, $10, $c3, $16, $60                  ;$c925
-        .byte   $2c, $c1, $f5, $03, $23, $03, $24, $32                  ;$c92d
-        .byte   $3c, $f5, $10, $c3, $16, $60, $38, $63                  ;$c935
-        .byte   $f5, $10, $c3, $16, $60, $32, $3c, $f5                  ;$c93d
-        .byte   $03, $23, $03, $24, $2a, $3e, $f5, $10                  ;$c945
-        .byte   $c3, $16, $60, $25, $a2, $f5, $04, $30                  ;$c94d
-        .byte   $04, $35, $2a, $3e, $f5, $10, $c3, $15                  ;$c955
-        .byte   $1f, $21, $87, $f5, $10, $c3, $15, $1f                  ;$c95d
-        .byte   $19, $1e, $f5, $04, $30, $04, $35, $19                  ;$c965
-        .byte   $1e, $f4, $10, $c3, $15, $1f, $f4, $10                  ;$c96d
-        .byte   $c3, $15, $1f, $85, $04, $30, $04, $35                  ;$c975
-        .byte   $03, $23, $83, $04, $39, $85, $10, $c3                  ;$c97d
-        .byte   $15, $1f, $06, $47, $83, $08, $61, $f4                  ;$c985
-        .byte   $03, $23, $03, $24, $f4, $10, $c3, $16                  ;$c98d
-        .byte   $60, $f4, $10, $c3, $16, $60, $f4, $03                  ;$c995
-        .byte   $23, $03, $24, $f4, $10, $c3, $16, $60                  ;$c99d
-        .byte   $f4, $10, $c3, $16, $60, $85, $03, $23                  ;$c9a5
-        .byte   $03, $24, $03, $25, $83, $04, $b4, $85                  ;$c9ad
-        .byte   $10, $c3, $16, $60, $06, $47, $83, $09                  ;$c9b5
-        .byte   $68, $f4, $04, $30, $04, $35, $85, $10                  ;$c9bd
-        .byte   $c3, $15, $1f, $19, $1e, $83, $19, $1e                  ;$c9c5
-        .byte   $f5, $10, $c3, $15, $1f, $21, $87, $f5                  ;$c9cd
-        .byte   $04, $30, $04, $35, $2a, $3e, $f5, $10                  ;$c9d5
-        .byte   $c3, $15, $1f, $32, $3c, $f4, $10, $c3                  ;$c9dd
-        .byte   $15, $1f, $f4, $04, $30, $04, $35, $85                  ;$c9e5
-        .byte   $10, $c3, $15, $1f, $32, $3c, $83, $38                  ;$c9ed
-        .byte   $63, $f5, $05, $98, $05, $9f, $3b, $be                  ;$c9f5
-        .byte   $f5, $0b, $30, $0e, $18, $38, $63, $f4                  ;$c9fd
-        .byte   $0b, $30, $0e, $18, $f5, $05, $47, $05                  ;$ca05
-        .byte   $4f, $32, $3c, $f4, $0a, $8f, $0c, $8f                  ;$ca0d
-        .byte   $f5, $0a, $8f, $0c, $8f, $2a, $3e, $f5                  ;$ca15
-        .byte   $05, $47, $05, $4d, $32, $3c, $f5, $0a                  ;$ca1d
-        .byte   $8f, $0c, $8f, $38, $63, $f5, $09, $68                  ;$ca25
-        .byte   $09, $6f, $25, $a2, $f4, $12, $d1, $16                  ;$ca2d
-        .byte   $60, $f4, $12, $d1, $16, $60, $f5, $12                  ;$ca35
-        .byte   $d1, $16, $60, $08, $61, $f4, $12, $d1                  ;$ca3d
-        .byte   $16, $60, $f5, $12, $d1, $16, $60, $07                  ;$ca45
-        .byte   $e9, $f4, $12, $d1, $16, $60, $f5, $12                  ;$ca4d
-        .byte   $d1, $16, $60, $07, $0c, $f5, $0c, $8f                  ;$ca55
-        .byte   $0f, $d2, $06, $47, $f4, $0c, $8f, $0f                  ;$ca5d
-        .byte   $d2, $f4, $0c, $8f, $0f, $d2, $f5, $0c                  ;$ca65
-        .byte   $8f, $0f, $d2, $05, $98, $f4, $0c, $8f                  ;$ca6d
-        .byte   $0f, $d2, $f5, $0e, $18, $10, $c3, $05                  ;$ca75
-        .byte   $47, $f4, $0e, $18, $10, $c3, $f5, $02                  ;$ca7d
-        .byte   $d2, $12, $d1, $04, $b4, $f4, $04, $30                  ;$ca85
-        .byte   $04, $35, $85, $10, $c3, $15, $1f, $19                  ;$ca8d
-        .byte   $1e, $83, $19, $1e, $f5, $10, $c3, $15                  ;$ca95
-        .byte   $1f, $21, $87, $f5, $04, $30, $04, $35                  ;$ca9d
-        .byte   $2a, $3e, $f5, $10, $c3, $15, $1f, $32                  ;$caa5
-        .byte   $3c, $f4, $10, $c3, $15, $1f, $f4, $04                  ;$caad
-        .byte   $30, $04, $35, $f4, $10, $c3, $15, $1f                  ;$cab5
-        .byte   $f4, $03, $23, $03, $24, $85, $10, $c3                  ;$cabd
-        .byte   $16, $60, $25, $a2, $83, $25, $a2, $f5                  ;$cac5
-        .byte   $10, $c3, $16, $60, $2c, $c1, $f5, $03                  ;$cacd
-        .byte   $23, $03, $24, $32, $3c, $f5, $10, $c3                  ;$cad5
-        .byte   $16, $60, $38, $63, $f5, $10, $c3, $16                  ;$cadd
-        .byte   $60, $32, $3c, $f5, $03, $23, $03, $24                  ;$cae5
-        .byte   $2a, $3e, $f5, $10, $c3, $16, $60, $25                  ;$caed
-        .byte   $a2, $f5, $04, $30, $04, $35, $2a, $3e                  ;$caf5
-        .byte   $f5, $10, $c3, $15, $1f, $21, $87, $f5                  ;$cafd
-        .byte   $10, $c3, $15, $1f, $19, $1e, $f5, $04                  ;$cb05
-        .byte   $30, $04, $35, $38, $63, $f4, $10, $c3                  ;$cb0d
-        .byte   $15, $1f, $f4, $10, $c3, $15, $1f, $f4                  ;$cb15
-        .byte   $04, $30, $04, $35, $f4, $10, $c3, $15                  ;$cb1d
-        .byte   $1f, $f5, $04, $b4, $04, $b8, $25, $a2                  ;$cb25
-        .byte   $f4, $12, $d1, $16, $60, $f4, $12, $d1                  ;$cb2d
-        .byte   $16, $60, $f4, $09, $68, $09, $6a, $f4                  ;$cb35
-        .byte   $12, $d1, $16, $60, $f4, $12, $d1, $16                  ;$cb3d
-        .byte   $60, $f4, $04, $b4, $04, $b8, $57, $06                  ;$cb45
-        .byte   $06, $08, $48, $48, $6b, $12, $d1, $16                  ;$cb4d
-        .byte   $60, $25, $a2, $38, $2a, $3e, $58, $06                  ;$cb55
-        .byte   $47, $06, $4f, $2c, $c1, $5f, $10, $c3                  ;$cb5d
-        .byte   $16, $60, $2a, $3e, $4f, $10, $c3, $16                  ;$cb65
-        .byte   $60, $5f, $06, $47, $06, $4f, $21, $87                  ;$cb6d
-        .byte   $5f, $10, $c3, $1c, $31, $2c, $c1, $5f                  ;$cb75
-        .byte   $10, $c3, $1c, $c1, $2a, $3e, $4f, $06                  ;$cb7d
-        .byte   $47, $06, $4f, $5f, $0e, $18, $16, $60                  ;$cb85
-        .byte   $21, $87, $df, $11, $11, $11, $f5, $1c                  ;$cb8d
-        .byte   $31, $21, $87, $2c, $c1, $f5, $1c, $31                  ;$cb95
-        .byte   $21, $87, $2a, $3e, $f4, $19, $1e, $1f                  ;$cb9d
-        .byte   $a5, $f5, $19, $1f, $1f, $a5, $21, $87                  ;$cba5
-        .byte   $f5, $16, $60, $1c, $31, $2c, $c1, $f5                  ;$cbad
-        .byte   $16, $60, $1c, $31, $2a, $3e, $f4, $15                  ;$cbb5
-        .byte   $1f, $19, $1e, $f5, $15, $1f, $19, $1e                  ;$cbbd
-        .byte   $21, $87, $5d, $21, $41, $41, $06, $47                  ;$cbc5
-        .byte   $2c, $c1, $38, $63, $18, $07, $0c, $58                  ;$cbcd
-        .byte   $07, $e9, $2a, $3e, $32, $3c, $18, $08                  ;$cbd5
-        .byte   $61, $18, $09, $68, $18, $0a, $8f, $58                  ;$cbdd
-        .byte   $0b, $30, $21, $87, $2a, $3e, $18, $0c                  ;$cbe5
-        .byte   $8f, $58, $0e, $18, $2c, $c1, $38, $63                  ;$cbed
-        .byte   $18, $0f, $d2, $58, $10, $c3, $2a, $3e                  ;$cbf5
-        .byte   $32, $3c, $18, $12, $d1, $18, $15, $1f                  ;$cbfd
-        .byte   $18, $16, $60, $58, $19, $1e, $21, $87                  ;$cc05
-        .byte   $2a, $3e, $18, $1c, $31, $58, $1f, $a5                  ;$cc0d
-        .byte   $2c, $c1, $32, $3c, $5f, $1f, $a5, $2c                  ;$cc15
-        .byte   $c1, $32, $3c, $58, $1f, $a5, $2c, $c1                  ;$cc1d
-        .byte   $32, $3c, $58, $1f, $a5, $2c, $c1, $32                  ;$cc25
-        .byte   $3c, $ff, $ff, $f5, $06, $47, $2c, $c1                  ;$cc2d
-        .byte   $4b, $45, $5f, $04, $30, $2a, $3e, $43                  ;$cc35
-        .byte   $0f, $18, $02, $f6, $18, $03, $23, $18                  ;$cc3d
-        .byte   $02, $a3, $18, $04, $b4, $18, $04, $30                  ;$cc45
-        .byte   $18, $03, $f4, $18, $04, $30, $48, $03                  ;$cc4d
-        .byte   $86, $07, $0c, $48, $03, $23, $06, $47                  ;$cc55
-        .byte   $48, $02, $a3, $05, $47, $48, $03, $23                  ;$cc5d
-        .byte   $06, $47, $48, $04, $b4, $09, $68, $48                  ;$cc65
-        .byte   $04, $30, $08, $61, $48, $03, $f4, $07                  ;$cc6d
-        .byte   $e9, $48, $04, $30, $08, $61, $48, $07                  ;$cc75
-        .byte   $0c, $0e, $18, $48, $05, $ed, $0b, $da                  ;$cc7d
-        .byte   $48, $06, $47, $0c, $8f, $48, $08, $61                  ;$cc85
-        .byte   $10, $c3, $48, $0a, $8f, $15, $1f, $ff                  ;$cc8d
-        .byte   $ff, $85, $06, $47, $0f, $d2, $32, $3c                  ;$cc95
-        .byte   $85, $05, $98, $0e, $18, $38, $63, $85                  ;$cc9d
-        .byte   $05, $47, $0c, $8f, $3b, $be, $85, $04                  ;$cca5
-        .byte   $b4, $0b, $30, $3f, $4b, $f5, $04, $30                  ;$ccad
-        .byte   $0a, $8f, $43, $0f, $f5, $04, $30, $0a                  ;$ccb5
-        .byte   $8f, $43, $0f, $f5, $04, $30, $0a, $8f                  ;$ccbd
-        .byte   $43, $0f, $57, $08, $08, $08, $86, $86                  ;$ccc5
-        .byte   $86, $04, $30, $0a, $8f, $43, $0f, $ff                  ;$cccd
-        .byte   $9f, $00                                                ;$ccd5
+        .byte   $4a, $b5, $b5, $b5, $b5, $b5, $b5, $b5                  ;$B71D
+        .byte   $b5, $b5, $b5, $b5, $b5, $b5, $b5, $b5                  ;$B725
+        .byte   $a7, $26, $26, $48, $29, $29, $aa, $00                  ;$B72D
+        .byte   $06, $00, $05, $00, $06, $ed, $21, $21                  ;$B735
+        .byte   $41, $1f, $f4, $70, $5c, $07, $0e, $ef                  ;$B73D
+        .byte   $12, $d1, $1d, $df, $5f, $0e, $ef, $12                  ;$B745
+        .byte   $d1, $1d, $df, $38, $1c, $31, $58, $0e                  ;$B74D
+        .byte   $ef, $1a, $9c, $1d, $df, $5f, $0e, $ef                  ;$B755
+        .byte   $13, $ef, $21, $87, $5f, $0e, $ef, $13                  ;$B75D
+        .byte   $ef, $21, $87, $38, $1f, $a5, $58, $0e                  ;$B765
+        .byte   $ef, $19, $1e, $21, $87, $5f, $0e, $ef                  ;$B76D
+        .byte   $16, $60, $25, $a2, $5f, $0e, $ef, $16                  ;$B775
+        .byte   $60, $25, $a2, $38, $21, $87, $58, $0e                  ;$B77D
+        .byte   $ef, $1a, $9c, $25, $a2, $5f, $0e, $ef                  ;$B785
+        .byte   $19, $1e, $27, $df, $5f, $0e, $ef, $16                  ;$B78D
+        .byte   $60, $2c, $31, $5f, $0e, $ef, $13, $ef                  ;$B795
+        .byte   $32, $3c, $7f, $08, $06, $29, $2a, $6a                  ;$B79D
+        .byte   $b8, $f1, $07, $77, $85, $0e, $ef, $12                  ;$B7A5
+        .byte   $d1, $2c, $31, $83, $2a, $3e, $f5, $0e                  ;$B7AD
+        .byte   $ef, $12, $d1, $2c, $c1, $f1, $07, $77                  ;$B7B5
+        .byte   $85, $0e, $ef, $13, $ef, $32, $3c, $83                  ;$B7BD
+        .byte   $2f, $6b, $f5, $0e, $ef, $13, $ef, $32                  ;$B7C5
+        .byte   $3c, $f1, $07, $77, $85, $0e, $ef, $15                  ;$B7CD
+        .byte   $1f, $32, $3c, $83, $2f, $6b, $f5, $0e                  ;$B7D5
+        .byte   $ef, $15, $1f, $32, $3c, $5c, $08, $07                  ;$B7DD
+        .byte   $77, $16, $60, $35, $39, $3f, $3b, $be                  ;$B7E5
+        .byte   $3f, $43, $0f, $ff, $c8, $09, $7e, $3f                  ;$B7ED
+        .byte   $a4, $60, $06, $06, $99, $1a, $1a, $8c                  ;$B7F5
+        .byte   $83, $35, $3a, $83, $3b, $be, $83, $43                  ;$B7FD
+        .byte   $0f, $83, $1d, $df, $f3, $35, $39, $f4                  ;$B805
+        .byte   $07, $77, $12, $d1, $f4, $07, $77, $12                  ;$B80D
+        .byte   $d1, $f4, $07, $77, $12, $d1, $3d, $21                  ;$B815
+        .byte   $11, $21, $35, $39, $38, $3b, $be, $38                  ;$B81D
+        .byte   $43, $0f, $38, $1d, $df, $38, $32, $3c                  ;$B825
+        .byte   $4f, $07, $77, $13, $ef, $4f, $07, $77                  ;$B82D
+        .byte   $13, $ef, $4f, $07, $77, $13, $ef, $ef                  ;$B835
+        .byte   $1f, $a4, $65, $83, $32, $3c, $83, $35                  ;$B83D
+        .byte   $39, $83, $3b, $be, $83, $1d, $df, $57                  ;$B845
+        .byte   $44, $48, $48, $2f, $8f, $89, $07, $77                  ;$B84D
+        .byte   $12, $d1, $2c, $c1, $3f, $1a, $9c, $3f                  ;$B855
+        .byte   $1d, $df, $5f, $07, $77, $10, $c3, $27                  ;$B85D
+        .byte   $df, $3f, $1a, $9c, $3f, $1d, $df, $5f                  ;$B865
+        .byte   $07, $77, $0e, $ef, $25, $a2, $3f, $1a                  ;$B86D
+        .byte   $9c, $3f, $1d, $df, $5f, $07, $77, $1a                  ;$B875
+        .byte   $9c, $21, $87, $3f, $16, $60, $3f, $1a                  ;$B87D
+        .byte   $9c, $5f, $07, $77, $19, $1e, $1d, $df                  ;$B885
+        .byte   $3f, $13, $ef, $3f, $19, $1e, $cf, $0b                  ;$B88D
+        .byte   $f5, $07, $77, $16, $60, $1a, $9c, $f3                  ;$B895
+        .byte   $12, $d1, $f3, $16, $60, $7d, $11, $11                  ;$B89D
+        .byte   $11, $27, $27, $27, $1b, $1b, $1b, $f5                  ;$B8A5
+        .byte   $07, $77, $07, $7a, $0e, $ef, $ff, $f5                  ;$B8AD
+        .byte   $06, $a7, $0d, $4e, $1a, $9c, $ff, $f5                  ;$B8B5
+        .byte   $05, $98, $0b, $30, $16, $60, $ff, $78                  ;$B8BD
+        .byte   $04, $69, $66, $1b, $ab, $9b, $de, $3f                  ;$B8C5
+        .byte   $f2, $60, $21, $11, $11, $21, $09, $f7                  ;$B8CD
+        .byte   $13, $ef, $ff, $1f, $0c, $8f, $f2, $19                  ;$B8D5
+        .byte   $1e, $ff, $21, $0e, $ef, $1d, $df, $ff                  ;$B8DD
+        .byte   $ff, $c7, $44, $46, $08, $2a, $99, $8a                  ;$B8E5
+        .byte   $0a, $f5, $04, $fb, $0c, $8f, $1d, $df                  ;$B8ED
+        .byte   $f4, $09, $f7, $0c, $8f, $f5, $09, $f7                  ;$B8F5
+        .byte   $32, $3c, $3b, $be, $f5, $04, $fb, $32                  ;$B8FD
+        .byte   $3c, $3b, $be, $f4, $09, $f7, $0c, $8f                  ;$B905
+        .byte   $f5, $09, $f7, $27, $df, $32, $3c, $f5                  ;$B90D
+        .byte   $04, $fb, $27, $df, $32, $3c, $f4, $09                  ;$B915
+        .byte   $f7, $0c, $8f, $47, $42, $69, $66, $1b                  ;$B91D
+        .byte   $ab, $9b, $09, $f7, $13, $ef, $4f, $09                  ;$B925
+        .byte   $f7, $13, $ef, $4f, $0c, $8f, $19, $1e                  ;$B92D
+        .byte   $4f, $0e, $ef, $1d, $df, $7f, $44, $46                  ;$B935
+        .byte   $08, $2a, $99, $8a, $f5, $05, $98, $09                  ;$B93D
+        .byte   $68, $1d, $df, $f4, $0d, $4e, $0e, $ef                  ;$B945
+        .byte   $f5, $12, $d2, $2c, $c1, $3b, $be, $f5                  ;$B94D
+        .byte   $07, $77, $2c, $c1, $3b, $be, $f4, $0e                  ;$B955
+        .byte   $ef, $12, $d1, $f5, $12, $d1, $2c, $c1                  ;$B95D
+        .byte   $35, $39, $f5, $03, $bb, $2c, $31, $35                  ;$B965
+        .byte   $39, $f4, $0d, $4e, $0e, $ef, $47, $42                  ;$B96D
+        .byte   $69, $66, $1b, $ab, $9b, $09, $68, $12                  ;$B975
+        .byte   $d1, $4f, $09, $68, $12, $d1, $4f, $0b                  ;$B97D
+        .byte   $30, $16, $60, $4f, $10, $c0, $21, $87                  ;$B985
+        .byte   $7f, $44, $44, $08, $2a, $59, $5a, $f5                  ;$B98D
+        .byte   $07, $77, $12, $d1, $21, $87, $f4, $0e                  ;$B995
+        .byte   $ef, $12, $d1, $f5, $12, $d1, $35, $39                  ;$B99D
+        .byte   $43, $0f, $f5, $03, $bb, $35, $39, $43                  ;$B9A5
+        .byte   $0f, $f4, $0e, $ef, $12, $d1, $f5, $12                  ;$B9AD
+        .byte   $d1, $2c, $c1, $35, $39, $f5, $07, $77                  ;$B9B5
+        .byte   $2c, $c1, $35, $39, $f4, $0d, $4e, $0e                  ;$B9BD
+        .byte   $ef, $47, $42, $69, $46, $1b, $ab, $ab                  ;$B9C5
+        .byte   $09, $68, $12, $d1, $4f, $09, $68, $12                  ;$B9CD
+        .byte   $d1, $4f, $0b, $30, $16, $60, $4f, $10                  ;$B9D5
+        .byte   $c3, $21, $87, $7f, $44, $44, $08, $2a                  ;$B9DD
+        .byte   $59, $5a, $f5, $04, $fb, $0c, $8f, $21                  ;$B9E5
+        .byte   $87, $f4, $0c, $8f, $0e, $ef, $f5, $13                  ;$B9ED
+        .byte   $ef, $32, $3c, $43, $0f, $f5, $07, $77                  ;$B9F5
+        .byte   $32, $3c, $43, $0f, $f4, $0c, $8f, $0e                  ;$B9FD
+        .byte   $ef, $f5, $13, $ef, $27, $df, $32, $3c                  ;$BA05
+        .byte   $f5, $04, $fb, $27, $df, $32, $3c, $f4                  ;$BA0D
+        .byte   $0c, $8f, $0e, $ef, $dc, $0b, $21, $21                  ;$BA15
+        .byte   $21, $e7, $04, $04, $44, $5b, $5b, $5b                  ;$BA1D
+        .byte   $6f, $f4, $65, $f4, $09, $f7, $13, $ef                  ;$BA25
+        .byte   $f4, $09, $f7, $13, $ef, $f4, $0c, $8f                  ;$BA2D
+        .byte   $19, $1e, $f4, $0e, $ef, $1d, $df, $c7                  ;$BA35
+        .byte   $44, $44, $48, $39, $49, $aa, $09, $f5                  ;$BA3D
+        .byte   $06, $47, $0c, $8f, $27, $df, $84, $09                  ;$BA45
+        .byte   $f7, $0c, $8f, $83, $4f, $bf, $f5, $0c                  ;$BA4D
+        .byte   $8f, $3b, $be, $4f, $bf, $f5, $06, $47                  ;$BA55
+        .byte   $32, $3c, $4f, $bf, $84, $0c, $8f, $0e                  ;$BA5D
+        .byte   $ef, $83, $3b, $be, $f5, $13, $ef, $32                  ;$BA65
+        .byte   $3c, $3b, $be, $f5, $04, $fb, $32, $3c                  ;$BA6D
+        .byte   $3b, $be, $f4, $09, $f7, $0c, $8f, $47                  ;$BA75
+        .byte   $06, $46, $46, $7b, $7b, $7b, $09, $f7                  ;$BA7D
+        .byte   $13, $ef, $4f, $09, $f7, $13, $ef, $4f                  ;$BA85
+        .byte   $0c, $8f, $19, $1e, $4f, $0e, $ef, $1d                  ;$BA8D
+        .byte   $df, $7f, $46, $46, $49, $59, $69, $aa                  ;$BA95
+        .byte   $f5, $06, $a7, $06, $af, $27, $df, $84                  ;$BA9D
+        .byte   $0d, $4e, $10, $c3, $83, $4f, $bf, $f5                  ;$BAA5
+        .byte   $0d, $4e, $10, $c3, $4f, $bf, $f5, $04                  ;$BAAD
+        .byte   $fb, $43, $0f, $4f, $bf, $84, $0d, $4e                  ;$BAB5
+        .byte   $10, $c3, $83, $43, $0f, $f5, $06, $a7                  ;$BABD
+        .byte   $35, $39, $43, $0f, $f5, $03, $53, $27                  ;$BAC5
+        .byte   $df, $43, $0f, $df, $21, $21, $41, $c7                  ;$BACD
+        .byte   $28, $28, $28, $9b, $9b, $9b, $0c, $f4                  ;$BAD5
+        .byte   $0b, $30, $16, $60, $f4, $0b, $30, $16                  ;$BADD
+        .byte   $60, $f4, $0d, $4e, $1a, $9c, $f4, $10                  ;$BAE5
+        .byte   $c3, $21, $87, $c8, $08, $57, $46, $46                  ;$BAED
+        .byte   $49, $59, $59, $ca, $03, $bb, $03, $bb                  ;$BAF5
+        .byte   $21, $87, $4f, $0e, $ef, $12, $d1, $4f                  ;$BAFD
+        .byte   $12, $d1, $16, $60, $1f, $06, $a7, $5f                  ;$BB05
+        .byte   $0e, $ef, $12, $d1, $1c, $31, $5f, $12                  ;$BB0D
+        .byte   $d1, $16, $60, $1d, $df, $5f, $06, $47                  ;$BB15
+        .byte   $06, $4a, $32, $3c, $4f, $0e, $ef, $13                  ;$BB1D
+        .byte   $ef, $4f, $13, $ef, $19, $1e, $1f, $04                  ;$BB25
+        .byte   $fb, $5f, $0c, $8f, $0e, $ef, $27, $df                  ;$BB2D
+        .byte   $5f, $0e, $ef, $13, $ef, $19, $1e, $5f                  ;$BB35
+        .byte   $06, $a7, $06, $aa, $19, $1e, $4f, $0d                  ;$BB3D
+        .byte   $4e, $10, $c3, $5f, $0d, $4e, $10, $c3                  ;$BB45
+        .byte   $16, $60, $5f, $03, $bb, $03, $bd, $21                  ;$BB4D
+        .byte   $87, $4f, $0d, $4e, $12, $d1, $5f, $12                  ;$BB55
+        .byte   $d1, $16, $60, $1d, $df, $5f, $09, $f7                  ;$BB5D
+        .byte   $0c, $8f, $13, $ef, $8f, $57, $08, $08                  ;$BB65
+        .byte   $08, $88, $88, $88, $02, $7d, $04, $fc                  ;$BB6D
+        .byte   $09, $f9, $58, $02, $7d, $04, $fc, $09                  ;$BB75
+        .byte   $f9, $ff, $7d, $11, $11, $11, $28, $24                  ;$BB7D
+        .byte   $44, $39, $2b, $7b, $ec, $10, $6f, $a4                  ;$BB85
+        .byte   $65, $32, $32, $3c, $4f, $bf, $28, $2c                  ;$BB8D
+        .byte   $c1, $83, $4b, $45, $85, $05, $98, $2c                  ;$BB95
+        .byte   $c1, $4b, $45, $85, $0b, $30, $27, $df                  ;$BB9D
+        .byte   $43, $0f, $85, $0e, $18, $27, $df, $43                  ;$BBA5
+        .byte   $0f, $81, $05, $98, $85, $0b, $30, $27                  ;$BBAD
+        .byte   $df, $43, $0f, $85, $0e, $18, $25, $a2                  ;$BBB5
+        .byte   $3f, $4b, $85, $05, $98, $25, $a2, $3f                  ;$BBBD
+        .byte   $4b, $85, $0b, $30, $27, $df, $43, $0f                  ;$BBC5
+        .byte   $85, $0e, $18, $27, $df, $43, $0f, $81                  ;$BBCD
+        .byte   $05, $98, $85, $0e, $18, $13, $ef, $16                  ;$BBD5
+        .byte   $60, $85, $10, $c3, $13, $ef, $16, $60                  ;$BBDD
+        .byte   $85, $07, $77, $12, $d1, $19, $1e, $81                  ;$BBE5
+        .byte   $0b, $30, $85, $0e, $ef, $12, $d1, $16                  ;$BBED
+        .byte   $60, $81, $05, $98, $85, $0b, $30, $12                  ;$BBF5
+        .byte   $d1, $16, $60, $85, $0e, $18, $12, $d1                  ;$BBFD
+        .byte   $16, $60, $85, $07, $77, $12, $d1, $21                  ;$BC05
+        .byte   $87, $81, $0b, $30, $85, $0e, $ef, $12                  ;$BC0D
+        .byte   $d1, $1d, $df, $81, $05, $98, $32, $32                  ;$BC15
+        .byte   $3c, $4f, $bf, $28, $2c, $c1, $83, $4b                  ;$BC1D
+        .byte   $45, $85, $05, $98, $2c, $c1, $4b, $45                  ;$BC25
+        .byte   $85, $0b, $30, $27, $df, $43, $0f, $85                  ;$BC2D
+        .byte   $0e, $18, $27, $df, $43, $0f, $81, $05                  ;$BC35
+        .byte   $98, $85, $0b, $30, $27, $df, $43, $0f                  ;$BC3D
+        .byte   $85, $0d, $4e, $2c, $c1, $4b, $45, $85                  ;$BC45
+        .byte   $05, $98, $38, $63, $59, $83, $85, $0b                  ;$BC4D
+        .byte   $30, $32, $3c, $4f, $bf, $85, $0e, $18                  ;$BC55
+        .byte   $32, $3c, $4f, $bf, $81, $05, $98, $5d                  ;$BC5D
+        .byte   $21, $21, $21, $0b, $30, $13, $ef, $1c                  ;$BC65
+        .byte   $31, $58, $0b, $da, $13, $ef, $21, $87                  ;$BC6D
+        .byte   $58, $0c, $8f, $12, $d1, $21, $87, $5f                  ;$BC75
+        .byte   $06, $47, $12, $d1, $1d, $df, $58, $09                  ;$BC7D
+        .byte   $f7, $16, $60, $1c, $31, $5f, $04, $fb                  ;$BC85
+        .byte   $13, $ef, $19, $1e, $c8, $08, $57, $08                  ;$BC8D
+        .byte   $08, $08, $89, $89, $89, $0b, $30, $13                  ;$BC95
+        .byte   $ef, $19, $1e, $58, $0b, $30, $13, $ef                  ;$BC9D
+        .byte   $19, $1e, $58, $0b, $30, $13, $ef, $19                  ;$BCA5
+        .byte   $1e, $5f, $05, $98, $0e, $18, $16, $60                  ;$BCAD
+        .byte   $5f, $03, $bb, $07, $77, $0e, $ef, $ff                  ;$BCB5
+        .byte   $7d, $21, $11, $21, $06, $46, $68, $1b                  ;$BCBD
+        .byte   $69, $99, $f3, $1d, $df, $85, $03, $bb                  ;$BCC5
+        .byte   $0d, $4e, $1a, $9c, $82, $0e, $ef, $84                  ;$BCCD
+        .byte   $07, $77, $12, $d1, $82, $16, $60, $85                  ;$BCD5
+        .byte   $07, $77, $1a, $9c, $1d, $df, $82, $1d                  ;$BCDD
+        .byte   $ef, $85, $03, $bb, $0d, $4e, $1a, $9c                  ;$BCE5
+        .byte   $82, $0e, $ef, $84, $07, $77, $12, $d1                  ;$BCED
+        .byte   $82, $16, $60, $85, $07, $77, $1a, $9c                  ;$BCF5
+        .byte   $1d, $df, $82, $1d, $ef, $57, $06, $46                  ;$BCFD
+        .byte   $89, $1b, $69, $ac, $03, $bb, $0d, $4e                  ;$BD05
+        .byte   $32, $3c, $28, $0e, $ef, $48, $07, $77                  ;$BD0D
+        .byte   $12, $d1, $28, $16, $60, $48, $07, $77                  ;$BD15
+        .byte   $1a, $9c, $28, $1d, $df, $48, $03, $bb                  ;$BD1D
+        .byte   $0d, $4e, $28, $0e, $ef, $58, $07, $77                  ;$BD25
+        .byte   $12, $d1, $2c, $c1, $28, $16, $60, $58                  ;$BD2D
+        .byte   $07, $77, $1a, $9c, $1d, $df, $28, $1d                  ;$BD35
+        .byte   $ef, $78, $06, $46, $68, $1b, $69, $99                  ;$BD3D
+        .byte   $85, $04, $fb, $0c, $8f, $19, $1e, $82                  ;$BD45
+        .byte   $0e, $ef, $84, $09, $f7, $13, $ef, $82                  ;$BD4D
+        .byte   $19, $1e, $85, $09, $f7, $1d, $ef, $1d                  ;$BD55
+        .byte   $df, $82, $27, $df, $85, $04, $fb, $0c                  ;$BD5D
+        .byte   $8f, $19, $1e, $82, $0e, $ef, $84, $09                  ;$BD65
+        .byte   $f7, $13, $ef, $82, $19, $1e, $85, $09                  ;$BD6D
+        .byte   $f7, $1d, $ef, $1d, $df, $82, $27, $df                  ;$BD75
+        .byte   $57, $06, $46, $89, $1b, $69, $ac, $04                  ;$BD7D
+        .byte   $fb, $0c, $8f, $2c, $c1, $28, $0e, $ef                  ;$BD85
+        .byte   $48, $09, $f7, $13, $ef, $28, $19, $1e                  ;$BD8D
+        .byte   $48, $09, $f7, $1d, $df, $28, $27, $df                  ;$BD95
+        .byte   $48, $02, $7d, $0c, $8f, $28, $0e, $ef                  ;$BD9D
+        .byte   $58, $09, $f7, $13, $ef, $27, $df, $48                  ;$BDA5
+        .byte   $09, $f7, $19, $1e, $58, $09, $f7, $1d                  ;$BDAD
+        .byte   $ef, $1d, $df, $28, $27, $df, $78, $06                  ;$BDB5
+        .byte   $46, $68, $1b, $69, $a9, $85, $03, $bb                  ;$BDBD
+        .byte   $0d, $4e, $1a, $9c, $82, $0e, $ef, $84                  ;$BDC5
+        .byte   $07, $77, $12, $d1, $82, $16, $60, $85                  ;$BDCD
+        .byte   $07, $77, $1a, $9c, $1d, $df, $82, $1d                  ;$BDD5
+        .byte   $ef, $85, $03, $bb, $0d, $4e, $1a, $9c                  ;$BDDD
+        .byte   $82, $0e, $ef, $84, $07, $77, $12, $d1                  ;$BDE5
+        .byte   $82, $16, $60, $85, $07, $77, $1a, $9c                  ;$BDED
+        .byte   $1d, $df, $82, $1d, $ef, $57, $06, $46                  ;$BDF5
+        .byte   $89, $1b, $69, $ac, $03, $bb, $0d, $4e                  ;$BDFD
+        .byte   $32, $3c, $28, $0e, $ef, $48, $07, $77                  ;$BE05
+        .byte   $12, $d1, $28, $16, $60, $48, $07, $77                  ;$BE0D
+        .byte   $1a, $9c, $28, $1d, $df, $48, $03, $bb                  ;$BE15
+        .byte   $0d, $4e, $28, $0e, $ef, $58, $07, $77                  ;$BE1D
+        .byte   $12, $d1, $2c, $c1, $28, $16, $60, $58                  ;$BE25
+        .byte   $07, $77, $1a, $9c, $1d, $df, $28, $1d                  ;$BE2D
+        .byte   $ef, $d8, $21, $21, $21, $f5, $09, $f7                  ;$BE35
+        .byte   $19, $1e, $27, $df, $f5, $12, $d1, $1a                  ;$BE3D
+        .byte   $9c, $2c, $c1, $f5, $11, $c3, $1d, $df                  ;$BE45
+        .byte   $32, $3c, $f5, $06, $a7, $2a, $3e, $3b                  ;$BE4D
+        .byte   $be, $f1, $03, $53, $f5, $10, $c3, $2c                  ;$BE55
+        .byte   $c1, $35, $39, $57, $08, $08, $08, $99                  ;$BE5D
+        .byte   $99, $c9, $07, $77, $27, $df, $32, $3c                  ;$BE65
+        .byte   $58, $07, $77, $27, $df, $32, $3c, $58                  ;$BE6D
+        .byte   $07, $77, $25, $a2, $32, $3c, $5f, $03                  ;$BE75
+        .byte   $bb, $1a, $9c, $2c, $c1, $5f, $02, $7d                  ;$BE7D
+        .byte   $19, $1e, $27, $df, $ff, $7c, $11, $27                  ;$BE85
+        .byte   $27, $48, $19, $19, $ba, $83, $27, $df                  ;$BE8D
+        .byte   $81, $07, $e9, $84, $0f, $d2, $13, $ef                  ;$BE95
+        .byte   $84, $0f, $d2, $13, $ef, $81, $07, $e9                  ;$BE9D
+        .byte   $85, $0f, $d2, $11, $c3, $2a, $3e, $85                  ;$BEA5
+        .byte   $0f, $d2, $13, $ef, $27, $df, $31, $05                  ;$BEAD
+        .byte   $47, $23, $86, $58, $0a, $8f, $0d, $4e                  ;$BEB5
+        .byte   $1f, $a5, $58, $0a, $8f, $0e, $ef, $1d                  ;$BEBD
+        .byte   $df, $58, $0a, $8f, $0f, $d2, $1a, $9c                  ;$BEC5
+        .byte   $3f, $1a, $9c, $18, $07, $77, $83, $23                  ;$BECD
+        .byte   $86, $84, $0e, $ef, $11, $c3, $85, $0e                  ;$BED5
+        .byte   $ef, $11, $c3, $23, $86, $81, $05, $ed                  ;$BEDD
+        .byte   $85, $0e, $ef, $15, $1f, $1a, $9c, $85                  ;$BEE5
+        .byte   $0e, $ef, $15, $1f, $17, $b5, $31, $07                  ;$BEED
+        .byte   $e9, $17, $b5, $48, $0f, $d2, $13, $ef                  ;$BEF5
+        .byte   $48, $0f, $d2, $13, $ef, $48, $0b, $da                  ;$BEFD
+        .byte   $15, $1f, $28, $13, $ef, $58, $07, $77                  ;$BF05
+        .byte   $11, $c3, $17, $b5, $18, $07, $e9, $83                  ;$BF0D
+        .byte   $27, $df, $84, $0f, $d2, $13, $ef, $84                  ;$BF15
+        .byte   $0f, $d2, $13, $ef, $81, $07, $e9, $85                  ;$BF1D
+        .byte   $0f, $d2, $11, $c3, $2a, $3e, $85, $0f                  ;$BF25
+        .byte   $d2, $13, $ef, $27, $df, $31, $05, $47                  ;$BF2D
+        .byte   $23, $86, $58, $0a, $8f, $0d, $4e, $1f                  ;$BF35
+        .byte   $a5, $58, $0a, $8f, $0e, $ef, $1d, $df                  ;$BF3D
+        .byte   $58, $0b, $30, $12, $d1, $1a, $9c, $5f                  ;$BF45
+        .byte   $07, $77, $12, $d1, $1a, $9c, $18, $09                  ;$BF4D
+        .byte   $f7, $83, $19, $1e, $84, $0e, $ef, $13                  ;$BF55
+        .byte   $ef, $85, $0e, $ef, $13, $ef, $19, $1e                  ;$BF5D
+        .byte   $81, $09, $f7, $85, $0f, $d2, $12, $d1                  ;$BF65
+        .byte   $1a, $9c, $85, $0f, $d2, $12, $d1, $1f                  ;$BF6D
+        .byte   $a5, $85, $09, $f7, $19, $1e, $1d, $df                  ;$BF75
+        .byte   $84, $07, $77, $0e, $ef, $84, $07, $77                  ;$BF7D
+        .byte   $0e, $ef, $84, $07, $77, $0e, $ef, $84                  ;$BF85
+        .byte   $07, $77, $0e, $ef, $dc, $08, $21, $11                  ;$BF8D
+        .byte   $21, $37, $06, $46, $68, $1b, $69, $99                  ;$BF95
+        .byte   $1d, $df, $5f, $03, $bb, $0d, $4e, $1a                  ;$BF9D
+        .byte   $9c, $28, $0e, $ef, $48, $07, $77, $12                  ;$BFA5
+        .byte   $d1, $28, $16, $60, $58, $07, $77, $1a                  ;$BFAD
+        .byte   $9c, $1d, $df, $28, $1d, $ef, $58, $03                  ;$BFB5
+        .byte   $bb, $0d, $4e, $1a, $9c, $28, $0e, $ef                  ;$BFBD
+        .byte   $48, $07, $77, $12, $d1, $28, $16, $60                  ;$BFC5
+        .byte   $58, $07, $77, $1a, $9c, $1d, $df, $28                  ;$BFCD
+        .byte   $1d, $ef, $78, $06, $46, $89, $1b, $69                  ;$BFD5
+        .byte   $ac, $85, $03, $bb, $0d, $4e, $32, $3c                  ;$BFDD
+        .byte   $82, $0e, $ef, $84, $07, $77, $12, $d1                  ;$BFE5
+        .byte   $82, $16, $60, $84, $07, $77, $1a, $9c                  ;$BFED
+        .byte   $82, $1d, $df, $84, $03, $bb, $0d, $4e                  ;$BFF5
+        .byte   $82, $0e, $ef, $85, $07, $77, $12, $d1                  ;$BFFD
+        .byte   $2c, $c1, $82, $16, $60, $85, $07, $77                  ;$C005
+        .byte   $1a, $9c, $1d, $df, $82, $1d, $ef, $57                  ;$C00D
+        .byte   $06, $46, $68, $1b, $69, $99, $04, $fb                  ;$C015
+        .byte   $0c, $8f, $19, $1e, $28, $0e, $ef, $48                  ;$C01D
+        .byte   $09, $f7, $13, $ef, $28, $19, $1e, $58                  ;$C025
+        .byte   $09, $f7, $1d, $ef, $1d, $df, $28, $27                  ;$C02D
+        .byte   $df, $58, $04, $fb, $0c, $8f, $19, $1e                  ;$C035
+        .byte   $28, $0e, $ef, $48, $09, $f7, $13, $ef                  ;$C03D
+        .byte   $28, $19, $1e, $58, $09, $f7, $1d, $ef                  ;$C045
+        .byte   $1d, $df, $28, $27, $df, $78, $06, $46                  ;$C04D
+        .byte   $89, $1b, $69, $ac, $85, $04, $fb, $0c                  ;$C055
+        .byte   $8f, $2c, $c1, $82, $0e, $ef, $84, $09                  ;$C05D
+        .byte   $f7, $13, $ef, $82, $19, $1e, $84, $09                  ;$C065
+        .byte   $f7, $1d, $df, $82, $27, $df, $84, $02                  ;$C06D
+        .byte   $7d, $0c, $8f, $82, $0e, $ef, $85, $09                  ;$C075
+        .byte   $f7, $13, $ef, $27, $df, $84, $09, $f7                  ;$C07D
+        .byte   $19, $1e, $85, $09, $f7, $1d, $ef, $1d                  ;$C085
+        .byte   $df, $82, $27, $df, $57, $06, $46, $69                  ;$C08D
+        .byte   $1a, $88, $a9, $03, $bb, $0d, $4e, $1a                  ;$C095
+        .byte   $9c, $28, $0e, $ef, $48, $07, $77, $12                  ;$C09D
+        .byte   $d1, $28, $16, $60, $58, $07, $77, $1a                  ;$C0A5
+        .byte   $9c, $1d, $df, $28, $1d, $ef, $58, $03                  ;$C0AD
+        .byte   $bb, $0d, $4e, $1a, $9c, $28, $0e, $ef                  ;$C0B5
+        .byte   $48, $07, $77, $12, $d1, $28, $16, $60                  ;$C0BD
+        .byte   $58, $07, $77, $1a, $9c, $1d, $df, $28                  ;$C0C5
+        .byte   $1d, $ef, $78, $06, $46, $89, $1b, $69                  ;$C0CD
+        .byte   $ac, $85, $03, $bb, $0d, $4e, $32, $3c                  ;$C0D5
+        .byte   $82, $0e, $ef, $84, $07, $77, $12, $d1                  ;$C0DD
+        .byte   $82, $16, $60, $84, $07, $77, $1a, $9c                  ;$C0E5
+        .byte   $82, $1d, $df, $84, $03, $bb, $0d, $4e                  ;$C0ED
+        .byte   $82, $0e, $ef, $85, $07, $77, $12, $d1                  ;$C0F5
+        .byte   $2c, $c1, $82, $16, $60, $85, $07, $77                  ;$C0FD
+        .byte   $1a, $9c, $1d, $df, $82, $1d, $ef, $5d                  ;$C105
+        .byte   $21, $21, $21, $09, $f7, $19, $1e, $27                  ;$C10D
+        .byte   $df, $5f, $12, $d1, $1a, $9c, $2c, $c1                  ;$C115
+        .byte   $5f, $11, $c3, $1d, $df, $32, $3c, $5f                  ;$C11D
+        .byte   $06, $a7, $2a, $3e, $3b, $be, $1f, $03                  ;$C125
+        .byte   $53, $5f, $10, $c3, $2c, $c1, $35, $39                  ;$C12D
+        .byte   $7f, $08, $08, $08, $99, $99, $c9, $85                  ;$C135
+        .byte   $07, $77, $27, $df, $32, $3c, $85, $07                  ;$C13D
+        .byte   $77, $27, $df, $32, $3c, $f5, $07, $77                  ;$C145
+        .byte   $25, $a2, $32, $3c, $f5, $03, $bb, $1a                  ;$C14D
+        .byte   $9c, $2c, $c1, $85, $02, $7d, $19, $1e                  ;$C155
+        .byte   $27, $df, $8c, $2f, $9c, $08, $ff, $a7                  ;$C15D
+        .byte   $05, $05, $0a, $17, $17, $fa, $00, $06                  ;$C165
+        .byte   $00, $04, $00, $01, $ec, $05, $7f, $f4                  ;$C16D
+        .byte   $50, $4d, $21, $21, $41, $10, $c3, $19                  ;$C175
+        .byte   $1e, $4f, $10, $c3, $19, $1e, $4f, $10                  ;$C17D
+        .byte   $c3, $19, $1e, $4f, $10, $c3, $19, $1e                  ;$C185
+        .byte   $4f, $10, $c3, $19, $1e, $4f, $10, $c3                  ;$C18D
+        .byte   $19, $1e, $4f, $10, $c3, $19, $1e, $4f                  ;$C195
+        .byte   $10, $c3, $19, $1e, $5f, $10, $c3, $19                  ;$C19D
+        .byte   $1e, $02, $f6, $38, $03, $23, $58, $10                  ;$C1A5
+        .byte   $c3, $19, $1e, $04, $30, $38, $05, $47                  ;$C1AD
+        .byte   $58, $10, $c3, $19, $1e, $07, $0c, $38                  ;$C1B5
+        .byte   $06, $47, $58, $10, $c3, $19, $1e, $09                  ;$C1BD
+        .byte   $68, $38, $0a, $8f, $58, $10, $c3, $19                  ;$C1C5
+        .byte   $1e, $0e, $18, $38, $0c, $8f, $58, $10                  ;$C1CD
+        .byte   $c3, $19, $1e, $12, $d1, $38, $15, $1f                  ;$C1D5
+        .byte   $58, $10, $c3, $19, $1f, $1c, $31, $38                  ;$C1DD
+        .byte   $17, $b5, $58, $10, $c3, $15, $1f, $19                  ;$C1E5
+        .byte   $1e, $38, $2a, $3e, $48, $10, $c3, $19                  ;$C1ED
+        .byte   $1e, $4f, $10, $c3, $19, $1e, $4f, $10                  ;$C1F5
+        .byte   $c3, $19, $1e, $4f, $10, $c3, $19, $1e                  ;$C1FD
+        .byte   $7f, $05, $05, $25, $17, $17, $a8, $4e                  ;$C205
+        .byte   $3f, $f4, $63, $0e, $18, $16, $60, $5f                  ;$C20D
+        .byte   $0e, $18, $16, $60, $19, $1e, $38, $19                  ;$C215
+        .byte   $1e, $58, $0e, $18, $16, $60, $21, $87                  ;$C21D
+        .byte   $5f, $0e, $18, $16, $60, $2a, $3e, $7f                  ;$C225
+        .byte   $04, $04, $29, $17, $17, $ab, $f5, $0c                  ;$C22D
+        .byte   $8f, $16, $60, $32, $3c, $f4, $0c, $8f                  ;$C235
+        .byte   $16, $60, $f4, $0c, $8f, $16, $60, $f4                  ;$C23D
+        .byte   $0c, $8f, $16, $60, $f5, $0c, $8f, $16                  ;$C245
+        .byte   $60, $1f, $a5, $f4, $0c, $8f, $16, $60                  ;$C24D
+        .byte   $f4, $0c, $8f, $16, $60, $f4, $0c, $8f                  ;$C255
+        .byte   $16, $60, $73, $00, $00, $31, $31, $04                  ;$C25D
+        .byte   $19, $19, $5b, $ed, $21, $41, $41, $3f                  ;$C265
+        .byte   $f4, $70, $4a, $00, $0a, $00, $0a, $00                  ;$C26D
+        .byte   $0a, $04, $30, $04, $35, $5f, $10, $c3                  ;$C275
+        .byte   $15, $1f, $19, $1e, $38, $19, $1e, $58                  ;$C27D
+        .byte   $10, $c3, $15, $1f, $21, $87, $5f, $04                  ;$C285
+        .byte   $30, $04, $35, $2a, $3e, $5f, $10, $c3                  ;$C28D
+        .byte   $15, $1f, $32, $3c, $4f, $10, $c3, $15                  ;$C295
+        .byte   $1f, $4f, $04, $30, $04, $35, $4f, $10                  ;$C29D
+        .byte   $c3, $15, $1f, $4f, $03, $23, $03, $24                  ;$C2A5
+        .byte   $5f, $10, $c3, $16, $60, $25, $a2, $38                  ;$C2AD
+        .byte   $25, $a2, $58, $10, $c3, $16, $60, $2c                  ;$C2B5
+        .byte   $c1, $5f, $03, $23, $03, $24, $32, $3c                  ;$C2BD
+        .byte   $5f, $10, $c3, $16, $60, $38, $63, $5f                  ;$C2C5
+        .byte   $10, $c3, $16, $60, $32, $3c, $5f, $03                  ;$C2CD
+        .byte   $23, $03, $24, $2a, $3e, $5f, $10, $c3                  ;$C2D5
+        .byte   $16, $60, $25, $a2, $5f, $04, $30, $04                  ;$C2DD
+        .byte   $35, $2a, $3e, $5f, $10, $c3, $15, $1f                  ;$C2E5
+        .byte   $21, $87, $5f, $10, $c3, $15, $1f, $19                  ;$C2ED
+        .byte   $1e, $5f, $04, $30, $04, $35, $19, $1e                  ;$C2F5
+        .byte   $4f, $10, $c3, $15, $1f, $4f, $10, $c3                  ;$C2FD
+        .byte   $15, $1f, $5f, $04, $30, $04, $35, $03                  ;$C305
+        .byte   $23, $38, $04, $39, $58, $10, $c3, $15                  ;$C30D
+        .byte   $1f, $06, $47, $38, $08, $61, $48, $03                  ;$C315
+        .byte   $23, $03, $24, $4f, $10, $c3, $16, $60                  ;$C31D
+        .byte   $4f, $10, $c3, $16, $60, $4f, $03, $23                  ;$C325
+        .byte   $03, $24, $4f, $10, $c3, $16, $60, $4f                  ;$C32D
+        .byte   $10, $c3, $16, $60, $5f, $03, $23, $03                  ;$C335
+        .byte   $24, $03, $25, $38, $04, $b4, $58, $10                  ;$C33D
+        .byte   $c3, $16, $60, $06, $47, $38, $09, $68                  ;$C345
+        .byte   $48, $04, $30, $04, $35, $5f, $10, $c3                  ;$C34D
+        .byte   $15, $1f, $19, $1e, $38, $19, $1e, $58                  ;$C355
+        .byte   $10, $c3, $15, $1f, $21, $87, $5f, $04                  ;$C35D
+        .byte   $30, $04, $35, $2a, $3e, $5f, $10, $c3                  ;$C365
+        .byte   $15, $1f, $32, $3c, $4f, $10, $c3, $15                  ;$C36D
+        .byte   $1f, $4f, $04, $30, $04, $35, $5f, $10                  ;$C375
+        .byte   $c3, $15, $1f, $32, $3c, $38, $38, $63                  ;$C37D
+        .byte   $58, $05, $98, $05, $9f, $3b, $be, $5f                  ;$C385
+        .byte   $0b, $30, $0e, $18, $38, $63, $4f, $0b                  ;$C38D
+        .byte   $30, $0e, $18, $5f, $05, $47, $05, $4f                  ;$C395
+        .byte   $32, $3c, $4f, $0a, $8f, $0c, $8f, $5f                  ;$C39D
+        .byte   $0a, $8f, $0c, $8f, $2a, $3e, $5f, $05                  ;$C3A5
+        .byte   $47, $05, $4d, $32, $3c, $5f, $0a, $8f                  ;$C3AD
+        .byte   $0c, $8f, $38, $63, $5f, $09, $68, $09                  ;$C3B5
+        .byte   $6f, $25, $a2, $4f, $12, $d1, $16, $60                  ;$C3BD
+        .byte   $4f, $12, $d1, $16, $60, $5f, $12, $d1                  ;$C3C5
+        .byte   $16, $60, $08, $61, $4f, $12, $d1, $16                  ;$C3CD
+        .byte   $60, $5f, $12, $d1, $16, $60, $07, $e9                  ;$C3D5
+        .byte   $4f, $12, $d1, $16, $60, $5f, $12, $d1                  ;$C3DD
+        .byte   $16, $60, $07, $0c, $5f, $0c, $8f, $0f                  ;$C3E5
+        .byte   $d2, $06, $47, $4f, $0c, $8f, $0f, $d2                  ;$C3ED
+        .byte   $4f, $0c, $8f, $0f, $d2, $5f, $0c, $8f                  ;$C3F5
+        .byte   $0f, $d2, $05, $98, $4f, $0c, $8f, $0f                  ;$C3FD
+        .byte   $d2, $5f, $0e, $18, $10, $c3, $05, $47                  ;$C405
+        .byte   $4f, $0e, $18, $10, $c3, $5f, $0f, $d2                  ;$C40D
+        .byte   $12, $d1, $04, $b4, $4f, $04, $30, $04                  ;$C415
+        .byte   $35, $5f, $10, $c3, $15, $1f, $19, $1e                  ;$C41D
+        .byte   $38, $19, $1e, $58, $10, $c3, $15, $1f                  ;$C425
+        .byte   $21, $87, $5f, $04, $30, $04, $35, $2a                  ;$C42D
+        .byte   $3e, $5f, $10, $c3, $15, $1f, $32, $3c                  ;$C435
+        .byte   $4f, $10, $c3, $15, $1f, $4f, $04, $30                  ;$C43D
+        .byte   $04, $35, $4f, $10, $c3, $15, $1f, $4f                  ;$C445
+        .byte   $03, $23, $03, $24, $5f, $10, $c3, $16                  ;$C44D
+        .byte   $60, $25, $a2, $38, $25, $a2, $58, $10                  ;$C455
+        .byte   $c3, $16, $60, $2c, $c1, $5f, $03, $23                  ;$C45D
+        .byte   $03, $24, $32, $3c, $5f, $10, $c3, $16                  ;$C465
+        .byte   $60, $38, $63, $5f, $10, $c3, $16, $60                  ;$C46D
+        .byte   $32, $3c, $5f, $03, $23, $03, $24, $2a                  ;$C475
+        .byte   $3e, $5f, $10, $c3, $16, $60, $25, $a2                  ;$C47D
+        .byte   $5f, $04, $30, $04, $35, $2a, $3e, $5f                  ;$C485
+        .byte   $10, $c3, $15, $1f, $21, $87, $5f, $10                  ;$C48D
+        .byte   $c3, $15, $1f, $19, $1e, $5f, $04, $30                  ;$C495
+        .byte   $04, $35, $38, $63, $4f, $10, $c3, $15                  ;$C49D
+        .byte   $1f, $4f, $10, $c3, $15, $1f, $4f, $04                  ;$C4A5
+        .byte   $30, $04, $35, $4f, $10, $c3, $15, $1f                  ;$C4AD
+        .byte   $5f, $04, $b4, $04, $b8, $25, $a2, $4f                  ;$C4B5
+        .byte   $12, $d1, $16, $60, $4f, $12, $d1, $16                  ;$C4BD
+        .byte   $60, $4f, $09, $68, $09, $6a, $4f, $12                  ;$C4C5
+        .byte   $d1, $16, $60, $4f, $12, $d1, $16, $60                  ;$C4CD
+        .byte   $4f, $04, $b4, $04, $b8, $7f, $04, $04                  ;$C4D5
+        .byte   $06, $28, $28, $8b, $85, $12, $d1, $16                  ;$C4DD
+        .byte   $60, $25, $a2, $83, $2a, $3e, $f5, $06                  ;$C4E5
+        .byte   $47, $06, $4f, $2c, $c1, $f5, $10, $c3                  ;$C4ED
+        .byte   $16, $60, $2a, $3e, $f4, $10, $c3, $16                  ;$C4F5
+        .byte   $60, $f5, $06, $47, $06, $4f, $21, $87                  ;$C4FD
+        .byte   $f5, $10, $c3, $1c, $31, $2c, $c1, $f5                  ;$C505
+        .byte   $10, $c3, $1c, $c1, $2a, $3e, $f4, $06                  ;$C50D
+        .byte   $47, $06, $4f, $f5, $0e, $18, $16, $60                  ;$C515
+        .byte   $21, $87, $f5, $0c, $8f, $16, $60, $32                  ;$C51D
+        .byte   $3c, $85, $0c, $8f, $16, $60, $32, $3c                  ;$C525
+        .byte   $83, $32, $3c, $f5, $0c, $8f, $16, $60                  ;$C52D
+        .byte   $32, $3c, $ff, $7f, $06, $06, $48, $48                  ;$C535
+        .byte   $48, $8a, $f5, $06, $47, $16, $60, $32                  ;$C53D
+        .byte   $3c, $5f, $04, $30, $15, $1f, $43, $0f                  ;$C545
+        .byte   $4f, $10, $c3, $15, $1f, $4f, $10, $c3                  ;$C54D
+        .byte   $15, $1f, $4f, $04, $30, $04, $35, $4f                  ;$C555
+        .byte   $10, $c3, $15, $1f, $4f, $10, $c3, $15                  ;$C55D
+        .byte   $1f, $4f, $03, $23, $03, $24, $4f, $10                  ;$C565
+        .byte   $c3, $16, $60, $7f, $06, $06, $06, $28                  ;$C56D
+        .byte   $28, $28, $f5, $02, $18, $10, $c3, $15                  ;$C575
+        .byte   $1f, $f5, $02, $18, $10, $c3, $15, $1f                  ;$C57D
+        .byte   $f5, $04, $30, $10, $c3, $15, $1f, $f5                  ;$C585
+        .byte   $02, $18, $10, $c3, $15, $1f, $ff, $f3                  ;$C58D
+        .byte   $08, $61, $f3, $07, $e9, $7d, $11, $11                  ;$C595
+        .byte   $41, $04, $08, $04, $68, $6c, $48, $f3                  ;$C59D
+        .byte   $07, $77, $84, $0b, $30, $0e, $ef, $84                  ;$C5A5
+        .byte   $0b, $30, $0e, $ef, $f4, $0e, $ef, $12                  ;$C5AD
+        .byte   $d1, $f5, $12, $d1, $16, $60, $07, $77                  ;$C5B5
+        .byte   $f4, $16, $60, $1d, $df, $f1, $12, $d1                  ;$C5BD
+        .byte   $31, $0e, $ef, $09, $68, $1f, $0b, $30                  ;$C5C5
+        .byte   $3f, $07, $77, $1f, $09, $68, $18, $0b                  ;$C5CD
+        .byte   $30, $18, $0e, $ef, $1f, $12, $d1, $f3                  ;$C5D5
+        .byte   $07, $77, $f1, $16, $60, $f1, $12, $d1                  ;$C5DD
+        .byte   $f5, $0e, $ef, $1d, $df, $07, $77, $f1                  ;$C5E5
+        .byte   $0b, $30, $32, $21, $87, $07, $0c, $1f                  ;$C5ED
+        .byte   $0a, $8f, $18, $0e, $18, $18, $10, $c3                  ;$C5F5
+        .byte   $5f, $15, $1f, $1c, $31, $07, $0c, $4f                  ;$C5FD
+        .byte   $1c, $31, $21, $87, $1f, $15, $1f, $7f                  ;$C605
+        .byte   $04, $04, $a0, $88, $09, $0b, $31, $10                  ;$C60D
+        .byte   $c3, $05, $47, $1f, $0e, $18, $1f, $0a                  ;$C615
+        .byte   $8f, $83, $03, $86, $81, $0e, $18, $81                  ;$C61D
+        .byte   $10, $c3, $81, $15, $1f, $31, $1c, $31                  ;$C625
+        .byte   $04, $30, $18, $21, $87, $18, $2a, $3e                  ;$C62D
+        .byte   $18, $38, $63, $18, $43, $0f, $83, $05                  ;$C635
+        .byte   $47, $81, $38, $63, $81, $2a, $3e, $81                  ;$C63D
+        .byte   $21, $87, $31, $1c, $31, $07, $0c, $18                  ;$C645
+        .byte   $15, $1f, $18, $10, $c3, $18, $0e, $18                  ;$C64D
+        .byte   $78, $04, $08, $04, $68, $6c, $48, $f3                  ;$C655
+        .byte   $07, $77, $84, $0b, $30, $0e, $ef, $84                  ;$C65D
+        .byte   $0b, $30, $0e, $ef, $f4, $0e, $ef, $12                  ;$C665
+        .byte   $d1, $f5, $12, $d1, $16, $60, $07, $77                  ;$C66D
+        .byte   $f4, $16, $60, $1d, $df, $f1, $12, $d1                  ;$C675
+        .byte   $31, $0e, $ef, $09, $68, $1f, $0b, $30                  ;$C67D
+        .byte   $3f, $07, $77, $1f, $09, $68, $18, $0b                  ;$C685
+        .byte   $30, $18, $0e, $ef, $1f, $12, $d1, $f3                  ;$C68D
+        .byte   $07, $77, $f4, $16, $60, $1c, $31, $f1                  ;$C695
+        .byte   $12, $d1, $f5, $0e, $ef, $1d, $df, $09                  ;$C69D
+        .byte   $68, $f1, $0b, $30, $32, $23, $86, $07                  ;$C6A5
+        .byte   $0c, $1f, $0a, $8f, $18, $0e, $18, $18                  ;$C6AD
+        .byte   $11, $c3, $1f, $15, $1f, $f3, $08, $e1                  ;$C6B5
+        .byte   $f1, $1c, $31, $f1, $15, $1f, $31, $11                  ;$C6BD
+        .byte   $c3, $0a, $8f, $1f, $0e, $18, $7f, $06                  ;$C6C5
+        .byte   $06, $a0, $88, $6b, $0b, $31, $0a, $8f                  ;$C6CD
+        .byte   $03, $86, $18, $0e, $18, $18, $11, $c3                  ;$C6D5
+        .byte   $18, $15, $1f, $18, $1c, $31, $83, $04                  ;$C6DD
+        .byte   $70, $81, $23, $86, $81, $2a, $3e, $81                  ;$C6E5
+        .byte   $38, $63, $31, $47, $0c, $05, $47, $18                  ;$C6ED
+        .byte   $38, $63, $18, $2a, $3e, $18, $23, $86                  ;$C6F5
+        .byte   $d8, $11, $21, $41, $85, $1c, $31, $23                  ;$C6FD
+        .byte   $86, $07, $0c, $81, $15, $1f, $81, $11                  ;$C705
+        .byte   $c3, $81, $0e, $18, $27, $06, $06, $06                  ;$C70D
+        .byte   $48, $6b, $48, $25, $a2, $f3, $09, $68                  ;$C715
+        .byte   $13, $12, $d1, $17, $b5, $3f, $12, $d1                  ;$C71D
+        .byte   $f1, $17, $b5, $f3, $09, $68, $f5, $17                  ;$C725
+        .byte   $b5, $1c, $31, $12, $d1, $13, $12, $d1                  ;$C72D
+        .byte   $17, $b5, $3f, $09, $68, $3f, $12, $d1                  ;$C735
+        .byte   $f1, $17, $b5, $13, $09, $68, $17, $b5                  ;$C73D
+        .byte   $3f, $12, $d1, $f1, $17, $b5, $13, $12                  ;$C745
+        .byte   $d1, $17, $b5, $3f, $09, $68, $f1, $17                  ;$C74D
+        .byte   $b5, $13, $12, $d1, $17, $b5, $3f, $12                  ;$C755
+        .byte   $d1, $f1, $17, $b5, $f5, $17, $b5, $1c                  ;$C75D
+        .byte   $31, $09, $68, $f5, $17, $b5, $25, $a2                  ;$C765
+        .byte   $12, $d1, $f5, $17, $b5, $27, $df, $09                  ;$C76D
+        .byte   $f7, $13, $13, $ef, $17, $b5, $3f, $13                  ;$C775
+        .byte   $ef, $f1, $17, $b5, $f3, $09, $f7, $f5                  ;$C77D
+        .byte   $17, $b5, $1d, $df, $13, $ef, $13, $13                  ;$C785
+        .byte   $ef, $17, $b5, $3f, $09, $f7, $3f, $13                  ;$C78D
+        .byte   $ef, $f1, $17, $b5, $13, $09, $f7, $17                  ;$C795
+        .byte   $b5, $3f, $13, $ef, $f1, $17, $b5, $13                  ;$C79D
+        .byte   $13, $ef, $17, $b5, $3f, $09, $f7, $f1                  ;$C7A5
+        .byte   $17, $b5, $7d, $21, $41, $41, $06, $06                  ;$C7AD
+        .byte   $06, $28, $6b, $28, $f5, $17, $b5, $1d                  ;$C7B5
+        .byte   $df, $13, $ef, $13, $13, $ef, $17, $b5                  ;$C7BD
+        .byte   $5f, $17, $b5, $27, $df, $09, $f7, $3f                  ;$C7C5
+        .byte   $17, $b5, $f1, $17, $b5, $32, $2a, $3e                  ;$C7CD
+        .byte   $09, $68, $3f, $0e, $18, $f1, $15, $1f                  ;$C7D5
+        .byte   $13, $12, $d1, $17, $b5, $3f, $09, $68                  ;$C7DD
+        .byte   $5f, $15, $1f, $1f, $a5, $0e, $18, $3f                  ;$C7E5
+        .byte   $12, $d1, $f1, $17, $b5, $f3, $09, $68                  ;$C7ED
+        .byte   $13, $0e, $18, $15, $1f, $3f, $12, $d1                  ;$C7F5
+        .byte   $f1, $17, $b5, $f3, $09, $68, $13, $0e                  ;$C7FD
+        .byte   $18, $15, $1f, $3f, $12, $d1, $f1, $17                  ;$C805
+        .byte   $b5, $32, $1f, $a5, $09, $68, $3f, $0e                  ;$C80D
+        .byte   $18, $81, $15, $1f, $82, $2a, $3e, $13                  ;$C815
+        .byte   $12, $d1, $17, $b5, $7f, $06, $06, $06                  ;$C81D
+        .byte   $48, $48, $9b, $f5, $17, $b5, $21, $87                  ;$C825
+        .byte   $09, $68, $85, $04, $b4, $05, $98, $2c                  ;$C82D
+        .byte   $c1, $84, $05, $47, $06, $47, $84, $05                  ;$C835
+        .byte   $98, $07, $0c, $84, $06, $47, $07, $e9                  ;$C83D
+        .byte   $84, $07, $c0, $08, $61, $84, $07, $e9                  ;$C845
+        .byte   $09, $68, $84, $08, $61, $0a, $8f, $84                  ;$C84D
+        .byte   $09, $68, $0b, $30, $84, $0a, $8f, $0c                  ;$C855
+        .byte   $8f, $84, $0b, $30, $0e, $18, $84, $0c                  ;$C85D
+        .byte   $8f, $0f, $d2, $84, $0e, $18, $10, $c3                  ;$C865
+        .byte   $85, $0f, $d2, $12, $d1, $2a, $3e, $84                  ;$C86D
+        .byte   $10, $c3, $15, $1f, $85, $12, $d1, $16                  ;$C875
+        .byte   $60, $2c, $c1, $84, $1c, $31, $21, $87                  ;$C87D
+        .byte   $57, $03, $03, $06, $29, $29, $9c, $19                  ;$C885
+        .byte   $1e, $1f, $a5, $32, $3c, $48, $12, $d1                  ;$C88D
+        .byte   $19, $1e, $48, $0f, $d2, $12, $d1, $48                  ;$C895
+        .byte   $0c, $8f, $0f, $d2, $48, $16, $60, $1c                  ;$C89D
+        .byte   $31, $48, $10, $c3, $16, $60, $48, $0e                  ;$C8A5
+        .byte   $18, $10, $c3, $48, $0b, $30, $0e, $18                  ;$C8AD
+        .byte   $58, $15, $1f, $19, $1e, $19, $23, $48                  ;$C8B5
+        .byte   $0f, $d2, $15, $1f, $48, $0c, $8f, $0f                  ;$C8BD
+        .byte   $d2, $48, $0a, $8f, $0c, $8f, $48, $0f                  ;$C8C5
+        .byte   $d2, $16, $60, $48, $0c, $8f, $12, $d1                  ;$C8CD
+        .byte   $48, $09, $68, $0f, $d2, $48, $06, $47                  ;$C8D5
+        .byte   $09, $68, $78, $30, $30, $06, $39, $39                  ;$C8DD
+        .byte   $4b, $f4, $04, $30, $04, $35, $85, $10                  ;$C8E5
+        .byte   $c3, $15, $1f, $19, $1e, $83, $19, $1e                  ;$C8ED
+        .byte   $f5, $10, $c3, $15, $1f, $21, $87, $f5                  ;$C8F5
+        .byte   $04, $30, $04, $35, $2a, $3e, $f5, $10                  ;$C8FD
+        .byte   $c3, $15, $1f, $32, $3c, $f4, $10, $c3                  ;$C905
+        .byte   $15, $1f, $f4, $04, $30, $04, $35, $f4                  ;$C90D
+        .byte   $10, $c3, $15, $1f, $f4, $03, $23, $03                  ;$C915
+        .byte   $24, $85, $10, $c3, $16, $60, $25, $a2                  ;$C91D
+        .byte   $83, $25, $a2, $f5, $10, $c3, $16, $60                  ;$C925
+        .byte   $2c, $c1, $f5, $03, $23, $03, $24, $32                  ;$C92D
+        .byte   $3c, $f5, $10, $c3, $16, $60, $38, $63                  ;$C935
+        .byte   $f5, $10, $c3, $16, $60, $32, $3c, $f5                  ;$C93D
+        .byte   $03, $23, $03, $24, $2a, $3e, $f5, $10                  ;$C945
+        .byte   $c3, $16, $60, $25, $a2, $f5, $04, $30                  ;$C94D
+        .byte   $04, $35, $2a, $3e, $f5, $10, $c3, $15                  ;$C955
+        .byte   $1f, $21, $87, $f5, $10, $c3, $15, $1f                  ;$C95D
+        .byte   $19, $1e, $f5, $04, $30, $04, $35, $19                  ;$C965
+        .byte   $1e, $f4, $10, $c3, $15, $1f, $f4, $10                  ;$C96D
+        .byte   $c3, $15, $1f, $85, $04, $30, $04, $35                  ;$C975
+        .byte   $03, $23, $83, $04, $39, $85, $10, $c3                  ;$C97D
+        .byte   $15, $1f, $06, $47, $83, $08, $61, $f4                  ;$C985
+        .byte   $03, $23, $03, $24, $f4, $10, $c3, $16                  ;$C98D
+        .byte   $60, $f4, $10, $c3, $16, $60, $f4, $03                  ;$C995
+        .byte   $23, $03, $24, $f4, $10, $c3, $16, $60                  ;$C99D
+        .byte   $f4, $10, $c3, $16, $60, $85, $03, $23                  ;$C9A5
+        .byte   $03, $24, $03, $25, $83, $04, $b4, $85                  ;$C9AD
+        .byte   $10, $c3, $16, $60, $06, $47, $83, $09                  ;$C9B5
+        .byte   $68, $f4, $04, $30, $04, $35, $85, $10                  ;$C9BD
+        .byte   $c3, $15, $1f, $19, $1e, $83, $19, $1e                  ;$C9C5
+        .byte   $f5, $10, $c3, $15, $1f, $21, $87, $f5                  ;$C9CD
+        .byte   $04, $30, $04, $35, $2a, $3e, $f5, $10                  ;$C9D5
+        .byte   $c3, $15, $1f, $32, $3c, $f4, $10, $c3                  ;$C9DD
+        .byte   $15, $1f, $f4, $04, $30, $04, $35, $85                  ;$C9E5
+        .byte   $10, $c3, $15, $1f, $32, $3c, $83, $38                  ;$C9ED
+        .byte   $63, $f5, $05, $98, $05, $9f, $3b, $be                  ;$C9F5
+        .byte   $f5, $0b, $30, $0e, $18, $38, $63, $f4                  ;$C9FD
+        .byte   $0b, $30, $0e, $18, $f5, $05, $47, $05                  ;$CA05
+        .byte   $4f, $32, $3c, $f4, $0a, $8f, $0c, $8f                  ;$CA0D
+        .byte   $f5, $0a, $8f, $0c, $8f, $2a, $3e, $f5                  ;$CA15
+        .byte   $05, $47, $05, $4d, $32, $3c, $f5, $0a                  ;$CA1D
+        .byte   $8f, $0c, $8f, $38, $63, $f5, $09, $68                  ;$CA25
+        .byte   $09, $6f, $25, $a2, $f4, $12, $d1, $16                  ;$CA2D
+        .byte   $60, $f4, $12, $d1, $16, $60, $f5, $12                  ;$CA35
+        .byte   $d1, $16, $60, $08, $61, $f4, $12, $d1                  ;$CA3D
+        .byte   $16, $60, $f5, $12, $d1, $16, $60, $07                  ;$CA45
+        .byte   $e9, $f4, $12, $d1, $16, $60, $f5, $12                  ;$CA4D
+        .byte   $d1, $16, $60, $07, $0c, $f5, $0c, $8f                  ;$CA55
+        .byte   $0f, $d2, $06, $47, $f4, $0c, $8f, $0f                  ;$CA5D
+        .byte   $d2, $f4, $0c, $8f, $0f, $d2, $f5, $0c                  ;$CA65
+        .byte   $8f, $0f, $d2, $05, $98, $f4, $0c, $8f                  ;$CA6D
+        .byte   $0f, $d2, $f5, $0e, $18, $10, $c3, $05                  ;$CA75
+        .byte   $47, $f4, $0e, $18, $10, $c3, $f5, $02                  ;$CA7D
+        .byte   $d2, $12, $d1, $04, $b4, $f4, $04, $30                  ;$CA85
+        .byte   $04, $35, $85, $10, $c3, $15, $1f, $19                  ;$CA8D
+        .byte   $1e, $83, $19, $1e, $f5, $10, $c3, $15                  ;$CA95
+        .byte   $1f, $21, $87, $f5, $04, $30, $04, $35                  ;$CA9D
+        .byte   $2a, $3e, $f5, $10, $c3, $15, $1f, $32                  ;$CAA5
+        .byte   $3c, $f4, $10, $c3, $15, $1f, $f4, $04                  ;$CAAD
+        .byte   $30, $04, $35, $f4, $10, $c3, $15, $1f                  ;$CAB5
+        .byte   $f4, $03, $23, $03, $24, $85, $10, $c3                  ;$CABD
+        .byte   $16, $60, $25, $a2, $83, $25, $a2, $f5                  ;$CAC5
+        .byte   $10, $c3, $16, $60, $2c, $c1, $f5, $03                  ;$CACD
+        .byte   $23, $03, $24, $32, $3c, $f5, $10, $c3                  ;$CAD5
+        .byte   $16, $60, $38, $63, $f5, $10, $c3, $16                  ;$CADD
+        .byte   $60, $32, $3c, $f5, $03, $23, $03, $24                  ;$CAE5
+        .byte   $2a, $3e, $f5, $10, $c3, $16, $60, $25                  ;$CAED
+        .byte   $a2, $f5, $04, $30, $04, $35, $2a, $3e                  ;$CAF5
+        .byte   $f5, $10, $c3, $15, $1f, $21, $87, $f5                  ;$CAFD
+        .byte   $10, $c3, $15, $1f, $19, $1e, $f5, $04                  ;$CB05
+        .byte   $30, $04, $35, $38, $63, $f4, $10, $c3                  ;$CB0D
+        .byte   $15, $1f, $f4, $10, $c3, $15, $1f, $f4                  ;$CB15
+        .byte   $04, $30, $04, $35, $f4, $10, $c3, $15                  ;$CB1D
+        .byte   $1f, $f5, $04, $b4, $04, $b8, $25, $a2                  ;$CB25
+        .byte   $f4, $12, $d1, $16, $60, $f4, $12, $d1                  ;$CB2D
+        .byte   $16, $60, $f4, $09, $68, $09, $6a, $f4                  ;$CB35
+        .byte   $12, $d1, $16, $60, $f4, $12, $d1, $16                  ;$CB3D
+        .byte   $60, $f4, $04, $b4, $04, $b8, $57, $06                  ;$CB45
+        .byte   $06, $08, $48, $48, $6b, $12, $d1, $16                  ;$CB4D
+        .byte   $60, $25, $a2, $38, $2a, $3e, $58, $06                  ;$CB55
+        .byte   $47, $06, $4f, $2c, $c1, $5f, $10, $c3                  ;$CB5D
+        .byte   $16, $60, $2a, $3e, $4f, $10, $c3, $16                  ;$CB65
+        .byte   $60, $5f, $06, $47, $06, $4f, $21, $87                  ;$CB6D
+        .byte   $5f, $10, $c3, $1c, $31, $2c, $c1, $5f                  ;$CB75
+        .byte   $10, $c3, $1c, $c1, $2a, $3e, $4f, $06                  ;$CB7D
+        .byte   $47, $06, $4f, $5f, $0e, $18, $16, $60                  ;$CB85
+        .byte   $21, $87, $df, $11, $11, $11, $f5, $1c                  ;$CB8D
+        .byte   $31, $21, $87, $2c, $c1, $f5, $1c, $31                  ;$CB95
+        .byte   $21, $87, $2a, $3e, $f4, $19, $1e, $1f                  ;$CB9D
+        .byte   $a5, $f5, $19, $1f, $1f, $a5, $21, $87                  ;$CBA5
+        .byte   $f5, $16, $60, $1c, $31, $2c, $c1, $f5                  ;$CBAD
+        .byte   $16, $60, $1c, $31, $2a, $3e, $f4, $15                  ;$CBB5
+        .byte   $1f, $19, $1e, $f5, $15, $1f, $19, $1e                  ;$CBBD
+        .byte   $21, $87, $5d, $21, $41, $41, $06, $47                  ;$CBC5
+        .byte   $2c, $c1, $38, $63, $18, $07, $0c, $58                  ;$CBCD
+        .byte   $07, $e9, $2a, $3e, $32, $3c, $18, $08                  ;$CBD5
+        .byte   $61, $18, $09, $68, $18, $0a, $8f, $58                  ;$CBDD
+        .byte   $0b, $30, $21, $87, $2a, $3e, $18, $0c                  ;$CBE5
+        .byte   $8f, $58, $0e, $18, $2c, $c1, $38, $63                  ;$CBED
+        .byte   $18, $0f, $d2, $58, $10, $c3, $2a, $3e                  ;$CBF5
+        .byte   $32, $3c, $18, $12, $d1, $18, $15, $1f                  ;$CBFD
+        .byte   $18, $16, $60, $58, $19, $1e, $21, $87                  ;$CC05
+        .byte   $2a, $3e, $18, $1c, $31, $58, $1f, $a5                  ;$CC0D
+        .byte   $2c, $c1, $32, $3c, $5f, $1f, $a5, $2c                  ;$CC15
+        .byte   $c1, $32, $3c, $58, $1f, $a5, $2c, $c1                  ;$CC1D
+        .byte   $32, $3c, $58, $1f, $a5, $2c, $c1, $32                  ;$CC25
+        .byte   $3c, $ff, $ff, $f5, $06, $47, $2c, $c1                  ;$CC2D
+        .byte   $4b, $45, $5f, $04, $30, $2a, $3e, $43                  ;$CC35
+        .byte   $0f, $18, $02, $f6, $18, $03, $23, $18                  ;$CC3D
+        .byte   $02, $a3, $18, $04, $b4, $18, $04, $30                  ;$CC45
+        .byte   $18, $03, $f4, $18, $04, $30, $48, $03                  ;$CC4D
+        .byte   $86, $07, $0c, $48, $03, $23, $06, $47                  ;$CC55
+        .byte   $48, $02, $a3, $05, $47, $48, $03, $23                  ;$CC5D
+        .byte   $06, $47, $48, $04, $b4, $09, $68, $48                  ;$CC65
+        .byte   $04, $30, $08, $61, $48, $03, $f4, $07                  ;$CC6D
+        .byte   $e9, $48, $04, $30, $08, $61, $48, $07                  ;$CC75
+        .byte   $0c, $0e, $18, $48, $05, $ed, $0b, $da                  ;$CC7D
+        .byte   $48, $06, $47, $0c, $8f, $48, $08, $61                  ;$CC85
+        .byte   $10, $c3, $48, $0a, $8f, $15, $1f, $ff                  ;$CC8D
+        .byte   $ff, $85, $06, $47, $0f, $d2, $32, $3c                  ;$CC95
+        .byte   $85, $05, $98, $0e, $18, $38, $63, $85                  ;$CC9D
+        .byte   $05, $47, $0c, $8f, $3b, $be, $85, $04                  ;$CCA5
+        .byte   $b4, $0b, $30, $3f, $4b, $f5, $04, $30                  ;$CCAD
+        .byte   $0a, $8f, $43, $0f, $f5, $04, $30, $0a                  ;$CCB5
+        .byte   $8f, $43, $0f, $f5, $04, $30, $0a, $8f                  ;$CCBD
+        .byte   $43, $0f, $57, $08, $08, $08, $86, $86                  ;$CCC5
+        .byte   $86, $04, $30, $0a, $8f, $43, $0f, $ff                  ;$CCCD
+        .byte   $9f, $00                                                ;$CCD5
 
 ;$CCD7

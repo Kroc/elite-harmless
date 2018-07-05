@@ -9,5 +9,9 @@
 ; screen. therefore the C64 only draws in a 256-px wide centered 'screen'.
 ; the dimensions of this viewport are given here:
 
+; (DON'T change this, the code is inextricably tied to this size)
+
 ELITE_VIEWPORT_WIDTH    = 256
 ELITE_VIEWPORT_HEIGHT   = 144
+
+ELITE_VIEWPORT_COLS     = ELITE_VIEWPORT_WIDTH / 8      ;=32
