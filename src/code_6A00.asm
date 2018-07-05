@@ -3390,13 +3390,13 @@ _7c7b:
         tay 
         lda _d000 - 1, y        ;?
         beq _7c79               ;!?
-        sta $58
+        sta ZP_HULL_ADDR_HI
         lda _d000 - 2, y        ;?
-        sta $57
+        sta ZP_HULL_ADDR_LO
         cpy # $04
         beq _7cc4
         ldy # $05
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
         lda $04f2
         sec 
@@ -3421,10 +3421,10 @@ _7cba:
         sta $04f3
 _7cc4:
         ldy # $0e
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         sta $2c
         ldy # $13
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         and # %00000111
         sta $28
         lda $bb
@@ -4463,7 +4463,7 @@ _832c:
         dec $045d, x
         ldx $ad
         ldy # $05
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         ldy # $21
         clc 
         adc [$59], y
@@ -7508,7 +7508,7 @@ _9a86:
         lda # $12
         sta [$2a], y
         ldy # $07
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         ldy # $02
         sta [$2a], y
 _9abb:
@@ -7555,7 +7555,7 @@ _9ae6:
         sbc ZP_POLYOBJ_ZPOS_pt2
         bcs _9ac9
         ldy # $06
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         tax 
         lda # $ff
         sta $0100, x
@@ -7580,7 +7580,7 @@ _9ae6:
         bpl _9b3a
 _9b29:
         ldy # $0d
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         cmp ZP_POLYOBJ_ZPOS_pt2
         bcs _9b3a
         lda # $20
@@ -7631,7 +7631,7 @@ _9b66:
         lda $28
         and # %00100000
         beq _9b8b
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         lsr 
         lsr 
         tax 
@@ -7646,11 +7646,11 @@ _9b88:
         jmp _9cfe
 
 _9b8b:
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         beq _9b88
         sta $ae
         ldy # $12
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         tax 
         lda $8c
         tay 
@@ -7693,13 +7693,13 @@ _9baa:
         lda $76
         sta $8d
         ldy # $04
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         clc 
-        adc $57
+        adc ZP_HULL_ADDR_LO
         sta $5b
         ldy # $11
-        lda [$57], y
-        adc $58
+        lda [ZP_HULL_ADDR], y
+        adc ZP_HULL_ADDR_HI
         sta $5c
         ldy # $00
 _9bf2:
@@ -7883,13 +7883,13 @@ _9cfe:
         sty ZP_TEMPOBJ_M0x1_LO
         stx ZP_TEMPOBJ_M0x1_HI
         ldy # $08
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         sta $ae
-        lda $57
+        lda ZP_HULL_ADDR_LO
         clc 
         adc # $14
         sta $5b
-        lda $58
+        lda ZP_HULL_ADDR_HI
         adc # $00
         sta $5c
         ldy # $00
@@ -8211,7 +8211,7 @@ _9f35:
         ora $28
         sta $28
         ldy # $09
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         sta $ae
         ldy # $00
         sty $99
@@ -8223,7 +8223,7 @@ _9f35:
         and # %10111111
         sta $28
         ldy # $06
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         tay 
         ldx $0100, y
         stx VAR_X
@@ -8266,15 +8266,15 @@ _9f82:
 _9f9f:
         ldy # $03
         clc 
-        lda [$57], y
-        adc $57
+        lda [ZP_HULL_ADDR], y
+        adc ZP_HULL_ADDR_LO
         sta $5b
         ldy # $10
-        lda [$57], y
-        adc $58
+        lda [ZP_HULL_ADDR], y
+        adc ZP_HULL_ADDR_HI
         sta $5c
         ldy # $05
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
         ldy $9f
 _9fb8:
@@ -8826,9 +8826,9 @@ _a2cb:
         lda # $00
 _a30d:
         ldy # $0f
-        cmp [$57], y
+        cmp [ZP_HULL_ADDR], y
         bcc _a315
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
 _a315:
         sta ZP_POLYOBJ_VERTX_LO
         lda # $00

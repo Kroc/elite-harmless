@@ -201,6 +201,14 @@ ZP_TEMPOBJ_M0x2_HI      = $56   ; "
 
 ;-------------------------------------------------------------------------------
 
+; pointer to a hull data structure:
+; (verticies, edges, faces &c.)
+ZP_HULL_ADDR            = $57
+ZP_HULL_ADDR_LO         = $57
+ZP_HULL_ADDR_HI         = $58
+
+;-------------------------------------------------------------------------------
+
 VAR_X                   = $6b   ; a common "X" variable
 VAR_Y                   = $6c   ; a common "Y" variable
 

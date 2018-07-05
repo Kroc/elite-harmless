@@ -625,9 +625,9 @@ _2040:
         asl 
         tay 
         lda _d000 - 2, y        ; HULL_TABLE?
-        sta $57
+        sta ZP_HULL_ADDR_LO
         lda _d000 - 1, y        ; HULL_TABLE?
-        sta $58
+        sta ZP_HULL_ADDR_HI
         
         lda $04c3
         bpl _2079
@@ -676,7 +676,7 @@ _207e:
         cpx # $05
         beq _20c0
         ldy # $00
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         lsr 
         lsr 
         lsr 
@@ -840,11 +840,11 @@ _21ab:
         ora $0482
         bne _21e2
         ldy # $0a
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         beq _21e2
         tax 
         iny 
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         tay 
         jsr _7481
         lda # $00
@@ -1091,7 +1091,7 @@ _234c:
         tya 
         tax 
         ldy # $00
-        and [$57], y
+        and [ZP_HULL_ADDR], y
         and # %00001111
 _2359:
         sta $aa
@@ -3982,7 +3982,7 @@ _32ef:
 _330f:
         ldy # $0e
         lda $2c
-        cmp [$57], y
+        cmp [ZP_HULL_ADDR], y
         bcs _3319
         inc $2c
 _3319:
@@ -4086,7 +4086,7 @@ _339a:
         sta $26
 _33a8:
         ldy # $0e
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         lsr 
         cmp $2c
         bcc _33fd
@@ -4146,7 +4146,7 @@ _33fd:
         cpx # $a0
         bcc _3434
         ldy # $13
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         and # %11111000
         beq _3434
         lda $28
@@ -4154,7 +4154,7 @@ _33fd:
         sta $28
         cpx # $a3                 ; move counter?
         bcc _3434
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         lsr 
         jsr _7bd2
         dec ZP_POLYOBJ_VERTX_HI
@@ -4538,11 +4538,11 @@ _363f:
         bcs _367e
         sta $9c
         ldy # $02
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         cmp $9c
         bne _367d
         dey 
-        lda [$57], y
+        lda [ZP_HULL_ADDR], y
         cmp $9b
 _367d:
         rts 
@@ -4657,9 +4657,9 @@ _3708:
 _370a:
         sta ZP_TEMP_VAR
        .phx                     ; push X to stack (via A)
-        lda $57
+        lda ZP_HULL_ADDR_LO
         pha 
-        lda $58
+        lda ZP_HULL_ADDR_HI
         pha 
         lda $59
         pha 
@@ -4724,9 +4724,9 @@ _377b:
         dex 
         bpl _377b
         pla 
-        sta $58
+        sta ZP_HULL_ADDR_HI
         pla 
-        sta $57
+        sta ZP_HULL_ADDR_LO
         pla 
         tax 
         rts 
