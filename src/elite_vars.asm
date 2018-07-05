@@ -59,6 +59,7 @@ PLAYER_MISSILE_ARMED    = $0485 ; armed state of missile
 
 PLAYER_LEGAL            = $04cd ; player's legal status
 
+;                       = $04e0 ; number of kills (lo byte?)
 PLAYER_KILLS            = $04e1 ; number of kills (hi byte?)
 
 PLAYER_SHIELD_FRONT     = $04e7

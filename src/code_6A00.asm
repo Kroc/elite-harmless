@@ -121,6 +121,8 @@
 
 ; from "gfx/hulls.asm"
 .import _d000:absolute
+.import _d062:absolute
+.import _d083:absolute
 
 ;===============================================================================
 
@@ -128,13 +130,13 @@
 
 _6a00:                                                                  ;$6A00
 .export _6a00
-        sta $04ef
+        sta $04ef               ; item index?
         lda # $01
-_6a05:  pha                                                             ;$6a05 
+_6a05:  pha                                                             ;$6A05 
         ldx # $0c
-        cpx $04ef
+        cpx $04ef               ; item index?
         bcc _6a1b                                                       
-_6a0d:  adc $04b0, x                                                    ;$6a0d
+_6a0d:  adc $04b0, x            ; cargo qty?                            ;$6A0D
         dex 
         bpl _6a0d
         adc PLAYER_TRUMBLES_HI
@@ -142,12 +144,12 @@ _6a0d:  adc $04b0, x                                                    ;$6a0d
         pla 
         rts
 
-_6a1b:                                                                  ;$6a1b
-        ldy $04ef
-        adc $04b0, y
+_6a1b:                                                                  ;$6A1B
+        ldy $04ef               ; item index?
+        adc $04b0, y            ; cargo qty?
         cmp # $c8
         pla 
-        rts
+        rts 
 
 
 .proc   set_cursor_col                                                  ;$6A25
@@ -266,7 +268,7 @@ _6a84:                                                                  ;$6A84
 _6a87:                                                                  ;$6a87
         jsr cursor_down
 _6a8a:                                                                  ;$6a8a
-        lda # $80
+        lda # %10000000
         sta $34
 
 _6a8e:                                                                  ;$6a8e
@@ -285,14 +287,14 @@ _6a93:                                                                  ;$6A93
 
 ;===============================================================================
 
-_6a9b:                                                                  ;$6a9b
+_6a9b:                                                                  ;$6A9B
 .export _6a9b
         jsr print_flight_token
         jmp _72c5
 
 ;===============================================================================
 
-_6aa1:                                                                  ;$6aa1:
+_6aa1:                                                                  ;$6AA1:
         lda # $01
         jsr _6a2f
 
@@ -732,7 +734,7 @@ _6d16:                                                                  ;$6d16
         lda # $80
         sta $34
         lda # $00
-        sta $04ef
+        sta $04ef               ; item index?
 _6d27:                                                                  ;$6d27
         jsr _7246
         lda $04ed
@@ -758,7 +760,7 @@ _6d3e:                                                                  ;$6d3e
         ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
 .import TXT_FOOD:direct
 
-        lda $04ef
+        lda $04ef               ; item index?
         clc 
         adc # TXT_FOOD
         jsr print_flight_token
@@ -791,12 +793,12 @@ _6d79:                                                                  ;$6d79
         jsr _745a
         ldy # $c5
         bcc _6d34
-        ldy $04ef
+        ldy $04ef               ; item index?
         lda $9b
         pha 
         clc 
-        adc $04b0, y
-        sta $04b0, y
+        adc $04b0, y            ; cargo qty?
+        sta $04b0, y            ; cargo qty?
         lda $04ce, y
         sec 
         sbc $9b
@@ -805,15 +807,15 @@ _6d79:                                                                  ;$6d79
         beq _6da4
         jsr _761f
 _6da4:                                                                  ;$6da4
-        lda $04ef
+        lda $04ef               ; item index?
         clc 
         adc # 5
         jsr set_cursor_row
         lda # 0
         jsr set_cursor_col
         
-        inc $04ef
-        lda $04ef
+        inc $04ef               ; item index?
+        lda $04ef               ; item index?
         cmp # $11
         bcs _6dbf
         jmp _6d27
@@ -888,7 +890,7 @@ _6e30:                                                                  ;$6e30
         jsr _723c
 
         jsr _7627
-        ldy $04ef
+        ldy $04ef               ; item index?
         jmp _6e5d
 _6e41:                                                                  ;$6e41
         lda # $04
@@ -909,9 +911,9 @@ _6e41:                                                                  ;$6e41
 _6e58:                                                                  ;$6e58
         ldy # $00
 _6e5a:                                                                  ;$6e5a
-        sty $04ef
+        sty $04ef               ; item index?
 _6e5d:                                                                  ;$6e5d
-        ldx $04b0, y
+        ldx $04b0, y            ; cargo qty?
         beq _6eca
         tya 
         asl 
@@ -923,7 +925,7 @@ _6e5d:                                                                  ;$6e5d
         jsr _6a8a
         
         clc 
-        lda $04ef
+        lda $04ef               ; item index?
 
         ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
@@ -956,15 +958,15 @@ _6e5d:                                                                  ;$6e5d
         jsr _6dc9
         beq _6eca
         bcs _6e30
-        lda $04ef
+        lda $04ef               ; item index?
         ldx # $ff
         stx $34
         jsr _7246
-        ldy $04ef
-        lda $04b0, y
+        ldy $04ef               ; item index?
+        lda $04b0, y            ; cargo qty?
         sec 
         sbc $9b
-        sta $04b0, y
+        sta $04b0, y            ; cargo qty?
         lda $9b
         sta ZP_VAR_P1
         lda $04ec
@@ -974,7 +976,7 @@ _6e5d:                                                                  ;$6e5d
         lda # $00
         sta $34
 _6eca:                                                                  ;$6eca
-        ldy $04ef
+        ldy $04ef               ; item index?
         iny 
         cpy # $11
         bcc _6e5a
@@ -1681,14 +1683,14 @@ _72e4:                                                                  ;$72e4
         jsr set_cursor_row
         
         lda # $00
-        sta $04ef
+        sta $04ef               ; item index?
 _7305:                                                                  ;$7305
         ldx # $80
         stx $34
         jsr _7246
         jsr cursor_down
-        inc $04ef
-        lda $04ef
+        inc $04ef               ; item index?
+        lda $04ef               ; item index?
         cmp # $11
         bcc _7305
         rts 
@@ -1951,7 +1953,7 @@ _74bb:                                                                  ;$74bb
         lda # 12
         jsr set_cursor_col
         
-        lda # $cf
+        lda # $cf               ;="EQUIP"?
         jsr _6a9b
 
 .import TXT_SHIP:direct
@@ -3069,7 +3071,7 @@ _7a9f:
         beq _7ac2
 
         lda # $00
-        sta $04b0
+        sta $04b0               ; cargo qty?
         sta $04b6
         jsr get_random_number
         and # %00001111
@@ -3372,7 +3374,7 @@ _7c6b:
         ldx # $00
 _7c6f:
         lda $0452, x            ; ship slots?
-        beq _7c7b
+       .bze _7c7b
         inx 
         cpx # $0a
         bcc _7c6f
@@ -4366,9 +4368,10 @@ current_memory_layout:                                                  ;$828e
 
 _828f:
         lda ZP_VAR_P1
-        sta $04f2
+        sta $04f2               ; "ship lines pointer lo"?
         lda ZP_VAR_P2
-        sta $04f3
+        sta $04f3               ; "ship lines pointer hi"?
+
         rts 
 
 ;===============================================================================
@@ -4398,77 +4401,93 @@ _82a4:
 _82bc:
         ldx # $ff
 _82be:
-        inx 
+        inx                     ; move to the next slot
         lda $0452, x            ; ship slots?
-        beq _828f
-        cmp # $01
-        bne _82be
-        txa 
-        asl 
-        tay 
+       .bze _828f               ; nothing in that slot?
+
+        cmp # $01               ; is missile?
+        bne _82be               ; no -- check next ship slot
+
+        ; missile?
+
+        txa                     ; slot index
+        asl                     ; double for lookup table
+        tay                     ; move to index register
+        
+        ; get the PolyObject address from that index
         lda _28a4 + 0, y
         sta ZP_TEMP_ADDR1_LO
         lda _28a4 + 1, y
         sta ZP_TEMP_ADDR1_HI
-        ldy # $20
+        
+        ldy # PolyObject::roll  ;=$20 -- perhaps this is supposed to be energy?
         lda [ZP_TEMP_ADDR1], y
-        bpl _82be
-        and # %01111111
-        lsr 
-        cmp $ad
-        bcc _82be
-        beq _82ed
-        sbc # $01
-        asl 
-        ora # %10000000
-        sta [ZP_TEMP_ADDR1], y
-        bne _82be
+        bpl _82be               ; if +ve, check next ship slot
+        and # %01111111         ; remove the sign
+        lsr                     ; divide by 2
+        cmp $ad                 ;?
+       .blt _82be               ;?
+        beq _82ed               ;?
+        sbc # $01               ; adjust for two's compliment
+        asl                     ; multiply by 2
+        ora # %10000000         ; add the sign on again
+        sta [ZP_TEMP_ADDR1], y  ; update the roll value
+        bne _82be               ; if not zero, check next ship slot
+
 _82ed:
-        lda # $00
+        lda # PolyObject::xpos  ;=$00
         sta [ZP_TEMP_ADDR1], y
-        beq _82be
+        beq _82be               ; if zero, check the next ship slot
+
 _82f3:
         stx $ad
         lda $7c
         cmp $ad
         bne _8305
+
         ldy # $57
         jsr _7d0c
+
         lda # $c8
         jsr _900d
 _8305:
         ldy $ad
         ldx $0452, y            ; ship slots?
-        cpx # $02
+        cpx # $02               ; is space station (coreolis)?
         beq _82a4
-        cpx # $1f
+        cpx # $1f               ; is Constrictor?
         bne _831d
 
+        ; the Constrictor has been destroyed!
         ; set the Constrictor mission complete
         lda MISSION_FLAGS
         ora # missions::constrictor_complete
         sta MISSION_FLAGS
         
         inc PLAYER_KILLS
+
 _831d:
-        cpx # $0f
+        cpx # $0f               ; is asteroid?
         beq _8329
-        cpx # $03
+        cpx # $03               ; is escape capsule?
         bcc _832c
-        cpx # $0b
+        cpx # $0b               ; is cobra mk-III? (trader)
         bcs _832c
 _8329:
         dec $047f
 _832c:
         dec $045d, x
+
         ldx $ad
-        ldy # $05
+        ldy # $05               ; "faces data offset lo"
         lda [ZP_HULL_ADDR], y
-        ldy # $21
+
+        ldy # PolyObject::pitch ;=$21 -- is this correct?
         clc 
         adc [ZP_POLYOBJ_ADDR], y
         sta ZP_VAR_P1
-        iny 
+        
+        iny                     ;=$22: `ai_attack`
         lda [ZP_POLYOBJ_ADDR], y
         adc # $00
         sta ZP_VAR_P2
@@ -4478,7 +4497,7 @@ _8343:
         lda $0452, x
         sta $0451, x
         bne _834f
-        jmp _82bc
+        jmp _82bc               ; search again from the top
 
 _834f:
         asl 
@@ -6596,13 +6615,13 @@ _906a:
         bmi _9001
         cpx # $16
         bcs _9001
-        lda $04b0, x
+        lda $04b0, x            ; cargo qty?
         beq _9001
         lda $048b
         bne _9001
         ldy # $03
         sty $048c
-        sta $04b0, x
+        sta $04b0, x            ; cargo qty?
         cpx # $11
         bcs _908f
         txa 
@@ -9553,22 +9572,26 @@ _a795:
         ldy # $04
         jmp _a858
 
-;===============================================================================
-
 _a7a6:
+;===============================================================================
+; kill a PolyObject?
+;
 .export _a7a6
-        lda $04cb
+        lda $04cb               ;?
         clc 
-        adc $d062, x
+        adc _d062, x
         sta $04cb
-        lda $04e0
-        adc $d083, x
-        sta $04e0
-        bcc _a7c3
-
-        inc PLAYER_KILLS
         
-        lda # $65                 ; hyperspace countdown (inner)?
+        ; add fractional kill value?
+        lda $04e0
+        adc _d083, x
+        sta $04e0
+        
+        bcc _a7c3               ; < 1.0
+
+        inc PLAYER_KILLS        ; +1
+        
+        lda # $65
         jsr _900d
 _a7c3:
         lda ZP_POLYOBJ_ZPOS_pt2

@@ -612,65 +612,80 @@ _202f:
 
 _2039:
         sta $a5
-
         jsr _3e87
         
-        ldy # $24
-_2040:
-        lda [ZP_POLYOBJ_ADDR], y
+        ; copy the given PolyObject to the zero page:
+        ; ($09..$2D)
+        ;
+        ldy # .sizeof(PolyObject) - 1
+:       lda [ZP_POLYOBJ_ADDR], y                                        ;$2040
         sta ZP_POLYOBJ, y
         dey 
-        bpl _2040
+        bpl :-
 
         lda $a5
-        bmi _2079
+        bmi @skip
         
         asl 
         tay 
-        lda _d000 - 2, y        ; HULL_TABLE?
+        lda _d000 - 2, y
         sta ZP_HULL_ADDR_LO
-        lda _d000 - 1, y        ; HULL_TABLE?
+        lda _d000 - 1, y
         sta ZP_HULL_ADDR_HI
         
-        lda $04c3
-        bpl _2079
-        cpy # $04
-        beq _2079
-        cpy # $3a
-        beq _2079
-        cpy # $3e
-        bcs _2079
-        lda $28
+        lda $04c3               ; energy bomb?
+        bpl @skip
+        
+        cpy # $04               ;=$02(x2): space station (coreolis)?
+        beq @skip
+
+        cpy # $3a               ;=$1D(x2): thargoid?
+        beq @skip
+
+        cpy # $3e               ;=$1F(x2): constrictor
+        bcs @skip
+
+        ; has enough energy?
+        lda ZP_POLYOBJ_ENERGY
         and # %00100000
-        bne _2079
-        asl $28
+        bne @skip
+
+        asl ZP_POLYOBJ_ENERGY   ;?
         sec 
-        ror $28
+        ror ZP_POLYOBJ_ENERGY   ;?
+
         ldx $a5
         jsr _a7a6
         
-_2079:
-        jsr _a2a0
-        ldy # $24
-_207e:
-        lda ZP_POLYOBJ, y
+@skip:  jsr _a2a0                                                       ;$2079
+
+        ; copy the zero-page PolyObject back to its storage
+
+        ldy # .sizeof(PolyObject) - 1
+:       lda ZP_POLYOBJ, y                                               ;$207E
         sta [ZP_POLYOBJ_ADDR], y
         dey 
-        bpl _207e
-        lda $28
+        bpl :-
+
+        lda ZP_POLYOBJ_ENERGY
         and # %10100000
         jsr _87b1
         bne _20e0
+
         lda ZP_POLYOBJ_XPOS_pt1 ;=$09
         ora ZP_POLYOBJ_YPOS_pt1 ;=$0C
         ora ZP_POLYOBJ_ZPOS_pt1 ;=$0F
         bmi _20e0
+
         ldx $a5
         bmi _20e0
+        
         cpx # $02
         beq _20e3
+        
         and # %11000000
         bne _20e0
+        
         cpx # $01
         beq _20e0
         lda $04c2
@@ -694,9 +709,9 @@ _20c5:
         jsr _6a00
         ldy # $4e
         bcs _2110
-        ldy $04ef
-        adc $04b0, y
-        sta $04b0, y
+        ldy $04ef               ; item index?
+        adc $04b0, y            ; cargo qty?
+        sta $04b0, y            ; cargo qty?
         tya 
         adc # $d0
         jsr _900d
@@ -816,6 +831,7 @@ _2192:
         jsr _234c
         ldy # $05
         jsr _234c
+
         ldx $a5
         jsr _a7a6
 _21a1:
@@ -3745,7 +3761,7 @@ _318a:
         lda # $00
         ldx # $10
 _319b:
-        sta $04b0, x
+        sta $04b0, x            ; cargo qty?
         dex 
         bpl _319b
         sta PLAYER_LEGAL

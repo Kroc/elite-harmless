@@ -59,6 +59,7 @@ ZP_TEMP_ADDR1_HI        = $08
         speed           .byte                                           ;+$1D
         acceleration    .byte                                           ;+$1E
         energy          .byte                                           ;+$1F
+
         roll            .byte                                           ;+$20
         pitch           .byte                                           ;+$21
 
@@ -113,6 +114,17 @@ ZP_POLYOBJ_M2x2_HI      = $23
 ZP_POLYOBJ_VERTX        = $24
 ZP_POLYOBJ_VERTX_LO     = $24
 ZP_POLYOBJ_VERTX_HI     = $25
+
+ZP_POLYOBJ_SPEED        = $26
+ZP_POLYOBJ_ACCEL        = $27   ; acceleration
+ZP_POLYOBJ_ENERGY       = $28
+
+ZP_POLYOBJ_ROLL         = $29
+ZP_POLYOBJ_PITCH        = $2a
+
+ZP_POLYOBJ_AI_ATK       = $2b
+ZP_POLYOBJ_AI_BHVR      = $2c
+ZP_POLYOBJ_AI_STATE     = $2d
 
 ;-------------------------------------------------------------------------------
 
