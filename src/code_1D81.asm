@@ -706,9 +706,11 @@ _20e0:
         ;-----------------------------------------------------------------------
 
 _20e3:
-        lda $f949
+        ;(last byte of `POLYOBJ_01`?)
+        lda POLYOBJ_01 + PolyObject::ai_state   ;=$F949
         and # %00000100
         bne _2107
+
         lda ZP_POLYOBJ_M0x2_HI
         cmp # $d6
         bcc _2107
@@ -4376,10 +4378,11 @@ _357a:
 ;===============================================================================
 
 _357b:
-        lda #< $f925
+        lda #< POLYOBJ_01       ;=$F925
         sta $5b
-        lda #> $f925
+        lda #> POLYOBJ_01       ;=$F925
 _3581:  sta $5c
+
         ldy # $02
         jsr _358f
 
@@ -4415,17 +4418,17 @@ _358f:
 ;===============================================================================
 
 _35b3:
-        ldx $f925, y
+        ldx POLYOBJ_01 + PolyObject::xpos + 0, y        ;=$F925
         stx $9a
         lda VAR_X
         jsr _3aa8
-        ldx $f927, y
+        ldx POLYOBJ_01 + PolyObject::xpos + 2, y        ;=$F927
         stx $9a
         lda VAR_Y
         jsr _3ace
         sta $9c
         stx $9b
-        ldx $f929, y
+        ldx POLYOBJ_01 + PolyObject::ypos + 1, y        ;=$F929
         stx $9a
         lda $6d
         jmp _3ace
@@ -4449,13 +4452,13 @@ _35d5:
 _35e8:
         jsr _35eb
 _35eb:
-        lda $f92f
+        lda POLYOBJ_01 + PolyObject::m0x0 + 1   ;=$F92F
         ldx # $00
         jsr _3600
-        lda $f931
+        lda POLYOBJ_01 + PolyObject::m0x1 + 1   ;=$F931
         ldx # $03
         jsr _3600
-        lda $f933
+        lda POLYOBJ_01 + PolyObject::m0x2 + 1   ;=$F933
         ldx # $06
 _3600:
         asl 
@@ -4631,9 +4634,10 @@ _36f7:
         ;-----------------------------------------------------------------------
 
 _36f8:
-        lda $f949
+        ; last byte of `POLYOBJ_01`?
+        lda POLYOBJ_01 + PolyObject::ai_state   ;=$F949
         ora # %00000100
-        sta $f949
+        sta POLYOBJ_01 + PolyObject::ai_state   ;=$F949
         rts 
 
 _3701:

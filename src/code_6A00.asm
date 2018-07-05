@@ -3225,15 +3225,19 @@ _7b93:
         inx 
         rts 
 
-;===============================================================================
 
 _7b9b:
-        ldx # $08
-_7b9d:
-        lda $f925, x            ;?
-        sta $35, x
+        ;=======================================================================
+        ; copy the X/Y/Z-position of `POLYOBJ_01` to the zero page
+        ;
+        ldx # (.sizeof(PolyObject::xpos) + .sizeof(PolyObject::ypos) + .sizeof(PolyObject::zpos) - 1)
+
+.import POLYOBJ_01
+:       lda POLYOBJ_01, x       ;=$F925..                               ;$7B9D
+        sta ZP_POLYOBJ01, x     ;=$35..
         dex 
-        bpl _7b9d
+        bpl :-
+
         jmp _8c8a
 
 ;===============================================================================
@@ -5949,8 +5953,10 @@ _8c7b:
 .export _8c7b
         ldx # $00
         jsr _7c11
+
         ldx # $03
         jsr _7c11
+
         ldx # $06
         jsr _7c11
 _8c8a:
@@ -6239,12 +6245,15 @@ _8e52:
         sta $9c
         sta $9b
         sta ZP_VAR_P1
+        
         lda POLYOBJ_00 + PolyObject::zpos + 2   ;=$F908
         jsr _3ad1
         sta POLYOBJ_00 + PolyObject::zpos + 2   ;=$F908
-        lda $f92d
+
+        lda POLYOBJ_01 + PolyObject::zpos + 2   ;=$F92D
         jsr _3ad1
-        sta $f92d
+        sta POLYOBJ_01 + PolyObject::zpos + 2   ;=$F92D
+
         lda # $01
         sta $a0
         sta $a3                 ; move counter?

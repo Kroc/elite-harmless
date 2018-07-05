@@ -61,9 +61,9 @@ ZP_TEMP_ADDR_HI         = $08
         pitch           .byte                                           ;+$21
 
         ; A.I. state
-        attack          .byte                                           ;+$22
-        behaviour       .byte                                           ;+$23
-        state           .byte                                           ;+$24
+        ai_attack       .byte                                           ;+$22
+        ai_behaviour    .byte                                           ;+$23
+        ai_state        .byte                                           ;+$24
 .endstruct
 
 ZP_POLYOBJ              = $09
@@ -134,6 +134,23 @@ ZP_VAR_P3               = $30
 ZP_CURSOR_COL           = $31
 ZP_CURSOR_ROW           = $33
 ;                       = $34   ; case switch for flight strings?
+
+;-------------------------------------------------------------------------------
+
+; the X/Y/Z-position of `POLYOBJ_01` are copied here
+ZP_POLYOBJ01            = $35
+ZP_POLYOBJ01_XPOS       = $35
+ZP_POLYOBJ01_XPOS_pt1   = $35
+ZP_POLYOBJ01_XPOS_pt2   = $36
+ZP_POLYOBJ01_XPOS_pt3   = $37
+ZP_POLYOBJ01_YPOS       = $38
+ZP_POLYOBJ01_YPOS_pt1   = $38
+ZP_POLYOBJ01_YPOS_pt2   = $39
+ZP_POLYOBJ01_YPOS_pt3   = $3a
+ZP_POLYOBJ01_ZPOS       = $3b
+ZP_POLYOBJ01_ZPOS_pt1   = $3b
+ZP_POLYOBJ01_ZPOS_pt2   = $3c
+ZP_POLYOBJ01_ZPOS_pt3   = $3d
 
 ;-------------------------------------------------------------------------------
 
