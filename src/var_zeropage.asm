@@ -152,6 +152,53 @@ ZP_POLYOBJ01_ZPOS_pt1   = $3b
 ZP_POLYOBJ01_ZPOS_pt2   = $3c
 ZP_POLYOBJ01_ZPOS_pt3   = $3d
 
+; only ever used once to check for non-zero X/Y/Z-position
+ZP_POLYOBJ01_POS        = $3e
+
+;-------------------------------------------------------------------------------
+
+;                       = $3f   ; a flag, but never gets set; see `_3571`
+
+;                       = $40   ; never used?
+;                       = $41   ; never used?
+;                       = $42   ; never used?
+
+;                       = $43   ; something to do with viewport height
+
+;-------------------------------------------------------------------------------
+
+; a working copy of the zero-page poly object rotation matrix:
+
+ZP_TEMPOBJ_M2x0         = $45
+ZP_TEMPOBJ_M2x0_LO      = $45
+ZP_TEMPOBJ_M2x0_HI      = $46
+ZP_TEMPOBJ_M2x1         = $47
+ZP_TEMPOBJ_M2x1_LO      = $47
+ZP_TEMPOBJ_M2x1_HI      = $48
+ZP_TEMPOBJ_M2x2         = $49
+ZP_TEMPOBJ_M2x2_LO      = $49
+ZP_TEMPOBJ_M2x2_HI      = $4a
+
+ZP_TEMPOBJ_M1x0         = $4b
+ZP_TEMPOBJ_M1x0_LO      = $4b
+ZP_TEMPOBJ_M1x0_HI      = $4c
+ZP_TEMPOBJ_M1x1         = $4d   ;TODO: not referenced directly?
+ZP_TEMPOBJ_M1x1_LO      = $4d   ; "
+ZP_TEMPOBJ_M1x1_HI      = $4e   ; "
+ZP_TEMPOBJ_M1x2         = $4f
+ZP_TEMPOBJ_M1x2_LO      = $4f
+ZP_TEMPOBJ_M1x2_HI      = $50
+
+ZP_TEMPOBJ_M0x0         = $51
+ZP_TEMPOBJ_M0x0_LO      = $51
+ZP_TEMPOBJ_M0x0_HI      = $52
+ZP_TEMPOBJ_M0x1         = $53
+ZP_TEMPOBJ_M0x1_LO      = $53
+ZP_TEMPOBJ_M0x1_HI      = $54
+ZP_TEMPOBJ_M0x2         = $55   ;TODO: not referenced directly?
+ZP_TEMPOBJ_M0x2_LO      = $55   ; "
+ZP_TEMPOBJ_M0x2_HI      = $56   ; "
+
 ;-------------------------------------------------------------------------------
 
 VAR_X                   = $6b   ; a common "X" variable

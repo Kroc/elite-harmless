@@ -2158,9 +2158,11 @@ _2977:
         txa 
         adc $43
         sta $8b
+
         lda $44
         adc $bb
         sta $8c
+        
         lda $a9
         beq _2998
         inc $a9
@@ -4367,8 +4369,9 @@ _3556:
         bcs _3524
         jsr _350a
 _3571:
-        lda $3f
+        lda $3f                 ; only use, ever. does not get set!
         bne _357a
+
         asl $2d
         sec 
         ror $2d
@@ -4763,8 +4766,10 @@ _37b2:
 .export _37b2
         ldx # $80
         stx ZP_POLYOBJ01_XPOS_pt1
-        ldx # $48
+
+        ldx # $48               ;TODO: half viewport height?
         stx $43
+        
         ldx # $00
         stx $ad
         stx ZP_POLYOBJ01_XPOS_pt2
