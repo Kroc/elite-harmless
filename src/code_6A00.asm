@@ -1247,7 +1247,7 @@ _705c:                                                                  ;$705c
         cpy # $03
         bcc _708d
         lda # $ff
-        sta $0009, y            ;16-bit reference?
+        sta ZP_POLYOBJ_XPOS_pt1, y
         lda # $80
         sta $34
         jsr _76e9
@@ -2637,7 +2637,7 @@ print_canned_message:                                                   ;$7813
 
 @skip_message:                                                           ;$7821
 
-        lda [$5b], y            ; read a code from the compressed text
+        lda [ZP_TEMP_ADDR2], y  ; read a code from the compressed text
         beq :+                  ; if zero terminator, end string
         iny                     ; next character 
         bne @skip_message       ; loop if not at 256 chars
@@ -2651,7 +2651,7 @@ print_canned_message:                                                   ;$7813
         bne @skip_message       ; keep looping if we haven't reached
                                 ; the desired message index yet
 
-print_flight_token_string:                                                     ;$7834
+print_flight_token_string:                                              ;$7834
         ;-----------------------------------------------------------------------
         ; remember the current index
         ; (this routine can call recursively)
@@ -2664,9 +2664,9 @@ print_flight_token_string:                                                     ;
         ; (see "text_flight.asm")
 .import TXT_FLIGHT_XOR:direct
 
-        lda [$5b], y            ; read a token
+        lda [ZP_TEMP_ADDR2], y  ; read a token
         eor # TXT_FLIGHT_XOR    ; 'descramble' token
-        jsr print_flight_token         ; process it
+        jsr print_flight_token  ; process it
 
         ; restore the previous page
         pla 
@@ -2681,7 +2681,7 @@ print_flight_token_string:                                                     ;
 
         ; is this the end of the string?
         ; (check for a $00 token)
-:       lda [$5b], y                                                    ;$784A
+:       lda [ZP_TEMP_ADDR2], y                                          ;$784A
         bne print_flight_token_string
 
 _784e:  rts                                                             ;$784E 
@@ -3137,17 +3137,17 @@ _7b1c:
 
         ldy # $1f
 _7b2a:
-        lda [$59], y
-        sta $0009, y
+        lda [ZP_POLYOBJ_ADDR], y
+        sta ZP_POLYOBJ_XPOS_pt1, y
         dey 
         bpl _7b2a
         stx $9d
         jsr _b410
         ldx $9d
         ldy # $1f
-        lda [$59], y
+        lda [ZP_POLYOBJ_ADDR], y
         and # %10100111
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
 _7b41:
         inx 
         bne _7b1c
@@ -3278,7 +3278,7 @@ _7bd2:
         sta $bb
         ldx # $00
         ldy # $08
-        lda [$59], y
+        lda [ZP_POLYOBJ_ADDR], y
         bmi _7bee
 
         lda PLAYER_SHIELD_FRONT
@@ -3451,7 +3451,7 @@ _7cec:
         ldy # $24
 _7cf9:
         lda ZP_POLYOBJ_XPOS_pt1, y
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         dey 
         bpl _7cf9
         sec 
@@ -4466,10 +4466,10 @@ _832c:
         lda [ZP_HULL_ADDR], y
         ldy # $21
         clc 
-        adc [$59], y
+        adc [ZP_POLYOBJ_ADDR], y
         sta ZP_VAR_P1
         iny 
-        lda [$59], y
+        lda [ZP_POLYOBJ_ADDR], y
         adc # $00
         sta ZP_VAR_P2
 _8343:
@@ -4508,24 +4508,24 @@ _834f:
 
         ldy # $24
         lda [ZP_TEMP_ADDR1], y
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR1], y
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR1], y
         sta $78
         lda ZP_VAR_P2
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR1], y
         sta $77
         lda ZP_VAR_P1
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         dey 
 _8399:
         lda [ZP_TEMP_ADDR1], y
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         dey 
         bpl _8399
         lda ZP_TEMP_ADDR1_LO
@@ -5273,7 +5273,7 @@ _8835:
         jsr get_random_number
         and # %10000000
         ldy # $1f
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         lda $0456
         beq _87fd
         jsr _8ed5
@@ -5633,7 +5633,7 @@ _8a6a:
         bcc _8a8d
         cmp _8ab4
         bcs _8a8d
-        sta $000e, y
+        sta ZP_POLYOBJ_YPOS_pt3, y      ;?
         iny 
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
@@ -5643,7 +5643,7 @@ _8a8f:
         jsr paint_char
         bcc _8a6a
 _8a94:
-        sta $000e, y
+        sta ZP_POLYOBJ_YPOS_pt3, y      ;?
 
         lda # $10
         sta $050c
@@ -7500,9 +7500,9 @@ _9a86:
         sta $28
         lda # $00
         ldy # $1c
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         ldy # $1e
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         jsr _9ad8
         ldy # $01
         lda # $12
@@ -7703,7 +7703,7 @@ _9baa:
         sta ZP_TEMP_ADDR2_HI
         ldy # $00
 _9bf2:
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $72
         and # %00011111
         cmp $ad
@@ -7726,13 +7726,13 @@ _9c0b:
         asl 
         sta $76
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $71
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $73
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $75
         ldx $9f
         cpx # $04
@@ -7896,22 +7896,22 @@ _9cfe:
         sty $aa
 _9d45:
         sty $9f
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_X
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_X2
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $6f
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $bb
         and # %00011111
         cmp $ad
         bcc _9d8e
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_P1
         and # %00001111
         tax 
@@ -7926,7 +7926,7 @@ _9d45:
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_P1
         and # %00001111
         tax 
@@ -8278,11 +8278,11 @@ _9f9f:
         sta ZP_TEMP_VAR
         ldy $9f
 _9fb8:
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         cmp $ad
         bcc _9fd6
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         iny 
         sta ZP_VAR_P1
         and # %00001111
@@ -8301,10 +8301,10 @@ _9fd6:
         jmp _a15b
 
 _9fd9:
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         tax 
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $9a
         lda $0101, x
         sta ZP_VAR_Y
@@ -9078,11 +9078,11 @@ _a4a1:
         ldx ZP_POLYOBJ_XPOS_pt1, y
         stx ZP_VAR_P1
         
-        lda $000a, y
+        lda ZP_POLYOBJ_XPOS_pt2, y
         eor # %10000000
         jsr _3ace
         
-        sta $000c, y
+        sta ZP_POLYOBJ_YPOS_pt1, y
         stx ZP_POLYOBJ_XPOS_pt3, y
         stx ZP_VAR_P1
         
@@ -9092,9 +9092,9 @@ _a4a1:
         ldx ZP_POLYOBJ_XPOS_pt2, y
         stx $9c
         
-        lda $000c, y
+        lda ZP_POLYOBJ_YPOS_pt1, y
         jsr _3ace
-        sta $000a, y
+        sta ZP_POLYOBJ_XPOS_pt2, y
         stx ZP_POLYOBJ_XPOS_pt1, y
         stx ZP_VAR_P1
         
@@ -9110,10 +9110,10 @@ _a4a1:
         ldx ZP_POLYOBJ_YPOS_pt2, y
         stx ZP_VAR_P1
         
-        lda $000e, y
+        lda ZP_POLYOBJ_YPOS_pt3, y
         eor # %10000000
         jsr _3ace
-        sta $000c, y
+        sta ZP_POLYOBJ_YPOS_pt1, y
         stx ZP_POLYOBJ_XPOS_pt3, y
         stx ZP_VAR_P1
         
@@ -9123,9 +9123,9 @@ _a4a1:
         ldx ZP_POLYOBJ_YPOS_pt3, y
         stx $9c
         
-        lda $000c, y
+        lda ZP_POLYOBJ_YPOS_pt1, y
         jsr _3ace
-        sta $000e, y
+        sta ZP_POLYOBJ_YPOS_pt3, y
         stx ZP_POLYOBJ_YPOS_pt2, y
         
         rts 
@@ -9309,7 +9309,7 @@ _a604:
 _a60e:
         stx ZP_TEMP_ADDR2_HI
         sty $bb
-        adc [$5b], y
+        adc [ZP_TEMP_ADDR2], y
         eor $bb
         sbc ZP_TEMP_ADDR2_HI
         dey 
@@ -9386,16 +9386,16 @@ _a65f:
         jsr _a693
         ldy # $15
 _a693:
-        lda $0009, y
+        lda ZP_POLYOBJ_XPOS_pt1, y
         ldx ZP_POLYOBJ_YPOS_pt2, y
-        sta $000d, y
+        sta ZP_POLYOBJ_YPOS_pt2, y
         stx ZP_POLYOBJ_XPOS_pt1, y
-        lda $000a, y
+        lda ZP_POLYOBJ_XPOS_pt2, y
         eor $b0
         tax 
-        lda $000e, y
+        lda ZP_POLYOBJ_YPOS_pt3, y
         eor $b1
-        sta $000a, y
+        sta ZP_POLYOBJ_XPOS_pt2, y
         stx ZP_POLYOBJ_YPOS_pt3, y
 _a6ad:
         rts 
@@ -11627,9 +11627,9 @@ _b343:
         jsr _3e87               ; get address of ship-slot
         
         ldy # $1f
-        lda [$59], y
+        lda [ZP_POLYOBJ_ADDR], y
         and # %11101111
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
 _b355:
         inx 
         bne _b343
@@ -11750,7 +11750,7 @@ _b3c0:
 _b3c3:
         ldy # $00
 _b3c5:
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta [ZP_TEMP_ADDR1], y
         dey 
         bne _b3c5

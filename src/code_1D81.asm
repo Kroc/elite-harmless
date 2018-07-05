@@ -617,8 +617,8 @@ _2039:
         
         ldy # $24
 _2040:
-        lda [$59], y
-        sta $0009, y
+        lda [ZP_POLYOBJ_ADDR], y
+        sta ZP_POLYOBJ, y
         dey 
         bpl _2040
 
@@ -653,8 +653,8 @@ _2079:
         jsr _a2a0
         ldy # $24
 _207e:
-        lda $0009, y
-        sta [$59], y
+        lda ZP_POLYOBJ, y
+        sta [ZP_POLYOBJ_ADDR], y
         dey 
         bpl _207e
         lda $28
@@ -828,7 +828,7 @@ _21a8:
 _21ab:
         ldy # $23
         lda $2c
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         lda $2d
         bmi _21e2
         lda $28
@@ -865,7 +865,7 @@ _21e5:
 _21ee:
         ldy # $1f
         lda $28
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         ldx $9d
         inx 
         jmp _202f
@@ -1201,7 +1201,7 @@ _23a0:                                                                  ;$23A0
         ;
 .import TXT_DOCKED_XOR:direct
 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
         bne :+                  ; keep going if not a message terminator ($00)
         dex                     ; message has ended, decrement index
@@ -1228,7 +1228,7 @@ _23a0:                                                                  ;$23A0
         ; $81-$D6 = ?
         ; $D7-$FF = some pre-defined character pairs ("text_pairs.asm")
         ;
-        lda [$5b], y            ; read a token
+        lda [ZP_TEMP_ADDR2], y  ; read a token
         eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
         beq @rts                ; has message ended? (token $00)
 
@@ -1752,7 +1752,7 @@ _27ab:  bne _27ab               ; infinite loop, why?
         lda ZP_POLYOBJ01_XPOS_pt1, x
 _27b6:  bne _27b6               ; infinite loop, why?
         iny 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_P1
         and # %00001111
         tax 
@@ -2532,10 +2532,10 @@ _2c1a:
         sta DUST_Y, y
         bne _2bed
 _2c2d:
-        lda $0009, y
+        lda ZP_POLYOBJ_XPOS_pt1, y
         asl 
         sta $78
-        lda $000a, y
+        lda ZP_POLYOBJ_XPOS_pt2, y
         rol 
         sta $79
         lda # $00
@@ -2812,12 +2812,12 @@ _2dc5:
         lda ZP_POLYOBJ_XPOS_pt2, x
         sbc # $00
         sta $9c
-        lda $0009, y
+        lda ZP_POLYOBJ_XPOS_pt1, y
         sta ZP_VAR_P1
-        lda $000a, y
+        lda ZP_POLYOBJ_XPOS_pt2, y
         and # %10000000
         sta $bb
-        lda $000a, y
+        lda ZP_POLYOBJ_XPOS_pt2, y
         and # %01111111
         lsr 
         ror ZP_VAR_P1
@@ -2834,15 +2834,15 @@ _2dc5:
         sta $78
         stx $77
         ldx $9a
-        lda $000a, y
+        lda ZP_POLYOBJ_XPOS_pt2, y
         and # %01111111
         lsr 
         sta $bb
-        lda $0009, y
+        lda ZP_POLYOBJ_XPOS_pt1, y
         sec 
         sbc $bb
         sta $9b
-        lda $000a, y
+        lda ZP_POLYOBJ_XPOS_pt2, y
         sbc # $00
         sta $9c
         lda ZP_POLYOBJ_XPOS_pt1, x
@@ -2865,7 +2865,7 @@ _2dc5:
         eor $b1
         stx $9a
         jsr _3ad1
-        sta $000a, y
+        sta ZP_POLYOBJ_XPOS_pt2, y
         stx ZP_POLYOBJ_XPOS_pt1, y
         ldx $9a
         lda $77
@@ -3877,12 +3877,12 @@ _3244:
         cmp # $82
         beq _321e
         ldy # $1f
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         ; this might be a `ldy # $32`, but I don't see any jump into it
         bit _32a0+1             ;!?
         bne _327d
         ora # %10000000
-        sta [$5b], y
+        sta [ZP_TEMP_ADDR2], y
 _327d:
         lda ZP_POLYOBJ_XPOS_pt1 ;=$09
         ora ZP_POLYOBJ_YPOS_pt1 ;=$0C
@@ -3913,7 +3913,7 @@ _3299:
         bcs _32a7
 _32a0:
         ldy # $20
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         lsr 
         bcs _32aa
 _32a7:
@@ -4107,7 +4107,7 @@ _33a8:
         and # %11110000
         sta $2d
         ldy # $24
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         lda # $00
         sta $29
         jmp _3706
@@ -4397,16 +4397,16 @@ _3581:  sta ZP_TEMP_ADDR2_HI
         
         ldy # $08
 _358f:
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         eor # %10000000
         sta $7a
 
         dey 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $79
         
         dey 
-        lda [$5b], y
+        lda [ZP_TEMP_ADDR2], y
         sta $78
         
         sty $99
@@ -4611,29 +4611,29 @@ _36c5:
         cmp # $02
         beq _36f8
         ldy # $24
-        lda [$59], y
+        lda [ZP_POLYOBJ_ADDR], y
         and # %00100000
         beq _36d4
         jsr _36f8
 _36d4:
         ldy # $20
-        lda [$59], y
+        lda [ZP_POLYOBJ_ADDR], y
         beq _367d
         ora # %10000000
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         ldy # $1c
         lda # $02
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         asl 
         ldy # $1e
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
         lda $a5
         cmp # $0b
         bcc _36f7
         ldy # $24
-        lda [$59], y
+        lda [ZP_POLYOBJ_ADDR], y
         ora # %00000100
-        sta [$59], y
+        sta [ZP_POLYOBJ_ADDR], y
 _36f7:
         rts 
 
@@ -4670,10 +4670,10 @@ _370a:
         pha 
         ldy # $24
 _371c:
-        lda $0009, y
+        lda ZP_POLYOBJ_XPOS_pt1, y
         sta $0100, y            ; the stack!?
-        lda [$59], y
-        sta $0009, y
+        lda [ZP_POLYOBJ_ADDR], y
+        sta ZP_POLYOBJ_XPOS_pt1, y
         dey 
         bpl _371c
         lda $a5

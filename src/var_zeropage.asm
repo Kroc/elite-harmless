@@ -257,6 +257,9 @@ ZP_VAR_Y                = $6c   ; a common "Y" variable
 ZP_VAR_X2               = $6d   ; a secondary "X" variable
 ZP_VAR_Y2               = $6e   ; a secondary "Y" variable
 
+;                       = $6f   ; `ZP_VAR_Z`?
+;                       = $70   ; `ZP_VAR_Y3` / `ZP_VAR_Z2`?
+
 ;-------------------------------------------------------------------------------
 
 
