@@ -15,39 +15,39 @@
 _d000:
 .export _d000
         
-        .addr   _d0a5           ; missile                               ;$D000
-        .addr   _d1a3           ; space station (coreolis)
-        .addr   _d2bf           ; escape capsule
-        .addr   _d313           ; plate / alloys
-        .addr   _d353           ; cargo cannister
-        .addr   _d3fb           ; boulder?
-        .addr   _d49d           ; asteroid?
-        .addr   _d573           ; splinter / rock
-        .addr   _d5af           ; shuttle                               ;$D010
-        .addr   _d6e1           ; transporter
-        .addr   _d8c3           ; cobra mk-III (trader?)
-        .addr   _da4b           ; python (trader?)
-        .addr   _db3d           ; boa?
-        .addr   _dc33           ; anaconda?
-        .addr   _dd35           ; asteroid?
-        .addr   _de0b           ; viper
-        .addr   _dee5           ; sidewinder                            ;$D020
-        .addr   _df8d           ; mamba
-        .addr   _e0bb           ; krait
-        .addr   _e1a1           ; adder
-        .addr   _e2d1           ; gecko
-        .addr   _e395           ; cobra mk-I
-        .addr   _e45b           ; worm
-        .addr   _e50b           ; combra mk-III (lone wolf?)
-        .addr   _e693           ; asp mk-II                             ;$D030
-        .addr   _e7bd           ; python (lone wolf?)
-        .addr   _e8af           ; fer-de-lance
-        .addr   _e9c9           ; moray
-        .addr   _eaa1           ; thargoid
-        .addr   _ebbd           ; thargon
-        .addr   _ec29           ; constrictor
-        .addr   _ed2b           ; cougar
-        .addr   _ee2d           ; space station (dodecahedral)          ;$D040
+        .addr   _d0a5           ; $01: missile                          ;$D000
+        .addr   _d1a3           ; $02: space station (coreolis)
+        .addr   _d2bf           ; $03: escape capsule
+        .addr   _d313           ; $04: plate / alloys
+        .addr   _d353           ; $05: cargo cannister
+        .addr   _d3fb           ; $06: boulder?
+        .addr   _d49d           ; $07: asteroid?
+        .addr   _d573           ; $08: splinter / rock
+        .addr   _d5af           ; $09: shuttle                          ;$D010
+        .addr   _d6e1           ; $0A: transporter
+        .addr   _d8c3           ; $0B: cobra mk-III (trader?)
+        .addr   _da4b           ; $0C: python (trader?)
+        .addr   _db3d           ; $0D: boa?
+        .addr   _dc33           ; $0E: anaconda?
+        .addr   _dd35           ; $0F: asteroid?
+        .addr   _de0b           ; $10: viper
+        .addr   _dee5           ; $11: sidewinder                       ;$D020
+        .addr   _df8d           ; $12: mamba
+        .addr   _e0bb           ; $13: krait
+        .addr   _e1a1           ; $14: adder
+        .addr   _e2d1           ; $15: gecko
+        .addr   _e395           ; $16: cobra mk-I
+        .addr   _e45b           ; $17: worm
+        .addr   _e50b           ; $18: combra mk-III (lone wolf?)
+        .addr   _e693           ; $19: asp mk-II                        ;$D030
+        .addr   _e7bd           ; $1A: python (lone wolf?)
+        .addr   _e8af           ; $1B: fer-de-lance
+        .addr   _e9c9           ; $1C: moray
+        .addr   _eaa1           ; $1D: thargoid
+        .addr   _ebbd           ; $1E: thargon
+        .addr   _ec29           ; $1F: constrictor
+        .addr   _ed2b           ; $20: cougar
+        .addr   _ee2d           ; $21: space station (dodecahedral)     ;$D040
 
 ;===============================================================================
 

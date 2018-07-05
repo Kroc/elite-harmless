@@ -75,6 +75,7 @@
 .import _8d28:absolute
 .import _8d2a:absolute
 .import _8d2e:absolute
+.import _8d35:absolute
 .import _8d36:absolute
 .import _8d38:absolute
 .import _8d3e:absolute
@@ -169,58 +170,57 @@ _1d81:                                                                  ;$1D81
        .bnz :+                  ; mission is underway/complete, ignore it
         
         lda PLAYER_KILLS
-        beq _1e00               ; ignore mission if kills less than 256
+        beq @skip               ; ignore mission if kills less than 256
 
         ; is the player in the first galaxy?
 
         lda PLAYER_GALAXY       ; if bit 0 is set, shifting right will cause
         lsr                     ; it to fall off the end, leaving zero;
-       .bnz _1e00               ; if not first galaxy, ignore mission
+       .bnz @skip               ; if not first galaxy, ignore mission
         
         ; start the Constrictor mission
         jmp _3dff
 
         ; is the mission complete? (both bits set)
 :       cmp # missions::constrictor                                     ;$1DB5
-       .bnz _1dbc
+       .bnz :+
 
         ; you've docked at a station, set up the 'tip' that will display in
         ; the planet info for where to find the Constrictor next
         jmp _3daf
 
-_1dbc:  ; check eligibility for Thargoid Blueprints mission             ;$1DBC
+:       ; check eligibility for Thargoid Blueprints mission             ;$1DBC
         ;-----------------------------------------------------------------------
         ; once you've met the criteria for this mission (3rd galaxy, have
-        ; completed the first mission, >=1280 kills) you're presented with
-        ; a message to fly to Ceerdi. Once there, you're given some
+        ; completed the Constrictor mission, >=1280 kills) you're presented
+        ; with a message to fly to Ceerdi. Once there, you're given some
         ; top-secret blueprints which you have to get to Birera
         
         ; is the player in the third galaxy?
         lda PLAYER_GALAXY
         cmp # 2
-        bne _1e00               ; no; ignore mission
+        bne @skip               ; no; ignore mission
 
         ; player is in the third galaxy; has the player completed the
         ; Constrictor mission already? (and hasn't started blueprints mission)
         lda MISSION_FLAGS
         and # missions::constrictor | missions::blueprints
         cmp # missions::constrictor_complete
-        bne _1dd6
+        bne :+
         
         ; has the player at least 1280 kills? (halfway to Deadly)
         lda PLAYER_KILLS
         cmp #> 1280
-       .blt _1e00               ; no; skip ahead if not enough
+       .blt @skip               ; no; skip ahead if not enough
 
         ; 'start' the mission: the player has to fly
         ; to Ceerdi to actually get the blueprints
         jmp mission_blueprints_begin
 
-_1dd6:                                                                  ;$1DD6
-        ; has the player started the blueprints mission?
+:       ; has the player started the blueprints mission?                ;$1DD6
         ; (and by association, completed the Constrictor mission)
         cmp # missions::constrictor_complete | missions::blueprints_begin
-        bne _1deb
+        bne :+
 
         ; is the player at Ceerdi?
         ;SPEED: couldn't we use the planet index number
@@ -228,17 +228,16 @@ _1dd6:                                                                  ;$1DD6
 
         lda PSYSTEM_POS_X
         cmp # 215
-        bne _1e00
+        bne @skip
         
         lda PSYSTEM_POS_Y
         cmp # 84
-        bne _1e00
+        bne @skip
         
         jmp mission_blueprints_ceerdi
-
-_1deb:                                                                  ;$1DEB
-        cmp # %00001010
-        bne _1e00
+  
+:       cmp # %00001010                                                 ;$1DEB
+        bne @skip
 
         ; is the player at Birera?
         ;SPEED: couldn't we use the planet index number
@@ -246,38 +245,35 @@ _1deb:                                                                  ;$1DEB
 
         lda PSYSTEM_POS_X
         cmp # 63
-        bne _1e00
+        bne @skip
         
         lda PSYSTEM_POS_Y
         cmp # 72
-        bne _1e00
+        bne @skip
         
         jmp mission_blueprints_birera
 
 .endif
 
-_1e00:                                                                  ;$1E00
-        ;=======================================================================
-        ; check for Trumbles™ mission
-        ;
+@skip:  ; check for Trumbles™ mission                                   ;$1E00
+        ;-----------------------------------------------------------------------
 .ifndef OPTION_NOTRUMBLES
         
         ; at least 6'553.5 cash?
         lda PLAYER_CASH_pt3
-        cmp # $c4               ; not sure how this works?
-       .blt _1e11
+        cmp # $c4               ;TODO: not sure how this works out as 6'553.5?
+       .blt :+
 
         ; has the mission already been done?
         lda MISSION_FLAGS
         and # missions::trumbles
-        bne _1e11
+        bne :+
 
         ; initiate Trumbles™ mission
         jmp mission_trumbles
 .endif
 
-_1e11:                                                                  ;$1E11
-        jmp _88e7
+:       jmp _88e7                                                       ;$1E11
 
 ;===============================================================================
 
@@ -291,6 +287,7 @@ _1e14:                                                                  ;$1E14
         rts 
 
 ;===============================================================================
+; Trumble™ A.I. data?
 
 _1e21:                                                                  ;$1E21
         .byte   $00, $01, $ff, $00
@@ -364,15 +361,18 @@ _1e6a:  lda _1e29, y                                                    ;$1E6A
 _1e94:
         and # %00000001
         beq _1ea4
+
         lda $bb
         cmp # $50
         lda # $01
         bcc _1ea4
+        
         lda # $00
         sta $bb
 _1ea4:
         sta $0531, y
         beq _1eb3
+
         lda _1e2a, y
         ora VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         sei 
@@ -387,7 +387,7 @@ _1eb3:
         
         jmp _1ece
 
-_1ec1:
+_1ec1:                                                                  ;$1EC1
 ;===============================================================================
 .export _1ec1
 
@@ -400,9 +400,8 @@ _1ec1:
         
         jmp _1e35
 
+_1ece:                                                                  ;$1ECE
         ;-----------------------------------------------------------------------
-
-_1ece:
         ldx $048d
         jsr _3c58
         jsr _3c58
@@ -539,7 +538,7 @@ _1fc2:
         lda _8d38
         and $04c5
         beq _1fd5
-        eor $8d35
+        eor _8d35
         beq _1fd5
         sta $0480
         jsr _9204
@@ -618,8 +617,10 @@ _2040:
         sta $0009, y
         dey 
         bpl _2040
+
         lda $a5
         bmi _2079
+        
         asl 
         tay 
         lda _d000 - 2, y        ; HULL_TABLE?
@@ -643,6 +644,7 @@ _2040:
         ror $28
         ldx $a5
         jsr _a7a6
+        
 _2079:
         jsr _a2a0
         ldy # $24
@@ -655,9 +657,9 @@ _207e:
         and # %10100000
         jsr _87b1
         bne _20e0
-        lda $09
-        ora $0c
-        ora $0f
+        lda ZP_POLYOBJ_XPOS_pt1 ;=$09
+        ora ZP_POLYOBJ_YPOS_pt1 ;=$0C
+        ora ZP_POLYOBJ_ZPOS_pt1 ;=$0F
         bmi _20e0
         ldx $a5
         bmi _20e0
@@ -668,7 +670,7 @@ _207e:
         cpx # $01
         beq _20e0
         lda $04c2
-        and $0e
+        and ZP_POLYOBJ_YPOS_pt3 ;=$0E
         bpl _2122
         cpx # $05
         beq _20c0
@@ -706,14 +708,14 @@ _20e3:
         lda $f949
         and # %00000100
         bne _2107
-        lda $17
+        lda ZP_POLYOBJ_M0x2_HI
         cmp # $d6
         bcc _2107
         jsr _8c7b
         lda $6d
         cmp # $59
         bcc _2107
-        lda $19
+        lda ZP_POLYOBJ_M1x0_HI
         and # %01111111
         cmp # $50
         bcc _2107
@@ -901,16 +903,47 @@ _2230:
         tay 
         jsr _2c50
         bne _2277
-        ldx # $1c
-_2248:
-        lda POLYOBJ_00, x       ;=$F900
-        sta $09, x
+
+        ; copy some of the PolyObject data to zeropage:
+        ;
+        ; the X/Y/Z position of the PolyObject
+        ; (these are not addresses, but they are 24-bit)
+        ;
+        ; $09-$0B:      xpos            .faraddr
+        ; $0C-$0E:      ypos            .faraddr
+        ; $0F-$11:      zpos            .faraddr
+        ;      
+        ; a 3x3 rotation matrix?
+        ;
+        ; $12-$13:      m0x0            .word
+        ; $14-$15:      m0x1            .word
+        ; $16-$17:      m0x2            .word
+        ; $18-$19:      m1x0            .word
+        ; $1A-$1B:      m1x1            .word
+        ; $1C-$1D:      m1x2            .word
+        ; $1E-$1F:      m2x0            .word
+        ; $20-$21:      m2x1            .word
+        ; $22-$23:      m2x2            .word
+        ;
+        ; a pointer to already processed vertex data
+        ;
+        ; $24-$25:      vertexData      .addr
+        
+        ; number of bytes to copy:
+        ; (up to, and including, the `vertexData` property)
+        ldx # PolyObject::vertexData + .sizeof(PolyObject::vertexData) - 1
+
+        ;?
+:       lda POLYOBJ_00, x       ;=$F900                                 ;$2248
+        sta ZP_POLYOBJ, x       ;=$09
         dex 
-        bpl _2248
+        bpl :-
+
         inx 
         ldy # $09
         jsr _2c2d
         bne _2277
+
         ldx # $03
         ldy # $0b
         jsr _2c2d
@@ -1740,16 +1773,16 @@ _27cd:  bne _27cd               ; infinite loop, why?
         asl 
         sta $70
         jsr _9a2c
-        lda $0b
+        lda ZP_POLYOBJ_XPOS_pt3 ;=$0b
         sta $6d
         eor $72
 _27e5:
         bmi _27e5               ; infinite loop, why??
         clc 
         lda $71
-        adc $09
+        adc ZP_POLYOBJ_XPOS_pt1 ;=$09
         sta VAR_X
-        lda $0a
+        lda ZP_POLYOBJ_XPOS_pt2 ;=$0A
         adc # $00
         sta VAR_Y
         jmp _9db3               ; SPEED: jump to a jump (`_9dd9`)
@@ -1758,11 +1791,11 @@ _27e5:
 
 ; unreferenced / unused?
 ;$27f7:
-        lda $09
+        lda ZP_POLYOBJ_XPOS_pt1 ;=$09
         sec 
         sbc $71
         sta VAR_X
-        lda $0a
+        lda ZP_POLYOBJ_XPOS_pt2 ;=$0a
         sbc # $00
         sta VAR_Y
 _2804:  bcs _2804               ; infinite loop, why??
@@ -1777,28 +1810,29 @@ _2814:
         lda $6d
         eor # %10000000
         sta $6d
-        lda $0e
+        lda ZP_POLYOBJ_YPOS_pt3 ;$0E
         sta $70
         eor $74
 _2820:  bmi _2820               ; infinite loop, why??
         clc 
         lda $73
-        adc $0c
+        adc ZP_POLYOBJ_YPOS_pt1 ;=$0C
         sta $6e
-        lda $0d
+        lda ZP_POLYOBJ_YPOS_pt2 ;=$0D
         adc # $00
         sta $6f
+
         jmp _9dee               ; SPEED: jump to a jump (`_9e16`)
 
 ;===============================================================================
 
 ; unreferenced / unused?
 ;$2832:
-        lda $0c
+        lda ZP_POLYOBJ_YPOS_pt1 ;=$0C
         sec 
         sbc $73
         sta $6e
-        lda $0d
+        lda ZP_POLYOBJ_YPOS_pt2 ;=$0D
         sbc # $00
         sta $6f
 _283f:  bcs _283f               ; infinite loop, why??
@@ -1817,9 +1851,9 @@ _2853:  bcc _2853               ; infinite loop, why??
 _2859:  bmi _2859               ; inifinite loop, why??
         lda $75
         clc 
-        adc $0f
+        adc ZP_POLYOBJ_ZPOS_pt1 ;=$0F
         sta $bb
-        lda $10
+        lda ZP_POLYOBJ_ZPOS_pt2 ;=$10
         adc # $00
         sta $99
         jmp _9e27               ; SPEED: jump to a jump (`_9e27`)
@@ -2502,13 +2536,13 @@ _2c2d:
         ror 
         sta $7a
         jsr _2d69
-        sta $0b, x
+        sta ZP_POLYOBJ_XPOS_pt3, x
 _2c43:
 .export _2c43
         ldy $78
-        sty $09, x
+        sty ZP_POLYOBJ_XPOS_pt1, x
         ldy $79
-        sty $0a, x
+        sty ZP_POLYOBJ_XPOS_pt2, x
         and # %01111111
         rts 
 
@@ -2707,17 +2741,17 @@ _2d69:
         sta $9c
         and # %10000000
         sta $bb
-        eor $0b, x
+        eor ZP_POLYOBJ_XPOS_pt3, x
         bmi _2d8d
         lda $78
         clc 
-        adc $09, x
+        adc ZP_POLYOBJ_XPOS_pt1, x
         sta $78
         lda $79
-        adc $0a, x
+        adc ZP_POLYOBJ_XPOS_pt2, x
         sta $79
         lda $7a
-        adc $0b, x
+        adc ZP_POLYOBJ_XPOS_pt3, x
         and # %01111111
         ora $bb
         sta $7a
@@ -2729,14 +2763,14 @@ _2d8d:
         lda $9c
         and # %01111111
         sta $9c
-        lda $09, x
+        lda ZP_POLYOBJ_XPOS_pt1, x
         sec 
         sbc $78
         sta $78
-        lda $0a, x
+        lda ZP_POLYOBJ_XPOS_pt2, x
         sbc $79
         sta $79
-        lda $0b, x
+        lda ZP_POLYOBJ_XPOS_pt3, x
         and # %01111111
         sbc $9c
         ora # %10000000
@@ -2761,15 +2795,15 @@ _2dc4:
 
 _2dc5:
 .export _2dc5
-        lda $0a, x
+        lda ZP_POLYOBJ_XPOS_pt2, x
         and # %01111111
         lsr 
         sta $bb
-        lda $09, x
+        lda ZP_POLYOBJ_XPOS_pt1, x
         sec 
         sbc $bb
         sta $9b
-        lda $0a, x
+        lda ZP_POLYOBJ_XPOS_pt2, x
         sbc # $00
         sta $9c
         lda $0009, y
@@ -2805,12 +2839,12 @@ _2dc5:
         lda $000a, y
         sbc # $00
         sta $9c
-        lda $09, x
+        lda ZP_POLYOBJ_XPOS_pt1, x
         sta $2e
-        lda $0a, x
+        lda ZP_POLYOBJ_XPOS_pt2, x
         and # %10000000
         sta $bb
-        lda $0a, x
+        lda ZP_POLYOBJ_XPOS_pt2, x
         and # %01111111
         lsr 
         ror $2e
@@ -2826,12 +2860,13 @@ _2dc5:
         stx $9a
         jsr _3ad1
         sta $000a, y
-        stx $09, y
+        stx ZP_POLYOBJ_XPOS_pt1, y
         ldx $9a
         lda $77
-        sta $09, x
+        sta ZP_POLYOBJ_XPOS_pt1, x
         lda $78
-        sta $0a, x
+        sta ZP_POLYOBJ_XPOS_pt2, x
+
         rts 
 
 ; convert values to strings:
@@ -3689,7 +3724,7 @@ _316e:
         jsr _3680
 _317f:
         lda # $08
-        sta $24
+        sta ZP_POLYOBJ_VERTX_LO
         lda # $c2
         sta $27
         lsr 
@@ -3744,13 +3779,14 @@ _31c6:
 _31d5:
         jsr txt_docked_token0E
         jsr _76e9
+
         ldx txt_buffer_index
-        lda $0e, x
+        lda ZP_POLYOBJ_YPOS_pt3, x      ;=$0E?
         cmp # $0d
         bne _31f1
 _31e4:
         dex 
-        lda $0e, x
+        lda ZP_POLYOBJ_YPOS_pt3, x      ;=$0E?
         ora # %00100000
         cmp $0648, x
         beq _31e4
@@ -3783,10 +3819,11 @@ _3208:
 ;===============================================================================
 
 _321e:
-        lda $09
-        ora $0c
-        ora $0f
+        lda ZP_POLYOBJ_XPOS_pt1 ;=$09
+        ora ZP_POLYOBJ_YPOS_pt1 ;=$0C
+        ora ZP_POLYOBJ_ZPOS_pt1 ;=$0F
         bne _322b
+
         lda # $50
         jsr _7bd2
 _322b:
@@ -3840,10 +3877,11 @@ _3244:
         ora # %10000000
         sta [$5b], y
 _327d:
-        lda $09
-        ora $0c
-        ora $0f
+        lda ZP_POLYOBJ_XPOS_pt1 ;=$09
+        ora ZP_POLYOBJ_YPOS_pt1 ;=$0C
+        ora ZP_POLYOBJ_ZPOS_pt1 ;=$0F
         bne _328a
+
         lda # $50
         jsr _7bd2
 _328a:
@@ -3950,7 +3988,7 @@ _3319:
         bne _3329
         lsr $29
         asl $29
-        lsr $24
+        lsr ZP_POLYOBJ_VERTX_LO
 _3328:
         rts 
 
@@ -4001,7 +4039,7 @@ _3357:
 _3365:
         ldx # $08
 _3367:
-        lda $09, x
+        lda ZP_POLYOBJ_XPOS_pt1, x
         sta $35, x
         dex 
         bpl _3367
@@ -4115,7 +4153,7 @@ _33fd:
         lda [$57], y
         lsr 
         jsr _7bd2
-        dec $25
+        dec ZP_POLYOBJ_VERTX_HI
         lda $67
         bne _3499
         ldy # $01
@@ -4126,11 +4164,11 @@ _33fd:
         ;-----------------------------------------------------------------------
 
 _3434:
-        lda $10
+        lda ZP_POLYOBJ_ZPOS_pt2 ;=$10
         cmp # $03
         bcs _3442
-        lda $0a
-        ora $0d
+        lda ZP_POLYOBJ_XPOS_pt2 ;=$0A
+        ora ZP_POLYOBJ_YPOS_pt2 ;=$0D
         and # %11111110
         beq _3454
 _3442:
@@ -4183,7 +4221,7 @@ _348d:
         cmp $ab
         bcc _349a
         lda # $03
-        sta $25
+        sta ZP_POLYOBJ_VERTX_HI
 _3499:
         rts 
 
@@ -4199,7 +4237,7 @@ _349a:
         bne _34a9
         asl 
 _34a9:
-        sta $25
+        sta ZP_POLYOBJ_VERTX_HI
 _34ab:
         rts 
 
@@ -4262,9 +4300,9 @@ _3504:
         jsr _34ac
 _350a:
         ldx # $00
-        stx $25
+        stx ZP_POLYOBJ_VERTX_HI
         inx 
-        stx $24
+        stx ZP_POLYOBJ_VERTX_LO
         rts 
 
         ;-----------------------------------------------------------------------
@@ -4280,7 +4318,7 @@ _3512:
         ;-----------------------------------------------------------------------
 
 _3524:
-        inc $25
+        inc ZP_POLYOBJ_VERTX_HI
         lda # $7f
         sta $26
         bne _3571
@@ -4311,11 +4349,11 @@ _352c:
         bcs _350a
 _3556:
         stx $26
-        lda $1f
+        lda ZP_POLYOBJ_M2x0_HI
         sta VAR_X
-        lda $21
+        lda ZP_POLYOBJ_M2x1_HI
         sta VAR_Y
-        lda $23
+        lda ZP_POLYOBJ_M2x2_HI
         sta $6d
         ldy # $10
         jsr _35b3
@@ -4460,22 +4498,28 @@ _3617:
 
 _363f:
         clc 
-        lda $11
+        lda ZP_POLYOBJ_ZPOS_pt3
         bne _367d
+
         lda $a5
         bmi _367d
+        
         lda $28
         and # %00100000
-        ora $0a
-        ora $0d
+        ora ZP_POLYOBJ_XPOS_pt2
+        ora ZP_POLYOBJ_YPOS_pt2
         bne _367d
-        lda $09
+        
+        lda ZP_POLYOBJ_XPOS_pt1
         jsr _3988
         sta $9c
+        
         lda $2e
         sta $9b
-        lda $0c
+        
+        lda ZP_POLYOBJ_YPOS_pt1
         jsr _3988
+        
         tax 
         lda $2e
         adc $9b
@@ -4505,11 +4549,11 @@ _367e:
 _3680:
         jsr _8447
         lda # $1c
-        sta $0c
+        sta ZP_POLYOBJ_YPOS_pt1
         lsr 
-        sta $0f
+        sta ZP_POLYOBJ_ZPOS_pt1
         lda # $80
-        sta $0e
+        sta ZP_POLYOBJ_YPOS_pt3
         lda $7c
         asl 
         ora # %10000000
@@ -4517,13 +4561,13 @@ _3680:
 _3695:
 .export _3695
         lda # $60
-        sta $17
+        sta ZP_POLYOBJ_M0x2_HI
         ora # %10000000
-        sta $1f
+        sta ZP_POLYOBJ_M2x0_HI
 
         lda $96                 ; player's ship speed?
         rol 
-        sta $24
+        sta ZP_POLYOBJ_VERTX_LO
         
         txa 
         jmp _7c6b
@@ -4624,15 +4668,15 @@ _371c:
         bne _374d
        .phx                     ; push X to stack (via A)
         lda # $20
-        sta $24
+        sta ZP_POLYOBJ_VERTX_LO
         ldx # $00
-        lda $13
+        lda ZP_POLYOBJ_M0x0_HI
         jsr _378c
         ldx # $03
-        lda $15
+        lda ZP_POLYOBJ_M0x1_HI
         jsr _378c
         ldx # $06
-        lda $17
+        lda ZP_POLYOBJ_M0x2_HI
         jsr _378c
         pla 
         tax 
@@ -4652,7 +4696,7 @@ _374d:
         sta $27
         txa 
         and # %00001111
-        sta $24
+        sta ZP_POLYOBJ_VERTX_LO
         lda # $ff
         ror 
         sta $26
@@ -4666,7 +4710,7 @@ _3770:
         ldx # $24
 _377b:
         lda $0100, x
-        sta $09, x
+        sta ZP_POLYOBJ_XPOS_pt1, x
         dex 
         bpl _377b
         pla 
@@ -5238,17 +5282,17 @@ _3aa8:
 ;===============================================================================
 
 _3ab2:
-        ldx $09, y
+        ldx ZP_POLYOBJ_XPOS_pt1, y
         stx $9a
         lda VAR_X
         jsr _3aa8
-        ldx $0b, y
+        ldx ZP_POLYOBJ_XPOS_pt3, y
         stx $9a
         lda VAR_Y
         jsr _3ace
         sta $9c
         stx $9b
-        ldx $0d, y
+        ldx ZP_POLYOBJ_YPOS_pt2, y
         stx $9a
         lda $6d
 _3ace:
@@ -5430,12 +5474,12 @@ _3bae:
 _3bc1:
 .export _3bc1
         sta $30
-        lda $0f
+        lda ZP_POLYOBJ_ZPOS_pt1
         ora # %00000001
         sta $9a
-        lda $10
+        lda ZP_POLYOBJ_ZPOS_pt2
         sta $9b
-        lda $11
+        lda ZP_POLYOBJ_ZPOS_pt3
         sta $9c
         lda $2e
         ora # %00000001
@@ -5849,7 +5893,7 @@ _3dff:                                                                  ;$3dff
         lda # 1
         jsr set_cursor_col
         
-        sta $10
+        sta ZP_POLYOBJ_ZPOS_pt2
         jsr _a72f
         lda # $40
         sta $a3                 ; move counter?
@@ -5864,24 +5908,24 @@ _3e07:
         dec $a3                 ; move counter?
         bne _3e01
 _3e11:                                                                  ;$3e11
-        lsr $09
-        inc $0f
+        lsr ZP_POLYOBJ_XPOS_pt1
+        inc ZP_POLYOBJ_ZPOS_pt1
         beq _3e31
-        inc $0f
+        inc ZP_POLYOBJ_ZPOS_pt1
         beq _3e31
-        ldx $0c
+        ldx ZP_POLYOBJ_YPOS_pt1
         inx 
         cpx # $50
         bcc _3e24
         ldx # $50
 _3e24:                                                                  ;$3e24
-        stx $0c
+        stx ZP_POLYOBJ_YPOS_pt1
         jsr _9a86
         jsr _a2a0
         dec $a3                 ; move counter?
         jmp _3e11
 _3e31:                                                                  ;$3e31
-        inc $10
+        inc ZP_POLYOBJ_ZPOS_pt2
         lda # $0a
         bne _3dbe               ; always branches
 
@@ -5942,14 +5986,14 @@ txt_docked_token1D:                                                     ;$3E5A
 _3e65:                                                                  ;$3E65
         ;-----------------------------------------------------------------------
         lda # $50
-        sta $0c
+        sta ZP_POLYOBJ_YPOS_pt1
 
         lda # $00
-        sta $09
-        sta $0f
+        sta ZP_POLYOBJ_XPOS_pt1
+        sta ZP_POLYOBJ_ZPOS_pt1
         
         lda # $02
-        sta $10
+        sta ZP_POLYOBJ_ZPOS_pt2
         
         jsr _9a86
         jsr _a2a0

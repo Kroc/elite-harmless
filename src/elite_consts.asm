@@ -30,15 +30,15 @@ ELITE_VIEWPORT_HEIGHT   = 144
 
         ; a 3x3 rotation matrix?
         ; TODO: I don't know how best to name these yet
-        m00             .word                                           ;+$09
-        m01             .word                                           ;+$0B
-        m02             .word                                           ;+$0D
-        m10             .word                                           ;+$0F
-        m11             .word                                           ;+$11
-        m12             .word                                           ;+$13
-        m20             .word                                           ;+$15
-        m21             .word                                           ;+$17
-        m22             .word                                           ;+$19
+        m0x0            .word                                           ;+$09
+        m0x1            .word                                           ;+$0B
+        m0x2            .word                                           ;+$0D
+        m1x0            .word                                           ;+$0F
+        m1x1            .word                                           ;+$11
+        m1x2            .word                                           ;+$13
+        m2x0            .word                                           ;+$15
+        m2x1            .word                                           ;+$17
+        m2x2            .word                                           ;+$19
 
         ; a pointer to already processed vertex data
         vertexData      .addr                                           ;+$1B
@@ -54,3 +54,49 @@ ELITE_VIEWPORT_HEIGHT   = 144
         behaviour       .byte                                           ;+$23
         state           .byte                                           ;+$24
 .endstruct
+
+ZP_POLYOBJ              = $09
+ZP_POLYOBJ_XPOS         = $09
+ZP_POLYOBJ_XPOS_pt1     = $09
+ZP_POLYOBJ_XPOS_pt2     = $0A
+ZP_POLYOBJ_XPOS_pt3     = $0B
+ZP_POLYOBJ_YPOS         = $0C
+ZP_POLYOBJ_YPOS_pt1     = $0C
+ZP_POLYOBJ_YPOS_pt2     = $0D
+ZP_POLYOBJ_YPOS_pt3     = $0E
+ZP_POLYOBJ_ZPOS         = $0F
+ZP_POLYOBJ_ZPOS_pt1     = $0F
+ZP_POLYOBJ_ZPOS_pt2     = $10
+ZP_POLYOBJ_ZPOS_pt3     = $11
+
+ZP_POLYOBJ_M0x0         = $12
+ZP_POLYOBJ_M0x0_LO      = $12
+ZP_POLYOBJ_M0x0_HI      = $13
+ZP_POLYOBJ_M0x1         = $14
+ZP_POLYOBJ_M0x1_LO      = $14
+ZP_POLYOBJ_M0x1_HI      = $15
+ZP_POLYOBJ_M0x2         = $16
+ZP_POLYOBJ_M0x2_LO      = $16
+ZP_POLYOBJ_M0x2_HI      = $17
+ZP_POLYOBJ_M1x0         = $18
+ZP_POLYOBJ_M1x0_LO      = $18
+ZP_POLYOBJ_M1x0_HI      = $19
+ZP_POLYOBJ_M1x1         = $1A
+ZP_POLYOBJ_M1x1_LO      = $1A
+ZP_POLYOBJ_M1x1_HI      = $1B
+ZP_POLYOBJ_M1x2         = $1C
+ZP_POLYOBJ_M1x2_LO      = $1C
+ZP_POLYOBJ_M1x2_HI      = $1D
+ZP_POLYOBJ_M2x0         = $1E
+ZP_POLYOBJ_M2x0_LO      = $1E
+ZP_POLYOBJ_M2x0_HI      = $1F
+ZP_POLYOBJ_M2x1         = $20
+ZP_POLYOBJ_M2x1_LO      = $20
+ZP_POLYOBJ_M2x1_HI      = $21
+ZP_POLYOBJ_M2x2         = $22
+ZP_POLYOBJ_M2x2_LO      = $22
+ZP_POLYOBJ_M2x2_HI      = $23
+
+ZP_POLYOBJ_VERTX        = $24
+ZP_POLYOBJ_VERTX_LO     = $24
+ZP_POLYOBJ_VERTX_HI     = $25
