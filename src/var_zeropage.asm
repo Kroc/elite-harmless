@@ -18,6 +18,8 @@ ZP_GOATSOUP_pt2         = $03
 ZP_GOATSOUP_pt3         = $04
 ZP_GOATSOUP_pt4         = $05
 
+;-------------------------------------------------------------------------------
+
 ZP_TEMP_VAR             = $06   ; a temporary single byte
 ZP_TEMP_ADDR1           = $07   ; a temporary word / addr
 ZP_TEMP_ADDR1_LO        = $07
@@ -252,7 +254,11 @@ ZP_TEMP_ADDR2_HI        = $5c
 ZP_VAR_X                = $6b   ; a common "X" variable
 ZP_VAR_Y                = $6c   ; a common "Y" variable
 
-ZP_VAR_X2               = $6d
+ZP_VAR_X2               = $6d   ; a secondary "X" variable
+ZP_VAR_Y2               = $6e   ; a secondary "Y" variable
+
+;-------------------------------------------------------------------------------
+
 
 ZP_SEED                 = $7f
 ZP_SEED_pt1             = $7f
@@ -262,6 +268,10 @@ ZP_SEED_pt4             = $82
 ZP_SEED_pt5             = $83
 ZP_SEED_pt6             = $84
 
+;-------------------------------------------------------------------------------
+
 PLAYER_SPEED            = $96
+
+;-------------------------------------------------------------------------------
 
 VAR_Z                   = $a1   ; a common "Z" variable

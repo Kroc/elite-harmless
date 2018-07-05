@@ -1775,7 +1775,7 @@ _27cd:  bne _27cd               ; infinite loop, why?
         lda $bb
         sta ZP_VAR_Y
         asl 
-        sta $6e
+        sta ZP_VAR_Y2
         asl 
         sta $70
         jsr _9a2c
@@ -1823,7 +1823,7 @@ _2820:  bmi _2820               ; infinite loop, why??
         clc 
         lda $73
         adc ZP_POLYOBJ_YPOS_pt1 ;=$0C
-        sta $6e
+        sta ZP_VAR_Y2
         lda ZP_POLYOBJ_YPOS_pt2 ;=$0D
         adc # $00
         sta $6f
@@ -1837,17 +1837,17 @@ _2820:  bmi _2820               ; infinite loop, why??
         lda ZP_POLYOBJ_YPOS_pt1 ;=$0C
         sec 
         sbc $73
-        sta $6e
+        sta ZP_VAR_Y2
         lda ZP_POLYOBJ_YPOS_pt2 ;=$0D
         sbc # $00
         sta $6f
 _283f:  bcs _283f               ; infinite loop, why??
         eor # %11111111
         sta $6f
-        lda $6e
+        lda ZP_VAR_Y2
         eor # %11111111
         adc # $01
-        sta $6e
+        sta ZP_VAR_Y2
         lda $70
         eor # %10000000
         sta $70
@@ -2005,7 +2005,7 @@ _28e5:
 .export _28e5
 
         sta ZP_VAR_Y
-        sta $6e
+        sta ZP_VAR_Y2
         ldx # $00
         stx ZP_VAR_X
         dex 
@@ -2185,7 +2185,7 @@ _2998:
         lda $87
         sta ZP_VAR_X2
         lda $88
-        sta $6e
+        sta ZP_VAR_Y2
         lda $89
         sta $6f
         lda $8a
@@ -2203,8 +2203,8 @@ _2998:
         sta ZP_VAR_X2
         sty ZP_VAR_X
         lda ZP_VAR_Y
-        ldy $6e
-        sta $6e
+        ldy ZP_VAR_Y2
+        sta ZP_VAR_Y2
         sty ZP_VAR_Y
 _29d2:
         ldy $7e
@@ -2219,7 +2219,7 @@ _29d2:
 _29e6:
         lda ZP_VAR_X2
         sta _26a4, y
-        lda $6e
+        lda ZP_VAR_Y2
         sta _27a4, y            ; writing to code??
         iny 
         sty $7e
@@ -5733,7 +5733,7 @@ _3d09:
         lda $06f1
         sta ZP_VAR_Y
         lda # $8f
-        sta $6e
+        sta ZP_VAR_Y2
         jsr _ab91
         lda $06f0
         sta ZP_VAR_X
@@ -5741,7 +5741,7 @@ _3d09:
         sta ZP_VAR_Y
         sty ZP_VAR_X2
         lda # $8f
-        sta $6e
+        sta ZP_VAR_Y2
         jmp _ab91
 
 ;===============================================================================
