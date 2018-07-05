@@ -3,40 +3,10 @@
 ; <github.com/Kroc/EliteDX>
 ;===============================================================================
 
+; "elite_vars.asm" -- some common variables Elite stores in $0400..$0700
+
 .include        "elite_consts.asm"
 
-; TODO: ideally all of this stuff would be defined structurally; `.tag`?
-
-VAR_X                   = $6b   ; a common "X" variable
-VAR_Y                   = $6c   ; a common "Y" variable
-VAR_Z                   = $a1   ; a common "Z" variable
-
-;-------------------------------------------------------------------------------
-
-ZP_SEED                 = $7f
-ZP_SEED_pt1             = $7f
-ZP_SEED_pt2             = $80
-ZP_SEED_pt3             = $81
-ZP_SEED_pt4             = $82
-ZP_SEED_pt5             = $83
-ZP_SEED_pt6             = $84
-
-; "goat soup" is the algorithm for generating planet descriptions.
-; its seed is taken from the last four bytes of the main seed 
-ZP_GOATSOUP             = $02
-ZP_GOATSOUP_pt1         = $02
-ZP_GOATSOUP_pt2         = $03
-ZP_GOATSOUP_pt3         = $04
-ZP_GOATSOUP_pt4         = $05
-
-;-------------------------------------------------------------------------------
-
-ZP_TEMP_VAR             = $06   ; a temporary single byte
-ZP_TEMP_ADDR            = $07   ; a temporary word / addr
-ZP_TEMP_ADDR_LO         = $07
-ZP_TEMP_ADDR_HI         = $08
-
-;-------------------------------------------------------------------------------
 
 MISSION_FLAGS           = $0499
 
@@ -62,8 +32,6 @@ PLAYER_TRUMBLES_HI      = $04ca
 .endif
 
 ;-------------------------------------------------------------------------------
-
-PLAYER_SPEED            = $96
 
 ; player's cash:
 PLAYER_CASH             = $04a2
