@@ -71,14 +71,14 @@ ZP_TEMP_ADDR1_HI        = $08
 ZP_POLYOBJ              = $09
 ZP_POLYOBJ_XPOS         = $09
 ZP_POLYOBJ_XPOS_pt1     = $09
-ZP_POLYOBJ_XPOS_pt2     = $0A
-ZP_POLYOBJ_XPOS_pt3     = $0B
-ZP_POLYOBJ_YPOS         = $0C
-ZP_POLYOBJ_YPOS_pt1     = $0C
-ZP_POLYOBJ_YPOS_pt2     = $0D
-ZP_POLYOBJ_YPOS_pt3     = $0E
-ZP_POLYOBJ_ZPOS         = $0F
-ZP_POLYOBJ_ZPOS_pt1     = $0F
+ZP_POLYOBJ_XPOS_pt2     = $0a
+ZP_POLYOBJ_XPOS_pt3     = $0b
+ZP_POLYOBJ_YPOS         = $0c
+ZP_POLYOBJ_YPOS_pt1     = $0c
+ZP_POLYOBJ_YPOS_pt2     = $0d
+ZP_POLYOBJ_YPOS_pt3     = $0e
+ZP_POLYOBJ_ZPOS         = $0f
+ZP_POLYOBJ_ZPOS_pt1     = $0f
 ZP_POLYOBJ_ZPOS_pt2     = $10
 ZP_POLYOBJ_ZPOS_pt3     = $11
 
@@ -94,15 +94,15 @@ ZP_POLYOBJ_M0x2_HI      = $17
 ZP_POLYOBJ_M1x0         = $18
 ZP_POLYOBJ_M1x0_LO      = $18
 ZP_POLYOBJ_M1x0_HI      = $19
-ZP_POLYOBJ_M1x1         = $1A
-ZP_POLYOBJ_M1x1_LO      = $1A
-ZP_POLYOBJ_M1x1_HI      = $1B
-ZP_POLYOBJ_M1x2         = $1C
-ZP_POLYOBJ_M1x2_LO      = $1C
-ZP_POLYOBJ_M1x2_HI      = $1D
-ZP_POLYOBJ_M2x0         = $1E
-ZP_POLYOBJ_M2x0_LO      = $1E
-ZP_POLYOBJ_M2x0_HI      = $1F
+ZP_POLYOBJ_M1x1         = $1a
+ZP_POLYOBJ_M1x1_LO      = $1a
+ZP_POLYOBJ_M1x1_HI      = $1b
+ZP_POLYOBJ_M1x2         = $1c
+ZP_POLYOBJ_M1x2_LO      = $1c
+ZP_POLYOBJ_M1x2_HI      = $1d
+ZP_POLYOBJ_M2x0         = $1e
+ZP_POLYOBJ_M2x0_LO      = $1e
+ZP_POLYOBJ_M2x0_HI      = $1f
 ZP_POLYOBJ_M2x1         = $20
 ZP_POLYOBJ_M2x1_LO      = $20
 ZP_POLYOBJ_M2x1_HI      = $21
@@ -123,12 +123,13 @@ ZP_MISSILE_STATE        = $28   ; BBC says "display/exploding state|missiles"??
 
 ;                       = $29   ; something to do with A.I.
 
-;                       = $2A   ; another temporary address?
-;                       = $2B
+ZP_TEMP_ADDR2           = $2a   ; another temporary address
+ZP_TEMP_ADDR2_LO        = $2a
+ZP_TEMP_ADDR2_HI        = $2b
 
-ZP_VAR_P                = $2E   ; a common variable called "P"
-ZP_VAR_P1               = $2E
-ZP_VAR_P2               = $2F
+ZP_VAR_P                = $2e   ; a common variable called "P"
+ZP_VAR_P1               = $2e
+ZP_VAR_P2               = $2f
 ZP_VAR_P3               = $30
 
 ;-------------------------------------------------------------------------------
@@ -217,9 +218,9 @@ ZP_POLYOBJ_ADDR         = $59
 ZP_POLYOBJ_ADDR_LO      = $59
 ZP_POLYOBJ_ADDR_HI      = $5a
 
-ZP_TEMP_ADDR2           = $5b
-ZP_TEMP_ADDR2_LO        = $5b
-ZP_TEMP_ADDR2_HI        = $5c
+ZP_TEMP_ADDR3           = $5b
+ZP_TEMP_ADDR3_LO        = $5b
+ZP_TEMP_ADDR3_HI        = $5c
 
 ;-------------------------------------------------------------------------------
 
