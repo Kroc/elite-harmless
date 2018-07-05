@@ -2623,9 +2623,9 @@ print_canned_message:                                                   ;$7813
 
         ; select the table of canned-messages
         lda #< _0700
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         lda #> _0700
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
 
         ; initialise loop counter
         ldy # $00
@@ -2641,12 +2641,12 @@ print_canned_message:                                                   ;$7813
         beq :+                  ; if zero terminator, end string
         iny                     ; next character 
         bne @skip_message       ; loop if not at 256 chars
-        inc $5c                 ; move to the next page,
+        inc ZP_TEMP_ADDR2_HI    ; move to the next page,
         bne @skip_message       ; and keep reading
 
 :       iny                     ; move forward over the zero            ;$782C 
         bne :+                  ; skip if we haven't overflowed a page
-        inc $5c                 ; next page if the zero happened there
+        inc ZP_TEMP_ADDR2_HI    ; next page if the zero happened there
 :       dex                     ; decrement message skip counter        ;$7831 
         bne @skip_message       ; keep looping if we haven't reached
                                 ; the desired message index yet
@@ -2657,7 +2657,7 @@ print_flight_token_string:                                                     ;
         ; (this routine can call recursively)
        .phy                     ; push Y to stack (via A)
         ; remember the current page
-        lda $5c
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; get the 'key' used for de-scrambling the text
@@ -2670,14 +2670,14 @@ print_flight_token_string:                                                     ;
 
         ; restore the previous page
         pla 
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
         ; and index
         pla 
         tay 
         
         iny                     ; next character
         bne :+                  ; overflowed the page?
-        inc $5c                 ; move to the next page
+        inc ZP_TEMP_ADDR2_HI    ; move to the next page
 
         ; is this the end of the string?
         ; (check for a $00 token)
@@ -2972,7 +2972,7 @@ _79ed:
         lda ZP_POLYOBJ01_YPOS_pt1
         clc 
         adc $050e
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda ZP_POLYOBJ01_XPOS_pt3
         adc # $00
         bmi _7a36
@@ -2992,7 +2992,7 @@ _79ed:
         and # %11111101
         ora _79a7, x
         sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
-        ldx ZP_TEMP_ADDR_LO
+        ldx ZP_TEMP_ADDR1_LO
         sty VIC_SPRITE1_Y
         stx VIC_SPRITE1_X
         lda VIC_SPRITE_ENABLE
@@ -3837,8 +3837,8 @@ _7f63:
         ldx $77
         lda # $00
 _7f67:
-        stx $5b
-        sta $5c
+        stx ZP_TEMP_ADDR2_LO
+        sta ZP_TEMP_ADDR2_HI
         lda $77
         jsr _3988
         sta $b3
@@ -3859,7 +3859,7 @@ _7f8c:
         dey 
         bne _7f80
 _7f8f:
-        lda $5b
+        lda ZP_TEMP_ADDR2_LO
         jsr _3988
         sta $bb
         lda $b2
@@ -3914,11 +3914,11 @@ _7ff5:
 _7ff8:
         dey 
         beq _803a
-        lda $5c
+        lda ZP_TEMP_ADDR2_HI
         bne _801c
-        dec $5b
+        dec ZP_TEMP_ADDR2_LO
         bne _7f8f
-        dec $5c
+        dec ZP_TEMP_ADDR2_HI
 _8005:
         jmp _7f8f
 
@@ -3933,9 +3933,9 @@ _8008:
         sta $0580, y
         beq _7ff8
 _801c:
-        ldx $5b
+        ldx ZP_TEMP_ADDR2_LO
         inx 
-        stx $5b
+        stx ZP_TEMP_ADDR2_LO
         cpx $77
         bcc _8005
         beq _8005
@@ -4407,11 +4407,11 @@ _82be:
         asl 
         tay 
         lda _28a4 + 0, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda _28a4 + 1, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $20
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         bpl _82be
         and # %01111111
         lsr 
@@ -4421,11 +4421,11 @@ _82be:
         sbc # $01
         asl 
         ora # %10000000
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         bne _82be
 _82ed:
         lda # $00
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         beq _82be
 _82f3:
         stx $ad
@@ -4484,12 +4484,12 @@ _834f:
         asl 
         tay 
         lda _d000-2, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda _d000-1, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ldy # $05
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta $bb
         lda ZP_VAR_P1
         sec 
@@ -4502,35 +4502,35 @@ _834f:
         asl 
         tay 
         lda _28a4 + 0, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda _28a4 + 1, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ldy # $24
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta [$59], y
         dey 
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta [$59], y
         dey 
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta $78
         lda ZP_VAR_P2
         sta [$59], y
         dey 
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta $77
         lda ZP_VAR_P1
         sta [$59], y
         dey 
 _8399:
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta [$59], y
         dey 
         bpl _8399
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sta ZP_POLYOBJ_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        lda ZP_TEMP_ADDR1_HI
         sta ZP_POLYOBJ_ADDR_HI
         ldy $bb
 _83aa:
@@ -5710,11 +5710,11 @@ _8ac7:
         dex 
 _8ad9:
         ldy # $00
-        sty ZP_TEMP_ADDR_LO
+        sty ZP_TEMP_ADDR1_LO
         lda # $00
-        stx ZP_TEMP_ADDR_HI
+        stx ZP_TEMP_ADDR1_HI
 _8ae1:
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         iny 
         bne _8ae1
         rts 
@@ -7696,11 +7696,11 @@ _9baa:
         lda [ZP_HULL_ADDR], y
         clc 
         adc ZP_HULL_ADDR_LO
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         ldy # $11
         lda [ZP_HULL_ADDR], y
         adc ZP_HULL_ADDR_HI
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
         ldy # $00
 _9bf2:
         lda [$5b], y
@@ -7888,10 +7888,10 @@ _9cfe:
         lda ZP_HULL_ADDR_LO
         clc 
         adc # $14
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         lda ZP_HULL_ADDR_HI
         adc # $00
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
         ldy # $00
         sty $aa
 _9d45:
@@ -8268,11 +8268,11 @@ _9f9f:
         clc 
         lda [ZP_HULL_ADDR], y
         adc ZP_HULL_ADDR_LO
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         ldy # $10
         lda [ZP_HULL_ADDR], y
         adc ZP_HULL_ADDR_HI
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
         ldy # $05
         lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
@@ -8542,11 +8542,11 @@ _a15b:
         cpy $ae
         bcs _a172
         ldy # $00
-        lda $5b
+        lda ZP_TEMP_ADDR2_LO
         adc # $04
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         bcc _a16f
-        inc $5c
+        inc ZP_TEMP_ADDR2_HI
 _a16f:
         jmp _9fb8
 
@@ -9251,16 +9251,16 @@ _a5db:
 _a604:
         sec 
         ldy # $00
-        sty $5b
+        sty ZP_TEMP_ADDR2_LO
         ldx # $10
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         txa 
 _a60e:
-        stx $5c
+        stx ZP_TEMP_ADDR2_HI
         sty $bb
         adc [$5b], y
         eor $bb
-        sbc $5c
+        sbc ZP_TEMP_ADDR2_HI
         dey 
         bne _a60e
         inx 
@@ -9978,17 +9978,17 @@ _aaa2:
         
         ; erase $0400..$0700
         lda #> $0400
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldx # $03               ; number of pages; 3 x 256 = 768 bytes
         lda #< $0400            ; address must be page aligned for A to be $00 
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         tay                     ; =0
 
-:       sta [ZP_TEMP_ADDR], y                                           ;$AABD
+:       sta [ZP_TEMP_ADDR1], y                                          ;$AABD
         iny 
         bne :-
 
-        inc ZP_TEMP_ADDR_HI     ; move to the next page
+        inc ZP_TEMP_ADDR1_HI     ; move to the next page
         dex 
         bne :-
 
@@ -10235,10 +10235,10 @@ _ac19:
         and # %11111000
         clc 
         adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
         adc # $00
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         tya 
         and # %00000111
         tay 
@@ -10274,8 +10274,8 @@ _ac5d:
 
 _ac60:
         lda # %10000000
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _ac5d
         lda $bf
@@ -10284,19 +10284,19 @@ _ac60:
         bcc _ac83
         dey 
         bpl _ac82
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _ac82:
         clc 
 _ac83:
         lda # $40
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _ac5d
         lda $bf
@@ -10305,19 +10305,19 @@ _ac83:
         bcc _aca6
         dey 
         bpl _aca5
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _aca5:
         clc 
 _aca6:
         lda # $20
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _ac5d
         lda $bf
@@ -10326,19 +10326,19 @@ _aca6:
         bcc _acc9
         dey 
         bpl _acc8
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _acc8:
         clc 
 _acc9:
         lda # $10
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _ac5d
         lda $bf
@@ -10347,19 +10347,19 @@ _acc9:
         bcc _acec
         dey 
         bpl _aceb
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _aceb:
         clc 
 _acec:
         lda # $08
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _ad39
         lda $bf
@@ -10368,19 +10368,19 @@ _acec:
         bcc _ad0f
         dey 
         bpl _ad0e
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _ad0e:
         clc 
 _ad0f:
         lda # $04
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _ad88
         lda $bf
@@ -10389,19 +10389,19 @@ _ad0f:
         bcc _ad32
         dey 
         bpl _ad31
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _ad31:
         clc 
 _ad32:
         lda # $02
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
 _ad39:
         beq _ad88
@@ -10411,19 +10411,19 @@ _ad39:
         bcc _ad55
         dey 
         bpl _ad54
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _ad54:
         clc 
 _ad55:
         lda # $01
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _ad88
         lda $bf
@@ -10432,26 +10432,26 @@ _ad55:
         bcc _ad78
         dey 
         bpl _ad77
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _ad77:
         clc 
 _ad78:
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $08
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcs _ad83
         jmp _ac60
 
         ;-----------------------------------------------------------------------
 
 _ad83:
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
         jmp _ac60
 
         ;-----------------------------------------------------------------------
@@ -10464,19 +10464,19 @@ _ad88:
 
 _ad8b:
         lda row_to_bitmap_hi, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         lda VAR_X
         and # %11111000
         adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcc _ad9e
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
         clc 
 _ad9e:
         sbc # $f7
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcs _ada6
-        dec ZP_TEMP_ADDR_HI
+        dec ZP_TEMP_ADDR1_HI
 _ada6:
         tya 
         and # %00000111
@@ -10519,8 +10519,8 @@ _addd:
 
 _ade0:
         lda # $80
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _addd
         lda $bf
@@ -10529,19 +10529,19 @@ _ade0:
         bcc _ae03
         iny 
         bne _ae02
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $f8
 _ae02:
         clc 
 _ae03:
         lda # $40
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _addd
         lda $bf
@@ -10550,19 +10550,19 @@ _ae03:
         bcc _ae26
         iny 
         bne _ae25
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $f8
 _ae25:
         clc 
 _ae26:
         lda # $20
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _addd
         lda $bf
@@ -10571,19 +10571,19 @@ _ae26:
         bcc _ae49
         iny 
         bne _ae48
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $f8
 _ae48:
         clc 
 _ae49:
         lda # $10
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _aeb9
         lda $bf
@@ -10592,19 +10592,19 @@ _ae49:
         bcc _ae6c
         iny 
         bne _ae6b
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $f8
 _ae6b:
         clc 
 _ae6c:
         lda # $08
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _aeb9
         lda $bf
@@ -10613,19 +10613,19 @@ _ae6c:
         bcc _ae8f
         iny 
         bne _ae8e
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $f8
 _ae8e:
         clc 
 _ae8f:
         lda # $04
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _af05
         lda $bf
@@ -10634,19 +10634,19 @@ _ae8f:
         bcc _aeb2
         iny 
         bne _aeb1
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $f8
 _aeb1:
         clc 
 _aeb2:
         lda # $02
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
 _aeb9:
         beq _af05
@@ -10656,19 +10656,19 @@ _aeb9:
         bcc _aed5
         iny 
         bne _aed4
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $f8
 _aed4:
         clc 
 _aed5:
         lda # $01
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         beq _af05
         lda $bf
@@ -10677,21 +10677,21 @@ _aed5:
         bcc _aef8
         iny 
         bne _aef7
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $f8
 _aef7:
         clc 
 _aef8:
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $08
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcc _af02
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
 _af02:
         jmp _ade0
 
@@ -10723,10 +10723,10 @@ _af22:
         and # %11111000
         clc 
         adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
         adc # $00
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         tya 
         and # %00000111
         tay 
@@ -10777,17 +10777,17 @@ _af77:
         dex 
 _af88:
         lda $be
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
 _af8e:
         dey 
         bpl _af9f
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _af9f:
         lda $bf
@@ -10797,11 +10797,11 @@ _af9f:
         lsr $be
         bcc _afb8
         ror $be
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $08
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcc _afb8
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
         clc 
 _afb8:
         dex 
@@ -10817,17 +10817,17 @@ _afbe:
         dex 
 _afc4:
         lda $be
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
 _afca:
         dey 
         bpl _afdb
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         ldy # $07
 _afdb:
         lda $bf
@@ -10837,11 +10837,11 @@ _afdb:
         asl $be
         bcc _aff4
         rol $be
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $07
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcs _aff3
-        dec ZP_TEMP_ADDR_HI
+        dec ZP_TEMP_ADDR1_HI
 _aff3:
         clc 
 _aff4:
@@ -10869,16 +10869,16 @@ _b00b:
         lda VAR_Y
         tay 
         and # %00000111
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         txa 
         and # %11111000
         clc 
         adc row_to_bitmap_lo, y
         tay 
         bcc _b025
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
 _b025:
         txa 
         and # %11111000
@@ -10896,13 +10896,13 @@ _b025:
         and # %00000111
         tax 
         lda _2907, x
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         tya 
         adc # $08
         tay 
         bcc _b04c
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
 _b04c:
         ldx $be
         dex 
@@ -10910,13 +10910,13 @@ _b04c:
         clc 
 _b052:
         lda # $ff
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         tya 
         adc # $08
         tay 
         bcc _b061
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
         clc 
 _b061:
         dex 
@@ -10926,8 +10926,8 @@ _b064:
         and # %00000111
         tax 
         lda _2900, x
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         ldy $9e
         rts 
 
@@ -10944,8 +10944,8 @@ _b073:
         tax 
         lda _2900, x
         and $c0
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         ldy $9e
         rts 
 
@@ -10990,10 +10990,10 @@ _b0b5:
         and # %11111000
         clc 
         adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
         adc # $00
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         tya 
         and # %00000111
         tay 
@@ -11002,22 +11002,22 @@ _b0b5:
         tax 
         lda _ab47, x
         and $32
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         lda _ab49, x
         bpl _b0ed
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         clc 
         adc # $08
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcc _b0ea
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
 _b0ea:
         lda _ab49, x
 _b0ed:
         and $32
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         rts 
 
 ;===============================================================================
@@ -11056,9 +11056,9 @@ _b11f:
         txa 
         inx 
         eor # %00000011
-        sty ZP_TEMP_ADDR_LO
+        sty ZP_TEMP_ADDR1_LO
         tay 
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sta $67c6, y
         ldy # $00
         rts 
@@ -11319,10 +11319,10 @@ _b1a1:
         beq _b210
 
 :       inc ZP_CURSOR_COL                                               ;$B1ED
-        ; this is `sta ZP_TEMP_ADDR_HI` if you jump in after the `bit`
+        ; this is `sta ZP_TEMP_ADDR1_HI` if you jump in after the `bit`
         ; instruction, but it doesn't look like this actually occurs
        .bit
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; paint the character (8-bytes) to the screen
         ; SPEED: this could be unrolled
@@ -11366,26 +11366,26 @@ _b21a:
         ; set starting position in top-left of the centred
         ; 32-char (256px) screen Elite uses
         lda #< (ELITE_MENUSCR_COLOR_ADDR + .scrpos( 0, 4 ))
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda #> (ELITE_MENUSCR_COLOR_ADDR + .scrpos( 0, 4 ))
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ldx # 24                ; colour 24 rows
 
 @row:   lda # .color_nybbles( WHITE, BLACK )                            ;$B224
         ldy # 31                ; 32 columns (0-31)
 
-:       sta [ZP_TEMP_ADDR], y                                           ;$B228
+:       sta [ZP_TEMP_ADDR1], y                                          ;$B228
         dey 
         bpl :-
 
         ; move to the next row
-        lda ZP_TEMP_ADDR_LO                 ; get the row lo-address
+        lda ZP_TEMP_ADDR1_LO    ; get the row lo-address
         clc 
         adc # 40                ; add 40 chars (one screen row)
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcc :+                  ; remains under 255?
-        inc ZP_TEMP_ADDR_HI                 ; if not, increase the hi-address
+        inc ZP_TEMP_ADDR1_HI    ; if not, increase the hi-address
 
 :       dex                     ; decrement remaining row count         ;$B238
         bne @row
@@ -11406,7 +11406,7 @@ _b21a:
         ; erase $5600..$567F?
         ldy # $7f
         jsr erase_bytes
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
 
         ;-----------------------------------------------------------------------
 
@@ -11477,12 +11477,12 @@ _b2b2:
         ldx # $12
         stx $c0
         ldy # $18
-        sty ZP_TEMP_ADDR_LO
+        sty ZP_TEMP_ADDR1_LO
         ldy # $40
         lda # $03
         jsr _b2e1
         ldy # $20
-        sty ZP_TEMP_ADDR_LO
+        sty ZP_TEMP_ADDR1_LO
         ldy # $41
         lda # $c0
         ldx $c0
@@ -11502,22 +11502,22 @@ _b2d5:
 
 _b2e1:
         sta $be
-        sty ZP_TEMP_ADDR_HI
+        sty ZP_TEMP_ADDR1_HI
 _b2e5:
         ldy # $07
 _b2e7:
         lda $be
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dey 
         bpl _b2e7
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         clc 
         adc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         dex 
         bne _b2e5
         rts 
@@ -11541,13 +11541,13 @@ _b301:
 
         ldx # $08
         lda #< __DATA_HUD_RUN__
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         lda #> __DATA_HUD_RUN__
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
         lda #< $5680            ; start of the HUD on bitmap?
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda #> $5680
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         jsr _b3c3
 
         ldy # $c0
@@ -11594,23 +11594,23 @@ _b359:
         ldx #< $4128
         ldy #> $4128
 _b364:
-        stx ZP_TEMP_ADDR_LO
-        sty ZP_TEMP_ADDR_HI
+        stx ZP_TEMP_ADDR1_LO
+        sty ZP_TEMP_ADDR1_HI
         ldx # $12
 _b36a:
         ldy # $17
 _b36c:
         lda # $ff
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         dey 
         bpl _b36c
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         clc 
         adc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         dex 
         bne _b36a
         rts 
@@ -11623,13 +11623,13 @@ _b384:
         clc 
 _b389:
         lda row_to_bitmap_lo, x
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, x
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         tya 
 
-:       sta [ZP_TEMP_ADDR], y                                           ;$B394
+:       sta [ZP_TEMP_ADDR1], y                                          ;$B394
         dey 
         bne :-
 
@@ -11653,7 +11653,7 @@ erase_page:                                                             ;$B3A7
         ;       X = page-number, i.e. hi-address
         ;
         ldy # $00
-        sty ZP_TEMP_ADDR_LO
+        sty ZP_TEMP_ADDR1_LO
 
 erase_bytes:                                                            ;$B3AB
         ;-----------------------------------------------------------------------
@@ -11664,9 +11664,9 @@ erase_bytes:                                                            ;$B3AB
         ;       Y = offset
         ;
         lda # $00
-        stx ZP_TEMP_ADDR_HI
+        stx ZP_TEMP_ADDR1_HI
 
-:       sta [ZP_TEMP_ADDR], y                                           ;$B3AF
+:       sta [ZP_TEMP_ADDR1], y                                          ;$B3AF
         dey 
         bne :-
 
@@ -11675,7 +11675,7 @@ erase_bytes:                                                            ;$B3AB
 _b3b5:
         ;=======================================================================
         lda # $00
-:       sta [ZP_TEMP_ADDR], y                                           ;$B3B7
+:       sta [ZP_TEMP_ADDR1], y                                          ;$B3B7
         iny 
         bne :-
 
@@ -11700,11 +11700,11 @@ _b3c3:
         ldy # $00
 _b3c5:
         lda [$5b], y
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         dey 
         bne _b3c5
-        inc $5c
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR2_HI
+        inc ZP_TEMP_ADDR1_HI
         dex 
         bne _b3c5
         rts 
@@ -11729,24 +11729,24 @@ txt_docked_token15:                                                     ;$B3D4
         sta ZP_CURSOR_COL
         
         lda #> $5a60
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         lda #< $5a60
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         ldx # $03
 _b3f7:
         lda # $00
         tay 
 _b3fa:
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         dey 
         bne _b3fa
         clc 
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         dex 
         bne _b3f7
 _b40f:
@@ -11790,7 +11790,7 @@ _b438:
 _b448:
         adc # $53
         eor # %11111111
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda ZP_POLYOBJ_YPOS_pt2
         lsr 
         clc 
@@ -11799,7 +11799,7 @@ _b448:
         eor # %11111111
         sec 
 _b459:
-        adc ZP_TEMP_ADDR_LO
+        adc ZP_TEMP_ADDR1_LO
         cmp # $92
         bcs _b461
         lda # $92
@@ -11810,7 +11810,7 @@ _b461:
 _b467:
         sta VAR_Y
         sec 
-        sbc ZP_TEMP_ADDR_LO
+        sbc ZP_TEMP_ADDR1_LO
         php 
         pha 
         jsr _b0b0
@@ -11826,17 +11826,17 @@ _b47f:
         dey 
         bpl _b491
         ldy # $07
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sec 
         sbc # $40
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 _b491:
         lda VAR_X
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         dex 
         bne _b47f
 _b49a:
@@ -11849,27 +11849,27 @@ _b49b:
         cpy # $08
         bne _b4ae
         ldy # $00
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 _b4ae:
         iny 
         cpy # $08
         bne _b4c1
         ldy # $00
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 _b4c1:
         lda VAR_X
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         inx 
         bne _b4ae
         rts 

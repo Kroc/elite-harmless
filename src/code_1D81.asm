@@ -1145,9 +1145,9 @@ _237e:                                                                  ;$237E
         pha 
         tax 
        .phy                     ; push Y to stack (via A)
-        lda $5b
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda $5c
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; switch base-address of the message pool and jump into the print
@@ -1156,7 +1156,7 @@ _237e:                                                                  ;$237E
 .import _1a5c
 
         lda # < _1a5c
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         lda # > _1a5c
         bne _23a0
 
@@ -1178,17 +1178,17 @@ print_docked_str:                                                       ;$2390
         ; when recursing, $5B/$5C+Y represent the
         ; current position in the message data
        .phy                     ; push Y to stack (via A)
-        lda $5b
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda $5c
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; load the message table
         lda #< _0e00
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         lda #> _0e00
 _23a0:                                                                  ;$23A0
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
         ldy # $00
 
 @skip_str:                                                              ;$23A4
@@ -1205,14 +1205,14 @@ _23a0:                                                                  ;$23A0
         beq @read_token         ; if we've found our message, exit loop
 :       iny                     ; move to next token                    ;$23AD
         bne @skip_str           ; if we haven't crossed the page, keep going
-        inc $5c                 ; move to the next page (256 bytes)
+        inc ZP_TEMP_ADDR2_HI    ; move to the next page (256 bytes)
         bne @skip_str           ; and continue
 
 @read_token:                                                            ;$23B4
         ;-----------------------------------------------------------------------
         iny                     ; step over the terminator byte ($00)
         bne :+                  ; did we step over the page boundary?
-        inc $5c                 ; if so, move forward to next page
+        inc ZP_TEMP_ADDR2_HI    ; if so, move forward to next page
 
 :       ; read and descramble a token:                                  ;$23B9
         ;
@@ -1235,9 +1235,9 @@ _23a0:                                                                  ;$23A0
 @rts:   ; finished printing, clean up and exit                          ;$23C5
         ;-----------------------------------------------------------------------
         pla 
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
         pla 
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         pla 
         tay 
         pla 
@@ -1254,9 +1254,9 @@ print_docked_token:                                                     ;$23CF
        ; save state before we recurse
         tax 
        .phy                     ; push Y to stack (via A) 
-        lda $5b
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda $5c
+        lda ZP_TEMP_ADDR2_HI
         pha 
         txa 
 
@@ -1365,9 +1365,9 @@ _format_code:                                                           ;$241B
         ; -- these format codes can get recursive
         tax 
        .phy                     ; push Y to stack (via A)
-        lda $5b
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda $5c
+        lda ZP_TEMP_ADDR2_HI
         pha 
         
         ; multiply token by two (lookup into table)
@@ -1398,22 +1398,22 @@ _format_code:                                                           ;$241B
 _2438:  ; restore state and exit                                        ;$2438
         ;-----------------------------------------------------------------------
         pla 
-        sta $5c
+        sta ZP_TEMP_ADDR2_HI
         pla 
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         pla 
         tay 
         rts 
 
 _2441:  ; process msg tokens $5B..$80                                   ;$2441
         ;-----------------------------------------------------------------------
-        sta ZP_TEMP_ADDR_LO     ; put token aside
+        sta ZP_TEMP_ADDR1_LO    ; put token aside
         
         ; put aside our current location in the text data
        .phy                     ; push Y to stack (via A)
-        lda $5b
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda $5c
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; choose planet description template 0-4:
@@ -1434,7 +1434,7 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 
         ; get back the token value and lookup another message index to print
         ; (since these tokens are $5B..$80, we index the table back $5B bytes)
-        ldx ZP_TEMP_ADDR_LO
+        ldx ZP_TEMP_ADDR1_LO
         adc _3eac - $5B, x
 
         jsr print_docked_str    ; print the new message
@@ -2109,10 +2109,10 @@ _293a:
         ; add this to the bitmap address for the given row
         clc 
         adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
         adc # $00
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; get the row within the character cell
         tya 
@@ -2129,8 +2129,8 @@ _293a:
        .bge _296d               
         
         lda _28c8, x            ; get mask for desired pixel-position
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         
         lda VAR_Z
         cmp # 80                ; is the dust-particle >= 80 Z-distance?
@@ -2143,8 +2143,8 @@ _293a:
 
 _296d:
         lda _28c8, x
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
 
 _2974:
         ldy ZP_TEMP_VAR         ; restore Y
@@ -3201,7 +3201,7 @@ TXT_BUFFER = $0648              ; $0648..$06A2? -- 3 lines
 
         ; put X parameter aside,
         ; we need the X register for now
-        stx ZP_TEMP_ADDR_LO
+        stx ZP_TEMP_ADDR1_LO
 
         ; disable the automatic lower-case transformation
         ldx # %11111111
@@ -3231,7 +3231,7 @@ TXT_BUFFER = $0648              ; $0648..$06A2? -- 3 lines
 :       stx txt_lcase_flag                                              ;$24F0
 
         ; get back the original X value
-        ldx ZP_TEMP_ADDR_LO
+        ldx ZP_TEMP_ADDR1_LO
 
         ; check 'use buffer' flag
         bit txt_buffer_flag     ; check if bit 7 is set
@@ -3253,7 +3253,7 @@ _add_to_buffer:                                                         ;$2F4D
 :       ldx txt_buffer_index                                            ;$2F56
         sta TXT_BUFFER, x       ; add the character to the buffer
         
-        ldx ZP_TEMP_ADDR_LO
+        ldx ZP_TEMP_ADDR1_LO
         inc txt_buffer_index
 
         clc 
@@ -3297,15 +3297,15 @@ _flush_line:                                                            ;$2F67
         ; note that whatever the value of $08 prior to calling this routine,
         ; shifting it right once will ensure that the 'minus' check below will
         ; always fail, so $08 will be 'reset' to %01000000 for this routine
-        lsr ZP_TEMP_ADDR_HI
+        lsr ZP_TEMP_ADDR1_HI
 
 _justify_line:                                                          ;$2F72
         ;-----------------------------------------------------------------------
-        lda ZP_TEMP_ADDR_HI     ; check the space-counter
+        lda ZP_TEMP_ADDR1_HI    ; check the space-counter
         bmi :+                  
 
         lda # %01000000         ; reset space-counter
-        sta ZP_TEMP_ADDR_HI     ; to its starting position
+        sta ZP_TEMP_ADDR1_HI    ; to its starting position
 
         ; begin at the end of the line and walk backwards through it:
 :       ldy # 29                                                        ;$2F7A
@@ -3327,13 +3327,13 @@ _justify_line:                                                          ;$2F72
         bne @find_spc           ; not a space, keep going
         
         ; space found:
-        asl ZP_TEMP_ADDR_HI     ; move the space-counter along
+        asl ZP_TEMP_ADDR1_HI    ; move the space-counter along
         bmi @find_spc           ; if it's hit the end, we ignore this space
                                 ; and look for the next one
         
         ; remember the current position,
         ; i.e. where the space is
-        sty ZP_TEMP_ADDR_LO
+        sty ZP_TEMP_ADDR1_LO
 
         ; insert another space, pushing everything forward
         ; (increase the spacing between two words)
@@ -3341,7 +3341,7 @@ _justify_line:                                                          ;$2F72
 :       lda TXT_BUFFER, y                                               ;$2F98
         sta TXT_BUFFER+1, y
         dey 
-        cpy ZP_TEMP_ADDR_LO
+        cpy ZP_TEMP_ADDR1_LO
        .bge :-
 
         ; given the space we added, increase the text-buffer length by 1
@@ -3430,9 +3430,9 @@ _2fee:                                                                  ;$2FEE
 _2ff3:
 .export _2ff3
         lda #< $5770
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda #> $5770
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         jsr _30bb
         stx $78
@@ -3508,9 +3508,9 @@ _3068:
         cpy # $04
         bne _3068
         lda #< $56b0
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda #> $56b0
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         lda # $aa
         sta $77
         sta $78
@@ -3625,16 +3625,16 @@ _30e5:
         lda $9b                 ; mask
 _30f1:
         and $32
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         iny 
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         iny 
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         tya 
         clc 
         adc # $06
         bcc _3103
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
 _3103:
         tay 
         dex 
@@ -3663,14 +3663,14 @@ _next_row:                                                              ;$3122
         ; move to the next row in the bitmap:
         ; -- i.e. add 320-px to the bitmap pointer
 
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         clc 
         adc #< 320
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
 
-        lda ZP_TEMP_ADDR_HI
+        lda ZP_TEMP_ADDR1_HI
         adc #> 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         rts 
 
@@ -3694,25 +3694,25 @@ _3149:
         sta $9a
         lda # $00
 _314d:
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         iny 
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         iny 
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         iny 
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         tya 
         clc 
         adc # $05
         tay 
         cpy # $1e
         bcc _3134
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $3f
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # $01
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         rts 
 
 ;===============================================================================
@@ -3858,7 +3858,7 @@ _3244:
         lsr 
         tax 
         lda _28a4 + 0, x
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         lda _28a4 + 1, x
         jsr _3581
 
@@ -4382,9 +4382,9 @@ _357a:
 
 _357b:
         lda #< POLYOBJ_01       ;=$F925
-        sta $5b
+        sta ZP_TEMP_ADDR2_LO
         lda #> POLYOBJ_01       ;=$F925
-_3581:  sta $5c
+_3581:  sta ZP_TEMP_ADDR2_HI
 
         ldy # $02
         jsr _358f

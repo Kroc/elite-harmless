@@ -19,9 +19,9 @@ ZP_GOATSOUP_pt3         = $04
 ZP_GOATSOUP_pt4         = $05
 
 ZP_TEMP_VAR             = $06   ; a temporary single byte
-ZP_TEMP_ADDR            = $07   ; a temporary word / addr
-ZP_TEMP_ADDR_LO         = $07
-ZP_TEMP_ADDR_HI         = $08
+ZP_TEMP_ADDR1           = $07   ; a temporary word / addr
+ZP_TEMP_ADDR1_LO        = $07
+ZP_TEMP_ADDR1_HI        = $08
 
 ;-------------------------------------------------------------------------------
 
@@ -165,6 +165,8 @@ ZP_POLYOBJ01_POS        = $3e
 
 ;                       = $43   ; something to do with viewport height
 
+;                       = $44   ; often related to `ZP_POLYOBJ01_XPOS_pt2`
+
 ;-------------------------------------------------------------------------------
 
 ; a working copy of the zero-page poly object rotation matrix:
@@ -212,6 +214,10 @@ ZP_HULL_ADDR_HI         = $58
 ZP_POLYOBJ_ADDR         = $59
 ZP_POLYOBJ_ADDR_LO      = $59
 ZP_POLYOBJ_ADDR_HI      = $5a
+
+ZP_TEMP_ADDR2           = $5b
+ZP_TEMP_ADDR2_LO        = $5b
+ZP_TEMP_ADDR2_HI        = $5c
 
 ;-------------------------------------------------------------------------------
 
