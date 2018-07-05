@@ -221,8 +221,38 @@ ZP_TEMP_ADDR2_HI        = $5c
 
 ;-------------------------------------------------------------------------------
 
-VAR_X                   = $6b   ; a common "X" variable
-VAR_Y                   = $6c   ; a common "Y" variable
+;                       = $5d   ; "VAR_XX_LO"?
+;                       = $5e   ; "VAR_XX_HI"?
+
+;                       = $5f   ; "VAR_YY_LO"?
+;                       = $60   ; "VAR_YY_HI"?
+
+;                       = $61   ; "SUNX_LO"?    location of SUN on screen?
+;                       = $62   ; "SUNX_HI"?
+
+;                       = $63   ;?
+;                       = $64   ;?
+
+;-------------------------------------------------------------------------------
+
+;                       = $65   ; hyperspace counter (inner)
+;                       = $66   ; hyperspace counter (outer)
+
+;-------------------------------------------------------------------------------
+
+;                       = $67   ;?
+
+;                       = $68   ; "roll magnitude"?
+;                       = $69   ; "roll sign"?
+
+;                       = $6a   ; "move count"?
+
+;-------------------------------------------------------------------------------
+
+ZP_VAR_X                = $6b   ; a common "X" variable
+ZP_VAR_Y                = $6c   ; a common "Y" variable
+
+ZP_VAR_X2               = $6d
 
 ZP_SEED                 = $7f
 ZP_SEED_pt1             = $7f

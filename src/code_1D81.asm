@@ -413,7 +413,7 @@ _1ece:                                                                  ;$1ECE
         sta $69
         stx $048d
         eor # %10000000
-        sta $6a
+        sta $6a                 ; move count?
         tya 
         bpl _1eee
         eor # %11111111
@@ -455,11 +455,14 @@ _1f20:
         sta $64
         ora $94
         sta $63
+        
         lda _8d10
         beq _1f33
+        
         lda $96                 ; player's ship speed?
         cmp # $28
         bcs _1f33
+        
         inc $96                 ; player's ship speed?
 _1f33:
         lda _8d15
@@ -715,7 +718,7 @@ _20e3:
         cmp # $d6
         bcc _2107
         jsr _8c7b
-        lda $6d
+        lda ZP_VAR_X2
         cmp # $59
         bcc _2107
         lda ZP_POLYOBJ_M1x0_HI
@@ -1770,24 +1773,24 @@ _27cd:  bne _27cd               ; infinite loop, why?
 ; unreferenced / unused?
 ;$27D2:
         lda $bb
-        sta VAR_Y
+        sta ZP_VAR_Y
         asl 
         sta $6e
         asl 
         sta $70
         jsr _9a2c
         lda ZP_POLYOBJ_XPOS_pt3 ;=$0b
-        sta $6d
+        sta ZP_VAR_X2
         eor $72
 _27e5:
         bmi _27e5               ; infinite loop, why??
         clc 
         lda $71
         adc ZP_POLYOBJ_XPOS_pt1 ;=$09
-        sta VAR_X
+        sta ZP_VAR_X
         lda ZP_POLYOBJ_XPOS_pt2 ;=$0A
         adc # $00
-        sta VAR_Y
+        sta ZP_VAR_Y
         jmp _9db3               ; SPEED: jump to a jump (`_9dd9`)
 
 ;===============================================================================
@@ -1797,22 +1800,22 @@ _27e5:
         lda ZP_POLYOBJ_XPOS_pt1 ;=$09
         sec 
         sbc $71
-        sta VAR_X
+        sta ZP_VAR_X
         lda ZP_POLYOBJ_XPOS_pt2 ;=$0a
         sbc # $00
-        sta VAR_Y
+        sta ZP_VAR_Y
 _2804:  bcs _2804               ; infinite loop, why??
         eor # %11111111
-        sta VAR_Y
+        sta ZP_VAR_Y
         lda # $01
-        sbc VAR_X
-        sta VAR_X
+        sbc ZP_VAR_X
+        sta ZP_VAR_X
         bcc _2814
-        inc VAR_Y
+        inc ZP_VAR_Y
 _2814:
-        lda $6d
+        lda ZP_VAR_X2
         eor # %10000000
-        sta $6d
+        sta ZP_VAR_X2
         lda ZP_POLYOBJ_YPOS_pt3 ;$0E
         sta $70
         eor $74
@@ -2001,12 +2004,12 @@ _28e5:
 ;===============================================================================
 .export _28e5
 
-        sta VAR_Y
+        sta ZP_VAR_Y
         sta $6e
         ldx # $00
-        stx VAR_X
+        stx ZP_VAR_X
         dex 
-        stx $6d
+        stx ZP_VAR_X2
         jmp _ab91
 
 _28f3:
@@ -2014,7 +2017,7 @@ _28f3:
 .export _28f3
 
         jsr _811e
-        sty VAR_Y
+        sty ZP_VAR_Y
         lda # $00
         sta $0580, y
         jmp _affa
@@ -2053,12 +2056,12 @@ _2918:
 ;===============================================================================
 ;
 ;       Y = ?
-;   VAR_X = ?
-;   VAR_Y = ?
+;   ZP_VAR_X = ?
+;   ZP_VAR_Y = ?
 ;
 .export _2918
 
-        lda VAR_X
+        lda ZP_VAR_X
         bpl :+
         
         ; swap negative number to positive?
@@ -2069,12 +2072,12 @@ _2918:
 :       eor # %10000000                                                 ;$2921
         tax 
         
-        lda VAR_Y
+        lda ZP_VAR_Y
         and # %01111111
         cmp # ELITE_VIEWPORT_HEIGHT / 2
        .bge _2976
 
-        lda VAR_Y
+        lda ZP_VAR_Y
         bpl :+
         
         ; flip pos/neg sign
@@ -2176,11 +2179,11 @@ _2988:
         bne _29fa
 _2998:
         lda $85
-        sta VAR_X
+        sta ZP_VAR_X
         lda $86
-        sta VAR_Y
+        sta ZP_VAR_Y
         lda $87
-        sta $6d
+        sta ZP_VAR_X2
         lda $88
         sta $6e
         lda $89
@@ -2195,26 +2198,26 @@ _2998:
         bcs _2988
         lda $06f4
         beq _29d2
-        lda VAR_X
-        ldy $6d
-        sta $6d
-        sty VAR_X
-        lda VAR_Y
+        lda ZP_VAR_X
+        ldy ZP_VAR_X2
+        sta ZP_VAR_X2
+        sty ZP_VAR_X
+        lda ZP_VAR_Y
         ldy $6e
         sta $6e
-        sty VAR_Y
+        sty ZP_VAR_Y
 _29d2:
         ldy $7e
         lda _27a3, y
         cmp # $ff
         bne _29e6
-        lda VAR_X
+        lda ZP_VAR_X
         sta _26a4, y
-        lda VAR_Y
+        lda ZP_VAR_Y
         sta _27a4, y            ; writing to code??
         iny 
 _29e6:
-        lda $6d
+        lda ZP_VAR_X2
         sta _26a4, y
         lda $6e
         sta _27a4, y            ; writing to code??
@@ -2246,10 +2249,10 @@ dust_swap_xy:                                                           ;$2A12
 
 :       ldx DUST_Y, y           ; get dust-particle Y-position          ;$2A15
         lda DUST_X, y           ; get dust-particle X-position
-        sta VAR_Y               ; (put aside X-position)
+        sta ZP_VAR_Y               ; (put aside X-position)
         sta DUST_Y, y           ; save the Y-value to the X-position
         txa                     ; move the Y-position into A
-        sta VAR_X               ; (put aside Y-value)
+        sta ZP_VAR_X               ; (put aside Y-value)
         sta DUST_X, y           ; write the X-value to the Y-position
         lda DUST_Z, y           ; get dust z-position
         sta VAR_Z               ; (put aside Z-position)
@@ -2301,21 +2304,21 @@ _2a43:
         adc $06c9, y
         sta $5f
         sta $9b
-        lda VAR_Y
+        lda ZP_VAR_Y
         adc $60
         sta $60
         sta $9c
         lda DUST_X, y
-        sta VAR_X
+        sta ZP_VAR_X
         jsr _3997
         sta $5e
         lda ZP_VAR_P1
         adc $06af, y
         sta $5d
-        lda VAR_X
+        lda ZP_VAR_X
         adc $5e
         sta $5e
-        eor $6a
+        eor $6a                 ; move count?
         jsr _393c
         jsr _3ad1
         sta $60
@@ -2351,14 +2354,14 @@ _2a43:
         eor # %10000000
         jsr _290f
         lda $5e
-        sta VAR_X
+        sta ZP_VAR_X
         sta DUST_X, y
         and # %01111111
         cmp # $78
         bcs _2b0a
         lda $60
         sta DUST_Y, y
-        sta VAR_Y
+        sta ZP_VAR_Y
         and # %01111111
         cmp # $78
         bcs _2b0a
@@ -2380,12 +2383,12 @@ _2b09:
 _2b0a:
         jsr get_random_number
         ora # %00000100
-        sta VAR_Y
+        sta ZP_VAR_Y
         sta DUST_Y, y
 
         jsr get_random_number
         ora # %00001000
-        sta VAR_X
+        sta ZP_VAR_X
         sta DUST_X, y
         
         jsr get_random_number
@@ -2393,7 +2396,7 @@ _2b0a:
         sta DUST_Z, y
         sta VAR_Z
         
-        lda VAR_Y
+        lda ZP_VAR_Y
         jmp _2b00
 
 ;===============================================================================
@@ -2410,13 +2413,13 @@ _2b30:
         ora # %00000001
         sta $9a
         lda DUST_X, y
-        sta VAR_X
+        sta ZP_VAR_X
         jsr _3997
         sta $5e
         lda $06af, y
         sbc ZP_VAR_P1
         sta $5d
-        lda VAR_X
+        lda ZP_VAR_X
         sbc $5e
         sta $5e
         jsr _3992
@@ -2425,7 +2428,7 @@ _2b30:
         sbc ZP_VAR_P1
         sta $5f
         sta $9b
-        lda VAR_Y
+        lda ZP_VAR_Y
         sbc $60
         sta $60
         sta $9c
@@ -2442,7 +2445,7 @@ _2b30:
         jsr _3ad1
         sta $60
         stx $5f
-        eor $6a
+        eor $6a                 ; move count?
         jsr _3934
         jsr _3ad1
         sta $5e
@@ -2475,11 +2478,11 @@ _2b30:
         lda $63
         jsr _290f
         lda $5e
-        sta VAR_X
+        sta ZP_VAR_X
         sta DUST_X, y
         lda $60
         sta DUST_Y, y
-        sta VAR_Y
+        sta ZP_VAR_Y
         and # %01111111
         cmp # $6e
         bcs _2bf7
@@ -2509,10 +2512,10 @@ _2bf7:
         lsr 
         lda # $fc
         ror 
-        sta VAR_X
+        sta ZP_VAR_X
         sta DUST_X, y
         jsr get_random_number
-        sta VAR_Y
+        sta ZP_VAR_Y
         sta DUST_Y, y
         jmp _2bed
 
@@ -2520,12 +2523,12 @@ _2bf7:
 
 _2c1a:
         jsr get_random_number
-        sta VAR_X
+        sta ZP_VAR_X
         sta DUST_X, y
         lsr 
         lda # $e6
         ror 
-        sta VAR_Y
+        sta ZP_VAR_Y
         sta DUST_Y, y
         bne _2bed
 _2c2d:
@@ -2682,7 +2685,7 @@ _2d04:
 _2d0e:
         lda $04c1
         beq _2d18
-        lda # VAR_Y
+        lda # ZP_VAR_Y
         jsr _2d61
 _2d18:
         lda # $71
@@ -4335,33 +4338,33 @@ _352c:
         stx $27
         lda $a5
         bpl _3556
-        eor VAR_X
-        eor VAR_Y
+        eor ZP_VAR_X
+        eor ZP_VAR_Y
         asl 
         lda # $02
         ror 
         sta $26
-        lda VAR_X
+        lda ZP_VAR_X
         asl 
         cmp # $0c
         bcs _350a
-        lda VAR_Y
+        lda ZP_VAR_Y
         asl 
         lda # $02
         ror 
         sta $27
-        lda VAR_Y
+        lda ZP_VAR_Y
         asl 
         cmp # $0c
         bcs _350a
 _3556:
         stx $26
         lda ZP_POLYOBJ_M2x0_HI
-        sta VAR_X
+        sta ZP_VAR_X
         lda ZP_POLYOBJ_M2x1_HI
-        sta VAR_Y
+        sta ZP_VAR_Y
         lda ZP_POLYOBJ_M2x2_HI
-        sta $6d
+        sta ZP_VAR_X2
         ldy # $10
         jsr _35b3
         asl 
@@ -4423,31 +4426,31 @@ _358f:
 _35b3:
         ldx POLYOBJ_01 + PolyObject::xpos + 0, y        ;=$F925
         stx $9a
-        lda VAR_X
+        lda ZP_VAR_X
         jsr _3aa8
         ldx POLYOBJ_01 + PolyObject::xpos + 2, y        ;=$F927
         stx $9a
-        lda VAR_Y
+        lda ZP_VAR_Y
         jsr _3ace
         sta $9c
         stx $9b
         ldx POLYOBJ_01 + PolyObject::ypos + 1, y        ;=$F929
         stx $9a
-        lda $6d
+        lda ZP_VAR_X2
         jmp _3ace
 
 ;===============================================================================
 
 _35d5:
-        lda VAR_X
+        lda ZP_VAR_X
         eor # %10000000
-        sta VAR_X
-        lda VAR_Y
+        sta ZP_VAR_X
+        lda ZP_VAR_Y
         eor # %10000000
-        sta VAR_Y
-        lda $6d
+        sta ZP_VAR_Y
+        lda ZP_VAR_X2
         eor # %10000000
-        sta $6d
+        sta ZP_VAR_X2
         rts 
 
 ;===============================================================================
@@ -4827,12 +4830,12 @@ _37fa:
         lda $06af, y
         sta ZP_VAR_P1
         lda DUST_X, y
-        sta VAR_X
+        sta ZP_VAR_X
         jsr _3ad1
         sta $9c
         stx $9b
         lda DUST_Y, y
-        sta VAR_Y
+        sta ZP_VAR_Y
         eor $94
         ldx $64
         jsr _393e
@@ -4841,7 +4844,7 @@ _37fa:
         sta $5e
         ldx $06c9, y
         stx $9b
-        ldx VAR_Y
+        ldx ZP_VAR_Y
         stx $9c
         ldx $64
         eor $95
@@ -4875,7 +4878,7 @@ _37fa:
         jsr _290f
         lda $5e
         sta DUST_X, y
-        sta VAR_X
+        sta ZP_VAR_X
         and # %01111111
         eor # %01111111
         cmp $ba
@@ -4883,7 +4886,7 @@ _37fa:
         beq _38be
         lda $60
         sta DUST_Y, y
-        sta VAR_Y
+        sta ZP_VAR_Y
         and # %01111111
 _3895:
 .export _3895
@@ -4905,7 +4908,7 @@ _38a3:
         eor $b0
         sta $69
         eor # %10000000
-        sta $6a
+        sta $6a                 ; move count?
         lda $94
         eor $b0
         sta $94
@@ -4917,20 +4920,20 @@ _38a3:
 
 _38be:
         jsr get_random_number
-        sta VAR_Y
+        sta ZP_VAR_Y
         sta DUST_Y, y
         lda # $73
         ora $b0
-        sta VAR_X
+        sta ZP_VAR_X
         sta DUST_X, y
         bne _38e2
 _38d1:
         jsr get_random_number
-        sta VAR_X
+        sta ZP_VAR_X
         sta DUST_X, y
         lda # $6e
-        ora $6a
-        sta VAR_Y
+        ora $6a                 ; move count?
+        sta ZP_VAR_Y
         sta DUST_Y, y
 _38e2:
         jsr get_random_number
@@ -5069,7 +5072,7 @@ _398d:
 
 _3992:
         lda DUST_Y, y
-        sta VAR_Y
+        sta ZP_VAR_Y
 _3997:
         and # %01111111
         sta ZP_VAR_P1
@@ -5296,17 +5299,17 @@ _3aa8:
 _3ab2:
         ldx ZP_POLYOBJ_XPOS_pt1, y
         stx $9a
-        lda VAR_X
+        lda ZP_VAR_X
         jsr _3aa8
         ldx ZP_POLYOBJ_XPOS_pt3, y
         stx $9a
-        lda VAR_Y
+        lda ZP_VAR_Y
         jsr _3ace
         sta $9c
         stx $9b
         ldx ZP_POLYOBJ_YPOS_pt2, y
         stx $9a
-        lda $6d
+        lda ZP_VAR_X2
 _3ace:
 .export _3ace
         jsr _3a54
@@ -5724,19 +5727,19 @@ _3cfa:
         lda # $30
         ldy # $d0
 _3d09:
-        sta $6d
+        sta ZP_VAR_X2
         lda $06f0
-        sta VAR_X
+        sta ZP_VAR_X
         lda $06f1
-        sta VAR_Y
+        sta ZP_VAR_Y
         lda # $8f
         sta $6e
         jsr _ab91
         lda $06f0
-        sta VAR_X
+        sta ZP_VAR_X
         lda $06f1
-        sta VAR_Y
-        sty $6d
+        sta ZP_VAR_Y
+        sty ZP_VAR_X2
         lda # $8f
         sta $6e
         jmp _ab91
