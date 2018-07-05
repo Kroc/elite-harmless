@@ -125,8 +125,14 @@ ZP_MISSILE_STATE        = $28   ; BBC says "display/exploding state|missiles"??
 ;                       = $2B
 
 ZP_VAR_P                = $2E   ; a common variable called "P"
-ZP_VAR_P_LO             = $2E
-ZP_VAR_P_HI             = $2F
+ZP_VAR_P1               = $2E
+ZP_VAR_P2               = $2F
+ZP_VAR_P3               = $30
+
+;-------------------------------------------------------------------------------
+
+ZP_CURSOR_COL           = $31
+ZP_CURSOR_ROW           = $33
 
 ;-------------------------------------------------------------------------------
 
