@@ -31,6 +31,13 @@ ZP_GOATSOUP_pt4         = $05
 
 ;-------------------------------------------------------------------------------
 
+ZP_TEMP_VAR             = $06   ; a temporary single byte
+ZP_TEMP_ADDR            = $07   ; a temporary word / addr
+ZP_TEMP_ADDR_LO         = $07
+ZP_TEMP_ADDR_HI         = $08
+
+;-------------------------------------------------------------------------------
+
 MISSION_FLAGS           = $0499
 
 .enum   missions

@@ -1404,7 +1404,7 @@ _2438:  ; restore state and exit                                        ;$2438
 
 _2441:  ; process msg tokens $5B..$80                                   ;$2441
         ;-----------------------------------------------------------------------
-        sta $07                 ; put token aside
+        sta ZP_TEMP_ADDR_LO     ; put token aside
         
         ; put aside our current location in the text data
        .phy                     ; push Y to stack (via A)
@@ -1431,7 +1431,7 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 
         ; get back the token value and lookup another message index to print
         ; (since these tokens are $5B..$80, we index the table back $5B bytes)
-        ldx $07
+        ldx ZP_TEMP_ADDR_LO
         adc _3eac - $5B, x
 
         jsr print_docked_str    ; print the new message
@@ -2095,7 +2095,7 @@ _293a:
 ;
 .export _293a
 
-        sty $06                 ; preserve Y through this ordeal
+        sty ZP_TEMP_VAR         ; preserve Y through this ordeal
 
         tay 
         txa 
@@ -2108,10 +2108,10 @@ _293a:
         ; add this to the bitmap address for the given row
         clc 
         adc row_to_bitmap_lo, y
-        sta $07
+        sta ZP_TEMP_ADDR_LO
         lda row_to_bitmap_hi, y
         adc # $00
-        sta $08
+        sta ZP_TEMP_ADDR_HI
 
         ; get the row within the character cell
         tya 
@@ -2146,7 +2146,7 @@ _296d:
         sta [$07], y
 
 _2974:
-        ldy $06                 ; restore Y
+        ldy ZP_TEMP_VAR         ; restore Y
 _2976:
         rts 
 
@@ -3198,7 +3198,7 @@ TXT_BUFFER = $0648              ; $0648..$06A2? -- 3 lines
 
         ; put X parameter aside,
         ; we need the X register for now
-        stx $07
+        stx ZP_TEMP_ADDR_LO
 
         ; disable the automatic lower-case transformation
         ldx # %11111111
@@ -3228,7 +3228,7 @@ TXT_BUFFER = $0648              ; $0648..$06A2? -- 3 lines
 :       stx txt_lcase_flag                                              ;$24F0
 
         ; get back the original X value
-        ldx $07
+        ldx ZP_TEMP_ADDR_LO
 
         ; check 'use buffer' flag
         bit txt_buffer_flag     ; check if bit 7 is set
@@ -3250,7 +3250,7 @@ _add_to_buffer:                                                         ;$2F4D
 :       ldx txt_buffer_index                                            ;$2F56
         sta TXT_BUFFER, x       ; add the character to the buffer
         
-        ldx $07
+        ldx ZP_TEMP_ADDR_LO
         inc txt_buffer_index
 
         clc 
@@ -3294,15 +3294,15 @@ _flush_line:                                                            ;$2F67
         ; note that whatever the value of $08 prior to calling this routine,
         ; shifting it right once will ensure that the 'minus' check below will
         ; always fail, so $08 will be 'reset' to %01000000 for this routine
-        lsr $08
+        lsr ZP_TEMP_ADDR_HI
 
 _justify_line:                                                          ;$2F72
         ;-----------------------------------------------------------------------
-        lda $08                 ; check the space-counter
+        lda ZP_TEMP_ADDR_HI     ; check the space-counter
         bmi :+                  
 
         lda # %01000000         ; reset space-counter
-        sta $08                 ; to its starting position
+        sta ZP_TEMP_ADDR_HI     ; to its starting position
 
         ; begin at the end of the line and walk backwards through it:
 :       ldy # 29                                                        ;$2F7A
@@ -3324,13 +3324,13 @@ _justify_line:                                                          ;$2F72
         bne @find_spc           ; not a space, keep going
         
         ; space found:
-        asl $08                 ; move the space-counter along
+        asl ZP_TEMP_ADDR_HI     ; move the space-counter along
         bmi @find_spc           ; if it's hit the end, we ignore this space
                                 ; and look for the next one
         
         ; remember the current position,
         ; i.e. where the space is
-        sty $07
+        sty ZP_TEMP_ADDR_LO
 
         ; insert another space, pushing everything forward
         ; (increase the spacing between two words)
@@ -3338,7 +3338,7 @@ _justify_line:                                                          ;$2F72
 :       lda TXT_BUFFER, y                                               ;$2F98
         sta TXT_BUFFER+1, y
         dey 
-        cpy $07
+        cpy ZP_TEMP_ADDR_LO
        .bge :-
 
         ; given the space we added, increase the text-buffer length by 1
@@ -3427,16 +3427,16 @@ _2fee:                                                                  ;$2FEE
 _2ff3:
 .export _2ff3
         lda #< $5770
-        sta $07
+        sta ZP_TEMP_ADDR_LO
         lda #> $5770
-        sta $08
+        sta ZP_TEMP_ADDR_HI
         
         jsr _30bb
         stx $78
         sta $77
         
         lda # $0e               ; threshold to change colour?
-        sta $06
+        sta ZP_TEMP_VAR
         
         lda $96                 ; player's ship speed?
         jsr hud_drawbar_32
@@ -3471,7 +3471,7 @@ _302b:
         sta $78
 
         ldx # $03               ; 4 energy banks
-        stx $06
+        stx ZP_TEMP_VAR
 _3044:
         sty $71, x
         dex 
@@ -3505,9 +3505,9 @@ _3068:
         cpy # $04
         bne _3068
         lda #< $56b0
-        sta $07
+        sta ZP_TEMP_ADDR_LO
         lda #> $56b0
-        sta $08
+        sta ZP_TEMP_ADDR_HI
         lda # $aa
         sta $77
         sta $78
@@ -3525,7 +3525,7 @@ _3068:
         stx $78
         sta $77
         ldx # $0b
-        stx $06
+        stx ZP_TEMP_VAR
 
         lda PLAYER_TEMP_CABIN
         jsr hud_drawbar_128
@@ -3534,7 +3534,7 @@ _3068:
         jsr hud_drawbar_128
 
         lda # $f0
-        sta $06
+        sta ZP_TEMP_VAR
 
         lda $06f3
         jsr hud_drawbar_128
@@ -3596,7 +3596,7 @@ hud_drawbar:                                                            ;$30CF
 
         ldx # %11111111         ; mask?
         stx $9b
-        cmp $06                 ; "threshold to change colour"
+        cmp ZP_TEMP_VAR         ; "threshold to change colour"
         bcs :+
         
         lda $78
@@ -3631,7 +3631,7 @@ _30f1:
         clc 
         adc # $06
         bcc _3103
-        inc $08
+        inc ZP_TEMP_ADDR_HI
 _3103:
         tay 
         dex 
@@ -3660,14 +3660,14 @@ _next_row:                                                              ;$3122
         ; move to the next row in the bitmap:
         ; -- i.e. add 320-px to the bitmap pointer
 
-        lda $07
+        lda ZP_TEMP_ADDR_LO
         clc 
         adc #< 320
-        sta $07
+        sta ZP_TEMP_ADDR_LO
 
-        lda $08
+        lda ZP_TEMP_ADDR_HI
         adc #> 320
-        sta $08
+        sta ZP_TEMP_ADDR_HI
         
         rts 
 
@@ -3704,12 +3704,12 @@ _314d:
         tay 
         cpy # $1e
         bcc _3134
-        lda $07
+        lda ZP_TEMP_ADDR_LO
         adc # $3f
-        sta $07
-        lda $08
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         adc # $01
-        sta $08
+        sta ZP_TEMP_ADDR_HI
         rts 
 
 ;===============================================================================
@@ -4220,7 +4220,7 @@ _348d:
         bmi _349a
         cmp $ab
         bcc _349a
-        lda # $03
+        lda #> $0300            ; processed vertex data is stored at $0300+
         sta ZP_POLYOBJ_VERTX_HI
 _3499:
         rts 
@@ -4231,10 +4231,12 @@ _349a:
         and # %01111111
         cmp # $12
         bcc _34ab
+
         lda # $ff
         ldx $a5
         cpx # $01
         bne _34a9
+        
         asl 
 _34a9:
         sta ZP_POLYOBJ_VERTX_HI
@@ -4303,6 +4305,7 @@ _350a:
         stx ZP_POLYOBJ_VERTX_HI
         inx 
         stx ZP_POLYOBJ_VERTX_LO
+
         rts 
 
         ;-----------------------------------------------------------------------
@@ -4645,7 +4648,7 @@ _3708:
 .export _3708
         lda # $fe
 _370a:
-        sta $06
+        sta ZP_TEMP_VAR
        .phx                     ; push X to stack (via A)
         lda $57
         pha 
@@ -4681,7 +4684,7 @@ _371c:
         pla 
         tax 
 _374d:
-        lda $06
+        lda ZP_TEMP_VAR
         sta $29
         lsr $26
         asl $26
@@ -4993,31 +4996,31 @@ _393e:
         beq _3981
         tax 
         dex 
-        stx $06
+        stx ZP_TEMP_VAR
         lda # $00
         lsr $2e
         bcc _3956
-        adc $06
+        adc ZP_TEMP_VAR
 _3956:
         ror 
         ror $2e
         bcc _395d
-        adc $06
+        adc ZP_TEMP_VAR
 _395d:
         ror 
         ror $2e
         bcc _3964
-        adc $06
+        adc ZP_TEMP_VAR
 _3964:
         ror 
         ror $2e
         bcc _396b
-        adc $06
+        adc ZP_TEMP_VAR
 _396b:
         ror 
         ror $2e
         bcc _3972
-        adc $06
+        adc ZP_TEMP_VAR
 _3972:
         ror 
         ror $2e
@@ -5222,41 +5225,41 @@ _3a54:
         beq _3aa5
         tax 
         dex 
-        stx $06
+        stx ZP_TEMP_VAR
         lda # $00
         tax 
         bcc _3a72
-        adc $06
+        adc ZP_TEMP_VAR
 _3a72:
         ror 
         ror $2e
         bcc _3a79
-        adc $06
+        adc ZP_TEMP_VAR
 _3a79:
         ror 
         ror $2e
         bcc _3a80
-        adc $06
+        adc ZP_TEMP_VAR
 _3a80:
         ror 
         ror $2e
         bcc _3a87
-        adc $06
+        adc ZP_TEMP_VAR
 _3a87:
         ror 
         ror $2e
         bcc _3a8e
-        adc $06
+        adc ZP_TEMP_VAR
 _3a8e:
         ror 
         ror $2e
         bcc _3a95
-        adc $06
+        adc ZP_TEMP_VAR
 _3a95:
         ror 
         ror $2e
         bcc _3a9c
-        adc $06
+        adc ZP_TEMP_VAR
 _3a9c:
         ror 
         ror $2e
@@ -5300,7 +5303,7 @@ _3ace:
         jsr _3a54
 _3ad1:
 .export _3ad1
-        sta $06
+        sta ZP_TEMP_VAR
         and # %10000000
         sta $bb
         eor $9c
@@ -5310,7 +5313,7 @@ _3ad1:
         adc $2e
         tax 
         lda $9c
-        adc $06
+        adc ZP_TEMP_VAR
         ora $bb
         rts 
 
@@ -5324,7 +5327,7 @@ _3ae8:
         sec 
         sbc $9b
         tax 
-        lda $06
+        lda ZP_TEMP_VAR
         and # %01111111
         sbc $99
         bcs _3b0a
@@ -5353,16 +5356,16 @@ _3b0d:
         txa 
         and # %01111111
         ldx # $fe
-        stx $06
+        stx ZP_TEMP_VAR
 _3b20:
         asl 
         cmp # $60
         bcc _3b27
         sbc # $60
 _3b27:
-        rol $06
+        rol ZP_TEMP_VAR
         bcs _3b20
-        lda $06
+        lda ZP_TEMP_VAR
         ora $bb
         rts 
 
@@ -5633,7 +5636,7 @@ _3c95:
 .export _3c95
         lda $2e
         eor $9a
-        sta $06
+        sta ZP_TEMP_VAR
         lda $9a
         beq _3cc4
         asl 
@@ -5645,7 +5648,7 @@ _3c95:
         jsr _3cce
         sec 
 _3cad:
-        ldx $06
+        ldx ZP_TEMP_VAR
         bmi _3cc7
         rts 
 
