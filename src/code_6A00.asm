@@ -11232,7 +11232,7 @@ _b16e:                                                                  ;$B16E
         ; this is a trampoline to account for a branch range limitation below
         ; TODO: this could be combined with the one at `_b168` to save 3 bytes
         ;
-_B176:  jmp _b210                                                       ;B176
+_b176:  jmp _b210                                                       ;B176
 
         ;-----------------------------------------------------------------------
 

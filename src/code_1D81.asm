@@ -296,7 +296,7 @@ _1e25:                                                                  ;$1E25
         .byte   $00, $00, $ff, $00
 _1e29:                                                                  ;$1E29
         .byte   $fb
-_1e2a:                                                                  ;$1E2a
+_1e2a:                                                                  ;$1E2A
         .byte   $04, $f7, $08, $ef, $10, $df, $20, $bf
         .byte   $40, $7f, $80
 
@@ -359,7 +359,7 @@ _1e6a:  lda _1e29, y                                                    ;$1E6A
         sta $bb
         
         lda # $01
-_1e94:
+_1e94:                                                                  ;$1E94
         and # %00000001
         beq _1ea4
 
@@ -370,7 +370,7 @@ _1e94:
         
         lda # $00
         sta $bb
-_1ea4:
+_1ea4:                                                                  ;$1EA4
         sta $0531, y
         beq _1eb3
 
@@ -378,7 +378,7 @@ _1ea4:
         ora VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
         sei 
         sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
-_1eb3:
+_1eb3:                                                                  ;$1EB3
         lda $bb
         sta VIC_SPRITE2_X, y
         cli 
@@ -419,13 +419,13 @@ _1ece:                                                                  ;$1ECE
         eor # %11111111
         clc 
         adc # $01
-_1eee:
+_1eee:                                                                  ;$1EEE
         lsr 
         lsr 
         cmp # $08
         bcs _1ef5
         lsr 
-_1ef5:
+_1ef5:                                                                  ;$1EF5
         sta $68
         ora $69
         sta $a6
@@ -442,7 +442,7 @@ _1ef5:
         tya 
         bpl _1f15
         eor # %11111111
-_1f15:
+_1f15:                                                                  ;$1F15
         adc # $04
         lsr 
         lsr 
@@ -451,7 +451,7 @@ _1f15:
         cmp # $03
         bcs _1f20
         lsr 
-_1f20:
+_1f20:                                                                  ;$1F20
         sta $64
         ora $94
         sta $63
@@ -464,13 +464,13 @@ _1f20:
         bcs _1f33
         
         inc $96                 ; player's ship speed?
-_1f33:
+_1f33:                                                                  ;$1F33
         lda _8d15
         beq _1f3e
         dec $96                 ; player's ship speed?
         bne _1f3e
         inc $96                 ; player's ship speed?
-_1f3e:
+_1f3e:                                                                  ;$1F3E
         lda _8d2e
         and PLAYER_MISSILES
         beq _1f55
@@ -482,7 +482,7 @@ _1f3e:
 
         lda # $00
         sta PLAYER_MISSILE_ARMED
-_1f55:
+_1f55:                                                                  ;$1F55
         lda $7c
         bpl _1f6b
         lda _8d36
@@ -495,13 +495,13 @@ _1f55:
 
         ldy # $87
         jsr _b11f
-_1f6b:
+_1f6b:                                                                  ;$1F6B
         lda _8d28
         beq _1f77
         lda $7c
         bmi _1fc2
         jsr _36a6
-_1f77:
+_1f77:                                                                  ;$1F77
         lda _8d0f
         beq _1f8b
         asl $04c3
@@ -510,13 +510,13 @@ _1f77:
         sty _a8e0
         ldy # $0d
         jsr _a858
-_1f8b:
+_1f8b:                                                                  ;$1F8B
         lda _8d23
         beq _1f98
         lda # $00
         sta $0480
         jsr _923b
-_1f98:
+_1f98:                                                                  ;$1F98
         lda _8d13
         and $04c7
         beq _1fa8
@@ -526,11 +526,11 @@ _1f98:
 
         ;-----------------------------------------------------------------------
 
-_1fa8:
+_1fa8:                                                                  ;$1FA8
         lda _8d2a
         beq _1fb0
         jsr _8e29
-_1fb0:
+_1fb0:                                                                  ;$1FB0
         lda _8d3e
         and $04c1
         beq _1fc2
@@ -538,7 +538,7 @@ _1fb0:
         bne _1fc2
         dec $0481
         jsr _b0f4
-_1fc2:
+_1fc2:                                                                  ;$1FC2
         lda _8d38
         and $04c5
         beq _1fd5
@@ -546,7 +546,7 @@ _1fc2:
         beq _1fd5
         sta $0480
         jsr _9204
-_1fd5:
+_1fd5:                                                                  ;$1FD5
         lda # $00
         sta $7b
         sta $97
@@ -577,9 +577,9 @@ _1fd5:
         cmp # $32
         bne _2012
         ldy # $0c
-_2012:
+_2012:                                                                  ;$2012
         bne _201d
-_2014:
+_2014:                                                                  ;$2014
         cmp # $97
         beq _201b
         ldy # $0a
@@ -587,20 +587,20 @@ _2014:
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
-_201b:
+_201b:                                                                  ;$201B
         ldy # $0b
-_201d:
+_201d:                                                                  ;$201D
         jsr _a858
         jsr _3cdb
         pla 
         bpl _2028
         lda # $00
-_2028:
+_2028:                                                                  ;$2028
         and # %11111010
         sta $0487
-_202d:
+_202d:                                                                  ;$202D
         ldx # $00
-_202f:
+_202f:                                                                  ;$202F
 .export _202f
         stx $9d
         lda $0452, x            ; ship slots?
@@ -610,7 +610,7 @@ _202f:
 
         ;-----------------------------------------------------------------------
 
-_2039:
+_2039:                                                                  ;$2039
         sta $a5
         jsr _3e87
         
@@ -702,10 +702,10 @@ _2039:
         beq _2122
         adc # $01
         bne _20c5
-_20c0:
+_20c0:                                                                  ;$20C0
         jsr get_random_number
         and # %00000111
-_20c5:
+_20c5:                                                                  ;$20C5
         jsr _6a00
         ldy # $4e
         bcs _2110
@@ -718,12 +718,12 @@ _20c5:
         asl $2d
         sec 
         ror $2d
-_20e0:
+_20e0:                                                                  ;$20E0
         jmp _2131
 
         ;-----------------------------------------------------------------------
 
-_20e3:
+_20e3:                                                                  ;$20E3
         ;(last byte of `POLYOBJ_01`?)
         lda POLYOBJ_01 + PolyObject::ai_state   ;=$F949
         and # %00000100
@@ -740,13 +740,13 @@ _20e3:
         and # %01111111
         cmp # $50
         bcc _2107
-_2101:
+_2101:                                                                  ;$2101
         jsr _923b
         jmp _1d81
 
         ;-----------------------------------------------------------------------
 
-_2107:
+_2107:                                                                  ;$2107
         lda $96                 ; player's ship speed?
         cmp # $05
         bcc _211a
@@ -754,32 +754,32 @@ _2107:
 
         ;-----------------------------------------------------------------------
 
-_2110:
+_2110:                                                                  ;$2110
         jsr _a813
         asl $28
         sec 
         ror $28
         bne _2131
-_211a:
+_211a:                                                                  ;$211A
         lda # $01
         sta $96                 ; player's ship speed?
         lda # $05
         bne _212b
-_2122:
+_2122:                                                                  ;$2122
         asl $28
         sec 
         ror $28
         lda $2c
         sec 
         ror 
-_212b:
+_212b:                                                                  ;$212B
         jsr _7bd2
         jsr _a813
-_2131:
+_2131:                                                                  ;$2131
         lda $2d
         bpl _2138
         jsr _b410
-_2138:
+_2138:                                                                  ;$2138
         lda $a0
         bne _21ab
         jsr _a626
@@ -793,7 +793,7 @@ _2138:
         ldx $9d
         ldy # $27
         jsr _7d0e
-_2153:
+_2153:                                                                  ;$2153
         lda $7b
         beq _21a8
         ldx # $0f
@@ -808,7 +808,7 @@ _2153:
         bne _21a3
         lsr $7b
         lsr $7b
-_2170:
+_2170:                                                                  ;$2170
         lda $2c
         sec 
         sbc $7b
@@ -826,7 +826,7 @@ _2170:
         ldx # $08
         and # %00000011
         jsr _2359
-_2192:
+_2192:                                                                  ;$2192
         ldy # $04
         jsr _234c
         ldy # $05
@@ -834,14 +834,14 @@ _2192:
 
         ldx $a5
         jsr _a7a6
-_21a1:
+_21a1:                                                                  ;$21A1
         sta $2c
-_21a3:
+_21a3:                                                                  ;$21A3
         lda $a5
         jsr _36c5
-_21a8:
+_21a8:                                                                  ;$21A8
         jsr _9a86
-_21ab:
+_21ab:                                                                  ;$21AB
         ldy # $23
         lda $2c
         sta [ZP_POLYOBJ_ADDR], y
@@ -868,17 +868,17 @@ _21ab:
         jsr _7481
         lda # $00
         jsr _900d
-_21e2:
+_21e2:                                                                  ;$21E2
         jmp _829a
 
         ;-----------------------------------------------------------------------
 
-_21e5:
+_21e5:                                                                  ;$21E5
         lda $a5
         bmi _21ee
         jsr _87a4
         bcc _21e2
-_21ee:
+_21ee:                                                                  ;$21EE
         ldy # $1f
         lda $28
         sta [ZP_POLYOBJ_ADDR], y
@@ -888,13 +888,13 @@ _21ee:
 
         ;-----------------------------------------------------------------------
 
-_21fa:
+_21fa:                                                                  ;$21FA
         lda $04c3               ; energy bomb?
         bpl _2207
         asl $04c3
         bmi _2207
         jsr _2367
-_2207:
+_2207:                                                                  ;$2207
         lda $a3                 ; move counter?
         and # %00000111
         bne _227a
@@ -908,13 +908,13 @@ _2207:
         ldx PLAYER_SHIELD_FRONT
         jsr _7b61
         stx PLAYER_SHIELD_FRONT
-_2224:
+_2224:                                                                  ;$2224
         sec 
         lda $04c4               ; energy charge rate?
         adc PLAYER_ENERGY
         bcs _2230
         sta PLAYER_ENERGY
-_2230:
+_2230:                                                                  ;$2230
         lda $0482
         bne _2277
         lda $a3                 ; move counter?
@@ -979,17 +979,17 @@ _2230:
         bcc _2277
         jsr _80ff
         jsr _7c24
-_2277:
+_2277:                                                                  ;$2277
         jmp _231c
 
         ;-----------------------------------------------------------------------
 
-_227a:
+_227a:                                                                  ;$227A
         lda $0482
         bne _2277
         lda $a3                 ; move counter?
         and # %00011111
-_2283:
+_2283:                                                                  ;$2283
         cmp # $0a
         bne _22b5
         lda # $32
@@ -997,7 +997,7 @@ _2283:
         bcc _2292
         asl 
         jsr _900d
-_2292:
+_2292:                                                                  ;$2292
         ldy # $ff
         sty $06f3
         iny 
@@ -1012,19 +1012,19 @@ _2292:
         lda $9a
         sta $06f3
         bne _231c
-_22b2:
+_22b2:                                                                  ;$22B2
         jmp _87d0
 
         ;-----------------------------------------------------------------------
 
-_22b5:
+_22b5:                                                                  ;$22B5
         cmp # $0f
         bne _22c2
         lda $0480
         beq _231c
         lda # $7b
         bne _2319
-_22c2:
+_22c2:                                                                  ;$22C2
         cmp # $14
         bne _231c
         lda # $1e
@@ -1061,7 +1061,7 @@ _22c2:
         ror PLAYER_TRUMBLES_LO
 .endif
 
-_2303:
+_2303:                                                                  ;$2303
         lda $04c2
         beq _231c
         lda $98
@@ -1070,12 +1070,12 @@ _2303:
         cmp # $46
         bcc _2314
         lda # $46
-_2314:
+_2314:                                                                  ;$2314
         sta PLAYER_FUEL
         lda # $a0
-_2319:
+_2319:                                                                  ;$2319
         jsr _900d
-_231c:
+_231c:                                                                  ;$231C
         lda $0484
         beq _2330
         lda $0487
@@ -1084,26 +1084,26 @@ _231c:
         jsr _3cfa
         lda # $00
         sta $0484
-_2330:
+_2330:                                                                  ;$2330
         lda $0481
         beq _233a
         jsr _7b64
         beq _2342
-_233a:
+_233a:                                                                  ;$233A
         lda $67
         beq _2345
         dec $67
         bne _2345
-_2342:
+_2342:                                                                  ;$2342
         jsr _a786
-_2345:
+_2345:                                                                  ;$2345
         lda $a0
         bne _2366
         jmp _2a32
 
 ;===============================================================================
 
-_234c:
+_234c:                                                                  ;$234C
         jsr get_random_number
         bpl _2366
 
@@ -1112,18 +1112,18 @@ _234c:
         ldy # $00
         and [ZP_HULL_ADDR], y
         and # %00001111
-_2359:
+_2359:                                                                  ;$2359
         sta $aa
         beq _2366
-_235d:
+_235d:                                                                  ;$235D
         lda # $00
         jsr _370a
         dec $aa
         bne _235d
-_2366:
+_2366:                                                                  ;$2366
         rts 
 
-_2367:
+_2367:                                                                  ;$2367
 ;===============================================================================
 .export _2367
         lda # $c0
@@ -1149,7 +1149,7 @@ txt_docked_token1C:                                                     ;$2376
 
         ; print some message from msg index $DC(220)+?
         lda # $dc
-_2378:
+_2378:                                                                  ;$2378
         clc 
         adc PLAYER_GALAXY
         bne print_docked_str    ; always branches
@@ -1575,7 +1575,7 @@ txt_docked_token11:                                                     ;$24B0
         jsr is_vowel
         bcc _24c9
         dec txt_buffer_index
-_24c9:
+_24c9:                                                                  ;$24C9
         lda # $99
         jmp print_docked_str
 
@@ -1588,7 +1588,7 @@ txt_docked_token12:                                                     ;$24CE
         jsr get_random_number
         and # %00000011
         tay 
-_24d7:
+_24d7:                                                                  ;$24D7
         jsr get_random_number
         and # %00111110
         tax 
@@ -1632,32 +1632,32 @@ is_vowel:                                                               ;$24F3
         beq _250a
         
         clc 
-_250a:  rts 
+_250a:  rts                                                             ;$250A
 
 ;===============================================================================
 
-_250b:  rts 
+_250b:  rts                                                             ;$250B
 
 ;===============================================================================
 
 .segment "CODE_25A6"
 
-_25a6:
+_25a6:                                                                  ;$25A6
 .export _25a6
         .byte   $3a, $30, $2e,$45                       ;":0.E"?
 
 ; 85 bytes here get copied by `_88f0` to $0490..$04E4
 
-_25aa:
+_25aa:                                                                  ;$25AA
 .export _25aa
         .byte   $2e                                     ;"."?
-_25ab:
+_25ab:                                                                  ;$25AB
 .export _25ab
         .byte   $6a, $61, $6d, $65, $73, $6f, $6e       ;"jameson"?
-_25b2:
+_25b2:                                                                  ;$25B2
 .export _25b2
         .byte   $0d
-_25b3:
+_25b3:                                                                  ;$25B3
 .export _25b3
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
@@ -1670,16 +1670,16 @@ _25b3:
         .byte   $11, $3a, $07, $09, $08, $00, $00, $00
         .byte   $00, $80
 
-_25fd:
+_25fd:                                                                  ;$25FD
 .export _25fd
         .byte   $00
-_25fe:
+_25fe:                                                                  ;$25FE
 .export _25fe
         .byte   $00
 
 ;-------------------------------------------------------------------------------
 
-_25ff:
+_25ff:                                                                  ;$25FF
 .export _25ff
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
@@ -1687,7 +1687,7 @@ _25ff:
         
         .byte   $3a, $30, $2e  ;":0.E."?
         .byte   $45, $2e
-_2619:
+_2619:                                                                  ;$2619
 .export _2619
         .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d  ;"JAMESON"
         .byte   $00 ,$14, $ad
@@ -1706,14 +1706,14 @@ _2619:
         .byte   $00 ,$80, $aa, $27, $03, $00, $00, $00
         .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
         .byte   $00 ,$00, $00, $00, $00
-_267e:
+_267e:                                                                  ;$267E
 .export _267e
         .byte   $00, $ff, $ff, $aa, $aa, $aa, $55, $55
         .byte   $55, $aa, $aa, $aa, $aa, $aa, $aa, $55
         .byte   $aa, $aa, $aa, $aa, $aa, $aa, $aa, $aa
         .byte   $aa, $aa, $aa, $aa, $aa, $5a, $aa, $aa
         .byte   $00, $aa, $00, $00, $00, $00
-_26a4:
+_26a4:                                                                  ;$26A4
 .export _26a4
         .byte   $76, $85, $9c, $a5, $8b, $85, $9a, $a5
         .byte   $8d, $20, $0c, $9a, $b0, $d2, $85, $6f
@@ -1750,15 +1750,15 @@ _26a4:
 
 ;===============================================================================
 
-_27a3:
+_27a3:                                                                  ;$27A3
         .byte   $5b
-_27a4:
+_27a4:                                                                  ;$27A4
 .export _27a4
         sta ZP_VAR_P1
         and # %00001111
         tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
-_27ab:  bne _27ab               ; infinite loop, why?
+_27ab:  bne _27ab               ; infinite loop, why?                   ;$27AB
         lda ZP_VAR_P1
         lsr 
         lsr 
@@ -1766,14 +1766,14 @@ _27ab:  bne _27ab               ; infinite loop, why?
         lsr 
         tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
-_27b6:  bne _27b6               ; infinite loop, why?
+_27b6:  bne _27b6               ; infinite loop, why?                   $27B6
         iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VAR_P1
         and # %00001111
         tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
-_27c2:  bne _27c2               ; infinite loop, why?
+_27c2:  bne _27c2               ; infinite loop, why?                   ;$27C2
         lda ZP_VAR_P1
         lsr 
         lsr 
@@ -1781,7 +1781,7 @@ _27c2:  bne _27c2               ; infinite loop, why?
         lsr 
         tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
-_27cd:  bne _27cd               ; infinite loop, why?
+_27cd:  bne _27cd               ; infinite loop, why?                   ;$27CD
         jmp _9d8e               ; SPEED: jump to a jump (`_9f06`)
 
 ;===============================================================================
@@ -1798,7 +1798,7 @@ _27cd:  bne _27cd               ; infinite loop, why?
         lda ZP_POLYOBJ_XPOS_pt3 ;=$0b
         sta ZP_VAR_X2
         eor $72
-_27e5:
+_27e5:                                                                  ;$27E5
         bmi _27e5               ; infinite loop, why??
         clc 
         lda $71
@@ -1820,7 +1820,7 @@ _27e5:
         lda ZP_POLYOBJ_XPOS_pt2 ;=$0a
         sbc # $00
         sta ZP_VAR_Y
-_2804:  bcs _2804               ; infinite loop, why??
+_2804:  bcs _2804               ; infinite loop, why??                  ;$2804
         eor # %11111111
         sta ZP_VAR_Y
         lda # $01
@@ -1828,14 +1828,14 @@ _2804:  bcs _2804               ; infinite loop, why??
         sta ZP_VAR_X
         bcc _2814
         inc ZP_VAR_Y
-_2814:
+_2814:                                                                  ;$2814
         lda ZP_VAR_X2
         eor # %10000000
         sta ZP_VAR_X2
         lda ZP_POLYOBJ_YPOS_pt3 ;$0E
         sta $70
         eor $74
-_2820:  bmi _2820               ; infinite loop, why??
+_2820:  bmi _2820               ; infinite loop, why??                  ;$2820
         clc 
         lda $73
         adc ZP_POLYOBJ_YPOS_pt1 ;=$0C
@@ -1857,7 +1857,7 @@ _2820:  bmi _2820               ; infinite loop, why??
         lda ZP_POLYOBJ_YPOS_pt2 ;=$0D
         sbc # $00
         sta $6f
-_283f:  bcs _283f               ; infinite loop, why??
+_283f:  bcs _283f               ; infinite loop, why??                  ;$283F
         eor # %11111111
         sta $6f
         lda ZP_VAR_Y2
@@ -1867,10 +1867,10 @@ _283f:  bcs _283f               ; infinite loop, why??
         lda $70
         eor # %10000000
         sta $70
-_2853:  bcc _2853               ; infinite loop, why??
+_2853:  bcc _2853               ; infinite loop, why??                  ;$2853
         inc $6f
         lda $76
-_2859:  bmi _2859               ; inifinite loop, why??
+_2859:  bmi _2859               ; inifinite loop, why??                 ;$2859
         lda $75
         clc 
         adc ZP_POLYOBJ_ZPOS_pt1 ;=$0F
@@ -1885,9 +1885,9 @@ _2859:  bmi _2859               ; inifinite loop, why??
 ; unreferenced / unused?
 ;$286b:
         ldx $9a
-_286d:  beq _286d               ; infinite loop, why??
+_286d:  beq _286d               ; infinite loop, why??                  ;$286D
         ldx # $00
-_2871:
+_2871:                                                                  ;$2871
         lsr 
         inx 
         cmp $9a
@@ -1896,10 +1896,10 @@ _2871:
         jsr _99af
         ldx $9c
         lda $9b
-_2880:
+_2880:                                                                  ;$2880
         asl 
         rol $99
-_2883:  bmi _2883               ; infinite loop, why??
+_2883:  bmi _2883               ; infinite loop, why??                  ;$2883
         dex 
         bne _2880
         sta $9b
@@ -1926,12 +1926,12 @@ _2883:  bmi _2883               ; infinite loop, why??
         lda # $00
         sbc $99
         sta $0100, x
-_28a2:
+_28a2:                                                                  ;$28A2
         .byte   $4c             ;=`jmp`
         .byte   $61             ;=$??61
 
 
-_28a4:
+_28a4:                                                                  ;$28A4
 ;===============================================================================
 .export _28a4
 
@@ -1971,7 +1971,7 @@ _28a4:
         .byte   %00001100       ;=$0C
         .byte   %00000011       ;=$03
 
-_28c8:  ; pixel pairs, in single step (for drawing dust)
+_28c8:  ; pixel pairs, in single step (for drawing dust)                ;$28C8
         .byte   %11000000       ;=$C0
         .byte   %11000000       ;=$C0
         .byte   %01100000       ;=$60
@@ -1981,7 +1981,7 @@ _28c8:  ; pixel pairs, in single step (for drawing dust)
         .byte   %00000110       ;=$06
         .byte   %00000011       ;=$03
 
-_28d0:  ; this looks like masks for multi-colour pixels?
+_28d0:  ; this looks like masks for multi-colour pixels?                ;$28D0
         .byte   %11000000       ;=$C0
         .byte   %00110000       ;=$30
         .byte   %00001100       ;=$0C
@@ -1990,13 +1990,13 @@ _28d0:  ; this looks like masks for multi-colour pixels?
 
 ;===============================================================================
 
-_28d5:
+_28d5:                                                                  ;$28D5
 .export _28d5
         lda # $0f
         tax 
         rts 
 
-_28d9:
+_28d9:                                                                  ;$28D9
 ;===============================================================================
 .export _28d9
 
@@ -2009,14 +2009,14 @@ txt_docked_token0B:                                                     ;$28DC
         lda # $13
         bne _28e5
 
-_28e0:
+_28e0:                                                                  ;$28E0
 ;===============================================================================
 .export _28e0
 
         lda # $17
         jsr cursor_down
 
-_28e5:
+_28e5:                                                                  ;$28E5
 ;===============================================================================
 .export _28e5
 
@@ -2028,7 +2028,7 @@ _28e5:
         stx ZP_VAR_X2
         jmp _ab91
 
-_28f3:
+_28f3:                                                                  ;$28F3
 ;===============================================================================
 .export _28f3
 
@@ -2040,7 +2040,7 @@ _28f3:
 
 ;===============================================================================
 
-_2900:
+_2900:                                                                  ;$2900
 .export _2900
         .byte   %10000000       ;=$80
         .byte   %11000000       ;=$C0
@@ -2049,7 +2049,7 @@ _2900:
         .byte   %11111000       ;=$F8
         .byte   %11111100       ;=$FC
         .byte   %11111110       ;=$FE
-_2907:
+_2907:                                                                  ;$2907
 .export _2907
         .byte   %11111111       ;=$FF
         .byte   %01111111       ;=$7F
@@ -2062,13 +2062,13 @@ _2907:
 
 ;===============================================================================
 
-_290f:
+_290f:                                                                  ;$209F
         jsr _3ad1
         sta $60
         txa 
         sta $06c9, y            ; "dust y-lo"
 
-_2918:
+_2918:                                                                  ;$2918
 ;===============================================================================
 ;
 ;       Y = ?
@@ -2104,7 +2104,7 @@ _2918:
         lda # (ELITE_VIEWPORT_HEIGHT / 2) + 1
         sbc $bb
 
-_293a:
+_293a:                                                                  ;$293A
 ;===============================================================================
 ;
 ;       A = Y-position (px)
@@ -2160,19 +2160,19 @@ _293a:
         
         ldy # $01
 
-_296d:
+_296d:                                                                  ;$296D
         lda _28c8, x
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
 
-_2974:
+_2974:                                                                  ;$2974
         ldy ZP_TEMP_VAR         ; restore Y
-_2976:
+_2976:                                                                  ;$2976
         rts 
 
 ;===============================================================================
 
-_2977:
+_2977:                                                                  ;$2977
 .export _2977
         txa 
         adc $43
@@ -2185,7 +2185,7 @@ _2977:
         lda $a9
         beq _2998
         inc $a9
-_2988:
+_2988:                                                                  ;$2988
         ldy $7e
         lda # $ff
         cmp _27a3, y
@@ -2193,7 +2193,7 @@ _2988:
         sta _27a4, y            ; writing to code??
         inc $7e
         bne _29fa
-_2998:
+_2998:                                                                  ;$2998
         lda $85
         sta ZP_VAR_X
         lda $86
@@ -2222,7 +2222,7 @@ _2998:
         ldy ZP_VAR_Y2
         sta ZP_VAR_Y2
         sty ZP_VAR_Y
-_29d2:
+_29d2:                                                                  ;$29D2
         ldy $7e
         lda _27a3, y
         cmp # $ff
@@ -2232,7 +2232,7 @@ _29d2:
         lda ZP_VAR_Y
         sta _27a4, y            ; writing to code??
         iny 
-_29e6:
+_29e6:                                                                  ;$2936
         lda ZP_VAR_X2
         sta _26a4, y
         lda ZP_VAR_Y2
@@ -2242,7 +2242,7 @@ _29e6:
         jsr _ab91
         lda $a2
         bne _2988
-_29fa:
+_29fa:                                                                  ;$29FA
         lda $89
         sta $85
         lda $8a
@@ -2282,7 +2282,7 @@ dust_swap_xy:                                                           ;$2A12
 
 ;===============================================================================
 
-_2a32:
+_2a32:                                                                  ;$2A32
         ldx $0486
         beq _2a40
         dex 
@@ -2291,14 +2291,14 @@ _2a32:
 
 ;===============================================================================
 
-_2a3d:
+_2a3d:                                                                  ;$2A3D
         jmp _37e9
 
         ;-----------------------------------------------------------------------
 
-_2a40:
+_2a40:                                                                  ;$2A40
         ldy DUST_COUNT          ; number of dust particles
-_2a43:
+_2a43:                                                                  ;$2A43
         jsr _3b30
         lda $9b
         lsr ZP_VAR_P1
@@ -2385,18 +2385,18 @@ _2a43:
         cmp # $10
         bcc _2b0a
         sta VAR_Z
-_2b00:
+_2b00:                                                                  ;$2B00
         jsr _2918
         dey 
         beq _2b09
         jmp _2a43
 
-_2b09:
+_2b09:                                                                  ;$2B09
         rts 
 
         ;-----------------------------------------------------------------------
 
-_2b0a:
+_2b0a:                                                                  ;$2B0A
         jsr get_random_number
         ora # %00000100
         sta ZP_VAR_Y
@@ -2417,9 +2417,9 @@ _2b0a:
 
 ;===============================================================================
 
-_2b2d:
+_2b2d:                                                                  ;$2B2D
         ldy DUST_COUNT          ; number of dust particles
-_2b30:
+_2b30:                                                                  ;$2B30
         jsr _3b30
         lda $9b
         lsr ZP_VAR_P1
@@ -2506,18 +2506,18 @@ _2b30:
         cmp # $a0
         bcs _2bf7
         sta VAR_Z
-_2bed:
+_2bed:                                                                  ;$2BED
         jsr _2918
         dey 
         beq _2bf6
         jmp _2b30
 
-_2bf6:
+_2bf6:                                                                  ;$2BF6
         rts 
 
         ;-----------------------------------------------------------------------
 
-_2bf7:
+_2bf7:                                                                  ;$2BF7
         jsr get_random_number
         and # %01111111
         adc # $0a
@@ -2537,7 +2537,7 @@ _2bf7:
 
         ;-----------------------------------------------------------------------
 
-_2c1a:
+_2c1a:                                                                  ;$2C1A
         jsr get_random_number
         sta ZP_VAR_X
         sta DUST_X, y
@@ -2547,7 +2547,7 @@ _2c1a:
         sta ZP_VAR_Y
         sta DUST_Y, y
         bne _2bed
-_2c2d:
+_2c2d:                                                                  ;$2C2D
         lda ZP_POLYOBJ_XPOS_pt1, y
         asl 
         sta $78
@@ -2559,7 +2559,7 @@ _2c2d:
         sta $7a
         jsr _2d69
         sta ZP_POLYOBJ_XPOS_pt3, x
-_2c43:
+_2c43:                                                                  ;$2C43
 .export _2c43
         ldy $78
         sty ZP_POLYOBJ_XPOS_pt1, x
@@ -2570,10 +2570,10 @@ _2c43:
 
 ;===============================================================================
 
-_2c4e:
+_2c4e:                                                                  ;$2C4E
 .export _2c4e
         lda # $00
-_2c50:
+_2c50:                                                                  ;$2C50
 .export _2c50
 .import POLYOBJ_00, PolyObject
 
@@ -2586,7 +2586,7 @@ _2c50:
 
 ;===============================================================================
 
-_2c5c:
+_2c5c:                                                                  ;$2C5C
         lda POLYOBJ_00 + PolyObject::xpos + 1, y        ;=$F901
         jsr _3988
         sta $9b
@@ -2601,14 +2601,14 @@ _2c5c:
         jsr _3988
         adc $9b
         bcc _2c7c
-_2c7a:
+_2c7a:                                                                  ;$2C7A
         lda # $ff
-_2c7c:
+_2c7c:                                                                  ;$2C7C
         rts 
 
 ;===============================================================================
 
-_2c7d:
+_2c7d:                                                                  ;$2C7D
 .import TXT_DOCKED_DOCKED:direct
         lda # TXT_DOCKED_DOCKED
         jsr print_docked_str
@@ -2616,7 +2616,7 @@ _2c7d:
         jsr _b179
         jmp _2cc7
 
-_2c88:
+_2c88:                                                                  ;$2C88
         ldx # $09               ; "Elite" status
         cmp #> 6400             ; 25*256 = 6400 kills
        .bge _2cee
@@ -2631,7 +2631,7 @@ _2c88:
 
         dex                     ; "Competent" status or below
         bne _2cee
-_2c9b:
+_2c9b:                                                                  ;$2C9B
 .export _2c9b
         lda # $08
         jsr _6a2f
@@ -2653,9 +2653,9 @@ _2c9b:
         ldy PLAYER_ENERGY
         cpy # $80
         adc # $01
-_2cc4:
+_2cc4:                                                                  ;$2CC4
         jsr _7773
-_2cc7:
+_2cc7:                                                                  ;$2CC7
         lda # $7d
         jsr _6a9b
         lda # $13
@@ -2663,7 +2663,7 @@ _2cc7:
         beq _2cd7
         cpy # $32
         adc # $01
-_2cd7:
+_2cd7:                                                                  ;$2CD7
         jsr _7773
 
         lda # $10
@@ -2676,11 +2676,11 @@ _2cd7:
         lda $04e0
         lsr 
         lsr 
-_2cea:
+_2cea:                                                                  ;$2CEA
         inx 
         lsr 
         bne _2cea
-_2cee:
+_2cee:                                                                  ;$2CEE
         txa 
         
         clc 
@@ -2693,31 +2693,31 @@ _2cee:
         beq _2d04
         lda # $70
         jsr _2d61
-_2d04:
+_2d04:                                                                  ;$2D04
         lda $04c2
         beq _2d0e
         lda # $6f
         jsr _2d61
-_2d0e:
+_2d0e:                                                                  ;$2D0E
         lda $04c1
         beq _2d18
         lda # ZP_VAR_Y
         jsr _2d61
-_2d18:
+_2d18:                                                                  ;$2D18
         lda # $71
         sta $ad
-_2d1c:
+_2d1c:                                                                  ;$2D1C
         tay 
         ldx $04c3 - $71, y      ; equipment slots?
         beq _2d25
         jsr _2d61
-_2d25:
+_2d25:                                                                  ;$2D25
         inc $ad
         lda $ad
         cmp # $75
         bcc _2d1c
         ldx # $00
-_2d2f:
+_2d2f:                                                                  ;$2D2F
         stx $aa
         ldy PLAYER_LASERS, x
         beq _2d59
@@ -2731,17 +2731,17 @@ _2d2f:
         cpy # $8f
         bne _2d4a
         lda # $68
-_2d4a:
+_2d4a:                                                                  ;$2D4A
         cpy # $97
         bne _2d50
         lda # $75
-_2d50:
+_2d50:                                                                  ;$2D50
         cpy # $32
         bne _2d56
         lda # $76
-_2d56:
+_2d56:                                                                  ;$2D56
         jsr _2d61
-_2d59:
+_2d59:                                                                  ;$2D59
         ldx $aa
         inx 
         cpx # $04
@@ -2750,15 +2750,16 @@ _2d59:
 
 ;===============================================================================
 
-_2d61:
+_2d61:                                                                  ;$2D61
         jsr _7773
         lda # 6
         jmp set_cursor_col
 
 ;===============================================================================
 
-_2d69:
+_2d69:                                                                  ;$2D69
 .export _2d69
+
         lda $7a
         sta $9c
         and # %10000000
@@ -2781,7 +2782,7 @@ _2d69:
 
         ;-----------------------------------------------------------------------
 
-_2d8d:
+_2d8d:                                                                  ;$2D8D
         lda $9c
         and # %01111111
         sta $9c
@@ -2810,13 +2811,14 @@ _2d8d:
         and # %01111111
         ora $bb
         sta $7a
-_2dc4:
+_2dc4:                                                                  ;$2DC4
         rts 
 
 ;===============================================================================
 
-_2dc5:
+_2dc5:                                                                  ;$2DC5
 .export _2dc5
+
         lda ZP_POLYOBJ_XPOS_pt2, x
         and # %01111111
         lsr 
@@ -3446,8 +3448,9 @@ _2fee:                                                                  ;$2FEE
 ;===============================================================================
 ; BBC code says this is "update displayed dials"
 
-_2ff3:
+_2ff3:                                                                  ;$2FF3
 .export _2ff3
+
         lda #< $5770
         sta ZP_TEMP_ADDR1_LO
         lda #> $5770
@@ -3481,7 +3484,7 @@ _2ff3:
         ldx $64
         beq _302b
         sbc # $01
-_302b:
+_302b:                                                                  ;$302B
         jsr _3ad1
         jsr _3130
         lda $a3                 ; move counter?
@@ -3494,7 +3497,7 @@ _302b:
 
         ldx # $03               ; 4 energy banks
         stx ZP_TEMP_VAR
-_3044:
+_3044:                                                                  ;$3044
         sty $71, x
         dex 
         bpl _3044
@@ -3504,7 +3507,7 @@ _3044:
         lsr 
         lsr 
         sta $9a
-_3052:
+_3052:                                                                  ;$3052
         sec 
         sbc # $10
         bcc _3064
@@ -3515,10 +3518,10 @@ _3052:
         dex 
         bpl _3052
         bmi _3068
-_3064:
+_3064:                                                                  ;$3064
         lda $9a
         sta $71, x
-_3068:
+_3068:                                                                  ;$3068
         lda $0071, y
         sty ZP_VAR_P1
         jsr hud_drawbar
@@ -3565,7 +3568,7 @@ _3068:
 
 ;===============================================================================
 
-_30bb:
+_30bb:                                                                  ;$30BB
         ldx # $aa
 
         lda $a3                 ; move counter?
@@ -3631,7 +3634,7 @@ hud_drawbar:                                                            ;$30CF
         ldy # $02               ; "height offset"
         ldx # $03               ; "height of bar - 1"
 
-_30e5:
+_30e5:                                                                  ;$30E5
         lda $9a                 ; get bar value 0-15
         
         ; subtract 4 if >= 4?
@@ -3642,7 +3645,7 @@ _30e5:
         sta $9a
 
         lda $9b                 ; mask
-_30f1:
+_30f1:                                                                  ;$30F1
         and $32
         sta [ZP_TEMP_ADDR1], y
         iny 
@@ -3654,16 +3657,16 @@ _30f1:
         adc # $06
         bcc _3103
         inc ZP_TEMP_ADDR1_HI
-_3103:
+_3103:                                                                  ;$3103
         tay 
         dex 
         bmi _next_row
         bpl _30e5
-_3109:
+_3109:                                                                  ;$3109
         eor # %00000011
         sta $9a
         lda $9b
-_310f:
+_310f:                                                                  ;$310F
         asl 
         asl 
         dec $9a
@@ -3695,10 +3698,10 @@ _next_row:                                                              ;$3122
 
 ;===============================================================================
 
-_3130:
+_3130:                                                                  ;$3130
         ldy # $01
         sta $9a
-_3134:
+_3134:                                                                  ;$3134
         sec 
         lda $9a
         sbc # $04
@@ -3709,10 +3712,10 @@ _3134:
         lda _28d0, x
         and # %10101010
         jmp _314d
-_3149:
+_3149:                                                                  ;$3149
         sta $9a
         lda # $00
-_314d:
+_314d:                                                                  ;$314D
         sta [ZP_TEMP_ADDR1], y
         iny 
         sta [ZP_TEMP_ADDR1], y
@@ -3736,7 +3739,7 @@ _314d:
 
 ;===============================================================================
 
-_316e:
+_316e:                                                                  ;$316E
         jsr _83df
         ldx # $0b
         stx $a5
@@ -3744,7 +3747,7 @@ _316e:
         bcs _317f
         ldx # $18
         jsr _3680
-_317f:
+_317f:                                                                  ;$317F
         lda # $08
         sta ZP_POLYOBJ_VERTX_LO
         
@@ -3752,7 +3755,7 @@ _317f:
         sta $27
         lsr 
         sta $29
-_318a:
+_318a:                                                                  ;$318A
         jsr _a2a0
         jsr _9a86
         dec $29
@@ -3760,7 +3763,7 @@ _318a:
         jsr _b410
         lda # $00
         ldx # $10
-_319b:
+_319b:                                                                  ;$319B
         sta $04b0, x            ; cargo qty?
         dex 
         bpl _319b
@@ -3783,15 +3786,16 @@ _319b:
         sta PLAYER_TRUMBLES_HI
 .endif
 
-_31be:
+_31be:                                                                  ;$31BE
         lda # $46
         sta PLAYER_FUEL
         jmp _2101
 
 ;===============================================================================
 
-_31c6:
+_31c6:                                                                  ;$31C6
 .export _31c6
+
         lda # $0e
         jsr print_docked_str
 
@@ -3799,7 +3803,7 @@ _31c6:
         jsr _70a0
         lda # $00
         sta $ae
-_31d5:
+_31d5:                                                                  ;$31D5
         jsr txt_docked_token0E
         jsr _76e9
 
@@ -3807,7 +3811,7 @@ _31d5:
         lda ZP_POLYOBJ_YPOS_pt3, x      ;=$0E?
         cmp # $0d
         bne _31f1
-_31e4:
+_31e4:                                                                  ;$31E4
         dex 
         lda ZP_POLYOBJ_YPOS_pt3, x      ;=$0E?
         ora # %00100000
@@ -3815,7 +3819,7 @@ _31e4:
         beq _31e4
         txa 
         bmi _3208
-_31f1:
+_31f1:                                                                  ;$31F1
         jsr _6a3b
         inc $ae
         bne _31d5
@@ -3829,7 +3833,7 @@ _31f1:
 
         ;-----------------------------------------------------------------------
 
-_3208:
+_3208:                                                                  ;$3208
         lda ZP_SEED_pt4
         sta TSYSTEM_POS_X
         lda ZP_SEED_pt2
@@ -3841,7 +3845,7 @@ _3208:
 
 ;===============================================================================
 
-_321e:
+_321e:                                                                  ;$321E
         lda ZP_POLYOBJ_XPOS_pt1 ;=$09
         ora ZP_POLYOBJ_YPOS_pt1 ;=$0C
         ora ZP_POLYOBJ_ZPOS_pt1 ;=$0F
@@ -3849,10 +3853,10 @@ _321e:
 
         lda # $50
         jsr _7bd2
-_322b:
+_322b:                                                                  ;$322B
         ldx # $04
         bne _3290
-_322f:
+_322f:                                                                  ;$322F
         lda # $00
         jsr _87b1
         beq _3239
@@ -3860,7 +3864,7 @@ _322f:
 
         ;-----------------------------------------------------------------------
 
-_3239:
+_3239:                                                                  ;$3239
         jsr _3293
         jsr _a813
         lda # $fa
@@ -3868,7 +3872,7 @@ _3239:
 
         ;-----------------------------------------------------------------------
 
-_3244:
+_3244:                                                                  ;$3244
         lda $67
         bne _321e
         lda $29
@@ -3899,7 +3903,7 @@ _3244:
         bne _327d
         ora # %10000000
         sta [ZP_TEMP_ADDR3], y
-_327d:
+_327d:                                                                  ;$327D
         lda ZP_POLYOBJ_XPOS_pt1 ;=$09
         ora ZP_POLYOBJ_YPOS_pt1 ;=$0C
         ora ZP_POLYOBJ_ZPOS_pt1 ;=$0F
@@ -3907,41 +3911,42 @@ _327d:
 
         lda # $50
         jsr _7bd2
-_328a:
+_328a:                                                                  ;$328A
         lda $29
         and # %01111111
         lsr 
         tax 
-_3290:
+_3290:                                                                  ;$3290
         jsr _a7a6
-_3293:
+_3293:                                                                  ;$3293
         asl $28
         sec 
         ror $28
-_3298:
+_3298:                                                                  ;$3298
         rts 
 
         ;-----------------------------------------------------------------------
 
-_3299:
+_3299:                                                                  ;$3299
         jsr get_random_number
         cmp # $10
         bcs _32a7
-_32a0:
+_32a0:                                                                  ;$32A0
         ldy # $20
         lda [ZP_TEMP_ADDR3], y
         lsr 
         bcs _32aa
-_32a7:
+_32a7:                                                                  ;$32A7
         jmp _336e
 
-_32aa:
+_32aa:                                                                  ;$32AA
         jmp _b0f4
 
 ;===============================================================================
 
-_32ad:
+_32ad:                                                                  ;$32AD
 .export _32ad
+
         lda #< $0403
         sta $b0
         lda #> $0403
@@ -3964,7 +3969,7 @@ _32ad:
         adc # $08
         tax 
         bne _32ea
-_32da:
+_32da:                                                                  ;$32DA
         jsr get_random_number
         cmp # $f0
         bcc _3298
@@ -3972,13 +3977,13 @@ _32da:
         cmp # $04
         bcs _3328
         ldx # $10
-_32ea:
+_32ea:                                                                  ;$32EA
         lda # $f1
         jmp _370a
 
         ;-----------------------------------------------------------------------
 
-_32ef:
+_32ef:                                                                  ;$32EF
         cpx # $0f
         bne _330f
         jsr get_random_number
@@ -3998,13 +4003,13 @@ _32ef:
 
         ;-----------------------------------------------------------------------
 
-_330f:
+_330f:                                                                  ;$330F
         ldy # $0e
         lda $2c
         cmp [ZP_HULL_ADDR], y
         bcs _3319
         inc $2c
-_3319:
+_3319:                                                                  ;$3319
         cpx # $1e
         bne _3329
         lda $047a
@@ -4012,19 +4017,19 @@ _3319:
         lsr $29
         asl $29
         lsr ZP_POLYOBJ_VERTX_LO
-_3328:
+_3328:                                                                  ;$3328
         rts 
 
         ;-----------------------------------------------------------------------
 
-_3329:
+_3329:                                                                  ;$3329
         jsr get_random_number
         lda $2d
         lsr 
         bcc _3335
         cpx # $32
         bcs _3328
-_3335:
+_3335:                                                                  ;$3335
         lsr 
         bcc _3347
         ldx PLAYER_LEGAL
@@ -4035,7 +4040,7 @@ _3335:
         sta $2d
         lsr 
         lsr 
-_3347:
+_3347:                                                                  ;$3347
         lsr 
         bcs _3357
         lsr 
@@ -4045,13 +4050,13 @@ _3347:
 
         ;-----------------------------------------------------------------------
 
-_3351:
+_3351:                                                                  ;$3351
         jsr _8c7b
         jmp _34ac
 
         ;-----------------------------------------------------------------------
 
-_3357:
+_3357:                                                                  ;$3357
         lsr 
         bcc _3365
         lda $045f
@@ -4059,14 +4064,14 @@ _3357:
         lda $29
         and # %10000001
         sta $29
-_3365:
+_3365:                                                                  ;$3365
         ldx # $08
-_3367:
+_3367:                                                                  ;$3367
         lda ZP_POLYOBJ_XPOS_pt1, x
         sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _3367
-_336e:
+_336e:                                                                  ;$336E
         jsr _8c8a
         ldy # $0a
         jsr _3ab2
@@ -4078,11 +4083,12 @@ _336e:
 
         ;-----------------------------------------------------------------------
 
-_3381:
+_3381:                                                                  ;$3381
         cmp # $0e
         bne _339a
-_3385:
+_3385:                                                                  ;$3385
 .export _3385
+
         jsr get_random_number
         cmp # $c8
         bcc _339a
@@ -4091,19 +4097,19 @@ _3385:
         cmp # $64
         bcs _3397
         ldx # $11
-_3397:
+_3397:                                                                  ;$3397
         jmp _32ea
 
         ;-----------------------------------------------------------------------
 
-_339a:
+_339a:                                                                  ;$339A
         jsr get_random_number
         cmp # $fa
         bcc _33a8
         jsr get_random_number
         ora # %01101000
         sta $26
-_33a8:
+_33a8:                                                                  ;$33A8
         ldy # $0e
         lda [ZP_HULL_ADDR], y
         lsr 
@@ -4130,7 +4136,7 @@ _33a8:
 
         ;-----------------------------------------------------------------------
 
-_33d6:
+_33d6:                                                                  ;$33D6
         lda $28
         and # %00000111
         beq _33fd
@@ -4151,12 +4157,12 @@ _33d6:
 
         ;-----------------------------------------------------------------------
 
-_33fa:
+_33fa:                                                                  ;$33FA
         jmp _a795
 
         ;-----------------------------------------------------------------------
 
-_33fd:
+_33fd:                                                                  ;$33FD
         lda # $00
         jsr _87b1
         and # %11100000
@@ -4186,7 +4192,7 @@ _33fd:
 
         ;-----------------------------------------------------------------------
 
-_3434:
+_3434:                                                                  ;$3434
         lda ZP_POLYOBJ_ZPOS_pt2 ;=$10
         cmp # $03
         bcs _3442
@@ -4194,18 +4200,18 @@ _3434:
         ora ZP_POLYOBJ_YPOS_pt2 ;=$0D
         and # %11111110
         beq _3454
-_3442:
+_3442:                                                                  ;$3442
         jsr get_random_number
         ora # %10000000
         cmp $29
         bcs _3454
-_344b:
+_344b:                                                                  ;$344B
         jsr _35d5
         lda $aa
         eor # %10000000
-_3452:
+_3452:                                                                  ;$3452
         sta $aa
-_3454:
+_3454:                                                                  ;$3454
         ldy # $10
         jsr _3ab2
         tax 
@@ -4219,7 +4225,7 @@ _3454:
         lda $b0
         ora $27
         sta $27
-_346c:
+_346c:                                                                  ;$346C
         lda $26
         asl 
         cmp # $20
@@ -4238,19 +4244,19 @@ _346c:
         lda $b0
         ora $26
         sta $26
-_348d:
+_348d:                                                                  ;$348D
         lda $aa
         bmi _349a
         cmp $ab
         bcc _349a
         lda #> $0300            ; processed vertex data is stored at $0300+
         sta ZP_POLYOBJ_VERTX_HI
-_3499:
+_3499:                                                                  ;$3499
         rts 
 
         ;-----------------------------------------------------------------------
 
-_349a:
+_349a:                                                                  ;$349A
         and # %01111111
         cmp # $12
         bcc _34ab
@@ -4261,27 +4267,28 @@ _349a:
         bne _34a9
         
         asl 
-_34a9:
+_34a9:                                                                  ;$34A9
         sta ZP_POLYOBJ_VERTX_HI
-_34ab:
+_34ab:                                                                  ;$34AB
         rts 
 
         ;-----------------------------------------------------------------------
 
-_34ac:
+_34ac:                                                                  ;$34AC
         ldy # $0a
         jsr _3ab2
         cmp # $98
         bcc _34b9
         ldx # $00
         stx $b1
-_34b9:
+_34b9:                                                                  ;$24B9
         jmp _3452
 
 ;===============================================================================
 
-_34bc:
+_34bc:                                                                  ;$34BC
 .export _34bc
+
         lda # $06
         sta $b1
         lsr 
@@ -4290,12 +4297,12 @@ _34bc:
         sta $ab
         lda $045f
         bne _34cf
-_34cc:
+_34cc:                                                                  ;$34CC
         jmp _3351
 
         ;-----------------------------------------------------------------------
 
-_34cf:
+_34cf:                                                                  ;$34CF
         jsr _357b
         lda ZP_POLYOBJ01_XPOS_pt3
         ora ZP_POLYOBJ01_YPOS_pt3
@@ -4320,10 +4327,10 @@ _34cf:
         bcc _3504
         lda $a5
         bmi _352c
-_3504:
+_3504:                                                                  ;$3504
         jsr _35d5
         jsr _34ac
-_350a:
+_350a:                                                                  ;$350A
         ldx # $00
         stx ZP_POLYOBJ_VERTX_HI
         inx 
@@ -4333,7 +4340,7 @@ _350a:
 
         ;-----------------------------------------------------------------------
 
-_3512:
+_3512:                                                                  ;$3512
         jsr _357b
         jsr _35e8
         jsr _35e8
@@ -4343,12 +4350,12 @@ _3512:
 
         ;-----------------------------------------------------------------------
 
-_3524:
+_3524:                                                                  ;$3524
         inc ZP_POLYOBJ_VERTX_HI
         lda # $7f
         sta $26
         bne _3571
-_352c:
+_352c:                                                                  ;$352C
         ldx # $00
         stx $b1
         stx $27
@@ -4373,7 +4380,7 @@ _352c:
         asl 
         cmp # $0c
         bcs _350a
-_3556:
+_3556:                                                                  ;$3556
         stx $26
         lda ZP_POLYOBJ_M2x0_HI
         sta ZP_VAR_X
@@ -4387,23 +4394,23 @@ _3556:
         cmp # $42
         bcs _3524
         jsr _350a
-_3571:
+_3571:                                                                  ;$3571
         lda $3f                 ; only use, ever. does not get set!
         bne _357a
 
         asl $2d
         sec 
         ror $2d
-_357a:
+_357a:                                                                  ;$357A
         rts 
 
 ;===============================================================================
 
-_357b:
+_357b:                                                                  ;$357B
         lda #< POLYOBJ_01       ;=$F925
         sta ZP_TEMP_ADDR3_LO
         lda #> POLYOBJ_01       ;=$F925
-_3581:  sta ZP_TEMP_ADDR3_HI
+_3581:  sta ZP_TEMP_ADDR3_HI                                            ;$3581
 
         ldy # $02
         jsr _358f
@@ -4412,7 +4419,7 @@ _3581:  sta ZP_TEMP_ADDR3_HI
         jsr _358f
         
         ldy # $08
-_358f:
+_358f:                                                                  ;$358F
         lda [ZP_TEMP_ADDR3], y
         eor # %10000000
         sta $7a
@@ -4439,7 +4446,7 @@ _358f:
 
 ;===============================================================================
 
-_35b3:
+_35b3:                                                                  ;$35B3
         ldx POLYOBJ_01 + PolyObject::xpos + 0, y        ;=$F925
         stx $9a
         lda ZP_VAR_X
@@ -4457,7 +4464,7 @@ _35b3:
 
 ;===============================================================================
 
-_35d5:
+_35d5:                                                                  ;$35D5
         lda ZP_VAR_X
         eor # %10000000
         sta ZP_VAR_X
@@ -4471,9 +4478,9 @@ _35d5:
 
 ;===============================================================================
 
-_35e8:
+_35e8:                                                                  ;$35E8
         jsr _35eb
-_35eb:
+_35eb:                                                                  ;$35EB
         lda POLYOBJ_01 + PolyObject::m0x0 + 1   ;=$F92F
         ldx # $00
         jsr _3600
@@ -4482,7 +4489,7 @@ _35eb:
         jsr _3600
         lda POLYOBJ_01 + PolyObject::m0x2 + 1   ;=$F933
         ldx # $06
-_3600:
+_3600:                                                                  ;$3600
         asl 
         sta $9b
         lda # $00
@@ -4495,12 +4502,12 @@ _3600:
         sta ZP_POLYOBJ01_XPOS_pt1, x
         bcc _3616
         inc ZP_POLYOBJ01_XPOS_pt2, x
-_3616:
+_3616:                                                                  ;$3616
         rts 
 
         ;-----------------------------------------------------------------------
 
-_3617:
+_3617:                                                                  ;$3617
         lda ZP_POLYOBJ01_XPOS_pt1, x
         sec 
         sbc $9b
@@ -4524,7 +4531,7 @@ _3617:
 
 ;===============================================================================
 
-_363f:
+_363f:                                                                  ;$363F
         clc 
         lda ZP_POLYOBJ_ZPOS_pt3
         bne _367d
@@ -4563,18 +4570,18 @@ _363f:
         dey 
         lda [ZP_HULL_ADDR], y
         cmp $9b
-_367d:
+_367d:                                                                  ;$367D
         rts 
 
         ;-----------------------------------------------------------------------
 
-_367e:
+_367e:                                                                  ;$367E
         clc 
         rts 
 
 ;===============================================================================
 
-_3680:
+_3680:                                                                  ;$3680
         jsr _8447
         lda # $1c
         sta ZP_POLYOBJ_YPOS_pt1
@@ -4586,8 +4593,10 @@ _3680:
         asl 
         ora # %10000000
         sta $29
-_3695:
+
+_3695:                                                                  ;$3695
 .export _3695
+
         lda # $60
         sta ZP_POLYOBJ_M0x2_HI
         ora # %10000000
@@ -4602,7 +4611,7 @@ _3695:
 
 ;===============================================================================
 
-_36a6:
+_36a6:                                                                  ;$36A6
         ldx # $01
         jsr _3680
         bcc _3701
@@ -4623,7 +4632,7 @@ _36a6:
 
 ;===============================================================================
 
-_36c5:
+_36c5:                                                                  ;$36C5
         cmp # $02
         beq _36f8
         ldy # $24
@@ -4631,7 +4640,7 @@ _36c5:
         and # %00100000
         beq _36d4
         jsr _36f8
-_36d4:
+_36d4:                                                                  ;$36D4
         ldy # $20
         lda [ZP_POLYOBJ_ADDR], y
         beq _367d
@@ -4650,30 +4659,31 @@ _36d4:
         lda [ZP_POLYOBJ_ADDR], y
         ora # %00000100
         sta [ZP_POLYOBJ_ADDR], y
-_36f7:
+_36f7:                                                                  ;$36F7
         rts 
 
         ;-----------------------------------------------------------------------
 
-_36f8:
+_36f8:                                                                  ;$36F8
         ; last byte of `POLYOBJ_01`?
         lda POLYOBJ_01 + PolyObject::ai_state   ;=$F949
         ora # %00000100
         sta POLYOBJ_01 + PolyObject::ai_state   ;=$F949
         rts 
 
-_3701:
+_3701:                                                                  ;$3701
         lda # $c9
         jmp _900d
 
 ;===============================================================================
 
-_3706:
+_3706:                                                                  ;$3706
         ldx # $03
-_3708:
+_3708:                                                                  ;$3708
 .export _3708
+
         lda # $fe
-_370a:
+_370a:                                                                  ;$370A
         sta ZP_TEMP_VAR
        .phx                     ; push X to stack (via A)
         lda ZP_HULL_ADDR_LO
@@ -4685,7 +4695,7 @@ _370a:
         lda ZP_POLYOBJ_ADDR_HI
         pha 
         ldy # $24
-_371c:
+_371c:                                                                  ;$371C
         lda ZP_POLYOBJ_XPOS_pt1, y
         sta $0100, y            ; the stack!?
         lda [ZP_POLYOBJ_ADDR], y
@@ -4709,7 +4719,7 @@ _371c:
         jsr _378c
         pla 
         tax 
-_374d:
+_374d:                                                                  ;$374D
         lda ZP_TEMP_VAR
         sta $29
         lsr $26
@@ -4730,14 +4740,14 @@ _374d:
         ror 
         sta $26
         pla 
-_3770:
+_3770:                                                                  ;$3770
         jsr _7c6b
         pla 
         sta ZP_POLYOBJ_ADDR_HI
         pla 
         sta ZP_POLYOBJ_ADDR_LO
         ldx # $24
-_377b:
+_377b:                                                                  ;$377B
         lda $0100, x
         sta ZP_POLYOBJ_XPOS_pt1, x
         dex 
@@ -4752,15 +4762,16 @@ _377b:
 
 ;===============================================================================
 
-_378c:
+_378c:                                                                  ;$378C
         asl 
         sta $9b
         lda # $00
         ror 
         jmp _a44c
 
-_3795:
+_3795:                                                                  ;$3795
 .export _3795
+
         jsr _a839
         lda # $04
         jsr _37a5
@@ -4768,12 +4779,13 @@ _3795:
 
 ;===============================================================================
 
-_379e:
+_379e:                                                                  ;$397E
 .export _379e
+
         ldy # $04
         jsr _a858
         lda # $08
-_37a5:
+_37a5:                                                                  ;$37A5
         sta $ac
         lda $a0
         pha 
@@ -4781,8 +4793,10 @@ _37a5:
         jsr _a72f
         pla 
         sta $a0
-_37b2:
+
+_37b2:                                                                  ;$37B2
 .export _37b2
+
         ldx # $80
         stx ZP_POLYOBJ01_XPOS_pt1
 
@@ -4793,7 +4807,7 @@ _37b2:
         stx $ad
         stx ZP_POLYOBJ01_XPOS_pt2
         stx $44
-_37c2:
+_37c2:                                                                  ;$37C2
         jsr _37ce
         inc $ad
         ldx $ad
@@ -4803,13 +4817,13 @@ _37c2:
 
 ;===============================================================================
 
-_37ce:
+_37ce:                                                                  ;$37CE
         lda $ad
         and # %00000111
         clc 
         adc # $08
         sta $77
-_37d7:
+_37d7:                                                                  ;$37D7
         lda # $01
         sta $7e
         jsr _805e
@@ -4818,12 +4832,12 @@ _37d7:
         lda $77
         cmp # $a0
         bcc _37d7
-_37e8:
+_37e8:                                                                  ;$37E8
         rts 
 
 ;===============================================================================
 
-_37e9:
+_37e9:                                                                  ;$37E9
         lda # $00
         cpx # $02
         ror 
@@ -4832,7 +4846,7 @@ _37e9:
         sta $b1
         jsr _38a3
         ldy DUST_COUNT          ; number of dust particles
-_37fa:
+_37fa:                                                                  ;$37FA
         lda DUST_Z, y
         sta VAR_Z
         lsr 
@@ -4904,11 +4918,12 @@ _37fa:
         sta DUST_Y, y
         sta ZP_VAR_Y
         and # %01111111
-_3895:
+_3895:                                                                  ;$3895
 .export _3895
+
         cmp # $74
         bcs _38d1
-_389a:
+_389a:                                                                  ;$389A
         jsr _2918
         dey 
         beq _38a3
@@ -4916,7 +4931,7 @@ _389a:
 
         ;-----------------------------------------------------------------------
 
-_38a3:
+_38a3:                                                                  ;$38A3
         lda $a6
         eor $b0
         sta $a6
@@ -4934,7 +4949,7 @@ _38a3:
 
         ;-----------------------------------------------------------------------
 
-_38be:
+_38be:                                                                  ;$38BE
         jsr get_random_number
         sta ZP_VAR_Y
         sta DUST_Y, y
@@ -4943,7 +4958,7 @@ _38be:
         sta ZP_VAR_X
         sta DUST_X, y
         bne _38e2
-_38d1:
+_38d1:                                                                  ;$38D1
         jsr get_random_number
         sta ZP_VAR_X
         sta DUST_X, y
@@ -4951,13 +4966,13 @@ _38d1:
         ora $6a                 ; move count?
         sta ZP_VAR_Y
         sta DUST_Y, y
-_38e2:
+_38e2:                                                                  ;$38E2
         jsr get_random_number
         ora # %00001000
         sta VAR_Z
         sta DUST_Z, y
         bne _389a
-_38ee:
+_38ee:                                                                  ;$38EE
         sta $77
         sta $78
         sta $79
@@ -4967,8 +4982,9 @@ _38ee:
 
         ;-----------------------------------------------------------------------
 
-_38f8:
+_38f8:                                                                  ;$38F8
 .export _38f8
+
         sta $9b
         and # %01111111
         sta $79
@@ -4987,10 +5003,10 @@ _38f8:
         sta $77
         lda # $00
         ldx # $18
-_3919:
+_3919:                                                                  ;$3919
         bcc _391d
         adc $bb
-_391d:
+_391d:                                                                  ;$391D
         ror 
         ror $79
         ror $78
@@ -5007,14 +5023,14 @@ _391d:
 
 ;===============================================================================
 
-_3934:
+_3934:                                                                  ;$3934
         ldx $5d
         stx $9b
         ldx $5e
         stx $9c
-_393c:
+_393c:                                                                  ;$393C
         ldx $68
-_393e:
+_393e:                                                                  ;$393E
         stx ZP_VAR_P1
         tax 
         and # %10000000
@@ -5029,27 +5045,27 @@ _393e:
         lsr ZP_VAR_P1
         bcc _3956
         adc ZP_TEMP_VAR
-_3956:
+_3956:                                                                  ;$3956
         ror 
         ror ZP_VAR_P1
         bcc _395d
         adc ZP_TEMP_VAR
-_395d:
+_395d:                                                                  ;$395D
         ror 
         ror ZP_VAR_P1
         bcc _3964
         adc ZP_TEMP_VAR
-_3964:
+_3964:                                                                  ;$3964
         ror 
         ror ZP_VAR_P1
         bcc _396b
         adc ZP_TEMP_VAR
-_396b:
+_396b:                                                                  ;$396B
         ror 
         ror ZP_VAR_P1
         bcc _3972
         adc ZP_TEMP_VAR
-_3972:
+_3972:                                                                  ;$3972
         ror 
         ror ZP_VAR_P1
         lsr 
@@ -5063,22 +5079,24 @@ _3972:
 
         ;-----------------------------------------------------------------------
 
-_3981:
+_3981:                                                                  ;$3981
         sta ZP_VAR_P2
         sta ZP_VAR_P1
         rts 
 
 ;===============================================================================
 
-_3986:
+_3986:                                                                  ;$3986
 .export _3986
+
         and # %01111111
-_3988:
+_3988:                                                                  ;$3988
 .export _3988
+
         sta ZP_VAR_P1
         tax 
         bne _399f
-_398d:
+_398d:                                                                  ;$398D
         clc 
         stx ZP_VAR_P1
         txa 
@@ -5086,17 +5104,18 @@ _398d:
 
         ;-----------------------------------------------------------------------
 
-_3992:
+_3992:                                                                  ;$3992
         lda DUST_Y, y
         sta ZP_VAR_Y
-_3997:
+_3997:                                                                  ;$3997
         and # %01111111
         sta ZP_VAR_P1
-_399b:
+_399b:                                                                  ;$399B
 .export _399b
+
         ldx $9a
         beq _398d
-_399f:
+_399f:                                                                  ;$399F
         dex 
         stx $bb
         lda # $00
@@ -5104,57 +5123,59 @@ _399f:
         lsr ZP_VAR_P1
         bcc _39ab
         adc $bb
-_39ab:
+_39ab:                                                                  ;$39AB
         ror 
         ror ZP_VAR_P1
         bcc _39b2
         adc $bb
-_39b2:
+_39b2:                                                                  ;$39B2
         ror 
         ror ZP_VAR_P1
         bcc _39b9
         adc $bb
-_39b9:
+_39b9:                                                                  ;$39B9
         ror 
         ror ZP_VAR_P1
         bcc _39c0
         adc $bb
-_39c0:
+_39c0:                                                                  ;$39C0
         ror 
         ror ZP_VAR_P1
         bcc _39c7
         adc $bb
-_39c7:
+_39c7:                                                                  ;$39C7
         ror 
         ror ZP_VAR_P1
         bcc _39ce
         adc $bb
-_39ce:
+_39ce:                                                                  ;$39CE
         ror 
         ror ZP_VAR_P1
         bcc _39d5
         adc $bb
-_39d5:
+_39d5:                                                                  ;$39D5
         ror 
         ror ZP_VAR_P1
         bcc _39dc
         adc $bb
-_39dc:
+_39dc:                                                                  ;$39DC
         ror 
         ror ZP_VAR_P1
         rts 
 
 ;===============================================================================
 
-_39e0:
+_39e0:                                                                  ;$39E0
 .export _39e0
+
         and # %00011111
         tax 
         lda _0ac0, x
         sta $9a
         lda $77
-_39ea:
+_39ea:                                                                  ;$39EA
 .export _39ea
+
         stx ZP_VAR_P1
         sta $b6
         tax 
@@ -5176,38 +5197,40 @@ _39ea:
 
         ;-----------------------------------------------------------------------
 
-_3a0f:
+_3a0f:                                                                  ;$3A0F
         lda _9300, x
         ldx $b6
         adc _9300, x
         bcc _3a20
         tax 
         lda _9600, x
-_3a1d:
+_3a1d:                                                                  ;$3A1D
         ldx ZP_VAR_P1
         rts 
 
         ;-----------------------------------------------------------------------
 
-_3a20:
+_3a20:                                                                  ;$3A20
         lda # $00
         ldx ZP_VAR_P1
         rts 
 
 ;===============================================================================
 
-_3a25:
+_3a25:                                                                  ;$3A25
 .export _3a25
+
         stx $9a
-_3a27:
+_3a27:                                                                  ;$3A27
 .export _3a27
+
         eor # %11111111
         lsr 
         sta ZP_VAR_P2
         lda # $00
         ldx # $10
         ror ZP_VAR_P1
-_3a32:
+_3a32:                                                                  ;$3A32
         bcs _3a3f
         adc $9a
         ror 
@@ -5219,7 +5242,7 @@ _3a32:
 
         ;-----------------------------------------------------------------------
 
-_3a3f:
+_3a3f:                                                                  ;$3A3F
         lsr 
         ror ZP_VAR_P2
         ror ZP_VAR_P1
@@ -5233,13 +5256,13 @@ _3a3f:
 ;$3a48
         ldx $68
         stx ZP_VAR_P1
-_3a4c:
+_3a4c:                                                                  ;$3A4C
         ldx $5e
         stx $9c
-_3a50:
+_3a50:                                                                  ;$3A50
         ldx $5d
         stx $9b
-_3a54:
+_3a54:                                                                  ;$3A54
         tax 
         and # %01111111
         lsr 
@@ -5258,37 +5281,37 @@ _3a54:
         tax 
         bcc _3a72
         adc ZP_TEMP_VAR
-_3a72:
+_3a72:                                                                  ;$3A72
         ror 
         ror ZP_VAR_P1
         bcc _3a79
         adc ZP_TEMP_VAR
-_3a79:
+_3a79:                                                                  ;$3A79
         ror 
         ror ZP_VAR_P1
         bcc _3a80
         adc ZP_TEMP_VAR
-_3a80:
+_3a80:                                                                  ;$3A80
         ror 
         ror ZP_VAR_P1
         bcc _3a87
         adc ZP_TEMP_VAR
-_3a87:
+_3a87:                                                                  ;$3A87
         ror 
         ror ZP_VAR_P1
         bcc _3a8e
         adc ZP_TEMP_VAR
-_3a8e:
+_3a8e:                                                                  ;$3A8E
         ror 
         ror ZP_VAR_P1
         bcc _3a95
         adc ZP_TEMP_VAR
-_3a95:
+_3a95:                                                                  ;$3A95
         ror 
         ror ZP_VAR_P1
         bcc _3a9c
         adc ZP_TEMP_VAR
-_3a9c:
+_3a9c:                                                                  ;$3A9C
         ror 
         ror ZP_VAR_P1
         lsr 
@@ -5296,14 +5319,15 @@ _3a9c:
         ora $bb
         rts 
 
-_3aa5:
+_3aa5:                                                                  ;$3AA5
         sta ZP_VAR_P1
         rts 
 
 ;===============================================================================
 
-_3aa8:
+_3aa8:                                                                  ;$3AA8
 .export _3aa8
+
         jsr _3a54
         sta $9c
         lda ZP_VAR_P1
@@ -5312,7 +5336,7 @@ _3aa8:
 
 ;===============================================================================
 
-_3ab2:
+_3ab2:                                                                  ;$3AB2
         ldx ZP_POLYOBJ_XPOS_pt1, y
         stx $9a
         lda ZP_VAR_X
@@ -5326,11 +5350,13 @@ _3ab2:
         ldx ZP_POLYOBJ_YPOS_pt2, y
         stx $9a
         lda ZP_VAR_X2
-_3ace:
+_3ace:                                                                  ;$3ACE
 .export _3ace
+
         jsr _3a54
-_3ad1:
+_3ad1:                                                                  ;$3AD1
 .export _3ad1
+
         sta ZP_TEMP_VAR
         and # %10000000
         sta $bb
@@ -5347,7 +5373,7 @@ _3ad1:
 
         ;-----------------------------------------------------------------------
 
-_3ae8:
+_3ae8:                                                                  ;$3AE8
         lda $9c
         and # %01111111
         sta $99
@@ -5367,14 +5393,15 @@ _3ae8:
         lda # $00
         sbc $99
         ora # %10000000
-_3b0a:
+_3b0a:                                                                  ;$3B0A
         eor $bb
         rts 
 
 ;===============================================================================
 
-_3b0d:
+_3b0d:                                                                  ;$3B0D
 .export _3b0d
+
         stx $9a
         eor # %10000000
         jsr _3ace
@@ -5385,12 +5412,12 @@ _3b0d:
         and # %01111111
         ldx # $fe
         stx ZP_TEMP_VAR
-_3b20:
+_3b20:                                                                  ;$3B20
         asl 
         cmp # $60
         bcc _3b27
         sbc # $60
-_3b27:
+_3b27:                                                                  ;$3B27
         rol ZP_TEMP_VAR
         bcs _3b20
         lda ZP_TEMP_VAR
@@ -5399,14 +5426,15 @@ _3b27:
 
 ;===============================================================================
 
-_3b30:
+_3b30:                                                                  ;$3B30
         lda DUST_Z, y
-_3b33:
+_3b33:                                                                  ;$3B33
         sta $9a
 
         lda $96                 ; player's ship speed?
-_3b37:
+_3b37:                                                                  ;$3B37
 .export _3b37
+
         asl 
         sta ZP_VAR_P1
         
@@ -5416,49 +5444,49 @@ _3b37:
         bcc _3b43
         
         sbc $9a
-_3b43:
+_3b43:                                                                  ;$3B43
         rol ZP_VAR_P1
         rol 
         cmp $9a
         bcc _3b4c
         sbc $9a
-_3b4c:
+_3b4c:                                                                  ;$3B4C
         rol ZP_VAR_P1
         rol 
         cmp $9a
         bcc _3b55
         sbc $9a
-_3b55:
+_3b55:                                                                  ;$3B55
         rol ZP_VAR_P1
         rol 
         cmp $9a
         bcc _3b5e
         sbc $9a
-_3b5e:
+_3b5e:                                                                  ;$3B5E
         rol ZP_VAR_P1
         rol 
         cmp $9a
         bcc _3b67
         sbc $9a
-_3b67:
+_3b67:                                                                  ;$3B67
         rol ZP_VAR_P1
         rol 
         cmp $9a
         bcc _3b70
         sbc $9a
-_3b70:
+_3b70:                                                                  ;$3B70
         rol ZP_VAR_P1
         rol 
         cmp $9a
         bcc _3b79
         sbc $9a
-_3b79:
+_3b79:                                                                  ;$3B79
         rol ZP_VAR_P1
         rol 
         cmp $9a
         bcc _3b82
         sbc $9a
-_3b82:
+_3b82:                                                                  ;$3B82
         rol ZP_VAR_P1
         ldx # $00
         sta $b6
@@ -5476,20 +5504,20 @@ _3b82:
         bcs _3ba9
         tax 
         lda _9500, x
-_3ba6:
+_3ba6:                                                                  ;$3BA6
         sta $9b
         rts 
         
         ;-----------------------------------------------------------------------
 
-_3ba9:
+_3ba9:                                                                  ;$3BA9
         lda # $ff
         sta $9b
         rts 
 
         ;-----------------------------------------------------------------------
 
-_3bae:
+_3bae:                                                                  ;$3ABE
         ldx $b6
         lda _9300, x
         ldx $9a
@@ -5502,8 +5530,9 @@ _3bae:
 
 ;===============================================================================
 
-_3bc1:
+_3bc1:                                                                  ;$3BC1
 .export _3bc1
+
         sta ZP_VAR_P3
         lda ZP_POLYOBJ_ZPOS_pt1
         ora # %00000001
@@ -5522,7 +5551,7 @@ _3bc1:
         ldy # $00
         lda ZP_VAR_P3
         and # %01111111
-_3be5:
+_3be5:                                                                  ;$3BE5
         cmp # $40
         bcs _3bf1
         asl ZP_VAR_P1
@@ -5530,11 +5559,11 @@ _3be5:
         rol 
         iny 
         bne _3be5
-_3bf1:
+_3bf1:                                                                  ;$3BF1
         sta ZP_VAR_P3
         lda $9c
         and # %01111111
-_3bf7:
+_3bf7:                                                                  ;$3BF7
         dey 
         asl $9a
         rol $9b
@@ -5544,24 +5573,24 @@ _3bf7:
         lda # $fe
         sta $9b
         lda ZP_VAR_P3
-_3c07:
+_3c07:                                                                  ;$3C07
         asl 
         bcs _3c17
         cmp $9a
         bcc _3c10
         sbc $9a
-_3c10:
+_3c10:                                                                  ;$3C10
         rol $9b
         bcs _3c07
         jmp _3c20
 
-_3c17:
+_3c17:                                                                  ;$3C17
         sbc $9a
         sec 
         rol $9b
         bcs _3c07
         lda $9b
-_3c20:
+_3c20:                                                                  ;$3C20
         lda # $00
         sta $78
         sta $79
@@ -5569,7 +5598,7 @@ _3c20:
         tya 
         bpl _3c49
         lda $9b
-_3c2d:
+_3c2d:                                                                  ;$3C2D
         asl 
         rol $78
         rol $79
@@ -5584,7 +5613,7 @@ _3c2d:
 
 ;===============================================================================
 
-_3c40:
+_3c40:                                                                  ;$3C40
         lda $9b
         sta $77
         lda $bb
@@ -5593,10 +5622,10 @@ _3c40:
 
         ;-----------------------------------------------------------------------
 
-_3c49:
+_3c49:                                                                  ;$3C49
         beq _3c40
         lda $9b
-_3c4d:
+_3c4d:                                                                  ;$3C4D
         lsr 
         dey 
         bne _3c4d
@@ -5607,28 +5636,29 @@ _3c4d:
 
 ;===============================================================================
 
-_3c58:
+_3c58:                                                                  ;$3C58
         lda $0480
         bne _3c62
         lda _1d06
         bne _3c6e
-_3c62:
+_3c62:                                                                  ;$3C62
         txa 
         bpl _3c68
         dex 
         bmi _3c6e
-_3c68:
+_3c68:                                                                  ;$3C68
         inx 
         bne _3c6e
         dex 
         beq _3c68
-_3c6e:
+_3c6e:                                                                  ;$3C68
         rts 
 
 ;===============================================================================
 
-_3c6f:
+_3c6f:                                                                  ;$3C6F
 .export _3c6f
+
         sta $bb
         txa 
         clc 
@@ -5636,16 +5666,17 @@ _3c6f:
         tax 
         bcc _3c7a
         ldx # $ff
-_3c7a:
+_3c7a:                                                                  ;$3C7A
         bpl _3c8c
-_3c7c:
+_3c7c:                                                                  ;$3C7C
         lda $bb
         rts 
 
         ;-----------------------------------------------------------------------
 
-_3c7f:
+_3c7f:                                                                  ;$3C7F
 .export _3c7f
+
         sta $bb
         txa 
         sec 
@@ -5653,15 +5684,16 @@ _3c7f:
         tax 
         bcs _3c8a
         ldx # $01
-_3c8a:
+_3c8a:                                                                  ;$3C8A
         bpl _3c7c
-_3c8c:
+_3c8c:                                                                  ;$3C8C
         lda _1d07
         bne _3c7c
         ldx # $80
         bmi _3c7c
-_3c95:
+_3c95:                                                                  ;$3C95
 .export _3c95
+
         lda ZP_VAR_P1
         eor $9a
         sta ZP_TEMP_VAR
@@ -5675,14 +5707,14 @@ _3c95:
         bcs _3cb2
         jsr _3cce
         sec 
-_3cad:
+_3cad:                                                                  ;$3CAD
         ldx ZP_TEMP_VAR
         bmi _3cc7
         rts 
 
         ;-----------------------------------------------------------------------
 
-_3cb2:
+_3cb2:                                                                  ;$3CB2
         ldx $9a
         sta $9a
         stx ZP_VAR_P1
@@ -5692,13 +5724,13 @@ _3cb2:
         lda # $40
         sbc $bb
         bcs _3cad
-_3cc4:
+_3cc4:                                                                  ;$3CC4
         lda # $3f
         rts 
 
         ;-----------------------------------------------------------------------
 
-_3cc7:
+_3cc7:                                                                  ;$3CC7
         sta $bb
         lda # $80
         sbc $bb
@@ -5706,7 +5738,7 @@ _3cc7:
 
         ;-----------------------------------------------------------------------
 
-_3cce:
+_3cce:                                                                  ;$3CCE
         jsr _99af
         lda $9b
         lsr 
@@ -5714,12 +5746,12 @@ _3cce:
         lsr 
         tax 
         lda _0ae0, x
-_3cda:
+_3cda:                                                                  ;$3CDA
         rts 
 
 ;===============================================================================
 
-_3cdb:
+_3cdb:                                                                  ;$3CDB
         jsr get_random_number
         and # %00000111
         adc # $44
@@ -5734,7 +5766,7 @@ _3cdb:
         adc # $08
         sta PLAYER_TEMP_LASER
         jsr _7b64
-_3cfa:
+_3cfa:                                                                  ;$3CFA
         lda $a0
         bne _3cda
         lda # $20
@@ -5742,7 +5774,7 @@ _3cfa:
         jsr _3d09
         lda # $30
         ldy # $d0
-_3d09:
+_3d09:                                                                  ;$3D09
         sta ZP_VAR_X2
         lda $06f0
         sta ZP_VAR_X
@@ -5762,8 +5794,9 @@ _3d09:
 
 ;===============================================================================
 
-_3d2f:
+_3d2f:                                                                  ;$3D2F
 .export _3d2f
+
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
        .bnz _3d6f
@@ -5771,7 +5804,7 @@ _3d2f:
         lda $a7
         bpl _3d6f
         ldy # $00
-_3d3d:
+_3d3d:                                                                  ;$3D3D
         lda _1a27, y
         cmp VAR_Z
         bne _3d6c
@@ -5801,10 +5834,10 @@ _3d3d:
 
         lda # $b1
         bne _3d7a
-_3d6c:
+_3d6c:                                                                  ;$3D6C
         dey 
         bne _3d3d
-_3d6f:
+_3d6f:                                                                  ;$3D6F
         ; copy the last four bytes of the main seed to the "goat soup" seed,
         ; used for generating the planet descriptions
         ldx # $03
@@ -5814,7 +5847,7 @@ _3d6f:
         bpl :-
 
         lda # $05
-_3d7a:  jmp print_docked_str
+_3d7a:  jmp print_docked_str                                            ;$3D7A
 
 
 mission_blueprints_begin:                                               ;$3D7D
@@ -5829,9 +5862,9 @@ mission_blueprints_begin:                                               ;$3D7D
 .import TXT_DOCKED_0B:direct
         lda # TXT_DOCKED_0B
 
-_3d87:                                                                  ;$3d87
+_3d87:                                                                  ;$3D87
         jsr print_docked_str
-_3d8a:                                                                  ;$3d8a
+_3d8a:                                                                  ;$3D8A
         jmp _88e7
 
 
@@ -5860,7 +5893,7 @@ mission_blueprints_birera:                                              ;$3D9B
         lda # $df
         bne _3d87               ; always branches
 
-_3daf:                                                                  ;$3daf
+_3daf:                                                                  ;$3DAF
         ;=======================================================================
         lsr MISSION_FLAGS
         asl MISSION_FLAGS
@@ -5870,7 +5903,7 @@ _3daf:                                                                  ;$3daf
         jsr _7481
         
         lda # $0f
-_3dbe:                                                                  ;$3dbe
+_3dbe:                                                                  ;$3DBE
         bne _3d87               ; always branches
 
 .ifndef OPTION_NOTRUMBLES
@@ -5907,7 +5940,7 @@ mission_trumbles:                                                       ;$3DC0
 
 ;===============================================================================
 
-_3dff:                                                                  ;$3dff
+_3dff:                                                                  ;$3DFF
         ; and this is how you set bit 0, without using registers!
 
         lsr MISSION_FLAGS       ; push bit 0 into the bit-bucket
@@ -5928,17 +5961,17 @@ _3dff:                                                                  ;$3dff
         jsr _a72f
         lda # $40
         sta $a3                 ; move counter?
-_3e01:                                                                  ;$3e01
+_3e01:                                                                  ;$3E01
         ldx # $7f
         stx $26
         stx $27
-_3e07:
+_3e07:                                                                  ;$3E07
 .export _3e08 := _3e07+1
         jsr _9a86
         jsr _a2a0
         dec $a3                 ; move counter?
         bne _3e01
-_3e11:                                                                  ;$3e11
+_3e11:                                                                  ;$3E11
         lsr ZP_POLYOBJ_XPOS_pt1
         inc ZP_POLYOBJ_ZPOS_pt1
         beq _3e31
@@ -5949,13 +5982,13 @@ _3e11:                                                                  ;$3e11
         cpx # $50
         bcc _3e24
         ldx # $50
-_3e24:                                                                  ;$3e24
+_3e24:                                                                  ;$3E24
         stx ZP_POLYOBJ_YPOS_pt1
         jsr _9a86
         jsr _a2a0
         dec $a3                 ; move counter?
         jmp _3e11
-_3e31:                                                                  ;$3e31
+_3e31:                                                                  ;$3E31
         inc ZP_POLYOBJ_ZPOS_pt2
         lda # $0a
         bne _3dbe               ; always branches
@@ -5982,7 +6015,7 @@ txt_docked_token16:                                                     ;$3E41
         
         jsr _3e65
         bne txt_docked_token16
-_3e46:                                                                  ;$3e46
+_3e46:                                                                  ;$3E46
         jsr _3e65
         beq _3e46
         
