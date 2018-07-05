@@ -4661,14 +4661,14 @@ _370a:
         pha 
         lda ZP_HULL_ADDR_HI
         pha 
-        lda $59
+        lda ZP_POLYOBJ_ADDR_LO
         pha 
-        lda $5a
+        lda ZP_POLYOBJ_ADDR_HI
         pha 
         ldy # $24
 _371c:
         lda $0009, y
-        sta $0100, y
+        sta $0100, y            ; the stack!?
         lda [$59], y
         sta $0009, y
         dey 
@@ -4714,9 +4714,9 @@ _374d:
 _3770:
         jsr _7c6b
         pla 
-        sta $5a
+        sta ZP_POLYOBJ_ADDR_HI
         pla 
-        sta $59
+        sta ZP_POLYOBJ_ADDR_LO
         ldx # $24
 _377b:
         lda $0100, x
@@ -6038,9 +6038,9 @@ _3e87:                                                                  ;$3E87
         asl                     ; multiply by 2 (for 2-byte table-lookup)
         tay 
         lda _28a4 + 0, y
-        sta $59
+        sta ZP_POLYOBJ_ADDR_LO
         lda _28a4 + 1, y
-        sta $5a
+        sta ZP_POLYOBJ_ADDR_HI
         
         rts 
 

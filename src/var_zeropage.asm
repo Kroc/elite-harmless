@@ -207,6 +207,12 @@ ZP_HULL_ADDR            = $57
 ZP_HULL_ADDR_LO         = $57
 ZP_HULL_ADDR_HI         = $58
 
+; a pointer to a PolyObject in RAM -- i.e. a currently in-play 3D object,
+; such as a ship, asteroid or station
+ZP_POLYOBJ_ADDR         = $59
+ZP_POLYOBJ_ADDR_LO      = $59
+ZP_POLYOBJ_ADDR_HI      = $5a
+
 ;-------------------------------------------------------------------------------
 
 VAR_X                   = $6b   ; a common "X" variable

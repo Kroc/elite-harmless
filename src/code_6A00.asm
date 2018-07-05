@@ -3406,10 +3406,10 @@ _7c7b:
         sbc # $00
         sta $2b
         lda $2a
-        sbc $59
+        sbc ZP_POLYOBJ_ADDR_LO
         tay 
         lda $2b
-        sbc $5a
+        sbc ZP_POLYOBJ_ADDR_HI
         bcc _7c7a
         bne _7cba
         cpy # $25
@@ -4529,9 +4529,9 @@ _8399:
         dey 
         bpl _8399
         lda ZP_TEMP_ADDR_LO
-        sta $59
+        sta ZP_POLYOBJ_ADDR_LO
         lda ZP_TEMP_ADDR_HI
-        sta $5a
+        sta ZP_POLYOBJ_ADDR_HI
         ldy $bb
 _83aa:
         dey 
