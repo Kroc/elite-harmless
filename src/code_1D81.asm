@@ -1738,7 +1738,7 @@ _27a4:
         sta ZP_VAR_P1
         and # %00001111
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
 _27ab:  bne _27ab               ; infinite loop, why?
         lda ZP_VAR_P1
         lsr 
@@ -1746,14 +1746,14 @@ _27ab:  bne _27ab               ; infinite loop, why?
         lsr 
         lsr 
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
 _27b6:  bne _27b6               ; infinite loop, why?
         iny 
         lda [$5b], y
         sta ZP_VAR_P1
         and # %00001111
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
 _27c2:  bne _27c2               ; infinite loop, why?
         lda ZP_VAR_P1
         lsr 
@@ -1761,7 +1761,7 @@ _27c2:  bne _27c2               ; infinite loop, why?
         lsr 
         lsr 
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
 _27cd:  bne _27cd               ; infinite loop, why?
         jmp _9d8e               ; SPEED: jump to a jump (`_9f06`)
 
@@ -3860,13 +3860,13 @@ _3244:
         lda _28a4 + 1, x
         jsr _3581
 
-        lda $37
-        ora $3a
-        ora $3d
+        lda ZP_POLYOBJ01_XPOS_pt3
+        ora ZP_POLYOBJ01_YPOS_pt3
+        ora ZP_POLYOBJ01_ZPOS_pt3
         and # %01111111
-        ora $36
-        ora $39
-        ora $3c
+        ora ZP_POLYOBJ01_XPOS_pt2
+        ora ZP_POLYOBJ01_YPOS_pt2
+        ora ZP_POLYOBJ01_ZPOS_pt2
         bne _3299
         lda $29
         cmp # $82
@@ -4042,7 +4042,7 @@ _3365:
         ldx # $08
 _3367:
         lda ZP_POLYOBJ_XPOS_pt1, x
-        sta $35, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _3367
 _336e:
@@ -4276,9 +4276,9 @@ _34cc:
 
 _34cf:
         jsr _357b
-        lda $37
-        ora $3a
-        ora $3d
+        lda ZP_POLYOBJ01_XPOS_pt3
+        ora ZP_POLYOBJ01_YPOS_pt3
+        ora ZP_POLYOBJ01_ZPOS_pt3
         and # %01111111
         bne _34cc
         jsr _8cad
@@ -4408,11 +4408,11 @@ _358f:
         jsr _2d69
         
         ldy $99
-        sta $37, x
+        sta ZP_POLYOBJ01_XPOS_pt3, x
         lda $79
-        sta $36, x
+        sta ZP_POLYOBJ01_XPOS_pt2, x
         lda $78
-        sta $35, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         rts 
 
 ;===============================================================================
@@ -4466,38 +4466,38 @@ _3600:
         lda # $00
         ror 
         eor # %10000000
-        eor $37, x
+        eor ZP_POLYOBJ01_XPOS_pt3, x
         bmi _3617
         lda $9b
-        adc $35, x
-        sta $35, x
+        adc ZP_POLYOBJ01_XPOS_pt1, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         bcc _3616
-        inc $36, x
+        inc ZP_POLYOBJ01_XPOS_pt2, x
 _3616:
         rts 
 
         ;-----------------------------------------------------------------------
 
 _3617:
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
         sec 
         sbc $9b
-        sta $35, x
-        lda $36, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
+        lda ZP_POLYOBJ01_XPOS_pt2, x
         sbc # $00
-        sta $36, x
+        sta ZP_POLYOBJ01_XPOS_pt2, x
         bcs _3616
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
         eor # %11111111
         adc # $01
-        sta $35, x
-        lda $36, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
+        lda ZP_POLYOBJ01_XPOS_pt2, x
         eor # %11111111
         adc # $00
-        sta $36, x
-        lda $37, x
+        sta ZP_POLYOBJ01_XPOS_pt2, x
+        lda ZP_POLYOBJ01_XPOS_pt3, x
         eor # %10000000
-        sta $37, x
+        sta ZP_POLYOBJ01_XPOS_pt3, x
         jmp _3616
 
 ;===============================================================================
@@ -4762,12 +4762,12 @@ _37a5:
 _37b2:
 .export _37b2
         ldx # $80
-        stx $35
+        stx ZP_POLYOBJ01_XPOS_pt1
         ldx # $48
         stx $43
         ldx # $00
         stx $ad
-        stx $36
+        stx ZP_POLYOBJ01_XPOS_pt2
         stx $44
 _37c2:
         jsr _37ce

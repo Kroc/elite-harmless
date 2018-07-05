@@ -706,12 +706,12 @@ _6cda:                                                                  ;$6cda
         sta $8f
 _6cfe:                                                                  ;$6cfe
         lda $8e
-        sta $35
+        sta ZP_POLYOBJ01_XPOS_pt1
         lda $8f
         sta $43
         ldx # $00
         stx $44
-        stx $36
+        stx ZP_POLYOBJ01_XPOS_pt2
         inx 
         stx $7e
         ldx # $02
@@ -1247,11 +1247,11 @@ _705c:                                                                  ;$705c
         jsr _76e9
 _7070:                                                                  ;$7070
         lda # $00
-        sta $36
+        sta ZP_POLYOBJ01_XPOS_pt2
         sta $44
         sta $78
         lda $71
-        sta $35
+        sta ZP_POLYOBJ01_XPOS_pt1
         lda ZP_SEED_pt6
         and # %00000001
         adc # $02
@@ -2794,7 +2794,7 @@ _78f5:
 _78f7:
         iny 
         lda [$2a], y
-        sta $35, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _78f7
         sty $aa
@@ -2821,17 +2821,17 @@ _7911:
         sta ZP_GOATSOUP_pt2
         stx ZP_GOATSOUP_pt4
         sta VAR_Z
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         sta $9b
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         jsr _7974
         bne _795d
         cpx # $8f
         bcs _795d
         stx VAR_Y
-        lda $38
+        lda ZP_POLYOBJ01_YPOS_pt1
         sta $9b
-        lda $37
+        lda ZP_POLYOBJ01_XPOS_pt3
         jsr _7974
         bne _7948
         lda VAR_Y
@@ -2958,25 +2958,25 @@ _79eb:
 _79ed:
         iny 
         lda [$2a], y
-        sta $35, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _79ed
         sty $aa
-        lda $38
+        lda ZP_POLYOBJ01_YPOS_pt1
         clc 
         adc $050e
         sta ZP_TEMP_ADDR_LO
-        lda $37
+        lda ZP_POLYOBJ01_XPOS_pt3
         adc # $00
         bmi _7a36
         cmp # $02
         bcs _7a36
         tax 
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         clc 
         adc $050f
         tay 
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         adc # $00
         bne _7a36
         cpy # $c2
@@ -3004,17 +3004,17 @@ _7a38:
 _7a46:
         jsr _84ae
         sta VAR_Z
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         sta $9b
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         jsr _7974
         bne _7a86
         cpx # $8f
         bcs _7a86
         stx VAR_Y
-        lda $38
+        lda ZP_POLYOBJ01_YPOS_pt1
         sta $9b
-        lda $37
+        lda ZP_POLYOBJ01_XPOS_pt3
         jsr _7974
         bne _7a6c
         lda VAR_Y
@@ -3312,14 +3312,14 @@ _7c0b:
 
 _7c11:
         lda POLYOBJ_00 + PolyObject::xpos + 1, x        ;=$F901
-        sta $35, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         lda POLYOBJ_00 + PolyObject::xpos + 2, x        ;=$F902
         tay 
         and # %01111111
-        sta $36, x
+        sta ZP_POLYOBJ01_XPOS_pt2, x
         tya 
         and # %10000000
-        sta $37, x
+        sta ZP_POLYOBJ01_XPOS_pt3, x
         rts 
 
 ;===============================================================================
@@ -3490,10 +3490,10 @@ _7d1f:
         bcs _7d56
         lda $77
         adc # $80
-        sta $35
+        sta ZP_POLYOBJ01_XPOS_pt1
         txa 
         adc # $00
-        sta $36
+        sta ZP_POLYOBJ01_XPOS_pt2
         lda ZP_POLYOBJ_YPOS_pt1
         sta ZP_VAR_P1
         lda ZP_POLYOBJ_YPOS_pt2
@@ -3597,11 +3597,11 @@ _7de0:
         ldx # $0f
         jsr _8189
         clc 
-        adc $35
-        sta $35
+        adc ZP_POLYOBJ01_XPOS_pt1
+        sta ZP_POLYOBJ01_XPOS_pt1
         tya 
-        adc $36
-        sta $36
+        adc ZP_POLYOBJ01_XPOS_pt2
+        sta ZP_POLYOBJ01_XPOS_pt2
         jsr _8189
         sta ZP_VAR_P1
         lda $43
@@ -3719,10 +3719,10 @@ _7e5f:
         sta $bb
 _7ec8:
         txa 
-        adc $35
+        adc ZP_POLYOBJ01_XPOS_pt1
         sta $89
         lda $bb
-        adc $36
+        adc ZP_POLYOBJ01_XPOS_pt2
         sta $8a
         lda $77
         sta $9b
@@ -3875,9 +3875,9 @@ _7fb6:
         sta $5d
         lda $6d
         sta $5e
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         sta $5f
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         sta $60
         lda $0580, y
         jsr _811e
@@ -3906,9 +3906,9 @@ _8005:
         jmp _7f8f
 
 _8008:
-        ldx $35
+        ldx ZP_POLYOBJ01_XPOS_pt1
         stx $5f
-        ldx $36
+        ldx ZP_POLYOBJ01_XPOS_pt2
         stx $60
         jsr _811e
         bcc _7ff5
@@ -3935,9 +3935,9 @@ _8037:
         bne _802f
 _803a:
         clc 
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         sta $61
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         sta $62
 _8043:
         rts 
@@ -3982,9 +3982,9 @@ _8065:
         txa 
         clc 
 _8081:
-        adc $35
+        adc ZP_POLYOBJ01_XPOS_pt1
         sta $89
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         adc $bb
         sta $8a
         lda $aa
@@ -4113,16 +4113,16 @@ _8148:
         rts 
 
 _814f:
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         clc 
         adc $77
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         adc # $00
         bmi _8187
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         sec 
         sbc $77
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         sbc # $00
         bmi _8167
         bne _8187
@@ -5961,38 +5961,38 @@ _8c7b:
         jsr _7c11
 _8c8a:
 .export _8c8a
-        lda $35
-        ora $38
-        ora $3b
+        lda ZP_POLYOBJ01_XPOS_pt1
+        ora ZP_POLYOBJ01_YPOS_pt1
+        ora ZP_POLYOBJ01_ZPOS_pt1
         ora # %00000001
         sta $3e
-        lda $36
-        ora $39
-        ora $3c
+        lda ZP_POLYOBJ01_XPOS_pt2
+        ora ZP_POLYOBJ01_YPOS_pt2
+        ora ZP_POLYOBJ01_ZPOS_pt2
 _8c9a:
         asl $3e
         rol 
         bcs _8cad
-        asl $35
-        rol $36
-        asl $38
-        rol $39
-        asl $3b
-        rol $3c
+        asl ZP_POLYOBJ01_XPOS_pt1
+        rol ZP_POLYOBJ01_XPOS_pt2
+        asl ZP_POLYOBJ01_YPOS_pt1
+        rol ZP_POLYOBJ01_YPOS_pt2
+        asl ZP_POLYOBJ01_ZPOS_pt1
+        rol ZP_POLYOBJ01_ZPOS_pt2
         bcc _8c9a
 _8cad:
 .export _8cad
-        lda $36
+        lda ZP_POLYOBJ01_XPOS_pt2
         lsr 
-        ora $37
+        ora ZP_POLYOBJ01_XPOS_pt3
         sta VAR_X
-        lda $39
+        lda ZP_POLYOBJ01_YPOS_pt2
         lsr 
-        ora $3a
+        ora ZP_POLYOBJ01_YPOS_pt3
         sta VAR_Y
-        lda $3c
+        lda ZP_POLYOBJ01_ZPOS_pt2
         lsr 
-        ora $3d
+        ora ZP_POLYOBJ01_ZPOS_pt3
         sta $6d
 _8cc2:
         lda VAR_X
@@ -7220,7 +7220,7 @@ menuscr_hi:                                                             ;$9919
 _9932:
         jsr _9ad8
         jsr _7d1f
-        ora $36
+        ora ZP_POLYOBJ01_XPOS_pt2
         bne _995d
         lda $43
         cmp # $8e
@@ -7253,7 +7253,7 @@ _9964:
         iny 
         iny 
         sta [$2a], y
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         dey 
         sta [$2a], y
         adc # $03
@@ -7604,7 +7604,7 @@ _9b66:
         tax 
         lda # $ff
 _9b80:
-        sta $35, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _9b80
         inx 
@@ -7680,7 +7680,7 @@ _9bf2:
         lsr 
         tax 
         lda # $ff
-        sta $35, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         tya 
         adc # $04
         tay 
@@ -7815,7 +7815,7 @@ _9ca9:
         bmi _9cf4
         lda # $00
 _9cf4:
-        sta $35, x
+        sta ZP_POLYOBJ01_XPOS_pt1, x
         iny 
 _9cf7:
         cpy $ae
@@ -7882,7 +7882,7 @@ _9d45:
         sta ZP_VAR_P1
         and # %00001111
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
         lda ZP_VAR_P1
         lsr 
@@ -7890,14 +7890,14 @@ _9d45:
         lsr 
         lsr 
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
         iny 
         lda [$5b], y
         sta ZP_VAR_P1
         and # %00001111
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
         lda ZP_VAR_P1
         lsr 
@@ -7905,7 +7905,7 @@ _9d45:
         lsr 
         lsr 
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
 _9d8e:
 .export _9d8e
@@ -8254,7 +8254,7 @@ _9fb8:
         sta ZP_VAR_P1
         and # %00001111
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9fd9
         lda ZP_VAR_P1
         lsr 
@@ -8262,7 +8262,7 @@ _9fb8:
         lsr 
         lsr 
         tax 
-        lda $35, x
+        lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9fd9
 _9fd6:
         jmp _a15b
@@ -11116,7 +11116,7 @@ _b168:
 
 _b16e:
         jsr _b384
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
         jmp _b189
 
         ;-----------------------------------------------------------------------
@@ -11140,7 +11140,7 @@ paint_char:                                                             ;$B17B
 
         ; store current registers
         ; (compatibility with KERNAL_CHROUT?)
-        sta $35
+        sta ZP_POLYOBJ01_XPOS_pt1
         sty $0490
         stx $048f
 
@@ -11320,7 +11320,7 @@ _b210:  ; restore registers before returning
         ; (compatibility with KERNAL_CHROUT?)
         ldy $0490
         ldx $048f
-        lda $35
+        lda ZP_POLYOBJ01_XPOS_pt1
 
         clc 
         rts 
