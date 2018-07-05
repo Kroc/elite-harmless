@@ -2127,8 +2127,8 @@ _293a:
        .bge _296d               
         
         lda _28c8, x            ; get mask for desired pixel-position
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         
         lda VAR_Z
         cmp # 80                ; is the dust-particle >= 80 Z-distance?
@@ -2141,8 +2141,8 @@ _293a:
 
 _296d:
         lda _28c8, x
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
 
 _2974:
         ldy ZP_TEMP_VAR         ; restore Y
@@ -3621,11 +3621,11 @@ _30e5:
         lda $9b                 ; mask
 _30f1:
         and $32
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         tya 
         clc 
         adc # $06
@@ -3690,13 +3690,13 @@ _3149:
         sta $9a
         lda # $00
 _314d:
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         tya 
         clc 
         adc # $05

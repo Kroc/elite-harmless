@@ -4387,7 +4387,7 @@ _82be:
         lda _28a4 + 1, y
         sta ZP_TEMP_ADDR_HI
         ldy # $20
-        lda [$07], y
+        lda [ZP_TEMP_ADDR], y
         bpl _82be
         and # %01111111
         lsr 
@@ -4397,11 +4397,11 @@ _82be:
         sbc # $01
         asl 
         ora # %10000000
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         bne _82be
 _82ed:
         lda # $00
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         beq _82be
 _82f3:
         stx $ad
@@ -4465,7 +4465,7 @@ _834f:
         sta ZP_TEMP_ADDR_HI
         
         ldy # $05
-        lda [$07], y
+        lda [ZP_TEMP_ADDR], y
         sta $bb
         lda ZP_VAR_P1
         sec 
@@ -4483,24 +4483,24 @@ _834f:
         sta ZP_TEMP_ADDR_HI
 
         ldy # $24
-        lda [$07], y
+        lda [ZP_TEMP_ADDR], y
         sta [$59], y
         dey 
-        lda [$07], y
+        lda [ZP_TEMP_ADDR], y
         sta [$59], y
         dey 
-        lda [$07], y
+        lda [ZP_TEMP_ADDR], y
         sta $78
         lda ZP_VAR_P2
         sta [$59], y
         dey 
-        lda [$07], y
+        lda [ZP_TEMP_ADDR], y
         sta $77
         lda ZP_VAR_P1
         sta [$59], y
         dey 
 _8399:
-        lda [$07], y
+        lda [ZP_TEMP_ADDR], y
         sta [$59], y
         dey 
         bpl _8399
@@ -5690,7 +5690,7 @@ _8ad9:
         lda # $00
         stx ZP_TEMP_ADDR_HI
 _8ae1:
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         iny 
         bne _8ae1
         rts 
@@ -9211,7 +9211,7 @@ _a604:
         ldy # $00
         sty $5b
         ldx # $10
-        lda [$07], y
+        lda [ZP_TEMP_ADDR], y
         txa 
 _a60e:
         stx $5c
@@ -9942,7 +9942,7 @@ _aaa2:
         sta ZP_TEMP_ADDR_LO
         tay                     ; =0
 
-:       sta [$07], y                                                    ;$AABD
+:       sta [ZP_TEMP_ADDR], y                                           ;$AABD
         iny 
         bne :-
 
@@ -10232,8 +10232,8 @@ _ac5d:
 
 _ac60:
         lda # %10000000
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _ac5d
         lda $bf
@@ -10253,8 +10253,8 @@ _ac82:
         clc 
 _ac83:
         lda # $40
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _ac5d
         lda $bf
@@ -10274,8 +10274,8 @@ _aca5:
         clc 
 _aca6:
         lda # $20
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _ac5d
         lda $bf
@@ -10295,8 +10295,8 @@ _acc8:
         clc 
 _acc9:
         lda # $10
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _ac5d
         lda $bf
@@ -10316,8 +10316,8 @@ _aceb:
         clc 
 _acec:
         lda # $08
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _ad39
         lda $bf
@@ -10337,8 +10337,8 @@ _ad0e:
         clc 
 _ad0f:
         lda # $04
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _ad88
         lda $bf
@@ -10358,8 +10358,8 @@ _ad31:
         clc 
 _ad32:
         lda # $02
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
 _ad39:
         beq _ad88
@@ -10380,8 +10380,8 @@ _ad54:
         clc 
 _ad55:
         lda # $01
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _ad88
         lda $bf
@@ -10477,8 +10477,8 @@ _addd:
 
 _ade0:
         lda # $80
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _addd
         lda $bf
@@ -10498,8 +10498,8 @@ _ae02:
         clc 
 _ae03:
         lda # $40
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _addd
         lda $bf
@@ -10519,8 +10519,8 @@ _ae25:
         clc 
 _ae26:
         lda # $20
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _addd
         lda $bf
@@ -10540,8 +10540,8 @@ _ae48:
         clc 
 _ae49:
         lda # $10
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _aeb9
         lda $bf
@@ -10561,8 +10561,8 @@ _ae6b:
         clc 
 _ae6c:
         lda # $08
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _aeb9
         lda $bf
@@ -10582,8 +10582,8 @@ _ae8e:
         clc 
 _ae8f:
         lda # $04
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _af05
         lda $bf
@@ -10603,8 +10603,8 @@ _aeb1:
         clc 
 _aeb2:
         lda # $02
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
 _aeb9:
         beq _af05
@@ -10625,8 +10625,8 @@ _aed4:
         clc 
 _aed5:
         lda # $01
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         beq _af05
         lda $bf
@@ -10735,8 +10735,8 @@ _af77:
         dex 
 _af88:
         lda $be
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
 _af8e:
         dey 
         bpl _af9f
@@ -10775,8 +10775,8 @@ _afbe:
         dex 
 _afc4:
         lda $be
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
 _afca:
         dey 
         bpl _afdb
@@ -10854,8 +10854,8 @@ _b025:
         and # %00000111
         tax 
         lda _2907, x
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         tya 
         adc # $08
         tay 
@@ -10868,8 +10868,8 @@ _b04c:
         clc 
 _b052:
         lda # $ff
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         tya 
         adc # $08
         tay 
@@ -10884,8 +10884,8 @@ _b064:
         and # %00000111
         tax 
         lda _2900, x
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         ldy $9e
         rts 
 
@@ -10902,8 +10902,8 @@ _b073:
         tax 
         lda _2900, x
         and $c0
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         ldy $9e
         rts 
 
@@ -10960,8 +10960,8 @@ _b0b5:
         tax 
         lda _ab47, x
         and $32
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         lda _ab49, x
         bpl _b0ed
         lda ZP_TEMP_ADDR_LO
@@ -10974,8 +10974,8 @@ _b0ea:
         lda _ab49, x
 _b0ed:
         and $32
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         rts 
 
 ;===============================================================================
@@ -11333,7 +11333,7 @@ _b21a:
 @row:   lda # .color_nybbles( WHITE, BLACK )                            ;$B224
         ldy # 31                ; 32 columns (0-31)
 
-:       sta [$07], y                                                    ;$B228
+:       sta [ZP_TEMP_ADDR], y                                           ;$B228
         dey 
         bpl :-
 
@@ -11364,7 +11364,7 @@ _b21a:
         ; erase $5600..$567F?
         ldy # $7f
         jsr erase_bytes
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
 
         ;-----------------------------------------------------------------------
 
@@ -11465,8 +11465,8 @@ _b2e5:
         ldy # $07
 _b2e7:
         lda $be
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dey 
         bpl _b2e7
         lda ZP_TEMP_ADDR_LO
@@ -11559,7 +11559,7 @@ _b36a:
         ldy # $17
 _b36c:
         lda # $ff
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         dey 
         bpl _b36c
         lda ZP_TEMP_ADDR_LO
@@ -11587,7 +11587,7 @@ _b389:
         
         tya 
 
-:       sta [$07], y                                                    ;$B394
+:       sta [ZP_TEMP_ADDR], y                                           ;$B394
         dey 
         bne :-
 
@@ -11624,7 +11624,7 @@ erase_bytes:                                                            ;$B3AB
         lda # $00
         stx ZP_TEMP_ADDR_HI
 
-:       sta [$07], y                                                    ;$B3AF
+:       sta [ZP_TEMP_ADDR], y                                           ;$B3AF
         dey 
         bne :-
 
@@ -11633,7 +11633,7 @@ erase_bytes:                                                            ;$B3AB
 _b3b5:
         ;=======================================================================
         lda # $00
-:       sta [$07], y                                                    ;$B3B7
+:       sta [ZP_TEMP_ADDR], y                                           ;$B3B7
         iny 
         bne :-
 
@@ -11658,7 +11658,7 @@ _b3c3:
         ldy # $00
 _b3c5:
         lda [$5b], y
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         dey 
         bne _b3c5
         inc $5c
@@ -11695,7 +11695,7 @@ _b3f7:
         lda # $00
         tay 
 _b3fa:
-        sta [$07], y
+        sta [ZP_TEMP_ADDR], y
         dey 
         bne _b3fa
         clc 
@@ -11793,8 +11793,8 @@ _b47f:
         sta ZP_TEMP_ADDR_HI
 _b491:
         lda VAR_X
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         bne _b47f
 _b49a:
@@ -11826,8 +11826,8 @@ _b4ae:
         sta ZP_TEMP_ADDR_HI
 _b4c1:
         lda VAR_X
-        eor [$07], y
-        sta [$07], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         inx 
         bne _b4ae
         rts 

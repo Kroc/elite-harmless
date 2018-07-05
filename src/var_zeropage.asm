@@ -133,6 +133,7 @@ ZP_VAR_P3               = $30
 
 ZP_CURSOR_COL           = $31
 ZP_CURSOR_ROW           = $33
+;                       = $34   ; case switch for flight strings?
 
 ;-------------------------------------------------------------------------------
 
