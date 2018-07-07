@@ -7,6 +7,7 @@
 .include        "c64.asm"
 .include        "elite_vars.asm"
 .include        "var_zeropage.asm"
+.include        "gfx/hull_struct.asm"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -121,6 +122,7 @@
 
 ; from "gfx/hulls.asm"
 .import _d000:absolute
+.import _d042:absolute
 .import _d062:absolute
 .import _d083:absolute
 
@@ -192,13 +194,12 @@ _6a2e:                                                                  ;$62AE
         rts 
 _6a2f:                                                                  ;$6A2F
 .export _6a2f
+
         jsr _a72f
         jsr _28d5
         lda # $30
         jsr _6a2e
         rts 
-
-; RNG?
 
 _6a3b:  ; roll RNG seed four times?                                     ;$6A3B
 ;===============================================================================
@@ -278,7 +279,7 @@ _6a8e:                                                                  ;$6A8E
 
 
 _6a93:                                                                  ;$6A93
-;===============================================================================
+        ;=======================================================================
         ; print "MAINLY"
         ;
 .import TXT_MAINLY:direct
@@ -3396,9 +3397,11 @@ _7c7b:                                                                  ;$7C7B
         sta ZP_HULL_ADDR_HI
         lda _d000 - 2, y        ;?
         sta ZP_HULL_ADDR_LO
-        cpy # $04
+
+        cpy # $04               ; is space station (coreolis)?
         beq _7cc4
-        ldy # $05
+        
+        ldy # Hull::_05        ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
         lda $04f2
@@ -3423,13 +3426,15 @@ _7cba:                                                                  ;$7CBA
         lda ZP_TEMP_ADDR2_HI
         sta $04f3
 _7cc4:                                                                  ;$7CC4
-        ldy # $0e
+        ldy # Hull::energy      ;=$0E: energy
         lda [ZP_HULL_ADDR], y
         sta $2c
-        ldy # $13
+
+        ldy # Hull::_13         ;=$13: "laser / missile count"?
         lda [ZP_HULL_ADDR], y
         and # %00000111
         sta $28
+        
         lda $bb
 _7cd4:                                                                  ;$7CD4
         sta $0452, x            ; ship slots?
@@ -3447,7 +3452,7 @@ _7ce9:                                                                  ;$7CE9
         inc $045d, x
 _7cec:                                                                  ;$7CEC
         ldy $bb
-        lda $d041, y
+        lda _d042 - 1, y        ;TODO: why is this less one?
         and # %01101111
         ora $2d
         sta $2d
@@ -4480,7 +4485,8 @@ _832c:                                                                  ;$832C
         dec $045d, x
 
         ldx $ad
-        ldy # $05               ; "faces data offset lo"
+
+        ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
 
         ldy # PolyObject::pitch ;=$21 -- is this correct?
@@ -7527,9 +7533,11 @@ _9a86:                                                                  ;$9A86
         ldy # $01
         lda # $12
         sta [ZP_TEMP_ADDR2], y
-        ldy # $07
+
+        ldy # Hull::_07         ;=$07: "explosion count"?
         lda [ZP_HULL_ADDR], y
-        ldy # $02
+        
+        ldy # $02               ;?
         sta [ZP_TEMP_ADDR2], y
 _9abb:                                                                  ;$9ABB
         iny 
@@ -7574,9 +7582,11 @@ _9ae6:                                                                  ;$9AE6
         lda ZP_POLYOBJ_YPOS_pt2
         sbc ZP_POLYOBJ_ZPOS_pt2
         bcs _9ac9
-        ldy # $06
+
+        ldy # Hull::_06         ;=$06: "gun vertex"?
         lda [ZP_HULL_ADDR], y
         tax 
+        
         lda # $ff
         sta $0100, x
         sta $0101, x
@@ -7599,10 +7609,11 @@ _9ae6:                                                                  ;$9AE6
         sta $ad
         bpl _9b3a
 _9b29:                                                                  ;$9B29
-        ldy # $0d
+        ldy # Hull::_0d         ;=$0D: level-of-detail distance
         lda [ZP_HULL_ADDR], y
         cmp ZP_POLYOBJ_ZPOS_pt2
         bcs _9b3a
+
         lda # $20
         and $28
         bne _9b3a
@@ -7647,7 +7658,7 @@ _9b66:                                                                  ;$9B66
         lda # $ff
         sta $44
         
-        ldy # $0c
+        ldy # Hull::face_count  ;=$0C: face count
         lda $28
         and # %00100000
         beq _9b8b
@@ -7669,7 +7680,8 @@ _9b8b:                                                                  ;$9B8B
         lda [ZP_HULL_ADDR], y
         beq _9b88
         sta $ae
-        ldy # $12
+
+        ldy # Hull::_12         ;=$12: "scaling of normals"?
         lda [ZP_HULL_ADDR], y
         tax 
         lda $8c
@@ -7712,16 +7724,19 @@ _9baa:                                                                  ;$9BAA
         sta $8b
         lda $76
         sta $8d
-        ldy # $04
+
+        ldy # Hull::face_data_lo
         lda [ZP_HULL_ADDR], y
         clc 
         adc ZP_HULL_ADDR_LO
         sta ZP_TEMP_ADDR3_LO
-        ldy # $11
+
+        ldy # Hull::face_data_hi
         lda [ZP_HULL_ADDR], y
         adc ZP_HULL_ADDR_HI
         sta ZP_TEMP_ADDR3_HI
-        ldy # $00
+
+        ldy # Hull::_00         ;=$00: "scoop / debris"?
 _9bf2:                                                                  ;$9BF2
         lda [ZP_TEMP_ADDR3], y
         sta $72
@@ -7902,9 +7917,11 @@ _9cfe:                                                                  ;$9CFE
         sta ZP_TEMPOBJ_M1x2_HI
         sty ZP_TEMPOBJ_M0x1_LO
         stx ZP_TEMPOBJ_M0x1_HI
-        ldy # $08
+
+        ldy # Hull::_08         ;=$08: verticies byte length
         lda [ZP_HULL_ADDR], y
         sta $ae
+        
         lda ZP_HULL_ADDR_LO
         clc 
         adc # $14
@@ -8230,9 +8247,11 @@ _9f2a:                                                                  ;$9F2A
 _9f35:                                                                  ;$9F35
         ora $28
         sta $28
-        ldy # $09
+
+        ldy # Hull::edge_count  ;=$09: edge count
         lda [ZP_HULL_ADDR], y
         sta $ae
+        
         ldy # $00
         sty $99
         sty $9f
@@ -8242,7 +8261,8 @@ _9f35:                                                                  ;$9F35
         lda $28
         and # %10111111
         sta $28
-        ldy # $06
+
+        ldy # Hull::_06         ;=$06: gun vertex
         lda [ZP_HULL_ADDR], y
         tay 
         ldx $0100, y
@@ -8284,18 +8304,21 @@ _9f82:                                                                  ;$9F82
         iny 
         sty $99
 _9f9f:                                                                  ;$9F9F
-        ldy # $03
+        ldy # Hull::edge_data_lo
         clc 
         lda [ZP_HULL_ADDR], y
         adc ZP_HULL_ADDR_LO
         sta ZP_TEMP_ADDR3_LO
-        ldy # $10
+
+        ldy # Hull::edge_data_hi
         lda [ZP_HULL_ADDR], y
         adc ZP_HULL_ADDR_HI
         sta ZP_TEMP_ADDR3_HI
-        ldy # $05
+
+        ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
+
         ldy $9f
 _9fb8:                                                                  ;$9FB8
         lda [ZP_TEMP_ADDR3], y
@@ -8845,7 +8868,7 @@ _a2cb:                                                                  ;$A2CB
         bpl _a30d
         lda # $00
 _a30d:                                                                  ;$A30D
-        ldy # $0f
+        ldy # Hull::speed       ;=$0F
         cmp [ZP_HULL_ADDR], y
         bcc _a315
         lda [ZP_HULL_ADDR], y
@@ -11832,6 +11855,7 @@ _b40f:                                                                  ;$B40F
 
 _b410:                                                                  ;$B410
 .export _b410
+
         lda $a0
         bne _b40f
         lda $28
@@ -12332,6 +12356,8 @@ _b70d:                                                                  ;$B70D
 ;===============================================================================
 
 .segment        "DATA_B70E"
+
+; this is very likely to be audio data
 
 _b70e:                                                                  ;$B70E
         .byte   $60, $05, $0e, $17, $20, $2f, $44, $5b                  ;$B70E

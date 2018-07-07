@@ -6,6 +6,7 @@
 .include        "c64.asm"
 .include        "elite_vars.asm"
 .include        "var_zeropage.asm"
+.include        "gfx/hull_struct.asm"
 
 ; from "text_flight.asm"
 .import _0ac0:absolute
@@ -693,7 +694,8 @@ _2039:                                                                  ;$2039
         bpl _2122
         cpx # $05
         beq _20c0
-        ldy # $00
+
+        ldy # Hull::_00         ;=$00: "scoop / debris"?
         lda [ZP_HULL_ADDR], y
         lsr 
         lsr 
@@ -858,11 +860,13 @@ _21ab:                                                                  ;$21AB
         lda $048b
         ora $0482
         bne _21e2
-        ldy # $0a
+
+        ldy # Hull::bounty      ;=$0A: (bounty lo-byte)
         lda [ZP_HULL_ADDR], y
         beq _21e2
+        
         tax 
-        iny 
+        iny                     ;=$0B: (bounty hi-byte)
         lda [ZP_HULL_ADDR], y
         tay 
         jsr _7481
@@ -1109,7 +1113,7 @@ _234c:                                                                  ;$234C
 
         tya 
         tax 
-        ldy # $00
+        ldy # Hull::_00         ;=$00: "scoop / debris"?
         and [ZP_HULL_ADDR], y
         and # %00001111
 _2359:                                                                  ;$2359
@@ -4004,7 +4008,7 @@ _32ef:                                                                  ;$32EF
         ;-----------------------------------------------------------------------
 
 _330f:                                                                  ;$330F
-        ldy # $0e
+        ldy # Hull::energy      ;=$0E: energy
         lda $2c
         cmp [ZP_HULL_ADDR], y
         bcs _3319
@@ -4012,8 +4016,10 @@ _330f:                                                                  ;$330F
 _3319:                                                                  ;$3319
         cpx # $1e
         bne _3329
+
         lda $047a
         bne _3329
+        
         lsr $29
         asl $29
         lsr ZP_POLYOBJ_VERTX_LO
@@ -4110,7 +4116,7 @@ _339a:                                                                  ;$339A
         ora # %01101000
         sta $26
 _33a8:                                                                  ;$33A8
-        ldy # $0e
+        ldy # Hull::energy      ;=$0E: energy
         lda [ZP_HULL_ADDR], y
         lsr 
         cmp $2c
@@ -4123,7 +4129,7 @@ _33a8:                                                                  ;$33A8
         cmp # $e6
         bcc _33d6
         ldx $a5
-        lda $d041, x            ;TODO: HULL_DATA?
+        lda $d042 - 1, x        ;TODO: why is this less one?
         bpl _33d6
         lda $2d
         and # %11110000
@@ -4170,15 +4176,18 @@ _33fd:                                                                  ;$33FD
         ldx $aa
         cpx # $a0
         bcc _3434
-        ldy # $13
+
+        ldy # Hull::_13         ;=$13: "laser / missile count"?
         lda [ZP_HULL_ADDR], y
         and # %11111000
         beq _3434
+        
         lda $28
         ora # %01000000
         sta $28
         cpx # $a3                 ; move counter?
         bcc _3434
+
         lda [ZP_HULL_ADDR], y
         lsr 
         jsr _7bd2
@@ -4563,11 +4572,11 @@ _363f:                                                                  ;$363F
         adc $9c
         bcs _367e
         sta $9c
-        ldy # $02
+        ldy # Hull::_0102 + 1   ;=$02: "missile lock area" hi-byte?
         lda [ZP_HULL_ADDR], y
         cmp $9c
         bne _367d
-        dey 
+        dey                     ;=$01: "missile lock area" lo-byte?
         lda [ZP_HULL_ADDR], y
         cmp $9b
 _367d:                                                                  ;$367D

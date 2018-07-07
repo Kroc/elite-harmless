@@ -10,6 +10,8 @@
 
 ; this file was produced with the help of nc513 on the lemon64 forums
 
+.include        "hull_struct.asm"
+
 .segment        "HULL_TABLE"
 
 _d000:
@@ -51,27 +53,40 @@ _d000:
 
 ;===============================================================================
 
-.segment        "HULL_DATA"
+.segment        "HULL_D042"
 
 ; these represent a data byte for each hull defined above
 
-;$d042:
+_d042:                                                                  ;$D042
+.export _d042
+
         .byte             $00, $00, $01, $00, $00, $00
         .byte   $00, $00, $21, $61, $a0, $a0, $a0, $a1
         .byte   $a1, $c2, $0c, $8c, $8c, $8c, $0c, $8c                  ;$D050
         .byte   $05, $8c, $8c, $8c, $82, $0c, $0c, $04
         .byte   $04, $20                                                ;$D060
 
+.segment        "HULL_D062"
+
+; these represent a data byte for each hull defined above
+
 _d062:
 .export _d062
+
         .byte             $00, $95, $00, $10, $0a, $0a
         .byte   $06, $08, $0a, $10, $11, $ea, $aa, $d5
         .byte   $00, $55, $1a, $55, $80, $55, $5a, $55                  ;$D070
         .byte   $aa, $32, $2a, $15, $2a, $40, $c0, $aa
         .byte   $21, $55, $55                                           ;$D080
         
+
+.segment        "HULL_D083"
+
+; these represent a data byte for each hull defined above
+
 _d083:
 .export _d083
+
         .byte                  $00, $00, $00, $00, $00
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
         .byte   $00, $01, $00, $00, $00, $00, $00, $00                  ;$D090
@@ -79,6 +94,8 @@ _d083:
         .byte   $02, $00, $05, $05, $00                                 ;$D0A0
 
 ;===============================================================================
+
+.segment        "HULL_DATA"
 
 .proc   _d0a5   ; missle                                                ;$D0A5
 
