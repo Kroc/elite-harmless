@@ -94,7 +94,7 @@ L:
 .endmacro
 
 ; this does the same thing,
-; but using a `cmp` instruction
+; but using a `cmp $????` instruction
 
 .macro .cmp
         .byte   $cd

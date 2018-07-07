@@ -5220,24 +5220,33 @@ _87b1:                                                                  ;$87B1
          rts 
 
 ;===============================================================================
+; a debugging error? `brk` causes a beep and a message to be printed
 
 _87b8:                                                                  ;$87B8
+        ; error mode? $FF = error occurred, $00 = normal
         .byte   $00
 
 ; BRK routine, set up by `_1e14`
 _87b9:                                                                  ;$87B9
 .export _87b9
+
         dec _87b8
+
+        ; clear the stack!
+        ; this puts the stack pointer back to the top of the stack
         ldx # $ff
         txs 
-        jsr _8c60
+
+        jsr _8c60               ; just returns -- removed code
         tay 
+
+        ; beep and print error message?
+
         lda # $07               ; BEEP?
-_87c5:                                                                  ;$87C5
-        jsr paint_char
+:       jsr paint_char                                                  ;$87C5
         iny 
         lda [$fd], y
-        bne _87c5
+        bne :-
         jmp _8888
 
 ;===============================================================================
@@ -5798,12 +5807,13 @@ _8b27:                                                                  ;$8B27
         lda # $04
         jsr print_docked_str
         
+        ; copy $0500..$04E5 (data to be saved?)
         ldx # $4c
-_8b37:                                                                  ;$8B37
-        lda $0499, x            ; $0500+?
+:       lda $0499, x                                                    ;$8B37
         sta _25b3, x
         dex 
-        bpl _8b37
+        bpl :-
+
         jsr _89f9
         sta _25fe
         jsr _89eb
@@ -5826,15 +5836,24 @@ _8b37:                                                                  ;$8B37
         eor # %10101001
         sta _25fd
         jsr _8bc0
+
         lda #< _25b3
         sta $fd
         lda #> _25b3
         sta $fe
+        
+        ; save to disk:
+
+.import __DATA_SAVE_LOAD__
+.import __DATA_SAVE_SIZE__
+
+        ; data is located at the pointer in $FD/$FE
         lda # $fd
-        ldx # $00
-        ldy # $26
-        jsr KERNAL_SAVE         ;save after call setlfs,setnam    
+        ldx #< (__DATA_SAVE_LOAD__ + __DATA_SAVE_SIZE__)
+        ldy #> (__DATA_SAVE_LOAD__ + __DATA_SAVE_SIZE__)
+        jsr KERNAL_SAVE
         php 
+        
         sei 
         bit $dc0d               ;cia1: cia interrupt control register
         lda # $01
