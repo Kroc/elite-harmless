@@ -1,5 +1,10 @@
 #!/usr/bin/sh
 
+# Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018, see LICENSE.txt
+# "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
+# <github.com/Kroc/elite-harmless>
+#===============================================================================
+
 sudo apt-get install git gcc make python3
 
 # todo: make this script `git pull` if code is already present?

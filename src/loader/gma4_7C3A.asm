@@ -1,6 +1,6 @@
-; "Elite" C64 disassembly / "Elite DX", cc0 2018, see LICENSE.txt
+; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018, see LICENSE.txt
 ; "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
-; <github.com/Kroc/EliteDX>
+; <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
 ; this data is part of the GMA4 2nd payload, but appears unreferenced.

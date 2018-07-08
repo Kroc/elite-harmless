@@ -1,10 +1,38 @@
-# Elite DX #
+# Elite : Harmless #
 
-Elite DX is a disassembly of the Commodore 64 port of the seminal space-trading-combat sim Elite.
+Elite : Harmless is a greatly enhanced version of the [Commodore 64][c64] port of the seminal space-trading-combat sim [Elite][elite], made possible by a full disassembly.
 
-## Building Elite DX ##
+[c64]:      https://en.wikipedia.org/wiki/Commodore_64
+[elite]:    https://en.wikipedia.org/wiki/Elite_(video_game)
 
-Elite DX can be built on Windows, Linux & Mac.
+## State Of The Project ##
+
+The game is disassembled but documentation is on-going.  
+No improvements have been implemented yet.  
+Help is needed in these areas:
+
+* Understanding / commenting the 3D math code;  
+  working out how to rebuild the math tables from macros
+* Commenting SID code (I know literally nothing of audio theory)
+* See also the [list of "Help Wanted" issues][helpw]
+
+[helpw]:    https://github.com/Kroc/elite-harmless/labels/help%20wanted
+
+Planned Improvements:
+
+* [Speed improvements][speed]
+* "Quality of Life" improvements, making the game [more accessible][ease] to new players and players who may never have played an 8-bit or C64 game before
+* [Feature enhancements][feat]
+* See the complete [list of issues][issues]
+
+[speed]:    https://github.com/Kroc/elite-harmless/labels/speed
+[ease]:     https://github.com/Kroc/elite-harmless/labels/ease-of-use
+[feat]:     https://github.com/Kroc/elite-harmless/labels/enhancement
+[issues]:   https://github.com/kroc/elite-harmless/issues
+
+## Building Elite : Harmless ##
+
+Elite : Harmless can be built on Windows, Linux & Mac.
 
 ### Prerequisites ###
 
@@ -23,20 +51,27 @@ Elite DX can be built on Windows, Linux & Mac.
 3. From the VSCode menu, select "Tasks" > "Run Task..." and click on "Install build tools".
    The setup Bash script will download and compile CC65. The script will ask for your Linux password so as to install the GCC compiler suite and required tools (`sudo apt-get install git gcc make python3`).
 
-### Building the Elite DX Source ###
+### Building the Elite : Harmless Source ###
 
 Just press `CTRL+SHIFT+B` in VSCode to build the source code.
 
-## Resources Used ##
+## Acknowledgements ##
 
 This work was made possible by various resources available on the web, for which I would like to give thanks to the people involved and for the love and effort they've poured into their work.
 
-* [Classic BBC Elite Disk flight code](http://www.elitehomepage.org/archive/a/d4090012.txt) and [Classic BBC Elite Disk docked code](http://www.elitehomepage.org/archive/a/d4090010.txt) by Paul Brink, 2014
+* [Classic BBC Elite Disk flight code][bbc-flight] and [Classic BBC Elite Disk docked code][bbc-docked] by Paul Brink, 2014
 
-* [Elite's crazy tokenised string routine](https://xania.org/201406/elites-crazy-string-format) by Matt Godbolt
+[bbc-flight]: http://www.elitehomepage.org/archive/a/d4090012.txt
+[bbc-docked]: http://www.elitehomepage.org/archive/a/d4090010.txt
+
+* [Elite's crazy tokenised string routine][crazy] by Matt Godbolt
+
+[crazy]:  https://xania.org/201406/elites-crazy-string-format
 
 ## Legal ##
 
-"Elite" is copyright David Braben & Ian Bell, Firebird / British Telecom, 1984-1985, all rights reserved. The name "Elite" is used in this project for historical, educational and archival purposes only.
+"Elite" is copyright David Braben & Ian Bell, Acornsoft (BBC / Electron versions), Firebird / British Telecom (C64 version), 1984-1985, all rights reserved. The name "Elite" is used in this project for historical, educational and archival purposes only.
 
-To that end, no copyright claim is made on "Elite DX", it is published under a 'Public Domain'-like [Creative Commons CC0 licence](https://creativecommons.org/publicdomain/zero/1.0/). Any contributions are also licenced as such and authors agree to the licence terms upon contributing.
+To protect the legal interests involved, "Elite : Harmless" is made available under a [Creative Commons Attribution, Non-Commercial, Share-Alike Licence][cc-by-nc-sa].
+
+[cc-by-nc-sa]:  https://creativecommons.org/licenses/by-nc-sa/4.0/

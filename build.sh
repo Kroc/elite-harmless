@@ -1,8 +1,8 @@
 #!/usr/bin/sh
 
-# "Elite" C64 disassembly / "Elite DX", cc0 2018, see LICENSE.txt
+# Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018, see LICENSE.txt
 # "Elite" is copyright / trademark David Braben & Ian Bell, All Rights Reserved
-# <github.com/Kroc/EliteDX>
+# <github.com/Kroc/elite-harmless>
 #===============================================================================
 
 # stop further processing on any error
@@ -23,7 +23,7 @@ encrypt="python3 link/encrypt.py"
 
 
 clear
-echo "building Elite DX:"
+echo "building Elite : Harmless:"
 echo
 
 echo "* cleaning up:"
@@ -78,12 +78,12 @@ $ca65 -o build/var_polyobj.o    src/var_polyobj.asm
 
 # let's try ham-fistedly link our own PRG without the loader
 echo
-echo "* build Elite DX (incomplete)"
-echo "  ==========================="
-echo "- link 'elite-dx.prg'"
+echo "* build Elite : Harmless (incomplete)"
+echo "  ==================================="
+echo "- link 'elite-harmless.prg'"
 $ld65 \
-       -C link/elite_dx.cfg \
-       -o bin/elite-dx.prg \
+       -C link/elite-harmless.cfg \
+       -o bin/elite-harmless.prg \
     --obj build/prgheader.o \
     --obj build/elite_memory.o \
     --obj build/text_pairs.o \
