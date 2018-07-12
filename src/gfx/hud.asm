@@ -6,7 +6,7 @@
 ; this is the multi-colour bitmap data for the HUD
 ; TODO: save this to a bitmap and convert during build
 
-.segment        "DATA_HUD"
+.segment        "GFX_HUD"
 
         .byte   $00, $00, $00, $00, $00, $00, $00, $00                  ;$EF90
         .byte   $00, $00, $00, $00, $00, $00, $00, $00

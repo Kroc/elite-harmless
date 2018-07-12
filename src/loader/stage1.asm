@@ -13,9 +13,9 @@
 .import _1d22:absolute
 
 ;===============================================================================
-
 ; populate the .PRG header using the address given
-; by the linker config (see "link/elite-gma86.cfg")
+; by the linker config (see "link/elite-original-gma86.cfg")
+
 .segment        "HEAD_STAGE1"
 .import         __GMA1_PRG_START__
         .addr   __GMA1_PRG_START__+2
@@ -709,6 +709,8 @@ _0670:
 _067b:  inx
         rts
 
+        ;-----------------------------------------------------------------------
+        
 _067d:  .byte   $00
 
 _067e:  .byte   $93             ; clear screen

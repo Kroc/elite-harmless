@@ -55,7 +55,7 @@ _F1D_                   = .encrypt ( $1D )      ;=$4A
 _F1E_                   = .encrypt ( $1E )      ;=$49
 _F1F_                   = .encrypt ( $1F )      ;=$48
 
-_250c:
+_250c:                                                                  ;$250C
 .export _250c
         .import txt_docked_token01
         .addr   txt_docked_token01              ; docked token $01

@@ -459,36 +459,36 @@ _77a3:  sta $d802,y
         cli 
 
         ; get the location of the HUD data from the linker configuration
-.import __DATA_HUD_LOAD__, __DATA_HUD_SIZE__
+.import __GFX_HUD_LOAD__, __GFX_HUD_SIZE__
 
         ; number of whole pages to copy. note that, the lack of a rounding-up
         ; divide is fixed by adding just shy of one page before dividing,
         ; instead of just adding one to the result. this means that a round
         ; number of bytes, e.g. $1000 would not calculate as one more page
         ; than necessary 
-        ldx #< ((__DATA_HUD_SIZE__ + 255) / 256)
+        ldx #< ((__GFX_HUD_SIZE__ + 255) / 256)
 
         ; get the location where the HUD data is to be copied to
-.import __DATA_HUD_RUN__
+.import __GFX_HUD_RUN__
 
-        lda #< __DATA_HUD_RUN__
+        lda #< __GFX_HUD_RUN__
         sta ZP_COPY_TO+0
-        lda #> __DATA_HUD_RUN__
+        lda #> __GFX_HUD_RUN__
         sta ZP_COPY_TO+1
-        lda #< __DATA_HUD_LOAD__
+        lda #< __GFX_HUD_LOAD__
         sta ZP_COPY_FROM+0
-        lda #> __DATA_HUD_LOAD__
+        lda #> __GFX_HUD_LOAD__
         jsr copy_bytes
 
         ;-----------------------------------------------------------------------
 
-.import __DATA_SPRITES_LOAD__   ;=$7A7A
+.import __GFX_SPRITES_LOAD__   ;=$7A7A
 
         ; copy $7A7A..$7B7A to $6800..$6900
         ; SPRITES!
 
         ldy # $00
-_77ff:  lda __DATA_SPRITES_LOAD__, y
+_77ff:  lda __GFX_SPRITES_LOAD__, y
         sta $6800, y
         dey 
         bne _77ff
@@ -496,7 +496,7 @@ _77ff:  lda __DATA_SPRITES_LOAD__, y
         ; copy $7B7A..$7C7A to $6900..$6A00
         ; two sprites, plus a bunch of unknown data
 
-_7808:  lda __DATA_SPRITES_LOAD__+$100, y
+_7808:  lda __GFX_SPRITES_LOAD__+$100, y
         sta $6900, y
         dey 
         bne _7808

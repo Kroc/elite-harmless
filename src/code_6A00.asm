@@ -11341,11 +11341,11 @@ _b1a1:                                                                  ;$B1A1
         ; page 3 = codes 96-127 : "£", "a" to "z", "{", "|", "}", "~"
 
         ; get the location of the font data in RAM
-.import __DATA_FONT_RUN__:absolute
+.import __GFX_FONT_RUN__:absolute
 
         ; default to 0th page since character codes begin from 0,
         ; but in practice we'll only see codes 32-128
-        ldx # (>__DATA_FONT_RUN__) - 1
+        ldx # (>__GFX_FONT_RUN__) - 1
         
         ; if you shift any number twice to the left
         ; then numbers 64 or above will carry (> 255) 
@@ -11355,7 +11355,7 @@ _b1a1:                                                                  ;$B1A1
                                 ; char is in the 0th (unlikely) or 1st page
 
         ; -- char is in the 2rd or 3rd page
-        ldx # (>__DATA_FONT_RUN__) + 1
+        ldx # (>__GFX_FONT_RUN__) + 1
 
         ; shift left again -- codes 32 or over will carry,
         ; so we can determine which of the two possible pages it's in
@@ -11655,12 +11655,12 @@ _b301:                                                                  ;$B301
         bne _b335
         
         ; reset the HUD graphics from the copy kept in RAM
-.import __DATA_HUD_RUN__
+.import __GFX_HUD_RUN__
 
         ldx # $08
-        lda #< __DATA_HUD_RUN__
+        lda #< __GFX_HUD_RUN__
         sta ZP_TEMP_ADDR3_LO
-        lda #> __DATA_HUD_RUN__
+        lda #> __GFX_HUD_RUN__
         sta ZP_TEMP_ADDR3_HI
         lda #< $5680            ; start of the HUD on bitmap?
         sta ZP_TEMP_ADDR1_LO

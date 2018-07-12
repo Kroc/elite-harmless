@@ -1,60 +1,235 @@
 # Elite Memory Map #
 
-          .             .
-          :             :
-    $0300 +-------------+
-          | ?           |     Some heap space?
-    $0400 |-------------|
-          |             |     variable space
-          |             |     (extact details incomplete)
-    $0700 |-------------|
-          | TEXT_FLIGHT |     compressed text
-          |             |
-          |             |
-    $0B00 |-------------|
-          | DATA_FONT   |     font graphics
-          |             |
-    $0E00 |-------------|
-          | TEXT_DOCKED |     compressed text
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-          |             |
-    $1D00 |-------------|
-          | CODE_1D00   |     variable space
-    $1D21 |-------------|
+          .              .
+          :               :
+          +---------------+
+    $0300 | ?             |   Some heap space?
+          |---------------|
+    $0400 |               |   variable space
+          |               |   (extact details incomplete)
+          |               |
+          |---------------|
+    $0700 | TEXT_FLIGHT   |   compressed text
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $0B00 | DATA_FONT     |   font graphics
+          |               |
+          |               |
+          |-------------  |
+    $0E00 | TEXT_DOCKED   |   compressed text
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $1D00 | CODE_1D00     |   variable space
+          |---------------|
+    $1D21 | CODE_GMA5     |   loader stage 5 decryption routine (left behind)
+          |---------------|
+    $1D81 | CODE_1D81     |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $250C | TEXT_TOKENS   |
+    $254C | TEXT_PAIRS    |
+          |---------------|
+    $25A6 | DATA_SAVE     |
+    $2600 | DATA_2600     |
+          |---------------|
+    $27A3 | CODE_27A3     |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $3EAC | TEXT_PDESC    |
+          +---------------+
 
+          +---------------+
+    $4000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $5000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $6000 |               |
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $6400 |               |
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $6800 | GFX_SPRITES   |
+          |               |
+          +---------------+
 
+          +---------------+
+    $6A00 | CODE_6A00     |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $7000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $8000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $9000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $A000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $B000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $B70E | DATA_B70E     |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $C000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $CCD7 +---------------+
 
-------------    ----------------------------------------------------------------
-
-$4000..$6000    HIGH-RESOLUTION BITMAP SCREEN:
-
-$6000..$6400    MENU-SCREEN COLOUR MAP:
-                this is the 1K of colour map information for the bitmap screen,
-                when Elite is displaying menu screens (no HUD), such as when
-                docked
-
-$6400..$6800    MAIN-SCREEN COLOUR MAP:
-                this is the 1K of colour map information for the bitmap screen,
-                when Elite is displaying the main flight screen (3D graphics)
-
-$6800..$69C0    SPRITE GRAPHICS:
-                contains sprite definitions; 4 crosshairs, an explosion(?),
-                and two trumble images
-
-$6A00..$CCE0    CODE/DATA? (GMA6.PRG)
-
-------------    ----------------------------------------------------------------
 
 $D000..$EF90    SHIP MODELS:
                 3D vector data for the various ships / objects in the game

@@ -7,7 +7,7 @@
 
 ; NOTE: must be aligned to 64 bytes (at destination)
 
-.segment        "DATA_SPRITES"
+.segment        "GFX_SPRITES"
 
 _6800:  ; sprites:                                                      ;$6800
 
