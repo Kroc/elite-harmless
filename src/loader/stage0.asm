@@ -18,14 +18,14 @@
 ; program to the intended load address before executing it
 
 ; populate the .PRG header using the address given
-; by the linker config (see "link/elite-gma86.cfg")
+; by the linker config (see "link/elite-original-gma86.cfg")
 .segment        "HEAD_STAGE0"
 .import         __FIREBIRD_PRG_START__
         .addr   __FIREBIRD_PRG_START__+2
 
 ; the BASIC bootstrap needs to be stored at the beginning of the program,
 ; canonically $02A7, but needs to be addressed as running from $0801.
-; the linker configuration handles this ("link/elite-gma86.cfg")
+; the linker configuration handles this ("link/elite-original-gma86.cfg")
 
 .segment        "BASIC_STAGE0"
 
@@ -54,7 +54,7 @@
         ; routine to copy the program to its intended location
         ;-----------------------------------------------------------------------
 
-        ; NOTE: the linker configuration ("link/elite-gma86.cfg")
+        ; NOTE: the linker configuration ("link/elite-original-gma86.cfg")
         ;       defines the segments, their addresses, and exports those
         ;       values for use here:
 
@@ -130,7 +130,7 @@ start:                                                                  ;$02c1
         .endrepeat
 
         ; get the address where GMA1.PRG loads from the linker
-        ; (see "link/elite-gma86.cfg")
+        ; (see "link/elite-original-gma86.cfg")
 .import __CODE_STAGE1_LOAD__
 
         jmp __CODE_STAGE1_LOAD__
@@ -140,7 +140,7 @@ start:                                                                  ;$02c1
 .segment        "BASIC_VECTORS"
 
 ; these are various vectors for BASIC -- the loader hijacks these to cause
-; the loader to start immediately withtout the need for a BASIC bootstrap
+; the loader to start immediately without the need for a BASIC bootstrap
 
         ;$0300/1    execution address of warm reset, displaying optional BASIC
         ;           error message and entering BASIC idle loop. default: $E38B

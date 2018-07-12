@@ -122,11 +122,11 @@ echo "- assemble 'loader/stage6.asm'"
 $ca65 -o build/loader/stage6.o  src/loader/stage6.asm
 
 echo
-echo "* build 'elite-gma86.prg'"
-echo "  ======================="
-echo "-     link 'elite-gma86.cfg'"
+echo "* build 'elite-original-gma86.prg'"
+echo "  ================================"
+echo "-     link 'elite-original-gma86.cfg'"
 $ld65 \
-       -C link/elite-gma86.cfg \
+       -C link/elite-original-gma86.cfg \
     --obj build/elite_memory.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
@@ -237,7 +237,7 @@ cat "build/loader/gma6_prg.bin" \
 echo
 echo "* write floppy disk image"
 $mkd64 \
-    -o bin/elite_gma86.d64 \
+    -o bin/elite-original-gma86.d64 \
     -m xtracks -XDS \
     -m cbmdos -d "ELITE 040486" -i "GMA86" \
     -f bin/firebird.prg     -t 17 -s 0 -n "FIREBIRD"    -P -S 1 -w \

@@ -1,17 +1,39 @@
+# Elite Memory Map #
 
-$0400..$0700    ?
-                a work area for variables / data?
+          .             .
+          :             :
+    $0300 +-------------+
+          | ?           |     Some heap space?
+    $0400 |-------------|
+          |             |     variable space
+          |             |     (extact details incomplete)
+    $0700 |-------------|
+          | TEXT_FLIGHT |     compressed text
+          |             |
+          |             |
+    $0B00 |-------------|
+          | DATA_FONT   |     font graphics
+          |             |
+    $0E00 |-------------|
+          | TEXT_DOCKED |     compressed text
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+          |             |
+    $1D00 |-------------|
+          | CODE_1D00   |     variable space
+    $1D21 |-------------|
 
-$0700..$0B00    ?
 
-$0B00..$0E00    CHARACTER GFX:
-                the font used. interestingly, the characters are defined in
-                ASCII order, regardless of C64's PETSCII appearance. this is
-                very likely for compatibility with the BBC Micro's data 
-
-$0E00..$1D00    ?
-
-$1D00..$3ED4    CODE/DATA? (GMA5.PRG)
 
 ------------    ----------------------------------------------------------------
 

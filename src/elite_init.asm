@@ -7,19 +7,17 @@
 
 .include        "c64.asm"
 
-;-------------------------------------------------------------------------------
-
 .zeropage
 
 ZP_COPY_TO      := $18
 ZP_COPY_FROM    := $1a
 
-;-------------------------------------------------------------------------------
-
 .segment        "CODE_INIT"
-.export         __CODE_INIT__:absolute = 1
 
 _75e4:                                                                  ;$75E4
+;===============================================================================
+.export _75e4
+
         ; this code will switch the VIC-II bank to $4000..$8000;
         ; all graphics to be displayed (characters, sprites, bitmaps)
         ; must therfore exist within this memory range
@@ -34,15 +32,30 @@ _75e4:                                                                  ;$75E4
         ; oddly, $4000..$4800 would be the character set, however only graphics
         ; for $4400..$4700 are defined, therefore the [used] character graphics
         ; get copied to $0B00..$0E00 (the rest is other data)
+
+.import __GMA4_DATA1A_START__
+.import __GMA4_DATA1A_LAST__
+
+        ; number of whole pages to copy. note that the lack of a rounding-up
+        ; divide is fixed by adding just shy of one page before dividing,
+        ; instead of just adding one to the result. this means that a round
+        ; number of bytes, e.g. $1000 would not calculate as one more page
+        ; than necessary 
+        ldx #< (((__GMA4_DATA1A_LAST__ - __GMA4_DATA1A_START__) + 255) / 256)
         
-        ldx # $16               ; size of block-copy -- 22 x 256 = 5'632 bytes
-        lda #< $0700
+        ;TODO: this is not ideal as an import        
+.import __TEXT_FLIGHT_RUN__
+
+        lda #< __TEXT_FLIGHT_RUN__
         sta ZP_COPY_TO+0
-        lda #> $0700
+        lda #> __TEXT_FLIGHT_RUN__
         sta ZP_COPY_TO+1
-        lda #< $4000
+
+.import __GMA4_DATA1A_START__
+
+        lda #< __GMA4_DATA1A_START__
         sta ZP_COPY_FROM+0
-        lda #> $4000
+        lda #> __GMA4_DATA1A_START__
         jsr copy_bytes
 
         ;-----------------------------------------------------------------------
@@ -63,14 +76,22 @@ _75e4:                                                                  ;$75E4
         ; relocate part of the binary payload in "gma4.prg" --
         ; copy $5600..$7F00 to $D000..$F900 -- note that includes this code!
 
+        ;TODO: this is very difficult to calculate!
         ldx # $29               ; size of block-copy -- 41 x 256 = 10'496 bytes
-        lda #< $d000
+
+        ;TODO: use HIDATA memory segment address instead?
+.import __HULL_TABLE_RUN__
+
+        lda #< __HULL_TABLE_RUN__
         sta ZP_COPY_TO+0
-        lda #> $d000
+        lda #> __HULL_TABLE_RUN__
         sta ZP_COPY_TO+1
-        lda #< $5600
+
+.import __GMA4_DATA1B_START__
+
+        lda #< __GMA4_DATA1B_START__
         sta ZP_COPY_FROM+0
-        lda #> $5600
+        lda #> __GMA4_DATA1B_START__
         jsr copy_bytes
 
         ; switch the I/O area back on:
