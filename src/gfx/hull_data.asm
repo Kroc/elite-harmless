@@ -3,10 +3,8 @@
 ; <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; this file defines the 3D vector models of the
-; various ships / objects in the game
-
-; TODO: break this data out into more meaningful numbers / macros
+; "hull_data.asm" -- this file defines the 3D vector models of the various
+; ships / objects in the game
 
 ; this file was produced with the help of nc513 on the lemon64 forums
 
@@ -14,42 +12,43 @@
 
 .segment        "HULL_TABLE"
 
-_d000:
-.export _d000
+hull_pointers:                                                          ;$D000
+;===============================================================================
+.export hull_pointers
         
-        .addr   _d0a5           ; $01: missile                          ;$D000
-        .addr   _d1a3           ; $02: space station (coreolis)
-        .addr   _d2bf           ; $03: escape capsule
-        .addr   _d313           ; $04: plate / alloys
-        .addr   _d353           ; $05: cargo cannister
-        .addr   _d3fb           ; $06: boulder?
-        .addr   _d49d           ; $07: asteroid?
-        .addr   _d573           ; $08: splinter / rock
-        .addr   _d5af           ; $09: shuttle                          ;$D010
-        .addr   _d6e1           ; $0A: transporter
-        .addr   _d8c3           ; $0B: cobra mk-III (trader?)
-        .addr   _da4b           ; $0C: python (trader?)
-        .addr   _db3d           ; $0D: boa?
-        .addr   _dc33           ; $0E: anaconda?
-        .addr   _dd35           ; $0F: asteroid?
-        .addr   _de0b           ; $10: viper
-        .addr   _dee5           ; $11: sidewinder                       ;$D020
-        .addr   _df8d           ; $12: mamba
-        .addr   _e0bb           ; $13: krait
-        .addr   _e1a1           ; $14: adder
-        .addr   _e2d1           ; $15: gecko
-        .addr   _e395           ; $16: cobra mk-I
-        .addr   _e45b           ; $17: worm
-        .addr   _e50b           ; $18: combra mk-III (lone wolf?)
-        .addr   _e693           ; $19: asp mk-II                        ;$D030
-        .addr   _e7bd           ; $1A: python (lone wolf?)
-        .addr   _e8af           ; $1B: fer-de-lance
-        .addr   _e9c9           ; $1C: moray
-        .addr   _eaa1           ; $1D: thargoid
-        .addr   _ebbd           ; $1E: thargon
-        .addr   _ec29           ; $1F: constrictor
-        .addr   _ed2b           ; $20: cougar
-        .addr   _ee2d           ; $21: space station (dodecahedral)     ;$D040
+        .addr   hull_missile            ; $01: missile                  ;$D000
+        .addr   hull_coreolis           ; $02: space station (coreolis)
+        .addr   hull_escape             ; $03: escape capsule
+        .addr   hull_plate              ; $04: plate / alloys
+        .addr   hull_cargo              ; $05: cargo cannister
+        .addr   _d3fb                   ; $06: boulder?
+        .addr   _d49d                   ; $07: asteroid?
+        .addr   hull_splinter           ; $08: splinter / rock
+        .addr   hull_shuttle            ; $09: shuttle                  ;$D010
+        .addr   hull_transporter        ; $0A: transporter
+        .addr   _d8c3                   ; $0B: cobra mk-III (trader?)
+        .addr   _da4b                   ; $0C: python (trader?)
+        .addr   hull_boa                ; $0D: boa
+        .addr   hull_anaconda           ; $0E: anaconda?
+        .addr   _dd35                   ; $0F: asteroid?
+        .addr   hull_viper              ; $10: viper
+        .addr   hull_sidewinder         ; $11: sidewinder               ;$D020
+        .addr   hull_mamba              ; $12: mamba
+        .addr   hull_krait              ; $13: krait
+        .addr   hull_adder              ; $14: adder
+        .addr   hull_gecko              ; $15: gecko
+        .addr   hull_cobramk1           ; $16: cobra mk-I
+        .addr   hull_worm               ; $17: worm
+        .addr   _e50b                   ; $18: combra mk-III (lone wolf?)
+        .addr   hull_aspmk2             ; $19: asp mk-II                ;$D030
+        .addr   _e7bd                   ; $1A: python (lone wolf?)
+        .addr   hull_ferdelance         ; $1B: fer-de-lance
+        .addr   hull_moray              ; $1C: moray
+        .addr   hull_thargoid           ; $1D: thargoid
+        .addr   hull_thargon            ; $1E: thargon
+        .addr   hull_constrictor        ; $1F: constrictor
+        .addr   hull_cougar             ; $20: cougar
+        .addr   hull_dodo               ; $21: space station (dodo)     ;$D040
 
 ;===============================================================================
 
@@ -57,8 +56,9 @@ _d000:
 
 ; these represent a data byte for each hull defined above
 
-_d042:                                                                  ;$D042
-.export _d042
+hull_d042:                                                              ;$D042
+        ;-----------------------------------------------------------------------
+.export hull_d042
 
         .byte             $00, $00, $01, $00, $00, $00
         .byte   $00, $00, $21, $61, $a0, $a0, $a0, $a1
@@ -70,8 +70,9 @@ _d042:                                                                  ;$D042
 
 ; these represent a data byte for each hull defined above
 
-_d062:
-.export _d062
+hull_d062:
+        ;-----------------------------------------------------------------------
+.export hull_d062
 
         .byte             $00, $95, $00, $10, $0a, $0a
         .byte   $06, $08, $0a, $10, $11, $ea, $aa, $d5
@@ -84,8 +85,9 @@ _d062:
 
 ; these represent a data byte for each hull defined above
 
-_d083:
-.export _d083
+hull_d083:
+        ;-----------------------------------------------------------------------
+.export hull_d083
 
         .byte                  $00, $00, $00, $00, $00
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
@@ -93,12 +95,18 @@ _d083:
         .byte   $00, $00, $00, $01, $01, $01, $01, $00
         .byte   $02, $00, $05, $05, $00                                 ;$D0A0
 
-;===============================================================================
 
 .segment        "HULL_DATA"
 
-.proc   _d0a5   ; missle                                                ;$D0A5
+; enumerate hulls as we define them; each needs an index number that will
+; be used in the code to refer to them, in the order they appear here
+hull_index      .set    0
 
+        hull_index           .set hull_index + 1
+.export hull_missile_index     := hull_index
+
+.proc   hull_missile                                                    ;$D0A5
+        ;=======================================================================
         .proc   header
 
         .byte   $00             ; "scoop / debris"
@@ -143,6 +151,8 @@ _d083:
         .byte   $08, $08, $0c, $68, $54, $55                    ; vertex 17
 
         .endproc
+        
+        vertex_bytes = .sizeof( verticies )
 
         .proc   edges
 
@@ -173,6 +183,9 @@ _d083:
 
         .endproc
         
+        edges_offset = edges - header
+        edge_count   = .sizeof( edges ) / 4
+
         .proc   faces
 
         .byte   $9f, $40, $00, $10, $5f, $00, $40, $10
@@ -183,9 +196,112 @@ _d083:
 
         .endproc
 
+        faces_offset = faces - header
+        face_count   = .sizeof( faces )
+
+.endproc
+
+        hull_index           .set hull_index + 1
+.export hull_coreolis_index    := hull_index
+
+.proc   hull_coreolis                                                   ;$D1A3
+        ;=======================================================================
+        ; space station (coreolis)
+
+        .proc   header
+
+        .byte   $00             ; "scoop / debris"
+        .word   $6400           ; "missile lock area"?
+        .byte   < edges_offset  ; "edges data offset lo"
+        .byte   < faces_offset  ; "faces data offset lo"
+        .byte   $59             ; "4*maxlines+1 for ship lines stack"?
+        .byte   $00             ; "gun vertex*4"?
+        .byte   $36             ; "explosion count"?
+        .byte   vertex_bytes    ; verticies byte count
+        .byte   edge_count      ; edge count
+        .word   $0000           ; bounty
+        .byte   face_count      ; face count
+        .byte   $78             ; LOD distance
+        .byte   $f0             ; energy
+        .byte   $00             ; speed
+        .byte   > edges_offset  ; "edges data offset hi"
+        .byte   > faces_offset  ; "faces data offset hi"
+        .byte   $00             ; scaling of normals
+        .byte   $06             ; laser / missile count?
+        
+        .endproc
+
+        .proc   verticies
+
+        .byte   $a0, $00, $a0, $1f, $10, $62                    ; vertex 1
+        .byte   $00, $a0, $a0, $1f, $20, $83                    ; vertex 2
+        .byte   $a0, $00, $a0, $9f, $30, $74                    ; vertex 3
+        .byte   $00, $a0, $a0, $5f, $10, $54                    ; vertex 4
+        .byte   $a0, $a0, $00, $5f, $51, $a6                    ; vertex 5
+        .byte   $a0, $a0, $00, $1f, $62, $b8                    ; vertex 6
+        .byte   $a0, $a0, $00, $9f, $73, $c8                    ; vertex 7
+        .byte   $a0, $a0, $00, $df, $54, $97                    ; vertex 8
+        .byte   $a0, $00, $a0, $3f, $a6, $db                    ; vertex 9
+        .byte   $00, $a0, $a0, $3f, $b8, $dc                    ; vertex 10
+        .byte   $a0, $00, $a0, $bf, $97, $dc                    ; vertex 11
+        .byte   $00, $a0, $a0, $7f, $95, $da                    ; vertex 12
+        .byte   $0a, $1e, $a0, $5e, $00, $00                    ; vertex 13
+        .byte   $0a, $1e, $a0, $1e, $00, $00                    ; vertex 14
+        .byte   $0a, $1e, $a0, $9e, $00, $00                    ; vertex 15
+        .byte   $0a, $1e, $a0, $de, $00, $00                    ; vertex 16
+        
+        .endproc
+
         vertex_bytes = .sizeof( verticies )
+
+        .proc   edges
+
+        .byte   $1f, $10, $00, $0c                              ; edge 1
+        .byte   $1f, $20, $00, $04                              ; edge 2
+        .byte   $1f, $30, $04, $08                              ; edge 3
+        .byte   $1f, $40, $08, $0c                              ; edge 4
+        .byte   $1f, $51, $0c, $10                              ; edge 5
+        .byte   $1f, $61, $00, $10                              ; edge 6
+        .byte   $1f, $62, $00, $14                              ; edge 7
+        .byte   $1f, $82, $14, $04                              ; edge 8
+        .byte   $1f, $83, $04, $18                              ; edge 9
+        .byte   $1f, $73, $08, $18                              ; edge 10
+        .byte   $1f, $74, $08, $1c                              ; edge 11
+        .byte   $1f, $54, $0c, $1c                              ; edge 12
+        .byte   $1f, $da, $20, $2c                              ; edge 13
+        .byte   $1f, $db, $20, $24                              ; edge 14
+        .byte   $1f, $dc, $24, $28                              ; edge 15
+        .byte   $1f, $d9, $28, $2c                              ; edge 16
+        .byte   $1f, $a5, $10, $2c                              ; edge 17
+        .byte   $1f, $a6, $10, $20                              ; edge 18
+        .byte   $1f, $b6, $14, $20                              ; edge 19
+        .byte   $1f, $b8, $14, $24                              ; edge 20
+        .byte   $1f, $c8, $18, $24                              ; edge 21
+        .byte   $1f, $c7, $18, $28                              ; edge 22
+        .byte   $1f, $97, $1c, $28                              ; edge 23
+        .byte   $1f, $95, $1c, $2c                              ; edge 24
+        .byte   $1e, $00, $30, $34                              ; edge 25
+        .byte   $1e, $00, $34, $38                              ; edge 26
+        .byte   $1e, $00, $38, $3c                              ; edge 27
+        .byte   $1e, $00, $3c, $30                              ; edge 28
+        
+        .endproc
+
         edges_offset = edges - header
         edge_count   = .sizeof( edges ) / 4
+
+        .proc   faces
+
+        .byte   $1f, $00, $00, $a0, $5f, $6b, $6b, $6b
+        .byte   $1f, $6b, $6b, $6b, $9f, $6b, $6b, $6b
+        .byte   $df, $6b, $6b, $6b, $5f, $00, $a0, $00
+        .byte   $1f, $a0, $00, $00, $9f, $a0, $00, $00
+        .byte   $1f, $00, $a0, $00, $ff, $6b, $6b, $6b
+        .byte   $7f, $6b, $6b, $6b, $3f, $6b, $6b, $6b
+        .byte   $bf, $6b, $6b, $6b, $3f, $00, $00, $a0
+        
+        .endproc
+
         faces_offset = faces - header
         face_count   = .sizeof( faces )
 
@@ -193,47 +309,12 @@ _d083:
 
 ;-------------------------------------------------------------------------------
 
-_d1a3:  ; space station (coreolis)                                      ;$D1A3
-        .byte                  $00, $00, $64, $74, $e4
-        .byte   $59, $00, $36, $60, $1c, $00, $00, $38
-        .byte   $78, $f0, $00, $00, $00, $00, $06, $a0                  ;$D1B0
-        .byte   $00, $a0, $1f, $10, $62, $00, $a0, $a0
-        .byte   $1f, $20, $83, $a0, $00, $a0, $9f, $30                  ;$D1C0
-        .byte   $74, $00, $a0, $a0, $5f, $10, $54, $a0
-        .byte   $a0, $00, $5f, $51, $a6, $a0, $a0, $00                  ;$D1D0
-        .byte   $1f, $62, $b8, $a0, $a0, $00, $9f, $73
-        .byte   $c8, $a0, $a0, $00, $df, $54, $97, $a0                  ;$D1E0
-        .byte   $00, $a0, $3f, $a6, $db, $00, $a0, $a0
-        .byte   $3f, $b8, $dc, $a0, $00, $a0, $bf, $97                  ;$D1F0
-        .byte   $dc, $00, $a0, $a0, $7f, $95, $da, $0a
-        .byte   $1e, $a0, $5e, $00, $00, $0a, $1e, $a0                  ;$D200
-        .byte   $1e, $00, $00, $0a, $1e, $a0, $9e, $00
-        .byte   $00, $0a, $1e, $a0, $de, $00, $00, $1f                  ;$D210
-        .byte   $10, $00, $0c, $1f, $20, $00, $04, $1f
-        .byte   $30, $04, $08, $1f, $40, $08, $0c, $1f                  ;$D220
-        .byte   $51, $0c, $10, $1f, $61, $00, $10, $1f
-        .byte   $62, $00, $14, $1f, $82, $14, $04, $1f                  ;$D230
-        .byte   $83, $04, $18, $1f, $73, $08, $18, $1f
-        .byte   $74, $08, $1c, $1f, $54, $0c, $1c, $1f                  ;$D240
-        .byte   $da, $20, $2c, $1f, $db, $20, $24, $1f
-        .byte   $dc, $24, $28, $1f, $d9, $28, $2c, $1f                  ;$D250
-        .byte   $a5, $10, $2c, $1f, $a6, $10, $20, $1f
-        .byte   $b6, $14, $20, $1f, $b8, $14, $24, $1f                  ;$D260
-        .byte   $c8, $18, $24, $1f, $c7, $18, $28, $1f
-        .byte   $97, $1c, $28, $1f, $95, $1c, $2c, $1e                  ;$D270
-        .byte   $00, $30, $34, $1e, $00, $34, $38, $1e
-        .byte   $00, $38, $3c, $1e, $00, $3c, $30, $1f                  ;$D280
-        .byte   $00, $00, $a0, $5f, $6b, $6b, $6b, $1f
-        .byte   $6b, $6b, $6b, $9f, $6b, $6b, $6b, $df                  ;$D290
-        .byte   $6b, $6b, $6b, $5f, $00, $a0, $00, $1f
-        .byte   $a0, $00, $00, $9f, $a0, $00, $00, $1f                  ;$D2A0
-        .byte   $00, $a0, $00, $ff, $6b, $6b, $6b, $7f
-        .byte   $6b, $6b, $6b, $3f, $6b, $6b, $6b, $bf                  ;$D2B0
-        .byte   $6b, $6b, $6b, $3f, $00, $00, $a0
+        hull_index           .set hull_index + 1
+.export hull_escape_index      := hull_index
 
-;-------------------------------------------------------------------------------
+.proc   hull_escape                                                     ;$D2BF
+        ; escape capsule
 
-_d2bf:  ; escape capsule                                                ;$D2BF
         .byte                                      $20
         .byte   $00, $01, $2c, $44, $1d, $00, $16, $18                  ;$D2C0
         .byte   $06, $00, $00, $10, $08, $11, $08, $00
@@ -247,9 +328,16 @@ _d2bf:  ; escape capsule                                                ;$D2BF
         .byte   $27, $67, $1e, $5f, $27, $67, $1e, $9f
         .byte   $70, $00, $00                                           ;$D310
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_d313:  ; plate / alloys                                                ;$D313
+        hull_index           .set hull_index + 1
+.export hull_plate_index       := hull_index
+
+.proc   hull_plate                                                      ;$D313
+        ; plate / alloys
+
         .byte                  $80, $64, $00, $2c, $3c
         .byte   $15, $00, $0a, $18, $04, $00, $00, $04
         .byte   $05, $10, $10, $00, $00, $03, $00, $0f                  ;$D320
@@ -260,9 +348,16 @@ _d313:  ; plate / alloys                                                ;$D313
         .byte   $ff, $08, $0c, $10, $ff, $0c, $00, $00
         .byte   $00, $00, $00                                           ;$D350
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_d353:  ; cargo cannister                                               ;$D353
+        hull_index           .set hull_index + 1
+.export hull_cargo_index       := hull_index
+
+.proc   hull_cargo                                                      ;$D353
+        ; cargo cannister
+
         .byte                  $00, $90, $01, $50, $8c
         .byte   $35, $00, $12, $3c, $0f, $00, $00, $1c
         .byte   $0c, $11, $0f, $00, $00, $02, $00, $18                  ;$D360
@@ -286,9 +381,15 @@ _d353:  ; cargo cannister                                               ;$D353
         .byte   $00, $12, $30, $3f, $00, $29, $1e, $9f                  ;$D3F0
         .byte   $60, $00, $00
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_d3fb:  ; boulder?                                                      ;$D3FB
+        hull_index           .set hull_index + 1
+.export hull_d3fb_index        := hull_index
+
+.proc   _d3fb   ; boulder?                                              ;$D3FB
+
         .byte                  $00, $84, $03, $3e, $7a
         .byte   $31, $00, $0e, $2a, $0f, $01, $00, $28                  ;$D400
         .byte   $14, $14, $1e, $00, $00, $02, $00, $12
@@ -311,9 +412,15 @@ _d3fb:  ; boulder?                                                      ;$D3FB
         .byte   $15, $7f, $4c, $23, $52, $3f, $16, $38                  ;$D490
         .byte   $89, $3f, $28, $6e, $26
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_d49d:  ; asteroid?                                                     ;$D49D
+        hull_index           .set hull_index + 1
+.export hull_d49d_index        := hull_index
+
+.proc   _d49d   ; asteroid?                                             ;$D49D
+
         .byte                            $00, $00, $19
         .byte   $4a, $9e, $45, $00, $22, $36, $15, $05                  ;$D4A0
         .byte   $00, $38, $32, $3c, $1e, $00, $00, $01
@@ -343,9 +450,16 @@ _d49d:  ; asteroid?                                                     ;$D49D
         .byte   $3a, $66, $33, $3f, $51, $09, $43, $3f
         .byte   $2f, $5e, $3f                                           ;$D570
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_d573:  ; splinter / rock                                               ;$D573
+        hull_index           .set hull_index + 1
+.export hull_splinter_index    := hull_index
+
+.proc   hull_splinter                                                   ;$D573
+        ; splinter / rock
+
         .byte                  $b0, $00, $01, $78, $44
         .byte   $1d, $00, $16, $18, $06, $00, $00, $10
         .byte   $08, $14, $0a, $fd, $00, $05, $00, $18                  ;$D580
@@ -355,9 +469,16 @@ _d573:  ; splinter / rock                                               ;$D573
         .byte   $23, $00, $04, $1f, $03, $04, $08, $1f                  ;$D5A0
         .byte   $01, $08, $0c, $1f, $12, $0c, $00
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_d5af:  ; shuttle                                                       ;$D5AF
+        hull_index           .set hull_index + 1
+.export hull_shuttle_index     := hull_index
+
+.proc   hull_shuttle                                                    ;$D5AF
+        ; shuttle
+
         .byte                                      $0f
         .byte   $c4, $09, $86, $fe, $71, $00, $26, $72                  ;$D5B0
         .byte   $1e, $00, $00, $34, $16, $20, $08, $00
@@ -399,9 +520,16 @@ _d5af:  ; shuttle                                                       ;$D5AF
         .byte   $5a, $1f, $29, $29, $5a, $5f, $37, $37
         .byte   $28                                                     ;$D6E0
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_d6e1:  ; transporter                                                   ;$D6E1
+        hull_index           .set hull_index + 1
+.export hull_transporter_index := hull_index
+
+.proc   hull_transporter                                                ;$D6E1
+        ; transporter
+        
         .byte        $00, $c4, $09, $f2, $aa, $95, $30
         .byte   $1a, $de, $2e, $00, $00, $38, $10, $20
         .byte   $0a, $00, $01, $02, $00, $00, $0a, $1a                  ;$D6F0
@@ -464,9 +592,15 @@ _d6e1:  ; transporter                                                   ;$D6E1
         .byte   $08, $22, $0b, $1f, $00, $26, $11, $1f
         .byte   $00, $00, $79                                           ;$D8C0
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_d8c3:  ; cobra mk-III                                                  ;$D8C3
+        hull_index           .set hull_index + 1
+.export hull_d8c3_index        := hull_index
+
+.proc   _d8c3   ; cobra mk-III                                          ;$D8C3
+
         .byte                  $03, $41, $23, $bc, $54
         .byte   $9d, $54, $2a, $a8, $26, $00, $00, $34
         .byte   $32, $96, $1c, $00, $01, $01, $13, $20                  ;$D8D0
@@ -518,9 +652,15 @@ _d8c3:  ; cobra mk-III                                                  ;$D8C3
         .byte   $07, $2a, $09, $5f, $00, $1e, $06, $5f                  ;$DA40
         .byte   $07, $2a, $09
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_da4b:  ; python (trader?)                                              :$DA4B
+        hull_index           .set hull_index + 1
+.export hull_da4b_index        := hull_index
+
+.proc   _da4b   ; python (trader?)                                      ;$DA4B
+
         .byte                  $05, $00, $19, $56, $be
         .byte   $59, $00, $2a, $42, $1a, $00, $00, $34                  ;$DA50
         .byte   $28, $fa, $14, $00, $00, $00, $1b, $00
@@ -553,9 +693,16 @@ _da4b:  ; python (trader?)                                              :$DA4B
         .byte   $0b, $7f, $19, $25, $0b, $ff, $19, $25                  ;$DB30
         .byte   $0b, $3f, $00, $00, $70
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_db3d:  ; boa?                                                          ;$DB3D
+        hull_index           .set hull_index + 1
+.export hull_boa_index         := hull_index
+
+.proc   hull_boa                                                        ;$DB3D
+        ; boa
+
         .byte                            $05, $24, $13
         .byte   $62, $c2, $5d, $00, $26, $4e, $18, $00                  ;$DB40
         .byte   $00, $34, $28, $fa, $18, $00, $00, $00
@@ -589,9 +736,16 @@ _db3d:  ; boa?                                                          ;$DB3D
         .byte   $00, $1f, $0c, $1f, $1a, $0d, $0a, $2e
         .byte   $00, $00, $6b                                           ;$DC30
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_dc33:  ; anaconda?                                                     ;$DC33
+        hull_index           .set hull_index + 1
+.export hull_anaconda_index    := hull_index
+
+.proc   hull_anaconda                                                   ;$DC33
+        ; anaconda
+
         .byte                  $07, $10, $27, $6e, $d2
         .byte   $5d, $30, $2e, $5a, $19, $00, $00, $30
         .byte   $24, $fc, $0e, $00, $00, $01, $3f, $00                  ;$DC40
@@ -626,9 +780,15 @@ _dc33:  ; anaconda?                                                     ;$DC33
         .byte   $22, $5f, $6c, $44, $22, $1f, $61, $48
         .byte   $18, $1f, $00, $5e, $12                                 ;$DD30
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_dd35:  ; asteroid?                                                     ;$DD35
+        hull_index           .set hull_index + 1
+.export hull_dd35_index        := hull_index
+
+.proc   _dd35   ; asteroid?                                             ;$DD35
+
         .byte                            $07, $00, $19
         .byte   $4a, $9e, $45, $00, $32, $36, $15, $00
         .byte   $00, $38, $32, $b4, $1e, $00, $00, $01                  ;$DD40
@@ -658,9 +818,16 @@ _dd35:  ; asteroid?                                                     ;$DD35
         .byte   $3a, $66, $33, $3f, $51, $09, $43, $3f                  ;$DE00
         .byte   $2f, $5e, $3f
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_de0b:  ; viper                                                         ;$DE0B
+        hull_index           .set hull_index + 1
+.export hull_viper_index       := hull_index
+
+.proc   hull_viper                                                      ;$DE0B
+        ; viper
+
         .byte                  $00, $f9, $15, $6e, $be
         .byte   $51, $00, $2a, $5a, $14, $00, $00, $1c                  ;$DE10
         .byte   $17, $8c, $20, $00, $00, $01, $11, $00
@@ -690,9 +857,16 @@ _de0b:  ; viper                                                         ;$DE0B
         .byte   $0b, $5f, $16, $21, $0b, $5f, $00, $20
         .byte   $00, $3f, $00, $00, $30                                 ;$DEE0
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_dee5:  ; sidewinder                                                    ;$DEE5
+        hull_index           .set hull_index + 1
+.export hull_sidewinder_index  := hull_index
+
+.proc   hull_sidewinder                                                 ;$DEE5
+        ; sidewinder
+
         .byte                            $00, $81, $10
         .byte   $50, $8c, $41, $00, $1e, $3c, $0f, $32
         .byte   $00, $1c, $14, $46, $25, $00, $00, $02                  ;$DEF0
@@ -716,9 +890,16 @@ _dee5:  ; sidewinder                                                    ;$DEE5
         .byte   $70, $df, $0c, $2f, $06, $5f, $00, $20                  ;$DF80
         .byte   $08, $5f, $0c, $2f, $06
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_df8d:  ; mamba                                                         ;$DF8D
+        hull_index           .set hull_index + 1
+.export hull_mamba_index       := hull_index
+
+.proc   hull_mamba                                                      ;$DF8D
+        ; mamba
+
         .byte                            $01, $24, $13
         .byte   $aa, $1a, $61, $00, $22, $96, $1c, $96                  ;$DF90
         .byte   $00, $14, $19, $5a, $1e, $00, $01, $02
@@ -759,9 +940,16 @@ _df8d:  ; mamba                                                         ;$DF8D
         .byte   $20, $40, $10, $1e, $20, $40, $10, $3e                  ;$E0B0
         .byte   $00, $00, $7f
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e0bb:  ; krait                                                         ;$E0BB
+        hull_index           .set hull_index + 1
+.export hull_krait_index       := hull_index
+
+.proc   hull_krait                                                      ;$E0BB
+        ; krait
+
         .byte   $01, $10, $0e, $7a, $ce
         .byte   $59, $00, $12, $66, $15, $64, $00, $18                  ;$E0C0
         .byte   $14, $50, $1e, $00, $00, $01, $10, $00
@@ -793,9 +981,16 @@ _e0bb:  ; krait                                                         ;$E0BB
         .byte   $03, $3f, $26, $00, $4d, $bf, $26, $00
         .byte   $4d                                                     ;$E1A0
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e1a1:  ; adder                                                         ;$E1A1
+        hull_index           .set hull_index + 1
+.export hull_adder_index       := hull_index
+
+.proc   hull_adder                                                      ;$E1A1
+        ; adder
+
         .byte        $00, $c4, $09, $80, $f4, $65, $00
         .byte   $16, $6c, $1d, $28, $00, $3c, $14, $55
         .byte   $18, $00, $00, $02, $10, $12, $00, $28                  ;$E1B0
@@ -836,9 +1031,16 @@ _e1a1:  ; adder                                                         ;$E1A1
         .byte   $0d, $1f, $00, $1c, $00, $5f, $00, $1c
         .byte   $00                                                     ;$E2D0
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e2d1:  ; gecko                                                         ;$E2D1
+        hull_index           .set hull_index + 1
+.export hull_gecko_index       := hull_index
+
+.proc   hull_gecko                                                      ;$E2D1
+        ; gecko
+
         .byte        $00, $49, $26, $5c, $a0, $45, $00
         .byte   $1a, $48, $11, $37, $00, $24, $12, $46
         .byte   $1e, $00, $00, $03, $10, $0a, $04, $2f                  ;$E2E0
@@ -865,9 +1067,16 @@ _e2d1:  ; gecko                                                         ;$E2D1
         .byte   $08, $bf, $58, $10, $d6, $3f, $00, $00
         .byte   $bb, $3f, $58, $10, $d6                                 ;$E390
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e395:  ; cobra mk-I                                                    ;$E395
+        hull_index           .set hull_index + 1
+.export hull_cobramk1_index    := hull_index
+
+.proc   hull_cobramk1                                                   ;$E395
+        ; cobra mk-I
+
         .byte                            $03, $49, $26
         .byte   $56, $9e, $49, $28, $1a, $42, $12, $4b
         .byte   $00, $28, $13, $5a, $1a, $00, $00, $02                  ;$E3A0
@@ -895,9 +1104,16 @@ _e395:  ; cobra mk-I                                                    ;$E395
         .byte   $00, $00, $9a, $bf, $79, $6f, $3e, $3f                  ;$E450
         .byte   $79, $6f, $3e
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e45b:  ; worm                                                          ;$E45B
+        hull_index           .set hull_index + 1
+.export hull_worm_index        := hull_index
+
+.proc   hull_worm                                                       ;$E45B
+        ; worm
+
         .byte                  $00, $49, $26, $50, $90
         .byte   $4d, $00, $12, $3c, $10, $00, $00, $20                  ;$E460
         .byte   $13, $1e, $17, $00, $00, $03, $08, $0a
@@ -922,9 +1138,15 @@ _e45b:  ; worm                                                          ;$E45B
         .byte   $40, $31, $0e, $3f, $00, $00, $c8, $5f                  ;$E500
         .byte   $00, $50, $00
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e50b:  ; combra mk-III (lone wolf?)                                    ;$E50B
+        hull_index           .set hull_index + 1
+.export hull_e50b_index        := hull_index
+
+.proc   _e50b   ; combra mk-III (lone wolf?)                            ;$E50B
+
         .byte                  $01, $41, $23, $bc, $54
         .byte   $9d, $54, $2a, $a8, $26, $af, $00, $34                  ;$E510
         .byte   $32, $96, $1c, $00, $01, $01, $12, $20
@@ -976,9 +1198,16 @@ _e50b:  ; combra mk-III (lone wolf?)                                    ;$E50B
         .byte   $07, $2a, $09, $5f, $00, $1e, $06, $5f
         .byte   $07, $2a, $09                                           ;$E690
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e693:  ; asp mk-II                                                     ;$E693
+        hull_index           .set hull_index + 1
+.export hull_aspmk2_index      := hull_index
+
+.proc   hull_aspmk2                                                     ;$E693
+        ; asp mk-II
+        
         .byte                  $00, $10, $0e, $86, $f6
         .byte   $69, $20, $1a, $72, $1c, $c8, $00, $30
         .byte   $28, $96, $28, $00, $00, $01, $29, $00                  ;$E6A0
@@ -1018,9 +1247,15 @@ _e693:  ; asp mk-II                                                     ;$E693
         .byte   $32, $9f, $50, $2e, $32, $3f, $00, $00                  ;$E7B0
         .byte   $5a, $59, $3a, $43, $4d
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e7bd:  ; python (lone-wolf?)                                           ;$E7BD
+        hull_index           .set hull_index + 1
+.export hull_e7bd_index        := hull_index
+
+.proc   _e7bd   ; python (lone-wolf?)                                   ;$E7BD
+
         .byte                            $02, $00, $19
         .byte   $56, $be, $59, $00, $2a, $42, $1a, $c8                  ;$E7C0
         .byte   $00, $34, $28, $fa, $14, $00, $00, $00
@@ -1053,9 +1288,16 @@ _e7bd:  ; python (lone-wolf?)                                           ;$E7BD
         .byte   $19, $25, $0b, $7f, $19, $25, $0b, $ff                  ;$E8A0
         .byte   $19, $25, $0b, $3f, $00, $00, $70
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e8af:  ; fer-de-lance                                                  ;$E8AF
+        hull_index           .set hull_index + 1
+.export hull_ferdelance_index  := hull_index
+
+.proc   hull_ferdelance                                                 ;$E8AF
+        ; fer-de-lance
+
         .byte                                      $00
         .byte   $40, $06, $86, $f2, $6d, $00, $1a, $72                  ;$E8B0
         .byte   $1b, $00, $00, $28, $28, $a0, $1e, $00
@@ -1094,9 +1336,16 @@ _e8af:  ; fer-de-lance                                                  ;$E8AF
         .byte   $16, $3c, $0c, $2e, $13, $5f, $00, $1c                  ;$E9C0
         .byte   $00
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_e9c9:  ; moray                                                         ;$E9C9
+        hull_index           .set hull_index + 1
+.export hull_moray_index       := hull_index
+
+.proc   hull_moray                                                      ;$E9C9
+        ; moray
+        
         .byte        $01, $84, $03, $68, $b4, $49, $00
         .byte   $1a, $54, $13, $32, $00, $24, $28, $64                  ;$E9D0
         .byte   $19, $00, $00, $02, $10, $0f, $00, $41
@@ -1126,9 +1375,16 @@ _e9c9:  ; moray                                                         ;$E9C9
         .byte   $32, $5f, $00, $53, $1e, $5f, $48, $63
         .byte   $32                                                     ;$EAA0
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_eaa1:  ; thargoid                                                      ;$EAA1
+        hull_index           .set hull_index + 1
+.export hull_thargoid_index    := hull_index
+
+.proc   hull_thargoid                                                   ;$EAA1
+        ; thargoid
+
         .byte        $00, $49, $26, $8c, $f4, $69, $3c
         .byte   $26, $78, $1a, $f4, $01, $28, $37, $f0
         .byte   $27, $00, $00, $02, $16, $20, $30, $30                  ;$EAB0
@@ -1166,9 +1422,16 @@ _eaa1:  ; thargoid                                                      ;$EAA1
         .byte   $19, $1f, $67, $19, $3c, $5f, $67, $19                  ;$EBB0
         .byte   $3c, $9f, $30, $00, $00
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_ebbd:  ; thargon                                                       ;$EBBD
+        hull_index           .set hull_index + 1
+.export hull_thargon_index     := hull_index
+
+.proc   hull_thargon                                                    ;$EBBD
+        ; thargon (the thargoid drone ships)
+
         .byte                            $f0, $40, $06
         .byte   $e6, $50, $45, $00, $12, $3c, $0f, $32                  ;$EBC0
         .byte   $00, $1c, $14, $14, $1e, $e7, $00, $02
@@ -1185,9 +1448,16 @@ _ebbd:  ; thargon                                                       ;$EBBD
         .byte   $0e, $1f, $14, $05, $07, $1f, $24, $00                  ;$EC20
         .byte   $00
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_ec29:  ; constrictor                                                   ;$EC29
+        hull_index           .set hull_index + 1
+.export hull_constrictor_index := hull_index
+
+.proc   hull_constrictor                                                ;$EC29
+        ; constrictor (mission)
+
         .byte        $03, $81, $10, $7a, $da, $51, $00
         .byte   $2e, $66, $18, $00, $00, $28, $2d, $fc                  ;$EC30
         .byte   $24, $00, $00, $02, $34, $14, $07, $50
@@ -1222,9 +1492,16 @@ _ec29:  ; constrictor                                                   ;$EC29
         .byte   $2c, $4b, $00, $3f, $00, $00, $a0, $5f                  ;$ED20
         .byte   $00, $1b, $00
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_ed2b:  ; cougar                                                        ;$ED2B
+        hull_index           .set hull_index + 1
+.export hull_cougar_index      := hull_index
+
+.proc   hull_cougar                                                     ;$ED2B
+        ; the secret stealth ship
+
         .byte                  $03, $24, $13, $86, $ea
         .byte   $69, $00, $2a, $72, $19, $00, $00, $18                  ;$ED30
         .byte   $22, $fc, $28, $00, $00, $02, $34, $00
@@ -1259,9 +1536,16 @@ _ed2b:  ; cougar                                                        ;$ED2B
         .byte   $05, $5f, $10, $2e, $04, $1f, $10, $2e                  ;$EE20
         .byte   $04, $3e, $00, $00, $a0
 
+.endproc
+
 ;-------------------------------------------------------------------------------
 
-_ee2d:  ; space station (dodecahedral)                                  ;$EE2D
+        hull_index           .set hull_index + 1
+.export hull_dodo_index        := hull_index
+
+.proc   hull_dodo                                                       ;$EE2D
+        ; space station (dodecahedral)
+
         .byte                            $00, $90, $7e
         .byte   $a4, $2c, $65, $00, $36, $90, $22, $00                  ;$EE30
         .byte   $00, $30, $7d, $f0, $00, $00, $01, $00
@@ -1307,5 +1591,7 @@ _ee2d:  ; space station (dodecahedral)                                  ;$EE2D
         .byte   $59, $7f, $67, $8e, $58, $ff, $67, $8e
         .byte   $58, $bf, $a9, $37, $59, $3f, $00, $00                  ;$EF80
         .byte   $c4, $4c, $44, $41, $52, $1f, $3f, $58
+
+.endproc
 
 ;$EF90

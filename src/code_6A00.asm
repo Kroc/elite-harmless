@@ -58,7 +58,9 @@
 .import _267e:absolute
 .import _26a4:absolute
 .import _27a4:absolute
-.import _28a4:absolute
+.import polyobj_addrs:absolute
+.import polyobj_addrs_lo:absolute
+.import polyobj_addrs_hi:absolute
 .import _28d5:absolute
 .import _28d9:absolute
 .import txt_docked_token0B:absolute
@@ -116,15 +118,15 @@
 .import _3c95:absolute
 .import _3d2f:absolute
 .import _3e08:absolute
-.import _3e87:absolute
-.import _3e95:absolute
+.import get_polyobj:absolute
+.import set_psystem_to_tsystem:absolute
 .import wait_frames:absolute
 
-; from "gfx/hulls.asm"
-.import _d000:absolute
-.import _d042:absolute
-.import _d062:absolute
-.import _d083:absolute
+; from "gfx/hull_data.asm"
+.import hull_pointers:absolute
+.import hull_d042:absolute
+.import hull_d062:absolute
+.import hull_d083:absolute
 
 ;===============================================================================
 
@@ -1724,22 +1726,26 @@ _7331:                                                                  ;$7331
         jsr _70ab
 _7337:                                                                  ;$7337
         jsr _7217
+
         ldx # $05
-_733c:                                                                  ;$733C
-        lda $04fa, x
+:       lda $04fa, x                                                    ;$733C
         sta $04f4, x
         dex 
-        bpl _733c
+        bpl :-
+
         inx 
         stx $048a
+        
         lda TSYSTEM_ECONOMY
         sta PSYSTEM_ECONOMY
         lda TSYSTEM_TECHLEVEL
         sta PSYSTEM_TECHLEVEL
         lda TSYSTEM_GOVERNMENT
         sta PSYSTEM_GOVERNMENT
+        
         jsr get_random_number
         sta $04df
+        
         ldx # $00
         stx $ad
 _7365:                                                                  ;$7365
@@ -3137,7 +3143,7 @@ _7b1c:                                                                  ;$7B1C
         bmi _7b41
         sta $a5
         
-        jsr _3e87
+        jsr get_polyobj
 
         ldy # $1f
 _7b2a:                                                                  ;$7B2A
@@ -3386,22 +3392,22 @@ _7c7a:                                                                  ;$7C7A
         rts 
 
 _7c7b:                                                                  ;$7C7B
-        jsr _3e87
+        jsr get_polyobj
 
         lda $bb
         bmi _7cd4
         asl 
         tay 
-        lda _d000 - 1, y        ;?
-        beq _7c79               ;!?
+        lda hull_pointers - 1, y
+        beq _7c79
         sta ZP_HULL_ADDR_HI
-        lda _d000 - 2, y        ;?
+        lda hull_pointers - 2, y
         sta ZP_HULL_ADDR_LO
 
         cpy # $04               ; is space station (coreolis)?
         beq _7cc4
         
-        ldy # Hull::_05        ;=$05: max.lines
+        ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
         lda $04f2
@@ -3452,7 +3458,7 @@ _7ce9:                                                                  ;$7CE9
         inc $045d, x
 _7cec:                                                                  ;$7CEC
         ldy $bb
-        lda _d042 - 1, y        ;TODO: why is this less one?
+        lda hull_d042 - 1, y
         and # %01101111
         ora $2d
         sta $2d
@@ -4421,9 +4427,9 @@ _82be:                                                                  ;$82BE
         tay                     ; move to index register
         
         ; get the PolyObject address from that index
-        lda _28a4 + 0, y
+        lda polyobj_addrs_lo, y
         sta ZP_TEMP_ADDR1_LO
-        lda _28a4 + 1, y
+        lda polyobj_addrs_hi, y
         sta ZP_TEMP_ADDR1_HI
         
         ldy # PolyObject::roll  ;=$20 -- perhaps this is supposed to be energy?
@@ -4509,9 +4515,9 @@ _8343:                                                                  ;$8343
 _834f:                                                                  ;$834F
         asl 
         tay 
-        lda _d000-2, y
+        lda hull_pointers - 2, y
         sta ZP_TEMP_ADDR1_LO
-        lda _d000-1, y
+        lda hull_pointers - 1, y
         sta ZP_TEMP_ADDR1_HI
         
         ldy # $05
@@ -4527,9 +4533,9 @@ _834f:                                                                  ;$834F
         txa 
         asl 
         tay 
-        lda _28a4 + 0, y
+        lda polyobj_addrs_lo, y
         sta ZP_TEMP_ADDR1_LO
-        lda _28a4 + 1, y
+        lda polyobj_addrs_hi, y
         sta ZP_TEMP_ADDR1_HI
 
         ldy # $24
@@ -5145,7 +5151,7 @@ _8741:                                                                  ;$8741
         cmp # $1a
         bne _875c
         jsr _6f82
-        jsr _3e95
+        jsr set_psystem_to_tsystem
         jmp _6f82
 
 _875c:                                                                  ;$875C
@@ -5226,9 +5232,9 @@ _87b8:                                                                  ;$87B8
         ; error mode? $FF = error occurred, $00 = normal
         .byte   $00
 
-; BRK routine, set up by `_1e14`
-_87b9:                                                                  ;$87B9
-.export _87b9
+; BRK routine, set up by `debug_for_brk`
+debug_brk:                                                              ;$87B9
+.export debug_brk
 
         dec _87b8
 
@@ -5386,15 +5392,16 @@ _88ac:                                                                  ;$88AC
         ldy # $30
         jsr _8920
         jsr _9245
-        jsr _3e95
+        jsr set_psystem_to_tsystem
         jsr _70ab
         jsr _7217
+
         ldx # $05
-_88c9:                                                                  ;$88C9
-        lda ZP_SEED, x
+:       lda ZP_SEED, x                                                  ;$88C9
         sta $04f4, x
         dex 
-        bpl _88c9
+        bpl :-
+
         inx 
         stx $048a
 
@@ -9622,12 +9629,12 @@ _a7a6:                                                                  ;$A7A6
 .export _a7a6
         lda $04cb               ;?
         clc 
-        adc _d062, x
+        adc hull_d062, x
         sta $04cb
         
         ; add fractional kill value?
         lda $04e0
-        adc _d083, x
+        adc hull_d083, x
         sta $04e0
         
         bcc _a7c3               ; < 1.0
@@ -11691,7 +11698,7 @@ _b343:                                                                  ;$B343
         beq _b358
         bmi _b355
 
-        jsr _3e87               ; get address of ship-slot
+        jsr get_polyobj         ; get address of ship-slot
         
         ldy # $1f
         lda [ZP_POLYOBJ_ADDR], y
@@ -11877,57 +11884,60 @@ _b410:                                                                  ;$B410
 
         lda $a0
         bne _b40f
+
         lda $28
         and # %00010000
         beq _b40f
+        
         ldx $a5
         bmi _b40f
         lda _267e, x
         sta $32
+
         lda ZP_POLYOBJ_XPOS_pt2
         ora ZP_POLYOBJ_YPOS_pt2
         ora ZP_POLYOBJ_ZPOS_pt2
         and # %11000000
         bne _b40f
+
         lda ZP_POLYOBJ_XPOS_pt2
         clc 
+        
         ldx ZP_POLYOBJ_XPOS_pt3
-        bpl _b438
+        bpl :+
         eor # %11111111
         adc # $01
-_b438:                                                                  ;$B438
-        adc # $7b
+:       adc # $7b                                                       ;$B438
         sta ZP_VAR_X
+
         lda ZP_POLYOBJ_ZPOS_pt2
         lsr 
         lsr 
         clc 
         ldx ZP_POLYOBJ_ZPOS_pt3
-        bpl _b448
+        bpl :+
         eor # %11111111
         sec 
-_b448:                                                                  ;$B448
-        adc # $53
+:       adc # $53                                                       ;$B448
         eor # %11111111
         sta ZP_TEMP_ADDR1_LO
+        
         lda ZP_POLYOBJ_YPOS_pt2
         lsr 
         clc 
         ldx ZP_POLYOBJ_YPOS_pt3
-        bmi _b459
+        bmi :+
         eor # %11111111
         sec 
-_b459:                                                                  ;$B459
-        adc ZP_TEMP_ADDR1_LO
+:       adc ZP_TEMP_ADDR1_LO                                            ;$B459
         cmp # $92
-        bcs _b461
+        bcs :+
         lda # $92
-_b461:                                                                  ;$B461
-        cmp # $c7
-        bcc _b467
+:       cmp # $c7                                                       ;$B461
+        bcc :+
         lda # $c6
-_b467:                                                                  ;$B467
-        sta ZP_VAR_Y
+:       sta ZP_VAR_Y                                                    ;$B467
+        
         sec 
         sbc ZP_TEMP_ADDR1_LO
         php 

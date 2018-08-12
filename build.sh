@@ -23,7 +23,7 @@ encrypt="python3 link/encrypt.py"
 
 
 clear
-echo "building Elite : Harmless:"
+echo "building Elite : Harmless"
 echo
 
 echo "* cleaning up:"
@@ -39,64 +39,44 @@ rm -f bin/*.d64
 
 echo "- OK"
 
-# assemble the stand-alone Elite code into object files;
-# these can be linked into program files in whichever order we please later
+# build an original version of the game, including the original fast-loader
 
 echo
-echo "* assemble Elite source code:"
-echo "  ==========================="
+echo "* build original Elite"
+echo "  ======================================"
+
 echo "- assemble 'prgheader.asm'"
 $ca65 -o build/prgheader.o      src/prgheader.asm
 echo "- assemble 'elite_memory.asm'"
 $ca65 -o build/elite_memory.o   src/elite_memory.asm
+
+# assemble 'original' version of the code; the `OPTION_ORIGINAL` symbol
+# is used within the files to exlcude changed code from the original
+
 echo "- assemble 'elite_init.asm'"
-$ca65 -o build/elite_init.o     src/elite_init.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-elite_init.o      src/elite_init.asm
 echo "- assemble 'text_pairs.asm'"
-$ca65 -o build/text_pairs.o     src/text_pairs.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-text_pairs.o      src/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
-$ca65 -o build/text_flight.o    src/text_flight.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-text_flight.o     src/text_flight.asm
 echo "- assemble 'text_docked.asm'"
-$ca65 -o build/text_docked.o    src/text_docked.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-text_docked.o     src/text_docked.asm
 echo "- assemble 'code_1D00.asm'"
-$ca65 -o build/code_1D00.o      src/code_1D00.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-code_1D00.o       src/code_1D00.asm
 echo "- assemble 'code_1D81.asm'"
-$ca65 -o build/code_1D81.o      src/code_1D81.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-code_1D81.o       src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
-$ca65 -o build/code_6A00.o      src/code_6A00.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-code_6A00.o       src/code_6A00.asm
 echo "- assemble 'gfx_font.asm'"
-$ca65 -o build/gfx_font.o       src/gfx/font.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-gfx_font.o        src/gfx/font.asm
 echo "- assemble 'gfx_sprites.asm'"
-$ca65 -o build/gfx_sprites.o    src/gfx/sprites.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-gfx_sprites.o     src/gfx/sprites.asm
 echo "- assemble 'gfx_hull_data.asm'"
-$ca65 -o build/gfx_hull_data.o  src/gfx/hull_data.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-gfx_hull_data.o   src/gfx/hull_data.asm
 echo "- assemble 'gfx_hud.asm'"
-$ca65 -o build/gfx_hud.o        src/gfx/hud.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-gfx_hud.o         src/gfx/hud.asm
 echo "- assemble 'var_polyobj.asm'"
-$ca65 -o build/var_polyobj.o    src/var_polyobj.asm
-
-#===============================================================================
-
-# let's try ham-fistedly link our own PRG without the loader
-echo
-echo "* build Elite : Harmless (incomplete)"
-echo "  ==================================="
-echo "- link 'elite-harmless.prg'"
-$ld65 \
-       -C link/elite-harmless.cfg \
-       -o bin/elite-harmless.prg \
-    --obj build/prgheader.o \
-    --obj build/elite_memory.o \
-    --obj build/text_pairs.o \
-    --obj build/text_flight.o \
-    --obj build/text_docked.o \
-    --obj build/code_1D00.o \
-    --obj build/code_1D81.o \
-    --obj build/code_6A00.o \
-    --obj build/gfx_font.o \
-    --obj build/gfx_sprites.o \
-    --obj build/gfx_hull_data.o \
-    --obj build/gfx_hud.o \
-    --obj build/var_polyobj.o 
+$ca65 -DOPTION_ORIGINAL -o build/orig-var_polyobj.o     src/var_polyobj.asm
 
 #===============================================================================
 
@@ -104,8 +84,8 @@ $ld65 \
 # the code or failed to preserve the original somewhere along the lines
 
 echo
-echo "* assemble GMA86 loader:"
-echo "  ======================"
+echo "* assemble GMA86 loader"
+echo "  --------------------------------------"
 echo "- assemble 'loader/stage0.asm'"
 $ca65 -o build/loader/stage0.o  src/loader/stage0.asm
 echo "- assemble 'loader/stage1.asm'"
@@ -122,8 +102,8 @@ echo "- assemble 'loader/stage6.asm'"
 $ca65 -o build/loader/stage6.o  src/loader/stage6.asm
 
 echo
-echo "* build 'elite-original-gma86.prg'"
-echo "  ================================"
+echo "* make 'elite-original-gma86.d64'"
+echo "  --------------------------------------"
 echo "-     link 'elite-original-gma86.cfg'"
 $ld65 \
        -C link/elite-original-gma86.cfg \
@@ -136,18 +116,18 @@ $ld65 \
     --obj build/loader/stage5.o \
     --obj build/loader/stage6.o \
     --obj build/loader/gma4_7C3A.o \
-    --obj build/text_pairs.o \
-    --obj build/text_flight.o \
-    --obj build/text_docked.o \
-    --obj build/code_1D00.o \
-    --obj build/elite_init.o \
-    --obj build/code_1D81.o \
-    --obj build/code_6A00.o \
-    --obj build/gfx_font.o \
-    --obj build/gfx_sprites.o \
-    --obj build/gfx_hud.o \
-    --obj build/gfx_hull_data.o \
-    --obj build/var_polyobj.o
+    --obj build/orig-text_pairs.o \
+    --obj build/orig-text_flight.o \
+    --obj build/orig-text_docked.o \
+    --obj build/orig-code_1D00.o \
+    --obj build/orig-elite_init.o \
+    --obj build/orig-code_1D81.o \
+    --obj build/orig-code_6A00.o \
+    --obj build/orig-gfx_font.o \
+    --obj build/orig-gfx_sprites.o \
+    --obj build/orig-gfx_hud.o \
+    --obj build/orig-gfx_hull_data.o \
+    --obj build/orig-var_polyobj.o
 
 # encrypt GMA4.PRG:
 #-------------------------------------------------------------------------------
@@ -237,7 +217,7 @@ cat "build/loader/gma6_prg.bin" \
 echo
 echo "* write floppy disk image"
 $mkd64 \
-    -o bin/elite-original-gma86.d64 \
+    -o release/elite-original-gma86.d64 \
     -m xtracks -XDS \
     -m cbmdos -d "ELITE 040486" -i "GMA86" \
     -f bin/firebird.prg     -t 17 -s 0 -n "FIREBIRD"    -P -S 1 -w \
@@ -262,5 +242,76 @@ cd ..
 #===============================================================================
 
 echo
-echo "complete."
+echo "* build Elite : Harmless"
+echo "  ======================================"
+
+echo "* cleaning up:"
+
+rm -rf build/*.o
+rm -rf build/*.s
+rm -rf build/*.bin
+rm -rf build/*.prg
+rm -rf build/*.d64
+
+rm -f bin/*.prg
+rm -f bin/*.d64
+
+echo "- OK"
+
+echo
+echo "- assemble 'prgheader.asm'"
+$ca65 -o build/prgheader.o      src/prgheader.asm
+echo "- assemble 'elite_memory.asm'"
+$ca65 -o build/elite_memory.o   src/elite_memory.asm
+echo "- assemble 'elite_init.asm'"
+$ca65 -o build/elite_init.o     src/elite_init.asm
+echo "- assemble 'text_pairs.asm'"
+$ca65 -o build/text_pairs.o     src/text_pairs.asm
+echo "- assemble 'text_flight.asm'"
+$ca65 -o build/text_flight.o    src/text_flight.asm
+echo "- assemble 'text_docked.asm'"
+$ca65 -o build/text_docked.o    src/text_docked.asm
+echo "- assemble 'code_1D00.asm'"
+$ca65 -o build/code_1D00.o      src/code_1D00.asm
+echo "- assemble 'code_1D81.asm'"
+$ca65 -o build/code_1D81.o      src/code_1D81.asm
+echo "- assemble 'code_6A00.asm'"
+$ca65 -o build/code_6A00.o      src/code_6A00.asm
+echo "- assemble 'gfx_font.asm'"
+$ca65 -o build/gfx_font.o       src/gfx/font.asm
+echo "- assemble 'gfx_sprites.asm'"
+$ca65 -o build/gfx_sprites.o    src/gfx/sprites.asm
+echo "- assemble 'gfx_hull_data.asm'"
+$ca65 -o build/gfx_hull_data.o  src/gfx/hull_data.asm
+echo "- assemble 'gfx_hud.asm'"
+$ca65 -o build/gfx_hud.o        src/gfx/hud.asm
+echo "- assemble 'var_polyobj.asm'"
+$ca65 -o build/var_polyobj.o    src/var_polyobj.asm
+
+# let's try ham-fistedly link our own PRG without the loader
+echo
+echo "* make 'elite-harmless.d64' (incomplete)"
+echo "  --------------------------------------"
+echo "- link 'elite-harmless.prg'"
+$ld65 \
+       -C link/elite-harmless.cfg \
+       -o bin/elite-harmless.prg \
+    --obj build/prgheader.o \
+    --obj build/elite_memory.o \
+    --obj build/text_pairs.o \
+    --obj build/text_flight.o \
+    --obj build/text_docked.o \
+    --obj build/code_1D00.o \
+    --obj build/code_1D81.o \
+    --obj build/code_6A00.o \
+    --obj build/gfx_font.o \
+    --obj build/gfx_sprites.o \
+    --obj build/gfx_hull_data.o \
+    --obj build/gfx_hud.o \
+    --obj build/var_polyobj.o 
+
+#===============================================================================
+
+echo
+echo "* complete."
 exit 0

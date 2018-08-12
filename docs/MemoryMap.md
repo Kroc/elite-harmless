@@ -1,6 +1,6 @@
 # Elite Memory Map #
 
-          .              .
+          .               .
           :               :
           +---------------+
     $0300 | ?             |   Some heap space?
@@ -17,7 +17,7 @@
     $0B00 | DATA_FONT     |   font graphics
           |               |
           |               |
-          |-------------  |
+          |---------------|
     $0E00 | TEXT_DOCKED   |   compressed text
           |               |
           |               |
@@ -230,15 +230,53 @@
           |               |
     $CCD7 +---------------+
 
-
-$D000..$EF90    SHIP MODELS:
-                3D vector data for the various ships / objects in the game
-
-$EF90..$F890    HUD IMAGE (COPY):
-                copied from $7D7A..$867A by GMA4.PRG.
-                this appears to be a backup-copy of the HUD.
-                this is probably used for keeping the radar intact when
-                erasing and drawing the poles on the radar; could sprite
-                multiplexing be used to avoid this?
-
-$F900..         ?
+          +---------------+
+    $D000 | HULL_TABLE    |
+          |---------------|
+    $D042 | HULL_D042     |
+    $D062 | HULL_D062     |
+    $D083 | HULL_D083     |
+          |---------------|
+    $D0A5 | HULL_DATA     |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $E000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |---------------|
+    $EF90 | GFX_HUD       |
+    $F000 |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+          |               |
+    $F870 +---------------+

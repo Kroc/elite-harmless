@@ -60,7 +60,7 @@
 .import _87a4:absolute
 .import _87a6:absolute
 .import _87b1:absolute
-.import _87b9:absolute
+.import debug_brk:absolute
 .import _87d0:absolute
 .import _88e7:absolute
 .import txt_docked_token1A:absolute
@@ -128,8 +128,8 @@
 .import txt_docked_token15:absolute
 .import _b410:absolute
 
-; from "data_hulls.asm"
-.import _d000:absolute
+; from "hull_data.asm"
+.import hull_pointers
 
 ;-------------------------------------------------------------------------------
 
@@ -277,15 +277,18 @@ _1d81:                                                                  ;$1D81
 
 :       jmp _88e7                                                       ;$1E11
 
-;===============================================================================
 
-_1e14:                                                                  ;$1E14
-        lda #< _87b9
-        sei 
+debug_for_brk:                                                          ;$1E14
+        ;=======================================================================
+        ; set a routine to capture use of the `brk` instruction
+        ;
+        lda #< debug_brk
+        sei                     ; disable interrupts
         sta $0316               ; vector for BRK routine 
-        lda #> _87b9
+        lda #> debug_brk
         sta $0317               ; vector for BRK routine
-        cli 
+        cli                     ; enable interrupts
+
         rts 
 
 ;===============================================================================
@@ -613,7 +616,7 @@ _202f:                                                                  ;$202F
 
 _2039:                                                                  ;$2039
         sta $a5
-        jsr _3e87
+        jsr get_polyobj
         
         ; copy the given PolyObject to the zero page:
         ; ($09..$2D)
@@ -629,9 +632,9 @@ _2039:                                                                  ;$2039
         
         asl 
         tay 
-        lda _d000 - 2, y
+        lda hull_pointers - 2, y
         sta ZP_HULL_ADDR_LO
-        lda _d000 - 1, y
+        lda hull_pointers - 1, y
         sta ZP_HULL_ADDR_HI
         
         lda $04c3               ; energy bomb?
@@ -1945,9 +1948,16 @@ _28a2:                                                                  ;$28A2
         .byte   $61             ;=$??61
 
 
-_28a4:                                                                  ;$28A4
+polyobj_addrs:                                                          ;$28A4
 ;===============================================================================
-.export _28a4
+; a total of 11 3D-objects ("poly-objects") can be 'in-play' at a time,
+; each object has a block of runtime storage to keep track of its current
+; state including rotation, speed, shield etc. this is a lookup-table of
+; addresses for each poly-object slot
+;
+.export polyobj_addrs
+.export polyobj_addrs_lo = polyobj_addrs
+.export polyobj_addrs_hi = polyobj_addrs + 1
 
 .import POLYOBJ_00
         .word   POLYOBJ_00
@@ -1972,6 +1982,8 @@ _28a4:                                                                  ;$28A4
 .import POLYOBJ_10
         .word   POLYOBJ_10
         
+;===============================================================================
+
 ; unused / unreferenced?
 ;$28BA:
 
@@ -3892,11 +3904,12 @@ _3244:                                                                  ;$3244
         lda $29
         asl 
         bmi _322f
+        
         lsr 
         tax 
-        lda _28a4 + 0, x
+        lda polyobj_addrs_lo, x
         sta ZP_TEMP_ADDR3_LO
-        lda _28a4 + 1, x
+        lda polyobj_addrs_hi, x
         jsr _3581
 
         lda ZP_POLYOBJ01_XPOS_pt3
@@ -4636,7 +4649,7 @@ _36a6:                                                                  ;$36A6
         bcc _3701
         
         ldx $7c                 ; missile target?
-        jsr _3e87
+        jsr get_polyobj
 
         lda $0452, x            ; ship slots?
         jsr _36c5
@@ -5978,6 +5991,7 @@ _3dff:                                                                  ;$3DFF
         
         sta ZP_POLYOBJ_ZPOS_pt2
         jsr _a72f
+
         lda # $40
         sta $a3                 ; move counter?
 _3e01:                                                                  ;$3E01
@@ -5994,12 +6008,15 @@ _3e11:                                                                  ;$3E11
         lsr ZP_POLYOBJ_XPOS_pt1
         inc ZP_POLYOBJ_ZPOS_pt1
         beq _3e31
+
         inc ZP_POLYOBJ_ZPOS_pt1
         beq _3e31
+        
         ldx ZP_POLYOBJ_YPOS_pt1
         inx 
         cpx # $50
         bcc _3e24
+        
         ldx # $50
 _3e24:                                                                  ;$3E24
         stx ZP_POLYOBJ_YPOS_pt1
@@ -6095,31 +6112,37 @@ txt_docked_token18:                                                     ;$3E7C
         
         rts 
 
-_3e87:                                                                  ;$3E87
+get_polyobj:                                                            ;$3E87
 ;===============================================================================
-; get an address from $F900..$FA72 (in 36 byte increments) based on an index
+; a total of 11 3D-objects ("poly-objects") can be 'in-play' at a time,
+; each object has a block of runtime storage to keep track of its current
+; state including rotation, speed, shield etc.
+;
+; given an index for a poly-object 0-10, this routine will
+; return an address for the poly-object's variable storage
 ;
 ;       X = index
 ;
 ; returns address in $59/$5A
 ;
-.export _3e87
+.export get_polyobj
 
         txa 
         asl                     ; multiply by 2 (for 2-byte table-lookup)
         tay 
-        lda _28a4 + 0, y
+        lda polyobj_addrs_lo, y
         sta ZP_POLYOBJ_ADDR_LO
-        lda _28a4 + 1, y
+        lda polyobj_addrs_hi, y
         sta ZP_POLYOBJ_ADDR_HI
         
         rts 
 
-_3e95:                                                                  ;$3E95
+set_psystem_to_tsystem:                                                 ;$3E95
 ;===============================================================================
-; copy present system co-ordinates to target system co-ordinates
+; copy present system co-ordinates to target system co-ordinates,
+; i.e. you have arrived at your destination
 ;
-.export _3e95
+.export set_psystem_to_tsystem
 
         ldx # 1
 :       lda PSYSTEM_POS, x                                              ;$3E97
