@@ -75,3 +75,11 @@ _1d14:
         .byte   $2e, $17, $2c, $32, $24
 _1d21:                                                                  ;$1D21
         .byte   $60
+
+;===============================================================================
+
+;FIXME: this is a spacing hack to make elite-harmless line-up with
+;original elite until the remaining unlabelled addresses are fixed
+.ifndef OPTION_ORIGINAL
+        .res    $1D81 - $1D22
+.endif

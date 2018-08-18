@@ -54,7 +54,7 @@ $ca65 -o build/elite_memory.o   src/elite_memory.asm
 # is used within the files to exlcude changed code from the original
 
 echo "- assemble 'elite_init.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-elite_init.o      src/elite_init.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-elite_init.o      src/orig/elite_init.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 -DOPTION_ORIGINAL -o build/orig-text_pairs.o      src/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -263,8 +263,10 @@ echo "- assemble 'prgheader.asm'"
 $ca65 -o build/prgheader.o      src/prgheader.asm
 echo "- assemble 'elite_memory.asm'"
 $ca65 -o build/elite_memory.o   src/elite_memory.asm
-echo "- assemble 'elite_init.asm'"
-$ca65 -o build/elite_init.o     src/elite_init.asm
+echo "- assemble 'code_boot.asm'"
+$ca65 -o build/code_boot.o      src/code_boot.asm
+echo "- assemble 'code_init.asm'"
+$ca65 -o build/code_init.o      src/code_init.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 -o build/text_pairs.o     src/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -292,16 +294,20 @@ $ca65 -o build/var_polyobj.o    src/var_polyobj.asm
 echo
 echo "* make 'elite-harmless.d64' (incomplete)"
 echo "  --------------------------------------"
-echo "- link 'elite-harmless.prg'"
+echo "- link 'load.prg'"
+echo "- link 'harmless.prg'"
 $ld65 \
        -C link/elite-harmless.cfg \
-       -o bin/elite-harmless.prg \
+       -S \$0400 \
+       -o bin/harmless.prg \
     --obj build/prgheader.o \
+    --obj build/code_boot.o \
     --obj build/elite_memory.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
     --obj build/code_1D00.o \
+    --obj build/code_init.o \
     --obj build/code_1D81.o \
     --obj build/code_6A00.o \
     --obj build/gfx_font.o \
@@ -309,6 +315,18 @@ $ld65 \
     --obj build/gfx_hull_data.o \
     --obj build/gfx_hud.o \
     --obj build/var_polyobj.o 
+
+#-------------------------------------------------------------------------------
+
+echo
+echo "* write floppy disk image"
+$mkd64 \
+    -o release/elite-harmless.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f bin/load.prg         -t 17 -s 0 -n "LOAD"        -P -w \
+    -f bin/harmless.prg     -t 17 -s 1 -n "HARMLESS"    -P -w \
+    1>/dev/null
+echo "- OK"
 
 #===============================================================================
 
