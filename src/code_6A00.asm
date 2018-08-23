@@ -683,7 +683,7 @@ _6cc3:                                                                  ;$6CC3
         sta $90
         jsr _6c6d
         lda PLAYER_FUEL
-        sta $77
+        sta ZP_VALUE_pt1
         jmp _6cfe
 
 _6cda:                                                                  ;$6CDA
@@ -692,7 +692,7 @@ _6cda:                                                                  ;$6CDA
         lda PLAYER_FUEL
         lsr 
         lsr 
-        sta $77
+        sta ZP_VALUE_pt1
 
         lda PSYSTEM_POS_X
         sta $8e
@@ -1261,14 +1261,14 @@ _7070:                                                                  ;$7070
         lda # $00
         sta ZP_POLYOBJ01_XPOS_pt2
         sta $44
-        sta $78
+        sta ZP_VALUE_pt2
 
         lda $71
         sta ZP_POLYOBJ01_XPOS_pt1
         lda ZP_SEED_pt6
         and # %00000001
         adc # $02
-        sta $77
+        sta ZP_VALUE_pt1
         jsr _7b4f
         jsr _7f22
         jsr _7b4f
@@ -1363,10 +1363,10 @@ _70f1:                                                                  ;$70F1
         eor # %11111111
         adc # $01
 :       jsr _3988                                                       ;$710C
-        sta $78
+        sta ZP_VALUE_pt2
 
         lda ZP_VAR_P1
-        sta $77
+        sta ZP_VALUE_pt1
         lda TSYSTEM_POS_Y
         sec 
         sbc PSYSTEM_POS_Y
@@ -1379,10 +1379,10 @@ _7122:                                                                  ;$7122
         pha 
         lda ZP_VAR_P1
         clc 
-        adc $77
+        adc ZP_VALUE_pt1
         sta ZP_VAR_Q
         pla 
-        adc $78
+        adc ZP_VALUE_pt2
         bcc _7135
         lda # $ff
 _7135:                                                                  ;$7135
@@ -2084,10 +2084,10 @@ _7596:                                                                  ;$7596
         ldx $04c2
         beq _75b9
 _75a1:                                                                  ;$75A1
-        sty $77
+        sty ZP_VALUE_pt1
         jsr _7642
         jsr _7481
-        lda $77
+        lda ZP_VALUE_pt1
         jsr _6a9b
         
 .import TXT_PRESENT:direct
@@ -2382,7 +2382,7 @@ _775f:                                                                  ;$775F
 
         ; copy $04A2..$04A5 to $77..$7A?
 :       lda PLAYER_CASH, x                                              ;$7761
-        sta $77, x
+        sta ZP_VALUE, x
         dex 
         bpl :-
 
@@ -3512,7 +3512,7 @@ _7d1f:                                                                  ;$7D1F
         lda ZP_POLYOBJ_XPOS_pt3
         jsr _81c9
         bcs _7d56
-        lda $77
+        lda ZP_VALUE_pt1
         adc # $80
         sta ZP_POLYOBJ01_XPOS_pt1
         txa 
@@ -3527,7 +3527,7 @@ _7d1f:                                                                  ;$7D1F
         jsr _81c9
         bcs _7d56
         
-        lda $77
+        lda ZP_VALUE_pt1
         adc # $48               ;TODO: half viewport height?
         sta $43
 
@@ -3566,10 +3566,10 @@ _7d62:                                                                  ;$7D62
         lda #< $6000
         sta ZP_VAR_P1
         jsr _3bc1
-        lda $78
+        lda ZP_VALUE_pt2
         beq _7d84
         lda # $f8
-        sta $77
+        sta ZP_VALUE_pt1
 _7d84:                                                                  ;$7D84
         lda $a5
         lsr 
@@ -3580,7 +3580,7 @@ _7d8c:                                                                  ;$7D8C
         jsr _80bb
         jsr _8044
         bcs _7d98
-        lda $78
+        lda ZP_VALUE_pt2
         beq _7d99
 _7d98:                                                                  ;$7D98
         rts 
@@ -3591,7 +3591,7 @@ _7d99:                                                                  ;$7D99
         lda $a5
         cmp # $80
         bne _7de0
-        lda $77
+        lda ZP_VALUE_pt1
         cmp # $06
         bcc _7d98
         lda ZP_POLYOBJ_M0x2_HI
@@ -3676,12 +3676,12 @@ _7e36:                                                                  ;$7E36
         lda ZP_POLYOBJ_XPOS_pt2, x
         and # %10000000
         jsr _3bc1
-        lda $77
-        ldy $78
+        lda ZP_VALUE_pt1
+        ldy ZP_VALUE_pt2
         beq _7e4f
         lda # $fe
 _7e4f:                                                                  ;$7E4F
-        ldy $7a
+        ldy ZP_VALUE_pt4
         inx 
         inx 
         rts 
@@ -3705,7 +3705,7 @@ _7e5f:                                                                  ;$7E5F
         sta ZP_VAR_R
         lda $b5
         jsr _39ea
-        sta $77
+        sta ZP_VALUE_pt1
         ldx $ab
         cpx # $21
         lda # $00
@@ -3720,7 +3720,7 @@ _7e5f:                                                                  ;$7E5F
         sta ZP_VAR_Q
         lda $b3
         jsr _39ea
-        sta $79
+        sta ZP_VALUE_pt3
         lda $b2
         jsr _39ea
         sta ZP_VAR_P1
@@ -3755,12 +3755,12 @@ _7ec8:                                                                  ;$7EC8
         lda ZP_VAR_T
         adc ZP_POLYOBJ01_XPOS_pt2
         sta $8a
-        lda $77
+        lda ZP_VALUE_pt1
         sta ZP_VAR_R
         lda ZP_TEMPOBJ_M2x2_HI
         eor ZP_TEMPOBJ_M2x1_HI
         sta ZP_VAR_S
-        lda $79
+        lda ZP_VALUE_pt3
         sta ZP_VAR_P1
         lda ZP_TEMPOBJ_M2x2_LO
         eor ZP_TEMPOBJ_M2x0_HI
@@ -3816,7 +3816,7 @@ _7f22:                                                                  ;$7F22
         jsr _814f
         bcs _7f13
         lda # $00
-        ldx $77
+        ldx ZP_VALUE_pt1
         cpx # $60
         rol 
         cpx # $28
@@ -3848,15 +3848,15 @@ _7f4b:                                                                  ;$7F4B
         inx 
         dex 
         beq _7f1d
-        cpx $77
+        cpx ZP_VALUE_pt1
         bcc _7f67
 _7f63:                                                                  ;$7F63
-        ldx $77
+        ldx ZP_VALUE_pt1
         lda # $00
 _7f67:                                                                  ;$7F67
         stx ZP_TEMP_ADDR3_LO
         sta ZP_TEMP_ADDR3_HI
-        lda $77
+        lda ZP_VALUE_pt1
         jsr _3988
         sta $b3
         lda ZP_VAR_P1
@@ -3953,7 +3953,7 @@ _801c:                                                                  ;$801C
         ldx ZP_TEMP_ADDR3_LO
         inx 
         stx ZP_TEMP_ADDR3_LO
-        cpx $77
+        cpx ZP_VALUE_pt1
         bcc _8005
         beq _8005
         lda $61
@@ -3983,7 +3983,7 @@ _8044:                                                                  ;$8044
         bcs _8043
         lda # $00
         sta _26a4
-        ldx $77
+        ldx ZP_VALUE_pt1
         lda # $08
         cpx # $08
         bcc _805c
@@ -4149,13 +4149,13 @@ _8148:                                                                  ;$8148
 _814f:                                                                  ;$814F
         lda ZP_POLYOBJ01_XPOS_pt1
         clc 
-        adc $77
+        adc ZP_VALUE_pt1
         lda ZP_POLYOBJ01_XPOS_pt2
         adc # $00
         bmi _8187
         lda ZP_POLYOBJ01_XPOS_pt1
         sec 
-        sbc $77
+        sbc ZP_VALUE_pt1
         lda ZP_POLYOBJ01_XPOS_pt2
         sbc # $00
         bmi _8167
@@ -4163,7 +4163,7 @@ _814f:                                                                  ;$814F
 _8167:                                                                  ;$8167
         lda $43
         clc 
-        adc $77
+        adc ZP_VALUE_pt1
         sta ZP_VAR_P2
         
         lda $44
@@ -4173,7 +4173,7 @@ _8167:                                                                  ;$8167
         
         lda $43
         sec 
-        sbc $77
+        sbc ZP_VALUE_pt1
         tax 
         
         lda $44
@@ -4195,7 +4195,7 @@ _8189:                                                                  ;$8189
         stx ZP_VAR_U
         jsr _399b
         ldx ZP_VAR_U
-        ldy $7a
+        ldy ZP_VALUE_pt4
         bpl _81a7
         eor # %11111111
         clc 
@@ -4231,19 +4231,19 @@ _81ba:                                                                  ;$81BA
 
 _81c9:                                                                  ;$81C9
         jsr _3bc1
-        lda $7a
+        lda ZP_VALUE_pt4
         and # %01111111
-        ora $79
+        ora ZP_VALUE_pt3
         bne _8187
-        ldx $78
+        ldx ZP_VALUE_pt2
         cpx # $04
         bcs _81ed
-        lda $7a
+        lda ZP_VALUE_pt4
         bpl _81ed
-        lda $77
+        lda ZP_VALUE_pt1
         eor # %11111111
         adc # $01
-        sta $77
+        sta ZP_VALUE_pt1
         txa 
         eor # %11111111
         adc # $00
@@ -4549,12 +4549,12 @@ _834f:                                                                  ;$834F
         sta [ZP_POLYOBJ_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR1], y
-        sta $78
+        sta ZP_VALUE_pt2
         lda ZP_VAR_P2
         sta [ZP_POLYOBJ_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR1], y
-        sta $77
+        sta ZP_VALUE_pt1
         lda ZP_VAR_P1
         sta [ZP_POLYOBJ_ADDR], y
         dey 
@@ -5834,14 +5834,14 @@ _8b27:                                                                  ;$8B27
         sta _25ff
         pha 
         ora # %10000000
-        sta $77
+        sta ZP_VALUE_pt1
         eor PLAYER_COMPETITION
-        sta $79
+        sta ZP_VALUE_pt3
         eor PLAYER_CASH_pt3     ;?
-        sta $78
+        sta ZP_VALUE_pt2
         eor # %01011010
         eor PLAYER_KILLS
-        sta $7a
+        sta ZP_VALUE_pt4
         clc 
         jsr print_large_value
         jsr _6a8e
@@ -9268,18 +9268,18 @@ _a53d:                                                                  ;$A53D
         ldx # $03
         jsr _2d69
         
-        lda $78
+        lda ZP_VALUE_pt2
         sta $b3
         sta ZP_VAR_P1
         
-        lda $79
+        lda ZP_VALUE_pt3
         sta $b4
         sta ZP_VAR_P2
         
         lda $63
         sta ZP_VAR_Q
         
-        lda $7a
+        lda ZP_VALUE_pt4
         sta $b5
         
         jsr _38f8
@@ -9287,56 +9287,56 @@ _a53d:                                                                  ;$A53D
         ldx # $06
         jsr _2d69
         
-        lda $78
+        lda ZP_VALUE_pt2
         sta ZP_VAR_P1
         sta ZP_POLYOBJ_ZPOS_pt1
         
-        lda $79
+        lda ZP_VALUE_pt3
         sta ZP_VAR_P2
         sta ZP_POLYOBJ_ZPOS_pt2
         
-        lda $7a
+        lda ZP_VALUE_pt4
         sta ZP_POLYOBJ_ZPOS_pt3
         eor # %10000000
         jsr _38f8
         
-        lda $7a
+        lda ZP_VALUE_pt4
         and # %10000000
         sta ZP_VAR_T
         eor $b5
         bmi _a5a8
         
-        lda $77
+        lda ZP_VALUE_pt1
         clc 
         adc $b2
         
-        lda $78
+        lda ZP_VALUE_pt2
         adc $b3
         sta ZP_POLYOBJ_YPOS_pt1
         
-        lda $79
+        lda ZP_VALUE_pt3
         adc $b4
         sta ZP_POLYOBJ_YPOS_pt2
         
-        lda $7a
+        lda ZP_VALUE_pt4
         adc $b5
         
         jmp _a5db
 
 _a5a8:                                                                  ;$A5A8
-        lda $77
+        lda ZP_VALUE_pt1
         sec 
         sbc $b2
-        lda $78
+        lda ZP_VALUE_pt2
         sbc $b3
         sta ZP_POLYOBJ_YPOS_pt1
-        lda $79
+        lda ZP_VALUE_pt3
         sbc $b4
         sta ZP_POLYOBJ_YPOS_pt2
         lda $b5
         and # %01111111
         sta ZP_VAR_P1
-        lda $7a
+        lda ZP_VALUE_pt4
         and # %01111111
         sbc ZP_VAR_P1
         sta ZP_VAR_P1
@@ -9363,11 +9363,11 @@ _a5db:                                                                  ;$A5DB
         jsr _38f8
         ldx # $00
         jsr _2d69
-        lda $78
+        lda ZP_VALUE_pt2
         sta ZP_POLYOBJ_XPOS_pt1
-        lda $79
+        lda ZP_VALUE_pt3
         sta ZP_POLYOBJ_XPOS_pt2
-        lda $7a
+        lda ZP_VALUE_pt4
         sta ZP_POLYOBJ_XPOS_pt3
         jmp _a3bf
 

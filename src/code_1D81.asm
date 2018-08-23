@@ -2608,20 +2608,20 @@ _2c1a:                                                                  ;$2C1A
 _2c2d:                                                                  ;$2C2D
         lda ZP_POLYOBJ_XPOS_pt1, y
         asl 
-        sta $78
+        sta ZP_VALUE_pt2
         lda ZP_POLYOBJ_XPOS_pt2, y
         rol 
-        sta $79
+        sta ZP_VALUE_pt3
         lda # $00
         ror 
-        sta $7a
+        sta ZP_VALUE_pt4
         jsr _2d69
         sta ZP_POLYOBJ_XPOS_pt3, x
 _2c43:                                                                  ;$2C43
 .export _2c43
-        ldy $78
+        ldy ZP_VALUE_pt2
         sty ZP_POLYOBJ_XPOS_pt1, x
-        ldy $79
+        ldy ZP_VALUE_pt3
         sty ZP_POLYOBJ_XPOS_pt2, x
         and # %01111111
         rts 
@@ -2818,24 +2818,24 @@ _2d61:                                                                  ;$2D61
 _2d69:                                                                  ;$2D69
 .export _2d69
 
-        lda $7a
+        lda ZP_VALUE_pt4
         sta ZP_VAR_S
         and # %10000000
         sta ZP_VAR_T
         eor ZP_POLYOBJ_XPOS_pt3, x
         bmi _2d8d
-        lda $78
+        lda ZP_VALUE_pt2
         clc 
         adc ZP_POLYOBJ_XPOS_pt1, x
-        sta $78
-        lda $79
+        sta ZP_VALUE_pt2
+        lda ZP_VALUE_pt3
         adc ZP_POLYOBJ_XPOS_pt2, x
-        sta $79
-        lda $7a
+        sta ZP_VALUE_pt3
+        lda ZP_VALUE_pt4
         adc ZP_POLYOBJ_XPOS_pt3, x
         and # %01111111
         ora ZP_VAR_T
-        sta $7a
+        sta ZP_VALUE_pt4
         rts 
 
         ;-----------------------------------------------------------------------
@@ -2846,29 +2846,29 @@ _2d8d:                                                                  ;$2D8D
         sta ZP_VAR_S
         lda ZP_POLYOBJ_XPOS_pt1, x
         sec 
-        sbc $78
-        sta $78
+        sbc ZP_VALUE_pt2
+        sta ZP_VALUE_pt2
         lda ZP_POLYOBJ_XPOS_pt2, x
-        sbc $79
-        sta $79
+        sbc ZP_VALUE_pt3
+        sta ZP_VALUE_pt3
         lda ZP_POLYOBJ_XPOS_pt3, x
         and # %01111111
         sbc ZP_VAR_S
         ora # %10000000
         eor ZP_VAR_T
-        sta $7a
+        sta ZP_VALUE_pt4
         bcs _2dc4
         lda # $01
-        sbc $78
-        sta $78
+        sbc ZP_VALUE_pt2
+        sta ZP_VALUE_pt2
         lda # $00
-        sbc $79
-        sta $79
+        sbc ZP_VALUE_pt3
+        sta ZP_VALUE_pt3
         lda # $00
-        sbc $7a
+        sbc ZP_VALUE_pt4
         and # %01111111
         ora ZP_VAR_T
-        sta $7a
+        sta ZP_VALUE_pt4
 _2dc4:                                                                  ;$2DC4
         rts 
 
@@ -2907,8 +2907,8 @@ _2dc5:                                                                  ;$2DC5
         eor $b1
         stx ZP_VAR_Q
         jsr _3ad1
-        sta $78
-        stx $77
+        sta ZP_VALUE_pt2
+        stx ZP_VALUE_pt1
         ldx ZP_VAR_Q
         lda ZP_POLYOBJ_XPOS_pt2, y
         and # %01111111
@@ -2944,9 +2944,9 @@ _2dc5:                                                                  ;$2DC5
         sta ZP_POLYOBJ_XPOS_pt2, y
         stx ZP_POLYOBJ_XPOS_pt1, y
         ldx ZP_VAR_Q
-        lda $77
+        lda ZP_VALUE_pt1
         sta ZP_POLYOBJ_XPOS_pt1, x
-        lda $78
+        lda ZP_VALUE_pt2
         sta ZP_POLYOBJ_XPOS_pt2, x
 
         rts 
@@ -2956,11 +2956,7 @@ _2dc5:                                                                  ;$2DC5
 ;===============================================================================
 
 ; the number to be converted:
-.exportzp       ZP_VALUE        := $77
-.exportzp       ZP_VALUE_pt1    := $77
-.exportzp       ZP_VALUE_pt2    := $78
-.exportzp       ZP_VALUE_pt3    := $79
-.exportzp       ZP_VALUE_pt4    := $7a
+; (a 4-byte big-endian buffer is defined for $77..$7A)
 .exportzp       ZP_VALUE_OVFLW  := $9c  ; because, why not!?
 
 ; working copy of the number:
@@ -3515,8 +3511,8 @@ _2ff3:                                                                  ;$2FF3
         sta ZP_TEMP_ADDR1_HI
         
         jsr _30bb
-        stx $78
-        sta $77
+        stx ZP_VALUE_pt2
+        sta ZP_VALUE_pt1
         
         lda # $0e               ; threshold to change colour?
         sta ZP_TEMP_VAR
@@ -3552,8 +3548,8 @@ _302b:                                                                  ;$302B
         
         ldy # $00
         jsr _30bb
-        stx $77
-        sta $78
+        stx ZP_VALUE_pt1
+        sta ZP_VALUE_pt2
 
         ldx # $03               ; 4 energy banks
         stx ZP_TEMP_VAR
@@ -3594,8 +3590,8 @@ _3068:                                                                  ;$3068
         lda #> $56b0
         sta ZP_TEMP_ADDR1_HI
         lda # $aa
-        sta $77
-        sta $78
+        sta ZP_VALUE_pt1
+        sta ZP_VALUE_pt2
 
         lda PLAYER_SHIELD_FRONT
         jsr hud_drawbar_128
@@ -3607,8 +3603,8 @@ _3068:                                                                  ;$3068
         jsr hud_drawbar_64
 
         jsr _30bb
-        stx $78
-        sta $77
+        stx ZP_VALUE_pt2
+        sta ZP_VALUE_pt1
         ldx # $0b
         stx ZP_TEMP_VAR
 
@@ -3684,10 +3680,10 @@ hud_drawbar:                                                            ;$30CF
         cmp ZP_TEMP_VAR         ; "threshold to change colour"
         bcs :+
         
-        lda $78
+        lda ZP_VALUE_pt2
         bne :++                 ;SPEED: could use `.bit` here?
 
-:       lda $77                                                         ;$30DD
+:       lda ZP_VALUE_pt1                                                ;$30DD
 
 :       sta $32                 ; colour to use                         ;$30DF
 
@@ -3744,7 +3740,7 @@ _next_row:                                                              ;$3122
         ;-----------------------------------------------------------------------
         ; move to the next row in the bitmap:
         ; -- i.e. add 320-px to the bitmap pointer
-
+        ;
         lda ZP_TEMP_ADDR1_LO
         clc 
         adc #< 320
@@ -3772,6 +3768,7 @@ _3134:                                                                  ;$3134
         lda _28d0, x
         and # %10101010
         jmp _314d
+
 _3149:                                                                  ;$3149
         sta ZP_VAR_Q
         lda # $00
@@ -4377,7 +4374,7 @@ _34cf:                                                                  ;$34CF
         bne _34cc
         jsr _8cad
         lda ZP_VAR_Q
-        sta $77
+        sta ZP_VALUE_pt1
         jsr _8c8a
         ldy # $0a
         jsr _35b3
@@ -4388,7 +4385,7 @@ _34cf:                                                                  ;$34CF
         jsr _3ab2
         cmp # $a2
         bcs _352c
-        lda $77
+        lda ZP_VALUE_pt1
         cmp # $9d
         bcc _3504
         lda $a5
@@ -4488,15 +4485,15 @@ _3581:  sta ZP_TEMP_ADDR3_HI                                            ;$3581
 _358f:                                                                  ;$358F
         lda [ZP_TEMP_ADDR3], y
         eor # %10000000
-        sta $7a
+        sta ZP_VALUE_pt4
 
         dey 
         lda [ZP_TEMP_ADDR3], y
-        sta $79
+        sta ZP_VALUE_pt3
         
         dey 
         lda [ZP_TEMP_ADDR3], y
-        sta $78
+        sta ZP_VALUE_pt2
         
         sty ZP_VAR_U
         ldx ZP_VAR_U
@@ -4504,9 +4501,9 @@ _358f:                                                                  ;$358F
         
         ldy ZP_VAR_U
         sta ZP_POLYOBJ01_XPOS_pt3, x
-        lda $79
+        lda ZP_VALUE_pt3
         sta ZP_POLYOBJ01_XPOS_pt2, x
-        lda $78
+        lda ZP_VALUE_pt2
         sta ZP_POLYOBJ01_XPOS_pt1, x
         rts 
 
@@ -4888,14 +4885,14 @@ _37ce:                                                                  ;$37CE
         and # %00000111
         clc 
         adc # $08
-        sta $77
+        sta ZP_VALUE_pt1
 _37d7:                                                                  ;$37D7
         lda # $01
         sta $7e
         jsr _805e
-        asl $77
+        asl ZP_VALUE_pt1
         bcs _37e8
-        lda $77
+        lda ZP_VALUE_pt1
         cmp # $a0
         bcc _37d7
 _37e8:                                                                  ;$37E8
@@ -5039,10 +5036,10 @@ _38e2:                                                                  ;$38E2
         sta DUST_Z, y
         bne _389a
 _38ee:                                                                  ;$38EE
-        sta $77
-        sta $78
-        sta $79
-        sta $7a
+        sta ZP_VALUE_pt1
+        sta ZP_VALUE_pt2
+        sta ZP_VALUE_pt3
+        sta ZP_VALUE_pt4
         clc 
         rts 
 
@@ -5053,7 +5050,7 @@ _38f8:                                                                  ;$38F8
 
         sta ZP_VAR_R
         and # %01111111
-        sta $79
+        sta ZP_VALUE_pt3
         lda ZP_VAR_Q
         and # %01111111
         beq _38ee
@@ -5061,12 +5058,12 @@ _38f8:                                                                  ;$38F8
         sbc # $01
         sta ZP_VAR_T
         lda ZP_VAR_P2
-        lsr $79
+        lsr ZP_VALUE_pt3
         ror 
-        sta $78
+        sta ZP_VALUE_pt2
         lda ZP_VAR_P1
         ror 
-        sta $77
+        sta ZP_VALUE_pt1
         lda # $00
         ldx # $18
 _3919:                                                                  ;$3919
@@ -5074,9 +5071,9 @@ _3919:                                                                  ;$3919
         adc ZP_VAR_T
 _391d:                                                                  ;$391D
         ror 
-        ror $79
-        ror $78
-        ror $77
+        ror ZP_VALUE_pt3
+        ror ZP_VALUE_pt2
+        ror ZP_VALUE_pt1
         dex 
         bne _3919
         sta ZP_VAR_T
@@ -5084,7 +5081,7 @@ _391d:                                                                  ;$391D
         eor ZP_VAR_Q
         and # %10000000
         ora ZP_VAR_T
-        sta $7a
+        sta ZP_VALUE_pt4
         rts 
 
 ;===============================================================================
@@ -5238,7 +5235,7 @@ _39e0:                                                                  ;$39E0
         tax 
         lda _0ac0, x
         sta ZP_VAR_Q
-        lda $77
+        lda ZP_VALUE_pt1
 _39ea:                                                                  ;$39EA
 .export _39ea
 
@@ -5658,32 +5655,32 @@ _3c17:                                                                  ;$3C17
         lda ZP_VAR_R
 _3c20:                                                                  ;$3C20
         lda # $00
-        sta $78
-        sta $79
-        sta $7a
+        sta ZP_VALUE_pt2
+        sta ZP_VALUE_pt3
+        sta ZP_VALUE_pt4
         tya 
         bpl _3c49
         lda ZP_VAR_R
 _3c2d:                                                                  ;$3C2D
         asl 
-        rol $78
-        rol $79
-        rol $7a
+        rol ZP_VALUE_pt2
+        rol ZP_VALUE_pt3
+        rol ZP_VALUE_pt4
         iny 
         bne _3c2d
-        sta $77
-        lda $7a
+        sta ZP_VALUE_pt1
+        lda ZP_VALUE_pt4
         ora ZP_VAR_T
-        sta $7a
+        sta ZP_VALUE_pt4
         rts 
 
 ;===============================================================================
 
 _3c40:                                                                  ;$3C40
         lda ZP_VAR_R
-        sta $77
+        sta ZP_VALUE_pt1
         lda ZP_VAR_T
-        sta $7a
+        sta ZP_VALUE_pt4
         rts 
 
         ;-----------------------------------------------------------------------
@@ -5695,9 +5692,9 @@ _3c4d:                                                                  ;$3C4D
         lsr 
         dey 
         bne _3c4d
-        sta $77
+        sta ZP_VALUE_pt1
         lda ZP_VAR_T
-        sta $7a
+        sta ZP_VALUE_pt4
         rts 
 
 ;===============================================================================

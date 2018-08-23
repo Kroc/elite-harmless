@@ -273,6 +273,14 @@ ZP_VAR_Y2               = $6e   ; a secondary "Y" variable
 ;                       = $6f   ; `ZP_VAR_Z`?
 ;                       = $70   ; `ZP_VAR_Y3` / `ZP_VAR_Z2`?
 
+; a 4-byte big-endian number buffer for working with big integers:
+
+ZP_VALUE                = $77
+ZP_VALUE_pt1            = $77
+ZP_VALUE_pt2            = $78
+ZP_VALUE_pt3            = $79
+ZP_VALUE_pt4            = $7a
+
 ;-------------------------------------------------------------------------------
 
 ZP_SEED                 = $7f
@@ -291,8 +299,6 @@ ZP_VAR_U                = $99   ; a common variable named "U"
 ZP_VAR_Q                = $9a   ; a common variable named "Q"
 ZP_VAR_R                = $9b   ; a common variable named "R"
 ZP_VAR_S                = $9c   ; a common variable named "S"
-
-;-------------------------------------------------------------------------------
 
 ZP_VAR_Z                = $a1   ; a common "Z" variable
 
