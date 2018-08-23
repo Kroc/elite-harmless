@@ -551,12 +551,12 @@ _6ba9:                                                                  ;$6BA9
         
         lda TSYSTEM_GOVERNMENT
         adc # $04
-        sta $9a
+        sta ZP_VAR_Q
         
         jsr _399b
         
         lda TSYSTEM_POPULATION
-        sta $9a
+        sta ZP_VAR_Q
         
         jsr _399b
         
@@ -792,7 +792,7 @@ _6d3e:                                                                  ;$6D3E
         bcs _6d34
 _6d79:                                                                  ;$6D79
         lda $04ec
-        sta $9a
+        sta ZP_VAR_Q
         jsr _74a2
         jsr _745a
         ldy # $c5
@@ -845,7 +845,7 @@ _6dd6:                                                                  ;$6DD6
         cmp # $4e
         beq _6e26
 _6de5:                                                                  ;$6DE5
-        sta $9a
+        sta ZP_VAR_Q
         sec 
         sbc # $30
         bcc _6e13
@@ -866,7 +866,7 @@ _6de5:                                                                  ;$6DE5
         beq _6e0a
         bcs _6e13
 _6e0a:                                                                  ;$6E0A
-        lda $9a
+        lda ZP_VAR_Q
         jsr print_char
 
         dec ZP_TEMP_VAR
@@ -974,7 +974,7 @@ _6e5d:                                                                  ;$6E5d
         lda ZP_VAR_R
         sta ZP_VAR_P1
         lda $04ec
-        sta $9a
+        sta ZP_VAR_Q
         jsr _74a2
         jsr _7481
         lda # $00
@@ -1380,7 +1380,7 @@ _7122:                                                                  ;$7122
         lda ZP_VAR_P1
         clc 
         adc $77
-        sta $9a
+        sta ZP_VAR_Q
         pla 
         adc $78
         bcc _7135
@@ -1388,7 +1388,7 @@ _7122:                                                                  ;$7122
 _7135:                                                                  ;$7135
         sta ZP_VAR_R
         jsr _9978
-        lda $9a
+        lda ZP_VAR_Q
         asl 
         ldx # $00
         stx TSYSTEM_DISTANCE_HI
@@ -1978,9 +1978,9 @@ _74bb:                                                                  ;$74BB
         bcc _74e2
         lda # $0e
 _74e2:                                                                  ;$74E2
-        sta $9a
+        sta ZP_VAR_Q
         sta $04ed
-        inc $9a
+        inc ZP_VAR_Q
         lda # $46
         sec 
         sbc PLAYER_FUEL
@@ -2011,7 +2011,7 @@ _74f5:                                                                  ;$74F5
         jsr print_medium_value
         ldx $a2
         inx 
-        cpx $9a
+        cpx ZP_VAR_Q
         bcc _74f5
         jsr txt_docked_token15
 
@@ -2743,7 +2743,7 @@ _787d:                                                                  ;$787D
         sec 
         rol 
 _7885:                                                                  ;$7885
-        sta $9a
+        sta ZP_VAR_Q
         ldy # $01
         lda [ZP_TEMP_ADDR2], y
         sta $050d
@@ -2791,7 +2791,7 @@ _78bc:                                                                  ;$78BC
 _78d6:                                                                  ;$78D6
         ldy # $00
         lda [ZP_TEMP_ADDR2], y
-        sta $9a
+        sta ZP_VAR_Q
         iny 
         lda [ZP_TEMP_ADDR2], y
         bpl _78e3
@@ -2955,7 +2955,7 @@ _79c0:                                                                  ;$79C0
         sty $050f
         ldy # $00
         lda [ZP_TEMP_ADDR2], y
-        sta $9a
+        sta ZP_VAR_Q
         iny 
         lda [ZP_TEMP_ADDR2], y
         bpl _79d9
@@ -3228,7 +3228,7 @@ _7b7d:                                                                  ;$7B7D
         ror 
         tay 
         lda # $14
-        sta $9a
+        sta ZP_VAR_Q
         txa 
         jsr _3b37
         ldx ZP_VAR_P1
@@ -3699,7 +3699,7 @@ _7e5f:                                                                  ;$7E5F
         and # %00011111
         tax 
         lda _0ac0, x
-        sta $9a
+        sta ZP_VAR_Q
         lda $b4
         jsr _39ea
         sta ZP_VAR_R
@@ -3717,7 +3717,7 @@ _7e5f:                                                                  ;$7E5F
         and # %00011111
         tax 
         lda _0ac0, x
-        sta $9a
+        sta ZP_VAR_Q
         lda $b3
         jsr _39ea
         sta $79
@@ -3882,7 +3882,7 @@ _7f8f:                                                                  ;$7F8F
         lda $b2
         sec 
         sbc ZP_VAR_P1
-        sta $9a
+        sta ZP_VAR_Q
         lda $b3
         sbc ZP_VAR_T
         sta ZP_VAR_R
@@ -3892,7 +3892,7 @@ _7f8f:                                                                  ;$7F8F
         jsr get_random_number
         and $aa
         clc 
-        adc $9a
+        adc ZP_VAR_Q
         bcc _7fb6
         lda # $ff
 _7fb6:                                                                  ;$7FB6
@@ -4191,7 +4191,7 @@ _8189:                                                                  ;$8189
         jsr _7e36
         sta ZP_VAR_P1
         lda # $de
-        sta $9a
+        sta ZP_VAR_Q
         stx $99
         jsr _399b
         ldx $99
@@ -4209,7 +4209,7 @@ _81a7:                                                                  ;$81A7
         rts 
 
 _81aa:                                                                  ;$81AA
-        sta $9a
+        sta ZP_VAR_Q
         jsr _3c95
         ldx ZP_POLYOBJ_M0x2_HI
         bmi _81b5
@@ -6080,13 +6080,13 @@ _8cc2:                                                                  ;$8CC2
         jsr _3986
         sta ZP_VAR_R
         lda ZP_VAR_P1
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_Y
         jsr _3986
         sta ZP_VAR_T
         lda ZP_VAR_P1
-        adc $9a
-        sta $9a
+        adc ZP_VAR_Q
+        sta ZP_VAR_Q
         lda ZP_VAR_T
         adc ZP_VAR_R
         sta ZP_VAR_R
@@ -6094,8 +6094,8 @@ _8cc2:                                                                  ;$8CC2
         jsr _3986
         sta ZP_VAR_T
         lda ZP_VAR_P1
-        adc $9a
-        sta $9a
+        adc ZP_VAR_Q
+        sta ZP_VAR_Q
         lda ZP_VAR_T
         adc ZP_VAR_R
         sta ZP_VAR_R
@@ -6765,7 +6765,7 @@ _9131:                                                                  ;$9131
         lda ZP_VAR_X2
         sta ZP_POLYOBJ_M1x2_HI
         lda ZP_POLYOBJ_M0x1_HI
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_POLYOBJ_M1x2_HI
         jsr _3aa8
         ldx ZP_POLYOBJ_M0x2_HI
@@ -6801,15 +6801,15 @@ _9184:                                                                  ;$9184
 _918b:                                                                  ;$918B
         tay 
         and # %01111111
-        cmp $9a
+        cmp ZP_VAR_Q
         bcs _91b2
         ldx # $fe
         stx ZP_VAR_T
 _9196:                                                                  ;$9196
         asl 
-        cmp $9a
+        cmp ZP_VAR_Q
         bcc _919d
-        sbc $9a
+        sbc ZP_VAR_Q
 _919d:                                                                  ;$919D
         rol ZP_VAR_T
         bcs _9196
@@ -6836,33 +6836,33 @@ _91b2:                                                                  ;$91B2
 _91b8:                                                                  ;$91B8
         sta ZP_VAR_P3
         lda ZP_POLYOBJ_M0x0_HI, x
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_POLYOBJ_M1x0_HI, x
         jsr _3aa8
         ldx ZP_POLYOBJ_M0x0_HI, y
-        stx $9a
+        stx ZP_VAR_Q
         lda $0019, y
         jsr _3ace
         stx ZP_VAR_P1
         ldy ZP_VAR_P3
         ldx ZP_POLYOBJ_M0x0_HI, y
-        stx $9a
+        stx ZP_VAR_Q
         eor # %10000000
         sta ZP_VAR_P2
-        eor $9a
+        eor ZP_VAR_Q
         and # %10000000
         sta ZP_VAR_T
         lda # $00
         ldx # $10
         asl ZP_VAR_P1
         rol ZP_VAR_P2
-        asl $9a
-        lsr $9a
+        asl ZP_VAR_Q
+        lsr ZP_VAR_Q
 _91eb:                                                                  ;$91EB
         rol 
-        cmp $9a
+        cmp ZP_VAR_Q
         bcc _91f2
-        sbc $9a
+        sbc ZP_VAR_Q
 _91f2:                                                                  ;$91F2
         rol ZP_VAR_P1
         rol ZP_VAR_P2
@@ -7354,14 +7354,14 @@ _9964:                                                                  ;$9964
 _9978:                                                                  ;$9978
 .export _9978
         ldy ZP_VAR_R
-        lda $9a
+        lda ZP_VAR_Q
         sta ZP_VAR_S
         ldx # $00
-        stx $9a
+        stx ZP_VAR_Q
         lda # $08
         sta ZP_VAR_T
 _9986:                                                                  ;$9986
-        cpx $9a
+        cpx ZP_VAR_Q
         bcc _9998
         bne _9990
         cpy # $40
@@ -7371,10 +7371,10 @@ _9990:                                                                  ;$9990
         sbc # $40
         tay 
         txa 
-        sbc $9a
+        sbc ZP_VAR_Q
         tax 
 _9998:                                                                  ;$9998
-        rol $9a
+        rol ZP_VAR_Q
         asl ZP_VAR_S
         tya 
         rol 
@@ -7397,19 +7397,19 @@ _9998:                                                                  ;$9998
 
 _99af:                                                                  ;$99AF
 .export _99af
-        cmp $9a
+        cmp ZP_VAR_Q
         bcs _9a07
         sta $b6
         tax 
         beq _99d3
         lda _9400, x
-        ldx $9a
+        ldx ZP_VAR_Q
         sec 
         sbc _9400, x
         bmi _99d6
         ldx $b6
         lda _9300, x
-        ldx $9a
+        ldx ZP_VAR_Q
         sbc _9300, x
         bcs _9a07
         tax 
@@ -7421,7 +7421,7 @@ _99d3:                                                                  ;$99D3
 _99d6:                                                                  ;$99D6
         ldx $b6
         lda _9300, x
-        ldx $9a
+        ldx ZP_VAR_Q
         sbc _9300, x
         bcs _9a07
         tax 
@@ -7439,16 +7439,16 @@ _99d6:                                                                  ;$99D6
 _99ef:                                                                  ;$99EF
         asl 
         bcs _99fd
-        cmp $9a
+        cmp ZP_VAR_Q
         bcc _99f8
-        sbc $9a
+        sbc ZP_VAR_Q
 _99f8:                                                                  ;$99F8
         rol ZP_VAR_R
         bcs _99ef
         rts 
 
 _99fd:                                                                  ;$99FD
-        sbc $9a
+        sbc ZP_VAR_Q
         sec 
         rol ZP_VAR_R
         bcs _99ef
@@ -7465,7 +7465,7 @@ _9a07:                                                                  ;$9A07
 _9a0c:                                                                  ;$9A0C
         eor ZP_VAR_S
         bmi _9a16
-        lda $9a
+        lda ZP_VAR_Q
         clc 
         adc ZP_VAR_R
         rts 
@@ -7473,7 +7473,7 @@ _9a0c:                                                                  ;$9A0C
 _9a16:                                                                  ;$9A16
         lda ZP_VAR_R
         sec 
-        sbc $9a
+        sbc ZP_VAR_Q
         bcc _9a1f
         clc 
         rts 
@@ -7496,7 +7496,7 @@ _9a2c:                                                                  ;$9A2C
         ldy # $00
 _9a30:                                                                  ;$9A30
         lda ZP_VAR_X
-        sta $9a
+        sta ZP_VAR_Q
         lda $45, x
         jsr _39ea
         sta ZP_VAR_T
@@ -7504,10 +7504,10 @@ _9a30:                                                                  ;$9A30
         eor ZP_TEMPOBJ_M2x0_HI, x
         sta ZP_VAR_S
         lda ZP_VAR_X2
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_TEMPOBJ_M2x1_LO, x
         jsr _39ea
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
         lda ZP_VAR_Y2
@@ -7515,10 +7515,10 @@ _9a30:                                                                  ;$9A30
         jsr _9a0c
         sta ZP_VAR_T
         lda $6f
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_TEMPOBJ_M2x2_LO, x
         jsr _39ea
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
         lda $70
@@ -7668,7 +7668,7 @@ _9b3a:                                                                  ;$9B3A
         bpl :-
 
         lda # $c5
-        sta $9a
+        sta ZP_VAR_Q
         ldy # $10
 _9b51:                                                                  ;$9B51
         lda $0045, y
@@ -7845,7 +7845,7 @@ _9c60:                                                                  ;$9C60
         lda $76
         sta ZP_VAR_S
         lda $8b
-        sta $9a
+        sta ZP_VAR_Q
         lda $8d
         jsr _9a0c
         bcs _9c43
@@ -7857,7 +7857,7 @@ _9c60:                                                                  ;$9C60
         lda $72
         sta ZP_VAR_S
         lda $85
-        sta $9a
+        sta ZP_VAR_Q
         lda $87
         jsr _9a0c
         bcs _9c43
@@ -7869,7 +7869,7 @@ _9c60:                                                                  ;$9C60
         lda $74
         sta ZP_VAR_S
         lda $88
-        sta $9a
+        sta ZP_VAR_Q
         lda $8a
         jsr _9a0c
         bcs _9c43
@@ -7878,7 +7878,7 @@ _9c60:                                                                  ;$9C60
         sta ZP_VAR_Y2
 _9ca9:                                                                  ;$9CA9
         lda $71
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_X
         jsr _39ea
         sta ZP_VAR_T
@@ -7886,10 +7886,10 @@ _9ca9:                                                                  ;$9CA9
         eor ZP_VAR_Y
         sta ZP_VAR_S
         lda $73
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_X2
         jsr _39ea
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
         lda $74
@@ -7897,10 +7897,10 @@ _9ca9:                                                                  ;$9CA9
         jsr _9a0c
         sta ZP_VAR_T
         lda $75
-        sta $9a
+        sta ZP_VAR_Q
         lda $6f
         jsr _39ea
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
         lda $70
@@ -8114,13 +8114,13 @@ _9e27:                                                                  ;$9E27
 ;===============================================================================
 
 _9e2a:                                                                  ;$9E2A
-        ldx $9a
+        ldx ZP_VAR_Q
         beq _9e4a
         ldx # $00
 _9e30:                                                                  ;$9E30
         lsr 
         inx 
-        cmp $9a
+        cmp ZP_VAR_Q
         bcs _9e30
         stx ZP_VAR_S
         jsr _99af
@@ -8189,9 +8189,9 @@ _9e83:                                                                  ;$9E83
 
 _9e9a:                                                                  ;$9E9A
         lda ZP_VAR_T
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_X
-        cmp $9a
+        cmp ZP_VAR_Q
         bcc _9eaa
         jsr _9e2a
         jmp _9ead
@@ -8215,9 +8215,9 @@ _9ec3:                                                                  ;$9EC3
         lda # $00
         sta $99
         lda ZP_VAR_T
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_VAR_Y2
-        cmp $9a
+        cmp ZP_VAR_Q
         bcc _9eec
         jsr _9e2a
         jmp _9eef
@@ -8381,7 +8381,7 @@ _9fd9:                                                                  ;$9FD9
         tax 
         iny 
         lda [ZP_TEMP_ADDR3], y
-        sta $9a
+        sta ZP_VAR_Q
         lda $0101, x
         sta ZP_VAR_Y
         lda $0100, x
@@ -8390,7 +8390,7 @@ _9fd9:                                                                  ;$9FD9
         sta ZP_VAR_X2
         lda $0103, x
         sta ZP_VAR_Y2
-        ldx $9a
+        ldx ZP_VAR_Q
         lda $0100, x
         sta $6f
         lda $0103, x
@@ -8532,14 +8532,14 @@ _a0d2:                                                                  ;$A0D2
         lda $73
         cmp $75
         bcc _a0e4
-        sta $9a
+        sta ZP_VAR_Q
         lda $75
         jsr _99af
         jmp _a0ef
 
 _a0e4:                                                                  ;$A0E4
         lda $75
-        sta $9a
+        sta ZP_VAR_Q
         lda $73
         jsr _99af
         dec ZP_VAR_T
@@ -8749,7 +8749,7 @@ _a225:                                                                  ;$A225
         tay 
         lsr ZP_VAR_S
         ror ZP_VAR_R
-        asl $9a
+        asl ZP_VAR_Q
         bcc _a23a
 _a231:                                                                  ;$A231
         txa 
@@ -8762,7 +8762,7 @@ _a231:                                                                  ;$A231
 _a23a:                                                                  ;$A23A
         lsr ZP_VAR_S
         ror ZP_VAR_R
-        asl $9a
+        asl ZP_VAR_Q
         bcs _a231
         bne _a23a
         pla 
@@ -8786,10 +8786,10 @@ _a255:                                                                  ;$A255
         rol ZP_VAR_S
         lda ZP_VAR_S
         bcs _a261
-        cmp $9a
+        cmp ZP_VAR_Q
         bcc _a26c
 _a261:                                                                  ;$A261
-        sbc $9a
+        sbc ZP_VAR_Q
         sta ZP_VAR_S
         lda ZP_VAR_R
         sbc # $00
@@ -8821,7 +8821,7 @@ _a283:                                                                  ;$A283
 
 _a284:                                                                  ;$A284
         ldx $73
-        stx $9a
+        stx ZP_VAR_Q
         lda ZP_VAR_S
         bpl _a29d
         lda # $00
@@ -8873,7 +8873,7 @@ _a2cb:                                                                  ;$A2CB
         lda ZP_POLYOBJ_VERTX_LO
         asl 
         asl 
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_POLYOBJ_M0x0_HI
         and # %01111111
         jsr _39ea
@@ -9143,7 +9143,7 @@ _a4a0:                                                                  ;$A4A0
 
 _a4a1:                                                                  ;$A4A1
         lda $a6
-        sta $9a
+        sta ZP_VAR_Q
 
         ldx ZP_POLYOBJ_XPOS_pt3, y
         stx ZP_VAR_R
@@ -9175,7 +9175,7 @@ _a4a1:                                                                  ;$A4A1
         stx ZP_VAR_P1
         
         lda $63
-        sta $9a
+        sta ZP_VAR_Q
         
         ldx ZP_POLYOBJ_XPOS_pt3, y
         stx ZP_VAR_R
@@ -9254,7 +9254,7 @@ _a52f:                                                                  ;$A52F
 _a53d:                                                                  ;$A53D
         lda $a6
         eor # %10000000
-        sta $9a
+        sta ZP_VAR_Q
 
         lda ZP_POLYOBJ_XPOS_pt1
         sta ZP_VAR_P1
@@ -9277,7 +9277,7 @@ _a53d:                                                                  ;$A53D
         sta ZP_VAR_P2
         
         lda $63
-        sta $9a
+        sta ZP_VAR_Q
         
         lda $7a
         sta $b5
@@ -9354,7 +9354,7 @@ _a5db:                                                                  ;$A5DB
         eor ZP_VAR_T
         sta ZP_POLYOBJ_YPOS_pt3
         lda $a6
-        sta $9a
+        sta ZP_VAR_Q
         lda ZP_POLYOBJ_YPOS_pt1
         sta ZP_VAR_P1
         lda ZP_POLYOBJ_YPOS_pt2
