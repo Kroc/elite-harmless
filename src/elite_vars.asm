@@ -31,6 +31,34 @@ PLAYER_TRUMBLES_HI      = $04ca
 
 TRUMBLES_ONSCREEN       = $0510 ; number of Trumbles™ on-screen; up to 6
 
+; the amount each Trumble™ moves X / Y
+
+TRUMBLES_MOVE_X         = $0511
+TRUMBLES_MOVE_Y         = $0512
+
+TRUMBLES_MOVE_X0        = $0511
+TRUMBLES_MOVE_Y0        = $0512
+TRUMBLES_MOVE_X1        = $0513
+TRUMBLES_MOVE_Y1        = $0514
+TRUMBLES_MOVE_X2        = $0515
+TRUMBLES_MOVE_Y2        = $0516
+TRUMBLES_MOVE_X3        = $0517
+TRUMBLES_MOVE_Y3        = $0518
+TRUMBLES_MOVE_X4        = $0519
+TRUMBLES_MOVE_Y4        = $051A
+TRUMBLES_MOVE_X5        = $051B
+TRUMBLES_MOVE_Y5        = $051C
+TRUMBLES_MOVE_X6        = $051D
+TRUMBLES_MOVE_Y6        = $051E
+TRUMBLES_MOVE_X7        = $051F ; UNUSED! There is no 7th Trumble™ on-screen!
+TRUMBLES_MOVE_Y7        = $0520 ; UNUSED! There is no 7th Trumble™ on-screen!
+
+;                       = $0521
+;                       = $0522 ; UNUSED!
+
+;                       = $0531
+;                       = $0532 ; UNUSED!
+
 .endif
 
 ;-------------------------------------------------------------------------------

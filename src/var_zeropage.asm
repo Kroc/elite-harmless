@@ -287,6 +287,9 @@ ZP_SEED_pt6             = $84
 
 PLAYER_SPEED            = $96
 
+ZP_VAR_R                = $9b   ; a common variable named "R"
+ZP_VAR_S                = $9c   ; a common variable named "S"
+
 ;-------------------------------------------------------------------------------
 
 ZP_VAR_Z                = $a1   ; a common "Z" variable
