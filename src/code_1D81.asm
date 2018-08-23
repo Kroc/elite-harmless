@@ -1926,7 +1926,7 @@ _2859:  bmi _2859               ; inifinite loop, why??                 ;$2859
         sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_pt2 ;=$10
         adc # $00
-        sta $99
+        sta ZP_VAR_U
         jmp _9e27               ; SPEED: jump to a jump (`_9e27`)
 
 ;===============================================================================
@@ -1947,7 +1947,7 @@ _2871:                                                                  ;$2871
         lda ZP_VAR_R
 _2880:                                                                  ;$2880
         asl 
-        rol $99
+        rol ZP_VAR_U
 _2883:  bmi _2883               ; infinite loop, why??                  ;$2883
         dex 
         bne _2880
@@ -1960,7 +1960,7 @@ _2883:  bmi _2883               ; infinite loop, why??                  ;$2883
 ;$288b:
         lda # $32
         sta ZP_VAR_R
-        sta $99
+        sta ZP_VAR_U
         rts 
 
 ;===============================================================================
@@ -1973,7 +1973,7 @@ _2883:  bmi _2883               ; infinite loop, why??                  ;$2883
         sta $0100, x
         inx 
         lda # $00
-        sbc $99
+        sbc ZP_VAR_U
         sta $0100, x
 _28a2:                                                                  ;$28A2
         .byte   $4c             ;=`jmp`
@@ -4498,11 +4498,11 @@ _358f:                                                                  ;$358F
         lda [ZP_TEMP_ADDR3], y
         sta $78
         
-        sty $99
-        ldx $99
+        sty ZP_VAR_U
+        ldx ZP_VAR_U
         jsr _2d69
         
-        ldy $99
+        ldy ZP_VAR_U
         sta ZP_POLYOBJ01_XPOS_pt3, x
         lda $79
         sta ZP_POLYOBJ01_XPOS_pt2, x
@@ -5442,22 +5442,22 @@ _3ad1:                                                                  ;$3AD1
 _3ae8:                                                                  ;$3AE8
         lda ZP_VAR_S
         and # %01111111
-        sta $99
+        sta ZP_VAR_U
         lda ZP_VAR_P1
         sec 
         sbc ZP_VAR_R
         tax 
         lda ZP_TEMP_VAR
         and # %01111111
-        sbc $99
+        sbc ZP_VAR_U
         bcs _3b0a
-        sta $99
+        sta ZP_VAR_U
         txa 
         eor # %11111111
         adc # $01
         tax 
         lda # $00
-        sbc $99
+        sbc ZP_VAR_U
         ora # %10000000
 _3b0a:                                                                  ;$3B0A
         eor ZP_VAR_T

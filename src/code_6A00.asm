@@ -1307,7 +1307,7 @@ _70ab:                                                                  ;$70AB
         ldy # $7f
         sty ZP_VAR_T
         lda # $00
-        sta $99
+        sta ZP_VAR_U
 _70b6:                                                                  ;$70B6
         lda ZP_SEED_pt4
         sec 
@@ -1337,11 +1337,11 @@ _70dd:                                                                  ;$70DD
         sta $8e, x
         dex 
         bpl _70dd
-        lda $99
+        lda ZP_VAR_U
         sta ZP_VAR_Z
 _70e8:                                                                  ;$70E8
         jsr _6a3b
-        inc $99
+        inc ZP_VAR_U
         bne _70b6
         ldx # $05
 _70f1:                                                                  ;$70F1
@@ -2387,7 +2387,7 @@ _775f:                                                                  ;$775F
         bpl :-
 
         lda # $09               ; align to 10 digits
-        sta $99
+        sta ZP_VAR_U
         
         sec                     ; set carry flag - use decimal point
         jsr print_large_value   ; convert value to string
@@ -2802,7 +2802,7 @@ _78e3:                                                                  ;$78E3
         lsr 
         lsr 
         ora # %00000001
-        sta $99
+        sta ZP_VAR_U
         iny 
         lda [ZP_TEMP_ADDR2], y
         sta $a8
@@ -2826,7 +2826,7 @@ _7903:                                                                  ;$7903
         sta $ffff, y            ;irq
         cpy # $06
         bne _7903
-        ldy $99
+        ldy ZP_VAR_U
 _7911:                                                                  ;$7911
         clc 
         lda ZP_GOATSOUP_pt1
@@ -2966,7 +2966,7 @@ _79d9:                                                                  ;$79D9
         lsr 
         lsr 
         ora # %00000001
-        sta $99
+        sta ZP_VAR_U
         iny 
         lda [ZP_TEMP_ADDR2], y
         sta $a8
@@ -3020,7 +3020,7 @@ _7a38:                                                                  ;$7A38
         sta $ffff, y            ;irq
         cpy # $06
         bne _7a38
-        ldy $99
+        ldy ZP_VAR_U
 _7a46:                                                                  ;$7A46
         jsr _84ae
         sta ZP_VAR_Z
@@ -4192,9 +4192,9 @@ _8189:                                                                  ;$8189
         sta ZP_VAR_P1
         lda # $de
         sta ZP_VAR_Q
-        stx $99
+        stx ZP_VAR_U
         jsr _399b
-        ldx $99
+        ldx ZP_VAR_U
         ldy $7a
         bpl _81a7
         eor # %11111111
@@ -8106,7 +8106,7 @@ _9e16:                                                                  ;$9E16
         sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_pt2
         adc # $00
-        sta $99
+        sta ZP_VAR_U
 _9e27:                                                                  ;$9E27
 .export _9e27
         jmp _9e83
@@ -8128,7 +8128,7 @@ _9e30:                                                                  ;$9E30
         lda ZP_VAR_R
 _9e3f:                                                                  ;$9E3F
         asl 
-        rol $99
+        rol ZP_VAR_U
         bmi _9e4a
         dex 
         bne _9e3f
@@ -8138,7 +8138,7 @@ _9e3f:                                                                  ;$9E3F
 _9e4a:                                                                  ;$9E4A
         lda # $32
         sta ZP_VAR_R
-        sta $99
+        sta ZP_VAR_U
         rts 
 
 ;===============================================================================
@@ -8150,7 +8150,7 @@ _9e51:                                                                  ;$9E51
         sta $0100, x
         inx 
         lda # $00
-        sbc $99
+        sbc ZP_VAR_U
         sta $0100, x
         jmp _9ec3
 
@@ -8163,7 +8163,7 @@ _9e64:                                                                  ;$9E64
         sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_pt2
         sbc # $00
-        sta $99
+        sta ZP_VAR_U
         bcc _9e7b
         bne _9e83
         lda ZP_VAR_T
@@ -8171,11 +8171,11 @@ _9e64:                                                                  ;$9E64
         bcs _9e83
 _9e7b:                                                                  ;$9E7B
         lda # $00
-        sta $99
+        sta ZP_VAR_U
         lda # $04
         sta ZP_VAR_T
 _9e83:                                                                  ;$9E83
-        lda $99
+        lda ZP_VAR_U
         ora ZP_VAR_Y
         ora $6f
         beq _9e9a
@@ -8183,7 +8183,7 @@ _9e83:                                                                  ;$9E83
         ror ZP_VAR_X
         lsr $6f
         ror ZP_VAR_Y2
-        lsr $99
+        lsr ZP_VAR_U
         ror ZP_VAR_T
         jmp _9e83
 
@@ -8207,13 +8207,13 @@ _9ead:                                                                  ;$9EAD
         adc # $80
         sta $0100, x
         inx 
-        lda $99
+        lda ZP_VAR_U
         adc # $00
         sta $0100, x
 _9ec3:                                                                  ;$9EC3
        .phx                     ; push X to stack (via A)
         lda # $00
-        sta $99
+        sta ZP_VAR_U
         lda ZP_VAR_T
         sta ZP_VAR_Q
         lda ZP_VAR_Y2
@@ -8229,7 +8229,7 @@ _9ed9:                                                                  ;$9ED9
         sta $0100, x
         inx 
         lda # $00
-        adc $99
+        adc ZP_VAR_U
         sta $0100, x
         jmp _9f06
 
@@ -8247,7 +8247,7 @@ _9eef:                                                                  ;$9EEF
         sta $0100, x
         inx 
         lda # $00
-        sbc $99
+        sbc ZP_VAR_U
         sta $0100, x
 _9f06:                                                                  ;$9F06
         clc 
@@ -8286,9 +8286,9 @@ _9f35:                                                                  ;$9F35
         sta $ae
         
         ldy # $00
-        sty $99
+        sty ZP_VAR_U
         sty $9f
-        inc $99
+        inc ZP_VAR_U
         bit $28
         bvc _9f9f
         lda $28
@@ -8322,7 +8322,7 @@ _9f35:                                                                  ;$9F35
 _9f82:                                                                  ;$9F82
         jsr _a013
         bcs _9f9f
-        ldy $99
+        ldy ZP_VAR_U
         lda ZP_VAR_X
         sta [ZP_TEMP_ADDR2], y
         iny 
@@ -8335,7 +8335,7 @@ _9f82:                                                                  ;$9F82
         lda ZP_VAR_Y2
         sta [ZP_TEMP_ADDR2], y
         iny 
-        sty $99
+        sty ZP_VAR_U
 _9f9f:                                                                  ;$9F9F
         ldy # Hull::edge_data_lo
         clc 
@@ -8596,7 +8596,7 @@ _a13b:                                                                  ;$A13B
 ;===============================================================================
 
 _a13f:                                                                  ;$A13F
-        ldy $99
+        ldy ZP_VAR_U
         lda ZP_VAR_X
         sta [ZP_TEMP_ADDR2], y
         iny 
@@ -8609,7 +8609,7 @@ _a13f:                                                                  ;$A13F
         lda ZP_VAR_Y2
         sta [ZP_TEMP_ADDR2], y
         iny 
-        sty $99
+        sty ZP_VAR_U
         cpy ZP_TEMP_VAR
         bcs _a172
 _a15b:                                                                  ;$A15B
@@ -8629,7 +8629,7 @@ _a16f:                                                                  ;$A16F
         ;-----------------------------------------------------------------------
 
 _a172:                                                                  ;$A172
-        lda $99
+        lda ZP_VAR_U
 _a174:                                                                  ;$A174
         ldy # $00
         sta [ZP_TEMP_ADDR2], y
