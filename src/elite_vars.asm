@@ -29,6 +29,8 @@ PLAYER_TRUMBLES         = $04c9 ; number of Trumbles™ in the player's hold
 PLAYER_TRUMBLES_LO      = $04c9
 PLAYER_TRUMBLES_HI      = $04ca
 
+TRUMBLES_ONSCREEN       = $0510 ; number of Trumbles™ on-screen; up to 6
+
 .endif
 
 ;-------------------------------------------------------------------------------
@@ -48,9 +50,9 @@ PLAYER_GALAXY           = $04a8 ; current galaxy number
 
 PLAYER_LASERS           = $04a9 ; which laser is mounted to each view
 PLAYER_LASER_FRONT      = $04a9 ; front laser type
-PLAYER_LASER_2          = $04aa ; is this left, right, or rear?
-PLAYER_LASER_3          = $04ab ; is this left, right, or rear?
-PLAYER_LASER_4          = $04ac ; is this left, right, or rear?
+PLAYER_LASER_2          = $04aa ;TODO: is this left, right, or rear?
+PLAYER_LASER_3          = $04ab ;TODO: is this left, right, or rear?
+PLAYER_LASER_4          = $04ac ;TODO: is this left, right, or rear?
 
 PLAYER_GDRIVE           = $04c6 ; player has a galactic hyper-drive?
 
@@ -105,3 +107,5 @@ DUST_COUNT              = $050b ; number of dust particles
 DUST_X                  = $06a2 ; X-positions of dust-particles
 DUST_Y                  = $06bc ; Y-positions of dust-particles
 DUST_Z                  = $06d6 ; Z-positions of dust-particles
+
+                        ; $06EF

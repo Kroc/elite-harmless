@@ -5,6 +5,9 @@
 # <github.com/Kroc/elite-harmless>
 #===============================================================================
 
+# if you've just installed Linux on Windows, you need to fetch up-to-date
+# package information or install downloads will 404
+sudo apt update
 sudo apt-get install git gcc make python3
 
 # todo: make this script `git pull` if code is already present?

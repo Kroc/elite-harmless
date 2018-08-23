@@ -116,7 +116,7 @@ ZP_POLYOBJ_VERTX_LO     = $24
 ZP_POLYOBJ_VERTX_HI     = $25
 
 ZP_POLYOBJ_SPEED        = $26
-ZP_POLYOBJ_ACCEL        = $27   ; acceleration
+ZP_POLYOBJ_ACCEL        = $27
 ZP_POLYOBJ_ENERGY       = $28
 
 ZP_POLYOBJ_ROLL         = $29
@@ -275,7 +275,6 @@ ZP_VAR_Y2               = $6e   ; a secondary "Y" variable
 
 ;-------------------------------------------------------------------------------
 
-
 ZP_SEED                 = $7f
 ZP_SEED_pt1             = $7f
 ZP_SEED_pt2             = $80
@@ -290,4 +289,6 @@ PLAYER_SPEED            = $96
 
 ;-------------------------------------------------------------------------------
 
-VAR_Z                   = $a1   ; a common "Z" variable
+ZP_VAR_Z                = $a1   ; a common "Z" variable
+
+ZP_VAR_T                = $bb   ; a common variable named "T"

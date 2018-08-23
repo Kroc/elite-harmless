@@ -117,7 +117,7 @@
 .import _3c7f:absolute
 .import _3c95:absolute
 .import _3d2f:absolute
-.import _3e08:absolute
+.import _3ea8:absolute
 .import get_polyobj:absolute
 .import set_psystem_to_tsystem:absolute
 .import wait_frames:absolute
@@ -160,7 +160,7 @@ _6a1b:                                                                  ;$6A1B
         ;=======================================================================
         ; set the cursor column (where text printing occurs)
         ;
-        ; A = column number
+        ;     A = column number
         ;
 .export set_cursor_col
 
@@ -172,7 +172,7 @@ _6a1b:                                                                  ;$6A1B
         ;=======================================================================
         ; set the cursor row (where text printing occurs)
         ;
-        ; A = row number
+        ;     A = row number
         ;
 .export set_cursor_row
 
@@ -602,7 +602,7 @@ _6c40:                                                                  ;$6C40
         ldy ZP_SEED_pt5
         tya 
         ora # %01010000
-        sta VAR_Z
+        sta ZP_VAR_Z
         lda ZP_SEED_pt2
         lsr 
         clc 
@@ -856,10 +856,10 @@ _6de5:                                                                  ;$6DE5
         cmp # $1a
         bcs _6e13
         asl 
-        sta $bb
+        sta ZP_VAR_T
         asl 
         asl 
-        adc $bb
+        adc ZP_VAR_T
         adc $9c
         sta $9b
         cmp $04ed
@@ -1305,7 +1305,7 @@ _70ab:                                                                  ;$70AB
 .export _70ab
         jsr _70a0
         ldy # $7f
-        sty $bb
+        sty ZP_VAR_T
         lda # $00
         sta $99
 _70b6:                                                                  ;$70B6
@@ -1328,9 +1328,9 @@ _70d1:                                                                  ;$70D1
         lsr 
         clc 
         adc $9c
-        cmp $bb
+        cmp ZP_VAR_T
         bcs _70e8
-        sta $bb
+        sta ZP_VAR_T
         ldx # 5
 _70dd:                                                                  ;$70DD
         lda ZP_SEED, x
@@ -1338,7 +1338,7 @@ _70dd:                                                                  ;$70DD
         dex 
         bpl _70dd
         lda $99
-        sta VAR_Z
+        sta ZP_VAR_Z
 _70e8:                                                                  ;$70E8
         jsr _6a3b
         inc $99
@@ -2264,11 +2264,11 @@ _76a1:                                                                  ;$76A1
         beq _76bc
         ldy # $0d
 _76bc:                                                                  ;$76BC
-        stx VAR_Z
+        stx ZP_VAR_Z
         tya 
         jsr _7642
         jsr _7481
-        ldx VAR_Z
+        ldx ZP_VAR_Z
 _76c7:                                                                  ;$76C7
         lda ZP_TEMP_VAR
         sta PLAYER_LASERS, x
@@ -2296,7 +2296,7 @@ _76eb:                                                                  ;$76EB
         bvs _76f9
         dey 
 _76f9:                                                                  ;$76F9
-        sty $bb
+        sty ZP_VAR_T
 _76fb:                                                                  ;$76FB
         lda ZP_SEED_pt6
         and # %00011111
@@ -2305,7 +2305,7 @@ _76fb:                                                                  ;$76FB
         jsr print_flight_token
 _7706:                                                                  ;$7706
         jsr _6a41
-        dec $bb
+        dec ZP_VAR_T
         bpl _76fb
         ldx # $05
 _770f:                                                                  ;$770F
@@ -2697,7 +2697,9 @@ print_flight_token_string:                                              ;$7834
 _784e:  rts                                                             ;$784E 
 
 ;===============================================================================
-
+; restore zero-page backup?
+; part of loader / unused?
+;
 _784f:                                                                  ;$784F
         ldx # $36
 _7851:                                                                  ;$7851
@@ -2710,7 +2712,8 @@ _7851:                                                                  ;$7851
         rts 
 
 ;===============================================================================
-
+; unused / unreferenced?
+;
 _785f:                                                                  ;$785F
         lda $28
         ora # %10100000
@@ -2720,22 +2723,22 @@ _785f:                                                                  ;$785F
 ;===============================================================================
 
 _7866:                                                                  ;$7866
-        lda $28
-        and # %01000000
+        lda $28                 ; current POLYOBJ energy?
+        and # %01000000         ; 64 or above?
         beq _786f
         jsr _78d6
 _786f:                                                                  ;$786F
         lda ZP_POLYOBJ_ZPOS_pt1
-        sta $bb
+        sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_pt2
         cmp # $20
         bcc _787d
         lda # $fe
         bne _7885
 _787d:                                                                  ;$787D
-        asl $bb
+        asl ZP_VAR_T
         rol 
-        asl $bb
+        asl ZP_VAR_T
         rol 
         sec 
         rol 
@@ -2837,7 +2840,7 @@ _7911:                                                                  ;$7911
         adc ZP_GOATSOUP_pt4
         sta ZP_GOATSOUP_pt2
         stx ZP_GOATSOUP_pt4
-        sta VAR_Z
+        sta ZP_VAR_Z
         lda ZP_POLYOBJ01_XPOS_pt2
         sta $9b
         lda ZP_POLYOBJ01_XPOS_pt1
@@ -2917,9 +2920,9 @@ _7974:                                                                  ;$7974
 
 _7998:                                                                  ;$7998
         jsr _39ea
-        sta $bb
+        sta ZP_VAR_T
         lda $9b
-        sbc $bb
+        sbc ZP_VAR_T
         tax 
         lda $9c
         sbc # $00
@@ -3020,7 +3023,7 @@ _7a38:                                                                  ;$7A38
         ldy $99
 _7a46:                                                                  ;$7A46
         jsr _84ae
-        sta VAR_Z
+        sta ZP_VAR_Z
         lda ZP_POLYOBJ01_XPOS_pt2
         sta $9b
         lda ZP_POLYOBJ01_XPOS_pt1
@@ -3125,7 +3128,7 @@ _7afa:                                                                  ;$7AFA
         jsr get_random_number
         ora # %00001000
         sta DUST_Z, y
-        sta VAR_Z
+        sta ZP_VAR_Z
         jsr get_random_number
         sta DUST_X, y
         sta ZP_VAR_X
@@ -3269,9 +3272,9 @@ _7bab:                                                                  ;$7BAB
         sta $04ea
         lda ZP_VAR_Y
         jsr _7b7d
-        stx $bb
+        stx ZP_VAR_T
         lda # $9c
-        sbc $bb
+        sbc ZP_VAR_T
         sta $04eb
         lda # $aa
         ldx ZP_VAR_X2
@@ -3285,14 +3288,14 @@ _7bcc:                                                                  ;$7BCC
 
 _7bd2:                                                                  ;$7BD2
 .export _7bd2
-        sta $bb
+        sta ZP_VAR_T
         ldx # $00
         ldy # $08
         lda [ZP_POLYOBJ_ADDR], y
         bmi _7bee
 
         lda PLAYER_SHIELD_FRONT
-        sbc $bb
+        sbc ZP_VAR_T
         bcc _7be7
         sta PLAYER_SHIELD_FRONT
         
@@ -3304,7 +3307,7 @@ _7be7:                                                                  ;$7BE7
         bcc _7bfe
 _7bee:                                                                  ;$7BEE
         lda PLAYER_SHIELD_REAR
-        sbc $bb
+        sbc ZP_VAR_T
         bcc _7bf9
         sta PLAYER_SHIELD_REAR
 
@@ -3378,7 +3381,7 @@ _7c61:                                                                  ;$7C61
         lda # $02
 _7c6b:                                                                  ;$7C6B
 .export _7c6b
-        sta $bb
+        sta ZP_VAR_T
         ldx # $00
 _7c6f:                                                                  ;$7C6F
         lda $0452, x            ; ship slots?
@@ -3394,7 +3397,7 @@ _7c7a:                                                                  ;$7C7A
 _7c7b:                                                                  ;$7C7B
         jsr get_polyobj
 
-        lda $bb
+        lda ZP_VAR_T
         bmi _7cd4
         asl 
         tay 
@@ -3441,7 +3444,7 @@ _7cc4:                                                                  ;$7CC4
         and # %00000111
         sta $28
         
-        lda $bb
+        lda ZP_VAR_T
 _7cd4:                                                                  ;$7CD4
         sta $0452, x            ; ship slots?
         tax 
@@ -3457,7 +3460,7 @@ _7ce6:                                                                  ;$7CE6
 _7ce9:                                                                  ;$7CE9
         inc $045d, x
 _7cec:                                                                  ;$7CEC
-        ldy $bb
+        ldy ZP_VAR_T
         lda hull_d042 - 1, y
         and # %01101111
         ora $2d
@@ -3734,22 +3737,22 @@ _7e5f:                                                                  ;$7E5F
         lda ZP_TEMPOBJ_M2x2_LO
         eor $45
         jsr _3ad1
-        sta $bb
+        sta ZP_VAR_T
         bpl _7ec8
         txa 
         eor # %11111111
         clc 
         adc # $01
         tax 
-        lda $bb
+        lda ZP_VAR_T
         eor # %01111111
         adc # $00
-        sta $bb
+        sta ZP_VAR_T
 _7ec8:                                                                  ;$7EC8
         txa 
         adc ZP_POLYOBJ01_XPOS_pt1
         sta $89
-        lda $bb
+        lda ZP_VAR_T
         adc ZP_POLYOBJ01_XPOS_pt2
         sta $8a
         lda $77
@@ -3763,17 +3766,17 @@ _7ec8:                                                                  ;$7EC8
         eor ZP_TEMPOBJ_M2x0_HI
         jsr _3ad1
         eor # %10000000
-        sta $bb
+        sta ZP_VAR_T
         bpl _7efd
         txa 
         eor # %11111111
         clc 
         adc # $01
         tax 
-        lda $bb
+        lda ZP_VAR_T
         eor # %01111111
         adc # $00
-        sta $bb
+        sta ZP_VAR_T
 _7efd:                                                                  ;$7EFD
         jsr _2977
         cmp $a8
@@ -3875,13 +3878,13 @@ _7f8c:                                                                  ;$7F8C
 _7f8f:                                                                  ;$7F8F
         lda ZP_TEMP_ADDR3_LO
         jsr _3988
-        sta $bb
+        sta ZP_VAR_T
         lda $b2
         sec 
         sbc ZP_VAR_P1
         sta $9a
         lda $b3
-        sbc $bb
+        sbc ZP_VAR_T
         sta $9b
         sty ZP_VAR_Y
         jsr _9978
@@ -4000,7 +4003,7 @@ _8065:                                                                  ;$8065
         lda $aa
         jsr _39e0
         ldx # $00
-        stx $bb
+        stx ZP_VAR_T
         ldx $aa
         cpx # $21
         bcc _8081
@@ -4009,14 +4012,14 @@ _8065:                                                                  ;$8065
         tax 
         lda # $ff
         adc # $00
-        sta $bb
+        sta ZP_VAR_T
         txa 
         clc 
 _8081:                                                                  ;$8081
         adc ZP_POLYOBJ01_XPOS_pt1
         sta $89
         lda ZP_POLYOBJ01_XPOS_pt2
-        adc $bb
+        adc ZP_VAR_T
         sta $8a
         lda $aa
         clc 
@@ -4024,7 +4027,7 @@ _8081:                                                                  ;$8081
         jsr _39e0
         tax 
         lda # $00
-        sta $bb
+        sta ZP_VAR_T
         lda $aa
         adc # $0f
         and # %00111111
@@ -4036,7 +4039,7 @@ _8081:                                                                  ;$8081
         tax 
         lda # $ff
         adc # $00
-        sta $bb
+        sta ZP_VAR_T
         clc 
 _80af:                                                                  ;$80AF
         jsr _2977
@@ -4109,7 +4112,7 @@ _8116:                                                                  ;$8116
 
 _811e:                                                                  ;$811E
 .export _811e
-        sta $bb
+        sta ZP_VAR_T
         clc 
         adc $5f
         sta ZP_VAR_X2
@@ -4122,7 +4125,7 @@ _811e:                                                                  ;$811E
 _8131:                                                                  ;$8131
         lda $5f
         sec 
-        sbc $bb
+        sbc ZP_VAR_T
         sta ZP_VAR_X
         lda $60
         sbc # $00
@@ -4522,10 +4525,10 @@ _834f:                                                                  ;$834F
         
         ldy # $05
         lda [ZP_TEMP_ADDR1], y
-        sta $bb
+        sta ZP_VAR_T
         lda ZP_VAR_P1
         sec 
-        sbc $bb
+        sbc ZP_VAR_T
         sta ZP_VAR_P1
         lda ZP_VAR_P2
         sbc # $00
@@ -4564,7 +4567,7 @@ _8399:                                                                  ;$8399
         sta ZP_POLYOBJ_ADDR_LO
         lda ZP_TEMP_ADDR1_HI
         sta ZP_POLYOBJ_ADDR_HI
-        ldy $bb
+        ldy ZP_VAR_T
 _83aa:                                                                  ;$83AA
         dey 
         lda [$77], y
@@ -4642,7 +4645,7 @@ _83ed:                                                                  ;$83ED
         sta $6a                 ; move count?
         sta $95
         sta $a3                 ; move counter?
-        sta $0510
+        sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
 
         lda # $03
         sta $96                 ; player's ship speed?
@@ -4867,11 +4870,11 @@ _856a:                                                                  ;$856A
         beq _8576
         ora PLAYER_LEGAL
 _8576:                                                                  ;$8576
-        sta $bb
+        sta ZP_VAR_T
         jsr _848d
         cmp # $88
         beq _85f8
-        cmp $bb
+        cmp ZP_VAR_T
         bcs _8588
         lda # $10
         jsr _7c6b
@@ -4953,9 +4956,9 @@ _860b:                                                                  ;$860B
         sta $a2
 _8612:                                                                  ;$8612
         jsr get_random_number
-        sta $bb
+        sta ZP_VAR_T
         jsr get_random_number
-        and $bb
+        and ZP_VAR_T
         and # %00000111
         adc # $11
         jsr _7c6b
@@ -5007,14 +5010,14 @@ _8654:                                                                  ;$8654
 _8670:                                                                  ;$8670
         lda PLAYER_TRUMBLES_HI
         beq _86a1
-        sta $bb
+        sta ZP_VAR_T
         lda PLAYER_TEMP_CABIN
         cmp # $e0
         bcs _8680
-        asl $bb
+        asl ZP_VAR_T
 _8680:                                                                  ;$8680
         jsr get_random_number
-        cmp $bb
+        cmp ZP_VAR_T
         bcs _86a1
         jsr get_random_number
         ora # %01000000
@@ -5532,8 +5535,10 @@ _8994:                                                                  ;$8994
         
         lda # $0c
         sta $ab
+
         lda # $05
         sta $a3                 ; move counter?
+        
         lda # $ff
         sta _1d0c
 _89be:                                                                  ;$89BE
@@ -5543,8 +5548,10 @@ _89be:                                                                  ;$89BE
         dec ZP_POLYOBJ_ZPOS_pt2
 _89c6:                                                                  ;$89C6
         jsr _a2a0
+        
         ldx $06fb
         stx ZP_POLYOBJ_ZPOS_pt1
+        
         lda $a3                 ; move counter?
         and # %00000011
         lda # $00
@@ -5582,8 +5589,8 @@ _89f9:                                                                  ;$89F9
         clc 
         txa 
 _89fd:                                                                  ;$89FD
-        stx $bb
-        eor $bb
+        stx ZP_VAR_T
+        eor ZP_VAR_T
         ror 
         adc _25b2, x
         eor _25b3, x
@@ -6076,20 +6083,20 @@ _8cc2:                                                                  ;$8CC2
         sta $9a
         lda ZP_VAR_Y
         jsr _3986
-        sta $bb
+        sta ZP_VAR_T
         lda ZP_VAR_P1
         adc $9a
         sta $9a
-        lda $bb
+        lda ZP_VAR_T
         adc $9b
         sta $9b
         lda ZP_VAR_X2
         jsr _3986
-        sta $bb
+        sta ZP_VAR_T
         lda ZP_VAR_P1
         adc $9a
         sta $9a
-        lda $bb
+        lda ZP_VAR_T
         adc $9b
         sta $9b
         jsr _9978
@@ -6797,25 +6804,25 @@ _918b:                                                                  ;$918B
         cmp $9a
         bcs _91b2
         ldx # $fe
-        stx $bb
+        stx ZP_VAR_T
 _9196:                                                                  ;$9196
         asl 
         cmp $9a
         bcc _919d
         sbc $9a
 _919d:                                                                  ;$919D
-        rol $bb
+        rol ZP_VAR_T
         bcs _9196
-        lda $bb
+        lda ZP_VAR_T
         lsr 
         lsr 
-        sta $bb
+        sta ZP_VAR_T
         lsr 
-        adc $bb
-        sta $bb
+        adc ZP_VAR_T
+        sta ZP_VAR_T
         tya 
         and # %10000000
-        ora $bb
+        ora ZP_VAR_T
         rts 
 
 _91b2:                                                                  ;$91B2
@@ -6844,7 +6851,7 @@ _91b8:                                                                  ;$91B8
         sta ZP_VAR_P2
         eor $9a
         and # %10000000
-        sta $bb
+        sta ZP_VAR_T
         lda # $00
         ldx # $10
         asl ZP_VAR_P1
@@ -6862,7 +6869,7 @@ _91f2:                                                                  ;$91F2
         dex 
         bne _91eb
         lda ZP_VAR_P1
-        ora $bb
+        ora ZP_VAR_T
 _91fd:                                                                  ;$91FD
         rts 
 
@@ -7352,7 +7359,7 @@ _9978:                                                                  ;$9978
         ldx # $00
         stx $9a
         lda # $08
-        sta $bb
+        sta ZP_VAR_T
 _9986:                                                                  ;$9986
         cpx $9a
         bcc _9998
@@ -7382,7 +7389,7 @@ _9998:                                                                  ;$9998
         txa 
         rol 
         tax 
-        dec $bb
+        dec ZP_VAR_T
         bne _9986
         rts 
 
@@ -7492,7 +7499,7 @@ _9a30:                                                                  ;$9A30
         sta $9a
         lda $45, x
         jsr _39ea
-        sta $bb
+        sta ZP_VAR_T
         lda ZP_VAR_Y
         eor ZP_TEMPOBJ_M2x0_HI, x
         sta $9c
@@ -7501,18 +7508,18 @@ _9a30:                                                                  ;$9A30
         lda ZP_TEMPOBJ_M2x1_LO, x
         jsr _39ea
         sta $9a
-        lda $bb
+        lda ZP_VAR_T
         sta $9b
         lda ZP_VAR_Y2
         eor ZP_TEMPOBJ_M2x1_HI, x
         jsr _9a0c
-        sta $bb
+        sta ZP_VAR_T
         lda $6f
         sta $9a
         lda ZP_TEMPOBJ_M2x2_LO, x
         jsr _39ea
         sta $9a
-        lda $bb
+        lda ZP_VAR_T
         sta $9b
         lda $70
         eor ZP_TEMPOBJ_M2x2_HI, x
@@ -7617,17 +7624,17 @@ _9ae6:                                                                  ;$9AE6
         sta $0100, x
         sta $0101, x
         lda ZP_POLYOBJ_ZPOS_pt1
-        sta $bb
+        sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_pt2
         lsr 
-        ror $bb
+        ror ZP_VAR_T
         lsr 
-        ror $bb
+        ror ZP_VAR_T
         lsr 
-        ror $bb
+        ror ZP_VAR_T
         lsr 
         bne _9b29
-        lda $bb
+        lda ZP_VAR_T
         ror 
         lsr 
         lsr 
@@ -7874,7 +7881,7 @@ _9ca9:                                                                  ;$9CA9
         sta $9a
         lda ZP_VAR_X
         jsr _39ea
-        sta $bb
+        sta ZP_VAR_T
         lda $72
         eor ZP_VAR_Y
         sta $9c
@@ -7883,18 +7890,18 @@ _9ca9:                                                                  ;$9CA9
         lda ZP_VAR_X2
         jsr _39ea
         sta $9a
-        lda $bb
+        lda ZP_VAR_T
         sta $9b
         lda $74
         eor ZP_VAR_Y2
         jsr _9a0c
-        sta $bb
+        sta ZP_VAR_T
         lda $75
         sta $9a
         lda $6f
         jsr _39ea
         sta $9a
-        lda $bb
+        lda ZP_VAR_T
         sta $9b
         lda $70
         eor $76
@@ -7969,7 +7976,7 @@ _9d45:                                                                  ;$9D45
         sta $6f
         iny 
         lda [ZP_TEMP_ADDR3], y
-        sta $bb
+        sta ZP_VAR_T
         and # %00011111
         cmp $ad
         bcc _9d8e
@@ -8010,7 +8017,7 @@ _9d8e:                                                                  ;$9D8E
         ;-----------------------------------------------------------------------
 
 _9d91:                                                                  ;$9D91
-        lda $bb
+        lda ZP_VAR_T
         sta ZP_VAR_Y
         asl 
         sta ZP_VAR_Y2
@@ -8096,7 +8103,7 @@ _9e16:                                                                  ;$9E16
         lda $75
         clc 
         adc ZP_POLYOBJ_ZPOS_pt1
-        sta $bb
+        sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_pt2
         adc # $00
         sta $99
@@ -8153,20 +8160,20 @@ _9e64:                                                                  ;$9E64
         lda ZP_POLYOBJ_ZPOS_pt1
         sec 
         sbc $75
-        sta $bb
+        sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_pt2
         sbc # $00
         sta $99
         bcc _9e7b
         bne _9e83
-        lda $bb
+        lda ZP_VAR_T
         cmp # $04
         bcs _9e83
 _9e7b:                                                                  ;$9E7B
         lda # $00
         sta $99
         lda # $04
-        sta $bb
+        sta ZP_VAR_T
 _9e83:                                                                  ;$9E83
         lda $99
         ora ZP_VAR_Y
@@ -8177,11 +8184,11 @@ _9e83:                                                                  ;$9E83
         lsr $6f
         ror ZP_VAR_Y2
         lsr $99
-        ror $bb
+        ror ZP_VAR_T
         jmp _9e83
 
 _9e9a:                                                                  ;$9E9A
-        lda $bb
+        lda ZP_VAR_T
         sta $9a
         lda ZP_VAR_X
         cmp $9a
@@ -8207,7 +8214,7 @@ _9ec3:                                                                  ;$9EC3
        .phx                     ; push X to stack (via A)
         lda # $00
         sta $99
-        lda $bb
+        lda ZP_VAR_T
         sta $9a
         lda ZP_VAR_Y2
         cmp $9a
@@ -8521,7 +8528,7 @@ _a0c8:                                                                  ;$A0C8
         ;-----------------------------------------------------------------------
 
 _a0d2:                                                                  ;$A0D2
-        stx $bb
+        stx ZP_VAR_T
         lda $73
         cmp $75
         bcc _a0e4
@@ -8535,7 +8542,7 @@ _a0e4:                                                                  ;$A0E4
         sta $9a
         lda $73
         jsr _99af
-        dec $bb
+        dec ZP_VAR_T
 _a0ef:                                                                  ;$A0EF
         lda $9b
         sta $73
@@ -8734,7 +8741,7 @@ _a219:                                                                  ;$A219
         sta $9b
         jsr _a284
         pha 
-        ldx $bb
+        ldx ZP_VAR_T
         bne _a250
 _a225:                                                                  ;$A225
         lda # $00
@@ -8767,7 +8774,7 @@ _a23a:                                                                  ;$A23A
 _a248:                                                                  ;$A248
         jsr _a284
         pha 
-        ldx $bb
+        ldx ZP_VAR_T
         bne _a225
 _a250:                                                                  ;$A250
         lda # $ff
@@ -9085,7 +9092,7 @@ _a44c:                                                                  ;$A44C
         sta $9c
         lda # $00
         ror 
-        sta $bb
+        sta ZP_VAR_T
         lsr $9c
         eor ZP_POLYOBJ_XPOS_pt3, x
         bmi _a46f
@@ -9097,7 +9104,7 @@ _a44c:                                                                  ;$A44C
         sta ZP_POLYOBJ_XPOS_pt2, x
         lda ZP_POLYOBJ_XPOS_pt3, x
         adc # $00
-        ora $bb
+        ora ZP_VAR_T
         sta ZP_POLYOBJ_XPOS_pt3, x
         rts 
 
@@ -9115,7 +9122,7 @@ _a46f:                                                                  ;$A46F
         and # %01111111
         sbc # $00
         ora # %10000000
-        eor $bb
+        eor ZP_VAR_T
         sta ZP_POLYOBJ_XPOS_pt3, x
         bcs _a4a0
         lda # $01
@@ -9127,7 +9134,7 @@ _a46f:                                                                  ;$A46F
         lda # $00
         sbc ZP_POLYOBJ_XPOS_pt3, x
         and # %01111111
-        ora $bb
+        ora ZP_VAR_T
         sta ZP_POLYOBJ_XPOS_pt3, x
 _a4a0:                                                                  ;$A4A0
         rts 
@@ -9295,7 +9302,7 @@ _a53d:                                                                  ;$A53D
         
         lda $7a
         and # %10000000
-        sta $bb
+        sta ZP_VAR_T
         eor $b5
         bmi _a5a8
         
@@ -9344,7 +9351,7 @@ _a5a8:                                                                  ;$A5A8
         sbc ZP_VAR_P1
         ora # %10000000
 _a5db:                                                                  ;$A5DB
-        eor $bb
+        eor ZP_VAR_T
         sta ZP_POLYOBJ_YPOS_pt3
         lda $a6
         sta $9a
@@ -9377,9 +9384,9 @@ _a604:                                                                  ;$A604
         txa 
 _a60e:                                                                  ;$A60E
         stx ZP_TEMP_ADDR3_HI
-        sty $bb
+        sty ZP_VAR_T
         adc [ZP_TEMP_ADDR3], y
-        eor $bb
+        eor ZP_VAR_T
         sbc ZP_TEMP_ADDR3_HI
         dey 
         bne _a60e
@@ -9497,27 +9504,34 @@ _a6d4:                                                                  ;$A6D4
         lda # MEM_IO_ONLY
         jsr set_memory_layout
 
-        ldy $0486
-        lda PLAYER_LASERS, y
-        beq _a700
-        ldy # $a0
-        cmp # $0f
+        ldy $0486               ; current viewpoint? (front, rear, left, right)
+        lda PLAYER_LASERS, y    ; get type of laser for current viewpoint
+        beq _a700               ; no laser? skip ahead
+
+        ldy # $a0               ; a two-nybble colour?
+        cmp # $0f               ; a type of laser?
         beq _a6f2
         iny 
-        cmp # $8f
+        cmp # $8f               ; a type of laser?
         beq _a6f2
         iny 
-        cmp # $97
+        cmp # $97               ; a type of laser?
         beq _a6f2
         iny 
 _a6f2:                                                                  ;$A6F2
-        sty $63f8               ;?
-        sty $67f8               ;?
-        lda _3e08, y            ;!?
-        sta $d027               ;sprite 0 color? (or ship model table)
-        lda # $01
+        sty $63f8               ; somewhere in the HUD?
+        sty $67f8               ; somehwere in the HUD?
+
+        lda _3ea8 - $a0, y
+        sta $d027               ;sprite 0 color?
+        
+        ; mark the cross-hairs sprite as enabled
+        lda # %00000001
+
 _a700:                                                                  ;$A700
-        sta $bb
+        ;-----------------------------------------------------------------------
+        sta ZP_VAR_T
+
         lda PLAYER_TRUMBLES_HI
         and # %01111111
         lsr 
@@ -9525,21 +9539,33 @@ _a700:                                                                  ;$A700
         lsr 
         lsr 
         tax 
-        lda _a71f, x
-        sta $0510
-        lda _a727, x
-        ora $bb
+        lda trumbles_sprite_count, x
+        sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
+        lda trumbles_sprite_mask, x
+        ora ZP_VAR_T            ; other sprites mask?
         sta VIC_SPRITE_ENABLE
 
+        ; turn off the I/O and go back to 64K RAM
         lda # MEM_64K
         jmp set_memory_layout
 
-;===============================================================================
-
-_a71f:                                                                  ;$A71F
+trumbles_sprite_count:                                                  ;$A71F
+        ;-----------------------------------------------------------------------
         .byte   $00, $01, $02, $03, $04, $05, $06, $06
-_a727:                                                                  ;$A727
-        .byte   $00, $04, $0c, $1c, $3c, $7c, $fc, $fc
+
+trumbles_sprite_mask:                                                   ;$A727
+        ;-----------------------------------------------------------------------
+        ; table of bit-masks for which sprites to enable for Trumbles™.
+        ; up to six Trumbles™ can appear on-screen, two sprites are always
+        ; reserved for other uses (cross-hair and explosion-sprite)
+        .byte   %00000000
+        .byte   %00000100
+        .byte   %00001100
+        .byte   %00011100
+        .byte   %00111100
+        .byte   %01111100
+        .byte   %11111100
+        .byte   %11111100
 
 ;===============================================================================
 
