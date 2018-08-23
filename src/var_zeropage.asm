@@ -8,6 +8,9 @@
 
 ; note that $00 & $01 are hard-wired to the CPU, so can't be used
 
+; unanmed zero-page usage can be found with the following regex search:
+; "\b([a-z]{3})(\s+)\$xx\b" where xx is the zero-page address
+
 ;-------------------------------------------------------------------------------
 
 ; "goat soup" is the algorithm for generating planet descriptions.
@@ -147,6 +150,7 @@ ZP_VAR_P3               = $30
 ;-------------------------------------------------------------------------------
 
 ZP_CURSOR_COL           = $31
+;                       = $32   ;?
 ZP_CURSOR_ROW           = $33
 ;                       = $34   ; case switch for flight strings?
 
@@ -173,13 +177,10 @@ ZP_POLYOBJ01_POS        = $3e
 ;-------------------------------------------------------------------------------
 
 ;                       = $3f   ; a flag, but never gets set; see `_3571`
-
-;                       = $40   ; never used?
-;                       = $41   ; never used?
-;                       = $42   ; never used?
-
+;                       = $40   ;UNUSED?
+;                       = $41   ;UNUSED?
+;                       = $42   ;UNUSED?
 ;                       = $43   ; something to do with viewport height
-
 ;                       = $44   ; often related to `ZP_POLYOBJ01_XPOS_pt2`
 
 ;-------------------------------------------------------------------------------
@@ -238,28 +239,17 @@ ZP_TEMP_ADDR3_HI        = $5c
 
 ;                       = $5d   ; "VAR_XX_LO"?
 ;                       = $5e   ; "VAR_XX_HI"?
-
 ;                       = $5f   ; "VAR_YY_LO"?
 ;                       = $60   ; "VAR_YY_HI"?
-
 ;                       = $61   ; "SUNX_LO"?    location of SUN on screen?
 ;                       = $62   ; "SUNX_HI"?
-
-;                       = $63   ;?
-;                       = $64   ;?
-
-;-------------------------------------------------------------------------------
-
+;                       = $63   ;? x8
+;                       = $64   ;? x8
 ;                       = $65   ; hyperspace counter (inner)
 ;                       = $66   ; hyperspace counter (outer)
-
-;-------------------------------------------------------------------------------
-
-;                       = $67   ;?
-
+;                       = $67   ;? x9
 ;                       = $68   ; "roll magnitude"?
 ;                       = $69   ; "roll sign"?
-
 ;                       = $6a   ; "move count"?
 
 ;-------------------------------------------------------------------------------
@@ -272,6 +262,12 @@ ZP_VAR_Y2               = $6e   ; a secondary "Y" variable
 
 ;                       = $6f   ; `ZP_VAR_Z`?
 ;                       = $70   ; `ZP_VAR_Y3` / `ZP_VAR_Z2`?
+;                       = $71   ;? x22
+;                       = $72   ;? x16
+;                       = $73   ;? x20
+;                       = $74   ;? x12
+;                       = $75   ;? x14
+;                       = $76   ;? x12
 
 ; a 4-byte big-endian number buffer for working with big integers:
 
@@ -280,6 +276,11 @@ ZP_VALUE_pt1            = $77
 ZP_VALUE_pt2            = $78
 ZP_VALUE_pt3            = $79
 ZP_VALUE_pt4            = $7a
+
+;                       = $7b   ;? x8
+;                       = $7c   ;? x7
+;                       = $7d   ;? x6
+;                       = $7e   ;? x10
 
 ;-------------------------------------------------------------------------------
 
@@ -293,13 +294,139 @@ ZP_SEED_pt6             = $84
 
 ;-------------------------------------------------------------------------------
 
+;                       = $85   ;? x9
+;                       = $86   ;? x3
+;                       = $87   ;? x6
+;                       = $88   ;? x8
+;                       = $89   ;? x5
+;                       = $8a   ;? x8
+;                       = $8b   ;? x9
+;                       = $8c   ;? x4
+;                       = $8d   ;? x4
+;                       = $8e   ;? x18
+;                       = $8f   ;? x19
+;                       = $90   ;? x11
+;                       = $91   ;? x9
+;                       = $92   ;? x6
+;                       = $93   ;? x4
+;                       = $94   ;? x8
+;                       = $95   ;? x6
+
 PLAYER_SPEED            = $96
+
+;                       = $97   ;? x5
+;                       = $98   ;? x4
 
 ZP_VAR_U                = $99   ; a common variable named "U"
 ZP_VAR_Q                = $9a   ; a common variable named "Q"
 ZP_VAR_R                = $9b   ; a common variable named "R"
 ZP_VAR_S                = $9c   ; a common variable named "S"
 
+;                       = $9d   ;? x11
+;                       = $9e   ;? x12
+;                       = $9f   ;? x10
+;                       = $a0   ;? x38
+
 ZP_VAR_Z                = $a1   ; a common "Z" variable
 
+;                       = $a2   ;? x14
+;                       = $a3   ;? x18 "MOVE COUNTER"?
+;                       = $a4   ;UNUSED?
+;                       = $a5   ;? x31
+;                       = $a6   ;? x8 "ALPHA"?
+;                       = $a7   ;? x10
+;                       = $a8   ;? x9
+;                       = $a9   ;? x4
+;                       = $aa   ;? x30
+;                       = $ab   ;? x12
+;                       = $ac   ;? x5
+;                       = $ad   ;? x21
+;                       = $ae   ;? x12
+;                       = $af   ;UNUSED?
+;                       = $b0   ;? x12
+;                       = $b1   ;? x17
+;                       = $b2   ;? x7
+;                       = $b3   ;? x11
+;                       = $b4   ;? x9
+;                       = $b5   ;? x10
+;                       = $b6   ;? x9
+;                       = $b7   ;? x4
+;                       = $b8   ;? x7
+;                       = $b9   ;? x2
+;                       = $ba   ;? x2
+
 ZP_VAR_T                = $bb   ; a common variable named "T"
+
+;                       = $bc   ;? x15
+;                       = $bd   ;? x25
+;                       = $be   ;? x11
+;                       = $bf   ;? x37
+;                       = $c0   ;? x6
+;                       = $c1   ;UNUSED?
+;                       = $c2   ;? x2
+;                       = $c3   ;? x3
+;                       = $c4   ;? x2
+;                       = $c5   ;? x2
+;                       = $c6   ;? x5
+;                       = $c7   ;? x5
+;                       = $c8   ;? x5
+;                       = $c9   ;? x2
+;                       = $ca   ;? x2
+;                       = $cb   ;? x3
+;                       = $cc   ;? x4
+;                       = $cd   ;? x2
+;                       = $ce   ;? x2
+;                       = $cf   ;? x3
+;                       = $d0   ;? x4
+;                       = $d1   ;? x8
+
+;                       = $d2   ;UNUSED?
+;                       = $d3   ;UNUSED?
+;                       = $d4   ;UNUSED?
+;                       = $d5   ;UNUSED?
+;                       = $d6   ;UNUSED?
+;                       = $d7   ;UNUSED?
+;                       = $d8   ;UNUSED?
+;                       = $d9   ;UNUSED?
+;                       = $da   ;UNUSED?
+;                       = $db   ;UNUSED?
+;                       = $dc   ;UNUSED?
+;                       = $dd   ;UNUSED?
+;                       = $de   ;UNUSED?
+;                       = $df   ;UNUSED?
+;                       = $e0   ;UNUSED?
+;                       = $e1   ;UNUSED?
+;                       = $e2   ;UNUSED?
+;                       = $e3   ;UNUSED?
+;                       = $e4   ;UNUSED?
+;                       = $e5   ;UNUSED?
+;                       = $e6   ;UNUSED?
+;                       = $e7   ;UNUSED?
+;                       = $e8   ;UNUSED?
+;                       = $e9   ;UNUSED?
+;                       = $ea   ;UNUSED?
+;                       = $eb   ;UNUSED?
+;                       = $ec   ;UNUSED?
+;                       = $ed   ;UNUSED?
+;                       = $ee   ;UNUSED?
+;                       = $ef   ;UNUSED?
+;                       = $f0   ;UNUSED?
+;                       = $f1   ;UNUSED?
+;                       = $f2   ;UNUSED?
+;                       = $f3   ;UNUSED?
+;                       = $f4   ;UNUSED?
+;                       = $f5   ;UNUSED?
+;                       = $f6   ;UNUSED?
+;                       = $f7   ;UNUSED?
+;                       = $f8   ;UNUSED?
+
+;                       = $f9   ;? x1
+
+;                       = $fa   ;UNUSED?
+;                       = $fb   ;UNUSED?
+;                       = $fc   ;UNUSED?
+
+;                       = $fd   ;? x1
+;                       = $fe   ;? x1
+
+;                       = $ff   ;UNUSED?
