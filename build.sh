@@ -17,8 +17,8 @@ ca65="./bin/cc65/bin/ca65 \
     --bin-include-dir build \
     --feature leading_dot_in_identifiers \
     --feature bracket_as_indirect"
-ld65="./bin/cc65/bin/ld65"
-mkd64="./bin/mkd64/bin/mkd64"
+ld65="ld65"
+mkd64="mkd64"
 encrypt="python3 link/encrypt.py"
 
 

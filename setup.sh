@@ -7,17 +7,27 @@
 
 # if you've just installed Linux on Windows, you need to fetch up-to-date
 # package information or install downloads will 404
-sudo apt update
-sudo apt-get install git gcc make python3
+#sudo apt update
+#sudo apt-get install git gcc make python3
 
 # todo: make this script `git pull` if code is already present?
 
 cd bin
-git clone https://github.com/cc65/cc65.git
+
+if [ ! -d "cc65" ]; then
+    git clone --recurse-submodules https://github.com/cc65/cc65.git cc65
+fi
 cd cc65
 make
+sudo PREFIX=/usr/local make install
 
 cd ..
-git clone https://github.com/Zirias/c64_tool_mkd64.git mkd64
+if [ ! -d "mkd64" ]; then
+    git clone --recurse-submodules https://github.com/Zirias/c64_tool_mkd64.git mkd64
+fi
 cd mkd64
 make
+sudo make install
+
+echo
+echo "Build complete."
