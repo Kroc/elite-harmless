@@ -21,7 +21,7 @@
 ; see this page for details on comparisons and branching:
 ; http://www.6502.org/tutorials/compare_instructions.html
 ;
-; the set of macros below provide more visibly recognisable names.
+; the set of macros below provide more visibly recognisable names;
 ; these macros are already defined in CC65's "generic.mac", but this is pretty
 ; non-obvious, even to a CC65 user and I'd prefer to place them somewhere
 ; visible. (in these, a leading dot is included in the names, to make it
@@ -164,13 +164,28 @@ L:
 .define CIA1_INTERRUPT          $dc0d
 .define CIA2_INTERRUPT          $dd0d
 
-.define TIMER_A                 %001
-.define TIMER_B                 %010
-.define TIMER_TOD               %100
+.enum   CIA
+        TIMER_A                 = %001
+        TIMER_B                 = %010
+        TIMER_TOD               = %100
+.endenum
 
 .define VECTOR_NMI              $fffa
 .define VECTOR_RESET            $fffc
 .define VECTOR_IRQ              $fffe
+
+.define CIA2_PORTA              $dd00
+.define CIA2_PORTB              $dd01
+
+.define CIA2_PORTA_DDR          $dd02
+.define CIA2_PORTB_DDR          $dd03
+
+.define CIA2_TIMERA             $dd04
+.define CIA2_TIMERA_LO          $dd04
+.define CIA2_TIMERA_HI          $dd05
+.define CIA2_TIMERB             $dd06
+.define CIA2_TIMERB_LO          $dd06
+.define CIA2_TIMERB_HI          $dd07
 
 
 ;===============================================================================
@@ -264,15 +279,15 @@ L:
 ;
 .define KERNAL_SETMSG   $ff90
 
-; send LISTEN secondary address to serial bus.
-; (must call LISTEN beforehand)
+; send `LISTEN` secondary address to serial bus.
+; (must call `LISTEN` beforehand)
 ; input:
 ;       A : secondary address.
 ;
 .define KERNAL_LSTNSA   $ff93
 
-; send TALK secondary address to serial bus.
-; (must call TALK beforehand)
+; send `TALK` secondary address to serial bus.
+; (must call `TALK` beforehand)
 ; input:
 ;       A : secondary address
 ;
@@ -310,38 +325,38 @@ L:
 .define KERNAL_SETTMO   $ffa2
 
 ; read byte from serial bus.
-; (must call TALK and TALKSA beforehand)
+; (must call `TALK` and `TALKSA` beforehand)
 ; output:
 ;       A : byte read
 ;
 .define KERNAL_IECIN    $ffa5
 
 ; write byte to serial bus.
-; (must call LISTEN and LSTNSA beforehand)
+; (must call `LISTEN` and `LSTNSA` beforehand)
 ; input:
 ;       A : byte to write
 ;
 .define KERNAL_IECOUT   $ffa8
 
-; send UNTALK command to serial bus
+; send `UNTALK` command to serial bus
 .define KERNAL_UNTALK   $ffab
 
-; send UNLISTEN command to serial bus
+; send `UNLISTEN` command to serial bus
 .define KERNAL_UNLSTN   $ffae
 
-; send LISTEN command to serial bus
+; send `LISTEN` command to serial bus
 ; input:
 ;       A : device number
 ;
 .define KERNAL_LISTEN   $ffb1
 
-; send TALK command to serial bus
+; send `TALK` command to serial bus
 ; input:
 ;       A : device number
 ;
 .define KERNAL_TALK     $ffb4
 
-; fetch status of current input/output device, value of ST variable
+; fetch status of current input/output device, value of `ST` variable
 ; (for RS232, status is cleared)
 ; output:
 ;       A : device status
@@ -363,7 +378,7 @@ L:
 ;
 .define KERNAL_SETNAM   $ffbd
 
-; open file (must call SETLFS and SETNAM beforehand)
+; open file (must call `SETLFS` and `SETNAM` beforehand)
 .define KERNAL_OPEN     $ffc0
 
 ; close file
@@ -373,39 +388,39 @@ L:
 .define KERNAL_CLOSE    $ffc3
 
 ; define file as default input
-; (must call OPEN beforehand)
+; (must call `OPEN` beforehand)
 ; input:
 ;       X : logical number
 ;
 .define KERNAL_CHKIN    $ffc6
 
 ; define file as default output
-; (must call OPEN beforehand)
+; (must call `OPEN` beforehand)
 ; input:
 ;       X : logical number
 ;
 .define KERNAL_CHKOUT   $ffc9
 
-; close default input/output files (for serial bus, send UNTALK and/or
-; UNLISTEN); restore default input/output to keyboard/screen
+; close default input/output files (for serial bus, send `UNTALK` and/or
+; `UNLISTEN`); restore default input/output to keyboard/screen
 .define KERNAL_CLRCHN   $ffcc
 
 
 ; read byte from default input (for keyboard, read a line from the screen).
-; (if not keyboard, must call OPEN and CHKIN beforehand)
+; (if not keyboard, must call `OPEN` and `CHKIN` beforehand)
 ; output:
 ;       A : byte read
 ;
 .define KERNAL_CHRIN    $ffcf
 
 ; write byte to default output
-; (if not screen, must call OPEN and CHKOUT beforehand)
+; (if not screen, must call `OPEN` and `CHKOUT` beforehand)
 ; input:
 ;       A : byte to write
 ;
 .define KERNAL_CHROUT   $ffd2
 
-; load or verify file. (must call SETLFS and SETNAM beforehand)
+; load or verify file. (must call `SETLFS` and `SETNAM` beforehand)
 ; input:
 ;           A : 0 = load, 1-255 = verify;
 ;         X/Y : load address (if secondary address = 0)
@@ -416,7 +431,7 @@ L:
 ;
 .define KERNAL_LOAD     $ffd5
 
-; save file. (must call SETLFS and SETNAM beforehand)
+; save file. (must call `SETLFS` and `SETNAM` beforehand)
 ; input:
 ;           A : address of zero page register holding
 ;               start address of memory area to save
@@ -448,13 +463,13 @@ L:
 .define KERNAL_STOP     $ffe1
 
 ; read byte from default input
-; (if not keyboard, must call OPEN and CHKIN beforehand)
+; (if not keyboard, must call `OPEN` and `CHKIN` beforehand)
 ; output:
 ;       A : byte read
 ;
 .define KERNAL_GETIN    $ffe4
 
-; clear file table; call CLRCHN
+; clear file table; call `CLRCHN`
 .define KERNAL_CLALL    $ffe7
 
 ; update Time of Day, at memory address $00A0-$00A2,

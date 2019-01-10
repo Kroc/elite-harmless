@@ -3,17 +3,15 @@
 ; <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; this file is part of "GMA1.PRG"
+; "stage1.asm" -- this could be considered the 'main' part of the loading
+; process as it displays the fastload option and orchestrates the loading /
+; decryption of the other modules
 
 .include        "c64.asm"
-
-; jump into the stage 4 loader ("GMA4.PRG")
-.import _7596:absolute
-; jump into the stage 5 loader ("GMA5.PRG")
-.import _1d22:absolute
+.include        "c1541.asm"
 
 ;===============================================================================
-; populate the .PRG header using the address given
+; populate the "GMA1.PRG" header using the address given
 ; by the linker config (see "link/elite-original-gma86.cfg")
 
 .segment        "HEAD_STAGE1"
@@ -22,7 +20,7 @@
 
 ;===============================================================================
 
-.segment        "CODE_STAGE1"
+.segment        "CODE_STAGE1A"
 
 ; eight bytes of unused (by the Kernal) RAM exist at $0334, followed by
 ; the 192 byte Datasette buffer (no use to us here), another 4 unused bytes
@@ -31,16 +29,16 @@
 
         jmp     gma1_start                                              ;$0334
 
-_0337:                                                                  ;$0337
-        ; Track / Sector locations? (for the fast-loader)
+gma_trksec:                                                             ;$0337
+        ; track & sector numbers (for the fast-loader)
 
-        .byte   $00, $00        ; "GMA0" (invalid)
-        .byte   $00, $00        ; "GMA1" (invalid)
-        .byte   $11, $04        ; "GMA2" (invalid?)
-        .byte   $11, $05        ; "GMA3" (copy-protection?)
-        .byte   $11, $06        ; "GMA4" (decryption, payload 1 & 2)
-        .byte   $13, $00        ; "GMA5" (payload 3?)
-        .byte   $14, $08        ; "GMA6" (payload 4?)
+        .byte   0,  0           ; "GMA0" (invalid)
+        .byte   0,  0           ; "GMA1" (invalid)
+        .byte   17, 4           ; "GMA2" (invalid)
+        .byte   17, 5           ; "GMA3"
+        .byte   17, 6           ; "GMA4"
+        .byte   19, 0           ; "GMA5"
+        .byte   20, 8           ; "GMA6"
 
 gma1_start:                                                             ;$0345
         ; call Kernel SETMSG, "Set system error display switch at
@@ -56,7 +54,7 @@ gma1_start:                                                             ;$0345
         sta $0329
 
         ; set up the screen, display the "use the fast loader?" message.
-        ; if fast-loader is selected, control will have gone to _03fc,
+        ; if fast-loader is selected, control will have gone to `_03fc`,
         ; if slow-loader is selected, we will have returned here
         jsr _062b
 
@@ -69,9 +67,10 @@ gma1_start:                                                             ;$0345
 .ifdef  OPTION_NOCOPY
         ; start GMA3's code -- note that the current X & Y
         ; (pointer to filename) are re-used in here
-        ; TODO: link this with "loader/stage3.asm"
-        jsr $c800
+.import __CODE_STAGE3_START__:absolute
+        jsr __CODE_STAGE3_START__
 .else
+        ; "crack" the loader by jumping over the copy-protection check
         jmp :+
 .endif
 
@@ -106,12 +105,15 @@ gma1_start:                                                             ;$0345
         sta $ce0f
         lda #> _038a
         sta $ce10
+
+        ; jump into the stage 4 loader ("GMA4.PRG")
+.import _7596:absolute
         jmp _7596
 
-;===============================================================================
-
+        ;-----------------------------------------------------------------------
         ; after GMA4's post-decrypt code, we jump here!
-_038a:  clc
+
+_038a:  clc 
         jsr _0619
         
         lda CPU_CONTROL         ; read the processor port
@@ -138,13 +140,13 @@ _038a:  clc
         jsr KERNAL_RESTOR       ; restore the vector table ($0314-$0333)
         jsr KERNAL_CLALL        ; close all open files
 
-        ; jump into GMA5.PRG ("stage5.asm")
+        ; jump into the stage 5 loader ("GMA5.PRG")
         ; -- another decryption routine follows that unscrambles
         ;    the payload in GAM6.PRG
+.import _1d22:absolute
         jmp _1d22
 
-
-_03b5:
+_03b5:                                                                  ;$03B5
         ;-----------------------------------------------------------------------
         ; select the filename
         jsr _03c7
@@ -161,27 +163,37 @@ _03b5:
     
         rts
 
-_03c7:
-        ; select file name:
+_03c7:                                                                  ;$03C7
         ;-----------------------------------------------------------------------
-        ; A = number of file to load, i.e. $03 = "GMA3"
-        
+        ; select file name:
+        ;
+        ;     A = number of file to load, i.e. $03 = "GMA3"
+        ;
         tax                 ; put the current A value aside
 
         clc                 ; clear carry flag (before doing add)
         adc # '0'           ; convert A to a PETSCII numeral, i.e. "0"+A
         sta _filename_num   ; change the filename to load, e.g. "GMA3"
         
-        ; lookup the number in a table:
+        ; for the fast-loader, find the track / sector:
 
-        txa                 ; get the original number back
-        asl a               ; shift-left, i.e. multiply by 2
+        txa                 ; get the original file number back
+        asl                 ; shift-left, i.e. multiply by 2
         tax                 ; use it as the index
 
-        lda _0337+0, x      ; load 16-bit low-byte
-        sta _04b9
-        lda _0337+1, x      ; load 16-bit high-byte
-        sta _04bd
+        ; get the address of the block of 1541 code *here on the C64*
+        ; (not its address within the 1541, when it gets copied there)
+.import __CODE_1541_LOAD__
+.import __CODE_1541_RUN__
+
+        ; MODIFY THE 1541 PROGRAM, HERE ON THE C64,
+        ; BEFORE IT GETS SENT TO THE 1541 DRIVE!
+
+        ; write the track and sector to the fast-loader code:
+        lda gma_trksec+0, x     ; track
+        sta __CODE_1541_LOAD__ + (_04b9 - __CODE_1541_RUN__)
+        lda gma_trksec+1, x     ; sector
+        sta __CODE_1541_LOAD__ + (_04bd - __CODE_1541_RUN__)
 
         ; set file name
         ldx #< _filename
@@ -195,418 +207,390 @@ _filename:
 _filename_num:
         .byte   " "
 
-        ;$03eb: hidden message (not part of the filename)
+        ;$03EB: hidden message (not part of the filename)
         .byte   " was here 1985 ok"
 
-;===============================================================================
-
 _03fc:
+        ;=======================================================================
         ; fast-loader:
         ; (to be decompiled later)
 
-        ;03fc 20 da 05 jsr $05da
-        ;03ff 20 cf 05 jsr $05cf
-        ;0402 60       rts 
-        ;0403 a9 06    lda #$06
-        ;0405 85 31    sta $31
-        ;0407 20 0a f5 jsr $f50a
-        ;040a 50 fe    bvc $040a
-        ;040c b8       clv 
-        ;040d ad 01 1c lda $1c01
-        ;0410 99 00 06 sta $0600,y
-        ;0413 c8       iny 
-        ;0414 d0 f4    bne $040a
-        ;0416 a0 ba    ldy #$ba
-        ;0418 50 fe    bvc $0418
-        ;041a b8       clv 
-        ;041b ad 01 1c lda $1c01
-        ;041e 99 00 01 sta $0100,y
-        ;0421 c8       iny 
-        ;0422 d0 f4    bne $0418
-        ;0424 20 e0 f8 jsr $f8e0
-        ;0427 a5 38    lda $38
-        ;0429 c5 47    cmp $47
-        ;042b f0 04    beq $0431
-        ;042d a9 04    lda #$04
-        ;042f d0 3f    bne $0470
-        ;0431 20 e9 f5 jsr $f5e9
-        ;0434 c5 3a    cmp $3a
-        ;0436 f0 04    beq $043c
-        ;0438 a9 05    lda #$05
-        ;043a d0 34    bne $0470
-        ;043c ad 01 06 lda $0601
-        ;043f 85 07    sta $07
-        ;0441 a0 02    ldy #$02
-        ;0443 a2 ff    ldx #$ff
-        ;0445 ad 00 06 lda $0600
-        ;0448 f0 03    beq $044d
-        ;044a 8e 01 06 stx $0601
-        ;044d ee 01 06 inc $0601
-        ;0450 be 00 06 ldx $0600,y
-        ;0453 e0 01    cpx #$01
-        ;0455 d0 03    bne $045a
-        ;0457 20 82 03 jsr $0382
-        ;045a 20 82 03 jsr $0382
-        ;045d c8       iny 
-        ;045e cc 01 06 cpy $0601
-        ;0461 d0 ed    bne $0450
-        ;0463 ad 00 06 lda $0600
-        ;0466 f0 0e    beq $0476
-        ;0468 c5 06    cmp $06
-        ;046a 85 06    sta $06
-        ;046c f0 05    beq $0473
-        ;046e a9 01    lda #$01
-        ;0470 4c 69 f9 jmp $f969
-        ;0473 4c 04 03 jmp $0304
-        ;0476 a2 01    ldx #$01
-        ;0478 20 82 03 jsr $0382
-        ;047b a2 02    ldx #$02
-        ;047d 20 82 03 jsr $0382
-        ;0480 a9 7f    lda #$7f
-        ;0482 4c 69 f9 jmp $f969
-        ;0485 2c 00 18 bit $1800
-        ;0488 10 fb    bpl $0485
-        ;048a a9 10    lda #$10
-        ;048c 8d 00 18 sta $1800
-        ;048f 2c 00 18 bit $1800
-        ;0492 30 fb    bmi $048f
-        ;0494 8a       txa 
-        ;0495 4a       lsr a
-        ;0496 4a       lsr a
-        ;0497 4a       lsr a
-        ;0498 4a       lsr a
-        ;0499 8d 00 18 sta $1800
-        ;049c 0a       asl a
-        ;049d 29 0f    and #$0f
-        ;049f 8d 00 18 sta $1800
-        ;04a2 8a       txa 
-        ;04a3 29 0f    and #$0f
-        ;04a5 8d 00 18 sta $1800
-        ;04a8 0a       asl a
-        ;04a9 29 0f    and #$0f
-        ;04ab 8d 00 18 sta $1800
-        ;04ae a9 0f    lda #$0f
-        ;04b0 ea       nop 
-        ;04b1 8d 00 18 sta $1800
-        ;04b4 60       rts 
-        ;04b5 20 42 d0 jsr $d042
-        ;04b8 a9 ff    lda #$ff
+        jsr _05da
+        jsr _05cf
+        rts 
 
-        .byte   $20, $da, $05
-        .byte   $20, $cf, $05
-        .byte   $60
-        .byte   $a9, $06
-        .byte   $85, $31
-        .byte   $20, $0a, $f5
-        .byte   $50, $fe
-        .byte   $b8
-        .byte   $ad, $01, $1c
-        .byte   $99, $00, $06
-        .byte   $c8
-        .byte   $d0, $f4
-        .byte   $a0, $ba
-        .byte   $50, $fe
-        .byte   $b8
-        .byte   $ad, $01, $1c
-        .byte   $99, $00, $01
-        .byte   $c8
-        .byte   $d0, $f4
-        .byte   $20, $e0, $f8
-        .byte   $a5, $38
-        .byte   $c5, $47
-        .byte   $f0, $04
-        .byte   $a9, $04
-        .byte   $d0, $3f
-        .byte   $20, $e9, $f5
-        .byte   $c5, $3a
-        .byte   $f0, $04
-        .byte   $a9, $05
-        .byte   $d0, $34
-        .byte   $ad, $01, $06
-        .byte   $85, $07
-        .byte   $a0, $02
-        .byte   $a2, $ff
-        .byte   $ad, $00, $06
-        .byte   $f0, $03
-        .byte   $8e, $01, $06
-        .byte   $ee, $01, $06
-        .byte   $be, $00, $06
-        .byte   $e0, $01
-        .byte   $d0, $03
-        .byte   $20, $82, $03
-        .byte   $20, $82, $03
-        .byte   $c8
-        .byte   $cc, $01, $06
-        .byte   $d0, $ed
-        .byte   $ad, $00, $06
-        .byte   $f0, $0e
-        .byte   $c5, $06
-        .byte   $85, $06
-        .byte   $f0, $05
-        .byte   $a9, $01
-        .byte   $4c, $69, $f9
-        .byte   $4c, $04, $03
-        .byte   $a2, $01
-        .byte   $20, $82, $03
-        .byte   $a2, $02
-        .byte   $20, $82, $03
-        .byte   $a9, $7f
-        .byte   $4c, $69, $f9
-        .byte   $2c, $00, $18
-        .byte   $10, $fb
-        .byte   $a9, $10
-        .byte   $8d, $00, $18
-        .byte   $2c, $00, $18
-        .byte   $30, $fb
-        .byte   $8a
-        .byte   $4a
-        .byte   $4a       
-        .byte   $4a       
-        .byte   $4a       
-        .byte   $8d, $00, $18
-        .byte   $0a       
-        .byte   $29, $0f    
-        .byte   $8d, $00, $18 
-        .byte   $8a        
-        .byte   $29, $0f    
-        .byte   $8d, $00, $18 
-        .byte   $0a       
-        .byte   $29, $0f    
-        .byte   $8d, $00, $18 
-        .byte   $a9, $0f    
-        .byte   $ea        
-        .byte   $8d, $00, $18 
-        .byte   $60        
-        .byte   $20, $42, $d0 
-        .byte   $a9
+;===============================================================================
 
-        ; this label reference appears to be for self-modifying code
-_04b9:        
-        .byte   $ff
+.segment        "CODE_1541"
 
-        ;04ba 85 06    sta $06
-        ;04bc a9 ff    lda #$ff
+_0403:
+        ;=======================================================================
+        ; change buffer to $0600
+        lda #> C1541_BUFF3
+        sta C1541_ZP_CURBUFF_HI
 
-        .byte   $85, $06, $a9
+        ; read 256 bytes?
+_0407:
+        ; "find start of data block"?
+        jsr $f50a
+_040a:
+        bvc *                   ; wait for completion
+        clv                     ; clear overflow flag
+
+        lda $1c01
+        sta C1541_BUFF3, y
+        iny 
+        bne _040a
+
+        ldy # $ba
+_0418:
+        bvc *
+        clv 
+
+        lda $1c01
+        sta $0100, y
+        iny 
+        bne _0418
         
-        ; self-modifying code again
-_04bd:
+        ; decode GCR bytes
+        .byte   $20, $e0, $f8   ;0424 20 e0 f8 jsr $f8e0
+        .byte   $a5, $38        ;0427 a5 38    lda $38
+        .byte   $c5, $47        ;0429 c5 47    cmp $47
+        .byte   $f0, $04        ;042b f0 04    beq _0431
+        .byte   $a9, $04        ;042d a9 04    lda # $04
+        .byte   $d0, $3f        ;042f d0 3f    bne _0470
+_0431:
+        .byte   $20, $e9, $f5   ;0431 20 e9 f5 jsr $f5e9
+        .byte   $c5, $3a        ;0434 c5 3a    cmp $3a
+        .byte   $f0, $04        ;0436 f0 04    beq _043c
+        .byte   $a9, $05        ;0438 a9 05    lda # $05
+        .byte   $d0, $34        ;043a d0 34    bne _0470
+_043c:
+        .byte   $ad, $01, $06   ;043c ad 01 06 lda $0601
+        .byte   $85, $07        ;043f 85 07    sta $07
+        .byte   $a0, $02        ;0441 a0 02    ldy # $02
+        .byte   $a2, $ff        ;0443 a2 ff    ldx # $ff
+        .byte   $ad, $00, $06   ;0445 ad 00 06 lda C1541_BUFF3
+        .byte   $f0, $03        ;0448 f0 03    beq _044d
+        .byte   $8e, $01, $06   ;044a 8e 01 06 stx C1541_BUFF3+1
+_044d:
+        .byte   $ee, $01, $06   ;044d ee 01 06 inc C1541_BUFF3+1
+_0450:
+        .byte   $be, $00, $06   ;0450 be 00 06 ldx C1541_BUFF3, y
+        .byte   $e0, $01        ;0453 e0 01    cpx # $01
+        .byte   $d0, $03        ;0455 d0 03    bne _045a
+        .byte   $20, $82, $03   ;0457 20 82 03 jsr _0485
+_045a:
+        .byte   $20, $82, $03   ;045a 20 82 03 jsr _0485
+        .byte   $c8             ;045d c8       iny 
+        .byte   $cc, $01, $06   ;045e cc 01 06 cpy C1541_BUFF3+1
+        .byte   $d0, $ed        ;0461 d0 ed    bne _0450
+        .byte   $ad, $00, $06   ;0463 ad 00 06 lda C1541_BUFF3
+        .byte   $f0, $0e        ;0466 f0 0e    beq _0476
+        .byte   $c5, $06        ;0468 c5 06    cmp $06
+        .byte   $85, $06        ;046a 85 06    sta $06
+        .byte   $f0, $05        ;046c f0 05    beq _0473
+        .byte   $a9, $01        ;046e a9 01    lda # $01
+_0470:
+        .byte   $4c, $69, $f9   ;0470 4c 69 f9 jmp $f969
+
+_0473:
+        .byte   $4c, $04, $03   ;0473 4c 04 03 jmp _0407
+
+_0476:
+        .byte   $a2, $01        ;0476 a2 01    ldx # $01
+        .byte   $20, $82, $03   ;0478 20 82 03 jsr _0485
+        .byte   $a2, $02        ;047b a2 02    ldx # $02
+        .byte   $20, $82, $03   ;047d 20 82 03 jsr _0485
+        .byte   $a9, $7f        ;0480 a9 7f    lda # $7f
+        .byte   $4c, $69, $f9   ;0482 4c 69 f9 jmp $f969
+_0485:
+        .byte   $2c, $00, $18   ;0485 2c 00 18 bit $1800
+        .byte   $10, $fb        ;0488 10 fb    bpl _0485
+        .byte   $a9, $10        ;048a a9 10    lda # $10
+        .byte   $8d, $00, $18   ;048c 8d 00 18 sta $1800
+_048f:
+        .byte   $2c, $00, $18   ;048f 2c 00 18 bit $1800
+        .byte   $30, $fb        ;0492 30 fb    bmi _048f
+        .byte   $8a             ;0494 8a       txa 
+        .byte   $4a             ;0495 4a       lsr a
+        .byte   $4a             ;0496 4a       lsr a
+        .byte   $4a             ;0497 4a       lsr a
+        .byte   $4a             ;0498 4a       lsr a
+        .byte   $8d, $00, $18   ;0499 8d 00 18 sta $1800
+        .byte   $0a             ;049c 0a       asl a
+        .byte   $29, $0f        ;049d 29 0f    and # $0f
+        .byte   $8d, $00, $18   ;049f 8d 00 18 sta $1800
+        .byte   $8a             ;04a2 8a       txa 
+        .byte   $29, $0f        ;04a3 29 0f    and # $0f
+        .byte   $8d, $00, $18   ;04a5 8d 00 18 sta $1800
+        .byte   $0a             ;04a8 0a       asl a
+        .byte   $29, $0f        ;04a9 29 0f    and # $0f
+        .byte   $8d, $00, $18   ;04ab 8d 00 18 sta $1800
+        .byte   $a9, $0f        ;04ae a9 0f    lda # $0f
+        .byte   $ea             ;04b0 ea       nop 
+        .byte   $8d, $00, $18   ;04b1 8d 00 18 sta $1800
+        .byte   $60             ;04b4 60       rts 
+
+_04b5:
+        ;=======================================================================
+        ; this is where program execution begins
+
+        jsr $d042               ;load BAM
+
+        ; set track and sector
+
+        .byte   $a9             ;04b8 a9 ff    lda # $ff
+_04b9:  .byte   $ff
+
+        sta C1541_ZP_BUFF0_TRK
+        
+        .byte   $a9             ;04bc a9 ff    lda # $ff
+_04bd:  .byte   $ff
+
+        sta C1541_ZP_BUFF0_SEC
+_04c0:
+        lda # C1541_JOB::EXECUTE
+        sta C1541_ZP_JOB0
+
+        ; wait for the job to complete
+:       lda C1541_ZP_JOB0                                               ;$04C4
+        bmi :-
+
+        ;-----------------------------------------------------------------------
+
+        cmp # $7f
+        beq _04ce
+        bcc _04c0
+_04ce:
+        jmp $d048               ; ; re-read BAM!??
+
+;===============================================================================
+
+.segment        "CODE_STAGE1B"
+
+_04d1:
+        .byte   $a5, $a4        ;04d1 a5 a4    lda %10100100    ;=$A4
+        .byte   $8d, $00, $dd   ;04d3 8d 00 dd sta CIA2_PORTA
+_04d6:
+        .byte   $ad, $00, $dd   ;04d6 ad 00 dd lda CIA2_PORTA
+        .byte   $10, $fb        ;04d9 10 fb    bpl _04d6
+_04db:
+        .byte   $ad, $12, $d0   ;04db ad 12 d0 lda VIC_RASTER
+        .byte   $c9, $31        ;04de c9 31    cmp # $31
+        .byte   $90, $06        ;04e0 90 06    bcc _04e8
+        .byte   $29, $06        ;04e2 29 06    and # $06
+        .byte   $c9, $02        ;04e4 c9 02    cmp # $02
+        .byte   $f0, $f3        ;04e6 f0 f3    beq _04db
+_04e8:
+        .byte   $a5, $a5        ;04e8 a5 a5    lda $a5
+        .byte   $8d, $00, $dd   ;04ea 8d 00 dd sta CIA2_PORTA
+        .byte   $ea             ;04ed ea       nop 
+        .byte   $ea             ;04ee ea       nop 
+        .byte   $ea             ;04ef ea       nop 
+        .byte   $ea             ;04f0 ea       nop 
+        .byte   $ea             ;04f1 ea       nop 
+        .byte   $ea             ;04f2 ea       nop 
+        .byte   $ea             ;04f3 ea       nop 
+        .byte   $ea             ;04f4 ea       nop 
+        .byte   $ea             ;04f5 ea       nop 
+        .byte   $ea             ;04f6 ea       nop 
+        .byte   $ae, $00, $dd   ;04f7 ae 00 dd ldx CIA2_PORTA
+        .byte   $bd, $00, $cf   ;04fa bd 00 cf lda $cf00, x
+        .byte   $ae, $00, $dd   ;04fd ae 00 dd ldx CIA2_PORTA
+        .byte   $1d, $08, $cf   ;0500 1d 08 cf ora $cf08, x
+        .byte   $ae, $00, $dd   ;0503 ae 00 dd ldx CIA2_PORTA
+        .byte   $1d, $10, $cf   ;0506 1d 10 cf ora $cf10, x
+        .byte   $ae, $00, $dd   ;0509 ae 00 dd ldx CIA2_PORTA
+        .byte   $1d, $18, $cf   ;050c 1d 18 cf ora $cf18, x
+        .byte   $60             ;050f 60       rts 
+
+        ;=======================================================================
+        ; hijack of the KERNAL `LOAD` routine
+        ;
+_0510:
+        lda #< C1541_BUFF0      ; low-byte of write address in 1541 RAM
+        sta $a4                 ; byte-buffer for serial communication  
+_0514:
+        ; open the disk-drive command-channel; begin a command with "M-"
+        ; (memory "R" read / "W" write / "E" execute)
+        jsr _05a4
+
+        ; append the "W" to make a Memory-Write command
+        lda # 'w'
+        jsr $eddd               ;=KERNAL_IECOUT
+        
+        ; set the write-address within 1541 RAM
+        lda $a4
+        jsr $eddd               ;=KERNAL_IECOUT
+        lda #> C1541_BUFF0
+        jsr $eddd               ;=KERNAL_IECOUT
+        
+        ; "sending 32-bytes"
+        lda # 32
+        jsr $eddd               ;=KERNAL_IECOUT
+
+        ; move the write cursor forward 32-bytes
+        ldy $a4
+        clc 
+        lda $a4
+        adc # 32
+        sta $a4
+
+_0534:
+        ; send the code to the 1541 drive:
+        ; get the address of the block of 1541 code *here on the C64*
+        ; (not its address within the 1541, when it gets copied there)
+.import __CODE_1541_LOAD__
+        ; read a byte of program code
+        lda __CODE_1541_LOAD__, y
+        jsr $eddd               ;=KERNAL_IECOUT
+        iny 
+        cpy $a4
+        bne _0534
+
+        ; close the command-channel,
+        ; reset default output to screen
+        jsr KERNAL_CLRCHN
+
+        ; have we reached the end of the 1541 code?
+        lda $a4
+        cmp # $ce
+        bcc _0514
+
+        ; open the command channel again
+        jsr _05a4
+        ; start a memory-exexute command
+        lda # 'e'
+        jsr $eddd               ;=KERNAL_IECOUT
+
+        ; send the address (lo-hi) to execute inside the 1541.
+        ; the code inside the 1541 will begin executing independently!
+        lda #< $03b2            ;=$04B5 here
+        jsr $eddd               ;=KERNAL_IECOUT
+        lda #> $03b2            ;=$04B5 here
+        jsr $eddd               ;=KERNAL_IECOUT
+
+        ; close the command-channel
+        jsr KERNAL_CLRCHN
+
+        ; query the serial port; this will signal to the 1541's code that
+        ; the C64 is ready?
+        .byte   $ad, $00, $dd   ;055d ad 00 dd lda $dd00
+        .byte   $29, $07        ;0560 29 07    and # $07
+        .byte   $85, $a5        ;0562 85 a5    sta $a5
+        .byte   $09, $08        ;0564 09 08    ora # $08
+        .byte   $85, $a4        ;0566 85 a4    sta $a4
+        .byte   $78             ;0568 78       sei 
+        .byte   $20, $c4, $05   ;0569 20 c4 05 jsr _05c4
+        .byte   $a0, $00        ;056c a0 00    ldy # $00
+_056e:
+        .byte   $20, $f5, $05   ;056e 20 f5 05 jsr _05f5
+        .byte   $20, $d1, $04   ;0571 20 d1 04 jsr _04d1
+        .byte   $c9, $01        ;0574 c9 01    cmp # $01
+        .byte   $d0, $07        ;0576 d0 07    bne _057f
+        .byte   $20, $d1, $04   ;0578 20 d1 04 jsr _04d1
+        .byte   $c9, $01        ;057b c9 01    cmp # $01
+        .byte   $d0, $09        ;057d d0 09    bne _0588
+_057f:
+        .byte   $91, $ae        ;057f 91 ae    sta [$ae], y
+        .byte   $c8             ;0581 c8       iny 
+        .byte   $d0, $ea        ;0582 d0 ea    bne _056e
+        .byte   $e6, $af        ;0584 e6 af    inc $af
+        .byte   $d0, $e6        ;0586 d0 e6    bne _056e
+_0588:
+        .byte   $a5, $a5        ;0588 a5 a5    lda $a5
+        .byte   $8d, $18, $06   ;058a 8d 18 06 sta _0618
+        .byte   $20, $46, $f6   ;058d 20 46 f6 jsr $f646
+_0590:
+        .byte   $ad, $11, $d0   ;0590 ad 11 d0 lda $d011
+        .byte   $10, $fb        ;0593 10 fb    bpl _0590
+        .byte   $20, $a3, $fd   ;0595 20 a3 fd jsr $fda3
+        .byte   $ad, $00, $dd   ;0598 ad 00 dd lda $dd00
+        .byte   $29, $f8        ;059b 29 f8    and # $f8
+        .byte   $0d, $18, $06   ;059d 0d 18 06 ora _0618
+        .byte   $8d, $00, $dd   ;05a0 8d 00 dd sta $dd00
+        .byte   $60             ;05a3 60       rts 
+
+_05a4:                                                                  ;$05A4
+        ;-----------------------------------------------------------------------
+        ; open the command-channel to the 1541 drive and prepare a memory
+        ; action "M-". send "R" for read, "W" for write and "E" for execute
+        ;
+
+        ; no file name required for writing to the command-channel
+        lda # $00               ; file-name length
+        jsr KERNAL_SETNAM
+        
+        lda # 15                ; logical number
+        tay                     ; secondary-address (channel)
+        ldx # $08               ; device number
+        jsr KERNAL_SETLFS
+        jsr KERNAL_OPEN
+        
+        ; write to logical file 15 by default
+        ; (rather than printing to screen, for example)
+        ldx # 15
+        jsr KERNAL_CHKOUT
+        lda # 'm'
+        jsr KERNAL_CHROUT
+        lda # '-'
+        jsr KERNAL_CHROUT
+        
+        rts 
+
+        ;=======================================================================
+
+_05c4:
+        .byte   $20, $d1, $04   ;05c4 20 d1 04 jsr _04d1
+        .byte   $85, $ae        ;05c7 85 ae    sta $ae
+        .byte   $20, $d1, $04   ;05c9 20 d1 04 jsr _04d1
+        .byte   $85, $af        ;05cc 85 af    sta $af
+        .byte   $60             ;05ce 60       rts 
+
+        ;=======================================================================
+
+_05cf:                                                                  ;$05CF
+        lda #< _0510
+        sta $0330               ; vector for `LOAD` routine
+        lda #> _0510
+        sta $0331               ; vector for `LOAD` routine
+        rts 
+
+        ;=======================================================================
+
+_05da:                                                                  ;$05DA
+        ldx # $00
+        ldy # $00
+_05de:                                                                  ;$05DE
+        lda # $08
+        sta _0618               ; counter?
+
+        lda _05fc, x
+:       sta $cf00, y            ; decode buffer?                        ;$05E6
+        iny 
+        dec _0618
+        bne :-
+        inx 
+        cpx # $1c               ;=28
+        bcc _05de
+        
+        rts 
+        
+_05f5:                                                                  ;$05F5
+        inc VIC_BORDER
+        dec VIC_BORDER
+        rts 
+
+        ;=======================================================================
+_05fc:                                                                  ;$05FC
+        .byte   $a0, $50, $0a, $05
+_0600:                                                                  ;$0600
+        .byte   $00, $00, $00, $00, $20, $10, $02, $01
+        .byte   $ff, $ff, $ff, $ff, $80, $40, $08, $04
+        .byte   $ff, $ff, $ff, $ff, $00, $00, $00, $00
+_0618:                                                                  ;$0618
         .byte   $ff
-
-        ;04be 85 07    sta $07
-        ;04c0 a9 e0    lda #$e0
-        ;04c2 85 00    sta CPU_CONTROL
-        ;04c4 a5 00    lda CPU_CONTROL
-        ;04c6 30 fc    bmi $04c4
-        ;04c8 c9 7f    cmp #$7f
-        ;04ca f0 02    beq $04ce
-        ;04cc 90 f2    bcc $04c0
-        ;04ce 4c 48 d0 jmp $d048
-        ;04d1 a5 a4    lda $a4
-        ;04d3 8d 00 dd sta $dd00
-        ;04d6 ad 00 dd lda $dd00
-        ;04d9 10 fb    bpl $04d6
-        ;04db ad 12 d0 lda $d012
-        ;04de c9 31    cmp #$31
-        ;04e0 90 06    bcc $04e8
-        ;04e2 29 06    and #$06
-        ;04e4 c9 02    cmp #$02
-        ;04e6 f0 f3    beq $04db
-        ;04e8 a5 a5    lda $a5
-        ;04ea 8d 00 dd sta $dd00
-        ;04ed ea       nop 
-        ;04ee ea       nop 
-        ;04ef ea       nop 
-        ;04f0 ea       nop 
-        ;04f1 ea       nop 
-        ;04f2 ea       nop 
-        ;04f3 ea       nop 
-        ;04f4 ea       nop 
-        ;04f5 ea       nop 
-        ;04f6 ea       nop 
-        ;04f7 ae 00 dd ldx $dd00
-        ;04fa bd 00 cf lda $cf00,x
-        ;04fd ae 00 dd ldx $dd00
-        ;0500 1d 08 cf ora $cf08,x
-        ;0503 ae 00 dd ldx $dd00
-        ;0506 1d 10 cf ora $cf10,x
-        ;0509 ae 00 dd ldx $dd00
-        ;050c 1d 18 cf ora $cf18,x
-        ;050f 60       rts 
-        ;0510 a9 00    lda #$00
-        ;0512 85 a4    sta $a4
-        ;0514 20 a4 05 jsr $05a4
-        ;0517 a9 57    lda #$57
-        ;0519 20 dd ed jsr $eddd
-        ;051c a5 a4    lda $a4
-        ;051e 20 dd ed jsr $eddd
-        ;0521 a9 03    lda #$03
-        ;0523 20 dd ed jsr $eddd
-        ;0526 a9 20    lda #$20
-        ;0528 20 dd ed jsr $eddd
-        ;052b a4 a4    ldy $a4
-        ;052d 18       clc 
-        ;052e a5 a4    lda $a4
-        ;0530 69 20    adc #$20
-        ;0532 85 a4    sta $a4
-        ;0534 b9 03 04 lda $0403,y
-        ;0537 20 dd ed jsr $eddd
-        ;053a c8       iny 
-        ;053b c4 a4    cpy $a4
-        ;053d d0 f5    bne $0534
-        ;053f 20 cc ff jsr KERNAL_CLRCHN
-        ;0542 a5 a4    lda $a4
-        ;0544 c9 ce    cmp #$ce
-        ;0546 90 cc    bcc $0514
-        ;0548 20 a4 05 jsr $05a4
-        ;054b a9 45    lda #$45
-        ;054d 20 dd ed jsr $eddd
-        ;0550 a9 b2    lda #$b2
-        ;0552 20 dd ed jsr $eddd
-        ;0555 a9 03    lda #$03
-        ;0557 20 dd ed jsr $eddd
-        ;055a 20 cc ff jsr KERNAL_CLRCHN
-        ;055d ad 00 dd lda $dd00
-        ;0560 29 07    and #$07
-        ;0562 85 a5    sta $a5
-        ;0564 09 08    ora #$08
-        ;0566 85 a4    sta $a4
-        ;0568 78       sei 
-        ;0569 20 c4 05 jsr $05c4
-        ;056c a0 00    ldy #$00
-        ;056e 20 f5 05 jsr $05f5
-        ;0571 20 d1 04 jsr $04d1
-        ;0574 c9 01    cmp #$01
-        ;0576 d0 07    bne $057f
-        ;0578 20 d1 04 jsr $04d1
-        ;057b c9 01    cmp #$01
-        ;057d d0 09    bne $0588
-        ;057f 91 ae    sta [$ae],y
-        ;0581 c8       iny 
-        ;0582 d0 ea    bne $056e
-        ;0584 e6 af    inc $af
-        ;0586 d0 e6    bne $056e
-        ;0588 a5 a5    lda $a5
-        ;058a 8d 18 06 sta $0618
-        ;058d 20 46 f6 jsr $f646
-        ;0590 ad 11 d0 lda $d011
-        ;0593 10 fb    bpl $0590
-        ;0595 20 a3 fd jsr $fda3
-        ;0598 ad 00 dd lda $dd00
-        ;059b 29 f8    and #$f8
-        ;059d 0d 18 06 ora $0618
-        ;05a0 8d 00 dd sta $dd00
-        ;05a3 60       rts 
-        ;05a4 a9 00    lda #$00
-        ;05a6 20 bd ff jsr KERNAL_SETNAM
-        ;05a9 a9 0f    lda #$0f
-        ;05ab a8       tay 
-        ;05ac a2 08    ldx #$08
-        ;05ae 20 ba ff jsr KERNAL_SETLFS
-        ;05b1 20 c0 ff jsr KERNAL_OPEN
-        ;05b4 a2 0f    ldx #$0f
-        ;05b6 20 c9 ff jsr KERNAL_CHKOUT
-        ;05b9 a9 4d    lda #$4d
-        ;05bb 20 d2 ff jsr KERNAL_CHROUT
-        ;05be a9 2d    lda #$2d
-        ;05c0 20 d2 ff jsr KERNAL_CHROUT
-        ;05c3 60       rts 
-        ;05c4 20 d1 04 jsr $04d1
-        ;05c7 85 ae    sta $ae
-        ;05c9 20 d1 04 jsr $04d1
-        ;05cc 85 af    sta $af
-        ;05ce 60       rts 
-        ;05cf a9 10    lda #$10
-        ;05d1 8d 30 03 sta $0330
-        ;05d4 a9 05    lda #$05
-        ;05d6 8d 31 03 sta $0331
-        ;05d9 60       rts 
-        ;05da a2 00    ldx #$00
-        ;05dc a0 00    ldy #$00
-        ;05de a9 08    lda #$08
-        ;05e0 8d 18 06 sta $0618
-        ;05e3 bd fc 05 lda $05fc,x
-        ;05e6 99 00 cf sta $cf00,y
-        ;05e9 c8       iny 
-        ;05ea ce 18 06 dec $0618
-        ;05ed d0 f7    bne $05e6
-        ;05ef e8       inx 
-        ;05f0 e0 1c    cpx #$1c
-        ;05f2 90 ea    bcc $05de
-        ;05f4 60       rts 
-        ;05f5 ee 20 d0 inc VIC_BORDER
-        ;05f8 ce 20 d0 dec VIC_BORDER
-        ;05fb 60       rts
-
-        ;05fc a0 50    ldy #$50
-        ;05fe 0a       asl a
-        ;05ff 05 00    ora $00
-        ;0601 00       brk 
-        ;0602 00       brk 
-        ;0603 00       brk 
-        ;0604 20 10 02 jsr $0210
-        ;0607 01 ff    ora [$ff,x]
-        ;0609 ff       ???
-        ;060a ff       ???
-        ;060b ff       ???
-        ;060c 80       ???
-        ;060d 40       rti 
-        ;060e 08       php 
-        ;060f 04       ???
-        ;0610 ff       ???
-        ;0611 ff       ???
-        ;0612 ff       ???
-        ;0613 ff       ???
-        ;0614 00       brk 
-        ;0615 00       brk 
-        ;0616 00       brk 
-        ;0617 00       brk 
-        ;0618 ff       ???
-
-        .byte   $85, $07, $a9, $e0, $85, $00, $a5, $00
-        .byte   $30, $fc, $c9, $7f, $f0, $02, $90, $f2
-        .byte   $4c, $48, $d0, $a5, $a4, $8d, $00, $dd
-        .byte   $ad, $00, $dd, $10, $fb, $ad, $12, $d0
-        .byte   $c9, $31, $90, $06, $29, $06, $c9, $02
-        .byte   $f0, $f3, $a5, $a5, $8d, $00, $dd, $ea
-        .byte   $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-        .byte   $ea, $ae, $00, $dd, $bd, $00, $cf, $ae
-        .byte   $00, $dd, $1d, $08, $cf, $ae, $00, $dd
-        .byte   $1d, $10, $cf, $ae, $00, $dd, $1d, $18
-        .byte   $cf, $60, $a9, $00, $85, $a4, $20, $a4
-        .byte   $05, $a9, $57, $20, $dd, $ed, $a5, $a4
-        .byte   $20, $dd, $ed, $a9, $03, $20, $dd, $ed
-        .byte   $a9, $20, $20, $dd, $ed, $a4, $a4, $18
-        .byte   $a5, $a4, $69, $20, $85, $a4, $b9, $03
-        .byte   $04, $20, $dd, $ed, $c8, $c4, $a4, $d0
-        .byte   $f5, $20, $cc, $ff, $a5, $a4, $c9, $ce
-        .byte   $90, $cc, $20, $a4, $05, $a9, $45, $20
-        .byte   $dd, $ed, $a9, $b2, $20, $dd, $ed, $a9
-        .byte   $03, $20, $dd, $ed, $20, $cc, $ff, $ad
-        .byte   $00, $dd, $29, $07, $85, $a5, $09, $08
-        .byte   $85, $a4, $78, $20, $c4, $05, $a0, $00
-        .byte   $20, $f5, $05, $20, $d1, $04, $c9, $01
-        .byte   $d0, $07, $20, $d1, $04, $c9, $01, $d0
-        .byte   $09, $91, $ae, $c8, $d0, $ea, $e6, $af
-        .byte   $d0, $e6, $a5, $a5, $8d, $18, $06, $20
-        .byte   $46, $f6, $ad, $11, $d0, $10, $fb, $20
-        .byte   $a3, $fd, $ad, $00, $dd, $29, $f8, $0d
-        .byte   $18, $06, $8d, $00, $dd, $60, $a9, $00
-        .byte   $20, $bd, $ff, $a9, $0f, $a8, $a2, $08
-        .byte   $20, $ba, $ff, $20, $c0, $ff, $a2, $0f
-        .byte   $20, $c9, $ff, $a9, $4d, $20, $d2, $ff
-        .byte   $a9, $2d, $20, $d2, $ff, $60, $20, $d1
-        .byte   $04, $85, $ae, $20, $d1, $04, $85, $af
-        .byte   $60, $a9, $10, $8d, $30, $03, $a9, $05
-        .byte   $8d, $31, $03, $60, $a2, $00, $a0, $00
-        .byte   $a9, $08, $8d, $18, $06, $bd, $fc, $05
-        .byte   $99, $00, $cf, $c8, $ce, $18, $06, $d0
-        .byte   $f7, $e8, $e0, $1c, $90, $ea, $60, $ee
-        .byte   $20, $d0, $ce, $20, $d0, $60, $a0, $50
-        .byte   $0a, $05, $00, $00, $00, $00, $20, $10
-        .byte   $02, $01, $ff, $ff, $ff, $ff, $80, $40
-        .byte   $08, $04, $ff, $ff, $ff, $ff, $00, $00
-        .byte   $00, $00, $ff
 
 
 ;-------------------------------------------------------------------------------
@@ -624,9 +608,8 @@ _061b:  lda $00, x
         bne _061b
         rts
 
-;===============================================================================
-
 _062b:
+        ;=======================================================================
         ; wait until the screen register is non-zero
         ; since the screen will be blanked during disk loading,
         ; this should wait here until loading is complete?
@@ -643,13 +626,13 @@ _062b:
         jsr KERNAL_SCINIT
 
         ; change the RAM / ROM layout
-        lda VIC_MEMORY  ;=$d018, read the current state
+        lda VIC_MEMORY  ;=$D018, read the current state
         and # %00001111 ; strip out bits 4-7 leaving the bits 0-3 intact
         ora # %00100000 ; set bit 5 "%0010xxxx" to move the screen to $0800
         sta VIC_MEMORY
 
         ; change border / background colour
-        lda # $02
+        lda # RED
         sta VIC_BORDER
         sta VIC_BACKGROUND
 
@@ -673,20 +656,20 @@ _062b:
         ; write the red colour to the string, so when it gets printed again,
         ; the "use the fast loader?" text is made 'invisible'. this appears
         ; not to actually be used in practice
-        lda # $1c       ; red colour PETSCII code
+        lda # $1c               ; red colour PETSCII code
         sta _06b3
 
         ; read a keypress
         ; (returns A = keycode)
-_keypress:
+@keypress:
         jsr KERNAL_GETIN
-        beq _keypress
+        beq @keypress
 
-        cmp # 'n'
-        beq _066e       ; user pressed N, print the next string and return
+        cmp # 'n'               ; user pressed N?
+        beq _066e               ; print the next string and return
 
-        cmp # 'y'       ; if user did not press Y, get another keypress
-        bne _keypress
+        cmp # 'y'               ; if user did not press Y,
+        bne @keypress           ; get another keypress
 
         ; use fast-loader?
         jsr _03fc

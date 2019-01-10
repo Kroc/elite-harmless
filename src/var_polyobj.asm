@@ -11,7 +11,7 @@
 ; (based on everything else in RAM), but it's not written to disk;
 ; this variable space is only used at run-time
 ;
-; see the linker configs ("link/elite_*.cfg") for memory assignment.
+; see the linker configs ("link/elite-*.cfg") for memory assignment.
 ; in the original game, this is $F900
 ;
 .segment        "POLYOBJS"

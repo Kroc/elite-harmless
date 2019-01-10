@@ -14,41 +14,246 @@
 
 hull_pointers:                                                          ;$D000
 ;===============================================================================
+; enumerate hulls as we define them; each needs an index number that will
+; be used in the code to refer to them, in the order they appear here.
+;
+; note that the order of the indicies here do not have to match the order
+; of the actual data that follows
+;
+hull_index      .set    0
+
 .export hull_pointers
         
-        .addr   hull_missile            ; $01: missile                  ;$D000
-        .addr   hull_coreolis           ; $02: space station (coreolis)
-        .addr   hull_escape             ; $03: escape capsule
-        .addr   hull_plate              ; $04: plate / alloys
-        .addr   hull_cargo              ; $05: cargo cannister
-        .addr   _d3fb                   ; $06: boulder?
-        .addr   _d49d                   ; $07: asteroid?
-        .addr   hull_splinter           ; $08: splinter / rock
-        .addr   hull_shuttle            ; $09: shuttle                  ;$D010
-        .addr   hull_transporter        ; $0A: transporter
-        .addr   _d8c3                   ; $0B: cobra mk-III (trader?)
-        .addr   _da4b                   ; $0C: python (trader?)
-        .addr   hull_boa                ; $0D: boa
-        .addr   hull_anaconda           ; $0E: anaconda?
-        .addr   _dd35                   ; $0F: asteroid?
-        .addr   hull_viper              ; $10: viper
-        .addr   hull_sidewinder         ; $11: sidewinder               ;$D020
-        .addr   hull_mamba              ; $12: mamba
-        .addr   hull_krait              ; $13: krait
-        .addr   hull_adder              ; $14: adder
-        .addr   hull_gecko              ; $15: gecko
-        .addr   hull_cobramk1           ; $16: cobra mk-I
-        .addr   hull_worm               ; $17: worm
-        .addr   _e50b                   ; $18: combra mk-III (lone wolf?)
-        .addr   hull_aspmk2             ; $19: asp mk-II                ;$D030
-        .addr   _e7bd                   ; $1A: python (lone wolf?)
-        .addr   hull_ferdelance         ; $1B: fer-de-lance
-        .addr   hull_moray              ; $1C: moray
-        .addr   hull_thargoid           ; $1D: thargoid
-        .addr   hull_thargon            ; $1E: thargon
-        .addr   hull_constrictor        ; $1F: constrictor
-        .addr   hull_cougar             ; $20: cougar
-        .addr   hull_dodo               ; $21: space station (dodo)     ;$D040
+        ; $01: missile                                                  ;$D000/1
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_missile_index     := hull_index
+        
+        .addr   hull_missile
+
+        ; $02: space station (coreolis)                                 ;$D002/3
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_coreolis_index    := hull_index
+
+        .addr   hull_coreolis
+
+        ; $03: escape capsule                                           ;$D004/5
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_escape_index      := hull_index
+
+        .addr   hull_escape
+
+        ; $04: plate / alloys                                           ;$D006/7
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_plate_index       := hull_index
+
+        .addr   hull_plate
+
+        ; $05: cargo cannister                                          ;$D008/9
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_cargo_index       := hull_index
+
+        .addr   hull_cargo
+
+        ; $06: boulder?                                                 ;$D00A/B
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_d3fb_index        := hull_index
+
+        .addr   _d3fb
+
+        ; $07: asteroid?                                                ;$D00C/D
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_d49d_index        := hull_index
+
+        .addr   _d49d
+
+        ; $08: splinter / rock                                          ;$D00E/F
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_splinter_index    := hull_index
+
+        .addr   hull_splinter
+
+        ; $09: shuttle                                                  ;$D010/1
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_shuttle_index     := hull_index
+        
+        .addr   hull_shuttle
+
+        ; $0A: transporter                                              ;$D012/3
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_transporter_index := hull_index
+
+        .addr   hull_transporter
+
+        ; $0B: cobra mk-III (trader?)                                   ;$D014/5
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_d8c3_index        := hull_index
+
+        .addr   _d8c3
+
+        ; $0C: python (trader?)                                         ;$D016/7
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_da4b_index        := hull_index
+
+        .addr   _da4b
+
+        ; $0D: boa                                                      ;$D018/9
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_boa_index         := hull_index
+
+        .addr   hull_boa
+
+        ; $0E: anaconda?                                                ;$D01A/B
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_anaconda_index    := hull_index
+
+        .addr   hull_anaconda
+
+        ; $0F: asteroid?                                                ;$D01C/D
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_dd35_index        := hull_index
+
+        .addr   _dd35
+
+        ; $10: viper                                                    ;$D01E/F
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_viper_index       := hull_index
+
+        .addr   hull_viper
+
+        ; $11: sidewinder                                               ;$D020/1
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_sidewinder_index  := hull_index
+
+        .addr   hull_sidewinder
+
+        ; $12: mamba                                                    ;$D022/3
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_mamba_index       := hull_index
+
+        .addr   hull_mamba
+
+        ; $13: krait                                                    ;$D024/5
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_krait_index       := hull_index
+
+        .addr   hull_krait
+
+        ; $14: adder                                                    ;$D026/7
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_adder_index       := hull_index
+
+        .addr   hull_adder
+
+        ; $15: gecko                                                    ;$D028/9
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_gecko_index       := hull_index
+
+        .addr   hull_gecko
+
+        ; $16: cobra mk-I                                               ;$D02A/B
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_cobramk1_index    := hull_index
+
+        .addr   hull_cobramk1
+
+        ; $17: worm                                                     ;$D02C/D
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_worm_index        := hull_index
+
+        .addr   hull_worm
+        
+        ; $18: combra mk-III (lone wolf?)                               ;$D02E/F
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_e50b_index        := hull_index
+
+        .addr   _e50b
+
+        ; $19: asp mk-II                                                ;$D030/1
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_aspmk2_index      := hull_index
+
+        .addr   hull_aspmk2
+
+        ; $1A: python (lone wolf?)                                      ;$D032/3
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_e7bd_index        := hull_index
+
+        .addr   _e7bd
+
+        ; $1B: fer-de-lance                                             ;$D034/5
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_ferdelance_index  := hull_index
+
+        .addr   hull_ferdelance
+
+        ; $1C: moray                                                    ;$D036/7
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_moray_index       := hull_index
+
+        .addr   hull_moray
+
+        ; $1D: thargoid                                                 ;$D038/9
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_thargoid_index    := hull_index
+
+        .addr   hull_thargoid
+
+        ; $1E: thargon                                                  ;$D03A/B
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_thargon_index     := hull_index
+
+        .addr   hull_thargon
+
+        ; $1F: constrictor                                              ;$D03C/D
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_constrictor_index := hull_index
+
+        .addr   hull_constrictor
+
+        ; $20: cougar                                                   ;$D03E/F
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_cougar_index      := hull_index
+
+        .addr   hull_cougar
+
+        ; $21: space station (dodo)                                     ;$D040
+        ;-----------------------------------------------------------------------
+        hull_index           .set hull_index + 1
+.export hull_dodo_index        := hull_index
+
+        .addr   hull_dodo
 
 ;===============================================================================
 
@@ -97,13 +302,6 @@ hull_d083:
 
 
 .segment        "HULL_DATA"
-
-; enumerate hulls as we define them; each needs an index number that will
-; be used in the code to refer to them, in the order they appear here
-hull_index      .set    0
-
-        hull_index           .set hull_index + 1
-.export hull_missile_index     := hull_index
 
 .proc   hull_missile                                                    ;$D0A5
         ;=======================================================================
@@ -200,9 +398,6 @@ hull_index      .set    0
         face_count   = .sizeof( faces )
 
 .endproc
-
-        hull_index           .set hull_index + 1
-.export hull_coreolis_index    := hull_index
 
 .proc   hull_coreolis                                                   ;$D1A3
         ;=======================================================================
@@ -309,9 +504,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_escape_index      := hull_index
-
 .proc   hull_escape                                                     ;$D2BF
         ; escape capsule
 
@@ -332,9 +524,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_plate_index       := hull_index
-
 .proc   hull_plate                                                      ;$D313
         ; plate / alloys
 
@@ -351,9 +540,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_cargo_index       := hull_index
 
 .proc   hull_cargo                                                      ;$D353
         ; cargo cannister
@@ -385,9 +571,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_d3fb_index        := hull_index
-
 .proc   _d3fb   ; boulder?                                              ;$D3FB
 
         .byte                  $00, $84, $03, $3e, $7a
@@ -415,9 +598,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_d49d_index        := hull_index
 
 .proc   _d49d   ; asteroid?                                             ;$D49D
 
@@ -454,9 +634,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_splinter_index    := hull_index
-
 .proc   hull_splinter                                                   ;$D573
         ; splinter / rock
 
@@ -472,9 +649,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_shuttle_index     := hull_index
 
 .proc   hull_shuttle                                                    ;$D5AF
         ; shuttle
@@ -523,9 +697,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_transporter_index := hull_index
 
 .proc   hull_transporter                                                ;$D6E1
         ; transporter
@@ -596,9 +767,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_d8c3_index        := hull_index
-
 .proc   _d8c3   ; cobra mk-III                                          ;$D8C3
 
         .byte                  $03, $41, $23, $bc, $54
@@ -656,9 +824,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_da4b_index        := hull_index
-
 .proc   _da4b   ; python (trader?)                                      ;$DA4B
 
         .byte                  $05, $00, $19, $56, $be
@@ -696,9 +861,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_boa_index         := hull_index
 
 .proc   hull_boa                                                        ;$DB3D
         ; boa
@@ -739,9 +901,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_anaconda_index    := hull_index
 
 .proc   hull_anaconda                                                   ;$DC33
         ; anaconda
@@ -784,9 +943,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_dd35_index        := hull_index
-
 .proc   _dd35   ; asteroid?                                             ;$DD35
 
         .byte                            $07, $00, $19
@@ -821,9 +977,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_viper_index       := hull_index
 
 .proc   hull_viper                                                      ;$DE0B
         ; viper
@@ -861,9 +1014,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_sidewinder_index  := hull_index
-
 .proc   hull_sidewinder                                                 ;$DEE5
         ; sidewinder
 
@@ -893,9 +1043,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_mamba_index       := hull_index
 
 .proc   hull_mamba                                                      ;$DF8D
         ; mamba
@@ -944,9 +1091,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_krait_index       := hull_index
-
 .proc   hull_krait                                                      ;$E0BB
         ; krait
 
@@ -984,9 +1128,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_adder_index       := hull_index
 
 .proc   hull_adder                                                      ;$E1A1
         ; adder
@@ -1035,9 +1176,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_gecko_index       := hull_index
-
 .proc   hull_gecko                                                      ;$E2D1
         ; gecko
 
@@ -1070,9 +1208,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_cobramk1_index    := hull_index
 
 .proc   hull_cobramk1                                                   ;$E395
         ; cobra mk-I
@@ -1108,9 +1243,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_worm_index        := hull_index
-
 .proc   hull_worm                                                       ;$E45B
         ; worm
 
@@ -1141,9 +1273,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_e50b_index        := hull_index
 
 .proc   _e50b   ; combra mk-III (lone wolf?)                            ;$E50B
 
@@ -1202,9 +1331,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_aspmk2_index      := hull_index
-
 .proc   hull_aspmk2                                                     ;$E693
         ; asp mk-II
         
@@ -1251,9 +1377,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_e7bd_index        := hull_index
-
 .proc   _e7bd   ; python (lone-wolf?)                                   ;$E7BD
 
         .byte                            $02, $00, $19
@@ -1291,9 +1414,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_ferdelance_index  := hull_index
 
 .proc   hull_ferdelance                                                 ;$E8AF
         ; fer-de-lance
@@ -1340,9 +1460,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_moray_index       := hull_index
-
 .proc   hull_moray                                                      ;$E9C9
         ; moray
         
@@ -1378,9 +1495,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_thargoid_index    := hull_index
 
 .proc   hull_thargoid                                                   ;$EAA1
         ; thargoid
@@ -1426,9 +1540,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_thargon_index     := hull_index
-
 .proc   hull_thargon                                                    ;$EBBD
         ; thargon (the thargoid drone ships)
 
@@ -1451,9 +1562,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_constrictor_index := hull_index
 
 .proc   hull_constrictor                                                ;$EC29
         ; constrictor (mission)
@@ -1496,9 +1604,6 @@ hull_index      .set    0
 
 ;-------------------------------------------------------------------------------
 
-        hull_index           .set hull_index + 1
-.export hull_cougar_index      := hull_index
-
 .proc   hull_cougar                                                     ;$ED2B
         ; the secret stealth ship
 
@@ -1539,9 +1644,6 @@ hull_index      .set    0
 .endproc
 
 ;-------------------------------------------------------------------------------
-
-        hull_index           .set hull_index + 1
-.export hull_dodo_index        := hull_index
 
 .proc   hull_dodo                                                       ;$EE2D
         ; space station (dodecahedral)

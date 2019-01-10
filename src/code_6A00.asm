@@ -3139,16 +3139,17 @@ _7afa:                                                                  ;$7AFA
         dey 
         bne _7afa
 _7b1a:                                                                  ;$7B1A
+        ; begin with ship-slot 0
         ldx # $00
 _7b1c:                                                                  ;$7B1C
-        lda $0452, x            ; ship slots?
+        lda SHIP_SLOTS, x
         beq _7b44
         bmi _7b41
         sta $a5
         
         jsr get_polyobj
 
-        ldy # $1f
+        ldy # PolyObject::energy        ;$1F
 _7b2a:                                                                  ;$7B2A
         lda [ZP_POLYOBJ_ADDR], y
         sta ZP_POLYOBJ_XPOS_pt1, y
@@ -3157,7 +3158,8 @@ _7b2a:                                                                  ;$7B2A
         stx $9d
         jsr _b410
         ldx $9d
-        ldy # $1f
+        
+        ldy # PolyObject::energy        ;$1F
         lda [ZP_POLYOBJ_ADDR], y
         and # %10100111
         sta [ZP_POLYOBJ_ADDR], y
@@ -3379,17 +3381,20 @@ _7c61:                                                                  ;$7C61
         lda #> $0580
         sta ZP_TEMP_ADDR2_HI
         lda # $02
+
 _7c6b:                                                                  ;$7C6B
 .export _7c6b
-        sta ZP_VAR_T
+
+        sta ZP_VAR_T            ; put aside ship-type
         ldx # $00
-_7c6f:                                                                  ;$7C6F
-        lda $0452, x            ; ship slots?
-       .bze _7c7b
-        inx 
-        cpx # $0a
-        bcc _7c6f
-_7c79:                                                                  ;$7C79
+
+:       lda SHIP_SLOTS, x       ; is this ship-slot occupied?           ;$7C6F
+       .bze _7c7b               ; no, this slot is free
+        inx                     ; continue to the next slot
+        cpx # 10                ; maximum number of poly-objects (11)
+        bcc :-                  ; keep looping if slots remain
+
+_7c79:  ; return carry-clear for error                                  ;$7C79
         clc 
 _7c7a:                                                                  ;$7C7A
         rts 
@@ -3397,8 +3402,9 @@ _7c7a:                                                                  ;$7C7A
 _7c7b:                                                                  ;$7C7B
         jsr get_polyobj
 
-        lda ZP_VAR_T
-        bmi _7cd4
+        lda ZP_VAR_T            ; ship type
+        bmi _7cd4               ; high-bit means planet/sun?
+        
         asl 
         tay 
         lda hull_pointers - 1, y
@@ -3446,9 +3452,10 @@ _7cc4:                                                                  ;$7CC4
         
         lda ZP_VAR_T
 _7cd4:                                                                  ;$7CD4
-        sta $0452, x            ; ship slots?
+        sta SHIP_SLOTS, x
         tax 
-        bmi _7cec
+        bmi _7cec               ; is sun/planet?
+
         cpx # $0f
         beq _7ce6
         cpx # $03
@@ -3459,13 +3466,15 @@ _7ce6:                                                                  ;$7CE6
         inc $047f
 _7ce9:                                                                  ;$7CE9
         inc $045d, x
-_7cec:                                                                  ;$7CEC
+
+_7cec:  ; sun or planet                                                 ;$7CEC
         ldy ZP_VAR_T
         lda hull_d042 - 1, y
         and # %01101111
         ora $2d
         sta $2d
-        ldy # $24
+
+        ldy # $24               ; `PolyObject::visbility`?
 _7cf9:                                                                  ;$7CF9
         lda ZP_POLYOBJ_XPOS_pt1, y
         sta [ZP_POLYOBJ_ADDR], y
@@ -4413,14 +4422,19 @@ _82a4:                                                                  ;$82A4
 
 ;===============================================================================
 
+.import hull_missile_index:direct
+.import hull_coreolis_index:direct
+.import hull_constrictor_index:direct
+
 _82bc:                                                                  ;$82BC
         ldx # $ff
 _82be:                                                                  ;$82BE
         inx                     ; move to the next slot
-        lda $0452, x            ; ship slots?
+        lda SHIP_SLOTS, x
        .bze _828f               ; nothing in that slot?
 
-        cmp # $01               ; is missile?
+        ; is it a missile?
+        cmp # hull_missile_index
         bne _82be               ; no -- check next ship slot
 
         ; missile?
@@ -4438,6 +4452,7 @@ _82be:                                                                  ;$82BE
         ldy # PolyObject::roll  ;=$20 -- perhaps this is supposed to be energy?
         lda [ZP_TEMP_ADDR1], y
         bpl _82be               ; if +ve, check next ship slot
+
         and # %01111111         ; remove the sign
         lsr                     ; divide by 2
         cmp $ad                 ;?
@@ -4467,10 +4482,14 @@ _82f3:                                                                  ;$82F3
         jsr _900d
 _8305:                                                                  ;$8305
         ldy $ad
-        ldx $0452, y            ; ship slots?
-        cpx # $02               ; is space station (coreolis)?
+        ldx SHIP_SLOTS, y
+
+        ; is space station?
+        cpx # hull_coreolis_index
         beq _82a4
-        cpx # $1f               ; is Constrictor?
+
+        ; is Constrictor?
+        cpx # hull_constrictor_index
         bne _831d
 
         ; the Constrictor has been destroyed!
@@ -4510,8 +4529,8 @@ _832c:                                                                  ;$832C
 _8343:                                                                  ;$8343
         ; move the ship slots down?
         inx 
-        lda $0452, x
-        sta $0451, x
+        lda SHIP_SLOTS, x
+        sta SHIP_SLOTS-1, x
         bne _834f
         jmp _82bc               ; search again from the top
 
@@ -4597,7 +4616,7 @@ _83c9:                                                                  ;$83C9
 ;===============================================================================
 
 _83ca:                                                                  ;$83CA
-        jsr _8ac7               ; erase $0452...$048C
+        jsr _8ac7               ; erase $0452...$048C (58 bytes)
 
         ; erase $63...$69
 
@@ -4609,7 +4628,7 @@ _83ca:                                                                  ;$83CA
         txa                     ; set A = 0 (saves a byte over `lda # $00`)
         sta $a7
 
-        ; erase $04e7...$04e9
+        ; erase $04E7...$04E9
 
         ldx # $02
 :       sta $04e7, x                                                    ;$83D9
@@ -5744,6 +5763,8 @@ _8ac7:                                                                  ;$8AC7
         ldx # $3a
         lda # $00
 
+        ; $0452 is SHIP_SLOTS, but in this context
+        ; is some kind of larger data-block
 :       sta $0452, x                                                    ;$8ACB
         dex 
         bpl :-
@@ -5869,9 +5890,9 @@ _8b27:                                                                  ;$8B27
         php 
         
         sei 
-        bit $dc0d               ;cia1: cia interrupt control register
+        bit CIA1_INTERRUPT      ;cia1: cia interrupt control register
         lda # $01
-        sta $dc0d               ;cia1: cia interrupt control register
+        sta CIA1_INTERRUPT      ;cia1: cia interrupt control register
         ldx # $00
         stx _a8d9
         inx 
@@ -5916,7 +5937,7 @@ _8bc0:                                                                  ;$8BC0
         sta VIC_INTERRUPT_CONTROL
         cli 
         lda # $81
-        sta $dc0d               ;cia1: cia interrupt control register
+        sta CIA1_INTERRUPT      ;cia1: cia interrupt control register
         lda # $c0
         jsr KERNAL_SETMSG       ;enable/disable kernal messages   
         ldx _1d0e
@@ -5959,7 +5980,7 @@ _8c0d:                                                                  ;$8C0D
         jsr KERNAL_LOAD         ;load after call setlfs,setnam    
         php 
         lda # $01
-        sta $dc0d               ;cia1: cia interrupt control register
+        sta CIA1_INTERRUPT      ;cia1: cia interrupt control register
         sei 
         ldx # $00
         stx _a8d9
@@ -6394,14 +6415,19 @@ _8eab:                                                                  ;$8EAB
         rts 
 
 ;===============================================================================
-
+; Y = some index
+; X = some comparison value
+;
 _8eba:                                                                  ;$8EBA
         txa 
         cmp _1d14, y
-        bne _8ed4
+        bne @rts
+
         lda _1d06, y
         eor # %11111111
+        ; note: this is the only place $1D06 is writen to
         sta _1d06, y
+        
         jsr _2fee               ; BEEP?
        .phy                     ; push Y to stack (via A) 
         
@@ -6410,7 +6436,7 @@ _8eba:                                                                  ;$8EBA
 
         pla 
         tay 
-_8ed4:                                                                  ;$8ED4
+@rts:                                                                   ;$8ED4
         rts 
 
 ;===============================================================================
@@ -8842,9 +8868,11 @@ _a29d:                                                                  ;$A29D
 
 _a2a0:                                                                  ;$A2A0
 .export _a2a0
-        lda $28
+
+        lda $28                 ;`ZP_POLYOBJ_ENERGY`?
         and # %10100000
         bne _a2cb
+
         lda $a3                 ; move counter?
         eor $9d
         and # %00001111
@@ -9066,20 +9094,20 @@ _a40b:                                                                  ;$A40B
         ldy # $19
         jsr _2dc5
 _a434:                                                                  ;$A434
-        lda $28
+        lda $28                 ;`ZP_POLYOBJ_ENERGY`?
         and # %10100000
         bne _a443
-        lda $28
+        lda $28                 ;`ZP_POLYOBJ_ENERGY`?
         ora # %00010000
-        sta $28
+        sta $28                 ;`ZP_POLYOBJ_ENERGY`?
         jmp _b410
 
         ;-----------------------------------------------------------------------
 
 _a443:                                                                  ;$A443
-        lda $28
+        lda $28                 ;`ZP_POLYOBJ_ENERGY`?
         and # %11101111
-        sta $28
+        sta $28                 ;`ZP_POLYOBJ_ENERGY`?
         rts 
 
 ;===============================================================================
@@ -10170,7 +10198,7 @@ _aaa2:                                                                  ;$AAA2
 
         ; enable interrupts (regular and non-interruptable) for system
         ; timers A & B. do not use the TimeOfDay timer
-        lda # TIMER_A | TIMER_B
+        lda # CIA::TIMER_A | CIA::TIMER_B
         sta CIA1_INTERRUPT
         sta CIA2_INTERRUPT
         
@@ -11720,21 +11748,21 @@ _b335:  jsr _b359                                                       ;$B335
 _b341:                                                                  ;$B341
         ldx # $00
 _b343:                                                                  ;$B343
-        lda $0452, x            ; ship slots?
-        beq _b358
-        bmi _b355
+        lda SHIP_SLOTS, x
+        beq @rts
+        bmi :+
 
         jsr get_polyobj         ; get address of ship-slot
         
-        ldy # $1f
+        ldy # $1f               ; is this `PolyObject::energy`?
         lda [ZP_POLYOBJ_ADDR], y
         and # %11101111
         sta [ZP_POLYOBJ_ADDR], y
-_b355:                                                                  ;$B355
-        inx 
+
+:       inx                                                             ;$B355
         bne _b343
-_b358:                                                                  ;$B358
-        rts 
+
+@rts:   rts                                                             ;$B358 
 
 ;===============================================================================
 

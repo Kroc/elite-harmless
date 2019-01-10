@@ -7,6 +7,25 @@
 
 .include        "elite_consts.asm"
 
+; up to 11 3D-objects ("poly objcets") can be in the game at a time.
+; these are the 11 available slots; a value of $00 represents an unused slot,
+; otherwise the value is a hull index (see "hull_data.asm") 
+
+SHIP_SLOTS              = $0452
+
+SHIP_SLOT0              = $0452
+SHIP_SLOT1              = $0453
+SHIP_SLOT2              = $0454
+SHIP_SLOT3              = $0455
+SHIP_SLOT4              = $0456
+SHIP_SLOT5              = $0457
+SHIP_SLOT6              = $0458
+SHIP_SLOT7              = $0459
+SHIP_SLOT8              = $045a
+SHIP_SLOT9              = $045b
+SHIP_SLOT10             = $045c
+
+;-------------------------------------------------------------------------------
 
 MISSION_FLAGS           = $0499
 
@@ -24,6 +43,8 @@ MISSION_FLAGS           = $0499
 
 ; got Trumbles™?
 .ifndef OPTION_NOTRUMBLES
+
+;                       = $0480 ; something to do with roll-dampening
 
 PLAYER_TRUMBLES         = $04c9 ; number of Trumbles™ in the player's hold
 PLAYER_TRUMBLES_LO      = $04c9

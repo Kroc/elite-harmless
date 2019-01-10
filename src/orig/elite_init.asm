@@ -100,9 +100,9 @@ _75e4:                                                                  ;$75E4
         ora # MEM_IO_ONLY       ; switch I/O on, BASIC & KERNAL ROM off
         sta CPU_CONTROL
 
-        lda $dd02               ; read Port A ($DD00) data-direction register
+        lda CIA2_PORTA_DDR      ; read Port A ($DD00) data-direction register
         ora # %00000011         ; set bits 0/1 to R+W, all others read-only
-        sta $dd02
+        sta CIA2_PORTA_DDR
 
         ; set the VIC-II to get screen / sprite
         ; data from the zone $4000-$7FFF
@@ -118,8 +118,8 @@ _75e4:                                                                  ;$75E4
         ; writes to $DC0D control normal interrupts, and writes to $DD0D
         ; control non-maskable interrupts
         lda # %00000011
-        sta $dc0d               ; interrupt control / status register
-        sta $dd0d               ; non-maskable interrupt register
+        sta CIA1_INTERRUPT      ; interrupt control / status register
+        sta CIA2_INTERRUPT      ; non-maskable interrupt register
 
         ; set up VIC-II memory:
         ; NOTE: during loading, the bitmap screen is not set at the same

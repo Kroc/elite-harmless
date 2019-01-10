@@ -18,7 +18,7 @@ Help is needed in these areas:
 
 [helpw]:    https://github.com/Kroc/elite-harmless/labels/help%20wanted
 
-Planned Improvements:
+## Planned Improvements ##
 
 * [Speed improvements][speed]
 * "Quality of Life" improvements, making the game [more accessible][ease] to new players and players who may never have played an 8-bit or C64 game before

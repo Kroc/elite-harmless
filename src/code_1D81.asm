@@ -447,6 +447,7 @@ _1ece:                                                                  ;$1ECE
         sta $6a                 ; move count?
         tya 
         bpl _1eee
+
         eor # %11111111
         clc 
         adc # $01
@@ -460,6 +461,7 @@ _1ef5:                                                                  ;$1EF5
         sta $68                 ; roll magnitude
         ora $69                 ; roll sign?
         sta $a6
+
         ldx $048e
         jsr _3c58
         txa 
@@ -544,8 +546,10 @@ _1f77:                                                                  ;$1F77
 _1f8b:                                                                  ;$1F8B
         lda _8d23
         beq _1f98
+
         lda # $00
         sta $0480
+        
         jsr _923b
 _1f98:                                                                  ;$1F98
         lda _8d13
@@ -576,6 +580,7 @@ _1fc2:                                                                  ;$1FC2
         eor _8d35
         beq _1fd5
         sta $0480
+
         jsr _9204
 _1fd5:                                                                  ;$1FD5
         lda # $00
@@ -634,7 +639,8 @@ _202d:                                                                  ;$202D
 _202f:                                                                  ;$202F
 .export _202f
         stx $9d
-        lda $0452, x            ; ship slots?
+        
+        lda SHIP_SLOTS, x
         bne _2039
 
         jmp _21fa
@@ -642,7 +648,7 @@ _202f:                                                                  ;$202F
         ;-----------------------------------------------------------------------
 
 _2039:                                                                  ;$2039
-        sta $a5
+        sta $a5                 ; put ship type aside
         jsr get_polyobj
         
         ; copy the given PolyObject to the zero page:
@@ -654,8 +660,8 @@ _2039:                                                                  ;$2039
         dey 
         bpl :-
 
-        lda $a5
-        bmi @skip
+        lda $a5                 ; get ship type back
+        bmi @skip               ; if sun / planet, skip over
         
         asl 
         tay 
@@ -667,13 +673,20 @@ _2039:                                                                  ;$2039
         lda $04c3               ; energy bomb?
         bpl @skip
         
-        cpy # $04               ;=$02(x2): space station (coreolis)?
+.import hull_coreolis_index:direct
+.import hull_thargoid_index:direct
+.import hull_constrictor_index:direct
+
+        ; space station?
+        cpy # hull_coreolis_index *2 
         beq @skip
 
-        cpy # $3a               ;=$1D(x2): thargoid?
+        ; thargoid?
+        cpy # hull_thargoid_index *2
         beq @skip
 
-        cpy # $3e               ;=$1F(x2): constrictor
+        ; constrictor?
+        cpy # hull_constrictor_index *2
         bcs @skip
 
         ; has enough energy?
@@ -757,7 +770,7 @@ _20e0:                                                                  ;$20E0
 
 _20e3:                                                                  ;$20E3
         ;(last byte of `POLYOBJ_01`?)
-        lda POLYOBJ_01 + PolyObject::ai_state   ;=$F949
+        lda POLYOBJ_01 + PolyObject::visibility                         ;=$F949
         and # %00000100
         bne _2107
 
@@ -874,9 +887,10 @@ _21a3:                                                                  ;$21A3
 _21a8:                                                                  ;$21A8
         jsr _9a86
 _21ab:                                                                  ;$21AB
-        ldy # $23
+        ldy # PolyObject::ai_behaviour  ;$23
         lda $2c
         sta [ZP_POLYOBJ_ADDR], y
+
         lda $2d
         bmi _21e2
         lda $28
@@ -1059,21 +1073,28 @@ _22b2:                                                                  ;$22B2
 _22b5:                                                                  ;$22B5
         cmp # $0f
         bne _22c2
+
         lda $0480
         beq _231c
+        
         lda # $7b
         bne _2319
 _22c2:                                                                  ;$22C2
         cmp # $14
         bne _231c
+
         lda # $1e
         sta PLAYER_TEMP_CABIN
+        
         lda $045f
         bne _231c
+        
         ldy # $25
         jsr _2c50
         bne _231c
+        
         jsr _2c5c
+        
         eor # %11111111
         adc # $1e
         sta PLAYER_TEMP_CABIN
@@ -1095,7 +1116,7 @@ _22c2:                                                                  ;$22C2
         
 .ifndef OPTION_NOTRUMBLES
 
-        ; divide number of Trumbles™ by 2
+        ; reduce number of Trumbles™
         lsr PLAYER_TRUMBLES_HI
         ror PLAYER_TRUMBLES_LO
 .endif
@@ -2323,10 +2344,10 @@ dust_swap_xy:                                                           ;$2A12
 
 :       ldx DUST_Y, y           ; get dust-particle Y-position          ;$2A15
         lda DUST_X, y           ; get dust-particle X-position
-        sta ZP_VAR_Y               ; (put aside X-position)
+        sta ZP_VAR_Y            ; (put aside X-position)
         sta DUST_Y, y           ; save the Y-value to the X-position
         txa                     ; move the Y-position into A
-        sta ZP_VAR_X               ; (put aside Y-value)
+        sta ZP_VAR_X            ; (put aside Y-value)
         sta DUST_X, y           ; write the X-value to the Y-position
         lda DUST_Z, y           ; get dust z-position
         sta ZP_VAR_Z            ; (put aside Z-position)
@@ -4188,7 +4209,7 @@ _33a8:                                                                  ;$33A8
         lda $2d
         and # %11110000
         sta $2d
-        ldy # $24
+        ldy # PolyObject::visibility    ;$24
         sta [ZP_POLYOBJ_ADDR], y
         lda # $00
         sta $29
@@ -4682,7 +4703,7 @@ _36a6:                                                                  ;$36A6
         ldx $7c                 ; missile target?
         jsr get_polyobj
 
-        lda $0452, x            ; ship slots?
+        lda SHIP_SLOTS, x
         jsr _36c5
 
         ldy # $b7
@@ -4694,31 +4715,43 @@ _36a6:                                                                  ;$36A6
         jmp _a858
 
 ;===============================================================================
+; target / fire missile?
+
+.import hull_coreolis_index:direct
 
 _36c5:                                                                  ;$36C5
-        cmp # $02
+        ; firing misisle at space station?
+        ; (not a good idea)
+        cmp # hull_coreolis_index       ;$02
+        ; make the space-station hostile?
         beq _36f8
-        ldy # $24
+
+        ldy # PolyObject::visibility    ;$24
         lda [ZP_POLYOBJ_ADDR], y
         and # %00100000
         beq _36d4
+
         jsr _36f8
 _36d4:                                                                  ;$36D4
-        ldy # $20
+        ldy # PolyObject::roll          ;$20
         lda [ZP_POLYOBJ_ADDR], y
         beq _367d
+
         ora # %10000000
         sta [ZP_POLYOBJ_ADDR], y
+        
         ldy # $1c
         lda # $02
         sta [ZP_POLYOBJ_ADDR], y
         asl 
         ldy # $1e
         sta [ZP_POLYOBJ_ADDR], y
+
         lda $a5
         cmp # $0b
         bcc _36f7
-        ldy # $24
+
+        ldy # PolyObject::visibility    ;$24
         lda [ZP_POLYOBJ_ADDR], y
         ora # %00000100
         sta [ZP_POLYOBJ_ADDR], y
@@ -4728,10 +4761,10 @@ _36f7:                                                                  ;$36F7
         ;-----------------------------------------------------------------------
 
 _36f8:                                                                  ;$36F8
-        ; last byte of `POLYOBJ_01`?
-        lda POLYOBJ_01 + PolyObject::ai_state   ;=$F949
+        ; make hostile?
+        lda POLYOBJ_01 + PolyObject::visibility                         ;=$F949
         ora # %00000100
-        sta POLYOBJ_01 + PolyObject::ai_state   ;=$F949
+        sta POLYOBJ_01 + PolyObject::visibility                         ;=$F949
         rts 
 
 _3701:                                                                  ;$3701
@@ -5698,10 +5731,16 @@ _3c4d:                                                                  ;$3C4D
         rts 
 
 ;===============================================================================
+; roll dampening? -- slowly reduces roll to 0
+;
+; X = an index?
 
 _3c58:                                                                  ;$3C58
         lda $0480
+        ; negative?
         bne :+
+        ; positive, load a different value?
+        ; i.e. we are counting down to zero from this value
         lda _1d06
         bne @rts
 

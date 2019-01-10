@@ -9,7 +9,7 @@
 .include        "c64.asm"
 
 ; populate the .PRG header using the address given
-; by the linker config (see "link/elite-gma86.cfg")
+; by the linker config (see "link/elite-original-gma86.cfg")
 .segment        "HEAD_STAGE3"
 .import         __GMA3_PRG_START__
         .addr   __GMA3_PRG_START__+2
@@ -19,6 +19,7 @@ ZP_C1541_MEM            := $fb
 ZP_C1541_PROGRAM        := $fd
 
 .segment        "CODE_STAGE3"
+
         ; save a pointer for a memory address inside the drive
         lda #< $0300                                                    ;$C800
         sta ZP_C1541_MEM+0
@@ -46,7 +47,7 @@ ZP_C1541_PROGRAM        := $fd
         lda ZP_C1541_MEM+1
         jsr KERNAL_CHROUT
         ; uploads are done 32-bytes at a time
-        ; (the 1541 manual says 32 bytes maximum)
+        ; (the 1541 manual says 34 bytes maximum)
         lda # $20
         jsr KERNAL_CHROUT
 
@@ -79,7 +80,7 @@ ZP_C1541_PROGRAM        := $fd
 
         ; decrease the remaining bytes counter
         ; and keep looping if it hasn't reached zero yet
-:       dex
+:       dex 
         bne @upload_bytes
     
         ; close deafult output channel
@@ -128,7 +129,7 @@ _c873:
         jsr KERNAL_OPEN         ; open the command channel
 
         ; default all output to the disk drive:
-        ldx # $0f               ; logical file 15 (as above)
+        ldx # 15                ; logical file 15 (as above)
         jsr KERNAL_CHKOUT       ; define the default output
 
         ; unused byte at $02

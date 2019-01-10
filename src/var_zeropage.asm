@@ -69,8 +69,20 @@ ZP_TEMP_ADDR1_HI        = $08
         ; A.I. state
         ai_attack       .byte                                           ;+$22
         ai_behaviour    .byte                                           ;+$23
-        ai_state        .byte                                           ;+$24
+
+        ; visibility state, see enum below
+        visibility      .byte                                           ;+$24
 .endstruct
+
+; visibilty state and missile count
+.enum   visibility
+        explode_dust    = %10000000     ; distant explosion
+        firing          = %01000000     ; is firing at player, or exploding
+        display         = %00100000     ; display nodes (not dot)
+        scanner         = %00010000     ; visible on scanner
+        redraw          = %00001000     ; needs a redraw
+        missiles        = %00000111     ; no. of missiles (or thargons)
+.endenum
 
 ZP_POLYOBJ              = $09
 ZP_POLYOBJ_XPOS         = $09
@@ -127,7 +139,8 @@ ZP_POLYOBJ_PITCH        = $2a
 
 ZP_POLYOBJ_AI_ATK       = $2b
 ZP_POLYOBJ_AI_BHVR      = $2c
-ZP_POLYOBJ_AI_STATE     = $2d
+
+ZP_POLYOBJ_VISIBILITY   = $2d
 
 ;-------------------------------------------------------------------------------
 
@@ -360,7 +373,7 @@ ZP_VAR_T                = $bb   ; a common variable named "T"
 ;                       = $bc   ;? x15
 ;                       = $bd   ;? x25
 ;                       = $be   ;? x11
-;                       = $bf   ;? x37
+;                       = $bf   ;? x37 "S"?
 ;                       = $c0   ;? x6
 ;                       = $c1   ;UNUSED?
 ;                       = $c2   ;? x2

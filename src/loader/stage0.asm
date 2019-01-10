@@ -131,9 +131,9 @@ start:                                                                  ;$02c1
 
         ; get the address where GMA1.PRG loads from the linker
         ; (see "link/elite-original-gma86.cfg")
-.import __CODE_STAGE1_LOAD__
+.import __CODE_STAGE1A_LOAD__
 
-        jmp __CODE_STAGE1_LOAD__
+        jmp __CODE_STAGE1A_LOAD__
 
 ;===============================================================================
 
