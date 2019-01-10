@@ -3149,7 +3149,7 @@ _7b1c:                                                                  ;$7B1C
         
         jsr get_polyobj
 
-        ldy # PolyObject::energy        ;$1F
+        ldy # PolyObject::visibility        ;$1F
 _7b2a:                                                                  ;$7B2A
         lda [ZP_POLYOBJ_ADDR], y
         sta ZP_POLYOBJ_XPOS_pt1, y
@@ -3159,7 +3159,7 @@ _7b2a:                                                                  ;$7B2A
         jsr _b410
         ldx $9d
         
-        ldy # PolyObject::energy        ;$1F
+        ldy # PolyObject::visibility        ;$1F
         lda [ZP_POLYOBJ_ADDR], y
         and # %10100111
         sta [ZP_POLYOBJ_ADDR], y
@@ -3474,7 +3474,7 @@ _7cec:  ; sun or planet                                                 ;$7CEC
         ora $2d
         sta $2d
 
-        ldy # $24               ; `PolyObject::visbility`?
+        ldy # $24               ; `PolyObject::__visbility`?
 _7cf9:                                                                  ;$7CF9
         lda ZP_POLYOBJ_XPOS_pt1, y
         sta [ZP_POLYOBJ_ADDR], y
@@ -4449,7 +4449,7 @@ _82be:                                                                  ;$82BE
         lda polyobj_addrs_hi, y
         sta ZP_TEMP_ADDR1_HI
         
-        ldy # PolyObject::roll  ;=$20 -- perhaps this is supposed to be energy?
+        ldy # PolyObject::ai_atk  ;=$20 -- perhaps this is supposed to be energy?
         lda [ZP_TEMP_ADDR1], y
         bpl _82be               ; if +ve, check next ship slot
 
@@ -4517,7 +4517,7 @@ _832c:                                                                  ;$832C
         ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
 
-        ldy # PolyObject::pitch ;=$21 -- is this correct?
+        ldy # PolyObject::speed ;=$21 -- is this correct?
         clc 
         adc [ZP_POLYOBJ_ADDR], y
         sta ZP_VAR_P1
@@ -8869,7 +8869,7 @@ _a29d:                                                                  ;$A29D
 _a2a0:                                                                  ;$A2A0
 .export _a2a0
 
-        lda $28                 ;`ZP_POLYOBJ_ENERGY`?
+        lda $28                 ;`ZP_POLYOBJ_VISIBILITY`?
         and # %10100000
         bne _a2cb
 
@@ -9094,20 +9094,20 @@ _a40b:                                                                  ;$A40B
         ldy # $19
         jsr _2dc5
 _a434:                                                                  ;$A434
-        lda $28                 ;`ZP_POLYOBJ_ENERGY`?
+        lda $28                 ;`ZP_POLYOBJ_VISIBILITY`?
         and # %10100000
         bne _a443
-        lda $28                 ;`ZP_POLYOBJ_ENERGY`?
+        lda $28                 ;`ZP_POLYOBJ_VISIBILITY`?
         ora # %00010000
-        sta $28                 ;`ZP_POLYOBJ_ENERGY`?
+        sta $28                 ;`ZP_POLYOBJ_VISIBILITY`?
         jmp _b410
 
         ;-----------------------------------------------------------------------
 
 _a443:                                                                  ;$A443
-        lda $28                 ;`ZP_POLYOBJ_ENERGY`?
+        lda $28                 ;`ZP_POLYOBJ_VISIBILITY`?
         and # %11101111
-        sta $28                 ;`ZP_POLYOBJ_ENERGY`?
+        sta $28                 ;`ZP_POLYOBJ_VISIBILITY`?
         rts 
 
 ;===============================================================================
@@ -11754,7 +11754,7 @@ _b343:                                                                  ;$B343
 
         jsr get_polyobj         ; get address of ship-slot
         
-        ldy # $1f               ; is this `PolyObject::energy`?
+        ldy # $1f               ; is this `PolyObject::visibility`?
         lda [ZP_POLYOBJ_ADDR], y
         and # %11101111
         sta [ZP_POLYOBJ_ADDR], y

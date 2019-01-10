@@ -689,14 +689,13 @@ _2039:                                                                  ;$2039
         cpy # hull_constrictor_index *2
         bcs @skip
 
-        ; has enough energy?
-        lda ZP_POLYOBJ_ENERGY
+        lda ZP_POLYOBJ_VISIBILITY
         and # %00100000
         bne @skip
 
-        asl ZP_POLYOBJ_ENERGY   ;?
+        asl ZP_POLYOBJ_VISIBILITY   ;?
         sec 
-        ror ZP_POLYOBJ_ENERGY   ;?
+        ror ZP_POLYOBJ_VISIBILITY   ;?
 
         ldx $a5
         jsr _a7a6
@@ -711,7 +710,7 @@ _2039:                                                                  ;$2039
         dey 
         bpl :-
 
-        lda ZP_POLYOBJ_ENERGY
+        lda ZP_POLYOBJ_VISIBILITY
         and # %10100000
         jsr _87b1
         bne _20e0
@@ -760,6 +759,7 @@ _20c5:                                                                  ;$20C5
         tya 
         adc # $d0
         jsr _900d
+        
         asl $2d
         sec 
         ror $2d
@@ -770,7 +770,7 @@ _20e0:                                                                  ;$20E0
 
 _20e3:                                                                  ;$20E3
         ;(last byte of `POLYOBJ_01`?)
-        lda POLYOBJ_01 + PolyObject::visibility                         ;=$F949
+        lda POLYOBJ_01 + PolyObject::ai_bhvr                         ;=$F949
         and # %00000100
         bne _2107
 
@@ -887,7 +887,7 @@ _21a3:                                                                  ;$21A3
 _21a8:                                                                  ;$21A8
         jsr _9a86
 _21ab:                                                                  ;$21AB
-        ldy # PolyObject::ai_behaviour  ;$23
+        ldy # PolyObject::energy  ;$23
         lda $2c
         sta [ZP_POLYOBJ_ADDR], y
 
@@ -4209,7 +4209,7 @@ _33a8:                                                                  ;$33A8
         lda $2d
         and # %11110000
         sta $2d
-        ldy # PolyObject::visibility    ;$24
+        ldy # PolyObject::ai_bhvr    ;$24
         sta [ZP_POLYOBJ_ADDR], y
         lda # $00
         sta $29
@@ -4726,14 +4726,14 @@ _36c5:                                                                  ;$36C5
         ; make the space-station hostile?
         beq _36f8
 
-        ldy # PolyObject::visibility    ;$24
+        ldy # PolyObject::ai_bhvr    ;$24
         lda [ZP_POLYOBJ_ADDR], y
         and # %00100000
         beq _36d4
 
         jsr _36f8
 _36d4:                                                                  ;$36D4
-        ldy # PolyObject::roll          ;$20
+        ldy # PolyObject::ai_atk          ;$20
         lda [ZP_POLYOBJ_ADDR], y
         beq _367d
 
@@ -4751,7 +4751,7 @@ _36d4:                                                                  ;$36D4
         cmp # $0b
         bcc _36f7
 
-        ldy # PolyObject::visibility    ;$24
+        ldy # PolyObject::ai_bhvr    ;$24
         lda [ZP_POLYOBJ_ADDR], y
         ora # %00000100
         sta [ZP_POLYOBJ_ADDR], y
@@ -4762,9 +4762,9 @@ _36f7:                                                                  ;$36F7
 
 _36f8:                                                                  ;$36F8
         ; make hostile?
-        lda POLYOBJ_01 + PolyObject::visibility                         ;=$F949
+        lda POLYOBJ_01 + PolyObject::ai_bhvr                         ;=$F949
         ora # %00000100
-        sta POLYOBJ_01 + PolyObject::visibility                         ;=$F949
+        sta POLYOBJ_01 + PolyObject::ai_bhvr                         ;=$F949
         rts 
 
 _3701:                                                                  ;$3701

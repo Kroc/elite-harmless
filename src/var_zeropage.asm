@@ -59,19 +59,19 @@ ZP_TEMP_ADDR1_HI        = $08
         ; a pointer to already processed vertex data
         vertexData      .addr                                           ;+$1B
 
-        speed           .byte                                           ;+$1D
-        acceleration    .byte                                           ;+$1E
-        energy          .byte                                           ;+$1F
-
-        roll            .byte                                           ;+$20
-        pitch           .byte                                           ;+$21
-
-        ; A.I. state
-        ai_attack       .byte                                           ;+$22
-        ai_behaviour    .byte                                           ;+$23
-
+        roll            .byte                                           ;+$1D
+        pitch           .byte                                           ;+$1E
+        
         ; visibility state, see enum below
-        visibility      .byte                                           ;+$24
+        visibility      .byte                                           ;+$1F
+
+        ai_atk          .byte                                           ;+$20
+
+        speed           .byte                                           ;+$21
+        acceleration    .byte                                           ;+$22
+        energy          .byte                                           ;+$23
+
+        ai_bhvr         .byte                                           ;+$24
 .endstruct
 
 ; visibilty state and missile count
@@ -130,17 +130,18 @@ ZP_POLYOBJ_VERTX        = $24
 ZP_POLYOBJ_VERTX_LO     = $24
 ZP_POLYOBJ_VERTX_HI     = $25
 
-ZP_POLYOBJ_SPEED        = $26
-ZP_POLYOBJ_ACCEL        = $27
-ZP_POLYOBJ_ENERGY       = $28
+ZP_POLYOBJ_ROLL         = $26
+ZP_POLYOBJ_PITCH        = $27
 
-ZP_POLYOBJ_ROLL         = $29
-ZP_POLYOBJ_PITCH        = $2a
+ZP_POLYOBJ_VISIBILITY   = $28
 
-ZP_POLYOBJ_AI_ATK       = $2b
-ZP_POLYOBJ_AI_BHVR      = $2c
+ZP_POLYOBJ_AI_ATK       = $29
 
-ZP_POLYOBJ_VISIBILITY   = $2d
+ZP_POLYOBJ_SPEED        = $2a
+ZP_POLYOBJ_ACCEL        = $2b
+ZP_POLYOBJ_ENERGY       = $2c
+
+ZP_POLYOBJ_AI_BHVR      = $2d
 
 ;-------------------------------------------------------------------------------
 
