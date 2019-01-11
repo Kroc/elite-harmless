@@ -3837,16 +3837,19 @@ _317f:                                                                  ;$317F
         lda # $08
         sta ZP_POLYOBJ_VERTX_LO
         
-        lda # $c2
+        lda # %11000010
         sta ZP_POLYOBJ_PITCH
         lsr 
         sta ZP_POLYOBJ_ATTACK
 _318a:                                                                  ;$318A
         jsr _a2a0
         jsr _9a86
+
         dec ZP_POLYOBJ_ATTACK
         bne _318a
+        
         jsr _b410
+        
         lda # $00
         ldx # $10
 _319b:                                                                  ;$319B
@@ -3961,6 +3964,7 @@ _3239:                                                                  ;$3239
 _3244:                                                                  ;$3244
         lda $67
         bne _321e
+
         lda ZP_POLYOBJ_ATTACK
         asl 
         bmi _322f
@@ -3980,9 +3984,11 @@ _3244:                                                                  ;$3244
         ora ZP_POLYOBJ01_YPOS_pt2
         ora ZP_POLYOBJ01_ZPOS_pt2
         bne _3299
+
         lda ZP_POLYOBJ_ATTACK
-        cmp # $82
+        cmp # attack::active | attack::aggr1    ;=%10000010
         beq _321e
+        
         ldy # $1f
         lda [ZP_TEMP_ADDR3], y
         ; this might be a `ldy # $32`, but I don't see any jump into it
@@ -4000,7 +4006,7 @@ _327d:                                                                  ;$327D
         jsr _7bd2
 _328a:                                                                  ;$328A
         lda ZP_POLYOBJ_ATTACK
-        and # %01111111
+        and # attack::active ^$FF       ;=%01111111
         lsr 
         tax 
 _3290:                                                                  ;$3290
@@ -4076,15 +4082,18 @@ _32ef:                                                                  ;$32EF
         jsr get_random_number
         cmp # $c8
         bcc _3328
-        ldx # $00
+
+        ldx # %00000000
         stx ZP_POLYOBJ_ATTACK
+
         ldx # $24
         stx ZP_POLYOBJ_BEHAVIOUR
         and # %00000011
         adc # $11
         tax 
         jsr _32ea
-        lda # $00
+
+        lda # %00000000
         sta ZP_POLYOBJ_ATTACK
         rts 
 
@@ -4148,10 +4157,12 @@ _3351:                                                                  ;$3351
 _3357:                                                                  ;$3357
         lsr 
         bcc _3365
+        
         lda $045f
         beq _3365
+
         lda ZP_POLYOBJ_ATTACK
-        and # %10000001
+        and # attack::active | attack::ecm      ;=%10000001
         sta ZP_POLYOBJ_ATTACK
 _3365:                                                                  ;$3365
         ldx # $08
@@ -4219,7 +4230,8 @@ _33a8:                                                                  ;$33A8
         sta ZP_POLYOBJ_BEHAVIOUR
         ldy # PolyObject::behaviour    ;$24
         sta [ZP_POLYOBJ_ADDR], y
-        lda # $00
+        
+        lda # %00000000
         sta ZP_POLYOBJ_ATTACK
         jmp _3706
 
@@ -4242,7 +4254,8 @@ _33d6:                                                                  ;$33D6
         lda $a5
         cmp # $1d
         bne _33fa
-        ldx # $1e
+
+        ldx # %00011110
         lda ZP_POLYOBJ_ATTACK
         jmp _370a
 
@@ -4295,8 +4308,9 @@ _3434:                                                                  ;$3434
         and # %11111110
         beq _3454
 _3442:                                                                  ;$3442
+        ; randomly generate an attacking ship?
         jsr get_random_number
-        ora # %10000000
+        ora # attack::active    ;=%10000000
         cmp ZP_POLYOBJ_ATTACK
         bcs _3454
 _344b:                                                                  ;$344B
@@ -4683,9 +4697,10 @@ _3680:                                                                  ;$3680
         sta ZP_POLYOBJ_ZPOS_pt1
         lda # $80
         sta ZP_POLYOBJ_YPOS_pt3
+        
         lda $7c
         asl 
-        ora # %10000000
+        ora # attack::active
         sta ZP_POLYOBJ_ATTACK
 
 _3695:                                                                  ;$3695

@@ -1786,10 +1786,12 @@ _7388:                                                                  ;$7388
 
 _739b:                                                                  ;$739B
         jsr _848d
-        lda # $ff
+        lda # %11111111         ; why max-out? (is this a space-station?)
         sta ZP_POLYOBJ_ATTACK
+        
         lda # $1d
         jsr _7c6b
+        
         lda # $1e
         jmp _7c6b
 
@@ -3350,14 +3352,17 @@ _7c11:                                                                  ;$7C11
 _7c24:                                                                  ;$7C24
 .export _7c24
         jsr _b10e
-        ldx # $81
+        ldx # attack::active | attack::ecm      ;=%10000001
         stx ZP_POLYOBJ_ATTACK
+
         ldx # $00
         stx ZP_POLYOBJ_PITCH
         stx ZP_POLYOBJ_BEHAVIOUR
         stx $0453
+        
         dex 
         stx ZP_POLYOBJ_ROLL
+        
         ldx # $0a
         jsr _7d03
         jsr _7d03
@@ -4767,8 +4772,8 @@ _848d:                                                                  ;$848D
         sta ZP_POLYOBJ_ZPOS_pt2
         txa 
         cmp # $f5
-        rol 
-        ora # %11000000
+        rol                     ; increase aggression level?
+        ora # attack::active | attack::target   ;=%11000000
         sta ZP_POLYOBJ_ATTACK
 _84ae:                                                                  ;$84AE
         clc 
@@ -4802,11 +4807,14 @@ _84c3:                                                                  ;$84C3
         and # %00011111
         ora # %00010000
         sta ZP_POLYOBJ_VERTX_LO
+        
         jsr get_random_number
         bmi _84e2
+
         lda ZP_POLYOBJ_ATTACK
-        ora # %11000000
+        ora # attack::active | attack::target   ;=%11000000
         sta ZP_POLYOBJ_ATTACK
+        
         ldx # $10
         stx ZP_POLYOBJ_BEHAVIOUR
 _84e2:                                                                  ;$84E2
@@ -4868,8 +4876,9 @@ _854c:                                                                  ;$854C
         jsr get_random_number
         cmp # $fc
         bcc _8559
-        lda # $0f
-        sta ZP_POLYOBJ_ATTACK
+
+        lda # attack::ecm | attack::aggr1 | attack::aggr2 | attack::aggr3
+        sta ZP_POLYOBJ_ATTACK   ;=%00001111
         bne _855f
 _8559:                                                                  ;$8559
         cmp # $0a
@@ -4932,8 +4941,12 @@ _85bb:                                                                  ;$85BB
         tay 
         jsr _83b4
         bcc _85e0
-        lda # $f9
-        sta ZP_POLYOBJ_ATTACK
+
+        ; perhaps this bit-pattern has an alternative meaning?
+        lda # attack::active | attack::target \
+            | attack::aggr5 | attack::aggr4 | attack::aggr3 \
+            | attack::ecm
+        sta ZP_POLYOBJ_ATTACK   ;=%11111001
 
         lda MISSION_FLAGS
         and # missions::constrictor
@@ -4945,10 +4958,11 @@ _85bb:                                                                  ;$85BB
 _85e0:                                                                  ;$85E0
         lda # $04
         sta ZP_POLYOBJ_BEHAVIOUR
+
         jsr get_random_number
         cmp # $c8
         rol 
-        ora # %11000000
+        ora # attack::active | attack::target   ;=%11000000
         sta ZP_POLYOBJ_ATTACK
         tya 
         ; this causes the next instruction to become a meaningless `bit`
@@ -4964,10 +4978,16 @@ _85f8:                                                                  ;$85F8
         lda POLYOBJ_00 + PolyObject::zpos       ;=$F906
         and # %00111110
         bne _85a5
+        
         lda # $12
         sta ZP_POLYOBJ_VERTX_LO
-        lda # $79
-        sta ZP_POLYOBJ_ATTACK
+        
+        ; perhaps this bit-pattern has an alternative meaning?
+        lda # attack::target \
+            | attack::aggr5 | attack::aggr4 | attack::aggr3 \
+            | attack::ecm
+        sta ZP_POLYOBJ_ATTACK   ;=%01111001
+        
         lda # $20
         bne _85f2
 _860b:                                                                  ;$860B
@@ -8891,6 +8911,7 @@ _a2b1:                                                                  ;$A2B1
 _a2b8:                                                                  ;$A2B8
         lda ZP_POLYOBJ_ATTACK
         bpl _a2cb
+        
         cpx # $01
         beq _a2c8
         lda $a3                 ; move counter?

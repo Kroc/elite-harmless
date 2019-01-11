@@ -64,7 +64,7 @@ ZP_TEMP_ADDR1_HI        = $08
         
         ; visibility state, see enum below
         visibility      .byte                                           ;+$1F
-
+        ; attack state, see enum below
         attack          .byte                                           ;+$20
 
         speed           .byte                                           ;+$21
@@ -82,6 +82,19 @@ ZP_TEMP_ADDR1_HI        = $08
         scanner         = %00010000     ; visible on scanner
         redraw          = %00001000     ; needs a redraw
         missiles        = %00000111     ; no. of missiles (or thargons)
+.endenum
+
+; A.I. attack state
+.enum   attack
+        active          = %10000000     ; use tactics; missiles updated often
+        target          = %01000000     ; is targeting player
+        aggression      = %00111110     ; aggression level / missile target I.D.
+        aggr1           = %00000010     ; - aggression lvl.1
+        aggr2           = %00000100     ; - aggression lvl.2
+        aggr3           = %00001000     ; - aggression lvl.3
+        aggr4           = %00010000     ; - aggression lvl.4
+        aggr5           = %00100000     ; - agrression lvl.5
+        ecm             = %00000001     ; has E.C.M.
 .endenum
 
 ZP_POLYOBJ              = $09
