@@ -71,6 +71,7 @@ ZP_TEMP_ADDR1_HI        = $08
         acceleration    .byte                                           ;+$22
         energy          .byte                                           ;+$23
 
+        ; behaviour state, see enum below
         behaviour       .byte                                           ;+$24
 .endstruct
 
@@ -95,6 +96,18 @@ ZP_TEMP_ADDR1_HI        = $08
         aggr4           = %00010000     ; - aggression lvl.4
         aggr5           = %00100000     ; - agrression lvl.5
         ecm             = %00000001     ; has E.C.M.
+.endenum
+
+; A.I. behaviour state
+.enum   behaviour
+        remove          = %10000000     ; remove -- too far away
+        police          = %01000000     ; is police vessel
+        protected       = %00100000     ; protected by space-station
+        docking         = %00010000     ; is docking
+        pirate          = %00001000     ; is pirate
+        angry           = %00000100     ; is angry with the player
+        hunter          = %00000010     ; is a bounty-hunter
+        trader          = %00000001     ; is a peaceful trader          
 .endenum
 
 ZP_POLYOBJ              = $09

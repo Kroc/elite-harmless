@@ -2870,7 +2870,7 @@ _7948:                                                                  ;$7948
 
 .import POLYOBJ_00
 
-        lda POLYOBJ_00 + PolyObject::zpos       ;=$F906
+        lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
 
@@ -3057,7 +3057,7 @@ _7a78:                                                                  ;$7A78
         lda # MEM_64K
         jsr set_memory_layout
 
-        lda POLYOBJ_00 + PolyObject::zpos       ;=$F906
+        lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
 
@@ -3152,7 +3152,7 @@ _7b1c:                                                                  ;$7B1C
         
         jsr get_polyobj
 
-        ldy # PolyObject::visibility        ;$1F
+        ldy # PolyObject::visibility
 _7b2a:                                                                  ;$7B2A
         lda [ZP_POLYOBJ_ADDR], y
         sta ZP_POLYOBJ_XPOS_pt1, y
@@ -3162,9 +3162,10 @@ _7b2a:                                                                  ;$7B2A
         jsr _b410
         ldx $9d
         
-        ldy # PolyObject::visibility        ;$1F
+        ldy # PolyObject::visibility
         lda [ZP_POLYOBJ_ADDR], y
-        and # %10100111
+        and # visibility::exploding | visibility::display \
+            | visibility::missiles      ;=%10100111
         sta [ZP_POLYOBJ_ADDR], y
 _7b41:                                                                  ;$7B41
         inx 
@@ -3255,7 +3256,8 @@ _7b9b:                                                                  ;$7B9B
         ;=======================================================================
         ; copy the X/Y/Z-position of `POLYOBJ_01` to the zero page
         ;
-        ldx # (.sizeof(PolyObject::xpos) + .sizeof(PolyObject::ypos) + .sizeof(PolyObject::zpos) - 1)
+        ldx # (.sizeof(PolyObject::xpos) + .sizeof(PolyObject::ypos) \
+            + .sizeof(PolyObject::zpos) - 1)
 
 .import POLYOBJ_01
 :       lda POLYOBJ_01, x       ;=$F925..                               ;$7B9D
@@ -3476,13 +3478,13 @@ _7ce9:                                                                  ;$7CE9
 _7cec:  ; sun or planet                                                 ;$7CEC
         ldy ZP_VAR_T
         lda hull_d042 - 1, y
-        and # %01101111
+        and # (behaviour::remove | behaviour::docking)^$FF    ;=%01101111
         ora ZP_POLYOBJ_BEHAVIOUR
         sta ZP_POLYOBJ_BEHAVIOUR
 
-        ldy # $24               ; `PolyObject::__visbility`?
+        ldy # $24               ; `PolyObject::behaviour`?
 _7cf9:                                                                  ;$7CF9
-        lda ZP_POLYOBJ_XPOS_pt1, y
+        lda ZP_POLYOBJ_XPOS_pt1, y      ; what has this to do with behaviour???
         sta [ZP_POLYOBJ_ADDR], y
         dey 
         bpl _7cf9
@@ -4815,7 +4817,7 @@ _84c3:                                                                  ;$84C3
         ora # attack::active | attack::target   ;=%11000000
         sta ZP_POLYOBJ_ATTACK
         
-        ldx # $10
+        ldx # behaviour::docking
         stx ZP_POLYOBJ_BEHAVIOUR
 _84e2:                                                                  ;$84E2
         and # %00000010
@@ -4956,7 +4958,7 @@ _85bb:                                                                  ;$85BB
         ora $047c
         beq _85f0
 _85e0:                                                                  ;$85E0
-        lda # $04
+        lda # behaviour::angry
         sta ZP_POLYOBJ_BEHAVIOUR
 
         jsr get_random_number
@@ -4975,7 +4977,7 @@ _85f2:                                                                  ;$85F2
         jmp _8627
 
 _85f8:                                                                  ;$85F8
-        lda POLYOBJ_00 + PolyObject::zpos       ;=$F906
+        lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
         and # %00111110
         bne _85a5
         
@@ -6350,7 +6352,7 @@ _8e29:                                                                  ;$8E29
         ora $045f
         ora $0482
         bne _8e7c
-        ldy POLYOBJ_00 + PolyObject::zpos + 2   ;=$F908
+        ldy POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
         bmi _8e44
         tay 
         jsr _2c50
@@ -6369,13 +6371,13 @@ _8e52:                                                                  ;$8E52
         sta ZP_VAR_R
         sta ZP_VAR_P1
         
-        lda POLYOBJ_00 + PolyObject::zpos + 2   ;=$F908
+        lda POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
         jsr _3ad1
-        sta POLYOBJ_00 + PolyObject::zpos + 2   ;=$F908
+        sta POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
 
-        lda POLYOBJ_01 + PolyObject::zpos + 2   ;=$F92D
+        lda POLYOBJ_01 + PolyObject::zpos + 2                           ;=$F92D
         jsr _3ad1
-        sta POLYOBJ_01 + PolyObject::zpos + 2   ;=$F92D
+        sta POLYOBJ_01 + PolyObject::zpos + 2                           ;=$F92D
 
         lda # $01
         sta $a0
@@ -7595,12 +7597,15 @@ _9a86:                                                                  ;$9A86
         bmi _9a83
         lda # $1f
         sta $ad
+
         lda ZP_POLYOBJ_BEHAVIOUR
         bmi _9ad8
+        
         lda # visibility::display
         bit ZP_POLYOBJ_VISIBILITY
         bne _9ac5
         bpl _9ac5
+        
         ora ZP_POLYOBJ_VISIBILITY
         and # (visibility::exploding | visibility::firing)^$FF  ;=%00111111
         sta ZP_POLYOBJ_VISIBILITY
@@ -11778,9 +11783,9 @@ _b343:                                                                  ;$B343
 
         jsr get_polyobj         ; get address of ship-slot
         
-        ldy # $1f               ; is this `PolyObject::visibility`?
+        ldy # PolyObject::visibility
         lda [ZP_POLYOBJ_ADDR], y
-        and # %11101111
+        and # visibility::scanner ^$FF  ;=%11101111
         sta [ZP_POLYOBJ_ADDR], y
 
 :       inx                                                             ;$B355

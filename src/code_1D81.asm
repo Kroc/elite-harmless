@@ -769,9 +769,8 @@ _20e0:                                                                  ;$20E0
         ;-----------------------------------------------------------------------
 
 _20e3:                                                                  ;$20E3
-        ;(last byte of `POLYOBJ_01`?)
         lda POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
-        and # %00000100
+        and # behaviour::angry
         bne _2107
 
         lda ZP_POLYOBJ_M0x2_HI
@@ -905,7 +904,7 @@ _21ab:                                                                  ;$21AB
         beq _21e5
 
         lda ZP_POLYOBJ_BEHAVIOUR
-        and # %01000000
+        and # behaviour::police
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
         lda $048b
@@ -934,7 +933,7 @@ _21e5:                                                                  ;$21E5
         jsr _87a4
         bcc _21e2
 _21ee:                                                                  ;$21EE
-        ldy # PolyObject::visibility    ;$1f
+        ldy # PolyObject::visibility
         lda ZP_POLYOBJ_VISIBILITY
         sta [ZP_POLYOBJ_ADDR], y
 
@@ -2674,17 +2673,17 @@ _2c50:                                                                  ;$2C50
 ;===============================================================================
 
 _2c5c:                                                                  ;$2C5C
-        lda POLYOBJ_00 + PolyObject::xpos + 1, y        ;=$F901
+        lda POLYOBJ_00 + PolyObject::xpos + 1, y                        ;=$F901
         jsr _3988
         sta ZP_VAR_R
 
-        lda POLYOBJ_00 + PolyObject::ypos + 1, y        ;=$F904
+        lda POLYOBJ_00 + PolyObject::ypos + 1, y                        ;=$F904
         jsr _3988
         adc ZP_VAR_R
         bcs _2c7a
         sta ZP_VAR_R
         
-        lda POLYOBJ_00 + PolyObject::zpos + 1, y        ;=$F907
+        lda POLYOBJ_00 + PolyObject::zpos + 1, y                        ;=$F907
         jsr _3988
         adc ZP_VAR_R
         bcc _2c7c
@@ -4050,9 +4049,11 @@ _32ad:                                                                  ;$32AD
         beq _3244
         cpx # $02
         bne _32ef
+
         lda ZP_POLYOBJ_BEHAVIOUR
-        and # %00000100
+        and # behaviour::angry
         bne _32da
+        
         lda $0467
         bne _3298
         jsr get_random_number
@@ -4086,8 +4087,9 @@ _32ef:                                                                  ;$32EF
         ldx # %00000000
         stx ZP_POLYOBJ_ATTACK
 
-        ldx # $24
+        ldx # behaviour::protected | behaviour::angry   ;=%00100100
         stx ZP_POLYOBJ_BEHAVIOUR
+
         and # %00000011
         adc # $11
         tax 
@@ -4134,7 +4136,7 @@ _3335:                                                                  ;$3335
         cpx # $28
         bcc _3347
         lda ZP_POLYOBJ_BEHAVIOUR
-        ora # %00000100
+        ora # behaviour::angry
         sta ZP_POLYOBJ_BEHAVIOUR
         lsr 
         lsr 
@@ -4226,9 +4228,10 @@ _33a8:                                                                  ;$33A8
         lda $d042 - 1, x        ;TODO: why is this less one?
         bpl _33d6
         lda ZP_POLYOBJ_BEHAVIOUR
-        and # %11110000
+        and # behaviour::remove    | behaviour::police \
+            | behaviour::protected | behaviour::docking ;=%11110000
         sta ZP_POLYOBJ_BEHAVIOUR
-        ldy # PolyObject::behaviour    ;$24
+        ldy # PolyObject::behaviour
         sta [ZP_POLYOBJ_ADDR], y
         
         lda # %00000000
@@ -4555,17 +4558,17 @@ _358f:                                                                  ;$358F
 ;===============================================================================
 
 _35b3:                                                                  ;$35B3
-        ldx POLYOBJ_01 + PolyObject::xpos + 0, y        ;=$F925
+        ldx POLYOBJ_01 + PolyObject::xpos + 0, y                        ;=$F925
         stx ZP_VAR_Q
         lda ZP_VAR_X
         jsr _3aa8
-        ldx POLYOBJ_01 + PolyObject::xpos + 2, y        ;=$F927
+        ldx POLYOBJ_01 + PolyObject::xpos + 2, y                        ;=$F927
         stx ZP_VAR_Q
         lda ZP_VAR_Y
         jsr _3ace
         sta ZP_VAR_S
         stx ZP_VAR_R
-        ldx POLYOBJ_01 + PolyObject::ypos + 1, y        ;=$F929
+        ldx POLYOBJ_01 + PolyObject::ypos + 1, y                        ;=$F929
         stx ZP_VAR_Q
         lda ZP_VAR_X2
         jmp _3ace
@@ -4589,13 +4592,13 @@ _35d5:                                                                  ;$35D5
 _35e8:                                                                  ;$35E8
         jsr _35eb
 _35eb:                                                                  ;$35EB
-        lda POLYOBJ_01 + PolyObject::m0x0 + 1   ;=$F92F
+        lda POLYOBJ_01 + PolyObject::m0x0 + 1                           ;=$F92F
         ldx # $00
         jsr _3600
-        lda POLYOBJ_01 + PolyObject::m0x1 + 1   ;=$F931
+        lda POLYOBJ_01 + PolyObject::m0x1 + 1                           ;=$F931
         ldx # $03
         jsr _3600
-        lda POLYOBJ_01 + PolyObject::m0x2 + 1   ;=$F933
+        lda POLYOBJ_01 + PolyObject::m0x2 + 1                           ;=$F933
         ldx # $06
 _3600:                                                                  ;$3600
         asl 
@@ -4751,9 +4754,9 @@ _36c5:                                                                  ;$36C5
         ; make the space-station hostile?
         beq _36f8
 
-        ldy # PolyObject::behaviour    ;$24
+        ldy # PolyObject::behaviour
         lda [ZP_POLYOBJ_ADDR], y
-        and # %00100000
+        and # behaviour::protected
         beq _36d4
 
         jsr _36f8
@@ -4776,9 +4779,9 @@ _36d4:                                                                  ;$36D4
         cmp # $0b
         bcc _36f7
 
-        ldy # PolyObject::behaviour    ;$24
+        ldy # PolyObject::behaviour
         lda [ZP_POLYOBJ_ADDR], y
-        ora # %00000100
+        ora # behaviour::angry
         sta [ZP_POLYOBJ_ADDR], y
 _36f7:                                                                  ;$36F7
         rts 
@@ -4788,7 +4791,7 @@ _36f7:                                                                  ;$36F7
 _36f8:                                                                  ;$36F8
         ; make hostile?
         lda POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
-        ora # %00000100
+        ora # behaviour::angry
         sta POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
         rts 
 
