@@ -65,20 +65,20 @@ ZP_TEMP_ADDR1_HI        = $08
         ; visibility state, see enum below
         visibility      .byte                                           ;+$1F
 
-        ai_atk          .byte                                           ;+$20
+        attack          .byte                                           ;+$20
 
         speed           .byte                                           ;+$21
         acceleration    .byte                                           ;+$22
         energy          .byte                                           ;+$23
 
-        ai_bhvr         .byte                                           ;+$24
+        behaviour       .byte                                           ;+$24
 .endstruct
 
 ; visibilty state and missile count
 .enum   visibility
-        explode_dust    = %10000000     ; distant explosion
-        firing          = %01000000     ; is firing at player, or exploding
-        display         = %00100000     ; display nodes (not dot)
+        exploding       = %10000000     ; is exploding!
+        firing          = %01000000     ; is firing at player!
+        display         = %00100000     ; display nodes (not distant dot)
         scanner         = %00010000     ; visible on scanner
         redraw          = %00001000     ; needs a redraw
         missiles        = %00000111     ; no. of missiles (or thargons)
@@ -135,26 +135,21 @@ ZP_POLYOBJ_PITCH        = $27
 
 ZP_POLYOBJ_VISIBILITY   = $28
 
-ZP_POLYOBJ_AI_ATK       = $29
+ZP_POLYOBJ_ATTACK       = $29
 
 ZP_POLYOBJ_SPEED        = $2a
 ZP_POLYOBJ_ACCEL        = $2b
 ZP_POLYOBJ_ENERGY       = $2c
 
-ZP_POLYOBJ_AI_BHVR      = $2d
+ZP_POLYOBJ_BEHAVIOUR    = $2d
 
 ;-------------------------------------------------------------------------------
-
-ZP_ROTX                 = $26   ; rotate-X counter? "roll"
-ZP_ROTZ                 = $27   ; rotate-Z counter? "pitch"
-
-ZP_MISSILE_STATE        = $28   ; BBC says "display/exploding state|missiles"??
-
-;                       = $29   ; something to do with A.I.
 
 ZP_TEMP_ADDR2           = $2a   ; another temporary address
 ZP_TEMP_ADDR2_LO        = $2a
 ZP_TEMP_ADDR2_HI        = $2b
+
+;-------------------------------------------------------------------------------
 
 ZP_VAR_P                = $2e   ; a common variable called "P"
 ZP_VAR_P1               = $2e

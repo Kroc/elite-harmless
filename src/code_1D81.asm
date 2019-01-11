@@ -690,12 +690,12 @@ _2039:                                                                  ;$2039
         bcs @skip
 
         lda ZP_POLYOBJ_VISIBILITY
-        and # %00100000
+        and # visibility::display
         bne @skip
 
-        asl ZP_POLYOBJ_VISIBILITY   ;?
+        asl ZP_POLYOBJ_VISIBILITY
         sec 
-        ror ZP_POLYOBJ_VISIBILITY   ;?
+        ror ZP_POLYOBJ_VISIBILITY
 
         ldx $a5
         jsr _a7a6
@@ -711,7 +711,7 @@ _2039:                                                                  ;$2039
         bpl :-
 
         lda ZP_POLYOBJ_VISIBILITY
-        and # %10100000
+        and # visibility::exploding | visibility::display
         jsr _87b1
         bne _20e0
 
@@ -760,9 +760,9 @@ _20c5:                                                                  ;$20C5
         adc # $d0
         jsr _900d
         
-        asl $2d
+        asl ZP_POLYOBJ_BEHAVIOUR
         sec 
-        ror $2d
+        ror ZP_POLYOBJ_BEHAVIOUR
 _20e0:                                                                  ;$20E0
         jmp _2131
 
@@ -770,7 +770,7 @@ _20e0:                                                                  ;$20E0
 
 _20e3:                                                                  ;$20E3
         ;(last byte of `POLYOBJ_01`?)
-        lda POLYOBJ_01 + PolyObject::ai_bhvr                         ;=$F949
+        lda POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
         and # %00000100
         bne _2107
 
@@ -801,9 +801,11 @@ _2107:                                                                  ;$2107
 
 _2110:                                                                  ;$2110
         jsr _a813
-        asl $28
+
+        ; set top-bit of visibility state? 
+        asl ZP_POLYOBJ_VISIBILITY
         sec 
-        ror $28
+        ror ZP_POLYOBJ_VISIBILITY
         bne _2131
 _211a:                                                                  ;$211A
         lda # $01
@@ -811,17 +813,17 @@ _211a:                                                                  ;$211A
         lda # $05
         bne _212b
 _2122:                                                                  ;$2122
-        asl $28
+        asl ZP_POLYOBJ_VISIBILITY
         sec 
-        ror $28
-        lda $2c
+        ror ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_ENERGY
         sec 
         ror 
 _212b:                                                                  ;$212B
         jsr _7bd2
         jsr _a813
 _2131:                                                                  ;$2131
-        lda $2d
+        lda ZP_POLYOBJ_BEHAVIOUR
         bpl _2138
         jsr _b410
 _2138:                                                                  ;$2138
@@ -836,7 +838,7 @@ _2138:                                                                  ;$2138
         
         jsr _a80f
         ldx $9d
-        ldy # $27
+        ldy # ZP_POLYOBJ_PITCH  ;$27
         jsr _7d0e
 _2153:                                                                  ;$2153
         lda $7b
@@ -854,13 +856,15 @@ _2153:                                                                  ;$2153
         lsr $7b
         lsr $7b
 _2170:                                                                  ;$2170
-        lda $2c
+        lda ZP_POLYOBJ_ENERGY
         sec 
         sbc $7b
         bcs _21a1
-        asl $28
+
+        asl ZP_POLYOBJ_VISIBILITY
         sec 
-        ror $28
+        ror ZP_POLYOBJ_VISIBILITY
+        
         lda $a5
         cmp # $07
         bne _2192
@@ -880,24 +884,27 @@ _2192:                                                                  ;$2192
         ldx $a5
         jsr _a7a6
 _21a1:                                                                  ;$21A1
-        sta $2c
+        sta ZP_POLYOBJ_ENERGY
 _21a3:                                                                  ;$21A3
         lda $a5
         jsr _36c5
 _21a8:                                                                  ;$21A8
         jsr _9a86
 _21ab:                                                                  ;$21AB
-        ldy # PolyObject::energy  ;$23
-        lda $2c
+        ldy # PolyObject::energy
+        lda ZP_POLYOBJ_ENERGY
         sta [ZP_POLYOBJ_ADDR], y
 
-        lda $2d
+        lda ZP_POLYOBJ_BEHAVIOUR
         bmi _21e2
-        lda $28
-        bpl _21e5
-        and # %00100000
+
+        lda ZP_POLYOBJ_VISIBILITY
+        bpl _21e5               ; bit 7 set?
+        
+        and # visibility::display
         beq _21e5
-        lda $2d
+
+        lda ZP_POLYOBJ_BEHAVIOUR
         and # %01000000
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
@@ -927,9 +934,10 @@ _21e5:                                                                  ;$21E5
         jsr _87a4
         bcc _21e2
 _21ee:                                                                  ;$21EE
-        ldy # $1f
-        lda $28
+        ldy # PolyObject::visibility    ;$1f
+        lda ZP_POLYOBJ_VISIBILITY
         sta [ZP_POLYOBJ_ADDR], y
+
         ldx $9d
         inx 
         jmp _202f
@@ -3830,13 +3838,13 @@ _317f:                                                                  ;$317F
         sta ZP_POLYOBJ_VERTX_LO
         
         lda # $c2
-        sta $27
+        sta ZP_POLYOBJ_PITCH
         lsr 
-        sta $29
+        sta ZP_POLYOBJ_ATTACK
 _318a:                                                                  ;$318A
         jsr _a2a0
         jsr _9a86
-        dec $29
+        dec ZP_POLYOBJ_ATTACK
         bne _318a
         jsr _b410
         lda # $00
@@ -3953,7 +3961,7 @@ _3239:                                                                  ;$3239
 _3244:                                                                  ;$3244
         lda $67
         bne _321e
-        lda $29
+        lda ZP_POLYOBJ_ATTACK
         asl 
         bmi _322f
         
@@ -3972,7 +3980,7 @@ _3244:                                                                  ;$3244
         ora ZP_POLYOBJ01_YPOS_pt2
         ora ZP_POLYOBJ01_ZPOS_pt2
         bne _3299
-        lda $29
+        lda ZP_POLYOBJ_ATTACK
         cmp # $82
         beq _321e
         ldy # $1f
@@ -3991,16 +3999,16 @@ _327d:                                                                  ;$327D
         lda # $50
         jsr _7bd2
 _328a:                                                                  ;$328A
-        lda $29
+        lda ZP_POLYOBJ_ATTACK
         and # %01111111
         lsr 
         tax 
 _3290:                                                                  ;$3290
         jsr _a7a6
 _3293:                                                                  ;$3293
-        asl $28
+        asl ZP_POLYOBJ_VISIBILITY
         sec 
-        ror $28
+        ror ZP_POLYOBJ_VISIBILITY
 _3298:                                                                  ;$3298
         rts 
 
@@ -4036,7 +4044,7 @@ _32ad:                                                                  ;$32AD
         beq _3244
         cpx # $02
         bne _32ef
-        lda $2d
+        lda ZP_POLYOBJ_BEHAVIOUR
         and # %00000100
         bne _32da
         lda $0467
@@ -4069,25 +4077,25 @@ _32ef:                                                                  ;$32EF
         cmp # $c8
         bcc _3328
         ldx # $00
-        stx $29
+        stx ZP_POLYOBJ_ATTACK
         ldx # $24
-        stx $2d
+        stx ZP_POLYOBJ_BEHAVIOUR
         and # %00000011
         adc # $11
         tax 
         jsr _32ea
         lda # $00
-        sta $29
+        sta ZP_POLYOBJ_ATTACK
         rts 
 
         ;-----------------------------------------------------------------------
 
 _330f:                                                                  ;$330F
         ldy # Hull::energy      ;=$0E: energy
-        lda $2c
+        lda ZP_POLYOBJ_ENERGY
         cmp [ZP_HULL_ADDR], y
         bcs _3319
-        inc $2c
+        inc ZP_POLYOBJ_ENERGY
 _3319:                                                                  ;$3319
         cpx # $1e
         bne _3329
@@ -4095,8 +4103,8 @@ _3319:                                                                  ;$3319
         lda $047a
         bne _3329
         
-        lsr $29
-        asl $29
+        lsr ZP_POLYOBJ_ATTACK
+        asl ZP_POLYOBJ_ATTACK
         lsr ZP_POLYOBJ_VERTX_LO
 _3328:                                                                  ;$3328
         rts 
@@ -4105,7 +4113,7 @@ _3328:                                                                  ;$3328
 
 _3329:                                                                  ;$3329
         jsr get_random_number
-        lda $2d
+        lda ZP_POLYOBJ_BEHAVIOUR
         lsr 
         bcc _3335
         cpx # $32
@@ -4116,9 +4124,9 @@ _3335:                                                                  ;$3335
         ldx PLAYER_LEGAL
         cpx # $28
         bcc _3347
-        lda $2d
+        lda ZP_POLYOBJ_BEHAVIOUR
         ora # %00000100
-        sta $2d
+        sta ZP_POLYOBJ_BEHAVIOUR
         lsr 
         lsr 
 _3347:                                                                  ;$3347
@@ -4142,9 +4150,9 @@ _3357:                                                                  ;$3357
         bcc _3365
         lda $045f
         beq _3365
-        lda $29
+        lda ZP_POLYOBJ_ATTACK
         and # %10000001
-        sta $29
+        sta ZP_POLYOBJ_ATTACK
 _3365:                                                                  ;$3365
         ldx # $08
 _3367:                                                                  ;$3367
@@ -4189,16 +4197,16 @@ _339a:                                                                  ;$339A
         bcc _33a8
         jsr get_random_number
         ora # %01101000
-        sta $26
+        sta ZP_POLYOBJ_ROLL
 _33a8:                                                                  ;$33A8
         ldy # Hull::energy      ;=$0E: energy
         lda [ZP_HULL_ADDR], y
         lsr 
-        cmp $2c
+        cmp ZP_POLYOBJ_ENERGY
         bcc _33fd
         lsr 
         lsr 
-        cmp $2c
+        cmp ZP_POLYOBJ_ENERGY
         bcc _33d6
         jsr get_random_number
         cmp # $e6
@@ -4206,34 +4214,36 @@ _33a8:                                                                  ;$33A8
         ldx $a5
         lda $d042 - 1, x        ;TODO: why is this less one?
         bpl _33d6
-        lda $2d
+        lda ZP_POLYOBJ_BEHAVIOUR
         and # %11110000
-        sta $2d
-        ldy # PolyObject::ai_bhvr    ;$24
+        sta ZP_POLYOBJ_BEHAVIOUR
+        ldy # PolyObject::behaviour    ;$24
         sta [ZP_POLYOBJ_ADDR], y
         lda # $00
-        sta $29
+        sta ZP_POLYOBJ_ATTACK
         jmp _3706
 
         ;-----------------------------------------------------------------------
 
 _33d6:                                                                  ;$33D6
-        lda $28
-        and # %00000111
+        lda ZP_POLYOBJ_VISIBILITY
+        and # visibility::missiles
         beq _33fd
         sta ZP_VAR_T
+
         jsr get_random_number
         and # %00011111
         cmp ZP_VAR_T
         bcs _33fd
+        
         lda $67
         bne _33fd
-        dec $28
+        dec ZP_POLYOBJ_VISIBILITY       ; reduce number of missiles?
         lda $a5
         cmp # $1d
         bne _33fa
         ldx # $1e
-        lda $29
+        lda ZP_POLYOBJ_ATTACK
         jmp _370a
 
         ;-----------------------------------------------------------------------
@@ -4257,10 +4267,10 @@ _33fd:                                                                  ;$33FD
         and # %11111000
         beq _3434
         
-        lda $28
-        ora # %01000000
-        sta $28
-        cpx # $a3                 ; move counter?
+        lda ZP_POLYOBJ_VISIBILITY
+        ora # visibility::firing
+        sta ZP_POLYOBJ_VISIBILITY
+        cpx # $a3
         bcc _3434
 
         lda [ZP_HULL_ADDR], y
@@ -4287,7 +4297,7 @@ _3434:                                                                  ;$3434
 _3442:                                                                  ;$3442
         jsr get_random_number
         ora # %10000000
-        cmp $29
+        cmp ZP_POLYOBJ_ATTACK
         bcs _3454
 _344b:                                                                  ;$344B
         jsr _35d5
@@ -4301,33 +4311,33 @@ _3454:                                                                  ;$3454
         tax 
         eor # %10000000
         and # %10000000
-        sta $27
+        sta ZP_POLYOBJ_PITCH
         txa 
         asl 
         cmp $b1
         bcc _346c
         lda $b0
-        ora $27
-        sta $27
+        ora ZP_POLYOBJ_PITCH
+        sta ZP_POLYOBJ_PITCH
 _346c:                                                                  ;$346C
-        lda $26
+        lda ZP_POLYOBJ_ROLL
         asl 
         cmp # $20
         bcs _348d
         ldy # $16
         jsr _3ab2
         tax 
-        eor $27
+        eor ZP_POLYOBJ_PITCH
         and # %10000000
         eor # %10000000
-        sta $26
+        sta ZP_POLYOBJ_ROLL
         txa 
         asl 
         cmp $b1
         bcc _348d
         lda $b0
-        ora $26
-        sta $26
+        ora ZP_POLYOBJ_ROLL
+        sta ZP_POLYOBJ_ROLL
 _348d:                                                                  ;$348D
         lda $aa
         bmi _349a
@@ -4437,12 +4447,12 @@ _3512:                                                                  ;$3512
 _3524:                                                                  ;$3524
         inc ZP_POLYOBJ_VERTX_HI
         lda # $7f
-        sta $26
+        sta ZP_POLYOBJ_ROLL
         bne _3571
 _352c:                                                                  ;$352C
         ldx # $00
         stx $b1
-        stx $27
+        stx ZP_POLYOBJ_PITCH
         lda $a5
         bpl _3556
         eor ZP_VAR_X
@@ -4450,7 +4460,7 @@ _352c:                                                                  ;$352C
         asl 
         lda # $02
         ror 
-        sta $26
+        sta ZP_POLYOBJ_ROLL
         lda ZP_VAR_X
         asl 
         cmp # $0c
@@ -4459,13 +4469,13 @@ _352c:                                                                  ;$352C
         asl 
         lda # $02
         ror 
-        sta $27
+        sta ZP_POLYOBJ_PITCH
         lda ZP_VAR_Y
         asl 
         cmp # $0c
         bcs _350a
 _3556:                                                                  ;$3556
-        stx $26
+        stx ZP_POLYOBJ_ROLL
         lda ZP_POLYOBJ_M2x0_HI
         sta ZP_VAR_X
         lda ZP_POLYOBJ_M2x1_HI
@@ -4482,9 +4492,9 @@ _3571:                                                                  ;$3571
         lda $3f                 ; only use, ever. does not get set!
         bne _357a
 
-        asl $2d
+        asl ZP_POLYOBJ_BEHAVIOUR
         sec 
-        ror $2d
+        ror ZP_POLYOBJ_BEHAVIOUR
 _357a:                                                                  ;$357A
         rts 
 
@@ -4623,8 +4633,8 @@ _363f:                                                                  ;$363F
         lda $a5
         bmi _367d
         
-        lda $28
-        and # %00100000
+        lda ZP_POLYOBJ_VISIBILITY
+        and # visibility::display
         ora ZP_POLYOBJ_XPOS_pt2
         ora ZP_POLYOBJ_YPOS_pt2
         bne _367d
@@ -4676,7 +4686,7 @@ _3680:                                                                  ;$3680
         lda $7c
         asl 
         ora # %10000000
-        sta $29
+        sta ZP_POLYOBJ_ATTACK
 
 _3695:                                                                  ;$3695
 .export _3695
@@ -4726,14 +4736,14 @@ _36c5:                                                                  ;$36C5
         ; make the space-station hostile?
         beq _36f8
 
-        ldy # PolyObject::ai_bhvr    ;$24
+        ldy # PolyObject::behaviour    ;$24
         lda [ZP_POLYOBJ_ADDR], y
         and # %00100000
         beq _36d4
 
         jsr _36f8
 _36d4:                                                                  ;$36D4
-        ldy # PolyObject::ai_atk          ;$20
+        ldy # PolyObject::attack
         lda [ZP_POLYOBJ_ADDR], y
         beq _367d
 
@@ -4751,7 +4761,7 @@ _36d4:                                                                  ;$36D4
         cmp # $0b
         bcc _36f7
 
-        ldy # PolyObject::ai_bhvr    ;$24
+        ldy # PolyObject::behaviour    ;$24
         lda [ZP_POLYOBJ_ADDR], y
         ora # %00000100
         sta [ZP_POLYOBJ_ADDR], y
@@ -4762,9 +4772,9 @@ _36f7:                                                                  ;$36F7
 
 _36f8:                                                                  ;$36F8
         ; make hostile?
-        lda POLYOBJ_01 + PolyObject::ai_bhvr                         ;=$F949
+        lda POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
         ora # %00000100
-        sta POLYOBJ_01 + PolyObject::ai_bhvr                         ;=$F949
+        sta POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
         rts 
 
 _3701:                                                                  ;$3701
@@ -4817,9 +4827,9 @@ _371c:                                                                  ;$371C
         tax 
 _374d:                                                                  ;$374D
         lda ZP_TEMP_VAR
-        sta $29
-        lsr $26
-        asl $26
+        sta ZP_POLYOBJ_ATTACK
+        lsr ZP_POLYOBJ_ROLL
+        asl ZP_POLYOBJ_ROLL
         txa 
         cmp # $09
         bcs _3770
@@ -4828,13 +4838,13 @@ _374d:                                                                  ;$374D
         pha 
         jsr get_random_number
         asl 
-        sta $27
+        sta ZP_POLYOBJ_PITCH
         txa 
         and # %00001111
         sta ZP_POLYOBJ_VERTX_LO
         lda # $ff
         ror 
-        sta $26
+        sta ZP_POLYOBJ_ROLL
         pla 
 _3770:                                                                  ;$3770
         jsr _7c6b
@@ -6066,8 +6076,8 @@ _3dff:                                                                  ;$3DFF
         sta $a3                 ; move counter?
 _3e01:                                                                  ;$3E01
         ldx # $7f
-        stx $26
-        stx $27
+        stx ZP_POLYOBJ_ROLL
+        stx ZP_POLYOBJ_PITCH
         jsr _9a86
         jsr _a2a0
         dec $a3                 ; move counter?
@@ -6123,8 +6133,9 @@ _3e46:                                                                  ;$3E46
         jsr _3e65
         beq _3e46
         
-        lda # $00
-        sta $28
+        ; this might be a temporary variable and not the visibility state
+        lda # %00000000
+        sta ZP_POLYOBJ_VISIBILITY
         
         lda # $01
         jsr _a72f
