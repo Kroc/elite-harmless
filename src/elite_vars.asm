@@ -27,6 +27,8 @@ SHIP_SLOT10             = $045c
 
 ;-------------------------------------------------------------------------------
 
+;                       = $0480 ; something to do with roll-dampening
+
 MISSION_FLAGS           = $0499
 
 .enum   missions
@@ -43,8 +45,6 @@ MISSION_FLAGS           = $0499
 
 ; got Trumbles™?
 .ifndef OPTION_NOTRUMBLES
-
-;                       = $0480 ; something to do with roll-dampening
 
 PLAYER_TRUMBLES         = $04c9 ; number of Trumbles™ in the player's hold
 PLAYER_TRUMBLES_LO      = $04c9

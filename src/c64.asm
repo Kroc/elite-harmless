@@ -9,10 +9,21 @@
         pha 
 .endmacro
 
+.macro .plx             ; "Pull X"
+        pla 
+        tax 
+.endmacro
+
 .macro .phy             ; "Push Y"
         tya 
         pha 
 .endmacro
+
+.macro .ply             ; "Pull Y"
+        pla 
+        tay 
+.endmacro
+
 
 ; the 6502 CPU has very difficult to grasp semantics when it comes to
 ; comparisons and branching when compared to the Z80. this can make it
@@ -75,7 +86,7 @@ L:
 ; instruction which is then interpretted as some other instruction. a common
 ; example of this is using the `bit` instruction as a 'do nothing' instruction
 ; with the option to jump over the `bit` opcode and treat the 2-byte parameter
-; as different instruction:
+; as a different instruction:
 ;
 ;     bit $00a9 ;<-- this is `lda # $00` if you skip the `bit` opcode
 ;
@@ -161,6 +172,14 @@ L:
 ;===============================================================================
 ; CIA
 ;===============================================================================
+; CIA1 - keyboard, joysticks, lightpen & paddles I/O
+;-------------------------------------------------------------------------------
+.define CIA1_PORTA              $dc00
+.define CIA1_PORTB              $dc01
+
+.define CIA1_PORTA_DDR          $dc02
+.define CIA1_PORTB_DDR          $dc03
+
 .define CIA1_INTERRUPT          $dc0d
 .define CIA2_INTERRUPT          $dd0d
 
@@ -174,6 +193,8 @@ L:
 .define VECTOR_RESET            $fffc
 .define VECTOR_IRQ              $fffe
 
+; CIA2 - VIC memory bank, IEC serial & userport RS232 I/O
+;-------------------------------------------------------------------------------
 .define CIA2_PORTA              $dd00
 .define CIA2_PORTB              $dd01
 

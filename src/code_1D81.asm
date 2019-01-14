@@ -69,20 +69,20 @@
 .import _8c7b:absolute
 .import _8c8a:absolute
 .import _8cad:absolute
-.import _8d0f:absolute
-.import _8d10:absolute
-.import _8d13:absolute
-.import _8d15:absolute
-.import _8d23:absolute
-.import _8d28:absolute
-.import _8d2a:absolute
-.import _8d2e:absolute
-.import _8d35:absolute
-.import _8d36:absolute
-.import _8d38:absolute
-.import _8d3e:absolute
-.import _8d42:absolute
-.import _8d53:absolute
+.import key_bomb:absolute
+.import key_accelerate:absolute
+.import key_escape_pod:absolute
+.import key_decelerate:absolute
+.import key_docking_off:absolute
+.import key_missile_fire:absolute
+.import key_jump:absolute
+.import key_missile_untarget:absolute
+.import joy_down:absolute
+.import key_missile_target:absolute
+.import key_docking_on:absolute
+.import key_ecm:absolute
+.import joy_fire:absolute
+.import get_input:absolute
 .import _8e29:absolute
 .import _900d:absolute
 .import _9204:absolute
@@ -107,7 +107,7 @@
 .import _a2a0:absolute
 .import _a44c:absolute
 .import _a626:absolute
-.import _a72f:absolute
+.import set_page:absolute
 .import _a7a6:absolute
 .import _a786:absolute
 .import _a795:absolute
@@ -489,7 +489,7 @@ _1f20:                                                                  ;$1F20
         ora $94
         sta $63
         
-        lda _8d10
+        lda key_accelerate
         beq _1f33
         
         lda $96                 ; player's ship speed?
@@ -498,13 +498,13 @@ _1f20:                                                                  ;$1F20
         
         inc $96                 ; player's ship speed?
 _1f33:                                                                  ;$1F33
-        lda _8d15
+        lda key_decelerate
         beq _1f3e
         dec $96                 ; player's ship speed?
         bne _1f3e
         inc $96                 ; player's ship speed?
 _1f3e:                                                                  ;$1F3E
-        lda _8d2e
+        lda key_missile_untarget
         and PLAYER_MISSILES
         beq _1f55
 
@@ -518,7 +518,7 @@ _1f3e:                                                                  ;$1F3E
 _1f55:                                                                  ;$1F55
         lda $7c
         bpl _1f6b
-        lda _8d36
+        lda key_missile_target
         beq _1f6b
 
         ldx PLAYER_MISSILES
@@ -529,14 +529,15 @@ _1f55:                                                                  ;$1F55
         ldy # $87
         jsr _b11f
 _1f6b:                                                                  ;$1F6B
-        lda _8d28
+        lda key_missile_fire
         beq _1f77
         lda $7c
         bmi _1fc2
         jsr _36a6
 _1f77:                                                                  ;$1F77
-        lda _8d0f
+        lda key_bomb
         beq _1f8b
+
         asl $04c3
         beq _1f8b
         ldy # $d0
@@ -544,7 +545,7 @@ _1f77:                                                                  ;$1F77
         ldy # $0d
         jsr _a858
 _1f8b:                                                                  ;$1F8B
-        lda _8d23
+        lda key_docking_off
         beq _1f98
 
         lda # $00
@@ -552,9 +553,10 @@ _1f8b:                                                                  ;$1F8B
         
         jsr _923b
 _1f98:                                                                  ;$1F98
-        lda _8d13
+        lda key_escape_pod
         and $04c7
         beq _1fa8
+
         lda $0482
         bne _1fa8
         jmp _316e
@@ -562,11 +564,11 @@ _1f98:                                                                  ;$1F98
         ;-----------------------------------------------------------------------
 
 _1fa8:                                                                  ;$1FA8
-        lda _8d2a
+        lda key_jump
         beq _1fb0
         jsr _8e29
 _1fb0:                                                                  ;$1FB0
-        lda _8d3e
+        lda key_ecm
         and $04c1
         beq _1fc2
         lda $67
@@ -574,10 +576,10 @@ _1fb0:                                                                  ;$1FB0
         dec $0481
         jsr _b0f4
 _1fc2:                                                                  ;$1FC2
-        lda _8d38
+        lda key_docking_on
         and $04c5
         beq _1fd5
-        eor _8d35
+        eor joy_down
         beq _1fd5
         sta $0480
 
@@ -594,7 +596,7 @@ _1fd5:                                                                  ;$1FD5
         sta $98
         lda $0487
         bne _202d
-        lda _8d42
+        lda joy_fire
         beq _202d
         lda PLAYER_TEMP_LASER
         cmp # $f2
@@ -826,8 +828,10 @@ _2131:                                                                  ;$2131
         bpl _2138
         jsr _b410
 _2138:                                                                  ;$2138
-        lda $a0
+        ; are we in the cockpit-view?
+        lda SCREEN_PAGE
         bne _21ab
+
         jsr _a626
         jsr _363f
         bcc _21a8
@@ -1139,6 +1143,7 @@ _2303:                                                                  ;$2303
         lda # $46
 _2314:                                                                  ;$2314
         sta PLAYER_FUEL
+
         lda # $a0
 _2319:                                                                  ;$2319
         jsr _900d
@@ -1164,8 +1169,10 @@ _233a:                                                                  ;$233A
 _2342:                                                                  ;$2342
         jsr _a786
 _2345:                                                                  ;$2345
-        lda $a0
+        ; are we in the cockpit-view?
+        lda SCREEN_PAGE
         bne _2366
+
         jmp _2a32
 
 ;===============================================================================
@@ -1564,12 +1571,14 @@ txt_docked_token08:                                                     ;$2478
 
 txt_docked_token09:                                                     ;$2483
         ;=======================================================================
+        ; switch to view "1"(?)
+        ;
 .export txt_docked_token09
 
         lda # 1
         jsr set_cursor_col
 
-        jmp _a72f
+        jmp set_page
 
 txt_docked_token0D:                                                     ;$248B
         ;=======================================================================
@@ -1824,6 +1833,8 @@ _26a4:                                                                  ;$26A4
         .byte   $1f, $c5, $ad, $90, $fb, $c8, $b1
 
 ;===============================================================================
+; this could be 1541 code, due to the infinite loops
+; (waiting for the drive command to finish)
 
 .segment        "CODE_27A3"
 
@@ -2047,8 +2058,17 @@ polyobj_addrs:                                                          ;$28A4
 ; unused / unreferenced?
 ;$28BA:
 
-        .byte             $80, $40, $20, $10, $08, $04
-        .byte   $02, $01, $80, $40
+        ; single pixel masks?
+        .byte   %10000000       ;=$80
+        .byte   %01000000       ;=$40
+        .byte   %00100000       ;=$20
+        .byte   %00010000       ;=$10
+        .byte   %00001000       ;=$08
+        .byte   %00000100       ;=$04
+        .byte   %00000010       ;=$02
+        .byte   %00000001       ;=$01
+        .byte   %10000000       ;=$80
+        .byte   %01000000       ;=$40
 
 ; unused / unreferenced?
 ;$28C4:
@@ -2077,6 +2097,8 @@ _28d0:  ; this looks like masks for multi-colour pixels?                ;$28D0
 ;===============================================================================
 
 _28d5:                                                                  ;$28D5
+        ; loads A & F with $0F!
+
 .export _28d5
         lda # $0f
         tax 
@@ -2154,61 +2176,78 @@ _290f:                                                                  ;$209F
         txa 
         sta $06c9, y            ; "dust y-lo"
 
-_2918:                                                                  ;$2918
+draw_particle:                                                          ;$2918
 ;===============================================================================
+; draw a single dust particle
 ;
-;       Y = ?
-;   ZP_VAR_X = ?
-;   ZP_VAR_Y = ?
+;   ZP_VAR_X = X-distance from middle of screen
+;   ZP_VAR_Y = Y-distance from middle of screen
+;   ZP_VAR_Z = dust Z-distance;
 ;
-.export _2918
+.export draw_particle
 
         lda ZP_VAR_X
-        bpl :+
+        bpl :+                  ; handle dust to the right
         
-        ; swap negative number to positive?
-        eor # %01111111
-        clc 
-        adc # $01
+        ; X is negative (left of centre) --
+        ; negate the value for the math to follow:
+        eor # %01111111         ; flip the sign
+        clc                     ; carry must be clear
+        adc # $01               ; add 1 to create 2's compliment
 
+        ; flip the sign and put aside for later
 :       eor # %10000000                                                 ;$2921
         tax 
         
-        lda ZP_VAR_Y
-        and # %01111111
+        ; has the dust particle travelled off
+        ; the top/bottom of the screen?
+        lda ZP_VAR_Y            ; get particle's Y-distance from centre
+        and # %01111111         ; ignore the sign
+        ; has the dust particle gone beyond the half-height?
         cmp # ELITE_VIEWPORT_HEIGHT / 2
+        ; if yes, don't process
+        ; (this is an RTS jump)
        .bge _2976
 
+        ; if the dust Y-distance is positive,
+        ; the value doesn't need altering
         lda ZP_VAR_Y
         bpl :+
         
-        ; flip pos/neg sign
+        ; negate the Y
         eor # %01111111
         adc # $01
 
+        ; put aside the positive-only Y value
 :       sta ZP_VAR_T                                                    ;$2934
+
+        ; get the viewport half-height again
         lda # (ELITE_VIEWPORT_HEIGHT / 2) + 1
         sbc ZP_VAR_T
 
-_293a:                                                                  ;$293A
+        ; fall through to the routine that does
+        ; the actual bitmap manipulation
+
+paint_particle:                                                         ;$293A
 ;===============================================================================
+; draw dust particle?
 ;
 ;        A = Y-position (px)
 ;        X = X-position (px)
-; ZP_VAR_Z = pixel Z-distance
+; ZP_VAR_Z = dust Z-distance
 ;
 ; preserves Y
 ;
-.export _293a
+.export paint_particle
 
         sty ZP_TEMP_VAR         ; preserve Y through this ordeal
-
-        tay 
-        txa 
+        tay                     ; get a copy of our Y-coordinate
         
         ; get a bitmap address for a char row:
         
-        ; reduce the X-position to a multiple of 8, i.e. a character column
+        ; reduce the X-position to a multiple of 8,
+        ; i.e. a character column
+        txa 
         and # %11111000
 
         ; add this to the bitmap address for the given row
@@ -2229,29 +2268,30 @@ _293a:                                                                  ;$293A
         and # %00000111         ; modulo 8 (0-7)
         tax 
         
-        lda ZP_VAR_Z
+        lda ZP_VAR_Z            ; "pixel distance"
         cmp # 144               ; is the dust-particle >= 144 Z-distance?
-       .bge _296d               
+       .bge :+                  ; yes, is very far away
         
         lda _28c8, x            ; get mask for desired pixel-position
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
         
-        lda ZP_VAR_Z
+        lda ZP_VAR_Z            ; again get the dust Z-distance
         cmp # 80                ; is the dust-particle >= 80 Z-distance?
-       .bge _2974
+       .bge @restore
         
         dey                     ; move up a pixel-row 
-        bpl _296d               ; didn't go off the top of the char?
+        bpl :+                  ; didn't go off the top of the char?
         
-        ldy # $01
+        ldy # $01               ; use row 1 instead of chnaging chars
 
-_296d:                                                                  ;$296D
-        lda _28c8, x
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
+:       ; draw pixels for very distant dust:                            ;$296D
 
-_2974:                                                                  ;$2974
+        lda _28c8, x            ; get mask for desired pixel-position
+        eor [ZP_TEMP_ADDR1], y  ; mask the background
+        sta [ZP_TEMP_ADDR1], y  ; merge the pixel with the background
+
+@restore:                                                               ;$2974
         ldy ZP_TEMP_VAR         ; restore Y
 _2976:                                                                  ;$2976
         rts 
@@ -2359,7 +2399,7 @@ dust_swap_xy:                                                           ;$2A12
         lda DUST_Z, y           ; get dust z-position
         sta ZP_VAR_Z            ; (put aside Z-position)
         
-        jsr _2918
+        jsr draw_particle
 
         dey 
         bne :-
@@ -2472,7 +2512,7 @@ _2a43:                                                                  ;$2A43
         bcc _2b0a
         sta ZP_VAR_Z
 _2b00:                                                                  ;$2B00
-        jsr _2918
+        jsr draw_particle
         dey 
         beq _2b09
         jmp _2a43
@@ -2593,7 +2633,7 @@ _2b30:                                                                  ;$2B30
         bcs _2bf7
         sta ZP_VAR_Z
 _2bed:                                                                  ;$2BED
-        jsr _2918
+        jsr draw_particle
         dey 
         beq _2bf6
         jmp _2b30
@@ -2719,6 +2759,8 @@ _2c88:                                                                  ;$2C88
         bne _2cee
 _2c9b:                                                                  ;$2C9B
 .export _2c9b
+
+        ; switch to page "8"(?)
         lda # $08
         jsr _6a2f
         jsr _70ab
@@ -4911,12 +4953,16 @@ _379e:                                                                  ;$397E
         lda # $08
 _37a5:                                                                  ;$37A5
         sta $ac
-        lda $a0
+
+        lda SCREEN_PAGE
         pha 
+        
+        ; switch to cockpit-view?
         lda # $00
-        jsr _a72f
+        jsr set_page
+        
         pla 
-        sta $a0
+        sta SCREEN_PAGE
 
 _37b2:                                                                  ;$37B2
 .export _37b2
@@ -5048,7 +5094,7 @@ _3895:                                                                  ;$3895
         cmp # $74
         bcs _38d1
 _389a:                                                                  ;$389A
-        jsr _2918
+        jsr draw_particle
         dey 
         beq _38a3
         jmp _37fa
@@ -5764,12 +5810,9 @@ _3c4d:                                                                  ;$3C4D
 ; X = an index?
 
 _3c58:                                                                  ;$3C58
-        lda $0480
-        ; negative?
+        lda $0480               ; is roll already 0?
         bne :+
-        ; positive, load a different value?
-        ; i.e. we are counting down to zero from this value
-        lda _1d06
+        lda _1d06               ; is this the dampening flag?
         bne @rts
 
 :       txa                                                             ;$3C62 
@@ -5897,8 +5940,10 @@ _3cdb:                                                                  ;$3CDB
         sta PLAYER_TEMP_LASER
         jsr _7b64
 _3cfa:                                                                  ;$3CFA
-        lda $a0
+        ; are we in the cockpit-view?
+        lda SCREEN_PAGE
         bne _3cda
+
         lda # $20
         ldy # $e0
         jsr _3d09
@@ -6088,7 +6133,9 @@ _3dff:                                                                  ;$3DFF
         jsr set_cursor_col
         
         sta ZP_POLYOBJ_ZPOS_pt2
-        jsr _a72f
+        
+        ; switch to page "1"(?)
+        jsr set_page
 
         lda # $40
         sta $a3                 ; move counter?
@@ -6155,8 +6202,10 @@ _3e46:                                                                  ;$3E46
         lda # %00000000
         sta ZP_POLYOBJ_VISIBILITY
         
+        ; switch to page "1"(?)
         lda # $01
-        jsr _a72f
+        jsr set_page
+
         jsr _9a86
 
 txt_docked_token17:                                                     ;$3E57  
@@ -6195,16 +6244,16 @@ _3e65:                                                                  ;$3E65
         jsr _9a86
         jsr _a2a0
         
-        jmp _8d53
+        jmp get_input
 
 txt_docked_token18:                                                     ;$3E7C
         ;=======================================================================
 .export txt_docked_token18
         
-        jsr _8d53
+        jsr get_input
         bne txt_docked_token18
 
-        jsr _8d53
+        jsr get_input
         beq txt_docked_token18
         
         rts 

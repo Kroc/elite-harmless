@@ -116,7 +116,7 @@ init:
         sta $d026
 
         ; set all sprites to single-colour
-        ; (the trumbles are actually multi-colour,
+        ; (the Trumbles™ are actually multi-colour,
         ;  so this must be changed at some point)
         lda # %00000000
         sta VIC_SPRITE_MULTICOLOR

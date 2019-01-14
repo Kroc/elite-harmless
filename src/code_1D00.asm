@@ -14,8 +14,8 @@
 .export _1d07
 .export _1d08
 .export _1d09
-.export _1d0a
-.export _1d0b
+.export opt_flipvert
+.export opt_flipaxis
 .export _1d0c
 .export _1d0d
 .export _1d0e
@@ -42,6 +42,8 @@ _1d04:
         .byte   $00
 _1d05:
         .byte   $00
+
+        ; series of flags?
 _1d06:
         .byte   $00
 _1d07:
@@ -50,10 +52,11 @@ _1d08:
         .byte   $00
 _1d09:
         .byte   $00
-_1d0a:
-        .byte   $00
-_1d0b:
-        .byte   $00
+
+opt_flipvert:           .byte   $00     ; flip the vertical axis?
+
+opt_flipaxis:           .byte   $00     ; flip both axises
+
 _1d0c:
         .byte   $00
 _1d0d:
@@ -70,6 +73,8 @@ _1d12:
         .byte   $00
 _1d13:
         .byte   $00
+
+        ; default values (or some-such) for the above flags?
 _1d14:
         .byte   $01, $36, $29, $2b, $27, $1e, $1b, $1c
         .byte   $2e, $17, $2c, $32, $24

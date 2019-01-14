@@ -24,8 +24,8 @@
 .import _1d05:absolute
 .import _1d06:absolute
 .import _1d08:absolute
-.import _1d0a:absolute
-.import _1d0b:absolute
+.import opt_flipvert:absolute
+.import opt_flipaxis:absolute
 .import _1d0c:absolute
 .import _1d0d:absolute
 .import _1d0e:absolute
@@ -69,8 +69,8 @@
 .import _28f3:absolute
 .import _2900:absolute
 .import _2907:absolute
-.import _2918:absolute
-.import _293a:absolute
+.import draw_particle:absolute
+.import paint_particle:absolute
 .import _2977:absolute
 .import dust_swap_xy:absolute
 .import _2c4e:absolute
@@ -136,7 +136,7 @@ _6a00:                                                                  ;$6A00
 .export _6a00
         sta $04ef               ; item index?
         lda # $01
-_6a05:  pha                                                             ;$6A05 
+_6a05:  pha                                                             ;$6A05
         ldx # $0c
         cpx $04ef               ; item index?
         bcc _6a1b                                                       
@@ -193,14 +193,20 @@ _6a1b:                                                                  ;$6A1B
 ;===============================================================================
 
 _6a2e:                                                                  ;$62AE
+        ; !
         rts 
+
 _6a2f:                                                                  ;$6A2F
+        ; changes page and does some other pre-emptive work?
+
 .export _6a2f
 
-        jsr _a72f
-        jsr _28d5
+        jsr set_page
+
+        jsr _28d5               ; loads A & X with $0F
         lda # $30
-        jsr _6a2e
+        jsr _6a2e               ; DEAD CODE! this is just an RTS!
+
         rts 
 
 _6a3b:  ; roll RNG seed four times?                                     ;$6A3B
@@ -210,12 +216,12 @@ _6a3b:  ; roll RNG seed four times?                                     ;$6A3B
         ; this routine calls itself 4 times to ensure
         ; enough scrambling of the random number
 
-        jsr :+                  ; do this twice,                                             
+        jsr :+                  ; do this twice,
 :       jsr _6a41               ; and that twice                        ;$6A3E
 
 _6a41:  ; roll the RNG seed once?                                       ;$6A41
         ;=======================================================================
-        lda ZP_SEED_pt1                                                 
+        lda ZP_SEED_pt1
         clc 
         adc ZP_SEED_pt3
         tax 
@@ -299,6 +305,7 @@ _6a9b:                                                                  ;$6A9B
 ;===============================================================================
 
 _6aa1:                                                                  ;$6AA1
+        ; switch to page "1"(?)
         lda # $01
         jsr _6a2f
 
@@ -574,13 +581,14 @@ _6ba9:                                                                  ;$6BA9
         rts 
 
 ;===============================================================================
+; galactic chart
 
 _6c1c:                                                                  ;$6C1C
-        lda # $40
-        jsr _a72f
+        lda # $40               ; page-ID for galactic chart
+        jsr set_page            ; switch pages, clearing the screen
         
         lda # $10
-        jsr _6a2e
+        jsr _6a2e               ; DEAD CODE! this is just an RTS!
 
         lda # 7
         jsr set_cursor_col
@@ -608,7 +616,7 @@ _6c40:                                                                  ;$6C40
         clc 
         adc # $18
         sta ZP_VAR_Y
-        jsr _293a
+        jsr paint_particle
         jsr _6a3b
         ldx $9d
         inx 
@@ -622,7 +630,7 @@ _6c40:                                                                  ;$6C40
         sta $90
 _6c6d:                                                                  ;$6C6D
         lda # $18
-        ldx $a0
+        ldx SCREEN_PAGE
         bpl _6c75
         lda # $00
 _6c75:                                                                  ;$6C75
@@ -662,7 +670,7 @@ _6ca2:                                                                  ;$6CA2
         adc $93
         cmp # $98
         bcc _6cb8
-        ldx $a0
+        ldx SCREEN_PAGE
         bmi _6cb8
         lda # $97
 _6cb8:                                                                  ;$6CB8
@@ -687,8 +695,9 @@ _6cc3:                                                                  ;$6CC3
         jmp _6cfe
 
 _6cda:                                                                  ;$6CDA
-        lda $a0
+        lda SCREEN_PAGE
         bmi _6cc3
+
         lda PLAYER_FUEL
         lsr 
         lsr 
@@ -732,8 +741,10 @@ _6cfe:                                                                  ;$6CFE
 ;===============================================================================
 
 _6d16:                                                                  ;$6D16
+        ; switch to page "2"(?)
         lda # $02
         jsr _6a2f
+
         jsr _72db
         lda # $80
         sta $34
@@ -897,6 +908,7 @@ _6e30:                                                                  ;$6E30
         ldy $04ef               ; item index?
         jmp _6e5d
 _6e41:                                                                  ;$6E41
+        ; switch to page "4"(?)
         lda # $04
         jsr _6a2f
 
@@ -948,7 +960,8 @@ _6e5d:                                                                  ;$6E5d
         clc 
         jsr print_tiny_value
         jsr _72b8
-        lda $a0
+
+        lda SCREEN_PAGE
         cmp # $04
         bne _6eca
 
@@ -984,9 +997,11 @@ _6eca:                                                                  ;$6ECA
         iny 
         cpy # $11
         bcc _6e5a
-        lda $a0
+
+        lda SCREEN_PAGE
         cmp # $04
         bne _6ede
+        
         jsr _7627
         jmp _6dbf
 _6ede:                                                                  ;$6EDE
@@ -1109,8 +1124,9 @@ _6f55:                                                                  ;$6F55
         sta $8e
 _6f82:                                                                  ;$6F82
 .export _6f82
-        lda $a0
+        lda SCREEN_PAGE
         bmi _6fa9
+
         lda TSYSTEM_POS_X
         sta $8e
         lda TSYSTEM_POS_Y
@@ -1166,15 +1182,18 @@ _6fce:                                                                  ;$6FCE
         jmp _6c6d
 
 ;===============================================================================
+; short-range (local) chart
 
 _6fdb:                                                                  ;$6FDB
         lda # $c7
         sta $b8
         sta $b7
-        lda # $80
-        jsr _a72f
+
+        lda # $80               ; page-ID for short-range (local) chart
+        jsr set_page            ; switch pages, clearing the screen
+        
         lda # $10
-        jsr _6a2e
+        jsr _6a2e               ; DEAD CODE! this is just an RTS!
 
         lda # 7
         jsr set_cursor_col
@@ -1423,10 +1442,14 @@ _715c:                                                                  ;$715C
 _7165:                                                                  ;$7165
         jsr _8e92
         bmi _71ca
-        lda $a0
+
+        ; are we in the cockpit-view?
+        lda SCREEN_PAGE
         beq _71c4
+
         and # %11000000
         bne _7173
+        
         rts 
 
 _7173:                                                                  ;$7173
@@ -1449,8 +1472,9 @@ _7181:                                                                  ;$7181
         jsr set_cursor_col
         
         lda # $17
-        ldy $a0
+        ldy SCREEN_PAGE
         bne _7196
+
         lda # $11
 _7196:                                                                  ;$7196
         jsr set_cursor_row
@@ -1571,7 +1595,7 @@ _7244:                                                                  ;$7244
         pla 
         rts 
 
-_7246:                                                                  ;$7246                         
+_7246:                                                                  ;$7246
         pha 
         sta $92
         asl 
@@ -1803,7 +1827,8 @@ _73ac:                                                                  ;$73AC
         rol PLAYER_COMPETITION
 _73b3:                                                                  ;$73B3
         lda # $03
-        jsr _a72f
+        jsr set_page
+
         jsr _3795
         jsr _83df
         sty $0482
@@ -1819,15 +1844,13 @@ _73c1:                                                                  ;$73C1
         lda PSYSTEM_POS_Y
         eor # %00011111
         sta PSYSTEM_POS_Y
+
         rts 
 
 ;===============================================================================
 
-        ; seriously!?
 _73dc:                                                                  ;$73DC
         rts 
-
-;===============================================================================
 
 _73dd:                                                                  ;$73DD
         lda PLAYER_FUEL
@@ -1837,9 +1860,11 @@ _73dd:                                                                  ;$73DD
         lda # $00
 _73e8:                                                                  ;$73E8
         sta PLAYER_FUEL
-        lda $a0
+        
+        lda SCREEN_PAGE
         bne _73f5
-        jsr _a72f
+
+        jsr set_page
         jsr _3795
 _73f5:                                                                  ;$73F5
         jsr _8e92
@@ -1851,13 +1876,16 @@ _73f5:                                                                  ;$73F5
         jsr _7337
         jsr _83df
         jsr _7a9f
-        lda $a0
+
+        lda SCREEN_PAGE
         and # %00111111
         bne _73dc
+        
         jsr _a731
-        lda $a0
+
+        lda SCREEN_PAGE
         bne _7452
-        inc $a0
+        inc SCREEN_PAGE
 _741c:                                                                  ;$741C
         ldx $a7
         beq _744b
@@ -1875,8 +1903,10 @@ _741c:                                                                  ;$741C
         jsr _8798
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
+
         lda # $ff
-        sta $a0
+        sta SCREEN_PAGE
+        
         jsr _37b2
 _744b:                                                                  ;$744B
         ldx # $00
@@ -2200,8 +2230,9 @@ _764c:                                                                  ;$764C
         lda PSYSTEM_TECHLEVEL
         cmp # $08
         bcc _7658
+
         lda # $20
-        jsr _a72f
+        jsr set_page
 _7658:                                                                  ;$7658
         lda # 16
         tay 
@@ -2858,7 +2889,7 @@ _7911:                                                                  ;$7911
         jsr _7974
         bne _7948
         lda ZP_VAR_Y
-        jsr _293a
+        jsr paint_particle
 _7948:                                                                  ;$7948
         dey 
         bpl _7911
@@ -3041,7 +3072,7 @@ _7a46:                                                                  ;$7A46
         jsr _7974
         bne _7a6c
         lda ZP_VAR_Y
-        jsr _293a
+        jsr paint_particle
 _7a6c:                                                                  ;$7A6C
         dey 
         bpl _7a46
@@ -3123,7 +3154,7 @@ _7ac2:                                                                  ;$7AC2
         lda # $81
         jsr _7c6b
 _7af3:                                                                  ;$7AF3
-        lda $a0
+        lda SCREEN_PAGE
         bne _7b1a
 _7af7:                                                                  ;$7AF7
         ldy DUST_COUNT          ; number of dust particles
@@ -3138,7 +3169,7 @@ _7afa:                                                                  ;$7AFA
         jsr get_random_number
         sta DUST_Y, y
         sta ZP_VAR_Y
-        jsr _2918
+        jsr draw_particle
         dey 
         bne _7afa
 _7b1a:                                                                  ;$7B1A
@@ -4274,7 +4305,7 @@ _81ed:                                                                  ;$81ED
 
 _81ee:                                                                  ;$81EE
 .export _81ee
-        jsr _8fec
+        jsr wait_for_input
         cmp # $59
         beq _81ed
         cmp # $4e
@@ -4285,8 +4316,9 @@ _81ee:                                                                  ;$81EE
 ;===============================================================================
 
 _81fb:                                                                  ;$81FB
-        lda $a0
+        lda SCREEN_PAGE
         bne _8204
+
         jsr _8ee3
         txa 
         rts 
@@ -4295,60 +4327,60 @@ _8204:                                                                  ;$8204
         jsr _8ee3
         lda _1d0c
         beq _8244
-        lda _8d1d
-        bit _8d20
+        lda joy_left
+        bit joy_right
         bpl _8216
         lda # $01
 _8216:                                                                  ;$8216
-        bit _8d42
+        bit joy_fire
         bpl _821d
         asl 
         asl 
 _821d:                                                                  ;$821D
         tax 
-        lda _8d35
-        bit _8d3f
+        lda joy_down
+        bit joy_up
         bpl _8228
         lda # $01
 _8228:                                                                  ;$8228
-        bit _8d42
+        bit joy_fire
         bpl _822f
         asl 
         asl 
 _822f:                                                                  ;$822F
         tay 
         lda # $00
-        sta _8d1d
-        sta _8d20
-        sta _8d35
-        sta _8d3f
-        sta _8d42
+        sta joy_left
+        sta joy_right
+        sta joy_down
+        sta joy_up
+        sta joy_fire
         lda $7d
         rts 
 
 ;===============================================================================
 
 _8244:                                                                  ;$8244
-        lda _8d4a
+        lda key_right
         beq _8251
         lda # $01
-        ora _8d3d
-        ora _8d18
+        ora key_lshft
+        ora key_rshft
 _8251:                                                                  ;$8251
-        bit _8d4b
+        bit key_return
         bpl _8258
         asl 
         asl 
 _8258:                                                                  ;$8258
         tax 
-        lda _8d45
+        lda key_down
         beq _8268
         lda # $01
-        ora _8d3d
-        ora _8d18
+        ora key_lshft
+        ora key_rshft
         eor # %11111110
 _8268:                                                                  ;$8268
-        bit _8d4b
+        bit key_return
         bpl _826f
         asl 
         asl 
@@ -4709,7 +4741,7 @@ _8447:                                                                  ;$8447
 
         ldy # $24
         lda # $00
-:       sta ZP_POLYOBJ_XPOS_pt1, y                                      ;$844B                                                   ;$844B
+:       sta ZP_POLYOBJ_XPOS_pt1, y                                      ;$844B
         dey 
         bpl :-
 
@@ -4745,8 +4777,9 @@ _846c:                                                                  ;$846C
 ;===============================================================================
 
 _8475:                                                                  ;$8475
-        lda $a0
+        lda SCREEN_PAGE
         bne _8487
+
         lda $04e6
         jsr _900d
         lda # $00
@@ -5021,12 +5054,14 @@ _8632:                                                                  ;$8632
 _863b:                                                                  ;$863B
         stx $0487
 _863e:                                                                  ;$863E
-        lda $a0
+        lda SCREEN_PAGE
         bne _8645
+
         jsr _2ff3
 _8645:                                                                  ;$8645
-        lda $a0
+        lda SCREEN_PAGE
         beq _8654
+
         and _1d08
         lsr 
         bcs _8654
@@ -5169,7 +5204,7 @@ _871f:  ldx # $01                                                       ;$871F
         jmp _a6ba
 
 _8724:                                                                  ;$872F
-        bit _8d2f
+        bit key_hyperspace
         bpl _872c
         jmp _715c
 
@@ -5180,15 +5215,19 @@ _872c:                                                                  ;$872C
         bne _8741
         lda $a7
         beq _877d
-        lda $a0
+
+        lda SCREEN_PAGE
         and # %11000000
         beq _877d
+        
         jmp _31c6
 
 _8741:                                                                  ;$8741
         sta ZP_TEMP_VAR
-        lda $a0
+
+        lda SCREEN_PAGE
         and # %11000000
+
         beq _875f
         lda $66                 ; hyperspace countdown (outer)?
         bne _875f
@@ -5222,9 +5261,10 @@ _877d:                                                                  ;$877D
 
 _877e:                                                                  ;$877E
 .export _877e
-        lda $a0
+        lda SCREEN_PAGE
         and # %11000000
         beq _877d
+
         jsr _7695
         sta $34
         jsr _76e9
@@ -5310,7 +5350,7 @@ _87d0:                                                                  ;$87D0
         asl $96                 ; player's ship speed?
         ldx # $18
         jsr _7b5e
-        jsr _a72f
+        jsr set_page
         jsr _b2a5
         lda # $00
         sta $5f1f
@@ -5328,8 +5368,9 @@ _87fd:                                                                  ;$87FD
         lsr 
         lsr 
         sta ZP_POLYOBJ_XPOS_pt1
+
         ldy # $00
-        sty $a0
+        sty SCREEN_PAGE
         sty ZP_POLYOBJ_XPOS_pt2
         sty ZP_POLYOBJ_YPOS_pt2
         sty ZP_POLYOBJ_ZPOS_pt2
@@ -5413,7 +5454,7 @@ _8882:                                                                  ;$8882
 
         jsr _83df
 _8888:                                                                  ;$8888
-        jsr _8c6d
+        jsr clear_keyboard
         
         lda # 3
         jsr set_cursor_col
@@ -5473,7 +5514,7 @@ _88f0:                                                                  ;$88F0
         dex 
         bne :-
 
-        stx $a0
+        stx SCREEN_PAGE
 _88fd:                                                                  ;$88FD
         jsr _89eb
         cmp _25ff
@@ -5503,13 +5544,18 @@ _8920:                                                                  ;$8920
         jsr _83ca
         lda # $00
         sta _1d13
-        jsr _8c6d
+
+        jsr clear_keyboard
+
         lda # $20
-        jsr _6a2e
+        jsr _6a2e               ; DEAD CODE! this is just an RTS!
+
         lda # $0d
-        jsr _a72f
+        jsr set_page
+        
         lda # $00
-        sta $a0
+        sta SCREEN_PAGE
+
         lda # $60
         sta ZP_POLYOBJ_M0x2_HI
         lda # $60
@@ -5600,9 +5646,10 @@ _89c6:                                                                  ;$89C6
         sta ZP_POLYOBJ_XPOS_pt1
         sta ZP_POLYOBJ_YPOS_pt1
         jsr _9a86
-        jsr _8d53
+        jsr get_input
+
         dec $a3                 ; move counter?
-        bit _8d42
+        bit joy_fire
         bmi _89ea
         bcc _89be
         inc _1d0c
@@ -5708,7 +5755,7 @@ txt_docked_token1A:                                                     ;$8A5B
         ldy # 8
         jsr wait_frames
 
-        jsr _28d5
+        jsr _28d5               ; loads A & X with $0F
         ldy # $00
 _8a6a:                                                                  ;$8A6A
         jsr _8fea
@@ -5818,7 +5865,7 @@ _8ae7:                                                                  ;$8AE7
         lda # $01
         jsr print_docked_str
 
-        jsr _8fec
+        jsr wait_for_input
         cmp # $31
         beq _8b1c
         cmp # $32
@@ -5935,7 +5982,7 @@ _8b27:                                                                  ;$8B27
         cli 
         bcs _8bbb
         jsr _88f0
-        jsr _8fec
+        jsr wait_for_input
         clc 
         rts 
 
@@ -5979,7 +6026,7 @@ _8bc0:                                                                  ;$8BC0
         lda # $02
         jsr print_docked_str
 
-        jsr _8fec
+        jsr wait_for_input
         ora # %00010000
         jsr paint_char
         pha 
@@ -6039,7 +6086,7 @@ _8c55:                                                                  ;$8C55
         lda # $09
         jsr print_docked_str
         
-        jsr _8fec
+        jsr wait_for_input
         jmp _8ae7
 
 ;===============================================================================
@@ -6053,22 +6100,26 @@ _8c61:                                                                  ;$8C61
         lda # $ff
         jsr print_docked_str
 
-        jsr _8fec
+        jsr wait_for_input
         jmp _8ae7
 ;$8c6c:
         rts 
 
-_8c6d:                                                                  ;$8C6D
-        ldx # $40
+clear_keyboard:                                                         ;$8C6D
+        ;=======================================================================
+        ; clears the keyboard state.
+        ;
+        ldx # 64                ; number of keys on keyboard to scan
         lda # $00
-        sta $7d
-_8c73:                                                                  ;$8C73
-        sta _8d0c, x
-        dex 
-        bpl _8c73
+        sta $7d                 ; set currently pressed key to nothing
+
+:       sta key_states, x       ; reset the current key-state           ;$8C73
+        dex                     ; move to next key 
+        bpl :-                  ; keep going until all 64 are done
+
         rts 
-;$8c7a:
-        rts 
+
+        rts                                                             ;$8C7A
 
 ;===============================================================================
 
@@ -6156,191 +6207,306 @@ _8cc2:                                                                  ;$8CC2
         rts 
 
 ;===============================================================================
+; keyboard keys:
 
-; perhaps this is a text-buffer?
-; all these labels would just be offsets
+; map semantic names to the desired key-state memory locations.
+; this lets you very easily remap controls for compile time
 
-_8d0c:                                                                  ;$8D0C
-        .byte   $31, $32, $33                   ; '1', '2', '3'?
-_8d0f:                                                                  ;$8D0F
-.export _8d0f
-        .byte   $34                             ; '4'?
-_8d10:                                                                  ;$8D10
-.export _8d10
-        .byte   $35, $36, $37                   ; '5', '6', '7'?
-_8d13:                                                                  ;$8D13
-.export _8d13
-        .byte   $38, $39                        ; '8', '9'?
-_8d15:                                                                  ;$8D15
-.export _8d15
-        .byte   $41, $42, $43                   ; 'A', 'B', 'C'?
-_8d18:                                                                  ;$8D18
-        .byte   $44, $45, $46, $30, $31         ; 'D', 'E', 'F', '0', '1'?
-_8d1d:                                                                  ;$8D1D
-        .byte   $32, $33, $34                   ; '2', '3', '4'?
-_8d20:                                                                  ;$8D20
-        .byte   $35, $36, $37                   ; '5', '6', '7'?
-_8d23:                                                                  ;$8D23
-.export _8d23
-        .byte   $38, $39, $41, $42, $43         ; '8', '9', 'A', 'B', 'C'?
-_8d28:                                                                  ;$8D28
-.export _8d28
-        .byte   $44, $45                        ; 'D', 'E'?
-_8d2a:                                                                  ;$8D2A
-.export _8d2a
-        .byte   $46, $30, $31, $32              ; 'F', '0', '1', '2'?
-_8d2e:                                                                  ;$8D2E
-.export _8d2e
-        .byte   $33                             ; '3'?
-_8d2f:                                                                  ;$8D2F
-        .byte   $34, $35, $36, $37, $38, $39    ; '4', '5', '6', '7', '8', '9'?
-_8d35:                                                                  ;$8D35
-.export _8d35
-        .byte   $41                             ; 'A'?
-_8d36:                                                                  ;$8D36
-.export _8d36
-        .byte   $42, $43                        ; 'B', 'C'?
-_8d38:                                                                  ;$8D38
-.export _8d38
-        .byte   $44, $45, $46, $30, $31         ; 'D', 'E', 'F', '0', '1'?
-_8d3d:                                                                  ;$8D3D
-        .byte   $32                             ; '2'?
-_8d3e:                                                                  ;$8D3E
-.export _8d3e
-        .byte   $33                             ; '3'?
-_8d3f:                                                                  ;$8D3F
-        .byte   $34, $35, $36                   ; '4', '5', '6'?
-_8d42:                                                                  ;$8D4F
-.export _8d42
-        .byte   $37, $38, $39                   ; '7', '8', '9'?
-_8d45:                                                                  ;$8D45
-        .byte   $41, $42, $43, $44, $45         ; 'A', 'B', 'C', 'D', 'E'?
-_8d4a:                                                                  ;$8D4A
-        .byte   $46                             ; 'F'?
-_8d4b:                                                                  ;$8D4B
-        .byte   $30, $31, $32, $33              ; '0', '1', '2', '3'?
-        .byte   $34, $35, $36, $37              ; '4', '5', '6', '7'?
+.export joy_up                  = key_s
+.export joy_down                = key_x
+.export joy_left                = key_comma
+.export joy_right               = key_dot
+.export joy_fire                = key_a
 
+.export key_accelerate          = key_spc 
+.export key_decelerate          = key_slash
+
+.export key_missile_target      = key_t
+.export key_missile_untarget    = key_u
+.export key_missile_fire        = key_m
+
+.export key_bomb                = key_c64
+.export key_ecm                 = key_e
+.export key_escape_pod          = key_back
+
+.export key_docking_on          = key_c
+.export key_docking_off         = key_p
+
+.export key_jump                = key_j
+.export key_hyperspace          = key_h
+
+; the order of keys represented here is determined by the method used to read
+; off the keyboard matrix, which is starting at the 64th index in this table
+; and working backwards -- for each row 0 to 7, columns are read from 0 to 7.
+; this gives a key order of:
+;
+key_states:     .byte   $31     ; (unsued)                              ;$8D0C
+key_stop:       .byte   $32     ; STOP                                  ;$8D0D
+key_q:          .byte   $33     ; Q                                     ;$80DE
+key_c64:        .byte   $34     ; C=    (energy bomb)                   ;$8D0F
+key_spc:        .byte   $35     ; SPACE (accelerate)                    ;$8D10
+key_2:          .byte   $36     ; 2                                     ;$8D11
+key_ctrl:       .byte   $37     ; CTRL                                  ;$8D12
+key_back:       .byte   $38     ; <-    (escape pod)                    ;$8D13
+key_1:          .byte   $39     ; 1                                     ;$8D14
+key_slash:      .byte   $41     ; /     (decelerate)                    ;$8D15
+key_pow:        .byte   $42     ; ^                                     ;$8D16
+key_equ:        .byte   $43     ; =                                     ;$8D17
+key_rshft:      .byte   $44     ; RSHIFT                                ;$8D18
+key_home:       .byte   $45     ; HOME                                  ;$8D19
+key_semi:       .byte   $46     ; ;                                     ;$8D1A
+key_star:       .byte   $30     ; *                                     ;$8D1B
+key_gbp:        .byte   $31     ; £                                     ;$8D1C
+key_comma:      .byte   $32     ; ,     (roll anti-clockwise)           ;$8D1D
+key_at:         .byte   $33     ; @                                     ;$8D1E
+key_colon:      .byte   $34     ; :                                     ;$8D1E
+key_dot:        .byte   $35     ; .     (roll clockwise)                ;$8D20
+key_dash:       .byte   $36     ; -                                     ;$8D21
+key_l:          .byte   $37     ; L                                     ;$8D22
+key_p:          .byte   $38     ; P     (docking computer off)          ;$8D23
+key_plus:       .byte   $39     ; +                                     ;$8D24
+key_n:          .byte   $41     ; N                                     ;$8D25
+key_o:          .byte   $42     ; O                                     ;$8D26
+key_k:          .byte   $43     ; K                                     ;$8D27
+key_m:          .byte   $44     ; M     (fire missile)                  ;$8D28
+key_0:          .byte   $45     ; 0                                     ;$8D29
+key_j:          .byte   $46     ; J     (quick-jump)                    ;$8D2A
+key_i:          .byte   $30     ; I                                     ;$8D2B
+key_9:          .byte   $31     ; 9                                     ;$8D2C
+key_v:          .byte   $32     ; V                                     ;$8D2D
+key_u:          .byte   $33     ; U     (untarget missile)              ;$8D2E
+key_h:          .byte   $34     ; H     (hyperspace)                    ;$8D2F
+key_b:          .byte   $35     ; B                                     ;$8D30
+key_8:          .byte   $36     ; 8                                     ;$8D31
+key_g:          .byte   $37     ; G                                     ;$8D32
+key_y:          .byte   $38     ; Y                                     ;$8D33
+key_7:          .byte   $39     ; 7                                     ;$8D34
+key_x:          .byte   $41     ; X     (climb)                         ;$8D35
+key_t:          .byte   $42     ; T     (target missile)                ;$8D36
+key_f:          .byte   $43     ; F                                     ;$8D37
+key_c:          .byte   $44     ; C     (docking computer on)           ;$8D38
+key_6:          .byte   $45     ; 6                                     ;$8D39
+key_d:          .byte   $46     ; D                                     ;$8D3A
+key_r:          .byte   $30     ; R                                     ;$8D3B
+key_5:          .byte   $31     ; 5                                     ;$8D3C
+key_lshft:      .byte   $32     ; LSHIFT                                ;$8D3D
+key_e:          .byte   $33     ; E     (ECM)                           ;$8D3E
+key_s:          .byte   $34     ; S     (dive)                          ;$8D3F
+key_z:          .byte   $35     ; Z                                     ;$8D40
+key_4:          .byte   $36     ; 4                                     ;$8D41
+key_a:          .byte   $37     ; A     (fire)                          ;$8D42
+key_w:          .byte   $38     ; W                                     ;$8D43
+key_3:          .byte   $39     ; 3                                     ;$8D44
+key_down:       .byte   $41     ; DOWN                                  ;$8D45
+key_f5:         .byte   $42     ; F5    (starboard view)                ;$8D46
+key_f3:         .byte   $43     ; F3    (aft view)                      ;$8D47
+key_f1:         .byte   $44     ; F1    (front view)                    ;$8D48
+key_f7:         .byte   $45     ; F7    (portside view)                 ;$8D49
+key_right:      .byte   $46     ; RIGHT                                 ;$8D4A
+key_return:     .byte   $30     ; RETURN                                ;$8D4B
+key_del:        .byte   $31     ; DELETE                                ;$8D4C
+
+                ; unused?
+                .byte   $32
+                .byte   $33
+                .byte   $34
+                .byte   $35
+                .byte   $36
+                .byte   $37
+
+get_input:                                                              ;$8D53
 ;===============================================================================
+; read joystick & keyboard input:
+;
+; the keyboard is laid out as a matrix of rows & columns. writing to CIA1
+; port A ($DC00) sets which row(s) to select where bits 0-7 represent rows 0-7
+; and a bit-value of 0 means selected and 1 is ignored. reading from the port
+; returns the key-states[*] for the selected row(s).
+;
+; reads and writes to port B ($DC01) select columns in the same fashion.
+;
+; [*] note that the read byte uses a bit value of 0 to mean pressed
+;     and 1 to represent unpressed (i.e the key grounds a voltage level)
+;
+;  \   BIT 7 |  BIT 6 |  BIT 5 |   BIT 4 |  BIT 3 |  BIT 2 |  BIT 1 |  BIT 0   
+;   +--------¦--------¦--------¦---------¦--------¦--------¦--------¦--------   
+; 0 | DOWN   | F5     | F3     | F1      | F7     | RIGHT  | RETURN | DELETE
+; 1 | LSHIFT | e      | s      | z       | 4      | a      | w      | 3 
+; 2 | x      | t      | f      | c       | 6      | d      | r      | 5
+; 3 | v      | u      | h      | b       | 8      | g      | y      | 7
+; 4 | n      | o      | k      | m       | 0      | j      | i      | 9
+; 5 | ,      | @      | :      | .       | -      | l      | p      | +
+; 6 | /      | ^      | =      | RSHIFT  | HOME   | ;      | *      | £ 
+; 7 | STOP   | q      | C=     | SPACE   | 2      | CTRL   | <-     | 1
+;
+; this chart adapted from:
+; <http://codebase64.org/doku.php?id=base:reading_the_keyboard> 
+;
+.export get_input
 
-_8d53:                                                                  ;$8D53
-.export _8d53
-       .phy                     ; push Y to stack (via A)
+       .phy                     ; preserve Y
         
         lda # MEM_IO_ONLY
         jsr set_memory_layout
 
+        ; hide sprite 1: why?
         lda VIC_SPRITE_ENABLE
         and # %11111101
         sta VIC_SPRITE_ENABLE
-        jsr _8c6d
-        ldx _1d0c
-        beq _8d73
-        lda $dc00               ;cia1: data port register a
-        and # %00011111
-        eor # %00011111
-        bne _8db1
-_8d73:                                                                  ;$8D73
-        clc 
+
+        ; clear the current keyboard state
+        ; (sets all key-states to 0)
+        jsr clear_keyboard
+
+        ; read joystick?
+        ;-----------------------------------------------------------------------
+        ldx _1d0c               ; joystick control enabled?
+       .bze :+
+
+        lda CIA1_PORTA
+        and # %00011111         ; check only first 5 bits (joystick port 2)
+        eor # %00011111         ; flip so ON = 1 instead
+       .bnz @joy                ; anything pressed?
+
+        ; read keyboard:
+        ;-----------------------------------------------------------------------
+:       clc                                                             ;$8D73
         ldx # $00
-        sei 
-        stx $dc00               ;cia1: data port register a
-        ldx $dc01               ;cia1: data port register b
-        cli 
-        inx 
-        beq _8daa
-        ldx # $40
-        lda # $fe
-_8d85:                                                                  ;$8D85
-        sei 
-        sta $dc00               ;cia1: data port register a
-        pha 
-        ldy # $08
-_8d8c:                                                                  ;$8D8C
-        lda $dc01               ;cia1: data port register b
-        cmp $dc01               ;cia1: data port register b
-        bne _8d8c
-        cli 
-_8d95:                                                                  ;$8D95
-        lsr 
-        bcs _8d9e
-        dec _8d0c, x
-        stx $7d
+        sei                     ; disable interrupts before writing to CIA1
+        stx CIA1_PORTA          ; select all keyboard rows for reading ($00)
+        ldx CIA1_PORTB          ; read the keyboard matrix
+        cli                     ; enable interrupts
+        
+        ; if no keys were pressed, X will be $FF (bits are 1 for unpressed!)
+        ; and incrementing X will roll it over to 0
+        inx
+       .bze @done               ; no keys pressed at all? skip ahead
+
+        ; begin looping through the keyboard
+        ; matrix, row by row
+
+        ldx # 64                ; number of keys to scan
+        lda # %11111110         ; select keyboard row 0 for reading
+
+@row:   sei                     ; disable interrupts                    ;$8D85
+        sta CIA1_PORTA          ; select keyboard row to read
+        pha                     ; store this for later
+
+        ldy # 8                 ; initialise column counter
+
+        ; wait for the keyboard scan to happen
+:       lda CIA1_PORTB          ; read the keyboard column state        ;$8D8C
+        cmp CIA1_PORTB          ; has the state changed?
+       .bnz :-                  ; no, wait until the state has changed
+
+        cli                     ; enable interrupts again
+
+        
+@col:   ; read keys from each column in the current row:                ;$8D95
+        ;
+        lsr                     ; check the next key from the column
+        bcs :+                  ; no key pressed? skip ahead
+                                ; (note that 1 = unpressed, so carry will set)
+        
+        dec key_states, x       ; why decrement?
+        stx $7d                 ; remember currently pressed key
         sec 
-_8d9e:                                                                  ;$8D9E
-        dex 
-        bmi _8da8
-        dey 
-        bne _8d95
-        pla 
-        rol 
-        bne _8d85
-_8da8:                                                                  ;$8DA8
-        pla 
-        sec 
-_8daa:                                                                  ;$8DAA
-        lda # $7f
-        sta $dc00               ;cia1: data port register a
-        bne _8dfd
-_8db1:                                                                  ;$8DB1
-        lsr 
-        bcc _8db7
-        stx _8d3f
-_8db7:                                                                  ;$8DB7
-        lsr 
-        bcc _8dbd
-        stx _8d35
-_8dbd:                                                                  ;$8DBD
-        lsr 
-        bcc _8dc3
-        stx _8d1d
-_8dc3:                                                                  ;$8DC3
-        lsr 
-        bcc _8dc9
-        stx _8d20
-_8dc9:                                                                  ;$8DC9
-        lsr 
-        bcc _8dcf
-        stx _8d42
-_8dcf:                                                                  ;$8DCF
-        lda _1d0a
-        beq _8de0
-        lda _8d35
-        ldx _8d3f
-        sta _8d3f
-        stx _8d35
-_8de0:                                                                  ;$8DE0
-        lda _1d0b
-        beq _8dfd
-        lda _8d35
-        ldx _8d3f
-        sta _8d3f
-        stx _8d35
-        lda _8d1d
-        ldx _8d20
-        sta _8d20
-        stx _8d1d
-_8dfd:                                                                  ;$8DFD
-        lda $a0
-        beq _8e1e
+
+:       dex                     ; move along to the next key-state      ;$8D9E
+        bmi :+                  ; if all keys are done, skip ahead
+                                ; (X will roll-over to 255, bit 7 is "minus")
+        
+        dey                     ; next column 
+       .bnz @col
+        
+        pla                     ; retrieve the CIA keyboard row value 
+        rol                     ; move to the next row pattern
+       .bnz @row                ; if all rows done, fall through
+
+:       pla                     ; level the stack off                   ;$8DA8
+        sec                     ;?
+
+@done:  lda # %01111111         ; select keyboard row 7                 ;$8DAA
+        sta CIA1_PORTA
+        bne @exit               ; always triggers
+
+        ; handle joystick:
+        ;-----------------------------------------------------------------------
+@joy:   ; joystick up:                                                  ;$8DB1
+        lsr                     ; push bit 0 off
+        bcc :+                  ; unpressed? skip ahead
+        stx joy_up              ; set up-direction pressed flag
+
+:       ; joystick down:                                                ;$8DB7
+        lsr                     ; push bit 1 off
+        bcc :+                  ; unpressed? skip ahead
+        stx joy_down            ; set down-direction pressed flag
+
+:       ; joystick left:                                                ;$8DBD
+        lsr                     ; push bit 2 off
+        bcc :+                  ; unpressed? skip ahead
+        stx joy_left            ; set left-direction pressed flag
+
+:       ; joystick right:                                               ;$8DC3
+        lsr                     ; push bit 3 off 
+        bcc :+                  ; unpressed? skip ahead
+        stx joy_right           ; set right-direction pressed flag
+
+:       ; fire button                                                   ;$8DC9
+        lsr                     ; push bit 4 off 
+        bcc :+                  ; unpressed? skip ahead
+        stx joy_fire            ; set fire-button pressed flag
+
+:       ; flip vertical axis?                                           ;$8DCF
+        lda opt_flipvert
+        beq :+
+
+        lda joy_down
+        ldx joy_up
+        sta joy_up
+        stx joy_down
+
+:       ; flip both axises?                                             ;$8DE0
+        lda opt_flipaxis
+        beq @exit
+
+        lda joy_down
+        ldx joy_up
+        sta joy_up
+        stx joy_down
+        lda joy_left
+        ldx joy_right
+        sta joy_right
+        stx joy_left
+
+        ;-----------------------------------------------------------------------
+
+@exit:  lda SCREEN_PAGE         ; which screen page are we looking at?  ;$8DFD
+        beq :+                  ; if cockpit-view, skip 
+        
+        ; for non cockpit-view pages, do not
+        ; allow these key-states to persist
         lda # $00
-        sta _8d0f
-        sta _8d13
-        sta _8d36
-        sta _8d2e
-        sta _8d28
-        sta _8d3e
-        sta _8d2a
-        sta _8d38
-        sta _8d23
-_8e1e:                                                                  ;$8E1E
-        lda # MEM_64K
+        sta key_bomb
+        sta key_escape_pod
+        sta key_missile_target
+        sta key_missile_untarget
+        sta key_missile_fire
+        sta key_ecm
+        sta key_jump
+        sta key_docking_on
+        sta key_docking_off
+
+        ; turn the I/O shield off and
+        ; return to 'game' memory layout
+:       lda # MEM_64K                                                   ;$8E1E
         jsr set_memory_layout
 
-        pla 
-        tay 
-        lda $7d
-        tax 
+       .ply                     ; restore Y
+        
+        lda $7d                 ; return currently-pressed key in A...
+        tax                     ; ...and X
+
         rts 
 
 ;===============================================================================
@@ -6380,7 +6546,7 @@ _8e52:                                                                  ;$8E52
         sta POLYOBJ_01 + PolyObject::zpos + 2                           ;=$F92D
 
         lda # $01
-        sta $a0
+        sta SCREEN_PAGE
         sta $a3                 ; move counter?
         lsr 
         sta $048a
@@ -6402,11 +6568,13 @@ _8e7c:                                                                  ;$8E7C
 
 _8e92:                                                                  ;$8E92
         ldx # $06
-        lda _8d0c, x
+        lda key_states, x
         tax 
-        rts
+
+        rts 
 
 ;===============================================================================
+; read keyboard?
 
 ; ununsed / unreferenced?
 ; $8e99:
@@ -6414,8 +6582,8 @@ _8e92:                                                                  ;$8E92
         jsr set_memory_layout
         
         sei 
-        stx $dc00               ;cia1: data port register a
-        ldx $dc01               ;cia1: data port register b
+        stx CIA1_PORTA
+        ldx CIA1_PORTB
         cli 
         inx 
         beq _8eab
@@ -6434,10 +6602,12 @@ _8eab:                                                                  ;$8EAB
 
 ;$8eb3: unused / unreferenced?
         lda _9274, x
-        eor _1d0b
+        eor opt_flipaxis
         rts 
 
 ;===============================================================================
+; flip flags?
+;
 ; Y = some index
 ; X = some comparison value
 ;
@@ -6454,6 +6624,8 @@ _8eba:                                                                  ;$8EBA
         jsr _2fee               ; BEEP?
        .phy                     ; push Y to stack (via A) 
         
+        ; wait for a bit
+
         ldy # 20
         jsr wait_frames
 
@@ -6468,7 +6640,7 @@ _8ed5:                                                                  ;$8ED5
         lda # $00
         ldy # $38
 _8ed9:                                                                  ;$8ED9
-        sta _8d0c, y
+        sta key_states, y
         dey 
         bne _8ed9
         sta $0441
@@ -6477,49 +6649,57 @@ _8ed9:                                                                  ;$8ED9
 ;===============================================================================
 
 _8ee3:                                                                  ;$8EE3
-        jsr _8d53
+        jsr get_input
+        
         lda $0480
         beq _8f4d
         jsr _8447
-        lda # $60
+
+        lda # $60               ; this is the $6000 vector scale?
         sta ZP_POLYOBJ_M0x2_HI
         ora # %10000000
         sta ZP_POLYOBJ_M2x0_HI
         sta $a5
+
         lda $96                 ; player's ship speed?
         sta ZP_POLYOBJ_VERTX_LO
         jsr _34bc
+
 _8eff:                                                                  ;$8EFF
         lda ZP_POLYOBJ_VERTX_LO
 _8f01:                                                                  ;$8F01
         cmp # $16
-        bcc _8f07
+        bcc :+
+
         lda # $16
-_8f07:                                                                  ;$8F07
-        sta $96                 ; player's ship speed?
+:       sta $96                 ; player's ship speed?                  ;$8F07
+        
         lda # $ff
         ldx # $09
         ldy ZP_POLYOBJ_VERTX_HI
         beq _8f18
         bmi _8f15
+        
         ldx # $04
 _8f15:                                                                  ;$8F15
-        sta _8d0c, x
+        sta key_states, x
 _8f18:                                                                  ;$8F18
         lda # $80
         ldx # $11
         asl ZP_POLYOBJ_ROLL
         beq _8f35
         bcc _8f24
+
         ldx # $14
 _8f24:                                                                  ;$8F24
         bit ZP_POLYOBJ_ROLL
         bpl _8f2f
+
         lda # $40
         sta $048d
         lda # $00
 _8f2f:                                                                  ;$8F2F
-        sta _8d0c, x
+        sta key_states, x
         lda $048d
 _8f35:                                                                  ;$8F35
         sta $048d
@@ -6530,28 +6710,28 @@ _8f35:                                                                  ;$8F35
         bcs _8f44
         ldx # $33
 _8f44:                                                                  ;$8F44
-        sta _8d0c, x
+        sta key_states, x
         lda $048e
 _8f4a:                                                                  ;$8F4A
         sta $048e
 _8f4d:                                                                  ;$8F4D
         ldx $048d
         lda # $0e
-        ldy _8d1d
+        ldy joy_left
         beq _8f5a
         jsr _3c6f
 _8f5a:                                                                  ;$8F5A
-        ldy _8d20
+        ldy joy_right
         beq _8f62
         jsr _3c7f
 _8f62:                                                                  ;$8F62
         stx $048d
         ldx $048e
-        ldy _8d35
+        ldy joy_down
         beq _8f70
         jsr _3c7f
 _8f70:                                                                  ;$8F70
-        ldy _8d3f
+        ldy joy_up
         beq _8f78
         jsr _3c6f
 _8f78:                                                                  ;$8F78
@@ -6561,13 +6741,13 @@ _8f78:                                                                  ;$8F78
         lda $0480
         bne _8f9d
         ldx # $80
-        lda _8d1d
-        ora _8d20
+        lda joy_left
+        ora joy_right
         bne _8f92
         stx $048d
 _8f92:                                                                  ;$8F92
-        lda _8d35
-        ora _8d3f
+        lda joy_down
+        ora joy_up
         bne _8f9d
         stx $048e
 _8f9d:                                                                  ;$8F9D
@@ -6577,21 +6757,21 @@ _8f9d:                                                                  ;$8F9D
         bne _8fe9
 _8fa6:                                                                  ;$8FA6
         jsr wait_for_frame
-        jsr _8d53
+        jsr get_input
         cpx # $02
         bne _8fb3
         stx _1d05
 _8fb3:                                                                  ;$8FB3
         ldy # $00
 _8fb5:                                                                  ;$8FB5
-        jsr _8eba
+        jsr _8eba               ; flip a flag?
         iny 
         cpy # $0a
         bne _8fb5
         bit _1d08
         bpl _8fca
 _8fc2:                                                                  ;$8FC2
-        jsr _8eba
+        jsr _8eba               ; flip a flag?
         iny 
         cpy # $0d
         bne _8fc2
@@ -6619,18 +6799,22 @@ _8fe9:                                                                  ;$8FE9
 ;===============================================================================
 
 _8fea:                                                                  ;$8FEA
-        sty $9e
-_8fec:                                                                  ;$8FEC
+        sty $9e                 ; backup Y
+
+wait_for_input:                                                         ;$8FEC
+        ;-----------------------------------------------------------------------
         ldy # 2
         jsr wait_frames
 
-        jsr _8d53
-        bne _8fec
-_8ff6:                                                                  ;$8FF6
-        jsr _8d53
-        beq _8ff6
+        jsr get_input
+        bne wait_for_input
+
+:       jsr get_input                                                   ;$8FF6
+        beq :-
+
         lda _927e, x
-        ldy $9e
+        
+        ldy $9e                 ; restore Y
         tax 
 _9001:                                                                  ;$9001
         rts 
@@ -6646,9 +6830,11 @@ _9002:                                                                  ;$9002
 _900d:                                                                  ;$900D
 .export _900d
         pha 
+        
         lda # $10
-        ldx $a0
+        ldx SCREEN_PAGE
         beq _9019+1
+
         jsr txt_docked_token15
         lda # $19
 _9019:                                                                  ;$9019
@@ -6995,6 +7181,7 @@ _9266:                                                                  ;$9266
 _9274:                                                                  ;$9274
         .byte   $38, $39, $30, $31, $32, $33, $34, $35
         .byte   $36, $37
+
 _927e:                                                                  ;$927E
         .byte   $00, $01, $51, $02 ,$20, $32, $03, $1b                  ;$927E
         .byte   $31, $2f, $5e, $3d ,$05, $06, $3b, $2a                  ;$9286
@@ -9537,7 +9724,7 @@ _a6ad:                                                                  ;$A6AD
 
 _a6ae:                                                                  ;$A6AE
         stx $0486
-        jsr _a72f
+        jsr set_page
         jsr _a6d4
         jmp _7af3
 
@@ -9545,16 +9732,16 @@ _a6ae:                                                                  ;$A6AE
 
 _a6ba:                                                                  ;$A6BA
         lda # $00
-        jsr _6a2e
+        jsr _6a2e               ; DEAD CODE! this is just an RTS!
 
-        ldy $a0
+        ldy SCREEN_PAGE
         bne _a6ae
         
         cpx $0486
         beq _a6ad
         stx $0486
         
-        jsr _a72f
+        jsr set_page
         jsr dust_swap_xy
         jsr _7b1a
 _a6d4:                                                                  ;$A6D4
@@ -9625,20 +9812,27 @@ trumbles_sprite_mask:                                                   ;$A727
         .byte   %11111100
 
 ;===============================================================================
+; switch screen page?
+;
+;       A = page to switch to; e.g. cockpit-view, galactic chart &c.
+;
+set_page:                                                               ;$A72F
 
-_a72f:                                                                  ;$A72F
-.export _a72f
-        sta $a0
+.export set_page
+
+        sta SCREEN_PAGE
 _a731:                                                                  ;$A731
         jsr txt_docked_token02
+
         lda # $00
-        sta $7e
+        sta $7e                 ; "arc counter"?
         
         lda # %10000000
         sta $34
         sta txt_lcase_flag
 
         jsr _7b4f
+
         lda # $00
         sta $0484
         sta $048b
@@ -9649,15 +9843,20 @@ _a731:                                                                  ;$A731
         sta ZP_CURSOR_ROW
         jsr _b21a               ; clear screen -- called only here
         
+        ; display hyperspace countdown in the menu screens?
+
         ldx $66                 ; hyperspace countdown (outer)?
         beq _a75d
+
         jsr _7224
+
 _a75d:                                                                  ;$A75D
         lda # 1
         jsr set_cursor_row
         
-        lda $a0
-        bne _a77b
+        ; are we in the cockpit-view?
+        lda SCREEN_PAGE
+        bne :+
         
         lda # 11
         jsr set_cursor_col
@@ -9668,10 +9867,11 @@ _a75d:                                                                  ;$A75D
         jsr _72c5
 
 .import TXT_VIEW:direct
+
         lda # TXT_VIEW
         jsr print_flight_token
-_a77b:                                                                  ;$A77B
-        ldx # 1
+
+:       ldx # 1                                                         ;$A77B
         stx ZP_CURSOR_COL
         stx ZP_CURSOR_ROW
 
@@ -11487,7 +11687,7 @@ _b1a1:                                                                  ;$B1A1
         ; SPEED: this whole thing could seriously do with a lookup table
 
         ; divide into 64?
-:       lsr                                                             ;$B1C5                     
+:       lsr                                                             ;$B1C5
         ror ZP_CHROUT_DRAWADDR_LO
         lsr 
         ror ZP_CHROUT_DRAWADDR_LO
@@ -11523,7 +11723,7 @@ _b1a1:                                                                  ;$B1A1
         dec ZP_CHROUT_DRAWADDR_HI
         
         ldy # $f8
-        jsr _b3b5
+        jsr erase_page_to_end
         beq _b210
 
 :       inc ZP_CURSOR_COL                                               ;$B1ED
@@ -11613,7 +11813,7 @@ _b21a:                                                                  ;$B21A
 
         ; erase $5600..$567F?
         ldy # $7f
-        jsr erase_bytes
+        jsr erase_page_from
         sta [ZP_TEMP_ADDR1], y
 
         ;-----------------------------------------------------------------------
@@ -11625,9 +11825,10 @@ _b21a:                                                                  ;$B21A
         
         ;-----------------------------------------------------------------------
 
-        ; mode?
-        lda $a0
+        ; are we in the cockpit-view?
+        lda SCREEN_PAGE
         beq :+
+
         cmp # $0d
         bne _b25d
 :       jmp _b301                                                       ;$B25A
@@ -11652,7 +11853,7 @@ _b267:                                                                  ;$B267
         stx ZP_CURSOR_COL
         stx ZP_CURSOR_ROW
         jsr _b359
-        jsr _b341
+        jsr hide_all_ships
         jsr disable_sprites
         ldy # $1f
         lda # $70
@@ -11660,9 +11861,11 @@ _b289:                                                                  ;$B289
         sta $6004, y
         dey 
         bpl _b289
-        ldx $a0
+
+        ldx SCREEN_PAGE
         cpx # $02
         beq _b2a5
+        
         cpx # $40
         beq _b2a5
         cpx # $80
@@ -11747,7 +11950,7 @@ _b301:                                                                  ;$B301
         ; reset the HUD graphics from the copy kept in RAM
 .import __GFX_HUD_RUN__
 
-        ldx # $08
+        ldx # 8                 ; numbe of pages to copy (8*256)
         lda #< __GFX_HUD_RUN__
         sta ZP_TEMP_ADDR3_LO
         lda #> __GFX_HUD_RUN__
@@ -11756,12 +11959,13 @@ _b301:                                                                  ;$B301
         sta ZP_TEMP_ADDR1_LO
         lda #> $5680
         sta ZP_TEMP_ADDR1_HI
-        jsr _b3c3
+        jsr block_copy
 
         ldy # $c0
         ldx # $01
-        jsr _b3c5
-        jsr _b341
+        jsr block_copy_from
+
+        jsr hide_all_ships
         jsr _2ff3
 
 _b335:  jsr _b359                                                       ;$B335
@@ -11773,25 +11977,30 @@ _b335:  jsr _b359                                                       ;$B335
         rts 
 
 ;===============================================================================
+; appears to make all entities invisible to the radar scanner.
 
-_b341:                                                                  ;$B341
+hide_all_ships:                                                         ;$B341
+
+        ; search through the poly objects in-play
         ldx # $00
-_b343:                                                                  ;$B343
-        lda SHIP_SLOTS, x
-        beq @rts
-        bmi :+
 
-        jsr get_polyobj         ; get address of ship-slot
-        
+@next:  lda SHIP_SLOTS, x       ; what type of entitiy is here?         ;$B343
+       .bze @rts                ; no more ships once we hit a $00 marker
+        bmi :+                  ; skip over planets/suns
+
+        jsr get_polyobj         ; get address of entity storage
+
+        ; make the entitiy invisible to the radar!
+
         ldy # PolyObject::visibility
         lda [ZP_POLYOBJ_ADDR], y
         and # visibility::scanner ^$FF  ;=%11101111
         sta [ZP_POLYOBJ_ADDR], y
 
 :       inx                                                             ;$B355
-        bne _b343
+        bne @next
 
-@rts:   rts                                                             ;$B358 
+@rts:   rts                                                             ;$B358
 
 ;===============================================================================
 
@@ -11824,10 +12033,11 @@ _b36c:                                                                  ;$B36C
         rts 
 
 ;===============================================================================
+; clear screen?
 
 _b384:                                                                  ;$B384
-        ldx # $08
-        ldy # $00
+        ldx # 8
+        ldy # 0
         clc 
 _b389:                                                                  ;$B389
         lda row_to_bitmap_lo, x
@@ -11863,8 +12073,8 @@ erase_page:                                                             ;$B3A7
         ldy # $00
         sty ZP_TEMP_ADDR1_LO
 
-erase_bytes:                                                            ;$B3AB
-        ;-----------------------------------------------------------------------
+erase_page_from:                                                        ;$B3AB
+        ;=======================================================================
         ; erase some bytes:
         ;
         ;     $07 = lo-address
@@ -11880,7 +12090,7 @@ erase_bytes:                                                            ;$B3AB
 
         rts 
 
-_b3b5:                                                                  ;$B3B5
+erase_page_to_end:                                                      ;$B3B5
         ;=======================================================================
         lda # $00
 :       sta [ZP_TEMP_ADDR1], y                                          ;$B3B7
@@ -11903,19 +12113,32 @@ _b3c0:                                                                  ;$B3C0
         rts 
 
 ;===============================================================================
-
-_b3c3:                                                                  ;$B3C3
+; does a large block-copy of bytes. used to wipe the HUD by copying over a
+; clean copy of the HUD in RAM.
+;
+; [ZP_TEMP_ADDR3] = from address
+; [ZP_TEMP_ADDR1] = to address
+;               X = number of pages to copy
+;
+block_copy:                                                             ;$B3C3
+        ; start copying from the beginning of the page
         ldy # $00
-_b3c5:                                                                  ;$B3C5
-        lda [ZP_TEMP_ADDR3], y
-        sta [ZP_TEMP_ADDR1], y
-        dey 
-        bne _b3c5
+
+block_copy_from:                                                        ;$B3C5
+        ;=======================================================================
+        lda [ZP_TEMP_ADDR3], y  ; read from
+        sta [ZP_TEMP_ADDR1], y  ; write to
+        dey                     ; roll the byte-counter
+       .bnz block_copy_from     ; keep going until it looped
+
+        ; move to the next page
         inc ZP_TEMP_ADDR3_HI
         inc ZP_TEMP_ADDR1_HI
-        dex 
-        bne _b3c5
+        dex                     ; one less page to copy
+       .bnz block_copy_from     ; still pages to do?
+        
         rts 
+
 
 txt_docked_token15:                                                     ;$B3D4
         ;=======================================================================
@@ -11965,7 +12188,7 @@ _b40f:                                                                  ;$B40F
 _b410:                                                                  ;$B410
 .export _b410
 
-        lda $a0
+        lda SCREEN_PAGE
         bne _b40f
 
         lda ZP_POLYOBJ_VISIBILITY

@@ -383,7 +383,7 @@ _776c:
         ; set screen colours for the mult-colour bitmap
         ;-----------------------------------------------------------------------
 
-        ; set $d800-$dc00 (colour RAM) to black
+        ; set $D800..$DC00 (colour RAM) to black
         lda # BLACK
         sta ZP_COPY_TO+0
         tay 

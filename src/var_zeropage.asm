@@ -360,6 +360,23 @@ ZP_VAR_S                = $9c   ; a common variable named "S"
 ;                       = $9d   ;? x11
 ;                       = $9e   ;? x12
 ;                       = $9f   ;? x10
+
+; which 'page' the main screen is on,
+; e.g. cockpit-view, galactic chart &c.
+;
+;       $00 = cockpit-view (fore/left/right/aft-view is a separate variable)
+;       $01 = ?
+;       $03 = ?
+;       $04 = ?
+;       $08 = status?
+;       $0D = ?
+;       $10 = ?
+;       $20 = ?
+;       $40 = galactic chart
+;       $80 = short-range (local) chart
+;
+SCREEN_PAGE             = $a0
+
 ;                       = $a0   ;? x38
 
 ZP_VAR_Z                = $a1   ; a common "Z" variable
@@ -369,7 +386,7 @@ ZP_VAR_Z                = $a1   ; a common "Z" variable
 ;                       = $a4   ;UNUSED?
 ;                       = $a5   ;? x31
 ;                       = $a6   ;? x8 "ALPHA"?
-;                       = $a7   ;? x10
+;                       = $a7   ;? x10  ; docked flag?
 ;                       = $a8   ;? x9
 ;                       = $a9   ;? x4
 ;                       = $aa   ;? x30
