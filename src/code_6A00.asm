@@ -1440,7 +1440,7 @@ _715c:                                                                  ;$715C
         rts 
 
 _7165:                                                                  ;$7165
-        jsr _8e92
+        jsr get_ctrl
         bmi _71ca
 
         ; are we in the cockpit-view?
@@ -1867,7 +1867,7 @@ _73e8:                                                                  ;$73E8
         jsr set_page
         jsr _3795
 _73f5:                                                                  ;$73F5
-        jsr _8e92
+        jsr get_ctrl
         and _1d08
         bmi _73ac
         jsr get_random_number
@@ -1899,7 +1899,7 @@ _741c:                                                                  ;$741C
         inc ZP_POLYOBJ_ZPOS_pt2
         jsr _7c24
         lda # $0c
-        sta $96                 ; player's ship speed?
+        sta PLAYER_SPEED
         jsr _8798
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
@@ -2159,9 +2159,11 @@ _75e5:                                                                  ;$75E5
         iny 
         cmp # $0a
         bne _75f2
-        ldx $04c5
-        bne _75a1
-        dec $04c5
+
+        ldx PLAYER_DOCKCOM      ; does the player have a docking computer?
+       .bnz _75a1               ; yes: no need to give them one
+        dec PLAYER_DOCKCOM      ; no: change flag from $00 to $FF
+
 _75f2:                                                                  ;$75F2
         iny 
         cmp # $0b
@@ -4707,7 +4709,7 @@ _83ed:                                                                  ;$83ED
         sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
 
         lda # $03
-        sta $96                 ; player's ship speed?
+        sta PLAYER_SPEED
         sta $a6
         sta $68                 ; roll magnitude?
         
@@ -5346,8 +5348,8 @@ _87d0:                                                                  ;$87D0
 .export _87d0
         jsr _a813
         jsr _83df
-        asl $96                 ; player's ship speed?
-        asl $96                 ; player's ship speed?
+        asl PLAYER_SPEED        ;?
+        asl PLAYER_SPEED        ;?
         ldx # $18
         jsr _7b5e
         jsr set_page
@@ -5404,7 +5406,7 @@ _8835:                                                                  ;$8835
         lda $0456
         beq _87fd
         jsr _8ed5
-        sta $96                 ; player's ship speed?
+        sta PLAYER_SPEED
         jsr _1ec1
         jsr disable_sprites
 _8851:                                                                  ;$8851
@@ -5604,7 +5606,7 @@ _898c:                                                                  ;$898C
         bne _898c
 _8994:                                                                  ;$8994
         ldy # $00
-        sty $96                 ; player's ship speed?
+        sty PLAYER_SPEED
         sty _1d0c
 
         lda # 15
@@ -6222,7 +6224,7 @@ _8cc2:                                                                  ;$8CC2
 .export key_decelerate          = key_slash
 
 .export key_missile_target      = key_t
-.export key_missile_untarget    = key_u
+.export key_missile_disarm    = key_u
 .export key_missile_fire        = key_m
 
 .export key_bomb                = key_c64
@@ -6408,13 +6410,13 @@ get_input:                                                              ;$8D53
         bcs :+                  ; no key pressed? skip ahead
                                 ; (note that 1 = unpressed, so carry will set)
         
-        dec key_states, x       ; why decrement?
+        dec key_states, x       ; %0000000 -> %1111111
         stx $7d                 ; remember currently pressed key
         sec 
 
 :       dex                     ; move along to the next key-state      ;$8D9E
         bmi :+                  ; if all keys are done, skip ahead
-                                ; (X will roll-over to 255, bit 7 is "minus")
+                                ; (X will roll-under to 255, bit 7 is "minus")
         
         dey                     ; next column 
        .bnz @col
@@ -6459,7 +6461,7 @@ get_input:                                                              ;$8D53
 
 :       ; flip vertical axis?                                           ;$8DCF
         lda opt_flipvert
-        beq :+
+       .bze :+
 
         lda joy_down
         ldx joy_up
@@ -6468,7 +6470,7 @@ get_input:                                                              ;$8D53
 
 :       ; flip both axises?                                             ;$8DE0
         lda opt_flipaxis
-        beq @exit
+       .bze @exit
 
         lda joy_down
         ldx joy_up
@@ -6490,7 +6492,7 @@ get_input:                                                              ;$8D53
         sta key_bomb
         sta key_escape_pod
         sta key_missile_target
-        sta key_missile_untarget
+        sta key_missile_disarm
         sta key_missile_fire
         sta key_ecm
         sta key_jump
@@ -6566,15 +6568,18 @@ _8e7c:                                                                  ;$8E7C
         .byte   $e8, $e2, $e6, $e7, $c2, $d1, $c1, $60
         .byte   $70, $23, $35, $65, $22, $45, $52, $37
 
-_8e92:                                                                  ;$8E92
-        ldx # $06
+get_ctrl:                                                               ;$8E92
+        ;=======================================================================
+        ; get the state of the CTRL key
+        ;
+        ldx # (key_ctrl - key_states)
         lda key_states, x
         tax 
 
         rts 
 
 ;===============================================================================
-; read keyboard?
+; read key?
 
 ; ununsed / unreferenced?
 ; $8e99:
@@ -6661,7 +6666,7 @@ _8ee3:                                                                  ;$8EE3
         sta ZP_POLYOBJ_M2x0_HI
         sta $a5
 
-        lda $96                 ; player's ship speed?
+        lda PLAYER_SPEED
         sta ZP_POLYOBJ_VERTX_LO
         jsr _34bc
 
@@ -6672,7 +6677,7 @@ _8f01:                                                                  ;$8F01
         bcc :+
 
         lda # $16
-:       sta $96                 ; player's ship speed?                  ;$8F07
+:       sta PLAYER_SPEED                                                ;$8F07
         
         lda # $ff
         ldx # $09
@@ -9250,15 +9255,18 @@ _a39d:                                                                  ;$A39D
         lda ZP_VAR_P2
         sta ZP_POLYOBJ_XPOS_pt1
 _a3bf:                                                                  ;$A3BF
-        lda $96                 ; player's ship speed?
+        lda PLAYER_SPEED
         sta ZP_VAR_R
+
         lda # $80
         ldx # $06
         jsr _a44c
+        
         lda $a5
         and # %10000001
         cmp # $81
         bne _a3d3
+        
         rts 
 
         ;-----------------------------------------------------------------------

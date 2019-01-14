@@ -76,7 +76,7 @@
 .import key_docking_off:absolute
 .import key_missile_fire:absolute
 .import key_jump:absolute
-.import key_missile_untarget:absolute
+.import key_missile_disarm:absolute
 .import joy_down:absolute
 .import key_missile_target:absolute
 .import key_docking_on:absolute
@@ -145,7 +145,7 @@ _1d81:                                                                  ;$1D81
         ; now the player is docked, some variables can be reset
         ; -- the cabin temperature is not reset; oversight / bug?
         lda # $00
-        sta $96                 ; bring player's ship to a full stop
+        sta PLAYER_SPEED        ; bring player's ship to a full stop
         sta PLAYER_TEMP_LASER   ; complete laser cooldown
         sta $66                 ; reset hyperspace countdown
 
@@ -417,7 +417,9 @@ _1eb3:                                                                  ;$1EB3
         jmp _1ece
 
 _1ec1:                                                                  ;$1EC1
-        ;=======================================================================
+;===============================================================================
+; main cockpit-view game-play loop perhaps? (handles many key presses) 
+;
 .export _1ec1
 
 .import POLYOBJ_00
@@ -489,125 +491,140 @@ _1f20:                                                                  ;$1F20
         ora $94
         sta $63
         
-        lda key_accelerate
-        beq _1f33
+        lda key_accelerate      ; is accelerate being held?
+       .bze _1f33               ; if not, continue
         
-        lda $96                 ; player's ship speed?
-        cmp # $28
+        lda PLAYER_SPEED        ; current speed
+        cmp # $28               ; are we at maximum speed?
         bcs _1f33
         
-        inc $96                 ; player's ship speed?
+        inc PLAYER_SPEED        ; increase player's speed
+
 _1f33:                                                                  ;$1F33
-        lda key_decelerate
-        beq _1f3e
-        dec $96                 ; player's ship speed?
+        lda key_decelerate      ; is decelerate being held?
+       .bze _1f3e
+
+        dec PLAYER_SPEED        ; player's ship speed?
         bne _1f3e
-        inc $96                 ; player's ship speed?
+        inc PLAYER_SPEED        ; player's ship speed?
 _1f3e:                                                                  ;$1F3E
-        lda key_missile_untarget
-        and PLAYER_MISSILES
-        beq _1f55
+        lda key_missile_disarm  ; is disarm missile key being pressed?
+        and PLAYER_MISSILES     ; does the player have any missiles?
+       .bze :+                  ; no? skip ahead
 
         ldy # $57
         jsr _7d0c
         ldy # $06
         jsr _a858
 
-        lda # $00
+        lda # $00               ; set loaded missile as disarmed ($00)
         sta PLAYER_MISSILE_ARMED
-_1f55:                                                                  ;$1F55
-        lda $7c
-        bpl _1f6b
-        lda key_missile_target
-        beq _1f6b
 
-        ldx PLAYER_MISSILES
-        beq _1f6b
+:       lda $7c                                                         ;$1F55
+        bpl :+
 
+        lda key_missile_target  ; target missile key pressed?
+       .bze :+
+
+        ldx PLAYER_MISSILES     ; does the player have any missiles?
+       .bze :+
+
+        ; set missile armed flag on
+        ; (A = $FF from `key_missile_target`)
         sta PLAYER_MISSILE_ARMED
 
         ldy # $87
         jsr _b11f
-_1f6b:                                                                  ;$1F6B
-        lda key_missile_fire
-        beq _1f77
+
+:       lda key_missile_fire    ; fire missile key held?                ;$1F6B
+       .bze :+                  ; no, skip ahead
+
         lda $7c
         bmi _1fc2
         jsr _36a6
-_1f77:                                                                  ;$1F77
-        lda key_bomb
-        beq _1f8b
 
-        asl $04c3
-        beq _1f8b
+:       lda key_bomb            ; energy bomb key held?                 ;$1F77
+       .bze :+
+
+        asl $04c3               ; does player have an energy bomb?
+        beq :+                  ; no? keep going
+
         ldy # $d0
         sty _a8e0
+        
         ldy # $0d
         jsr _a858
-_1f8b:                                                                  ;$1F8B
-        lda key_docking_off
-        beq _1f98
 
-        lda # $00
-        sta $0480
+:       lda key_docking_off     ; docking-computer off pressed?         ;$1F8B
+       .bze :+                  ; no? skip ahead
+
+        lda # $00               ; $00 = off
+        sta $0480               ; turn docking computer off
         
         jsr _923b
-_1f98:                                                                  ;$1F98
-        lda key_escape_pod
-        and $04c7
-        beq _1fa8
+
+:       lda key_escape_pod      ; escape pod key pressed?               ;$1F98
+        and $04c7               ; does the player have an escape pod?
+       .bze :+                  ; no? keep moving
 
         lda $0482
-        bne _1fa8
+        bne :+
         jmp _316e
 
-        ;-----------------------------------------------------------------------
+:       lda key_jump            ; quick-jump key pressed?               ;$1FA8
+        beq :+                  ; no? skip ahead
+        
+        jsr _8e29               ; handle quick-jump?
 
-_1fa8:                                                                  ;$1FA8
-        lda key_jump
-        beq _1fb0
-        jsr _8e29
-_1fb0:                                                                  ;$1FB0
-        lda key_ecm
-        and $04c1
+:       lda key_ecm             ; E.C.M. key pressed?                   ;$1FB0
+        and $04c1               ; does the player have an E.C.M.?
         beq _1fc2
+
         lda $67
         bne _1fc2
         dec $0481
         jsr _b0f4
-_1fc2:                                                                  ;$1FC2
-        lda key_docking_on
-        and $04c5
-        beq _1fd5
-        eor joy_down
-        beq _1fd5
-        sta $0480
 
-        jsr _9204
-_1fd5:                                                                  ;$1FD5
-        lda # $00
+_1fc2:                                                                  ;$1FC2
+        lda key_docking_on      ; key for docking computers pressed?
+        and PLAYER_DOCKCOM      ; does the player have a docking computer?
+       .bze :+                  ; no, skip
+        eor joy_down            ; stops ship climbing, but why?
+       .bze :+
+        sta $0480               ;?
+
+        jsr _9204               ; handle docking computer behaviour?
+
+:       lda # $00                                                       ;$1FD5
         sta $7b
         sta $97
-        lda $96                 ; player's ship speed?
+
+        lda PLAYER_SPEED
         lsr 
         ror $97
         lsr 
         ror $97
         sta $98
+        
         lda $0487
         bne _202d
+        
         lda joy_fire
         beq _202d
+        
         lda PLAYER_TEMP_LASER
         cmp # $f2
         bcs _202d
+        
         ldx $0486
         lda PLAYER_LASERS, x
         beq _202d
+        
         pha 
         and # %01111111
         sta $7b
         sta $0484
+        
         ldy # $00
         pla 
         pha 
@@ -793,7 +810,7 @@ _2101:                                                                  ;$2101
         ;-----------------------------------------------------------------------
 
 _2107:                                                                  ;$2107
-        lda $96                 ; player's ship speed?
+        lda PLAYER_SPEED
         cmp # $05
         bcc _211a
         jmp _87d0
@@ -810,7 +827,7 @@ _2110:                                                                  ;$2110
         bne _2131
 _211a:                                                                  ;$211A
         lda # $01
-        sta $96                 ; player's ship speed?
+        sta PLAYER_SPEED
         lda # $05
         bne _212b
 _2122:                                                                  ;$2122
@@ -3587,7 +3604,7 @@ _2ff3:                                                                  ;$2FF3
         lda # $0e               ; threshold to change colour?
         sta ZP_TEMP_VAR
         
-        lda $96                 ; player's ship speed?
+        lda PLAYER_SPEED
         jsr hud_drawbar_32
         
         lda # $00
@@ -4756,7 +4773,7 @@ _3695:                                                                  ;$3695
         ora # %10000000
         sta ZP_POLYOBJ_M2x0_HI
 
-        lda $96                 ; player's ship speed?
+        lda PLAYER_SPEED
         rol 
         sta ZP_POLYOBJ_VERTX_LO
         
@@ -5601,7 +5618,7 @@ _3b30:                                                                  ;$3B30
 _3b33:                                                                  ;$3B33
         sta ZP_VAR_Q
 
-        lda $96                 ; player's ship speed?
+        lda PLAYER_SPEED
 _3b37:                                                                  ;$3B37
 .export _3b37
 

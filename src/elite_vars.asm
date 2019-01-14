@@ -43,6 +43,8 @@ MISSION_FLAGS           = $0499
         trumbles                = %00010000
 .endenum
 
+PLAYER_DOCKCOM          = $04C5 ; flag for player having a docking computer
+
 ; got Trumbles™?
 .ifndef OPTION_NOTRUMBLES
 
