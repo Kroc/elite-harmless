@@ -504,13 +504,13 @@ _1f20:                                                                  ;$1F20
 
 _1f33:                                                                  ;$1F33
         lda key_decelerate      ; is decelerate being held?
-       .bze _1f3e
+       .bze :+
 
         dec PLAYER_SPEED        ; player's ship speed?
-        bne _1f3e
+        bne :+
         inc PLAYER_SPEED        ; player's ship speed?
-_1f3e:                                                                  ;$1F3E
-        lda key_missile_disarm  ; is disarm missile key being pressed?
+
+:       lda key_missile_disarm  ; is disarm missile key being pressed?  ;$1F3E
         and PLAYER_MISSILES     ; does the player have any missiles?
        .bze :+                  ; no? skip ahead
 
@@ -2194,7 +2194,7 @@ _2907:                                                                  ;$2907
 
 _290f:                                                                  ;$209F
         jsr _3ad1
-        sta $60
+        sta ZP_VAR_YY_HI
         txa 
         sta $06c9, y            ; "dust y-lo"
 
@@ -2463,37 +2463,37 @@ _2a43:                                                                  ;$2A43
         sbc $98
         sta DUST_Z, y
         jsr _3992
-        sta $60
+        sta ZP_VAR_YY_HI
         lda ZP_VAR_P1
         adc $06c9, y
-        sta $5f
+        sta ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_Y
-        adc $60
-        sta $60
+        adc ZP_VAR_YY_HI
+        sta ZP_VAR_YY_HI
         sta ZP_VAR_S
         lda DUST_X, y
         sta ZP_VAR_X
         jsr _3997
-        sta $5e
+        sta ZP_VAR_XX_HI
         lda ZP_VAR_P1
         adc $06af, y
-        sta $5d
+        sta ZP_VAR_XX_LO
         lda ZP_VAR_X
-        adc $5e
-        sta $5e
+        adc ZP_VAR_XX_HI
+        sta ZP_VAR_XX_HI
         eor $6a                 ; move count?
         jsr _393c
         jsr _3ad1
-        sta $60
-        stx $5f
+        sta ZP_VAR_YY_HI
+        stx ZP_VAR_YY_LO
         eor $69                 ; roll sign?
         jsr _3934
         jsr _3ad1
-        sta $5e
-        stx $5d
+        sta ZP_VAR_XX_HI
+        stx ZP_VAR_XX_LO
         ldx $64
-        lda $60
+        lda ZP_VAR_YY_HI
         eor $95
         jsr _393e
         sta ZP_VAR_Q
@@ -2505,25 +2505,25 @@ _2a43:                                                                  ;$2A43
         ror 
         ora ZP_VAR_T
         jsr _3ad1
-        sta $5e
+        sta ZP_VAR_XX_HI
         txa 
         sta $06af, y
-        lda $5f
+        lda ZP_VAR_YY_LO
         sta ZP_VAR_R
-        lda $60
+        lda ZP_VAR_YY_HI
         sta ZP_VAR_S
         lda # $00
         sta ZP_VAR_P1
         lda ZP_BETA
         eor # %10000000
         jsr _290f
-        lda $5e
+        lda ZP_VAR_XX_HI
         sta ZP_VAR_X
         sta DUST_X, y
         and # %01111111
         cmp # $78
         bcs _2b0a
-        lda $60
+        lda ZP_VAR_YY_HI
         sta DUST_Y, y
         sta ZP_VAR_Y
         and # %01111111
@@ -2579,22 +2579,22 @@ _2b30:                                                                  ;$2B30
         lda DUST_X, y
         sta ZP_VAR_X
         jsr _3997
-        sta $5e
+        sta ZP_VAR_XX_HI
         lda $06af, y
         sbc ZP_VAR_P1
-        sta $5d
+        sta ZP_VAR_XX_LO
         lda ZP_VAR_X
-        sbc $5e
-        sta $5e
+        sbc ZP_VAR_XX_HI
+        sta ZP_VAR_XX_HI
         jsr _3992
-        sta $60
+        sta ZP_VAR_YY_HI
         lda $06c9, y
         sbc ZP_VAR_P1
-        sta $5f
+        sta ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_Y
-        sbc $60
-        sta $60
+        sbc ZP_VAR_YY_HI
+        sta ZP_VAR_YY_HI
         sta ZP_VAR_S
         lda $06e3, y
         adc $97
@@ -2603,23 +2603,23 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_Z
         adc $98
         sta DUST_Z, y
-        lda $5e
+        lda ZP_VAR_XX_HI
         eor $69                 ; roll sign?
         jsr _393c
         jsr _3ad1
-        sta $60
-        stx $5f
+        sta ZP_VAR_YY_HI
+        stx ZP_VAR_YY_LO
         eor $6a                 ; move count?
         jsr _3934
         jsr _3ad1
-        sta $5e
-        stx $5d
-        lda $60
+        sta ZP_VAR_XX_HI
+        stx ZP_VAR_XX_LO
+        lda ZP_VAR_YY_HI
         eor $95
         ldx $64
         jsr _393e
         sta ZP_VAR_Q
-        lda $5e
+        lda ZP_VAR_XX_HI
         sta ZP_VAR_S
         eor # %10000000
         jsr _3a50
@@ -2630,21 +2630,21 @@ _2b30:                                                                  ;$2B30
         ror 
         ora ZP_VAR_T
         jsr _3ad1
-        sta $5e
+        sta ZP_VAR_XX_HI
         txa 
         sta $06af, y
-        lda $5f
+        lda ZP_VAR_YY_LO
         sta ZP_VAR_R
-        lda $60
+        lda ZP_VAR_YY_HI
         sta ZP_VAR_S
         lda # $00
         sta ZP_VAR_P1
         lda ZP_BETA
         jsr _290f
-        lda $5e
+        lda ZP_VAR_XX_HI
         sta ZP_VAR_X
         sta DUST_X, y
-        lda $60
+        lda ZP_VAR_YY_HI
         sta DUST_Y, y
         sta ZP_VAR_Y
         and # %01111111
@@ -4634,7 +4634,7 @@ _35b3:                                                                  ;$35B3
         ldx POLYOBJ_01 + PolyObject::xpos + 0, y                        ;=$F925
         stx ZP_VAR_Q
         lda ZP_VAR_X
-        jsr _3aa8
+        jsr multiply_signed_into_RS
         ldx POLYOBJ_01 + PolyObject::xpos + 2, y                        ;=$F927
         stx ZP_VAR_Q
         lda ZP_VAR_Y
@@ -5071,8 +5071,8 @@ _37fa:                                                                  ;$37FA
         ldx $64
         jsr _393e
         jsr _3ad1
-        stx $5d
-        sta $5e
+        stx ZP_VAR_XX_LO
+        sta ZP_VAR_XX_HI
         ldx $06c9, y
         stx ZP_VAR_R
         ldx ZP_VAR_Y
@@ -5081,24 +5081,24 @@ _37fa:                                                                  ;$37FA
         eor $95
         jsr _393e
         jsr _3ad1
-        stx $5f
-        sta $60
+        stx ZP_VAR_YY_LO
+        sta ZP_VAR_YY_HI
         ldx $68                 ; roll magnitude?
         eor $69                 ; roll sign?
         jsr _393e
         sta ZP_VAR_Q
-        lda $5d
+        lda ZP_VAR_XX_LO
         sta ZP_VAR_R
-        lda $5e
+        lda ZP_VAR_XX_HI
         sta ZP_VAR_S
         eor # %10000000
         jsr multiply_and_add
-        sta $5e
+        sta ZP_VAR_XX_HI
         txa 
         sta $06af, y
-        lda $5f
+        lda ZP_VAR_YY_LO
         sta ZP_VAR_R
-        lda $60
+        lda ZP_VAR_YY_HI
         sta ZP_VAR_S
         jsr multiply_and_add
         sta ZP_VAR_S
@@ -5107,7 +5107,7 @@ _37fa:                                                                  ;$37FA
         sta ZP_VAR_P1
         lda ZP_ALPHA
         jsr _290f
-        lda $5e
+        lda ZP_VAR_XX_HI
         sta DUST_X, y
         sta ZP_VAR_X
         and # %01111111
@@ -5115,7 +5115,7 @@ _37fa:                                                                  ;$37FA
         cmp $ba
         bcc _38be
         beq _38be
-        lda $60
+        lda ZP_VAR_YY_HI
         sta DUST_Y, y
         sta ZP_VAR_Y
         and # %01111111
@@ -5225,9 +5225,9 @@ _391d:                                                                  ;$391D
 ;===============================================================================
 
 _3934:                                                                  ;$3934
-        ldx $5d
+        ldx ZP_VAR_XX_LO
         stx ZP_VAR_R
-        ldx $5e
+        ldx ZP_VAR_XX_HI
         stx ZP_VAR_S
 _393c:                                                                  ;$393C
         ldx $68                 ; roll magnitude?
@@ -5453,17 +5453,8 @@ _3a3f:                                                                  ;$3A3F
 
 ;===============================================================================
 
-; insert `multiply_qa` (and some precedents) from "math_3d.asm"
-.multiply_qa                                                            ;$3A48
-
-_3aa8:                                                                  ;$3AA8
-.export _3aa8
-
-        jsr multiply_qa
-        sta ZP_VAR_S
-        lda ZP_VAR_P
-        sta ZP_VAR_R
-        rts 
+; insert `multiply_signed` (and some precedents) from "math_3d.asm"
+.multiply_signed                                                        ;$3A48
 
 ;===============================================================================
 
@@ -5471,7 +5462,7 @@ _3ab2:                                                                  ;$3AB2
         ldx ZP_POLYOBJ_XPOS_pt1, y
         stx ZP_VAR_Q
         lda ZP_VAR_X
-        jsr _3aa8
+        jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_XPOS_pt3, y
         stx ZP_VAR_Q
         lda ZP_VAR_Y

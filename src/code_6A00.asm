@@ -108,7 +108,7 @@
 .import _39ea:absolute
 .import _3a25:absolute
 .import _3a27:absolute
-.import _3aa8:absolute
+.import multiply_signed_into_RS:absolute
 .import multiply_and_add:absolute
 .import _3ad1:absolute
 .import _3b0d:absolute
@@ -3914,10 +3914,10 @@ _7f67:                                                                  ;$7F67
         lda ZP_VAR_P1
         sta $b2
         ldy $b8
-        lda $61
-        sta $5f
-        lda $62
-        sta $60
+        lda ZP_SUNX_LO
+        sta ZP_VAR_YY_LO
+        lda ZP_SUNX_HI
+        sta ZP_VAR_YY_HI
 _7f80:                                                                  ;$7F80
         cpy $a8
         beq _7f8f
@@ -3951,32 +3951,32 @@ _7fb6:                                                                  ;$7FB6
         ldx $0580, y
         sta $0580, y
         beq _8008
-        lda $61
-        sta $5f
-        lda $62
-        sta $60
+        lda ZP_SUNX_LO
+        sta ZP_VAR_YY_LO
+        lda ZP_SUNX_HI
+        sta ZP_VAR_YY_HI
         txa 
         jsr _811e
         lda ZP_VAR_X
-        sta $5d
+        sta ZP_VAR_XX_LO
         lda ZP_VAR_X2
-        sta $5e
+        sta ZP_VAR_XX_HI
         lda ZP_POLYOBJ01_XPOS_pt1
-        sta $5f
+        sta ZP_VAR_YY_LO
         lda ZP_POLYOBJ01_XPOS_pt2
-        sta $60
+        sta ZP_VAR_YY_HI
         lda $0580, y
         jsr _811e
         bcs _7fed
         lda ZP_VAR_X2
-        ldx $5d
+        ldx ZP_VAR_XX_LO
         stx ZP_VAR_X2
-        sta $5d
+        sta ZP_VAR_XX_LO
         jsr _affa
 _7fed:                                                                  ;$7FED
-        lda $5d
+        lda ZP_VAR_XX_LO
         sta ZP_VAR_X
-        lda $5e
+        lda ZP_VAR_XX_HI
         sta ZP_VAR_X2
 _7ff5:                                                                  ;$7FF5
         jsr _affa
@@ -3993,9 +3993,9 @@ _8005:                                                                  ;$8005
 
 _8008:                                                                  ;$8008
         ldx ZP_POLYOBJ01_XPOS_pt1
-        stx $5f
+        stx ZP_VAR_YY_LO
         ldx ZP_POLYOBJ01_XPOS_pt2
-        stx $60
+        stx ZP_VAR_YY_HI
         jsr _811e
         bcc _7ff5
         lda # $00
@@ -4008,10 +4008,10 @@ _801c:                                                                  ;$801C
         cpx ZP_VALUE_pt1
         bcc _8005
         beq _8005
-        lda $61
-        sta $5f
-        lda $62
-        sta $60
+        lda ZP_SUNX_LO
+        sta ZP_VAR_YY_LO
+        lda ZP_SUNX_HI
+        sta ZP_VAR_YY_HI
 _802f:                                                                  ;$02F
         lda $0580, y
         beq _8037
@@ -4022,9 +4022,9 @@ _8037:                                                                  ;$8037
 _803a:                                                                  ;$803A
         clc 
         lda ZP_POLYOBJ01_XPOS_pt1
-        sta $61
+        sta ZP_SUNX_LO
         lda ZP_POLYOBJ01_XPOS_pt2
-        sta $62
+        sta ZP_SUNX_HI
 _8043:                                                                  ;$8043
         rts 
 
@@ -4146,10 +4146,10 @@ _80ff:                                                                  ;$80FF
 .export _80ff
         lda $0580
         bmi _80fe
-        lda $61
-        sta $5f
-        lda $62
-        sta $60
+        lda ZP_SUNX_LO
+        sta ZP_VAR_YY_LO
+        lda ZP_SUNX_HI
+        sta ZP_VAR_YY_HI
         ldy # $8f
 _810e:                                                                  ;$810E
         lda $0580, y
@@ -4166,20 +4166,20 @@ _811e:                                                                  ;$811E
 .export _811e
         sta ZP_VAR_T
         clc 
-        adc $5f
+        adc ZP_VAR_YY_LO
         sta ZP_VAR_X2
-        lda $60
+        lda ZP_VAR_YY_HI
         adc # $00
         bmi _8148
         beq _8131
         lda # $ff
         sta ZP_VAR_X2
 _8131:                                                                  ;$8131
-        lda $5f
+        lda ZP_VAR_YY_LO
         sec 
         sbc ZP_VAR_T
         sta ZP_VAR_X
-        lda $60
+        lda ZP_VAR_YY_HI
         sbc # $00
         bne _8140
         clc 
@@ -7014,21 +7014,21 @@ _9131:                                                                  ;$9131
         lda ZP_POLYOBJ_M0x1_HI
         sta ZP_VAR_Q
         lda ZP_POLYOBJ_M1x2_HI
-        jsr _3aa8
+        jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_M0x2_HI
         lda ZP_POLYOBJ_M1x1_HI
         jsr _3b0d
         eor # %10000000
         sta ZP_POLYOBJ_M2x0_HI
         lda ZP_POLYOBJ_M1x0_HI
-        jsr _3aa8
+        jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_M0x0_HI
         lda ZP_POLYOBJ_M1x2_HI
         jsr _3b0d
         eor # %10000000
         sta ZP_POLYOBJ_M2x1_HI
         lda ZP_POLYOBJ_M1x1_HI
-        jsr _3aa8
+        jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_M0x1_HI
         lda ZP_POLYOBJ_M1x0_HI
         jsr _3b0d
@@ -7085,7 +7085,7 @@ _91b8:                                                                  ;$91B8
         lda ZP_POLYOBJ_M0x0_HI, x
         sta ZP_VAR_Q
         lda ZP_POLYOBJ_M1x0_HI, x
-        jsr _3aa8
+        jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_M0x0_HI, y
         stx ZP_VAR_Q
         lda $0019, y
@@ -7372,7 +7372,7 @@ _9600:                                                                  ;$9600
 ; layout (pixels are in order of char-cells, not scanlines)
 ;
 ; therefore on the C64, there is some level of translation between a centred
-; 256-px (32 char) display and the C64 screen.
+; 256-px (32 char) display and the C64 screen (40 chars).
 ;
 ;        1  4                             36  40
 ;       +---=------------------------------=---+
@@ -7416,6 +7416,8 @@ _bmprow24 = ELITE_BITMAP_ADDR + .bmppos( 24, 4 ) ;=$5E20
 ; what is this madness!? despite the C64 screen being 25 rows, the data table
 ; just keeps going! this is purely because the lo/hi tables are indexed and it
 ; makes it faster to have these aligned a page ($00..$FF)
+
+; TODO: this is 1'952 bytes going unused!
 
 _bmprow25 = ELITE_BITMAP_ADDR + .bmppos( 25, 4 ) ;=$5F60
 _bmprow26 = ELITE_BITMAP_ADDR + .bmppos( 26, 4 ) ;=$60A0
@@ -7509,7 +7511,7 @@ row_to_bitmap_hi:                                                       ;$9800
 ; referenced in the `chrout` routine, these are a pair of hi/lo-byte lookup
 ; tables that index a row number (0-24) to the place in the menu screen memory
 ; where that row starts -- note that Elite uses a 32-char (256 px) wide
-; 'screen' so this equates the the 4th character in each row
+; 'screen' so this equates the the 4th character in each 40-char row
 
 .import ELITE_MENUSCR_COLOR_ADDR
 .define menuscr_pos \
@@ -9280,11 +9282,11 @@ _a3bf:                                                                  ;$A3BF
 
 _a3d3:                                                                  ;$A3D3
         ldy # MATRIX_ROW_0
-        jsr _a4a1               ; move ship?
+        jsr rotate_polyobj_axis
         ldy # MATRIX_ROW_1
-        jsr _a4a1               ; move ship?
+        jsr rotate_polyobj_axis
         ldy # MATRIX_ROW_2
-        jsr _a4a1               ; move ship?
+        jsr rotate_polyobj_axis
 
         ; slowly dampen pitch rate toward zero:
         ;-----------------------------------------------------------------------
@@ -9434,8 +9436,8 @@ _a4a0:                                                                  ;$A4A0
         rts 
 
 
-; insert the _a4a1 routine from "math_3d.asm"
-._a4a1                                                                  ;$A4A1
+; insert the `rotate_polyobj_axis` routine from "math_3d.asm"
+.rotate_polyobj_axis                                                    ;$A4A1
 
 ;===============================================================================
 
@@ -9761,6 +9763,8 @@ _a6f2:                                                                  ;$A6F2
 
 _a700:                                                                  ;$A700
         ;-----------------------------------------------------------------------
+.ifndef OPTION_NOTRUMBLES
+
         sta ZP_VAR_T
 
         lda PLAYER_TRUMBLES_HI
@@ -9775,10 +9779,12 @@ _a700:                                                                  ;$A700
         lda trumbles_sprite_mask, x
         ora ZP_VAR_T            ; other sprites mask?
         sta VIC_SPRITE_ENABLE
-
+.endif
         ; turn off the I/O and go back to 64K RAM
         lda # MEM_64K
         jmp set_memory_layout
+
+.ifndef OPTION_NOTRUMBLES
 
 trumbles_sprite_count:                                                  ;$A71F
         ;-----------------------------------------------------------------------
@@ -9797,6 +9803,8 @@ trumbles_sprite_mask:                                                   ;$A727
         .byte   %01111100
         .byte   %11111100
         .byte   %11111100
+
+.endif
 
 ;===============================================================================
 ; switch screen page?

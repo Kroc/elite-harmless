@@ -16,9 +16,9 @@
 ; math notation on page.1 like every other math tutorial does :|
 ;
 
-.macro  ._a4a1
+.macro  .rotate_polyobj_axis
 
-_a4a1:                                                                  ;$A4A1
+rotate_polyobj_axis:                                                    ;$A4A1
 ;===============================================================================
 ; rotate ship?
 ;
@@ -148,7 +148,7 @@ multiply_and_add:                                                       ;$3ACE
 .export multiply_and_add
 
         ; multiply Q & A?
-        jsr multiply_qa
+        jsr multiply_signed
 _3ad1:                                                                  ;$3AD1
 .export _3ad1
 
@@ -193,17 +193,17 @@ _3ad1:                                                                  ;$3AD1
 
 .endmacro
 
-.macro  .multiply_qa
+.macro  .multiply_signed
 
 ; unused / unreferenced?
 ;$3a48
         ldx $68                 ; roll magnitude?
         stx ZP_VAR_P1
 _3a4c:                                                                  ;$3A4C
-        ldx $5e
+        ldx ZP_VAR_XX_HI
         stx ZP_VAR_S
 _3a50:                                                                  ;$3A50
-        ldx $5d
+        ldx ZP_VAR_XX_LO
         stx ZP_VAR_R
 
         ; called from `multiply_and_add`.
@@ -214,7 +214,7 @@ _3a50:                                                                  ;$3A50
         ; i.e. multiplies two 8-bit (signed) numbers
         ; and returns a 16-bit (signed) number
         ;
-multiply_qa:                                                            ;$3A54
+multiply_signed:                                                            ;$3A54
         ;
         ; the algorithm used here is a common type, best described in context
         ; of the 6502 here: <http://nparker.llx.com/a2/mult.html> under the
@@ -382,10 +382,23 @@ multiply_qa:                                                            ;$3A54
         rts
 
         ; multiplying by zero will return zero. note that this is why that
-        ; carry was not added to the result lo-byte right away -- `A` will be 0
-        ; instead of 128! we can now zero out `P` and return a 16-bit zero
+        ; carry was not added to the result lo-byte right away --
+        ; `A` will be 0 so we can now zero out `P` and return a 16-bit zero
         ;-----------------------------------------------------------------------
 @zero:  sta ZP_VAR_P            ; `A` = 0 so also return `P` = 0        ;$3AA5
         rts                     ; `A.P` will be $0000
+
+multiply_signed_into_RS:                                                ;$3AA8
+        ;-----------------------------------------------------------------------
+        ; does a multiply as above (`multiply_signed`) and stores the result
+        ; in "`R.S`" (`ZP_VAR_R` & `ZP_VAR_S`)
+        ;
+.export multiply_signed_into_RS
+
+        jsr multiply_signed
+        sta ZP_VAR_S
+        lda ZP_VAR_P
+        sta ZP_VAR_R
+        rts 
 
 .endmacro

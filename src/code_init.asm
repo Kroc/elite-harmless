@@ -331,7 +331,7 @@ _7784:  sta [ZP_COPY_TO], y
 
         ldy # $22
         lda # $07
-_77a3:  sta $d802,y
+_77a3:  sta $d802, y
         dey 
         bne _77a3
 

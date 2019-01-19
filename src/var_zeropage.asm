@@ -291,14 +291,18 @@ ZP_TEMP_ADDR3           = $5b
 ZP_TEMP_ADDR3_LO        = $5b
 ZP_TEMP_ADDR3_HI        = $5c
 
+ZP_VAR_XX               = $5d
+ZP_VAR_XX_LO            = $5d
+ZP_VAR_XX_HI            = $5e
+
+ZP_VAR_YY               = $5f
+ZP_VAR_YY_LO            = $5f
+ZP_VAR_YY_HI            = $60
+
 ;-------------------------------------------------------------------------------
 
-;                       = $5d   ; "VAR_XX_LO"?
-;                       = $5e   ; "VAR_XX_HI"?
-;                       = $5f   ; "VAR_YY_LO"?
-;                       = $60   ; "VAR_YY_HI"?
-;                       = $61   ; "SUNX_LO"?    location of SUN on screen?
-;                       = $62   ; "SUNX_HI"?
+ZP_SUNX_LO              = $61   ; something to do with drawing the sun
+ZP_SUNX_HI              = $62   ; as above
 
 ZP_BETA                 = $63   ; a rotation variable used in matrix math
 
