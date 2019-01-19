@@ -107,6 +107,7 @@ echo "  --------------------------------------"
 echo "-     link 'elite-original-gma86.cfg'"
 $ld65 \
        -C link/elite-original-gma86.cfg \
+       -m build/elite-original-gma86.map -vm \
     --obj build/elite_memory.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
@@ -299,6 +300,7 @@ echo "- link 'harmless.prg'"
 $ld65 \
        -C link/elite-harmless.cfg \
        -S \$0400 \
+       -m build/elite-harmless.map -vm \
        -o bin/harmless.prg \
     --obj build/prgheader.o \
     --obj build/code_boot.o \
