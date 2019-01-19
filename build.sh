@@ -67,6 +67,8 @@ echo "- assemble 'code_1D81.asm'"
 $ca65 -DOPTION_ORIGINAL -o build/orig-code_1D81.o       src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 -DOPTION_ORIGINAL -o build/orig-code_6A00.o       src/code_6A00.asm
+echo "- assemble 'data_9300.asm'"
+$ca65 -DOPTION_ORIGINAL -o build/orig-data_9300.o       src/data/data_9300.asm
 echo "- assemble 'gfx_font.asm'"
 $ca65 -DOPTION_ORIGINAL -o build/orig-gfx_font.o        src/gfx/font.asm
 echo "- assemble 'gfx_sprites.asm'"
@@ -124,6 +126,7 @@ $ld65 \
     --obj build/orig-elite_init.o \
     --obj build/orig-code_1D81.o \
     --obj build/orig-code_6A00.o \
+    --obj build/orig-data_9300.o \
     --obj build/orig-gfx_font.o \
     --obj build/orig-gfx_sprites.o \
     --obj build/orig-gfx_hud.o \
@@ -280,6 +283,8 @@ echo "- assemble 'code_1D81.asm'"
 $ca65 -o build/code_1D81.o      src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 -o build/code_6A00.o      src/code_6A00.asm
+echo "- assemble 'data_9300.asm'"
+$ca65 -o build/data_9300.o      src/data/data_9300.asm
 echo "- assemble 'gfx_font.asm'"
 $ca65 -o build/gfx_font.o       src/gfx/font.asm
 echo "- assemble 'gfx_sprites.asm'"
@@ -312,6 +317,7 @@ $ld65 \
     --obj build/code_init.o \
     --obj build/code_1D81.o \
     --obj build/code_6A00.o \
+    --obj build/data_9300.o \
     --obj build/gfx_font.o \
     --obj build/gfx_sprites.o \
     --obj build/gfx_hull_data.o \
