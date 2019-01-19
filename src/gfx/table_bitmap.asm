@@ -1,0 +1,153 @@
+; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2019,
+; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
+; All Rights Reserved. <github.com/Kroc/elite-harmless>
+;===============================================================================
+.linecont+
+
+.include        "c64.asm"
+
+.import         ELITE_BITMAP_ADDR
+
+; NOTE: must be page-aligned!
+.segment        "TABLE_BITMAP"
+
+; the BBC Micro, unusually for an 8-bit, has programmable display circuitry
+; allowing the developer to create custom display modes. On the BBC, Elite uses
+; a 256-px wide display for easy math (x-coordinates do not have to be 2 bytes)
+; but on the C64 the screen is always 320-px wide and has a non-linear bitmap
+; layout (pixels are in order of char-cells, not scanlines)
+;
+; therefore on the C64, there is some level of translation between a centred
+; 256-px (32 char) display and the C64 screen (40 chars).
+;
+;        1  4                             36  40
+;       +---=------------------------------=---+
+;       |   1                             32   |
+;       |  ,--------------------------------.  |
+;       |  |                                |  |
+;       :  :                                :  :
+;       '  '                                '  '
+;     
+; we're going to build a pair of lookup tables that translate a row index
+; to a bitmap address for the 1st column of the centred display. each entry
+; is repeated 8 times, probably to account for scanlines-per-char(?)
+
+; first, calculate each row address:
+_bmprow00 = ELITE_BITMAP_ADDR + .bmppos(  0, 4 ) ;=$4020
+_bmprow01 = ELITE_BITMAP_ADDR + .bmppos(  1, 4 ) ;=$4160
+_bmprow02 = ELITE_BITMAP_ADDR + .bmppos(  2, 4 ) ;=$42A0
+_bmprow03 = ELITE_BITMAP_ADDR + .bmppos(  3, 4 ) ;=$43E0
+_bmprow04 = ELITE_BITMAP_ADDR + .bmppos(  4, 4 ) ;=$4520
+_bmprow05 = ELITE_BITMAP_ADDR + .bmppos(  5, 4 ) ;=$4660
+_bmprow06 = ELITE_BITMAP_ADDR + .bmppos(  6, 4 ) ;=$47A0
+_bmprow07 = ELITE_BITMAP_ADDR + .bmppos(  7, 4 ) ;=$48E0
+_bmprow08 = ELITE_BITMAP_ADDR + .bmppos(  8, 4 ) ;=$4A20
+_bmprow09 = ELITE_BITMAP_ADDR + .bmppos(  9, 4 ) ;=$4B60
+_bmprow10 = ELITE_BITMAP_ADDR + .bmppos( 10, 4 ) ;=$4CA0
+_bmprow11 = ELITE_BITMAP_ADDR + .bmppos( 11, 4 ) ;=$4DE0
+_bmprow12 = ELITE_BITMAP_ADDR + .bmppos( 12, 4 ) ;=$4F20
+_bmprow13 = ELITE_BITMAP_ADDR + .bmppos( 13, 4 ) ;=$5060
+_bmprow14 = ELITE_BITMAP_ADDR + .bmppos( 14, 4 ) ;=$51A0
+_bmprow15 = ELITE_BITMAP_ADDR + .bmppos( 15, 4 ) ;=$52E0
+_bmprow16 = ELITE_BITMAP_ADDR + .bmppos( 16, 4 ) ;=$5420
+_bmprow17 = ELITE_BITMAP_ADDR + .bmppos( 17, 4 ) ;=$5560
+_bmprow18 = ELITE_BITMAP_ADDR + .bmppos( 18, 4 ) ;=$56A0
+_bmprow19 = ELITE_BITMAP_ADDR + .bmppos( 19, 4 ) ;=$57E0
+_bmprow20 = ELITE_BITMAP_ADDR + .bmppos( 20, 4 ) ;=$5920
+_bmprow21 = ELITE_BITMAP_ADDR + .bmppos( 21, 4 ) ;=$5A60
+_bmprow22 = ELITE_BITMAP_ADDR + .bmppos( 22, 4 ) ;=$5BA0
+_bmprow23 = ELITE_BITMAP_ADDR + .bmppos( 23, 4 ) ;=$5CE0
+_bmprow24 = ELITE_BITMAP_ADDR + .bmppos( 24, 4 ) ;=$5E20
+
+; what is this madness!? despite the C64 screen being 25 rows, the data table
+; just keeps going! this is purely because the lo/hi tables are indexed and it
+; makes it faster to have these aligned a page ($00..$FF)
+
+; TODO: this is 1'952 bytes going unused! (976 bytes x 2)
+
+_bmprow25 = ELITE_BITMAP_ADDR + .bmppos( 25, 4 ) ;=$5F60
+_bmprow26 = ELITE_BITMAP_ADDR + .bmppos( 26, 4 ) ;=$60A0
+_bmprow27 = ELITE_BITMAP_ADDR + .bmppos( 27, 4 ) ;=$61E0
+_bmprow28 = ELITE_BITMAP_ADDR + .bmppos( 28, 4 ) ;=$6320
+_bmprow29 = ELITE_BITMAP_ADDR + .bmppos( 29, 4 ) ;=$6460
+_bmprow30 = ELITE_BITMAP_ADDR + .bmppos( 30, 4 ) ;=$65A0
+_bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
+
+; repeat each row address 8 times:
+.define _rowtobmp \
+        _bmprow00, _bmprow00, _bmprow00, _bmprow00, \
+        _bmprow00, _bmprow00, _bmprow00, _bmprow00, \
+        _bmprow01, _bmprow01, _bmprow01, _bmprow01, \
+        _bmprow01, _bmprow01, _bmprow01, _bmprow01, \
+        _bmprow02, _bmprow02, _bmprow02, _bmprow02, \
+        _bmprow02, _bmprow02, _bmprow02, _bmprow02, \
+        _bmprow03, _bmprow03, _bmprow03, _bmprow03, \
+        _bmprow03, _bmprow03, _bmprow03, _bmprow03, \
+        _bmprow04, _bmprow04, _bmprow04, _bmprow04, \
+        _bmprow04, _bmprow04, _bmprow04, _bmprow04, \
+        _bmprow05, _bmprow05, _bmprow05, _bmprow05, \
+        _bmprow05, _bmprow05, _bmprow05, _bmprow05, \
+        _bmprow06, _bmprow06, _bmprow06, _bmprow06, \
+        _bmprow06, _bmprow06, _bmprow06, _bmprow06, \
+        _bmprow07, _bmprow07, _bmprow07, _bmprow07, \
+        _bmprow07, _bmprow07, _bmprow07, _bmprow07, \
+        _bmprow08, _bmprow08, _bmprow08, _bmprow08, \
+        _bmprow08, _bmprow08, _bmprow08, _bmprow08, \
+        _bmprow09, _bmprow09, _bmprow09, _bmprow09, \
+        _bmprow09, _bmprow09, _bmprow09, _bmprow09, \
+        _bmprow10, _bmprow10, _bmprow10, _bmprow10, \
+        _bmprow10, _bmprow10, _bmprow10, _bmprow10, \
+        _bmprow11, _bmprow11, _bmprow11, _bmprow11, \
+        _bmprow11, _bmprow11, _bmprow11, _bmprow11, \
+        _bmprow12, _bmprow12, _bmprow12, _bmprow12, \
+        _bmprow12, _bmprow12, _bmprow12, _bmprow12, \
+        _bmprow13, _bmprow13, _bmprow13, _bmprow13, \
+        _bmprow13, _bmprow13, _bmprow13, _bmprow13, \
+        _bmprow14, _bmprow14, _bmprow14, _bmprow14, \
+        _bmprow14, _bmprow14, _bmprow14, _bmprow14, \
+        _bmprow15, _bmprow15, _bmprow15, _bmprow15, \
+        _bmprow15, _bmprow15, _bmprow15, _bmprow15, \
+        _bmprow16, _bmprow16, _bmprow16, _bmprow16, \
+        _bmprow16, _bmprow16, _bmprow16, _bmprow16, \
+        _bmprow17, _bmprow17, _bmprow17, _bmprow17, \
+        _bmprow17, _bmprow17, _bmprow17, _bmprow17, \
+        _bmprow18, _bmprow18, _bmprow18, _bmprow18, \
+        _bmprow18, _bmprow18, _bmprow18, _bmprow18, \
+        _bmprow19, _bmprow19, _bmprow19, _bmprow19, \
+        _bmprow19, _bmprow19, _bmprow19, _bmprow19, \
+        _bmprow20, _bmprow20, _bmprow20, _bmprow20, \
+        _bmprow20, _bmprow20, _bmprow20, _bmprow20, \
+        _bmprow21, _bmprow21, _bmprow21, _bmprow21, \
+        _bmprow21, _bmprow21, _bmprow21, _bmprow21, \
+        _bmprow22, _bmprow22, _bmprow22, _bmprow22, \
+        _bmprow22, _bmprow22, _bmprow22, _bmprow22, \
+        _bmprow23, _bmprow23, _bmprow23, _bmprow23, \
+        _bmprow23, _bmprow23, _bmprow23, _bmprow23, \
+        _bmprow24, _bmprow24, _bmprow24, _bmprow24, \
+        _bmprow24, _bmprow24, _bmprow24, _bmprow24, \
+        _bmprow25, _bmprow25, _bmprow25, _bmprow25, \
+        _bmprow25, _bmprow25, _bmprow25, _bmprow25, \
+        _bmprow26, _bmprow26, _bmprow26, _bmprow26, \
+        _bmprow26, _bmprow26, _bmprow26, _bmprow26, \
+        _bmprow27, _bmprow27, _bmprow27, _bmprow27, \
+        _bmprow27, _bmprow27, _bmprow27, _bmprow27, \
+        _bmprow28, _bmprow28, _bmprow28, _bmprow28, \
+        _bmprow28, _bmprow28, _bmprow28, _bmprow28, \
+        _bmprow29, _bmprow29, _bmprow29, _bmprow29, \
+        _bmprow29, _bmprow29, _bmprow29, _bmprow29, \
+        _bmprow30, _bmprow30, _bmprow30, _bmprow30, \
+        _bmprow30, _bmprow30, _bmprow30, _bmprow30, \
+        _bmprow31, _bmprow31, _bmprow31, _bmprow31, \
+        _bmprow31, _bmprow31, _bmprow31, _bmprow31
+
+; write out separate 256-byte tables for lo-address / hi-address:
+; TODO: these must be aligned by the linker
+
+row_to_bitmap_lo:                                                       ;$9700
+        .lobytes _rowtobmp
+
+row_to_bitmap_hi:                                                       ;$9800
+        .hibytes _rowtobmp
+
+.export row_to_bitmap_lo
+.export row_to_bitmap_hi
