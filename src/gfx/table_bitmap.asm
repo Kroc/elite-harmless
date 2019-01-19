@@ -8,9 +8,6 @@
 
 .import         ELITE_BITMAP_ADDR
 
-; NOTE: must be page-aligned!
-.segment        "TABLE_BITMAP"
-
 ; the BBC Micro, unusually for an 8-bit, has programmable display circuitry
 ; allowing the developer to create custom display modes. On the BBC, Elite uses
 ; a 256-px wide display for easy math (x-coordinates do not have to be 2 bytes)
@@ -31,6 +28,8 @@
 ; we're going to build a pair of lookup tables that translate a row index
 ; to a bitmap address for the 1st column of the centred display. each entry
 ; is repeated 8 times, probably to account for scanlines-per-char(?)
+
+; TODO: could this be shortened by doing away with the 8x repetition?
 
 ; first, calculate each row address:
 _bmprow00 = ELITE_BITMAP_ADDR + .bmppos(  0, 4 ) ;=$4020
@@ -141,10 +140,15 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
         _bmprow31, _bmprow31, _bmprow31, _bmprow31
 
 ; write out separate 256-byte tables for lo-address / hi-address:
-; TODO: these must be aligned by the linker
+; NOTE: these *must* be aligned by the linker!
+;       (especially if each table is not 256 bytes long)
+
+.segment        "TABLE_BITMAP_LO"
 
 row_to_bitmap_lo:                                                       ;$9700
         .lobytes _rowtobmp
+
+.segment        "TABLE_BITMAP_HI"
 
 row_to_bitmap_hi:                                                       ;$9800
         .hibytes _rowtobmp

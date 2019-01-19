@@ -20,7 +20,11 @@
 
 rotate_polyobj_axis:                                                    ;$A4A1
 ;===============================================================================
-; rotate ship?
+; rotate a poly-object around a single axis.
+;
+;        Y = matrix row (0, 1 or 2), i.e. axis to rotate
+; ZP_ALPHA = roll (signed byte) -- rotation around the Z axis (in/out)
+;  ZP_BETA = pitch (signed byte) -- rotation around the X axis (left/right)
 ;
 ; the BBC disassembly describes the matrix transformation here as:
 ;
@@ -30,10 +34,6 @@ rotate_polyobj_axis:                                                    ;$A4A1
 ; [ -sa.sb ca.sb  cb ]    [-ab b  1]      [z]    [z + b(y - ax)]
 ;
 ; TODO: consider <http://realtimecollisiondetection.net/blog/?p=21>
-;
-;        Y = matrix row (0, 1 or 2)
-; ZP_ALPHA = roll (signed byte) -- rotation around the Z axis (in/out)
-;  ZP_BETA = pitch (signed byte) -- rotation around the X axis (left/right)
 ;
 mYx0    = $00           ; column 0 of the matrix row given in Y (0, 1 or 2)
 mYx0_LO = $00
@@ -138,8 +138,8 @@ mYx2_HI = $05
 
 multiply_and_add:                                                       ;$3ACE
 ;===============================================================================
-; returns a 16-bit number (in X & A), by multiplying "Q" (`ZP_VAR_Q`) with A
-; and adding the 16-bit number in "R" (`ZP_VAR_R`) & "S" (`ZP_VAR_S`):
+; returns a 16-bit number (in X & A), by multiplying "Q" (`ZP_VAR_Q`) with `A`
+; and adding the 16-bit number in `R` (`ZP_VAR_R`) & `S` (`ZP_VAR_S`):
 ;
 ;       X.A = Q * A + R.S
 ;
@@ -147,10 +147,14 @@ multiply_and_add:                                                       ;$3ACE
 ;
 .export multiply_and_add
 
-        ; multiply Q & A?
+        ; calculate `Q * A`, returning `P.A`
         jsr multiply_signed
-_3ad1:                                                                  ;$3AD1
-.export _3ad1
+
+multiplied_now_add:                                                     ;$3AD1
+        ;-----------------------------------------------------------------------
+        ; skips the `Q * A` multiplication and adds `P.A`
+        ;
+.export multiplied_now_add
 
         sta ZP_TEMP_VAR
         and # %10000000
@@ -198,7 +202,7 @@ _3ad1:                                                                  ;$3AD1
 ; unused / unreferenced?
 ;$3a48
         ldx $68                 ; roll magnitude?
-        stx ZP_VAR_P1
+        stx ZP_VAR_P
 _3a4c:                                                                  ;$3A4C
         ldx ZP_VAR_XX_HI
         stx ZP_VAR_S

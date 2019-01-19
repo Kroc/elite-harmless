@@ -110,7 +110,7 @@
 .import _3a27:absolute
 .import multiply_signed_into_RS:absolute
 .import multiply_and_add:absolute
-.import _3ad1:absolute
+.import multiplied_now_add:absolute
 .import _3b0d:absolute
 .import _3b37:absolute
 .import _3bc1:absolute
@@ -3798,7 +3798,7 @@ _7e5f:                                                                  ;$7E5F
         sta ZP_VAR_S
         lda ZP_TEMPOBJ_M2x2_LO
         eor $45
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_T
         bpl _7ec8
         txa 
@@ -3826,7 +3826,7 @@ _7ec8:                                                                  ;$7EC8
         sta ZP_VAR_P1
         lda ZP_TEMPOBJ_M2x2_LO
         eor ZP_TEMPOBJ_M2x0_HI
-        jsr _3ad1
+        jsr multiplied_now_add
         eor # %10000000
         sta ZP_VAR_T
         bpl _7efd
@@ -6555,11 +6555,11 @@ _8e52:                                                                  ;$8E52
         sta ZP_VAR_P1
         
         lda POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
-        jsr _3ad1
+        jsr multiplied_now_add
         sta POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
 
         lda POLYOBJ_01 + PolyObject::zpos + 2                           ;=$F92D
-        jsr _3ad1
+        jsr multiplied_now_add
         sta POLYOBJ_01 + PolyObject::zpos + 2                           ;=$F92D
 
         lda # $01

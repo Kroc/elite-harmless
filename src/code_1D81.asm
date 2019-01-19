@@ -2193,7 +2193,7 @@ _2907:                                                                  ;$2907
 ;===============================================================================
 
 _290f:                                                                  ;$209F
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         txa 
         sta $06c9, y            ; "dust y-lo"
@@ -2484,12 +2484,12 @@ _2a43:                                                                  ;$2A43
         sta ZP_VAR_XX_HI
         eor $6a                 ; move count?
         jsr _393c
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         stx ZP_VAR_YY_LO
         eor $69                 ; roll sign?
         jsr _3934
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         stx ZP_VAR_XX_LO
         ldx $64
@@ -2504,7 +2504,7 @@ _2a43:                                                                  ;$2A43
         lda # $00
         ror 
         ora ZP_VAR_T
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         txa 
         sta $06af, y
@@ -2606,12 +2606,12 @@ _2b30:                                                                  ;$2B30
         lda ZP_VAR_XX_HI
         eor $69                 ; roll sign?
         jsr _393c
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         stx ZP_VAR_YY_LO
         eor $6a                 ; move count?
         jsr _3934
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         stx ZP_VAR_XX_LO
         lda ZP_VAR_YY_HI
@@ -2629,7 +2629,7 @@ _2b30:                                                                  ;$2B30
         lda # $00
         ror 
         ora ZP_VAR_T
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         txa 
         sta $06af, y
@@ -3001,7 +3001,7 @@ _2dc5:                                                                  ;$2DC5
         ora ZP_VAR_T
         eor $b1
         stx ZP_VAR_Q
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VALUE_pt2
         stx ZP_VALUE_pt1
         ldx ZP_VAR_Q
@@ -3035,7 +3035,7 @@ _2dc5:                                                                  ;$2DC5
         eor # %10000000
         eor $b1
         stx ZP_VAR_Q
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_POLYOBJ_XPOS_pt2, y
         stx ZP_POLYOBJ_XPOS_pt1, y
         ldx ZP_VAR_Q
@@ -3627,14 +3627,14 @@ _2ff3:                                                                  ;$2FF3
         lsr 
         ora $69                 ; roll sign?
         eor # %10000000
-        jsr _3ad1
+        jsr multiplied_now_add
         jsr _3130
         lda ZP_BETA
         ldx $64
         beq _302b
         sbc # $01
 _302b:                                                                  ;$302B
-        jsr _3ad1
+        jsr multiplied_now_add
         jsr _3130
         
         lda $a3                 ; move counter?
@@ -5062,7 +5062,7 @@ _37fa:                                                                  ;$37FA
         sta ZP_VAR_P1
         lda DUST_X, y
         sta ZP_VAR_X
-        jsr _3ad1
+        jsr multiplied_now_add
         sta ZP_VAR_S
         stx ZP_VAR_R
         lda DUST_Y, y
@@ -5070,7 +5070,7 @@ _37fa:                                                                  ;$37FA
         eor $94
         ldx $64
         jsr _393e
-        jsr _3ad1
+        jsr multiplied_now_add
         stx ZP_VAR_XX_LO
         sta ZP_VAR_XX_HI
         ldx $06c9, y
@@ -5080,7 +5080,7 @@ _37fa:                                                                  ;$37FA
         ldx $64
         eor $95
         jsr _393e
-        jsr _3ad1
+        jsr multiplied_now_add
         stx ZP_VAR_YY_LO
         sta ZP_VAR_YY_HI
         ldx $68                 ; roll magnitude?
