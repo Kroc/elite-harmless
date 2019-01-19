@@ -27,7 +27,8 @@ SHIP_SLOT10             = $045c
 
 ;-------------------------------------------------------------------------------
 
-;                       = $0480 ; something to do with roll-dampening
+DOCKCOM_STATE           = $0480 ; docking computer state: $00 = OFF, $FF = ON
+IS_MISJUMP              = $0482 ; has misjump occurred?
 
 MISSION_FLAGS           = $0499
 
@@ -42,8 +43,6 @@ MISSION_FLAGS           = $0499
 
         trumbles                = %00010000
 .endenum
-
-PLAYER_DOCKCOM          = $04C5 ; flag for player having a docking computer
 
 ; got Trumbles™?
 .ifndef OPTION_NOTRUMBLES
@@ -105,7 +104,11 @@ PLAYER_LASER_2          = $04aa ;TODO: is this left, right, or rear?
 PLAYER_LASER_3          = $04ab ;TODO: is this left, right, or rear?
 PLAYER_LASER_4          = $04ac ;TODO: is this left, right, or rear?
 
+PLAYER_ECM              = $04c1 ; player has an E.C.M.?
+PLAYER_EBOMB            = $04c3 ; player has energy bomb?
+PLAYER_DOCKCOM          = $04c5 ; player has a docking computer?
 PLAYER_GDRIVE           = $04c6 ; player has a galactic hyper-drive?
+PLAYER_ESCAPEPOD        = $04c7 ; player has an escape pod?
 
 PLAYER_MISSILES         = $04cc ; number of missiles the player has
 PLAYER_MISSILE_ARMED    = $0485 ; armed state of missile

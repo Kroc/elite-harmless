@@ -38,14 +38,17 @@ ZP_TEMP_ADDR1_HI        = $08
 ;
 .struct PolyObject                                                      ;offset
         ; NOTE: these are not addresses, but they are 24-bit
-        ;SPEED: do we need 24 bits for this? Can we get away with 16?
-        ;       surely +/- 32'767 is enough distance relative to the player?
         xpos            .faraddr                                        ;+$00
         ypos            .faraddr                                        ;+$03
         zpos            .faraddr                                        ;+$06
 
         ; a 3x3 rotation matrix?
         ; TODO: I don't know how best to name these yet
+        ; 
+        ; [ X ]    [ X, Y, Z ] ?
+        ; [ Y ] -> [ X, Y, Z ]
+        ; [ Z ]    [ X, Y, Z ]
+        ;
         m0x0            .word                                           ;+$09
         m0x1            .word                                           ;+$0B
         m0x2            .word                                           ;+$0D
@@ -124,6 +127,18 @@ ZP_POLYOBJ_ZPOS_pt1     = $0f
 ZP_POLYOBJ_ZPOS_pt2     = $10
 ZP_POLYOBJ_ZPOS_pt3     = $11
 
+; some math routines take parameters that are offsets
+; from the start of the poly-object to the desired matrix row 
+MATRIX_ROW_0  = (ZP_POLYOBJ_M0x0 - ZP_POLYOBJ)  ;=$09
+MATRIX_ROW_1  = (ZP_POLYOBJ_M1x0 - ZP_POLYOBJ)  ;=$0f
+MATRIX_ROW_2  = (ZP_POLYOBJ_M2x0 - ZP_POLYOBJ)  ;=$15
+
+; [ M0x0, M0x1, M0x2 ]
+; [ M1x0, M1x1, M1x2 ]
+; [ M2x0, M2x1, M2x2 ]
+;
+ZP_POLYOBJ_M0           = $12   ; matrix row 0
+;----------------------------
 ZP_POLYOBJ_M0x0         = $12
 ZP_POLYOBJ_M0x0_LO      = $12
 ZP_POLYOBJ_M0x0_HI      = $13
@@ -133,6 +148,9 @@ ZP_POLYOBJ_M0x1_HI      = $15
 ZP_POLYOBJ_M0x2         = $16
 ZP_POLYOBJ_M0x2_LO      = $16
 ZP_POLYOBJ_M0x2_HI      = $17
+
+ZP_POLYOBJ_M1           = $18   ; matrix row 1
+;----------------------------
 ZP_POLYOBJ_M1x0         = $18
 ZP_POLYOBJ_M1x0_LO      = $18
 ZP_POLYOBJ_M1x0_HI      = $19
@@ -142,6 +160,9 @@ ZP_POLYOBJ_M1x1_HI      = $1b
 ZP_POLYOBJ_M1x2         = $1c
 ZP_POLYOBJ_M1x2_LO      = $1c
 ZP_POLYOBJ_M1x2_HI      = $1d
+
+ZP_POLYOBJ_M2           = $1e   ; matrix row 2
+;----------------------------
 ZP_POLYOBJ_M2x0         = $1e
 ZP_POLYOBJ_M2x0_LO      = $1e
 ZP_POLYOBJ_M2x0_HI      = $1f
@@ -152,7 +173,7 @@ ZP_POLYOBJ_M2x2         = $22
 ZP_POLYOBJ_M2x2_LO      = $22
 ZP_POLYOBJ_M2x2_HI      = $23
 
-ZP_POLYOBJ_VERTX        = $24
+ZP_POLYOBJ_VERTX        = $24   ; an address where vertex data is cached
 ZP_POLYOBJ_VERTX_LO     = $24
 ZP_POLYOBJ_VERTX_HI     = $25
 
@@ -178,8 +199,8 @@ ZP_TEMP_ADDR2_HI        = $2b
 ;-------------------------------------------------------------------------------
 
 ZP_VAR_P                = $2e   ; a common variable called "P"
-ZP_VAR_P1               = $2e
-ZP_VAR_P2               = $2f
+ZP_VAR_P1               = $2e   ; additional bytes for storing-
+ZP_VAR_P2               = $2f   ; 16 or 24-bit values in P
 ZP_VAR_P3               = $30
 
 ;-------------------------------------------------------------------------------
@@ -278,13 +299,16 @@ ZP_TEMP_ADDR3_HI        = $5c
 ;                       = $60   ; "VAR_YY_HI"?
 ;                       = $61   ; "SUNX_LO"?    location of SUN on screen?
 ;                       = $62   ; "SUNX_HI"?
-;                       = $63   ;? x8
+
+ZP_BETA                 = $63   ; a rotation variable used in matrix math
+
 ;                       = $64   ;? x8
 ;                       = $65   ; hyperspace counter (inner)
 ;                       = $66   ; hyperspace counter (outer)
 ;                       = $67   ;? x9
 ;                       = $68   ; "roll magnitude"?
 ;                       = $69   ; "roll sign"?
+
 ;                       = $6a   ; "move count"?
 
 ;-------------------------------------------------------------------------------
@@ -385,7 +409,9 @@ ZP_VAR_Z                = $a1   ; a common "Z" variable
 ;                       = $a3   ;? x18 "MOVE COUNTER"?
 ;                       = $a4   ;UNUSED?
 ;                       = $a5   ;? x31
-;                       = $a6   ;? x8 "ALPHA"?
+
+ZP_ALPHA                = $a6   ; a rotation variable used in matrix math
+
 ;                       = $a7   ;? x10  ; docked flag?
 ;                       = $a8   ;? x9
 ;                       = $a9   ;? x4

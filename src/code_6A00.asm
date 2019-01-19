@@ -8,6 +8,7 @@
 .include        "elite_vars.asm"
 .include        "var_zeropage.asm"
 .include        "gfx/hull_struct.asm"
+.include        "math_3d.asm"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -108,7 +109,7 @@
 .import _3a25:absolute
 .import _3a27:absolute
 .import _3aa8:absolute
-.import _3ace:absolute
+.import multiply_and_add:absolute
 .import _3ad1:absolute
 .import _3b0d:absolute
 .import _3b37:absolute
@@ -1601,7 +1602,7 @@ _7246:                                                                  ;$7246
         asl 
         asl 
         sta $8e
-        lda $0482
+        lda IS_MISJUMP
         bne _7244
 
         lda # 1
@@ -1831,7 +1832,7 @@ _73b3:                                                                  ;$73B3
 
         jsr _3795
         jsr _83df
-        sty $0482
+        sty IS_MISJUMP
 _73c1:                                                                  ;$73C1
         jsr _739b
         lda # $03
@@ -2093,9 +2094,9 @@ _756f:                                                                  ;$756F
         cmp # $03
         bne _757c
         iny 
-        ldx $04c1
+        ldx PLAYER_ECM
         bne _75a1
-        dec $04c1
+        dec PLAYER_ECM
 _757c:                                                                  ;$757C
         cmp # $04
         bne _758a
@@ -2137,17 +2138,17 @@ _75bc:                                                                  ;$75BC
         iny 
         cmp # $07
         bne _75c9
-        ldx $04c7
+        ldx PLAYER_ESCAPEPOD
         bne _75a1
-        dec $04c7
+        dec PLAYER_ESCAPEPOD
 _75c9:                                                                  ;$75C9
         iny 
         cmp # $08
         bne _75d8
-        ldx $04c3
+        ldx PLAYER_EBOMB
         bne _75a1
         ldx # $7f
-        stx $04c3
+        stx PLAYER_EBOMB
 _75d8:                                                                  ;$75D8
         iny 
         cmp # $09
@@ -2367,7 +2368,7 @@ _7726:                                                                  ;$7726
 ;===============================================================================
 
 _7727:                                                                  ;$7727
-        bit $0482
+        bit IS_MISJUMP
         bmi _7741
         jsr _7732
         jsr _76e9
@@ -2383,12 +2384,13 @@ _7734:                                                                  ;$7734
 _7741:                                                                  ;$7741
         rts 
 
+print_galaxy_no:                                                        ;$7742
 ;===============================================================================
+; print galaxy number
 
-_7742:                                                                  ;$7742
         clc 
-        ldx PLAYER_GALAXY
-        inx 
+        ldx PLAYER_GALAXY       ; current galaxy number
+        inx                     ; print as 1-8, not 0-7
         jmp print_tiny_value
 
 ;===============================================================================
@@ -2461,7 +2463,7 @@ print_flight_token:                                                     ;$777E
         ; brief token breakdown:
         ;
         ;      $00 = ?
-        ;      $01 = ?
+        ;      $01 = print current galaxy number?
         ;      $02 = ?
         ;      $03 = ?
         ;      $04 = ?
@@ -2501,7 +2503,7 @@ print_flight_token:                                                     ;$777E
         ; token $01:
         ;
         dex                     ; decrement token value
-       .bze _7742               ; if now 0, it was 1 -- process 'tally'(?)
+       .bze print_galaxy_no     ; if now 0, it was 1 -- process 'tally'(?)
         
         ; token $02:
         ;
@@ -4365,6 +4367,7 @@ _822f:                                                                  ;$822F
 _8244:                                                                  ;$8244
         lda key_right
         beq _8251
+
         lda # $01
         ora key_lshft
         ora key_rshft
@@ -4681,11 +4684,11 @@ _83df:                                                                  ;$83DF
 .export _83df
         jsr _923b
 
-        lda $04c3
+        lda PLAYER_EBOMB
         bpl _83ed
 
         jsr _2367
-        sta $04c3
+        sta PLAYER_EBOMB
 _83ed:                                                                  ;$83ED
         lda # $0c
         sta DUST_COUNT          ; number of dust particles
@@ -4710,7 +4713,7 @@ _83ed:                                                                  ;$83ED
 
         lda # $03
         sta PLAYER_SPEED
-        sta $a6
+        sta ZP_ALPHA
         sta $68                 ; roll magnitude?
         
         lda # $10
@@ -4873,7 +4876,7 @@ _84fe:                                                                  ;$84FE
         jmp _8627
 
 _8501:                                                                  ;$8501
-        lda $0482
+        lda IS_MISJUMP
         bne _84fe
         jsr get_random_number
         cmp # $23
@@ -5206,7 +5209,7 @@ _871f:  ldx # $01                                                       ;$871F
         jmp _a6ba
 
 _8724:                                                                  ;$872F
-        bit key_hyperspace
+        bit key_hyperspace      ; hyperspace key pressed?
         bpl _872c
         jmp _715c
 
@@ -5405,7 +5408,9 @@ _8835:                                                                  ;$8835
         sta [ZP_POLYOBJ_ADDR], y
         lda $0456
         beq _87fd
-        jsr _8ed5
+
+        jsr _8ed5               ; clears 56 key-states, not 64
+
         sta PLAYER_SPEED
         jsr _1ec1
         jsr disable_sprites
@@ -6224,7 +6229,7 @@ _8cc2:                                                                  ;$8CC2
 .export key_decelerate          = key_slash
 
 .export key_missile_target      = key_t
-.export key_missile_disarm    = key_u
+.export key_missile_disarm      = key_u
 .export key_missile_fire        = key_m
 
 .export key_bomb                = key_c64
@@ -6487,7 +6492,7 @@ get_input:                                                              ;$8D53
         beq :+                  ; if cockpit-view, skip 
         
         ; for non cockpit-view pages, do not
-        ; allow these key-states to persist
+        ; allow these key-states to persist?
         lda # $00
         sta key_bomb
         sta key_escape_pod
@@ -6518,7 +6523,7 @@ _8e29:                                                                  ;$8E29
         ldx $047f
         lda $0454, x
         ora $045f
-        ora $0482
+        ora IS_MISJUMP
         bne _8e7c
         ldy POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
         bmi _8e44
@@ -6640,14 +6645,16 @@ _8eba:                                                                  ;$8EBA
         rts 
 
 ;===============================================================================
+; clears the key-states for 56 keys, not 64
 
 _8ed5:                                                                  ;$8ED5
         lda # $00
-        ldy # $38
-_8ed9:                                                                  ;$8ED9
-        sta key_states, y
+        ldy # 56                ; only 56 keys, not 64
+
+:       sta key_states, y                                               ;$8ED9
         dey 
-        bne _8ed9
+        bne :-
+
         sta $0441
         rts 
 
@@ -6656,7 +6663,7 @@ _8ed9:                                                                  ;$8ED9
 _8ee3:                                                                  ;$8EE3
         jsr get_input
         
-        lda $0480
+        lda DOCKCOM_STATE
         beq _8f4d
         jsr _8447
 
@@ -6743,7 +6750,7 @@ _8f78:                                                                  ;$8F78
         stx $048e
         lda _1d0c
         beq _8f9d
-        lda $0480
+        lda DOCKCOM_STATE
         bne _8f9d
         ldx # $80
         lda joy_left
@@ -7082,7 +7089,7 @@ _91b8:                                                                  ;$91B8
         ldx ZP_POLYOBJ_M0x0_HI, y
         stx ZP_VAR_Q
         lda $0019, y
-        jsr _3ace
+        jsr multiply_and_add
         stx ZP_VAR_P1
         ldy ZP_VAR_P3
         ldx ZP_POLYOBJ_M0x0_HI, y
@@ -7145,7 +7152,7 @@ _9222:                                                                  ;$9222
 _9231:                                                                  ;$9231
         sta _1d02
         eor # %11111111
-        and $0480
+        and DOCKCOM_STATE
         bmi _9222
 _923b:                                                                  ;$923B
 .export _923b
@@ -9272,53 +9279,88 @@ _a3bf:                                                                  ;$A3BF
         ;-----------------------------------------------------------------------
 
 _a3d3:                                                                  ;$A3D3
-        ldy # $09
-        jsr _a4a1
-        ldy # $0f
-        jsr _a4a1
-        ldy # $15
-        jsr _a4a1
+        ldy # MATRIX_ROW_0
+        jsr _a4a1               ; move ship?
+        ldy # MATRIX_ROW_1
+        jsr _a4a1               ; move ship?
+        ldy # MATRIX_ROW_2
+        jsr _a4a1               ; move ship?
+
+        ; slowly dampen pitch rate toward zero:
+        ;-----------------------------------------------------------------------
+        ; separate out the pitch sign
+        ; (positive / negative)
+        ;
+        lda ZP_POLYOBJ_PITCH    ; current pitch rate
+        and # %10000000         ; isolate pitch sign
+        sta $b1                 ; put aside sign
+        
+        ; TODO: we could use a register transfer instead of doing LDA again
+        ; i.e. use `tay` to keep `ZP_POLYOBJ_PITCH` for next use
+
+        ; get the pitch rate magnitude
+        ; (the "absolute" value, without sign)
+        ;
         lda ZP_POLYOBJ_PITCH
-        and # %10000000
-        sta $b1
-        lda ZP_POLYOBJ_PITCH
-        and # %01111111
-        beq _a40b
-        cmp # $7f
-        sbc # $00
-        ora $b1
-        sta ZP_POLYOBJ_PITCH
+        and # %01111111         ; isolate pitch magnitude
+        beq :+                  ; skip if pitch is level (= %x0000000)
+
+        ; on the 6502 `cmp` effectively subtracts the given value from A
+        ; but doesn't write the result back, setting the flags as the result;
+        ; if A is less than *or equal to* the value, carry will be set.
+        ;
+        ; this means that if we compare the magnitude, without sign (%x0000001
+        ; to %x1111111), with `%x1111111` then no matter what the magnitude,
+        ; the carry *will* be set. when we call 'SuBtract with Carry' only 1
+        ; will be subtracted, not the actual difference between the two!
+        ;
+        cmp # %01111111         ; carry will be set if pitch <= %x1111111,
+        sbc # $00               ; and 1 will be subtracted instead of 0
+        ora $b1                 ; add the sign back in
+        sta ZP_POLYOBJ_PITCH    ; save back the pitch rate
+        
         ldx # $0f
         ldy # $09
-        jsr _2dc5
+        jsr _2dc5               ; move ship?
         ldx # $11
         ldy # $0b
-        jsr _2dc5
+        jsr _2dc5               ; move ship?
         ldx # $13
         ldy # $0d
-        jsr _2dc5
-_a40b:                                                                  ;$A40B
+        jsr _2dc5               ; move ship?
+
+        ; slowly dampen roll rate toward zero:
+        ;-----------------------------------------------------------------------
+        ; separate out the roll sign
+        ; (positive / negative)
+        ;
+:       lda ZP_POLYOBJ_ROLL     ; current roll rate                     ;$A40B
+        and # %10000000         ; isolate roll sign
+        sta $b1                 ; put aside sign
+        
+        ; get the roll rate magnitude
+        ; (the "absolute" value, without sign)
+        ;
         lda ZP_POLYOBJ_ROLL
-        and # %10000000
-        sta $b1
-        lda ZP_POLYOBJ_ROLL
-        and # %01111111
-        beq _a434
-        cmp # $7f
-        sbc # $00
-        ora $b1
-        sta ZP_POLYOBJ_ROLL
+        and # %01111111         ; isolate roll magnitude
+        beq :+                  ; skip if roll is level (= %x0000000)
+
+        cmp # %01111111         ; carry will be set if roll <= %x1111111,
+        sbc # $00               ; and 1 will be subtracted instead of 0
+        ora $b1                 ; add the sign back in
+        sta ZP_POLYOBJ_ROLL     ; save back the roll rate
+
         ldx # $0f
         ldy # $15
-        jsr _2dc5
+        jsr _2dc5               ; move ship?
         ldx # $11
         ldy # $17
-        jsr _2dc5
+        jsr _2dc5               ; move ship?
         ldx # $13
         ldy # $19
         jsr _2dc5
-_a434:                                                                  ;$A434
-        lda ZP_POLYOBJ_VISIBILITY
+
+:       lda ZP_POLYOBJ_VISIBILITY                                       ;$A434
         and # visibility::exploding | visibility::display
         bne _a443
         lda ZP_POLYOBJ_VISIBILITY
@@ -9391,72 +9433,9 @@ _a46f:                                                                  ;$A46F
 _a4a0:                                                                  ;$A4A0
         rts 
 
-;===============================================================================
 
-_a4a1:                                                                  ;$A4A1
-        lda $a6
-        sta ZP_VAR_Q
-
-        ldx ZP_POLYOBJ_XPOS_pt3, y
-        stx ZP_VAR_R
-        
-        ldx ZP_POLYOBJ_YPOS_pt1, y
-        stx ZP_VAR_S
-        
-        ldx ZP_POLYOBJ_XPOS_pt1, y
-        stx ZP_VAR_P1
-        
-        lda ZP_POLYOBJ_XPOS_pt2, y
-        eor # %10000000
-        jsr _3ace
-        
-        sta ZP_POLYOBJ_YPOS_pt1, y
-        stx ZP_POLYOBJ_XPOS_pt3, y
-        stx ZP_VAR_P1
-        
-        ldx ZP_POLYOBJ_XPOS_pt1, y
-        stx ZP_VAR_R
-        
-        ldx ZP_POLYOBJ_XPOS_pt2, y
-        stx ZP_VAR_S
-        
-        lda ZP_POLYOBJ_YPOS_pt1, y
-        jsr _3ace
-        sta ZP_POLYOBJ_XPOS_pt2, y
-        stx ZP_POLYOBJ_XPOS_pt1, y
-        stx ZP_VAR_P1
-        
-        lda $63
-        sta ZP_VAR_Q
-        
-        ldx ZP_POLYOBJ_XPOS_pt3, y
-        stx ZP_VAR_R
-        
-        ldx ZP_POLYOBJ_YPOS_pt1, y
-        stx ZP_VAR_S
-        
-        ldx ZP_POLYOBJ_YPOS_pt2, y
-        stx ZP_VAR_P1
-        
-        lda ZP_POLYOBJ_YPOS_pt3, y
-        eor # %10000000
-        jsr _3ace
-        sta ZP_POLYOBJ_YPOS_pt1, y
-        stx ZP_POLYOBJ_XPOS_pt3, y
-        stx ZP_VAR_P1
-        
-        ldx ZP_POLYOBJ_YPOS_pt2, y
-        stx ZP_VAR_R
-        
-        ldx ZP_POLYOBJ_YPOS_pt3, y
-        stx ZP_VAR_S
-        
-        lda ZP_POLYOBJ_YPOS_pt1, y
-        jsr _3ace
-        sta ZP_POLYOBJ_YPOS_pt3, y
-        stx ZP_POLYOBJ_YPOS_pt2, y
-        
-        rts 
+; insert the _a4a1 routine from "math_3d.asm"
+._a4a1                                                                  ;$A4A1
 
 ;===============================================================================
 
@@ -9504,7 +9483,7 @@ _a52f:                                                                  ;$A52F
 ;===============================================================================
 
 _a53d:                                                                  ;$A53D
-        lda $a6
+        lda ZP_ALPHA
         eor # %10000000
         sta ZP_VAR_Q
 
@@ -9605,7 +9584,7 @@ _a5a8:                                                                  ;$A5A8
 _a5db:                                                                  ;$A5DB
         eor ZP_VAR_T
         sta ZP_POLYOBJ_YPOS_pt3
-        lda $a6
+        lda ZP_ALPHA
         sta ZP_VAR_Q
         lda ZP_POLYOBJ_YPOS_pt1
         sta ZP_VAR_P1
@@ -9897,6 +9876,7 @@ _a786:                                                                  ;$A786
         lda # $00
         sta $67
         sta $0481
+        
         jsr _b0fd
         ldy # $09
         jmp _a822
@@ -10207,7 +10187,7 @@ _a8fa:                                                                  ;$A8FA
         lda _a8e4, x
         sta $d028               ;sprite 1 color
         
-        bit $04c3
+        bit PLAYER_EBOMB
         bpl :+
         inc _a8e6
 :       lda _a8e6, x                                                    ;$A936

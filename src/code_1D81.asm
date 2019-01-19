@@ -6,6 +6,7 @@
 .include        "c64.asm"
 .include        "elite_vars.asm"
 .include        "var_zeropage.asm"
+.include        "math_3d.asm"
 .include        "gfx/hull_struct.asm"
 
 ; from "text_flight.asm"
@@ -418,7 +419,8 @@ _1eb3:                                                                  ;$1EB3
 
 _1ec1:                                                                  ;$1EC1
 ;===============================================================================
-; main cockpit-view game-play loop perhaps? (handles many key presses) 
+; main cockpit-view game-play loop perhaps?
+; (handles many key presses) 
 ;
 .export _1ec1
 
@@ -461,8 +463,8 @@ _1eee:                                                                  ;$1EEE
         lsr 
 _1ef5:                                                                  ;$1EF5
         sta $68                 ; roll magnitude
-        ora $69                 ; roll sign?
-        sta $a6
+        ora $69                 ; add sign
+        sta ZP_ALPHA            ; put aside for use in the matrix math
 
         ldx $048e
         jsr _3c58
@@ -489,7 +491,7 @@ _1f15:                                                                  ;$1F15
 _1f20:                                                                  ;$1F20
         sta $64
         ora $94
-        sta $63
+        sta ZP_BETA
         
         lda key_accelerate      ; is accelerate being held?
        .bze _1f33               ; if not, continue
@@ -546,7 +548,7 @@ _1f3e:                                                                  ;$1F3E
 :       lda key_bomb            ; energy bomb key held?                 ;$1F77
        .bze :+
 
-        asl $04c3               ; does player have an energy bomb?
+        asl PLAYER_EBOMB        ; does player have an energy bomb?
         beq :+                  ; no? keep going
 
         ldy # $d0
@@ -558,18 +560,19 @@ _1f3e:                                                                  ;$1F3E
 :       lda key_docking_off     ; docking-computer off pressed?         ;$1F8B
        .bze :+                  ; no? skip ahead
 
-        lda # $00               ; $00 = off
-        sta $0480               ; turn docking computer off
+        lda # $00               ; $00 = OFF
+        sta DOCKCOM_STATE       ; turn docking computer off
         
         jsr _923b
 
 :       lda key_escape_pod      ; escape pod key pressed?               ;$1F98
-        and $04c7               ; does the player have an escape pod?
+        and PLAYER_ESCAPEPOD    ; does the player have an escape pod?
        .bze :+                  ; no? keep moving
 
-        lda $0482
-        bne :+
-        jmp _316e
+        lda IS_MISJUMP          ; is the player stuck in witchspace?
+       .bnz :+                  ; yes...
+
+        jmp _316e               ; no: eject escpae pod
 
 :       lda key_jump            ; quick-jump key pressed?               ;$1FA8
         beq :+                  ; no? skip ahead
@@ -577,11 +580,12 @@ _1f3e:                                                                  ;$1F3E
         jsr _8e29               ; handle quick-jump?
 
 :       lda key_ecm             ; E.C.M. key pressed?                   ;$1FB0
-        and $04c1               ; does the player have an E.C.M.?
+        and PLAYER_ECM          ; does the player have an E.C.M.?
         beq _1fc2
 
         lda $67
         bne _1fc2
+
         dec $0481
         jsr _b0f4
 
@@ -591,7 +595,7 @@ _1fc2:                                                                  ;$1FC2
        .bze :+                  ; no, skip
         eor joy_down            ; stops ship climbing, but why?
        .bze :+
-        sta $0480               ;?
+        sta DOCKCOM_STATE       ; turn docking computer on (A = $FF)
 
         jsr _9204               ; handle docking computer behaviour?
 
@@ -689,7 +693,7 @@ _2039:                                                                  ;$2039
         lda hull_pointers - 1, y
         sta ZP_HULL_ADDR_HI
         
-        lda $04c3               ; energy bomb?
+        lda PLAYER_EBOMB        ; player has energy bomb?
         bpl @skip
         
 .import hull_coreolis_index:direct
@@ -734,9 +738,9 @@ _2039:                                                                  ;$2039
         jsr _87b1
         bne _20e0
 
-        lda ZP_POLYOBJ_XPOS_pt1 ;=$09
-        ora ZP_POLYOBJ_YPOS_pt1 ;=$0C
-        ora ZP_POLYOBJ_ZPOS_pt1 ;=$0F
+        lda ZP_POLYOBJ_XPOS_pt1
+        ora ZP_POLYOBJ_YPOS_pt1
+        ora ZP_POLYOBJ_ZPOS_pt1
         bmi _20e0
 
         ldx $a5
@@ -929,7 +933,7 @@ _21ab:                                                                  ;$21AB
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
         lda $048b
-        ora $0482
+        ora IS_MISJUMP
         bne _21e2
 
         ldy # Hull::bounty      ;=$0A: (bounty lo-byte)
@@ -965,9 +969,9 @@ _21ee:                                                                  ;$21EE
         ;-----------------------------------------------------------------------
 
 _21fa:                                                                  ;$21FA
-        lda $04c3               ; energy bomb?
+        lda PLAYER_EBOMB        ; player has energy bomb?
         bpl _2207
-        asl $04c3
+        asl PLAYER_EBOMB        ; player has energy bomb?
         bmi _2207
         jsr _2367
 _2207:                                                                  ;$2207
@@ -992,7 +996,7 @@ _2224:                                                                  ;$2224
         bcs _2230
         sta PLAYER_ENERGY
 _2230:                                                                  ;$2230
-        lda $0482
+        lda IS_MISJUMP
         bne _2277
         
         lda $a3                 ; move counter?
@@ -1065,7 +1069,7 @@ _2277:                                                                  ;$2277
         ;-----------------------------------------------------------------------
 
 _227a:                                                                  ;$227A
-        lda $0482
+        lda IS_MISJUMP
         bne _2277
         
         lda $a3                 ; move counter?
@@ -1102,7 +1106,7 @@ _22b5:                                                                  ;$22B5
         cmp # $0f
         bne _22c2
 
-        lda $0480
+        lda DOCKCOM_STATE
         beq _231c
         
         lda # $7b
@@ -1176,6 +1180,7 @@ _231c:                                                                  ;$231C
 _2330:                                                                  ;$2330
         lda $0481
         beq _233a
+        
         jsr _7b64
         beq _2342
 _233a:                                                                  ;$233A
@@ -2509,7 +2514,7 @@ _2a43:                                                                  ;$2A43
         sta ZP_VAR_S
         lda # $00
         sta ZP_VAR_P1
-        lda $63
+        lda ZP_BETA
         eor # %10000000
         jsr _290f
         lda $5e
@@ -2634,7 +2639,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_S
         lda # $00
         sta ZP_VAR_P1
-        lda $63
+        lda ZP_BETA
         jsr _290f
         lda $5e
         sta ZP_VAR_X
@@ -2834,7 +2839,7 @@ _2cee:                                                                  ;$2CEE
 
         lda # $12
         jsr _2d61
-        lda $04c7
+        lda PLAYER_ESCAPEPOD
         beq _2d04
         lda # $70
         jsr _2d61
@@ -2844,7 +2849,7 @@ _2d04:                                                                  ;$2D04
         lda # $6f
         jsr _2d61
 _2d0e:                                                                  ;$2D0E
-        lda $04c1
+        lda PLAYER_ECM
         beq _2d18
         lda # ZP_VAR_Y
         jsr _2d61
@@ -2853,7 +2858,7 @@ _2d18:                                                                  ;$2D18
         sta $ad
 _2d1c:                                                                  ;$2D1C
         tay 
-        ldx $04c3 - $71, y      ; equipment slots?
+        ldx SHIP_SLOTS, y       ; ship slots? NB: "$04c3 - $71"
         beq _2d25
         jsr _2d61
 _2d25:                                                                  ;$2D25
@@ -2960,7 +2965,10 @@ _2dc4:                                                                  ;$2DC4
         rts 
 
 ;===============================================================================
-
+;
+;       X = offset from `ZP_POLYOBJECT` to the desired matrix row;
+;           that is, a `MATRIX_ROW_?` constant
+;
 _2dc5:                                                                  ;$2DC5
 .export _2dc5
 
@@ -3621,7 +3629,7 @@ _2ff3:                                                                  ;$2FF3
         eor # %10000000
         jsr _3ad1
         jsr _3130
-        lda $63
+        lda ZP_BETA
         ldx $64
         beq _302b
         sbc # $01
@@ -3815,9 +3823,9 @@ _310f:                                                                  ;$310F
         dec ZP_VAR_Q
         bpl _310f
         pha 
-        lda #> $63
+        lda # $00
         sta ZP_VAR_R
-        lda #< $63
+        lda # $63
         sta ZP_VAR_Q
         pla 
         jmp _30f1
@@ -3882,13 +3890,17 @@ _314d:                                                                  ;$314D
         rts 
 
 ;===============================================================================
-
+; eject escape pod?
+;
 _316e:                                                                  ;$316E
         jsr _83df
+
         ldx # $0b
         stx $a5
+        
         jsr _3680
         bcs _317f
+        
         ldx # $18
         jsr _3680
 _317f:                                                                  ;$317F
@@ -3915,8 +3927,10 @@ _319b:                                                                  ;$319B
         dex 
         bpl _319b
         sta PLAYER_LEGAL
-        sta $04c7
+        sta PLAYER_ESCAPEPOD
         
+        ; some Trumbles™ will slip away
+        ; with you, the sneaky things!
 .ifndef OPTION_NOTRUMBLES
 
         ; does the player have any Trumbles™?
@@ -4624,13 +4638,13 @@ _35b3:                                                                  ;$35B3
         ldx POLYOBJ_01 + PolyObject::xpos + 2, y                        ;=$F927
         stx ZP_VAR_Q
         lda ZP_VAR_Y
-        jsr _3ace
+        jsr multiply_and_add
         sta ZP_VAR_S
         stx ZP_VAR_R
         ldx POLYOBJ_01 + PolyObject::ypos + 1, y                        ;=$F929
         stx ZP_VAR_Q
         lda ZP_VAR_X2
-        jmp _3ace
+        jmp multiply_and_add
 
 ;===============================================================================
 
@@ -5078,7 +5092,7 @@ _37fa:                                                                  ;$37FA
         lda $5e
         sta ZP_VAR_S
         eor # %10000000
-        jsr _3ace
+        jsr multiply_and_add
         sta $5e
         txa 
         sta $06af, y
@@ -5086,12 +5100,12 @@ _37fa:                                                                  ;$37FA
         sta ZP_VAR_R
         lda $60
         sta ZP_VAR_S
-        jsr _3ace
+        jsr multiply_and_add
         sta ZP_VAR_S
         stx ZP_VAR_R
         lda # $00
         sta ZP_VAR_P1
-        lda $a6
+        lda ZP_ALPHA
         jsr _290f
         lda $5e
         sta DUST_X, y
@@ -5119,9 +5133,9 @@ _389a:                                                                  ;$389A
         ;-----------------------------------------------------------------------
 
 _38a3:                                                                  ;$38A3
-        lda $a6
+        lda ZP_ALPHA
         eor $b0
-        sta $a6
+        sta ZP_ALPHA
         lda $69                 ; roll sign?
         eor $b0
         sta $69                 ; roll sign?
@@ -5439,85 +5453,15 @@ _3a3f:                                                                  ;$3A3F
 
 ;===============================================================================
 
-; unused / unreferenced?
-;$3a48
-        ldx $68                 ; roll magnitude?
-        stx ZP_VAR_P1
-_3a4c:                                                                  ;$3A4C
-        ldx $5e
-        stx ZP_VAR_S
-_3a50:                                                                  ;$3A50
-        ldx $5d
-        stx ZP_VAR_R
-_3a54:                                                                  ;$3A54
-        tax 
-        and # %01111111
-        lsr 
-        sta ZP_VAR_P1
-        txa 
-        eor ZP_VAR_Q
-        and # %10000000
-        sta ZP_VAR_T
-        lda ZP_VAR_Q
-        and # %01111111
-        beq _3aa5
-        tax 
-        dex 
-        stx ZP_TEMP_VAR
-        lda # $00
-        tax 
-        bcc _3a72
-        adc ZP_TEMP_VAR
-_3a72:                                                                  ;$3A72
-        ror 
-        ror ZP_VAR_P1
-        bcc _3a79
-        adc ZP_TEMP_VAR
-_3a79:                                                                  ;$3A79
-        ror 
-        ror ZP_VAR_P1
-        bcc _3a80
-        adc ZP_TEMP_VAR
-_3a80:                                                                  ;$3A80
-        ror 
-        ror ZP_VAR_P1
-        bcc _3a87
-        adc ZP_TEMP_VAR
-_3a87:                                                                  ;$3A87
-        ror 
-        ror ZP_VAR_P1
-        bcc _3a8e
-        adc ZP_TEMP_VAR
-_3a8e:                                                                  ;$3A8E
-        ror 
-        ror ZP_VAR_P1
-        bcc _3a95
-        adc ZP_TEMP_VAR
-_3a95:                                                                  ;$3A95
-        ror 
-        ror ZP_VAR_P1
-        bcc _3a9c
-        adc ZP_TEMP_VAR
-_3a9c:                                                                  ;$3A9C
-        ror 
-        ror ZP_VAR_P1
-        lsr 
-        ror ZP_VAR_P1
-        ora ZP_VAR_T
-        rts 
-
-_3aa5:                                                                  ;$3AA5
-        sta ZP_VAR_P1
-        rts 
-
-;===============================================================================
+; insert `multiply_qa` (and some precedents) from "math_3d.asm"
+.multiply_qa                                                            ;$3A48
 
 _3aa8:                                                                  ;$3AA8
 .export _3aa8
 
-        jsr _3a54
+        jsr multiply_qa
         sta ZP_VAR_S
-        lda ZP_VAR_P1
+        lda ZP_VAR_P
         sta ZP_VAR_R
         rts 
 
@@ -5531,58 +5475,15 @@ _3ab2:                                                                  ;$3AB2
         ldx ZP_POLYOBJ_XPOS_pt3, y
         stx ZP_VAR_Q
         lda ZP_VAR_Y
-        jsr _3ace
+        jsr multiply_and_add
         sta ZP_VAR_S
         stx ZP_VAR_R
         ldx ZP_POLYOBJ_YPOS_pt2, y
         stx ZP_VAR_Q
         lda ZP_VAR_X2
-_3ace:                                                                  ;$3ACE
-.export _3ace
 
-        jsr _3a54
-_3ad1:                                                                  ;$3AD1
-.export _3ad1
-
-        sta ZP_TEMP_VAR
-        and # %10000000
-        sta ZP_VAR_T
-        eor ZP_VAR_S
-        bmi _3ae8
-        lda ZP_VAR_R
-        clc 
-        adc ZP_VAR_P1
-        tax 
-        lda ZP_VAR_S
-        adc ZP_TEMP_VAR
-        ora ZP_VAR_T
-        rts 
-
-        ;-----------------------------------------------------------------------
-
-_3ae8:                                                                  ;$3AE8
-        lda ZP_VAR_S
-        and # %01111111
-        sta ZP_VAR_U
-        lda ZP_VAR_P1
-        sec 
-        sbc ZP_VAR_R
-        tax 
-        lda ZP_TEMP_VAR
-        and # %01111111
-        sbc ZP_VAR_U
-        bcs _3b0a
-        sta ZP_VAR_U
-        txa 
-        eor # %11111111
-        adc # $01
-        tax 
-        lda # $00
-        sbc ZP_VAR_U
-        ora # %10000000
-_3b0a:                                                                  ;$3B0A
-        eor ZP_VAR_T
-        rts 
+; insert the `multiply_and_add` routine from "math_3d.asm"
+.multiply_and_add                                                       ;$3ACE 
 
 ;===============================================================================
 
@@ -5591,7 +5492,7 @@ _3b0d:                                                                  ;$3B0D
 
         stx ZP_VAR_Q
         eor # %10000000
-        jsr _3ace
+        jsr multiply_and_add
         tax 
         and # %10000000
         sta ZP_VAR_T
@@ -5827,8 +5728,9 @@ _3c4d:                                                                  ;$3C4D
 ; X = an index?
 
 _3c58:                                                                  ;$3C58
-        lda $0480               ; is roll already 0?
+        lda DOCKCOM_STATE       ; is docking computer enabled?
         bne :+
+
         lda _1d06               ; is this the dampening flag?
         bne @rts
 
