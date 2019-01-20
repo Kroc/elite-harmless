@@ -1,0 +1,51 @@
+progress.o: progress.c progress.h log.h
+bas_main.o: bas_main.c log.h getflag.h bprg.h vec.h callback.h membuf.h
+bprg.o: bprg.c bprg.h vec.h callback.h membuf.h log.h
+named_buffer.o: named_buffer.c named_buffer.h membuf.h chunkpool.h \
+ callback.h vec.h map.h log.h membuf_io.h
+membuf_io.o: membuf_io.c membuf_io.h membuf.h log.h
+exodec.o: exodec.c exodec.h membuf.h flags.h log.h
+6502emu.o: 6502emu.c 6502emu.h int.h log.h
+log.o: log.c log.h
+bprg_link_patch.o: bprg_link_patch.c bprg.h vec.h callback.h membuf.h \
+ log.h
+getflag.o: getflag.c
+output.o: output.c log.h output.h membuf.h flags.h
+bprg_renumber.o: bprg_renumber.c bprg.h vec.h callback.h membuf.h log.h
+bprg_trampoline.o: bprg_trampoline.c bprg.h vec.h callback.h membuf.h \
+ log.h
+parse.o: parse.c parse.h int.h vec.h callback.h membuf.h expr.h asm.tab.h \
+ map.h named_buffer.h chunkpool.h pc.h log.h
+radix.o: radix.c log.h radix.h chunkpool.h callback.h vec.h membuf.h
+chunkpool.o: chunkpool.c chunkpool.h callback.h vec.h membuf.h log.h
+desfx.o: desfx.c desfx.h int.h 6502emu.h log.h vec.h callback.h membuf.h \
+ areatrace.h
+exo_helper.o: exo_helper.c log.h output.h membuf.h flags.h match.h \
+ chunkpool.h callback.h vec.h search.h optimal.h exodec.h exo_helper.h \
+ exo_util.h getflag.h
+vec.o: vec.c vec.h callback.h membuf.h
+membuf.o: membuf.c membuf.h
+exo_raw.o: exo_raw.c log.h getflag.h membuf.h membuf_io.h exo_helper.h \
+ search.h match.h chunkpool.h callback.h vec.h output.h flags.h optimal.h \
+ exo_util.h
+b2membuf.o: b2membuf.c
+exo_main.o: exo_main.c log.h search.h match.h chunkpool.h callback.h \
+ vec.h membuf.h output.h flags.h optimal.h getflag.h membuf_io.h \
+ exo_helper.h exo_util.h parse.h int.h expr.h asm.tab.h map.h \
+ named_buffer.h pc.h desfx.h
+asm.tab.o: asm.tab.c int.h parse.h vec.h callback.h membuf.h expr.h \
+ asm.tab.h map.h named_buffer.h chunkpool.h pc.h log.h
+match.o: match.c log.h match.h chunkpool.h callback.h vec.h membuf.h \
+ radix.h progress.h
+optimal.o: optimal.c log.h search.h match.h chunkpool.h callback.h vec.h \
+ membuf.h output.h flags.h radix.h optimal.h
+lex.yy.o: lex.yy.c int.h membuf.h parse.h vec.h callback.h expr.h \
+ asm.tab.h map.h named_buffer.h chunkpool.h pc.h
+search.o: search.c log.h search.h match.h chunkpool.h callback.h vec.h \
+ membuf.h output.h flags.h progress.h
+map.o: map.c map.h vec.h callback.h membuf.h log.h
+areatrace.o: areatrace.c areatrace.h int.h vec.h callback.h membuf.h
+pc.o: pc.c pc.h expr.h int.h asm.tab.h log.h
+expr.o: expr.c expr.h int.h asm.tab.h chunkpool.h callback.h vec.h \
+ membuf.h log.h
+exo_util.o: exo_util.c exo_util.h log.h membuf.h vec.h callback.h

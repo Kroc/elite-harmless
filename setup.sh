@@ -16,18 +16,27 @@ cd bin
 
 if [ ! -d "cc65" ]; then
     git clone --recurse-submodules https://github.com/cc65/cc65.git cc65
+    
+    cd cc65
+    make
+    sudo PREFIX=/usr/local make install
+    cd ..
 fi
-cd cc65
-make
-sudo PREFIX=/usr/local make install
 
-cd ..
 if [ ! -d "mkd64" ]; then
     git clone --recurse-submodules https://github.com/Zirias/c64_tool_mkd64.git mkd64
+    cd mkd64
+    make
+    sudo make install
+    cd ..
 fi
-cd mkd64
+
+# compile exomizer (requires CC65 to be on the path)
+cd exomizer/src
+
 make
-sudo make install
+
+cd ../..
 
 echo
 echo "Build complete."

@@ -20,6 +20,7 @@ ca65="./bin/cc65/bin/ca65 \
 ld65="ld65"
 mkd64="mkd64"
 encrypt="python3 link/encrypt.py"
+exomizer="./bin/exomizer/src/exomizer sfx"
 
 
 clear
@@ -332,13 +333,18 @@ $ld65 \
 
 #-------------------------------------------------------------------------------
 
+# compress and fast-load the program
+echo "- exomizing..."
+echo
+
+$exomizer \$0400 -B -x3 -o "bin/harmless-exo.prg" "bin/harmless.prg",\$0400
+
 echo
 echo "* write floppy disk image"
 $mkd64 \
     -o release/elite-harmless.d64 \
     -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f bin/load.prg         -t 17 -s 0 -n "LOAD"        -P -w \
-    -f bin/harmless.prg     -t 17 -s 1 -n "HARMLESS"    -P -w \
+    -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
     1>/dev/null
 echo "- OK"
 
