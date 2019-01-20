@@ -73,7 +73,7 @@ _bmprow30 = ELITE_BITMAP_ADDR + .bmppos( 30, 4 ) ;=$65A0
 _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
 
 ; repeat each row address 8 times:
-.define _rowtobmp \
+.define _rowtobmp_rows \
         _bmprow00, _bmprow00, _bmprow00, _bmprow00, \
         _bmprow00, _bmprow00, _bmprow00, _bmprow00, \
         _bmprow01, _bmprow01, _bmprow01, _bmprow01, \
@@ -123,7 +123,9 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
         _bmprow23, _bmprow23, _bmprow23, _bmprow23, \
         _bmprow23, _bmprow23, _bmprow23, _bmprow23, \
         _bmprow24, _bmprow24, _bmprow24, _bmprow24, \
-        _bmprow24, _bmprow24, _bmprow24, _bmprow24, \
+        _bmprow24, _bmprow24, _bmprow24, _bmprow24
+
+.define _rowtobmp_orig \
         _bmprow25, _bmprow25, _bmprow25, _bmprow25, \
         _bmprow25, _bmprow25, _bmprow25, _bmprow25, \
         _bmprow26, _bmprow26, _bmprow26, _bmprow26, \
@@ -138,6 +140,17 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
         _bmprow30, _bmprow30, _bmprow30, _bmprow30, \
         _bmprow31, _bmprow31, _bmprow31, _bmprow31, \
         _bmprow31, _bmprow31, _bmprow31, _bmprow31
+
+.ifdef  OPTION_ORIGINAL
+
+.define _rowtobmp \
+        _rowtobmp_rows, _rowtobmp_orig
+.else
+
+.define _rowtobmp \
+        _rowtobmp_rows
+
+.endif
 
 ; write out separate 256-byte tables for lo-address / hi-address:
 ; NOTE: these *must* be aligned by the linker!
