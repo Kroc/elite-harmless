@@ -18,7 +18,7 @@
 ; this is the entry point, jumped to by the stage 1 loader
 .export _1d22
 
-.import _aab2:absolute
+.import init_mem:absolute
 .import _8863:absolute
 
 ; populate the .PRG header using the address given
@@ -49,7 +49,7 @@ _1d22:
 
         ; initialise interrupts,
         ; clears $0400..$0700
-        jsr _aab2               ;<-- GMA6.PRG; $6A00..$CCE0             ;$1d30
+        jsr init_mem            ;<-- GMA6.PRG; $6A00..$CCE0             ;$1d30
 
         jmp _8863               ;<-- GMA6.PRG; $6A00..$CCE0
 

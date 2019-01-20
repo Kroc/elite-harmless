@@ -5,10 +5,10 @@
 
 .include        "c64.asm"
 
-; this file is the code for "firebird.prg", the first stage in loading,
-; it's what gets loaded by the normal C64 KERNAL. the program is designed to
-; hijack BASIC via the BASIC vectors located at $0300+, this means that the
-; program starts automatically without a BASIC bootstrap or `RUN`
+; this file is the code for "firebird.prg", the first stage in loading, it's
+; what gets loaded by the normal C64 KERNAL. the program is designed to hijack
+; BASIC via the BASIC vectors located at $0300+, this means that the program
+; starts automatically without a BASIC bootstrap or `RUN`
 
 ; interesting tidbit: the `,1` in `LOAD"*",8,1` tells the C64 to use the
 ; load address given by the program, in this case $02A7. if the user uses
@@ -50,8 +50,8 @@
         ; end of program
 @end:   .word   $0000
         
-        ; immediately following the BASIC bootstrap is a small machine-langauge
-        ; routine to copy the program to its intended location
+        ; immediately following the BASIC bootstrap is a small
+        ; machine-langauge routine to copy the program to its intended location
         ;-----------------------------------------------------------------------
 
         ; NOTE: the linker configuration ("link/elite-original-gma86.cfg")

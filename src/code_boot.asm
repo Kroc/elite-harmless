@@ -123,8 +123,8 @@ start:
 init_end:
 .export init_end
 
-.import _aab2, _8863
-        jsr _aab2
+.import init_mem, _8863
+        jsr init_mem
         jmp _8863
 
 ;===============================================================================

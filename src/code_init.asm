@@ -42,7 +42,7 @@ init:
         ; data from the zone $4000-$7FFF
 .import ELITE_VIC_DD00:direct
 
-        lda $dd00               ; read the serial bus / VIC-II bank state
+        lda CIA2_PORTA          ; read the serial bus / VIC-II bank state
         and # %11111100         ; keep current value except bits 0-1 (VIC bank)
         ora # ELITE_VIC_DD00    ; set bits 0-1 to %10: bank 1, $4000..$8000
         sta CIA2_PORTA
@@ -394,15 +394,15 @@ _76d8:  stx ZP_COPY_TO+1
 
         ;-----------------------------------------------------------------------
 
-.import _aab2
+.import init_mem
 .import _8863
         
-        ; NOTE: calling `_aab2` clears the variable storage from $0400..$0700
+        ; NOTE: calling `init_mem` clears variable storage from $0400..$0700
         ; *THIS VERY CODE IS WITHIN THAT REGION* -- ergo, we cannot return
         ; from a subroutine here but will still need to send execution to
         ; `_88b3` after clearing variable storage. we do this by pushing the
         ; address we want to jump to (`_88b3`) on to the stack and then jump
-        ; (*not* `jsr`) to the subroutine. when it hits `rts`, execution will
+        ; (*NOT* `jsr`) to the subroutine. when it hits `rts`, execution will
         ; move to the address we inserted into the stack!
         ;
         lda #> (_8863 - 1)
@@ -410,7 +410,7 @@ _76d8:  stx ZP_COPY_TO+1
         lda #< (_8863 - 1)
         pha 
 
-        jmp _aab2
+        jmp init_mem
 
 .proc   copy_bytes
         ;=======================================================================

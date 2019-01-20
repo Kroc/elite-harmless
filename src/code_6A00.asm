@@ -10099,15 +10099,25 @@ _aaa2:                                                                  ;$AAA2
 
 ; CALL FROM LOADER; this is the first thing called after initialisation
 
-.export _aab2
-.proc   _aab2                                                           ;$AAB2
+.export init_mem
+.proc   init_mem                                                        ;$AAB2
         ;=======================================================================
-        
         ; erase $0400..$0700
-        lda #> $0400
+
+.import __VARS_START__
+.import __VARS_SIZE__
+
+        lda #> __VARS_START__
         sta ZP_TEMP_ADDR1_HI
-        ldx # $03               ; number of pages; 3 x 256 = 768 bytes
-        lda #< $0400            ; address must be page aligned for A to be $00 
+
+        ; number of whole pages to copy; note that the lack of a rounding-up
+        ; divide is fixed by adding just shy of one page before dividing,
+        ; instead of just adding one to the result. this means that a round
+        ; number of bytes, e.g. $1000 would not calculate as one more page
+        ; than necessary 
+        ldx #< ((__VARS_SIZE__ + 255) / 256)
+
+        lda #< __VARS_START__   ; address must be page aligned for A to be $00 
         sta ZP_TEMP_ADDR1_LO
         tay                     ; =0
 
