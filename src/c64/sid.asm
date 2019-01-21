@@ -3,6 +3,19 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+.enum   voice_ctrl
+        gate            = %00000001     ; 1 = on: atk-dcy-sus, 0 = off: release
+        sync            = %00000010     ; 1 = sync enabled
+        ring            = %00000100     ; 1 = ring modulation enabled
+        test            = %00001000     ; 1 = disable / reset noise
+        triangle        = %00010000     ; 1 = triangle waveform selected
+        saw             = %00100000     ; 1 = saw waveform selected
+        rect            = %01000000     ; 1 = rectangle waveform selected
+        noise           = %10000000     ; 1 = noise enabled
+.endenum
+
+;-------------------------------------------------------------------------------
+
 .define SID_REGISTERS           $d400   ; beginning of the SID registers
 
 .define SID_VOICE1_FREQ         $d400

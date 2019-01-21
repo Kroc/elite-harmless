@@ -21,6 +21,9 @@ ZP_SOUND_START          = $c4
 ZP_SOUND_START_LO       = $c4
 ZP_SOUND_START_HI       = $c5
 
+;                       = $c6   ;?
+;                       = $c7   ;?
+;                       = $c8   ;?
 ;                       = $c9   ;?
 ;                       = $ca   ;?
 ;                       = $cb   ;?
@@ -32,12 +35,9 @@ ZP_SOUND_TOKEN          = $d1
 
 _b4cb:                                                                  ;$B4CB
         .byte   $00
-_b4cc:                                                                  ;$B4CC
-        .byte   $00             ; voice 1 freq?
-_b4cd:                                                                  ;$B4CD
-        .byte   $00             ; voice 2 freq?
-_b4ce:                                                                  ;$B4CE
-        .byte   $00             ; voice 3 freq?
+voice1_ctrl:    .byte   $00                                             ;$B4CC
+voice2_ctrl:    .byte   $00                                             ;$B4CD
+voice3_ctrl:    .byte   $00                                             ;$B4CE
 _b4cf:                                                                  ;$B4CF
         .byte   $00
 
@@ -52,11 +52,11 @@ sound_play_addr_hi:                                                     ;$B4D1
 _b4d2:                                                                  ;$B4D2
 ;===============================================================================
         ldy # $00
-        cpy $c6                 ; fading note?
+        cpy $c6                 
        .bze _b4dd
         
-        dec $c6                 ; reduce fade timer
-        jmp _b6e2               ; process fade?
+        dec $c6                 
+        jmp _b6e2               
 
 _b4dd:                                                                  ;$B4DD
         ;-----------------------------------------------------------------------
@@ -100,7 +100,7 @@ _b502:  jmp _b4dd                                                       ;$B502
 _b505:                                                                  ;$B505
 ;===============================================================================
         jsr get_voice1_freq
-        jsr _b5ee
+        jsr set_voice1_ctrl
 
         jmp _b4dd
 
@@ -108,14 +108,14 @@ _b505:                                                                  ;$B505
 _b50e:                                                                  ;$B50E
 ;===============================================================================
         jsr get_voice2_freq
-        jsr _b5f8
+        jsr set_voice2_ctrl
 
         jmp _b4dd
 
 _b517:                                                                  ;$B517
 ;===============================================================================
         jsr get_voice3_freq
-        jsr _b602
+        jsr set_voice3_ctrl
         
         jmp _b4dd
 
@@ -124,8 +124,8 @@ _b517:                                                                  ;$B517
 _b520:                                                                  ;$B520
         jsr get_voice1_freq
         jsr get_voice2_freq
-        jsr _b5ee
-        jsr _b5f8
+        jsr set_voice1_ctrl
+        jsr set_voice2_ctrl
         
         jmp _b4dd
 
@@ -134,26 +134,31 @@ _b52f:                                                                  ;$B52F
         jsr get_voice1_freq
         jsr get_voice2_freq
         jsr get_voice3_freq
-        jsr _b5ee
-        jsr _b5f8
-        jsr _b602
+        jsr set_voice1_ctrl
+        jsr set_voice2_ctrl
+        jsr set_voice3_ctrl
         
         jmp _b4dd
 
 _b544:                                                                  ;$B544
 ;===============================================================================
-        inc _b4cb+0
+        inc _b4cb
         
         jmp _b4dd
 
 _b54a:                                                                  ;$B54A
 ;===============================================================================
+; shifts the token up into the high nybble and replaces the low nybble with
+; token `%1000`. e.g.
+;
+;       0000_0101 -> 0000_1011 -> 0001_0110 -> 0010_1100 -> 0101_1000
+;
         lda ZP_SOUND_TOKEN
-        sec 
-        rol 
-        asl 
-        asl 
-        asl 
+        sec                     ; set carry
+        rol                     ; insert carry into bit 0
+        asl                     ; shift left (inserting 0 into bit 0)
+        asl                     ; again
+        asl                     ; now with feeling
         sta ZP_SOUND_TOKEN
 _b553:                                                                  ;$B653
         ;-----------------------------------------------------------------------
@@ -222,14 +227,14 @@ _b5bb:                                                                  ;$B5BB
         
         jmp _b4dd
 
-_b5c4:                                                                  ;$B5C4
+token_control:                                                          ;$B5C4
 ;===============================================================================
         jsr next_byte
-        sta _b4cb+1
+        sta voice1_ctrl
         jsr next_byte
-        sta _b4cd+0
+        sta voice2_ctrl
         jsr next_byte
-        sta _b4cd+1
+        sta voice3_ctrl
 
         jmp _b4dd
 
@@ -244,25 +249,25 @@ token_volume_filter:                                                    ;$B5D9
 
         jmp _b4dd
 
-_b5ee:                                                                  ;$B5EE
+set_voice1_ctrl:                                                        ;$B5EE
 ;===============================================================================
-        lda _b4cc
+        lda voice1_ctrl
         sty SID_VOICE1_CTRL
         sta SID_VOICE1_CTRL
         
         rts 
 
-_b5f8:                                                                  ;$B5F8
+set_voice2_ctrl:                                                        ;$B5F8
 ;===============================================================================
-        lda _b4cd
+        lda voice2_ctrl
         sty SID_VOICE2_CTRL
         sta SID_VOICE2_CTRL
         
         rts 
 
-_b602:                                                                  ;$B602
+set_voice3_ctrl:                                                        ;$B602
 ;===============================================================================
-        lda _b4ce
+        lda voice3_ctrl
         sty SID_VOICE3_CTRL
         sta SID_VOICE3_CTRL
         
@@ -444,15 +449,17 @@ _b6f2:                                                                  ;$B6F2
         cpx # $00
        .bnz :+
 
-        ldx _b4cb+1
+        ; fade volume?
+
+        ldx voice1_ctrl
         dex 
         stx SID_VOICE1_CTRL
         
-        ldx _b4cd+0
+        ldx voice2_ctrl
         dex 
         stx SID_VOICE2_CTRL
         
-        ldx _b4cd+1
+        ldx voice3_ctrl
         dex 
         stx SID_VOICE3_CTRL
 
@@ -476,27 +483,31 @@ _b6f2:                                                                  ;$B6F2
                 token_pulse, \
                 token_lxxp, \
                 _b5bb, \
-                _b5c4, \
+                token_control, \
                 token_volume_filter, \
                 _b54a
 
-B505            = %0001         ;? "voice 1 freq"
-B50E            = %0010         ;? "voice 2 freq"
-B517            = %0011         ;? "voice 3 freq"
-B520            = %0100         ;? "voice 1 & 2 freq"
-B52F            = %0101         ;? "voice 1, 2 & 3 freq"
+B505            = %0001         ;? "voice 1 freq". reads 2 bytes
+B50E            = %0010         ;? "voice 2 freq". reads 2 bytes
+B517            = %0011         ;? "voice 3 freq". reads 2 bytes
+B520            = %0100         ;? "voice 1 & 2 freq". reads 4 bytes
+B52F            = %0101         ;? "voice 1, 2 & 3 freq". reads 6 bytes
 B544            = %0110         ;?
 ADSR            = %0111         ; set ADSR for all voices. reads 6 bytes
-B553            = %1000         ;?
+B553            = %1000         ;? does not read
 LOOP            = %1001         ; return to set loop-point
 PLSE            = %1010         ; set pulse modulation for voices. 6 bytes
 LXXP            = %1011         ; same as LOOP (removed code?)
 B5BB            = %1100         ; sets `_b4cf`. reads 1 byte
-B5C4            = %1101         ;?
-VOLF            = %1110         ; set volume, filter and filter freq. 3 bytes
-B54A            = %1111         ;?
+CTRL            = %1101         ; control codes for voices, 3 bytes
+VOLF            = %1110         ; set volume, filter and filter-freq. 3 bytes
+B54A            = %1111         ;? does not read
 
+B553_B517       = B553 | (B517 << 4)    ;=$38
+B5BB_B52F       = B5BB | (B52F << 4)    ;=$5C
+B54A_B52F       = B54A | (B52F << 4)    ;=$5F
 ADSR_PLSE       = ADSR | (PLSE << 4)    ;=$A7
+CTRL_VOLF       = CTRL | (VOLF << 4)    ;=$ED
 
 _b70f:  .lobytes _addrs                                                 ;$B70F        
 _b71e:  .hibytes _addrs                                                 ;$B71E
@@ -507,13 +518,24 @@ _b71e:  .hibytes _addrs                                                 ;$B71E
 
 _b72d:                                                                  ;$B72D
         .byte   ADSR_PLSE
-        .byte           $26, $26, $48, $29, $29, $aa
-        .byte           $00, $06, $00, $05, $00, $06
+        .byte   $26, $26, $48, $29, $29, $aa
+        .byte   $00, $06, $00, $05, $00, $06
 
-        .byte   $ed, $21, $21                                           ;$B735
-        .byte   $41, $1f, $f4, $70, $5c, $07, $0e, $ef                  ;$B73D
-        .byte   $12, $d1, $1d, $df, $5f, $0e, $ef, $12                  ;$B745
-        .byte   $d1, $1d, $df, $38, $1c, $31, $58, $0e                  ;$B74D
+        .byte   CTRL_VOLF
+        .byte   $21, $21, $41
+        .byte   $1f, $f4, $70
+        
+        .byte   B5BB_B52F
+        .byte   $07
+        .byte   $0e, $ef, $12, $d1, $1d, $df
+
+        .byte   B54A_B52F
+        .byte   $0e, $ef, $12, $d1, $1d, $df
+        
+        .byte   B553_B517
+        .byte   $1c, $31
+        
+        .byte   $58, $0e                                 ;$B74D
         .byte   $ef, $1a, $9c, $1d, $df, $5f, $0e, $ef                  ;$B755
         .byte   $13, $ef, $21, $87, $5f, $0e, $ef, $13                  ;$B75D
         .byte   $ef, $21, $87, $38, $1f, $a5, $58, $0e                  ;$B765
