@@ -5838,12 +5838,12 @@ _3cdb:                                                                  ;$3CDB
         jsr get_random_number
         and # %00000111
         adc # $44
-        sta $06f1
+        sta $06f1               ;?
 
         jsr get_random_number
         and # %00000111
         adc # $7c
-        sta $06f0
+        sta $06f0               ;?
         
         lda PLAYER_TEMP_LASER
         adc # $08
@@ -5861,16 +5861,16 @@ _3cfa:                                                                  ;$3CFA
         ldy # $d0
 _3d09:                                                                  ;$3D09
         sta ZP_VAR_X2
-        lda $06f0
+        lda $06f0               ;?
         sta ZP_VAR_X
-        lda $06f1
+        lda $06f1               ;?
         sta ZP_VAR_Y
         lda # $8f
         sta ZP_VAR_Y2
         jsr _ab91
-        lda $06f0
+        lda $06f0               ;?
         sta ZP_VAR_X
-        lda $06f1
+        lda $06f1               ;?
         sta ZP_VAR_Y
         sty ZP_VAR_X2
         lda # $8f

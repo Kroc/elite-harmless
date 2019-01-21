@@ -85,6 +85,6 @@ _1d21:                                                                  ;$1D21
 
 ;FIXME: this is a spacing hack to make elite-harmless line-up with
 ;original elite until the remaining unlabelled addresses are fixed
-.ifndef OPTION_ORIGINAL
-        .res    $1D81 - $1D22
-.endif
+;;.ifndef OPTION_ORIGINAL
+;;        .res    $1D81 - $1D22
+;;.endif

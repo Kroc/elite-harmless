@@ -44,7 +44,7 @@ mYx1_HI = $03
 mYx2    = $04           ; column 2 of the matrix row given in Y (0, 1 or 2)
 mYx2_LO = $04
 mYx2_HI = $05
-
+        
         ; compute the following:
         ;
         ;       mYx1 = ALPHA * -mYx0 + mYx1
@@ -218,7 +218,8 @@ _3a50:                                                                  ;$3A50
         ; i.e. multiplies two 8-bit (signed) numbers
         ; and returns a 16-bit (signed) number
         ;
-multiply_signed:                                                            ;$3A54
+
+multiply_signed:                                                        ;$3A54
         ;
         ; the algorithm used here is a common type, best described in context
         ; of the 6502 here: <http://nparker.llx.com/a2/mult.html> under the
@@ -383,7 +384,7 @@ multiply_signed:                                                            ;$3A
         ror ZP_VAR_P
         ora ZP_VAR_T            ; restore the sign
 
-        rts
+        rts 
 
         ; multiplying by zero will return zero. note that this is why that
         ; carry was not added to the result lo-byte right away --
