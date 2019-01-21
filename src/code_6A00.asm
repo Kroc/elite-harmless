@@ -137,7 +137,7 @@
 .import sound_play_addr_lo:absolute
 .import sound_play_addr_hi:absolute
 .import _b4d2:absolute
-.import _b664:absolute
+.import sound_stop:absolute
 .import _b72d:absolute
 .import _c164:absolute
 
@@ -7175,7 +7175,7 @@ _9222:                                                                  ;$9222
         lda # MEM_IO_ONLY
         jsr set_memory_layout
 
-        jsr _b664
+        jsr sound_stop
         lda # $ff
         sta _1d03
         bne _9266

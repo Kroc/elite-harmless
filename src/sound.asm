@@ -9,7 +9,7 @@
 .export sound_play_addr_lo:absolute
 .export sound_play_addr_hi:absolute
 .export _b4d2:absolute
-.export _b664:absolute
+.export sound_stop:absolute
 .export _b72d:absolute
 .export _c164:absolute
 
@@ -21,14 +21,23 @@ ZP_SOUND_START          = $c4
 ZP_SOUND_START_LO       = $c4
 ZP_SOUND_START_HI       = $c5
 
+;                       = $c9   ;?
+;                       = $ca   ;?
+;                       = $cb   ;?
+;                       = $cc   ;?
+
 ZP_SOUND_TOKEN          = $d1
 
 .segment        "CODE_SOUND"
 
 _b4cb:                                                                  ;$B4CB
-        .byte   $00, $00
+        .byte   $00
+_b4cc:                                                                  ;$B4CC
+        .byte   $00             ; voice 1 freq?
 _b4cd:                                                                  ;$B4CD
-        .byte   $00, $00
+        .byte   $00             ; voice 2 freq?
+_b4ce:                                                                  ;$B4CE
+        .byte   $00             ; voice 3 freq?
 _b4cf:                                                                  ;$B4CF
         .byte   $00
 
@@ -237,7 +246,7 @@ token_volume_filter:                                                    ;$B5D9
 
 _b5ee:                                                                  ;$B5EE
 ;===============================================================================
-        lda _b4cb+1
+        lda _b4cc
         sty SID_VOICE1_CTRL
         sta SID_VOICE1_CTRL
         
@@ -245,7 +254,7 @@ _b5ee:                                                                  ;$B5EE
 
 _b5f8:                                                                  ;$B5F8
 ;===============================================================================
-        lda _b4cd+0
+        lda _b4cd
         sty SID_VOICE2_CTRL
         sta SID_VOICE2_CTRL
         
@@ -253,7 +262,7 @@ _b5f8:                                                                  ;$B5F8
 
 _b602:                                                                  ;$B602
 ;===============================================================================
-        lda _b4cd+1
+        lda _b4ce
         sty SID_VOICE3_CTRL
         sta SID_VOICE3_CTRL
         
@@ -321,7 +330,7 @@ get_voice3_freq:                                                        ;$B643
 
 :       rts                                                             ;$B663
 
-_b664:                                                                  ;$B664
+sound_stop:                                                             ;$B664
 ;===============================================================================
         ; clear current token(s);
         ; another will be read automatically
@@ -330,12 +339,16 @@ _b664:                                                                  ;$B664
         sta $c6
         sta $c7
         sta $c8
-        ldx # $18
-_b670:                                                                  ;$B670
-        sta SID_VOICE1_FREQ_LO, x
+
+        ; clear the SID registers
+        ; (working down from $D418 to $D400)
+        ldx # (SID_VOLUME_CTRL - SID_REGISTERS)
+:       sta SID_REGISTERS, x                                            ;$B670
         dex 
-        bne _b670
+        bne :-
         
+        ; reset the starting & looping play addresses:
+
         lda sound_play_addr_lo
         sta ZP_SOUND_ADDR_LO
         sta ZP_SOUND_START_LO
@@ -344,6 +357,7 @@ _b670:                                                                  ;$B670
         sta ZP_SOUND_ADDR_HI
         sta ZP_SOUND_START_HI
         
+        ; set default volume
         lda # 15
         sta SID_VOLUME_CTRL
         
@@ -466,11 +480,11 @@ _b6f2:                                                                  ;$B6F2
                 token_volume_filter, \
                 _b54a
 
-B505            = %0001         ;?
-B50E            = %0010         ;?
-B517            = %0011         ;?
-B520            = %0100         ;?
-B52F            = %0101         ;?
+B505            = %0001         ;? "voice 1 freq"
+B50E            = %0010         ;? "voice 2 freq"
+B517            = %0011         ;? "voice 3 freq"
+B520            = %0100         ;? "voice 1 & 2 freq"
+B52F            = %0101         ;? "voice 1, 2 & 3 freq"
 B544            = %0110         ;?
 ADSR            = %0111         ; set ADSR for all voices. reads 6 bytes
 B553            = %1000         ;?

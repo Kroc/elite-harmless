@@ -3,6 +3,8 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+.define SID_REGISTERS           $d400   ; beginning of the SID registers
+
 .define SID_VOICE1_FREQ         $d400
 .define SID_VOICE1_FREQ_LO      $d400
 .define SID_VOICE1_FREQ_HI      $d401
