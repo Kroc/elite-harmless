@@ -71,7 +71,9 @@ $ca65 -DOPTION_ORIGINAL -o build/orig-code_6A00.o       src/code_6A00.asm
 echo "- assemble 'data_9300.asm'"
 $ca65 -DOPTION_ORIGINAL -o build/orig-data_9300.o       src/data/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-table_bitmap.o   src/gfx/table_bitmap.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-table_bitmap.o    src/gfx/table_bitmap.asm
+echo "- assemble 'sound.asm'"
+$ca65 -DOPTION_ORIGINAL -o build/orig-sound.o           src/sound.asm
 echo "- assemble 'gfx_font.asm'"
 $ca65 -DOPTION_ORIGINAL -o build/orig-gfx_font.o        src/gfx/font.asm
 echo "- assemble 'gfx_sprites.asm'"
@@ -131,6 +133,7 @@ $ld65 \
     --obj build/orig-code_6A00.o \
     --obj build/orig-data_9300.o \
     --obj build/orig-table_bitmap.o \
+    --obj build/orig-sound.o \
     --obj build/orig-gfx_font.o \
     --obj build/orig-gfx_sprites.o \
     --obj build/orig-gfx_hud.o \
@@ -291,6 +294,8 @@ echo "- assemble 'data_9300.asm'"
 $ca65 -o build/data_9300.o      src/data/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
 $ca65 -o build/table_bitmap.o   src/gfx/table_bitmap.asm
+echo "- assemble 'sound.asm'"
+$ca65 -o build/sound.o          src/sound.asm
 echo "- assemble 'gfx_font.asm'"
 $ca65 -o build/gfx_font.o       src/gfx/font.asm
 echo "- assemble 'gfx_sprites.asm'"
@@ -302,9 +307,8 @@ $ca65 -o build/gfx_hud.o        src/gfx/hud.asm
 echo "- assemble 'var_polyobj.asm'"
 $ca65 -o build/var_polyobj.o    src/var_polyobj.asm
 
-# let's try ham-fistedly link our own PRG without the loader
 echo
-echo "* make 'elite-harmless.d64' (incomplete)"
+echo "* make 'elite-harmless.d64'"
 echo "  --------------------------------------"
 echo "- link 'load.prg'"
 echo "- link 'harmless.prg'"
@@ -325,6 +329,7 @@ $ld65 \
     --obj build/code_6A00.o \
     --obj build/data_9300.o \
     --obj build/table_bitmap.o \
+    --obj build/sound.o \
     --obj build/gfx_font.o \
     --obj build/gfx_sprites.o \
     --obj build/gfx_hull_data.o \
@@ -337,7 +342,16 @@ $ld65 \
 echo "- exomizing..."
 echo
 
-$exomizer \$0400 -B -x3 -o "bin/harmless-exo.prg" "bin/harmless.prg",\$0400
+# NB: `lda #$00 sta $d011` turns the screen "off" so no background is
+# displayed. it also speeds up the processor (no VIC wait-states).
+# we don't need to turn the screen back on afterwards as Elite
+# does this itself during initialisation
+
+$exomizer \$0400 -B \
+    -M256 \
+    -x3 -s "lda #\$00 sta \$d011" \
+    -o "bin/harmless-exo.prg" \
+    "bin/harmless.prg"
 
 echo
 echo "* write floppy disk image"
