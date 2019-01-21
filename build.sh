@@ -69,7 +69,7 @@ $ca65 -DOPTION_ORIGINAL -o build/orig-code_1D81.o       src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 -DOPTION_ORIGINAL -o build/orig-code_6A00.o       src/code_6A00.asm
 echo "- assemble 'data_9300.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-data_9300.o       src/data/data_9300.asm
+$ca65 -DOPTION_ORIGINAL -o build/orig-data_9300.o       src/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
 $ca65 -DOPTION_ORIGINAL -o build/orig-table_bitmap.o    src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"
@@ -291,7 +291,7 @@ $ca65 -o build/code_1D81.o      src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 -o build/code_6A00.o      src/code_6A00.asm
 echo "- assemble 'data_9300.asm'"
-$ca65 -o build/data_9300.o      src/data/data_9300.asm
+$ca65 -o build/data_9300.o      src/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
 $ca65 -o build/table_bitmap.o   src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"

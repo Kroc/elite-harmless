@@ -5,7 +5,7 @@
 
 ; "code_init.asm" : contains intialisation code
 
-.include        "c64.asm"
+.include        "c64/c64.asm"
 
 .zeropage
 

@@ -4,7 +4,7 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64.asm"
+.include        "c64/c64.asm"
 .include        "elite_vars.asm"
 .include        "var_zeropage.asm"
 .include        "gfx/hull_struct.asm"

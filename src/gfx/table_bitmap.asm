@@ -4,7 +4,7 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64.asm"
+.include        "c64/c64.asm"
 
 .import         ELITE_BITMAP_ADDR
 

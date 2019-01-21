@@ -6,7 +6,7 @@
 ; this file is part of "gma3.prg",
 ; it contains the copy-protection routines
 
-.include        "c64.asm"
+.include        "c64/c64.asm"
 
 ; populate the .PRG header using the address given
 ; by the linker config (see "link/elite-original-gma86.cfg")

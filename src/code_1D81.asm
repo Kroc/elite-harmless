@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "c64.asm"
+.include        "c64/c64.asm"
 .include        "elite_vars.asm"
 .include        "var_zeropage.asm"
 .include        "math_3d.asm"

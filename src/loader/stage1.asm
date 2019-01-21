@@ -7,8 +7,8 @@
 ; process as it displays the fastload option and orchestrates the loading /
 ; decryption of the other modules
 
-.include        "c64.asm"
-.include        "c1541.asm"
+.include        "c64/c64.asm"
+.include        "c64/c1541.asm"
 
 ;===============================================================================
 ; populate the "GMA1.PRG" header using the address given
