@@ -131,6 +131,7 @@
 
 ; from "hull_data.asm"
 .import hull_pointers
+.import hull_d042
 
 ;-------------------------------------------------------------------------------
 
@@ -4298,7 +4299,7 @@ _33a8:                                                                  ;$33A8
         cmp # $e6
         bcc _33d6
         ldx $a5
-        lda $d042 - 1, x        ;TODO: why is this less one?
+        lda hull_d042 - 1, x
         bpl _33d6
         lda ZP_POLYOBJ_BEHAVIOUR
         and # behaviour::remove    | behaviour::police \

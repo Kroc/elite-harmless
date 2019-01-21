@@ -143,6 +143,10 @@
 
 ; from "gfx/hull_data.asm"
 .import hull_pointers:absolute
+.import hull_pointer_current_lo:absolute
+.import hull_pointer_current_hi:absolute
+.import hull_pointer_dodo_lo:absolute
+.import hull_pointer_dodo_hi:absolute
 .import hull_d042:absolute
 .import hull_d062:absolute
 .import hull_d083:absolute
@@ -3424,18 +3428,18 @@ _7c24:                                                                  ;$7C24
         jsr _7d03
 
         lda _8861
-        sta $d002               ;I/O or ship-data?
+        sta hull_pointer_current_lo
         lda _8862
-        sta $d003               ;I/O or ship-data?
+        sta hull_pointer_current_hi
         
         lda PSYSTEM_TECHLEVEL
         cmp # $0a
         bcc _7c61
         
-        lda $d040               ;I/O or ship-data?
-        sta $d002
-        lda $d041               ;I/O or ship-data?
-        sta $d003
+        lda hull_pointer_dodo_lo
+        sta hull_pointer_current_lo
+        lda hull_pointer_dodo_hi
+        sta hull_pointer_current_hi
 _7c61:                                                                  ;$7C61
         lda #< $0580
         sta ZP_TEMP_ADDR2_LO
@@ -5462,9 +5466,9 @@ _8863:                                                                  ;$8863
         dex 
         bpl :-
 
-        lda VIC_SPRITE1_X       ; this might be HULL_TABLE
+        lda hull_pointer_current_lo
         sta _8861
-        lda VIC_SPRITE1_Y       ; this might be HULL_TABLE
+        lda hull_pointer_current_hi
         sta _8862
         
         jsr _8a0c
@@ -5985,18 +5989,21 @@ _8b27:                                                                  ;$8B27
         php 
         
         sei 
-        bit CIA1_INTERRUPT      ;cia1: cia interrupt control register
+        bit CIA1_INTERRUPT
         lda # $01
-        sta CIA1_INTERRUPT      ;cia1: cia interrupt control register
+        sta CIA1_INTERRUPT
+
         ldx # $00
         stx _a8d9
         inx 
         stx VIC_INTERRUPT_CONTROL
-        lda $d011               ;vic control register 1
-        and # %01111111
-        sta $d011               ;vic control register 1
-        lda # $28
-        sta $d012               ;raster position
+
+        lda VIC_SCREEN_CTL1
+        and # screen_ctl1::raster_line ^$FF
+        sta VIC_SCREEN_CTL1
+        
+        lda # 40                ; raster line 40
+        sta VIC_RASTER
 
         lda # MEM_64K
         jsr set_memory_layout
@@ -6081,11 +6088,13 @@ _8c0d:                                                                  ;$8C0D
         stx _a8d9
         inx 
         stx VIC_INTERRUPT_CONTROL
-        lda $d011               ;vic control register 1
-        and # %01111111
-        sta $d011               ;vic control register 1
-        lda # $28
-        sta $d012               ;raster position
+
+        lda VIC_SCREEN_CTL1
+        and # screen_ctl1::raster_line ^$FF
+        sta VIC_SCREEN_CTL1
+        
+        lda # 40                ; raster line 40
+        sta VIC_RASTER
         
         lda # MEM_64K
         jsr set_memory_layout
@@ -7279,6 +7288,10 @@ menuscr_hi:                                                             ;$9919
         .hibytes menuscr_pos
 
 ;===============================================================================
+
+;;.ifndef OPTION_ORIGINAL
+;;        nop 
+;;.endif
 
 _9932:                                                                  ;$9932
         jsr _9ad8
@@ -9486,9 +9499,11 @@ _a6d4:                                                                  ;$A6D4
 _a6f2:                                                                  ;$A6F2
         sty $63f8               ; somewhere in the HUD?
         sty $67f8               ; somehwere in the HUD?
-
-        lda _3ea8 - $a0, y
-        sta $d027               ;sprite 0 color?
+        
+        ; set colour of cross-hairs according to type of laser
+        ;
+        lda _3ea8 - $a0, y      ; Y is $A0+ ..?
+        sta VIC_SPRITE0_COLOR
         
         ; mark the cross-hairs sprite as enabled
         lda # %00000001
@@ -9913,19 +9928,19 @@ _a8fa:                                                                  ;$A8FA
         ldx _a8d9
 
         lda _a8da, x
-        sta VIC_MEMORY          ;=$d018, VIC-II memory control register
+        sta VIC_MEMORY
 
         lda _a8e0, x
-        sta $d016               ;vic control register 2
+        sta VIC_SCREEN_CTL2
 
         lda _a8de, x
-        sta $d012               ;raster position
+        sta VIC_RASTER
         
         lda _a8e2, x
         sta VIC_SPRITE_MULTICOLOR
         
         lda _a8e4, x
-        sta $d028               ;sprite 1 color
+        sta VIC_SPRITE1_COLOR
         
         bit PLAYER_EBOMB
         bpl :+
@@ -10180,13 +10195,13 @@ _aaa2:                                                                  ;$AAA2
         inx 
         stx VIC_INTERRUPT_CONTROL
         
-        lda $d011               ;vic control register 1
-        and # %01111111
-        sta $d011               ;vic control register 1
+        lda VIC_SCREEN_CTL1
+        and # screen_ctl1::raster_line ^$FF
+        sta VIC_SCREEN_CTL1
         
         ; set the interrupt to occur at line 40 (and 296?)
         lda # 40
-        sta $d012               ;raster position
+        sta VIC_RASTER
         
         lda CPU_CONTROL
         and # %11111000

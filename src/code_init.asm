@@ -68,7 +68,7 @@ init:
 .import ELITE_TXTSCR_D018:direct
 
         lda # ELITE_TXTSCR_D018 | %00000001
-        sta VIC_MEMORY          ;=$D018, VIC-II memory control register
+        sta VIC_MEMORY
 
         lda # BLACK
         sta VIC_BORDER          ; set border colour black
@@ -76,20 +76,22 @@ init:
         sta VIC_BACKGROUND      ; set background colour black
 
         ; set up the bitmap screen:
-        ; - bit 0-2: raster scroll (default value)
+        ; - bit 0-2: vertical scroll offset (set to 3, why?)
         ; - bit   3: 25 rows
         ; - bit   4: screen on
         ; - bit   5: bitmap mode on
         ; - bit 6-7: extended mode off / raster interrupt off
-        lda # %00111011
-        sta $d011
+        lda # 3 | screen_ctl1::rows \
+                | screen_ctl1::display \
+                | screen_ctl1::bitmap
+        sta VIC_SCREEN_CTL1
 
         ; further screen setup:
         ; - bit 0-2: horizontal scroll (0)
         ; - bit   3: 38 columns (borders inset)
         ; - bit   4: multi-color mode off
-        lda # %11000000
-        sta $d016
+        lda # %11000000         ; undocumented bits? default?
+        sta VIC_SCREEN_CTL2
 
         ; disable all sprites
         lda # %00000000
@@ -97,29 +99,29 @@ init:
 
         ; set sprite 2 colour to brown
         lda # BROWN
-        sta $d029
+        sta VIC_SPRITE2_COLOR
         ; set sprite 3 colour to medium-grey
         lda # GREY
-        sta $d02a
+        sta VIC_SPRITE3_COLOR
         ; set sprite 4 colour to blue
         lda # BLUE
-        sta $d02b
+        sta VIC_SPRITE4_COLOR
         ; set sprite 5 colour to white
         lda # WHITE
-        sta $d02c
+        sta VIC_SPRITE5_COLOR
         ; set sprite 6 colour to green
         lda # GREEN
-        sta $d02d
+        sta VIC_SPRITE6_COLOR
         ; set sprite 7 colour to brown
         lda # BROWN
-        sta $d02e
+        sta VIC_SPRITE7_COLOR
 
         ; set sprite multi-colour 1 to orange
         lda # ORANGE
-        sta $d025
+        sta VIC_SPRITE_EXTRA1
         ; set sprite multi-colour 2 to yellow
         lda # YELLOW
-        sta $d026
+        sta VIC_SPRITE_EXTRA2
 
         ; set all sprites to single-colour
         ; (the Trumbles™ are actually multi-colour,
@@ -129,13 +131,13 @@ init:
 
         ; set all sprites to double-width, double-height
         lda # %11111111
-        sta $d017               ; sprite double-height register
-        sta $d01d               ; sprite double-width register
+        sta VIC_SPRITE_DBLHEIGHT
+        sta VIC_SPRITE_DBLWIDTH
 
         ; set sprites' X 8th bit to 0;
         ; i.e all X-positions are < 256
         lda # $00
-        sta $d010
+        sta VIC_SPRITES_X
 
         ; roughly centre sprite 0 on screen
         ; (crosshair?)

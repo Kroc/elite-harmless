@@ -33,6 +33,15 @@ hull_index      .set    0
 
         ; $02: space station (coreolis)                                 ;$D002/3
         ;-----------------------------------------------------------------------
+        ; the second entry in the table gets rewritten under two conditions:
+        ; 1. on the title screen, for the ship displayed there, and
+        ; 2. the current type of space-station (coreolis / dodo)
+        ;
+hull_pointer_current:
+.export hull_pointer_current:absolute
+.export hull_pointer_current_lo:absolute = hull_pointer_current+0
+.export hull_pointer_current_hi:absolute = hull_pointer_current+1
+
         hull_index           .set hull_index + 1
 .export hull_coreolis_index    := hull_index
 
@@ -250,6 +259,11 @@ hull_index      .set    0
 
         ; $21: space station (dodo)                                     ;$D040
         ;-----------------------------------------------------------------------
+        hull_pointer_dodo:
+.export hull_pointer_dodo:absolute
+.export hull_pointer_dodo_lo:absolute = hull_pointer_dodo+0
+.export hull_pointer_dodo_hi:absolute = hull_pointer_dodo+1
+        
         hull_index           .set hull_index + 1
 .export hull_dodo_index        := hull_index
 

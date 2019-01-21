@@ -232,8 +232,27 @@ L:
 
 .define VIC_SPRITES_X           $d010
 
-.define VIC_SCREEN_VERT         $d011
-.define VIC_SCREEN_HORZ         $d016
+.define VIC_SCREEN_CTL1         $d011   ; screen-control register
+
+.enum   screen_ctl1
+        scroll_vert     = %00000111     ; vertical scroll offset
+        rows            = %00001000     ; 0 = 24 rows, 1 = 25 rows
+        display         = %00010000     ; 1 = screen on, 0 = off
+        bitmap          = %00100000     ; 0 = text, 1 = bitmap
+        extended        = %01000000     ; 1 = extended background mode
+        raster_line     = %10000000     ; hi-bit of the raster line
+.endenum
+
+.define VIC_SCREEN_CTL2         $d016
+
+.enum   screen_ctl2
+        scroll_horz     = %00000111     ; horizontal scroll offset
+        cols            = %00001000     ; 1 = 38 cols, 0 = 40 cols
+        multicolor      = %00010000     ; 1 = multi-color mode on
+.endenum
+
+.define VIC_SCREEN_VERT         $d011   ; vertical scroll offset (bits 0-2)
+.define VIC_SCREEN_HORZ         $d016   ; horizontal scroll offset (bits 0-2)
 
 .define VIC_RASTER              $d012
 
@@ -265,6 +284,24 @@ L:
 .define VIC_BORDER              $d020
 .define VIC_BACKGROUND          $d021
 
+.define VIC_BKGND_EXTRA1        $d022   ; extended background colour 1
+.define VIC_BKGND_EXTRA2        $d023   ; extended background colour 2
+.define VIC_BKGND_EXTRA3        $d024   ; extended background colour 3
+
+.define VIC_SPRITE_EXTRA1       $d025   ; sprite extra colour 1
+.define VIC_SPRITE_EXTRA2       $d026   ; sprite extra colour 2
+
+.define VIC_SPRITE0_COLOR       $d027
+.define VIC_SPRITE1_COLOR       $d028
+.define VIC_SPRITE2_COLOR       $d029
+.define VIC_SPRITE3_COLOR       $d02a
+.define VIC_SPRITE4_COLOR       $d02b
+.define VIC_SPRITE5_COLOR       $d02c
+.define VIC_SPRITE6_COLOR       $d02d
+.define VIC_SPRITE7_COLOR       $d02e
+
+; $D02F..$D040 are unused
+; $D040..$D400 are repeats of the VIC registers (every $40/64 bytes)
 
 ;===============================================================================
 ; KERNAL routines:
