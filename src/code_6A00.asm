@@ -134,8 +134,8 @@
 .import row_to_bitmap_hi:absolute
 
 ; from "sound.asm"
-.import _b4d0:absolute
-.import _b4d1:absolute
+.import sound_play_addr_lo:absolute
+.import sound_play_addr_hi:absolute
 .import _b4d2:absolute
 .import _b664:absolute
 .import _b72d:absolute
@@ -2333,6 +2333,7 @@ _76c7:                                                                  ;$76C7
         rts 
 
 ;===============================================================================
+; price list?
 
 _76cd:                                                                  ;$76CD
         .word   $0001, $012c, $0fa0, $1770, $0fa0
@@ -7157,11 +7158,13 @@ _9204:                                                                  ;$9204
 .export _9204
         bit _1d11
         bmi _91fe
+        
         lda #< (_b72d - 1)
         ldx #> (_b72d - 1)
 _920d:                                                                  ;$920D
-        sta _b4d0
-        stx _b4d1
+        sta sound_play_addr_lo
+        stx sound_play_addr_hi
+
         bit _1d03
         bmi _91fd
         bit _1d10
@@ -7201,11 +7204,13 @@ _9245:                                                                  ;$9245
         ldx # $18
         sei 
 _925a:                                                                  ;$925A
-        sta $d400, x            ;voice 1: frequency control - low-byte
+        sta SID_VOICE1_FREQ_LO, x
         dex 
         bpl _925a
-        lda # $0f
-        sta $d418               ;select filter mode and volume
+
+        lda # 15
+        sta SID_VOLUME_CTRL
+        
         cli 
 _9266:                                                                  ;$9266
         lda # MEM_64K
@@ -9977,16 +9982,16 @@ _a969:                                                                  ;$A969
         lda # $00
         ldx # $06
 _a973:                                                                  ;$A973
-        sta $d400, x            ;voice 1: frequency control - low-byte
+        sta SID_VOICE1_FREQ_LO, x
         dex 
         bpl _a973
         ldx _aa2f, y
         lda _aa23, y
-        sta $d404, x            ;voice 1: control register
+        sta SID_VOICE1_CTRL, x
         lda _aa26, y
-        sta $d405, x            ;voice 1: attack / decay cycle control
+        sta SID_VOICE1_ATKDCY, x
         lda _aa29, y
-        sta $d406, x            ;voice 1: sustain / release cycle control
+        sta SID_VOICE1_SUSREL, x
         lda # $00
 _a990:                                                                  ;$A990
         clc 
@@ -9996,7 +10001,7 @@ _a990:                                                                  ;$A990
         pha 
         lsr 
         lsr 
-        sta $d401, x            ;voice 1: frequency control - high-byte
+        sta SID_VOICE1_FREQ_HI, x
         pla 
         asl 
         asl 
@@ -10004,9 +10009,9 @@ _a990:                                                                  ;$A990
         asl 
         asl 
         asl 
-        sta $d400, x            ;voice 1: frequency control - low-byte
+        sta SID_VOICE1_FREQ_LO, x
         lda _aa1c
-        sta $d403, x            ;voice 1: pulse waveform width - high-nybble
+        sta SID_VOICE1_PULSE_HI, x
 _a9ae:                                                                  ;$A9AE
         lda _aa13, y
         bmi _a9f1
@@ -10026,14 +10031,14 @@ _a9bd:                                                                  ;$A9BD
         sbc # $10
         sta _aa29, y
         ldx _aa2f, y
-        sta $d406, x            ;voice 1: sustain / release cycle control
+        sta SID_VOICE1_SUSREL, x
         jmp _a9f6
 
 _a9dc:                                                                  ;$A9DC
         ldx _aa2f, y
         lda _aa23, y
         and # %11111110
-        sta $d404, x            ;voice 1: control register
+        sta SID_VOICE1_CTRL, x
         lda # $00
         sta _aa13, y
         sta _aa19, y
@@ -10184,8 +10189,8 @@ _aaa2:                                                                  ;$AAA2
         sta CIA1_INTERRUPT
         sta CIA2_INTERRUPT
         
-        lda # $0f
-        sta $d418               ;select filter mode and volume
+        lda # 15
+        sta SID_VOLUME_CTRL
         
         ldx # $00
         stx _a8d9
