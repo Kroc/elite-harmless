@@ -7294,10 +7294,6 @@ menuscr_hi:                                                             ;$9919
 
 ;===============================================================================
 
-;;.ifndef OPTION_ORIGINAL
-;;        nop 
-;;.endif
-
 _9932:                                                                  ;$9932
         jsr _9ad8
         jsr _7d1f
@@ -7675,9 +7671,9 @@ _9b3a:                                                                  ;$9B3A
         sta ZP_VAR_Q
         ldy # $10
 _9b51:                                                                  ;$9B51
-        lda $0045, y
+        lda ZP_TEMPOBJ_M2x0_LO, y
         asl 
-        lda $0046, y
+        lda ZP_TEMPOBJ_M2x0_HI, y
         rol 
         jsr _99af
         ldx ZP_VAR_R
@@ -10296,22 +10292,30 @@ _ab47:                                                                  ;$AB47
         .byte   $c0, $c0
 _ab49:                                                                  ;$AB49
         .byte   $30, $30, $0c, $0c, $03, $03, $c0, $c0
-_ab51:                                                                  ;$AB51
-        .byte   $60, $83, $a6, $c9, $ec, $0f, $32, $55
-_ab59:                                                                  ;$AB59
-        .byte   $ac, $ac, $ac, $ac, $ac, $ad, $ad, $ad
-_ab61:                                                                  ;$AB61
-        .byte   $66, $89, $ac, $cf, $f2, $15, $38, $5b
-_ab69:                                                                  ;$AB69
-        .byte   $ac, $ac, $ac, $ac, $ac, $ad, $ad, $ad
-_ab71:                                                                  ;$AB71
-        .byte   $e0, $03, $26, $49, $6c, $8f, $b2, $d5
-_ab79:                                                                  ;$AB79
-        .byte   $ad, $ae, $ae, $ae, $ae, $ae, $ae, $ae
-_ab81:                                                                  ;$AB81
-        .byte   $e6, $09, $2c, $4f, $72, $95, $b8, $db
-_ab89:                                                                  ;$AB89
-        .byte   $ad, $ae, $ae, $ae, $ae, $ae, $ae, $ae
+
+.define _ab51_addrs \
+        _ac60, _ac83, _aca6, _acc9, _acec, _ad0f, _ad32, _ad55
+
+_ab51:  .lobytes _ab51_addrs                                            ;$AB51
+_ab59:  .hibytes _ab51_addrs                                            ;$AB59
+
+.define _ab61_addrs \
+        _ac66, _ac89, _acac, _accf, _acf2, _ad15, _ad38, _ad5b
+
+_ab61:  .lobytes _ab61_addrs                                            ;$AB61
+_ab69:  .hibytes _ab61_addrs                                            ;$AB69
+
+.define _ab71_addrs \
+        _ade0, _ae03, _ae26, _ae49, _ae6c, _ae8f, _aeb2, _aed5
+
+_ab71:  .lobytes _ab71_addrs                                            ;$AB71
+_ab79:  .hibytes _ab71_addrs                                            ;$AB79
+
+.define _ab81_addrs \
+        _ade6, _ae09, _ae2c, _ae4f, _ae72, _ae95, _aeb8, _aedb
+
+_ab81:  .lobytes _ab81_addrs                                            ;$AB81
+_ab89:  .hibytes _ab81_addrs                                            ;$AB89
 
 ;===============================================================================
 
@@ -10418,7 +10422,7 @@ _ac19:                                                                  ;$AC19
         sta _ac46+2
         ldx $bc
 _ac46:                                                                  ;$AC46
-        jmp _8888               ; is this address ever actually used?
+        jmp $8888
 
 _ac49:                                                                  ;$AC49
         lda _ab61, x
@@ -10429,7 +10433,7 @@ _ac49:                                                                  ;$AC49
         inx 
         beq _ac5d
 _ac5a:                                                                  ;$AC5A
-        jmp _8888               ; is this address ever actually used?
+        jmp $8888
 
 _ac5d:                                                                  ;$AC5D
         ldy $9e
@@ -10441,6 +10445,7 @@ _ac60:                                                                  ;$AC60
         lda # %10000000
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ac66:                                                                  ;$AC66
         dex 
         beq _ac5d
         lda $bf
@@ -10462,6 +10467,7 @@ _ac83:                                                                  ;$AC83
         lda # $40
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ac89:                                                                  ;$AC89
         dex 
         beq _ac5d
         lda $bf
@@ -10483,6 +10489,7 @@ _aca6:                                                                  ;$ACA6
         lda # $20
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_acac:                                                                  ;$ACAC
         dex 
         beq _ac5d
         lda $bf
@@ -10504,6 +10511,7 @@ _acc9:                                                                  ;$ACC9
         lda # $10
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_accf:                                                                  ;$ACCF
         dex 
         beq _ac5d
         lda $bf
@@ -10525,6 +10533,7 @@ _acec:                                                                  ;$ACEC
         lda # $08
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_acf2:                                                                  ;$ACF2
         dex 
         beq _ad39
         lda $bf
@@ -10546,6 +10555,7 @@ _ad0f:                                                                  ;$AD0F
         lda # $04
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ad15:                                                                  ;$AD15
         dex 
         beq _ad88
         lda $bf
@@ -10567,6 +10577,7 @@ _ad32:                                                                  ;$AD32
         lda # $02
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ad38:                                                                  ;$AD38
         dex 
 _ad39:                                                                  ;$AD39
         beq _ad88
@@ -10589,6 +10600,7 @@ _ad55:                                                                  ;$AD55
         lda # $01
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ad5b:                                                                  ;$AD5B
         dex 
         beq _ad88
         lda $bf
@@ -10652,6 +10664,7 @@ _ada6:                                                                  ;$ADA6
         tax 
         bit $06f4
         bmi _adc9
+
         lda _ab71, x
         sta _adc6+1
         lda _ab79, x
@@ -10686,6 +10699,7 @@ _ade0:                                                                  ;$ADE0
         lda # $80
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ade6:                                                                  ;$ADE6
         dex 
         beq _addd
         lda $bf
@@ -10707,6 +10721,7 @@ _ae03:                                                                  ;$AE03
         lda # $40
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ae09:                                                                  ;$AE09
         dex 
         beq _addd
         lda $bf
@@ -10728,6 +10743,7 @@ _ae26:                                                                  ;$AE26
         lda # $20
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ae2c:                                                                  ;$AE2C
         dex 
         beq _addd
         lda $bf
@@ -10749,6 +10765,7 @@ _ae49:                                                                  ;$AE49
         lda # $10
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ae4f:                                                                  ;$AE4F
         dex 
         beq _aeb9
         lda $bf
@@ -10770,6 +10787,7 @@ _ae6c:                                                                  ;$AE6C
         lda # $08
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ae72:                                                                  ;$AE72
         dex 
         beq _aeb9
         lda $bf
@@ -10791,6 +10809,7 @@ _ae8f:                                                                  ;$AE8F
         lda # $04
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_ae95:                                                                  ;$AE95
         dex 
         beq _af05
         lda $bf
@@ -10812,6 +10831,7 @@ _aeb2:                                                                  ;$AEB2
         lda # $02
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_aeb8:                                                                  ;$AEB8
         dex 
 _aeb9:                                                                  ;$AEB9
         beq _af05
@@ -10834,6 +10854,7 @@ _aed5:                                                                  ;$AED5
         lda # $01
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+_aedb:                                                                  ;$AEDB
         dex 
         beq _af05
         lda $bf
