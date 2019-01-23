@@ -201,7 +201,7 @@ multiplied_now_add:                                                     ;$3AD1
 
 ; unused / unreferenced?
 ;$3a48
-        ldx $68                 ; roll magnitude?
+        ldx ZP_68               ; roll magnitude?
         stx ZP_VAR_P
 _3a4c:                                                                  ;$3A4C
         ldx ZP_VAR_XX_HI

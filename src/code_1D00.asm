@@ -53,9 +53,9 @@ _1d08:
 _1d09:
         .byte   $00
 
-opt_flipvert:           .byte   $00     ; flip the vertical axis?
+opt_flipvert:           .byte   $00     ; flip the vertical axis?       ;$1D0A
 
-opt_flipaxis:           .byte   $00     ; flip both axises
+opt_flipaxis:           .byte   $00     ; flip both axises              ;$1D0B
 
 _1d0c:
         .byte   $00
@@ -80,11 +80,3 @@ _1d14:
         .byte   $2e, $17, $2c, $32, $24
 _1d21:                                                                  ;$1D21
         .byte   $60
-
-;===============================================================================
-
-;FIXME: this is a spacing hack to make elite-harmless line-up with
-;original elite until the remaining unlabelled addresses are fixed
-;;.ifndef OPTION_ORIGINAL
-;;        .res    $1D81 - $1D22
-;;.endif

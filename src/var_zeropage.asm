@@ -8,9 +8,6 @@
 
 ; note that $00 & $01 are hard-wired to the CPU, so can't be used
 
-; unanmed zero-page usage can be found with the following regex search:
-; "\b([a-z]{3})(\s+)\$xx\b" where xx is the zero-page address
-
 ;-------------------------------------------------------------------------------
 
 ; "goat soup" is the algorithm for generating planet descriptions.
@@ -206,9 +203,9 @@ ZP_VAR_P3               = $30
 ;-------------------------------------------------------------------------------
 
 ZP_CURSOR_COL           = $31
-;                       = $32   ;?
+ZP_32                   = $32   ;?
 ZP_CURSOR_ROW           = $33
-;                       = $34   ; case switch for flight strings?
+ZP_34                   = $34   ; case switch for flight strings?
 
 ;-------------------------------------------------------------------------------
 
@@ -232,12 +229,14 @@ ZP_POLYOBJ01_POS        = $3e
 
 ;-------------------------------------------------------------------------------
 
-;                       = $3f   ; a flag, but never gets set; see `_3571`
+ZP_3F                   = $3f   ; a flag, but never gets set; see `_3571`
+
 ;                       = $40   ;UNUSED?
 ;                       = $41   ;UNUSED?
 ;                       = $42   ;UNUSED?
-;                       = $43   ; something to do with viewport height
-;                       = $44   ; often related to `ZP_POLYOBJ01_XPOS_pt2`
+
+ZP_43                   = $43   ; something to do with viewport height
+ZP_44                   = $44   ; often related to `ZP_POLYOBJ01_XPOS_pt2`
 
 ;-------------------------------------------------------------------------------
 
@@ -306,14 +305,16 @@ ZP_SUNX_HI              = $62   ; as above
 
 ZP_BETA                 = $63   ; a rotation variable used in matrix math
 
-;                       = $64   ;? x8
-;                       = $65   ; hyperspace counter (inner)
-;                       = $66   ; hyperspace counter (outer)
-;                       = $67   ;? x9
-;                       = $68   ; "roll magnitude"?
-;                       = $69   ; "roll sign"?
+ZP_64                   = $64   ;? x8
 
-;                       = $6a   ; "move count"?
+ZP_65                   = $65   ; hyperspace counter (inner)?
+ZP_66                   = $66   ; hyperspace counter (outer)?
+
+ZP_67                   = $67   ;? x9
+ZP_68                   = $68   ; "roll magnitude"?
+ZP_69                   = $69   ; "roll sign"?
+
+ZP_6A                   = $6a   ; "move count"?
 
 ;-------------------------------------------------------------------------------
 
@@ -323,14 +324,17 @@ ZP_VAR_Y                = $6c   ; a common "Y" variable
 ZP_VAR_X2               = $6d   ; a secondary "X" variable
 ZP_VAR_Y2               = $6e   ; a secondary "Y" variable
 
-;                       = $6f   ; `ZP_VAR_Z`?
-;                       = $70   ; `ZP_VAR_Y3` / `ZP_VAR_Z2`?
-;                       = $71   ;? x22
-;                       = $72   ;? x16
-;                       = $73   ;? x20
-;                       = $74   ;? x12
-;                       = $75   ;? x14
-;                       = $76   ;? x12
+ZP_6F                   = $6f   ; `ZP_VAR_Z`?
+ZP_70                   = $70   ; `ZP_VAR_Y3` / `ZP_VAR_Z2`?
+
+; energy banks?
+ZP_71                   = $71   ;? x22
+ZP_72                   = $72   ;? x16
+ZP_73                   = $73   ;? x20
+ZP_74                   = $74
+
+ZP_75                   = $75   ;? x14
+ZP_76                   = $76   ;? x12
 
 ; a 4-byte big-endian number buffer for working with big integers:
 
@@ -340,10 +344,10 @@ ZP_VALUE_pt2            = $78
 ZP_VALUE_pt3            = $79
 ZP_VALUE_pt4            = $7a
 
-;                       = $7b   ;? x8
-;                       = $7c   ;? x7
-;                       = $7d   ;? x6
-;                       = $7e   ;? x10
+ZP_7B                   = $7b   ;? x8
+ZP_7C                   = $7c   ;? x7
+ZP_7D                   = $7d   ;? x6
+ZP_7E                   = $7e   ;? x10
 
 ;-------------------------------------------------------------------------------
 
@@ -357,37 +361,37 @@ ZP_SEED_pt6             = $84
 
 ;-------------------------------------------------------------------------------
 
-;                       = $85   ;? x9
-;                       = $86   ;? x3
-;                       = $87   ;? x6
-;                       = $88   ;? x8
-;                       = $89   ;? x5
-;                       = $8a   ;? x8
-;                       = $8b   ;? x9
-;                       = $8c   ;? x4
-;                       = $8d   ;? x4
-;                       = $8e   ;? x18
-;                       = $8f   ;? x19
-;                       = $90   ;? x11
-;                       = $91   ;? x9
-;                       = $92   ;? x6
-;                       = $93   ;? x4
-;                       = $94   ;? x8
-;                       = $95   ;? x6
+ZP_85                   = $85   ;? x9
+ZP_86                   = $86   ;? x3
+ZP_87                   = $87   ;? x6
+ZP_88                   = $88   ;? x8
+ZP_89                   = $89   ;? x5
+ZP_8A                   = $8a   ;? x8
+ZP_8B                   = $8b   ;? x9
+ZP_8C                   = $8c   ;? x4
+ZP_8D                   = $8d   ;? x4
+ZP_8E                   = $8e   ;? x18
+ZP_8F                   = $8f   ;? x19
+ZP_90                   = $90   ;? x11
+ZP_91                   = $91   ;? x9
+ZP_92                   = $92   ;? x6
+ZP_93                   = $93   ;? x4
+ZP_94                   = $94   ;? x8
+ZP_95                   = $95   ;? x6
 
 PLAYER_SPEED            = $96
 
-;                       = $97   ;? x5
-;                       = $98   ;? x4
+ZP_97                   = $97   ;? x5
+ZP_98                   = $98   ;? x4
 
 ZP_VAR_U                = $99   ; a common variable named "U"
 ZP_VAR_Q                = $9a   ; a common variable named "Q"
 ZP_VAR_R                = $9b   ; a common variable named "R"
 ZP_VAR_S                = $9c   ; a common variable named "S"
 
-;                       = $9d   ;? x11
-;                       = $9e   ;? x12
-;                       = $9f   ;? x10
+ZP_9D                   = $9d   ;? x11
+ZP_9E                   = $9e   ;? x12
+ZP_9F                   = $9f   ;? x10
 
 ; which 'page' the main screen is on,
 ; e.g. cockpit-view, galactic chart &c.
@@ -403,64 +407,51 @@ ZP_VAR_S                = $9c   ; a common variable named "S"
 ;       $40 = galactic chart
 ;       $80 = short-range (local) chart
 ;
-SCREEN_PAGE             = $a0
-
-;                       = $a0   ;? x38
+ZP_MENU_PAGE            = $a0
 
 ZP_VAR_Z                = $a1   ; a common "Z" variable
 
-;                       = $a2   ;? x14
-;                       = $a3   ;? x18 "MOVE COUNTER"?
+ZP_A2                   = $a2   ;? x14
+ZP_A3                   = $a3   ;? x18 "MOVE COUNTER"?
+
 ;                       = $a4   ;UNUSED?
-;                       = $a5   ;? x31
+
+ZP_A5                   = $a5   ;? x31
 
 ZP_ALPHA                = $a6   ; a rotation variable used in matrix math
 
-;                       = $a7   ;? x10  ; docked flag?
-;                       = $a8   ;? x9
-;                       = $a9   ;? x4
-;                       = $aa   ;? x30
-;                       = $ab   ;? x12
-;                       = $ac   ;? x5
-;                       = $ad   ;? x21
-;                       = $ae   ;? x12
+ZP_A7                   = $a7   ;? x10  ; docked flag?
+ZP_A8                   = $a8   ;? x9
+ZP_A9                   = $a9   ;? x4
+ZP_AA                   = $aa   ;? x30
+ZP_AB                   = $ab   ;? x12
+ZP_AC                   = $ac   ;? x5
+ZP_AD                   = $ad   ;? x21
+ZP_AE                   = $ae   ;? x12
+
 ;                       = $af   ;UNUSED?
-;                       = $b0   ;? x12
-;                       = $b1   ;? x17
-;                       = $b2   ;? x7
-;                       = $b3   ;? x11
-;                       = $b4   ;? x9
-;                       = $b5   ;? x10
-;                       = $b6   ;? x9
-;                       = $b7   ;? x4
-;                       = $b8   ;? x7
-;                       = $b9   ;? x2
-;                       = $ba   ;? x2
+
+ZP_B0                   = $b0   ;? x12
+ZP_B1                   = $b1   ;? x17
+ZP_B2                   = $b2   ;? x7
+ZP_B3                   = $b3   ;? x11
+ZP_B4                   = $b4   ;? x9
+ZP_B5                   = $b5   ;? x10
+ZP_B6                   = $b6   ;? x9
+ZP_B7                   = $b7   ;? x4
+ZP_B8                   = $b8   ;? x7
+ZP_B9                   = $b9   ;? x2
+ZP_BA                   = $ba   ;? x2
 
 ZP_VAR_T                = $bb   ; a common variable named "T"
 
-;                       = $bc   ;? x15
-;                       = $bd   ;? x25
-;                       = $be   ;? x11
-;                       = $bf   ;? x37 "S"?
-;                       = $c0   ;? x6
-;                       = $c1   ;UNUSED?
-;                       = $c2   ;? x2
-;                       = $c3   ;? x3
-;                       = $c4   ;? x2
-;                       = $c5   ;? x2
-;                       = $c6   ;? x5
-;                       = $c7   ;? x5
-;                       = $c8   ;? x5
-;                       = $c9   ;? x2
-;                       = $ca   ;? x2
-;                       = $cb   ;? x3
-;                       = $cc   ;? x4
-;                       = $cd   ;? x2
-;                       = $ce   ;? x2
-;                       = $cf   ;? x3
-;                       = $d0   ;? x4
-;                       = $d1   ;? x8
+ZP_BC                   = $bc   ;? x15
+ZP_BD                   = $bd   ;? x25
+ZP_BE                   = $be   ;? x11
+ZP_BF                   = $bf   ;? x37 "S"?
+
+; sound: $C0-$D1
+; (defined in "sound.asm" rather than here)
 
 ;                       = $d2   ;UNUSED?
 ;                       = $d3   ;UNUSED?
@@ -502,13 +493,13 @@ ZP_VAR_T                = $bb   ; a common variable named "T"
 ;                       = $f7   ;UNUSED?
 ;                       = $f8   ;UNUSED?
 
-;                       = $f9   ;? x1
+ZP_F9                   = $f9   ;? x1
 
 ;                       = $fa   ;UNUSED?
 ;                       = $fb   ;UNUSED?
 ;                       = $fc   ;UNUSED?
 
-;                       = $fd   ;? x1
-;                       = $fe   ;? x1
+ZP_FD                   = $fd   ; KERNAL use?
+ZP_FE                   = $fe   ; KERNAL use?
 
 ;                       = $ff   ;UNUSED?

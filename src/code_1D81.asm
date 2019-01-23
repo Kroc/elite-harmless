@@ -149,7 +149,7 @@ _1d81:                                                                  ;$1D81
         lda # $00
         sta PLAYER_SPEED        ; bring player's ship to a full stop
         sta PLAYER_TEMP_LASER   ; complete laser cooldown
-        sta $66                 ; reset hyperspace countdown
+        sta ZP_66               ; reset hyperspace countdown
 
         ; set shields to maximum:
         lda # $ff
@@ -318,7 +318,7 @@ _1e35:
         ;-----------------------------------------------------------------------
         ; move Trumbles™ around the screen
         ;
-        lda $a3                 ; "move counter"?
+        lda ZP_A3               ; "move counter"?
         and # %00000111         ; modulo 8 (0-7)
         cmp TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
        .blt :+
@@ -446,10 +446,10 @@ _1ece:                                                                  ;$1ECE
         eor # %10000000
         tay 
         and # %10000000
-        sta $69                 ; roll sign?
+        sta ZP_69               ; roll sign?
         stx $048d
         eor # %10000000
-        sta $6a                 ; move count?
+        sta ZP_6A               ; move count?
         tya 
         bpl _1eee
 
@@ -463,8 +463,8 @@ _1eee:                                                                  ;$1EEE
         bcs _1ef5
         lsr 
 _1ef5:                                                                  ;$1EF5
-        sta $68                 ; roll magnitude
-        ora $69                 ; add sign
+        sta ZP_68               ; roll magnitude
+        ora ZP_69               ; add sign
         sta ZP_ALPHA            ; put aside for use in the matrix math
 
         ldx $048e
@@ -474,9 +474,9 @@ _1ef5:                                                                  ;$1EF5
         tay 
         and # %10000000
         stx $048e
-        sta $95
+        sta ZP_95
         eor # %10000000
-        sta $94
+        sta ZP_94
         tya 
         bpl _1f15
         eor # %11111111
@@ -490,8 +490,8 @@ _1f15:                                                                  ;$1F15
         bcs _1f20
         lsr 
 _1f20:                                                                  ;$1F20
-        sta $64
-        ora $94
+        sta ZP_64
+        ora ZP_94
         sta ZP_BETA
         
         lda key_accelerate      ; is accelerate being held?
@@ -523,7 +523,7 @@ _1f33:                                                                  ;$1F33
         lda # $00               ; set loaded missile as disarmed ($00)
         sta PLAYER_MISSILE_ARMED
 
-:       lda $7c                                                         ;$1F55
+:       lda ZP_7C                                                       ;$1F55
         bpl :+
 
         lda key_missile_target  ; target missile key pressed?
@@ -542,7 +542,7 @@ _1f33:                                                                  ;$1F33
 :       lda key_missile_fire    ; fire missile key held?                ;$1F6B
        .bze :+                  ; no, skip ahead
 
-        lda $7c
+        lda ZP_7C
         bmi _1fc2
         jsr _36a6
 
@@ -584,7 +584,7 @@ _1f33:                                                                  ;$1F33
         and PLAYER_ECM          ; does the player have an E.C.M.?
         beq _1fc2
 
-        lda $67
+        lda ZP_67
         bne _1fc2
 
         dec $0481
@@ -601,15 +601,15 @@ _1fc2:                                                                  ;$1FC2
         jsr _9204               ; handle docking computer behaviour?
 
 :       lda # $00                                                       ;$1FD5
-        sta $7b
-        sta $97
+        sta ZP_7B
+        sta ZP_97
 
         lda PLAYER_SPEED
         lsr 
-        ror $97
+        ror ZP_97
         lsr 
-        ror $97
-        sta $98
+        ror ZP_97
+        sta ZP_98
         
         lda $0487
         bne _202d
@@ -627,7 +627,7 @@ _1fc2:                                                                  ;$1FC2
         
         pha 
         and # %01111111
-        sta $7b
+        sta ZP_7B
         sta $0484
         
         ldy # $00
@@ -662,7 +662,7 @@ _202d:                                                                  ;$202D
         ldx # $00
 _202f:                                                                  ;$202F
 .export _202f
-        stx $9d
+        stx ZP_9D
         
         lda SHIP_SLOTS, x
         bne _2039
@@ -672,7 +672,7 @@ _202f:                                                                  ;$202F
         ;-----------------------------------------------------------------------
 
 _2039:                                                                  ;$2039
-        sta $a5                 ; put ship type aside
+        sta ZP_A5               ; put ship type aside
         jsr get_polyobj
         
         ; copy the given PolyObject to the zero page:
@@ -684,7 +684,7 @@ _2039:                                                                  ;$2039
         dey 
         bpl :-
 
-        lda $a5                 ; get ship type back
+        lda ZP_A5               ; get ship type back
         bmi @skip               ; if sun / planet, skip over
         
         asl 
@@ -721,7 +721,7 @@ _2039:                                                                  ;$2039
         sec 
         ror ZP_POLYOBJ_VISIBILITY
 
-        ldx $a5
+        ldx ZP_A5
         jsr _a7a6
         
 @skip:  jsr _a2a0                                                       ;$2079
@@ -744,7 +744,7 @@ _2039:                                                                  ;$2039
         ora ZP_POLYOBJ_ZPOS_pt1
         bmi _20e0
 
-        ldx $a5
+        ldx ZP_A5
         bmi _20e0
         
         cpx # $02
@@ -851,7 +851,7 @@ _2131:                                                                  ;$2131
         jsr _b410
 _2138:                                                                  ;$2138
         ; are we in the cockpit-view?
-        lda SCREEN_PAGE
+        lda ZP_MENU_PAGE
         bne _21ab
 
         jsr _a626
@@ -862,38 +862,38 @@ _2138:                                                                  ;$2138
         beq _2153
         
         jsr _a80f
-        ldx $9d
-        ldy # ZP_POLYOBJ_PITCH  ;$27
+        ldx ZP_9D
+        ldy # $27
         jsr _7d0e
 _2153:                                                                  ;$2153
-        lda $7b
+        lda ZP_7B
         beq _21a8
         ldx # $0f
         jsr _a7e9
-        lda $a5
+        lda ZP_A5
         cmp # $02
         beq _21a3
         cmp # $1f
         bcc _2170
-        lda $7b
+        lda ZP_7B
         cmp # $17
         bne _21a3
-        lsr $7b
-        lsr $7b
+        lsr ZP_7B
+        lsr ZP_7B
 _2170:                                                                  ;$2170
         lda ZP_POLYOBJ_ENERGY
         sec 
-        sbc $7b
+        sbc ZP_7B
         bcs _21a1
 
         asl ZP_POLYOBJ_VISIBILITY
         sec 
         ror ZP_POLYOBJ_VISIBILITY
         
-        lda $a5
+        lda ZP_A5
         cmp # $07
         bne _2192
-        lda $7b
+        lda ZP_7B
         cmp # $32
         bne _2192
         jsr get_random_number
@@ -906,12 +906,12 @@ _2192:                                                                  ;$2192
         ldy # $05
         jsr _234c
 
-        ldx $a5
+        ldx ZP_A5
         jsr _a7a6
 _21a1:                                                                  ;$21A1
         sta ZP_POLYOBJ_ENERGY
 _21a3:                                                                  ;$21A3
-        lda $a5
+        lda ZP_A5
         jsr _36c5
 _21a8:                                                                  ;$21A8
         jsr _9a86
@@ -954,7 +954,7 @@ _21e2:                                                                  ;$21E2
         ;-----------------------------------------------------------------------
 
 _21e5:                                                                  ;$21E5
-        lda $a5
+        lda ZP_A5
         bmi _21ee
         jsr _87a4
         bcc _21e2
@@ -963,7 +963,7 @@ _21ee:                                                                  ;$21EE
         lda ZP_POLYOBJ_VISIBILITY
         sta [ZP_POLYOBJ_ADDR], y
 
-        ldx $9d
+        ldx ZP_9D
         inx 
         jmp _202f
 
@@ -976,7 +976,7 @@ _21fa:                                                                  ;$21FA
         bmi _2207
         jsr _2367
 _2207:                                                                  ;$2207
-        lda $a3                 ; move counter?
+        lda ZP_A3               ; move counter?
         and # %00000111
         bne _227a
 
@@ -1000,7 +1000,7 @@ _2230:                                                                  ;$2230
         lda IS_MISJUMP
         bne _2277
         
-        lda $a3                 ; move counter?
+        lda ZP_A3               ; move counter?
         and # %00011111
         bne _2283
         
@@ -1073,7 +1073,7 @@ _227a:                                                                  ;$227A
         lda IS_MISJUMP
         bne _2277
         
-        lda $a3                 ; move counter?
+        lda ZP_A3               ; move counter?
         and # %00011111
 _2283:                                                                  ;$2283
         cmp # $0a
@@ -1157,7 +1157,7 @@ _22c2:                                                                  ;$22C2
 _2303:                                                                  ;$2303
         lda $04c2
         beq _231c
-        lda $98
+        lda ZP_98
         lsr 
         adc PLAYER_FUEL
         cmp # $46
@@ -1185,15 +1185,15 @@ _2330:                                                                  ;$2330
         jsr _7b64
         beq _2342
 _233a:                                                                  ;$233A
-        lda $67
+        lda ZP_67
         beq _2345
-        dec $67
+        dec ZP_67
         bne _2345
 _2342:                                                                  ;$2342
         jsr _a786
 _2345:                                                                  ;$2345
         ; are we in the cockpit-view?
-        lda SCREEN_PAGE
+        lda ZP_MENU_PAGE
         bne _2366
 
         jmp _2a32
@@ -1210,12 +1210,12 @@ _234c:                                                                  ;$234C
         and [ZP_HULL_ADDR], y
         and # %00001111
 _2359:                                                                  ;$2359
-        sta $aa
+        sta ZP_AA
         beq _2366
 _235d:                                                                  ;$235D
         lda # $00
         jsr _370a
-        dec $aa
+        dec ZP_AA
         bne _235d
 _2366:                                                                  ;$2366
         rts 
@@ -1622,7 +1622,7 @@ txt_docked_token06:                                                     ;$2496
 .export txt_docked_token06
         
         lda # $80
-        sta $34
+        sta ZP_34
         lda # $ff
 
         ; this causes the next instruction to become a meaningless `bit`
@@ -1662,9 +1662,9 @@ txt_docked_token11:                                                     ;$24B0
         ;=======================================================================
 .export txt_docked_token11
 
-        lda $34
+        lda ZP_34
         and # %10111111         ;=$BF
-        sta $34
+        sta ZP_34
 
         lda # $03
         jsr print_flight_token
@@ -1904,15 +1904,15 @@ _27cd:  bne _27cd               ; infinite loop, why?                   ;$27CD
         asl 
         sta ZP_VAR_Y2
         asl 
-        sta $70
+        sta ZP_70
         jsr _9a2c
         lda ZP_POLYOBJ_XPOS_pt3 ;=$0b
         sta ZP_VAR_X2
-        eor $72
+        eor ZP_72
 _27e5:                                                                  ;$27E5
         bmi _27e5               ; infinite loop, why??
         clc 
-        lda $71
+        lda ZP_71
         adc ZP_POLYOBJ_XPOS_pt1 ;=$09
         sta ZP_VAR_X
         lda ZP_POLYOBJ_XPOS_pt2 ;=$0A
@@ -1926,7 +1926,7 @@ _27e5:                                                                  ;$27E5
 ;$27f7:
         lda ZP_POLYOBJ_XPOS_pt1 ;=$09
         sec 
-        sbc $71
+        sbc ZP_71
         sta ZP_VAR_X
         lda ZP_POLYOBJ_XPOS_pt2 ;=$0a
         sbc # $00
@@ -1944,16 +1944,16 @@ _2814:                                                                  ;$2814
         eor # %10000000
         sta ZP_VAR_X2
         lda ZP_POLYOBJ_YPOS_pt3 ;$0E
-        sta $70
-        eor $74
+        sta ZP_70
+        eor ZP_74
 _2820:  bmi _2820               ; infinite loop, why??                  ;$2820
         clc 
-        lda $73
+        lda ZP_73
         adc ZP_POLYOBJ_YPOS_pt1 ;=$0C
         sta ZP_VAR_Y2
         lda ZP_POLYOBJ_YPOS_pt2 ;=$0D
         adc # $00
-        sta $6f
+        sta ZP_6F
 
         jmp _9dee               ; SPEED: jump to a jump (`_9e16`)
 
@@ -1963,26 +1963,26 @@ _2820:  bmi _2820               ; infinite loop, why??                  ;$2820
 ;$2832:
         lda ZP_POLYOBJ_YPOS_pt1 ;=$0C
         sec 
-        sbc $73
+        sbc ZP_73
         sta ZP_VAR_Y2
         lda ZP_POLYOBJ_YPOS_pt2 ;=$0D
         sbc # $00
-        sta $6f
+        sta ZP_6F
 _283f:  bcs _283f               ; infinite loop, why??                  ;$283F
         eor # %11111111
-        sta $6f
+        sta ZP_6F
         lda ZP_VAR_Y2
         eor # %11111111
         adc # $01
         sta ZP_VAR_Y2
-        lda $70
+        lda ZP_70
         eor # %10000000
-        sta $70
+        sta ZP_70
 _2853:  bcc _2853               ; infinite loop, why??                  ;$2853
-        inc $6f
-        lda $76
+        inc ZP_6F
+        lda ZP_76
 _2859:  bmi _2859               ; inifinite loop, why??                 ;$2859
-        lda $75
+        lda ZP_75
         clc 
         adc ZP_POLYOBJ_ZPOS_pt1 ;=$0F
         sta ZP_VAR_T
@@ -2324,41 +2324,41 @@ _2976:                                                                  ;$2976
 _2977:                                                                  ;$2977
 .export _2977
         txa 
-        adc $43
-        sta $8b
+        adc ZP_43
+        sta ZP_8B
 
-        lda $44
+        lda ZP_44
         adc ZP_VAR_T
-        sta $8c
+        sta ZP_8C
         
-        lda $a9
+        lda ZP_A9
         beq _2998
-        inc $a9
+        inc ZP_A9
 _2988:                                                                  ;$2988
-        ldy $7e
+        ldy ZP_7E
         lda # $ff
         cmp _27a3, y
         beq _29fa
         sta _27a4, y            ; writing to code??
-        inc $7e
+        inc ZP_7E
         bne _29fa
 _2998:                                                                  ;$2998
-        lda $85
+        lda ZP_85
         sta ZP_VAR_X
-        lda $86
+        lda ZP_86
         sta ZP_VAR_Y
-        lda $87
+        lda ZP_87
         sta ZP_VAR_X2
-        lda $88
+        lda ZP_88
         sta ZP_VAR_Y2
-        lda $89
-        sta $6f
-        lda $8a
-        sta $70
-        lda $8b
-        sta $71
-        lda $8c
-        sta $72
+        lda ZP_89
+        sta ZP_6F
+        lda ZP_8A
+        sta ZP_70
+        lda ZP_8B
+        sta ZP_71
+        lda ZP_8C
+        sta ZP_72
         jsr _a013
         bcs _2988
         lda $06f4
@@ -2372,7 +2372,7 @@ _2998:                                                                  ;$2998
         sta ZP_VAR_Y2
         sty ZP_VAR_Y
 _29d2:                                                                  ;$29D2
-        ldy $7e
+        ldy ZP_7E
         lda _27a3, y
         cmp # $ff
         bne _29e6
@@ -2387,23 +2387,23 @@ _29e6:                                                                  ;$2936
         lda ZP_VAR_Y2
         sta _27a4, y            ; writing to code??
         iny 
-        sty $7e
+        sty ZP_7E
         jsr _ab91
-        lda $a2
+        lda ZP_A2
         bne _2988
 _29fa:                                                                  ;$29FA
-        lda $89
-        sta $85
-        lda $8a
-        sta $86
-        lda $8b
-        sta $87
-        lda $8c
-        sta $88
-        lda $aa
+        lda ZP_89
+        sta ZP_85
+        lda ZP_8A
+        sta ZP_86
+        lda ZP_8B
+        sta ZP_87
+        lda ZP_8C
+        sta ZP_88
+        lda ZP_AA
         clc 
-        adc $ac
-        sta $aa
+        adc ZP_AC
+        sta ZP_AA
         rts 
 
 dust_swap_xy:                                                           ;$2A12
@@ -2457,11 +2457,11 @@ _2a43:                                                                  ;$2A43
         ora # %00000001
         sta ZP_VAR_Q
         lda $06e3, y
-        sbc $97
+        sbc ZP_97
         sta $06e3, y
         lda DUST_Z, y
         sta ZP_VAR_Z
-        sbc $98
+        sbc ZP_98
         sta DUST_Z, y
         jsr _3992
         sta ZP_VAR_YY_HI
@@ -2483,19 +2483,19 @@ _2a43:                                                                  ;$2A43
         lda ZP_VAR_X
         adc ZP_VAR_XX_HI
         sta ZP_VAR_XX_HI
-        eor $6a                 ; move count?
+        eor ZP_6A               ; move count?
         jsr _393c
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         stx ZP_VAR_YY_LO
-        eor $69                 ; roll sign?
+        eor ZP_69               ; roll sign?
         jsr _3934
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         stx ZP_VAR_XX_LO
-        ldx $64
+        ldx ZP_64
         lda ZP_VAR_YY_HI
-        eor $95
+        eor ZP_95
         jsr _393e
         sta ZP_VAR_Q
         jsr _3a4c
@@ -2598,26 +2598,26 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
         lda $06e3, y
-        adc $97
+        adc ZP_97
         sta $06e3, y
         lda DUST_Z, y
         sta ZP_VAR_Z
-        adc $98
+        adc ZP_98
         sta DUST_Z, y
         lda ZP_VAR_XX_HI
-        eor $69                 ; roll sign?
+        eor ZP_69               ; roll sign?
         jsr _393c
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         stx ZP_VAR_YY_LO
-        eor $6a                 ; move count?
+        eor ZP_6A               ; move count?
         jsr _3934
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         stx ZP_VAR_XX_LO
         lda ZP_VAR_YY_HI
-        eor $95
-        ldx $64
+        eor ZP_95
+        ldx ZP_64
         jsr _393e
         sta ZP_VAR_Q
         lda ZP_VAR_XX_HI
@@ -2795,7 +2795,7 @@ _2c9b:                                                                  ;$2C9B
         jsr _28d9
         
         lda # $0f
-        ldy $a7
+        ldy ZP_A7
         bne _2c7d
         lda # $e6
         ldy $047f
@@ -2852,24 +2852,24 @@ _2d04:                                                                  ;$2D04
 _2d0e:                                                                  ;$2D0E
         lda PLAYER_ECM
         beq _2d18
-        lda # ZP_VAR_Y
+        lda # $6c
         jsr _2d61
 _2d18:                                                                  ;$2D18
         lda # $71
-        sta $ad
+        sta ZP_AD
 _2d1c:                                                                  ;$2D1C
         tay 
         ldx SHIP_SLOTS, y       ; ship slots? NB: "$04c3 - $71"
         beq _2d25
         jsr _2d61
 _2d25:                                                                  ;$2D25
-        inc $ad
-        lda $ad
+        inc ZP_AD
+        lda ZP_AD
         cmp # $75
         bcc _2d1c
         ldx # $00
 _2d2f:                                                                  ;$2D2F
-        stx $aa
+        stx ZP_AA
         ldy PLAYER_LASERS, x
         beq _2d59
         txa 
@@ -2877,7 +2877,7 @@ _2d2f:                                                                  ;$2D2F
         adc # $60
         jsr _6a9b
         lda # $67
-        ldx $aa
+        ldx ZP_AA
         ldy PLAYER_LASERS, x
         cpy # $8f
         bne _2d4a
@@ -2893,7 +2893,7 @@ _2d50:                                                                  ;$2D50
 _2d56:                                                                  ;$2D56
         jsr _2d61
 _2d59:                                                                  ;$2D59
-        ldx $aa
+        ldx ZP_AA
         inx 
         cpx # $04
         bcc _2d2f
@@ -3000,7 +3000,7 @@ _2dc5:                                                                  ;$2DC5
         lsr 
         ror ZP_VAR_P1
         ora ZP_VAR_T
-        eor $b1
+        eor ZP_B1
         stx ZP_VAR_Q
         jsr multiplied_now_add
         sta ZP_VALUE_pt2
@@ -3034,7 +3034,7 @@ _2dc5:                                                                  ;$2DC5
         ror ZP_VAR_P1
         ora ZP_VAR_T
         eor # %10000000
-        eor $b1
+        eor ZP_B1
         stx ZP_VAR_Q
         jsr multiplied_now_add
         sta ZP_POLYOBJ_XPOS_pt2, y
@@ -3146,7 +3146,7 @@ print_large_value:                                                      ;$2E65
 
 :       lda # 11                ; max length of text (12 chars)         ;$2E70
         sec                     ; set carry-flag, see note below
-        sta $9f                 ; put original max.length of text aside
+        sta ZP_9F               ; put original max.length of text aside
 
         ; subtract the max. number of digits from the max. length of text.
         ; since carry is set, this will underflow (sign-bit) if equal
@@ -3281,7 +3281,7 @@ _2f00:
         bpl _2f06
         inc ZP_MAXLEN
 _2f06:
-        dec $9f
+        dec ZP_9F
         bmi @rts
         bne :+
 
@@ -3623,22 +3623,22 @@ _2ff3:                                                                  ;$2FF3
         lda # $08
         sta ZP_VAR_S
         
-        lda $68                 ; roll magnitude?
+        lda ZP_68               ; roll magnitude?
         lsr 
         lsr 
-        ora $69                 ; roll sign?
+        ora ZP_69               ; roll sign?
         eor # %10000000
         jsr multiplied_now_add
         jsr _3130
         lda ZP_BETA
-        ldx $64
+        ldx ZP_64
         beq _302b
         sbc # $01
 _302b:                                                                  ;$302B
         jsr multiplied_now_add
         jsr _3130
         
-        lda $a3                 ; move counter?
+        lda ZP_A3               ; move counter?
         and # %00000011
         bne _2fe0
         
@@ -3650,7 +3650,7 @@ _302b:                                                                  ;$302B
         ldx # $03               ; 4 energy banks
         stx ZP_TEMP_VAR
 _3044:                                                                  ;$3044
-        sty $71, x
+        sty ZP_71, x
         dex 
         bpl _3044
 
@@ -3665,14 +3665,14 @@ _3052:                                                                  ;$3052
         bcc _3064
         sta ZP_VAR_Q
         lda # $10
-        sta $71, x
+        sta ZP_71, x
         lda ZP_VAR_Q
         dex 
         bpl _3052
         bmi _3068
 _3064:                                                                  ;$3064
         lda ZP_VAR_Q
-        sta $71, x
+        sta ZP_71, x
 _3068:                                                                  ;$3068
         lda $0071, y
         sty ZP_VAR_P1
@@ -3723,7 +3723,7 @@ _3068:                                                                  ;$3068
 _30bb:                                                                  ;$30BB
         ldx # $aa
 
-        lda $a3                 ; move counter?
+        lda ZP_A3               ; move counter?
         and # %00001000
         and _1d09
         beq :+
@@ -3781,7 +3781,7 @@ hud_drawbar:                                                            ;$30CF
 
 :       lda ZP_VALUE_pt1                                                ;$30DD
 
-:       sta $32                 ; colour to use                         ;$30DF
+:       sta ZP_32               ; colour to use                         ;$30DF
 
         ldy # $02               ; "height offset"
         ldx # $03               ; "height of bar - 1"
@@ -3798,7 +3798,7 @@ _30e5:                                                                  ;$30E5
 
         lda ZP_VAR_R            ; mask
 _30f1:                                                                  ;$30F1
-        and $32
+        and ZP_32
         sta [ZP_TEMP_ADDR1], y
         iny 
         sta [ZP_TEMP_ADDR1], y
@@ -3897,7 +3897,7 @@ _316e:                                                                  ;$316E
         jsr _83df
 
         ldx # $0b
-        stx $a5
+        stx ZP_A5
         
         jsr _3680
         bcs _317f
@@ -3964,7 +3964,7 @@ _31c6:                                                                  ;$31C6
         jsr _6f82
         jsr _70a0
         lda # $00
-        sta $ae
+        sta ZP_AE
 _31d5:                                                                  ;$31D5
         jsr txt_docked_token0E
         jsr _76e9
@@ -3983,7 +3983,7 @@ _31e4:                                                                  ;$31E4
         bmi _3208
 _31f1:                                                                  ;$31F1
         jsr _6a3b
-        inc $ae
+        inc ZP_AE
         bne _31d5
         jsr _70ab
         jsr _6f82
@@ -4035,7 +4035,7 @@ _3239:                                                                  ;$3239
         ;-----------------------------------------------------------------------
 
 _3244:                                                                  ;$3244
-        lda $67
+        lda ZP_67
         bne _321e
 
         lda ZP_POLYOBJ_ATTACK
@@ -4114,11 +4114,11 @@ _32ad:                                                                  ;$32AD
 .export _32ad
 
         lda #< $0403
-        sta $b0
+        sta ZP_B0
         lda #> $0403
-        sta $b1
+        sta ZP_B1
         lda # $16
-        sta $ab
+        sta ZP_AB
         cpx # $01
         beq _3244
         cpx # $02
@@ -4251,8 +4251,8 @@ _336e:                                                                  ;$336E
         jsr _8c8a
         ldy # $0a
         jsr _3ab2
-        sta $aa
-        lda $a5
+        sta ZP_AA
+        lda ZP_A5
         cmp # $01
         bne _3381
         jmp _344b
@@ -4298,7 +4298,7 @@ _33a8:                                                                  ;$33A8
         jsr get_random_number
         cmp # $e6
         bcc _33d6
-        ldx $a5
+        ldx ZP_A5
         lda hull_d042 - 1, x
         bpl _33d6
         lda ZP_POLYOBJ_BEHAVIOUR
@@ -4325,10 +4325,10 @@ _33d6:                                                                  ;$33D6
         cmp ZP_VAR_T
         bcs _33fd
         
-        lda $67
+        lda ZP_67
         bne _33fd
         dec ZP_POLYOBJ_VISIBILITY       ; reduce number of missiles?
-        lda $a5
+        lda ZP_A5
         cmp # $1d
         bne _33fa
 
@@ -4348,7 +4348,7 @@ _33fd:                                                                  ;$33FD
         jsr _87b1
         and # %11100000
         bne _3434
-        ldx $aa
+        ldx ZP_AA
         cpx # $a0
         bcc _3434
 
@@ -4367,7 +4367,7 @@ _33fd:                                                                  ;$33FD
         lsr 
         jsr _7bd2
         dec ZP_POLYOBJ_VERTX_HI
-        lda $67
+        lda ZP_67
         bne _3499
         ldy # $01
         jsr _a858
@@ -4392,10 +4392,10 @@ _3442:                                                                  ;$3442
         bcs _3454
 _344b:                                                                  ;$344B
         jsr _35d5
-        lda $aa
+        lda ZP_AA
         eor # %10000000
 _3452:                                                                  ;$3452
-        sta $aa
+        sta ZP_AA
 _3454:                                                                  ;$3454
         ldy # $10
         jsr _3ab2
@@ -4405,9 +4405,9 @@ _3454:                                                                  ;$3454
         sta ZP_POLYOBJ_PITCH
         txa 
         asl 
-        cmp $b1
+        cmp ZP_B1
         bcc _346c
-        lda $b0
+        lda ZP_B0
         ora ZP_POLYOBJ_PITCH
         sta ZP_POLYOBJ_PITCH
 _346c:                                                                  ;$346C
@@ -4424,15 +4424,15 @@ _346c:                                                                  ;$346C
         sta ZP_POLYOBJ_ROLL
         txa 
         asl 
-        cmp $b1
+        cmp ZP_B1
         bcc _348d
-        lda $b0
+        lda ZP_B0
         ora ZP_POLYOBJ_ROLL
         sta ZP_POLYOBJ_ROLL
 _348d:                                                                  ;$348D
-        lda $aa
+        lda ZP_AA
         bmi _349a
-        cmp $ab
+        cmp ZP_AB
         bcc _349a
         lda #> $0300            ; processed vertex data is stored at $0300+
         sta ZP_POLYOBJ_VERTX_HI
@@ -4447,7 +4447,7 @@ _349a:                                                                  ;$349A
         bcc _34ab
 
         lda # $ff
-        ldx $a5
+        ldx ZP_A5
         cpx # $01
         bne _34a9
         
@@ -4465,7 +4465,7 @@ _34ac:                                                                  ;$34AC
         cmp # $98
         bcc _34b9
         ldx # $00
-        stx $b1
+        stx ZP_B1
 _34b9:                                                                  ;$24B9
         jmp _3452
 
@@ -4475,11 +4475,11 @@ _34bc:                                                                  ;$34BC
 .export _34bc
 
         lda # $06
-        sta $b1
+        sta ZP_B1
         lsr 
-        sta $b0
+        sta ZP_B0
         lda # $1d
-        sta $ab
+        sta ZP_AB
         lda $045f
         bne _34cf
 _34cc:                                                                  ;$34CC
@@ -4510,7 +4510,7 @@ _34cf:                                                                  ;$34CF
         lda ZP_VALUE_pt1
         cmp # $9d
         bcc _3504
-        lda $a5
+        lda ZP_A5
         bmi _352c
 _3504:                                                                  ;$3504
         jsr _35d5
@@ -4542,9 +4542,9 @@ _3524:                                                                  ;$3524
         bne _3571
 _352c:                                                                  ;$352C
         ldx # $00
-        stx $b1
+        stx ZP_B1
         stx ZP_POLYOBJ_PITCH
-        lda $a5
+        lda ZP_A5
         bpl _3556
         eor ZP_VAR_X
         eor ZP_VAR_Y
@@ -4580,7 +4580,7 @@ _3556:                                                                  ;$3556
         bcs _3524
         jsr _350a
 _3571:                                                                  ;$3571
-        lda $3f                 ; only use, ever. does not get set!
+        lda ZP_3F               ; only use, ever. does not get set!
         bne _357a
 
         asl ZP_POLYOBJ_BEHAVIOUR
@@ -4721,7 +4721,7 @@ _363f:                                                                  ;$363F
         lda ZP_POLYOBJ_ZPOS_pt3
         bne _367d
 
-        lda $a5
+        lda ZP_A5
         bmi _367d
         
         lda ZP_POLYOBJ_VISIBILITY
@@ -4775,7 +4775,7 @@ _3680:                                                                  ;$3680
         lda # $80
         sta ZP_POLYOBJ_YPOS_pt3
         
-        lda $7c
+        lda ZP_7C
         asl 
         ora # attack::active
         sta ZP_POLYOBJ_ATTACK
@@ -4802,7 +4802,7 @@ _36a6:                                                                  ;$36A6
         jsr _3680
         bcc _3701
         
-        ldx $7c                 ; missile target?
+        ldx ZP_7C               ; missile target?
         jsr get_polyobj
 
         lda SHIP_SLOTS, x
@@ -4849,7 +4849,7 @@ _36d4:                                                                  ;$36D4
         ldy # $1e
         sta [ZP_POLYOBJ_ADDR], y
 
-        lda $a5
+        lda ZP_A5
         cmp # $0b
         bcc _36f7
 
@@ -4900,7 +4900,7 @@ _371c:                                                                  ;$371C
         sta ZP_POLYOBJ_XPOS_pt1, y
         dey 
         bpl _371c
-        lda $a5
+        lda ZP_A5
         cmp # $02
         bne _374d
        .phx                     ; push X to stack (via A)
@@ -4984,9 +4984,9 @@ _379e:                                                                  ;$397E
         jsr _a858
         lda # $08
 _37a5:                                                                  ;$37A5
-        sta $ac
+        sta ZP_AC
 
-        lda SCREEN_PAGE
+        lda ZP_MENU_PAGE
         pha 
         
         ; switch to cockpit-view?
@@ -4994,7 +4994,7 @@ _37a5:                                                                  ;$37A5
         jsr set_page
         
         pla 
-        sta SCREEN_PAGE
+        sta ZP_MENU_PAGE
 
 _37b2:                                                                  ;$37B2
 .export _37b2
@@ -5003,16 +5003,16 @@ _37b2:                                                                  ;$37B2
         stx ZP_POLYOBJ01_XPOS_pt1
 
         ldx # $48               ;TODO: half viewport height?
-        stx $43
+        stx ZP_43
         
         ldx # $00
-        stx $ad
+        stx ZP_AD
         stx ZP_POLYOBJ01_XPOS_pt2
-        stx $44
+        stx ZP_44
 _37c2:                                                                  ;$37C2
         jsr _37ce
-        inc $ad
-        ldx $ad
+        inc ZP_AD
+        ldx ZP_AD
         cpx # $08
         bne _37c2
         rts 
@@ -5020,14 +5020,14 @@ _37c2:                                                                  ;$37C2
 ;===============================================================================
 
 _37ce:                                                                  ;$37CE
-        lda $ad
+        lda ZP_AD
         and # %00000111
         clc 
         adc # $08
         sta ZP_VALUE_pt1
 _37d7:                                                                  ;$37D7
         lda # $01
-        sta $7e
+        sta ZP_7E
         jsr _805e
         asl ZP_VALUE_pt1
         bcs _37e8
@@ -5043,9 +5043,9 @@ _37e9:                                                                  ;$37E9
         lda # $00
         cpx # $02
         ror 
-        sta $b0
+        sta ZP_B0
         eor # %10000000
-        sta $b1
+        sta ZP_B1
         jsr _38a3
         ldy DUST_COUNT          ; number of dust particles
 _37fa:                                                                  ;$37FA
@@ -5056,8 +5056,8 @@ _37fa:                                                                  ;$37FA
         lsr 
         jsr _3b33
         lda ZP_VAR_P1
-        sta $ba
-        eor $b1
+        sta ZP_BA
+        eor ZP_B1
         sta ZP_VAR_S
         lda $06af, y
         sta ZP_VAR_P1
@@ -5068,8 +5068,8 @@ _37fa:                                                                  ;$37FA
         stx ZP_VAR_R
         lda DUST_Y, y
         sta ZP_VAR_Y
-        eor $94
-        ldx $64
+        eor ZP_94
+        ldx ZP_64
         jsr _393e
         jsr multiplied_now_add
         stx ZP_VAR_XX_LO
@@ -5078,14 +5078,14 @@ _37fa:                                                                  ;$37FA
         stx ZP_VAR_R
         ldx ZP_VAR_Y
         stx ZP_VAR_S
-        ldx $64
-        eor $95
+        ldx ZP_64
+        eor ZP_95
         jsr _393e
         jsr multiplied_now_add
         stx ZP_VAR_YY_LO
         sta ZP_VAR_YY_HI
-        ldx $68                 ; roll magnitude?
-        eor $69                 ; roll sign?
+        ldx ZP_68               ; roll magnitude?
+        eor ZP_69               ; roll sign?
         jsr _393e
         sta ZP_VAR_Q
         lda ZP_VAR_XX_LO
@@ -5113,7 +5113,7 @@ _37fa:                                                                  ;$37FA
         sta ZP_VAR_X
         and # %01111111
         eor # %01111111
-        cmp $ba
+        cmp ZP_BA
         bcc _38be
         beq _38be
         lda ZP_VAR_YY_HI
@@ -5135,18 +5135,18 @@ _389a:                                                                  ;$389A
 
 _38a3:                                                                  ;$38A3
         lda ZP_ALPHA
-        eor $b0
+        eor ZP_B0
         sta ZP_ALPHA
-        lda $69                 ; roll sign?
-        eor $b0
-        sta $69                 ; roll sign?
+        lda ZP_69               ; roll sign?
+        eor ZP_B0
+        sta ZP_69               ; roll sign?
         eor # %10000000
-        sta $6a                 ; move count?
-        lda $94
-        eor $b0
-        sta $94
+        sta ZP_6A               ; move count?
+        lda ZP_94
+        eor ZP_B0
+        sta ZP_94
         eor # %10000000
-        sta $95
+        sta ZP_95
         rts 
 
         ;-----------------------------------------------------------------------
@@ -5156,7 +5156,7 @@ _38be:                                                                  ;$38BE
         sta ZP_VAR_Y
         sta DUST_Y, y
         lda # $73
-        ora $b0
+        ora ZP_B0
         sta ZP_VAR_X
         sta DUST_X, y
         bne _38e2
@@ -5165,7 +5165,7 @@ _38d1:                                                                  ;$38D1
         sta ZP_VAR_X
         sta DUST_X, y
         lda # $6e
-        ora $6a                 ; move count?
+        ora ZP_6A               ; move count?
         sta ZP_VAR_Y
         sta DUST_Y, y
 _38e2:                                                                  ;$38E2
@@ -5231,7 +5231,7 @@ _3934:                                                                  ;$3934
         ldx ZP_VAR_XX_HI
         stx ZP_VAR_S
 _393c:                                                                  ;$393C
-        ldx $68                 ; roll magnitude?
+        ldx ZP_68               ; roll magnitude?
 _393e:                                                                  ;$393E
         stx ZP_VAR_P1
         tax 
@@ -5379,7 +5379,7 @@ _39ea:                                                                  ;$39EA
 .export _39ea
 
         stx ZP_VAR_P1
-        sta $b6
+        sta ZP_B6
         tax 
         beq _3a1d
         lda _9400, x
@@ -5389,7 +5389,7 @@ _39ea:                                                                  ;$39EA
         adc _9400, x
         bmi _3a0f
         lda _9300, x
-        ldx $b6
+        ldx ZP_B6
         adc _9300, x
         bcc _3a20
         tax 
@@ -5401,7 +5401,7 @@ _39ea:                                                                  ;$39EA
 
 _3a0f:                                                                  ;$3A0F
         lda _9300, x
-        ldx $b6
+        ldx ZP_B6
         adc _9300, x
         bcc _3a20
         tax 
@@ -5569,7 +5569,7 @@ _3b79:                                                                  ;$3B79
 _3b82:                                                                  ;$3B82
         rol ZP_VAR_P1
         ldx # $00
-        sta $b6
+        sta ZP_B6
         tax 
         beq _3ba6
         lda _9400, x
@@ -5577,7 +5577,7 @@ _3b82:                                                                  ;$3B82
         sec 
         sbc _9400, x
         bmi _3bae
-        ldx $b6
+        ldx ZP_B6
         lda _9300, x
         ldx ZP_VAR_Q
         sbc _9300, x
@@ -5598,7 +5598,7 @@ _3ba9:                                                                  ;$3BA9
         ;-----------------------------------------------------------------------
 
 _3bae:                                                                  ;$3ABE
-        ldx $b6
+        ldx ZP_B6
         lda _9300, x
         ldx ZP_VAR_Q
         sbc _9300, x
@@ -5843,7 +5843,7 @@ _3cdb:                                                                  ;$3CDB
 
         jsr get_random_number
         and # %00000111
-        adc # $7c
+        adc # $7C
         sta $06f0               ;?
         
         lda PLAYER_TEMP_LASER
@@ -5852,7 +5852,7 @@ _3cdb:                                                                  ;$3CDB
         jsr _7b64
 _3cfa:                                                                  ;$3CFA
         ; are we in the cockpit-view?
-        lda SCREEN_PAGE
+        lda ZP_MENU_PAGE
         bne _3cda
 
         lda # $20
@@ -5887,7 +5887,7 @@ _3d2f:                                                                  ;$3D2F
         ora TSYSTEM_DISTANCE_HI
        .bnz _3d6f
        
-        lda $a7
+        lda ZP_A7
         bpl _3d6f
         ldy # $00
 _3d3d:                                                                  ;$3D3D
@@ -6037,7 +6037,7 @@ _3dff:                                                                  ;$3DFF
         jsr _8447
         
         lda # $1f
-        sta $a5
+        sta ZP_A5
         jsr _7c6b
 
         lda # 1
@@ -6049,14 +6049,14 @@ _3dff:                                                                  ;$3DFF
         jsr set_page
 
         lda # $40
-        sta $a3                 ; move counter?
+        sta ZP_A3               ; move counter?
 _3e01:                                                                  ;$3E01
         ldx # $7f
         stx ZP_POLYOBJ_ROLL
         stx ZP_POLYOBJ_PITCH
         jsr _9a86
         jsr _a2a0
-        dec $a3                 ; move counter?
+        dec ZP_A3               ; move counter?
         bne _3e01
 _3e11:                                                                  ;$3E11
         lsr ZP_POLYOBJ_XPOS_pt1
@@ -6076,7 +6076,7 @@ _3e24:                                                                  ;$3E24
         stx ZP_POLYOBJ_YPOS_pt1
         jsr _9a86
         jsr _a2a0
-        dec $a3                 ; move counter?
+        dec ZP_A3               ; move counter?
         jmp _3e11
 _3e31:                                                                  ;$3E31
         inc ZP_POLYOBJ_ZPOS_pt2
