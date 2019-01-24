@@ -11727,22 +11727,102 @@ _b301:                                                                  ;$B301
         bne _b335
         
         ; reset the HUD graphics from the copy kept in RAM
+        ;-----------------------------------------------------------------------
+        ; the HUD is a 256px wide bitmap (with borders on the outside though).
+        ; this routine 'clears' the HUD by restoring a clean copy from RAM
+        ;
 .import __GFX_HUD_RUN__
+
+        ; the original Elite code does a rather inefficient byte-by-byte copy
+        ; -- for every byte copied, there's additional cycles spent on
+        ; decrementing the 16-bit address pointers and the slower indirect-X
+        ; addressing mode is used -- but in a rather rediculous case of this
+        ; being a rushed port from the BBC this routine also copies all the
+        ; blank space left and right of the HUD *every frame*!
+        ;
+.ifdef  OPTION_ORIGINAL
 
         ldx # 8                 ; numbe of pages to copy (8*256)
         lda #< __GFX_HUD_RUN__
         sta ZP_TEMP_ADDR3_LO
         lda #> __GFX_HUD_RUN__
         sta ZP_TEMP_ADDR3_HI
-        lda #< $5680            ; start of the HUD on bitmap?
+
+        hud_bmp = $4000 + .bmppos(18, 0)         ;=$5680
+
+        lda #< hud_bmp
         sta ZP_TEMP_ADDR1_LO
-        lda #> $5680
+        lda #> hud_bmp
         sta ZP_TEMP_ADDR1_HI
         jsr block_copy
 
         ldy # $c0
         ldx # $01
         jsr block_copy_from
+
+.else
+        ; we need to loop a full 256 times and we want to keep the exit check
+        ; fast (so testing for zero/non-zero). starting at $FF won't do, as a
+        ; zero-check at the bottom will exit out before the 0'th loop has been
+        ; done. ergo, we start at 0, the `dex` at the bottom will underflow
+        ; back to $FF and we loop around until back to $00 where the loop will
+        ; exit without repeating the 0'th iteration
+        ldx # $00
+
+        ; here we copy one byte of 7 bitmap rows at a time. note that the
+        ; bitmap data is stored in 256px strips, not 320px. doing 7 copies
+        ; per loop reduces the cost of loop-testing (very slow to exit-test
+        ; for every byte copied!) and also allows us to use the absolute-X
+        ; adressing mode which costs 5 cycles each rather than 6 for the
+        ; original code's use of indirect-X addressing
+        ;
+        bmp = ELITE_BITMAP_ADDR
+
+:       lda __GFX_HUD_RUN__, x          ; read from row 1 of backup HUD
+        sta bmp + .bmppos(18, 4), x     ; write to row 18 of bitmap screen
+        lda __GFX_HUD_RUN__ + $100 , x  ; read from row 2 of backup HUD
+        sta bmp + .bmppos(19, 4), x     ; write to row 19 of bitmap screen
+        lda __GFX_HUD_RUN__ + $200, x   ; read from row 3 of backup HUD
+        sta bmp + .bmppos(20, 4), x     ; write to row 20 of bitmap screen
+        lda __GFX_HUD_RUN__ + $300, x   ; read from row 4 of backup HUD
+        sta bmp + .bmppos(21, 4), x     ; write to row 21 of bitmap screen
+        lda __GFX_HUD_RUN__ + $400, x   ; read from row 5 of backup HUD
+        sta bmp + .bmppos(22, 4), x     ; write to row 22 of bitmap screen
+        lda __GFX_HUD_RUN__ + $500, x   ; read from row 6 of backup HUD
+        sta bmp + .bmppos(23, 4), x     ; write to row 23 of bitmap screen
+        lda __GFX_HUD_RUN__ + $600, x   ; read from row 7 of backup HUD
+        sta bmp + .bmppos(24, 4), x
+        dex 
+       .bnz :-
+
+        ; borders to the left and right of the HUD lay outside the 256px
+        ; centred HUD. 
+        ;
+        ; TODO: this should be drawn only once during initialisation,
+        ; as with the new HUD-copying method it never gets erased
+        ;
+        ldx # $08
+:       dex 
+        lda # %00000010                 ; yellow multi-color pixel on the right
+        sta bmp + .bmppos(18, 3), x     ; draw left-border on bitmap row 18
+        sta bmp + .bmppos(19, 3), x     ; draw left-border on bitmap row 19
+        sta bmp + .bmppos(20, 3), x     ; draw left-border on bitmap row 20
+        sta bmp + .bmppos(21, 3), x     ; draw left-border on bitmap row 21
+        sta bmp + .bmppos(22, 3), x     ; draw left-border on bitmap row 22
+        sta bmp + .bmppos(23, 3), x     ; draw left-border on bitmap row 23
+        sta bmp + .bmppos(24, 3), x     ; draw left-border on bitmap row 24
+        lda # %10000000                 ; yellow multi-color pixel on the left
+        sta bmp + .bmppos(18, 36), x    ; draw right-border on bitmap row 18
+        sta bmp + .bmppos(19, 36), x    ; draw right-border on bitmap row 19
+        sta bmp + .bmppos(20, 36), x    ; draw right-border on bitmap row 20
+        sta bmp + .bmppos(21, 36), x    ; draw right-border on bitmap row 21
+        sta bmp + .bmppos(22, 36), x    ; draw right-border on bitmap row 22
+        sta bmp + .bmppos(23, 36), x    ; draw right-border on bitmap row 23
+        sta bmp + .bmppos(24, 36), x    ; draw right-border on bitmap row 24
+        txa 
+        bne :-
+.endif
+        ;-----------------------------------------------------------------------
 
         jsr hide_all_ships
         jsr _2ff3
