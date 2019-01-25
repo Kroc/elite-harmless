@@ -5598,7 +5598,11 @@ _8920:                                                                  ;$8920
         lda ZP_A5
         jsr _7c6b
 
+.ifdef  OPTION_ORIGINAL
         lda # 6
+.else
+        lda # 2
+.endif
         jsr set_cursor_col
         
 .import TXT_ELITE:direct
@@ -11538,6 +11542,7 @@ _b1a1:                                                                  ;$B1A1
         ;-----------------------------------------------------------------------
 _b210:  ; restore registers before returning                            ;$B210
         ; (compatibility with KERNAL_CHROUT?)
+        ;
         ldy $0490
         ldx $048f
         lda ZP_POLYOBJ01_XPOS_pt1
@@ -11979,6 +11984,11 @@ _b3c0:                                                                  ;$B3C0
 ; [ZP_TEMP_ADDR1] = to address
 ;               X = number of pages to copy
 ;
+; the copy method is replaced with a faster alternative in elite-harmless,
+; so this code is no longer used there
+; 
+.ifdef  OPTION_ORIGINAL
+
 block_copy:                                                             ;$B3C3
         ; start copying from the beginning of the page
         ldy # $00
@@ -11997,7 +12007,7 @@ block_copy_from:                                                        ;$B3C5
        .bnz block_copy_from     ; still pages to do?
         
         rts 
-
+.endif
 
 txt_docked_token15:                                                     ;$B3D4
         ;=======================================================================

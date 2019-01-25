@@ -349,7 +349,8 @@
 ;$F870:
 
 ;===============================================================================
-
+; TODO: like the HUD, there's wasted bytes here too
+;
 .segment        "HUD_SCRCOLOR"
 
         ; screen RAM colour

@@ -54,36 +54,38 @@ $ca65 -o build/elite_memory.o   src/elite_memory.asm
 # assemble 'original' version of the code; the `OPTION_ORIGINAL` symbol
 # is used within the files to exlcude changed code from the original
 
+options="-DOPTION_ORIGINAL"
+
 echo "- assemble 'elite_init.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-elite_init.o      src/orig/elite_init.asm
+$ca65 $options -o build/orig-elite_init.o       src/orig/elite_init.asm
 echo "- assemble 'text_pairs.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-text_pairs.o      src/text_pairs.asm
+$ca65 $options -o build/orig-text_pairs.o       src/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-text_flight.o     src/text_flight.asm
+$ca65 $options -o build/orig-text_flight.o      src/text_flight.asm
 echo "- assemble 'text_docked.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-text_docked.o     src/text_docked.asm
+$ca65 $options -o build/orig-text_docked.o      src/text_docked.asm
 echo "- assemble 'code_1D00.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-code_1D00.o       src/code_1D00.asm
+$ca65 $options -o build/orig-code_1D00.o        src/code_1D00.asm
 echo "- assemble 'code_1D81.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-code_1D81.o       src/code_1D81.asm
+$ca65 $options -o build/orig-code_1D81.o        src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-code_6A00.o       src/code_6A00.asm
+$ca65 $options -o build/orig-code_6A00.o        src/code_6A00.asm
 echo "- assemble 'data_9300.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-data_9300.o       src/data_9300.asm
+$ca65 $options -o build/orig-data_9300.o        src/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-table_bitmap.o    src/gfx/table_bitmap.asm
+$ca65 $options -o build/orig-table_bitmap.o     src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-sound.o           src/sound.asm
+$ca65 $options -o build/orig-sound.o            src/sound.asm
 echo "- assemble 'gfx_font.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-gfx_font.o        src/gfx/font.asm
+$ca65 $options -o build/orig-gfx_font.o         src/gfx/font.asm
 echo "- assemble 'gfx_sprites.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-gfx_sprites.o     src/gfx/sprites.asm
+$ca65 $options -o build/orig-gfx_sprites.o      src/gfx/sprites.asm
 echo "- assemble 'gfx_hull_data.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-gfx_hull_data.o   src/gfx/hull_data.asm
+$ca65 $options -o build/orig-gfx_hull_data.o    src/gfx/hull_data.asm
 echo "- assemble 'gfx_hud.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-gfx_hud.o         src/gfx/hud.asm
+$ca65 $options -o build/orig-gfx_hud.o          src/gfx/hud.asm
 echo "- assemble 'var_polyobj.asm'"
-$ca65 -DOPTION_ORIGINAL -o build/orig-var_polyobj.o     src/var_polyobj.asm
+$ca65 $options -o build/orig-var_polyobj.o      src/var_polyobj.asm
 
 #===============================================================================
 
@@ -269,43 +271,45 @@ rm -f bin/*.d64
 
 echo "- OK"
 
+options="-DOPTION_MATHTABLES"
+
 echo
 echo "- assemble 'prgheader.asm'"
-$ca65 -o build/prgheader.o      src/prgheader.asm
+$ca65 $options -o build/prgheader.o         src/prgheader.asm
 echo "- assemble 'elite_memory.asm'"
-$ca65 -o build/elite_memory.o   src/elite_memory.asm
+$ca65 $options -o build/elite_memory.o      src/elite_memory.asm
 echo "- assemble 'code_boot.asm'"
-$ca65 -o build/code_boot.o      src/code_boot.asm
+$ca65 $options -o build/code_boot.o         src/code_boot.asm
 echo "- assemble 'code_init.asm'"
-$ca65 -o build/code_init.o      src/code_init.asm
+$ca65 $options -o build/code_init.o         src/code_init.asm
 echo "- assemble 'text_pairs.asm'"
-$ca65 -o build/text_pairs.o     src/text_pairs.asm
+$ca65 $options -o build/text_pairs.o        src/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
-$ca65 -o build/text_flight.o    src/text_flight.asm
+$ca65 $options -o build/text_flight.o       src/text_flight.asm
 echo "- assemble 'text_docked.asm'"
-$ca65 -o build/text_docked.o    src/text_docked.asm
+$ca65 $options -o build/text_docked.o       src/text_docked.asm
 echo "- assemble 'code_1D00.asm'"
-$ca65 -o build/code_1D00.o      src/code_1D00.asm
+$ca65 $options -o build/code_1D00.o         src/code_1D00.asm
 echo "- assemble 'code_1D81.asm'"
-$ca65 -o build/code_1D81.o      src/code_1D81.asm
+$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
-$ca65 -o build/code_6A00.o      src/code_6A00.asm
+$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
 echo "- assemble 'data_9300.asm'"
-$ca65 -o build/data_9300.o      src/data_9300.asm
+$ca65 $options -o build/data_9300.o         src/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
-$ca65 -o build/table_bitmap.o   src/gfx/table_bitmap.asm
+$ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"
-$ca65 -o build/sound.o          src/sound.asm
+$ca65 $options -o build/sound.o             src/sound.asm
 echo "- assemble 'gfx_font.asm'"
-$ca65 -o build/gfx_font.o       src/gfx/font.asm
+$ca65 $options -o build/gfx_font.o          src/gfx/font.asm
 echo "- assemble 'gfx_sprites.asm'"
-$ca65 -o build/gfx_sprites.o    src/gfx/sprites.asm
+$ca65 $options -o build/gfx_sprites.o       src/gfx/sprites.asm
 echo "- assemble 'gfx_hull_data.asm'"
-$ca65 -o build/gfx_hull_data.o  src/gfx/hull_data.asm
+$ca65 $options -o build/gfx_hull_data.o     src/gfx/hull_data.asm
 echo "- assemble 'gfx_hud.asm'"
-$ca65 -o build/gfx_hud.o        src/gfx/hud.asm
+$ca65 $options -o build/gfx_hud.o           src/gfx/hud.asm
 echo "- assemble 'var_polyobj.asm'"
-$ca65 -o build/var_polyobj.o    src/var_polyobj.asm
+$ca65 $options -o build/var_polyobj.o       src/var_polyobj.asm
 
 echo
 echo "* make 'elite-harmless.d64'"
@@ -348,7 +352,6 @@ echo
 # does this itself during initialisation
 
 $exomizer \$0400 -B \
-    -M256 \
     -x3 -s "lda #\$00 sta \$d011" \
     -o "bin/harmless-exo.prg" \
     "bin/harmless.prg"

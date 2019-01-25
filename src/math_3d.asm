@@ -66,17 +66,25 @@ mYx2_HI = $05
         stx ZP_VAR_S
 
         ldx ZP_POLYOBJ + mYx0_LO, y
-        stx ZP_VAR_P1                   ;?
 
+        ; this instruction appears entirely unecessary as `multiply_and_add`
+        ; will blindly overwrite `ZP_VAR_P` anyway. if compiling elite-harmless
+        ; without the multiplication lookup-tables, this instruction is skipped
+.ifdef  OPTION_ORIGINAL
+        stx ZP_VAR_P
+.endif
         lda ZP_POLYOBJ + mYx0_HI, y
         eor # %10000000                 ; flip the sign-bit
-
+        
         jsr multiply_and_add            ; calculate! (Q, R & S are setup)
         sta ZP_POLYOBJ + mYx1_HI, y     ; write back the hi-byte
         stx ZP_POLYOBJ + mYx1_LO, y     ; write back the lo-byte
 
-        stx ZP_VAR_P1                   ; also retain the lo-byte for later?
-        
+        ; as before, this instruction is unecessary
+.ifdef  OPTION_ORIGINAL
+        stx ZP_VAR_P
+.endif
+
         ; R.S = mYx0
         ;
         ldx ZP_POLYOBJ + mYx0_LO, y
@@ -89,8 +97,11 @@ mYx2_HI = $05
         sta ZP_POLYOBJ + mYx0_HI, y     ; write back the hi-byte
         stx ZP_POLYOBJ + mYx0_LO, y     ; write back the lo-byte
 
-        stx ZP_VAR_P1                   ; also retain the lo-byte for later?
-        
+        ; as before, this instruction is unecessary
+.ifdef  OPTION_ORIGINAL
+        stx ZP_VAR_P
+.endif
+
         ; compute the following:
         ;
         ;       mYx1 = BETA * -mYx2 + mYx1
@@ -107,16 +118,24 @@ mYx2_HI = $05
         stx ZP_VAR_S
         
         ldx ZP_POLYOBJ + mYx2_LO, y
-        stx ZP_VAR_P1                   ;?
-        
+
+        ; as before, this instruction is unecessary
+.ifdef  OPTION_ORIGINAL
+        stx ZP_VAR_P
+.endif
+
         lda ZP_POLYOBJ + mYx2_HI, y
         eor # %10000000                 ; flip the sign-bit
 
         jsr multiply_and_add            ; calculate! (Q, R & S are setup)
         sta ZP_POLYOBJ + mYx1_HI, y     ; write back the hi-byte
         stx ZP_POLYOBJ + mYx1_LO, y     ; write back the lo-byte
-        stx ZP_VAR_P1                   ;?
-        
+
+        ; as before, this instruction is unecessary
+.ifdef  OPTION_ORIGINAL
+        stx ZP_VAR_P
+.endif
+
         ; R.S = mYx2
         ;
         ldx ZP_POLYOBJ + mYx2_LO, y
@@ -147,12 +166,12 @@ multiply_and_add:                                                       ;$3ACE
 ;
 .export multiply_and_add
 
-        ; calculate `Q * A`, returning `P.A`
+        ; calculate `Q * A`, returning `A.P`
         jsr multiply_signed
 
 multiplied_now_add:                                                     ;$3AD1
         ;-----------------------------------------------------------------------
-        ; skips the `Q * A` multiplication and adds `P.A`
+        ; skips the `Q * A` multiplication and adds `A.P`
         ;
 .export multiplied_now_add
 
@@ -161,6 +180,7 @@ multiplied_now_add:                                                     ;$3AD1
         sta ZP_VAR_T
         eor ZP_VAR_S
         bmi :+
+
         lda ZP_VAR_R
         clc 
         adc ZP_VAR_P
@@ -168,6 +188,7 @@ multiplied_now_add:                                                     ;$3AD1
         lda ZP_VAR_S
         adc ZP_TEMP_VAR
         ora ZP_VAR_T
+        
         rts 
 
         ;-----------------------------------------------------------------------
@@ -175,7 +196,7 @@ multiplied_now_add:                                                     ;$3AD1
 :       lda ZP_VAR_S                                                    ;$3AE8
         and # %01111111
         sta ZP_VAR_U
-        lda ZP_VAR_P1
+        lda ZP_VAR_P
         sec 
         sbc ZP_VAR_R
         tax 
@@ -210,17 +231,89 @@ _3a50:                                                                  ;$3A50
         ldx ZP_VAR_XX_LO
         stx ZP_VAR_R
 
-        ; called from `multiply_and_add`.
-        ; calculates:
-        ;
-        ;       A.P = Q * A
-        ;
-        ; i.e. multiplies two 8-bit (signed) numbers
-        ; and returns a 16-bit (signed) number
-        ;
-
 multiply_signed:                                                        ;$3A54
+;===============================================================================
+; called from `multiply_and_add`.
+; calculates:
+;
+;       A.P = Q * A
+;
+; i.e. multiplies two 8-bit (signed) numbers
+; and returns a 16-bit (signed) number: A = HI, P = LO
+;
+
+; this was adapted (badly) from:
+; http://codebase64.org/doku.php?id=base:seriously_fast_multiplication
+;
+.ifdef  OPTION_MATHTABLES
+
+.import square1_lo, square1_hi
+.import square2_lo, square2_hi
         ;
+        ;       Q = multiplicand
+        ;       A = multiplier
+        ;
+        tax 
+        
+        ; compare signs for working out what the final sign will be. XOR'ing
+        ; the two operands will work out the +ve/-ve combination for us!
+        ;
+        ; +ve * +ve = +ve
+        ; +ve * -ve = -ve
+        ; -ve * +ve = -ve
+        ; -ve * -ve = +ve
+        ;
+        eor ZP_VAR_Q            ; load multiplicand, combining the signs
+        and # %10000000         ; extract resulting sign
+        sta ZP_VAR_T            ; keep resulting sign for the end
+
+        ; now the sign is separate, extract the "magnitude"
+        ; -- the value, without sign which will be 0 to 127
+        ;
+        lda ZP_VAR_Q            ; again, multiplicand
+        and # %01111111         ; extract the magnitude
+        sta $f8
+
+        txa 
+        and # %01111111
+        
+        tax 
+
+        lda $f8
+        sta sm1+1
+        sta sm3+1
+        eor # $ff
+        sta sm2+1
+        sta sm4+1
+;;:     
+        sec 
+sm1:    lda square1_lo, x
+sm2:    sbc square2_lo, x
+        sta ZP_VAR_P
+sm3:    lda square1_hi, x
+sm4:    sbc square2_hi, x
+
+;;        ; Apply sign (See C=Hacking16 for details).
+;;        lda ZP_VAR_Q
+;;        bpl :+
+;;        sec 
+;;        lda ZP_VAR_P2
+;;        sbc $f8
+;;        sta ZP_VAR_P2
+;;
+;;:       lda $f8
+;;        bpl :+
+;;        sec 
+;;        lda ZP_VAR_P2
+;;        sbc ZP_VAR_Q
+;;        sta ZP_VAR_P2
+;;:
+;;        lda ZP_VAR_P2
+
+        ora ZP_VAR_T            ; restore the sign
+        rts 
+
+.else   ;=======================================================================
         ; the algorithm used here is a common type, best described in context
         ; of the 6502 here: <http://nparker.llx.com/a2/mult.html> under the
         ; heading "Multplying Arbitrary Numbers"
@@ -393,6 +486,8 @@ multiply_signed:                                                        ;$3A54
 @zero:  sta ZP_VAR_P            ; `A` = 0 so also return `P` = 0        ;$3AA5
         rts                     ; `A.P` will be $0000
 
+.endif
+
 multiply_signed_into_RS:                                                ;$3AA8
         ;-----------------------------------------------------------------------
         ; does a multiply as above (`multiply_signed`) and stores the result
@@ -406,4 +501,45 @@ multiply_signed_into_RS:                                                ;$3AA8
         sta ZP_VAR_R
         rts 
 
+.endmacro
+
+.macro  .multiply_tables
+
+.pushseg
+.segment        "TABLE_SQR"
+
+; Table generation: I:0..511
+;       square1_lo = <((I*I)/4)
+;       square1_hi = >((I*I)/4)
+;       square2_lo = <(((I-255)*(I-255))/4)
+;       square2_hi = >(((I-255)*(I-255))/4)
+
+.export square1_lo, square1_hi
+.export square2_lo, square2_hi
+
+square1_lo:
+;-------------------------------------------------------------------------------
+.repeat 512, i
+        .byte <((i * i) / 4)
+.endrepeat
+
+square1_hi:
+;-------------------------------------------------------------------------------
+.repeat 512, i
+        .byte >((i * i) / 4)
+.endrepeat
+
+square2_lo:
+;-------------------------------------------------------------------------------
+.repeat 512, i
+        .byte <(((i-255) * (i-255)) / 4)
+.endrepeat
+
+square2_hi:
+;-------------------------------------------------------------------------------
+.repeat 512, i
+        .byte >(((i-255) * (i-255)) / 4)
+.endrepeat
+
+.popseg
 .endmacro

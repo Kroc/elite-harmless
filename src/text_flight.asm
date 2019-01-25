@@ -822,9 +822,17 @@ _0a91:  ;143.                                                           ;$0A91
         .skip_word              ; $1D^35 = $3E
 
 _0a98:  ;144.                                                           ;$0A98
+.ifdef  OPTION_ORIGINAL
+
         .byte   _HYPHEN, _HYPHEN, _HYPHEN, _HYPHEN
         .byte   __, E_, __, L_, __, I_, __, T_, __, E_, __
         .byte   _HYPHEN, _HYPHEN, _HYPHEN, _HYPHEN, __end
+.else
+        .byte   E_, __, L_, __, I_, __, T_, __, E_
+        .byte   __, __, _COLON, __, __
+        .byte   H_, __, A_, __, R_, __, M_, __, L_, __, E_, __, S_, __, S_
+        .byte   __end
+.endif
         .define_word \
                 "_ELITE"        ; $1E^35 = $3D
 

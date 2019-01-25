@@ -8,7 +8,7 @@ Elite : Harmless is a greatly enhanced version of the [Commodore 64][c64] port o
 ## State Of The Project ##
 
 The game is disassembled but documentation is on-going.  
-No improvements have been implemented yet.  
+Some improvements have been implemented, see below.
 Help is needed in these areas:
 
 * Understanding / commenting the 3D math code;  
@@ -17,6 +17,14 @@ Help is needed in these areas:
 * See also the [list of "Help Wanted" issues][helpw]
 
 [helpw]:    https://github.com/Kroc/elite-harmless/labels/help%20wanted
+
+## Improvements Implemented ##
+
+### Speed ###
+
+* _Multiplication routine upgraded to a faster version:_ I was able to free up 2 KB and insert some multiplication look-up tables which gives a general speed-up for 3D math
+
+* _The code was unnecessarily storing and copying the blank space either side of the HUD_, where the C64's screen is 320px wide rather than 256px on the BBC, on *every frame*; and with an inefficient copy routine. Needless to say, in Elite : Harmless the blank space is neither stored nor copied and the copy method is much faster
 
 ## Planned Improvements ##
 
@@ -53,7 +61,7 @@ Elite : Harmless can be built on Windows, Linux & Mac.
 
 ### Building the Elite : Harmless Source ###
 
-Just press `CTRL+SHIFT+B` in VSCode to build the source code.
+Just press `CTRL+SHIFT+B` in VSCode to build the source code. Fresh disk images are spat out into the "release" directory.
 
 ## Acknowledgements ##
 

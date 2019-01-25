@@ -6,6 +6,7 @@
 ; "code_init.asm" : contains intialisation code
 
 .include        "c64/c64.asm"
+.include        "math_3d.asm"
 
 .zeropage
 
@@ -312,12 +313,12 @@ _776c:
         stx ZP_COPY_TO+1
 
         ldx # $04               ; 4 x 256 = 1'024 bytes
-_7784:  sta [ZP_COPY_TO], y
+:       sta [ZP_COPY_TO], y
         iny 
-        bne _7784
+        bne :-
         inc ZP_COPY_TO+1
         dex 
-        bne _7784
+        bne :-
 
         ; colour the HUD:
         ;-----------------------------------------------------------------------
@@ -455,3 +456,6 @@ _76d8:  stx ZP_COPY_TO+1
         rts
 
 .endproc
+
+; insert the multiplication tables (2K) in "math_3d.asm"
+.multiply_tables
