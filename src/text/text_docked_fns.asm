@@ -246,3 +246,106 @@ txt_docked_token_set_lowercase:                                         ;$24ED
 
 ;///////////////////////////////////////////////////////////////////////////////
 .endmacro
+
+.macro  .txt_docked_token16_17_1D
+;///////////////////////////////////////////////////////////////////////////////
+
+txt_docked_token16:                                                     ;$3E41
+        ;=======================================================================
+.export txt_docked_token16
+        
+        jsr _3e65
+        bne txt_docked_token16
+_3e46:                                                                  ;$3E46
+        jsr _3e65
+        beq _3e46
+        
+        ; this might be a temporary variable and not the visibility state
+        lda # %00000000
+        sta ZP_POLYOBJ_VISIBILITY
+        
+        ; switch to page "1"(?)
+        lda # $01
+        jsr set_page
+
+        jsr _9a86
+
+txt_docked_token17:                                                     ;$3E57  
+        ;=======================================================================
+.export txt_docked_token17
+
+        lda # 10
+        ; this causes the next instruction to become a meaningless `bit`
+        ; instruction, a very handy way of skipping without branching
+       .bit
+
+txt_docked_token1D:                                                     ;$3E5A
+        ;=======================================================================
+.export txt_docked_token1D
+
+        lda # 6
+        jsr set_cursor_row
+
+        ;SPEED: dummy code -- it just returns!
+        jsr _250b
+        
+        jmp txt_docked_token0D
+
+_3e65:                                                                  ;$3E65
+        ;-----------------------------------------------------------------------
+        lda # $50
+        sta ZP_POLYOBJ_YPOS_pt1
+
+        lda # $00
+        sta ZP_POLYOBJ_XPOS_pt1
+        sta ZP_POLYOBJ_ZPOS_pt1
+        
+        lda # $02
+        sta ZP_POLYOBJ_ZPOS_pt2
+        
+        jsr _9a86
+        jsr _a2a0
+        
+        jmp get_input
+
+;///////////////////////////////////////////////////////////////////////////////
+.endmacro
+
+.macro  .txt_docked_token18
+;///////////////////////////////////////////////////////////////////////////////
+
+txt_docked_token18:                                                     ;$3E7C
+        ;=======================================================================
+.export txt_docked_token18
+        
+        jsr get_input
+        bne txt_docked_token18
+
+        jsr get_input
+        beq txt_docked_token18
+        
+        rts 
+
+;///////////////////////////////////////////////////////////////////////////////
+.endmacro
+
+.macro  .txt_docked_incoming_message
+;///////////////////////////////////////////////////////////////////////////////
+
+txt_docked_incoming_message:                                            ;$3E37
+        ;=======================================================================
+        ; print "INCOMING MESSAGE" on screen and wait a bit
+        ;
+.export txt_docked_incoming_message
+
+        ; print "INCOMING MESSAGE" on screen
+
+.import TXT_DOCKED_INCOMING_MESSAGE:direct
+        lda # TXT_DOCKED_INCOMING_MESSAGE
+        jsr print_docked_str
+
+        ldy # 100
+        jmp wait_frames
+
+;///////////////////////////////////////////////////////////////////////////////
+.endmacro
