@@ -6,7 +6,7 @@
 ; this is the multi-colour bitmap data for the HUD
 ; TODO: save this to a bitmap and convert during build
 
-.segment        "GFX_HUD"
+.segment        "HUD_DATA"
 
 ; in what is probably one of the most egregious cases of wasted CPU time and
 ; space in Elite C64, the backup HUD bitmap actually contains all the blank

@@ -7,6 +7,7 @@
 .include        "elite_vars.asm"
 .include        "var_zeropage.asm"
 .include        "math_3d.asm"
+.include        "text/text_docked_fns.asm"
 .include        "gfx/hull_struct.asm"
 
 ; from "text_flight.asm"
@@ -281,6 +282,7 @@ _1d81:                                                                  ;$1D81
 
 :       jmp _88e7                                                       ;$1E11
 
+.ifdef  OPTION_ORIGINAL
 
 debug_for_brk:                                                          ;$1E14
         ;=======================================================================
@@ -295,6 +297,7 @@ debug_for_brk:                                                          ;$1E14
         cli                     ; enable interrupts
 
         rts 
+.endif
 
 ;===============================================================================
 ; Trumble™ A.I. data?
@@ -426,6 +429,7 @@ _1ec1:                                                                  ;$1EC1
 .export _1ec1
 
 .import POLYOBJ_00
+
         lda POLYOBJ_00          ;=$F900?
         sta ZP_GOATSOUP_pt1     ;?
 
@@ -1223,6 +1227,7 @@ _2366:                                                                  ;$2366
 _2367:                                                                  ;$2367
 ;===============================================================================
 .export _2367
+
         lda # $c0
         sta _a8e0
 
@@ -1231,26 +1236,9 @@ _2367:                                                                  ;$2367
 
         rts 
 
-txt_docked_token1B:                                                     ;$2372
-;===============================================================================
-.export txt_docked_token1B
-
-        ; print some message from msg index $D9(217)+?
-        ; ("CURRUTHERS" / "FOSDYKE_SMYTHE" / "FORTESQUE")
-        lda # $d9
-        bne _2378               ; always branches
-
-txt_docked_token1C:                                                     ;$2376
-;===============================================================================
-.export txt_docked_token1C
-
-        ; print some message from msg index $DC(220)+?
-        lda # $dc
-_2378:                                                                  ;$2378
-        clc 
-        adc PLAYER_GALAXY
-        bne print_docked_str    ; always branches
-        
+; insert these docked token functions from "text_docked_fns.asm"
+.txt_docked_token1B
+.txt_docked_token1C
 
 _237e:                                                                  ;$237E
         ;=======================================================================
@@ -1357,7 +1345,8 @@ _23a0:                                                                  ;$23A0
         pla 
         tay 
         pla 
-        rts
+
+        rts 
 
 print_docked_token:                                                     ;$23CF
         ;=======================================================================
@@ -1557,164 +1546,16 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 
         jmp _2438               ; clean up and exit
 
-
-txt_docked_token01:                                                     ;$246A
-        ;=======================================================================
-.export txt_docked_token01
-
-        lda # %00000000
-
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
-       .bit
-
-txt_docked_token02:                                                     ;$246D
-        ;=======================================================================
-.export txt_docked_token02
-
-        lda # %00100000
-        sta txt_ucase_mask
-
-        lda # %00000000
-        sta txt_ucase_flag
-
-        rts
-
-txt_docked_token08:                                                     ;$2478
-        ;=======================================================================
-.export txt_docked_token08
-
-        lda # 6
-        jsr set_cursor_col
-
-        lda # %11111111
-        sta txt_lcase_flag
-
-        rts 
-
-txt_docked_token09:                                                     ;$2483
-        ;=======================================================================
-        ; switch to view "1"(?)
-        ;
-.export txt_docked_token09
-
-        lda # 1
-        jsr set_cursor_col
-
-        jmp set_page
-
-txt_docked_token0D:                                                     ;$248B
-        ;=======================================================================
-.export txt_docked_token0D
-        
-        ; enable the change-case flag?
-        lda # %10000000
-        sta txt_ucase_flag
-        
-        ; enable upper-casing
-        lda # %00100000
-        sta txt_ucase_mask
-
-        rts 
-
-txt_docked_token06:                                                     ;$2496
-        ;=======================================================================
-.export txt_docked_token06
-        
-        lda # $80
-        sta ZP_34
-        lda # $ff
-
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
-       .bit
-
-txt_docked_token05:                                                     ;$249D
-        ;=======================================================================
-.export txt_docked_token05
-
-        lda # %00000000
-        sta txt_flight_flag
-
-        rts 
-
-txt_docked_token0E:                                                     ;$24A3
-        ;=======================================================================
-.export txt_docked_token0E
-
-        lda # %10000000
-
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
-       .bit
-
-txt_docked_token0F:                                                     ;$24A6
-        ;=======================================================================
-.export txt_docked_token0F
-        
-        lda # %00000000
-        sta txt_buffer_flag
-        asl 
-        sta txt_buffer_index
-        rts 
-
-txt_docked_token11:                                                     ;$24B0
-        ;=======================================================================
-.export txt_docked_token11
-
-        lda ZP_34
-        and # %10111111         ;=$BF
-        sta ZP_34
-
-        lda # $03
-        jsr print_flight_token
-        
-        ldx txt_buffer_index
-        lda $0647, x
-        jsr is_vowel
-        bcc _24c9
-        dec txt_buffer_index
-_24c9:                                                                  ;$24C9
-        lda # $99
-        jmp print_docked_str
-
-txt_docked_token12:                                                     ;$24CE
-        ;=======================================================================
-.export txt_docked_token12
-
-        jsr txt_docked_token_set_lowercase
-
-        jsr get_random_number
-        and # %00000011
-        tay 
-_24d7:                                                                  ;$24D7
-        jsr get_random_number
-        and # %00111110
-        tax 
-
-.import _254e
-
-        lda _254e+0, x
-        jsr _2404
-        
-        lda _254e+1, x
-        jsr _2404
-        
-        dey 
-        bpl _24d7
-        
-        rts 
-
-txt_docked_token_set_lowercase:                                         ;$24ED
-        ;=======================================================================
-.export txt_docked_token_set_lowercase
-        
-        ; msg token $13
-        ;
-        lda # %11011111
-        sta txt_lcase_mask
-
-        rts 
+; insert these docked token functions from "text_docked_fns.asm"
+.txt_docked_token01_02
+.txt_docked_token08
+.txt_docked_token09
+.txt_docked_token0D
+.txt_docked_token06_05
+.txt_docked_token0E_0F
+.txt_docked_token11
+.txt_docked_token12
+.txt_docked_token_set_lowercase
 
 is_vowel:                                                               ;$24F3
         ;=======================================================================
@@ -2759,6 +2600,7 @@ _2c7c:                                                                  ;$2C7C
 
 _2c7d:                                                                  ;$2C7D
 .import TXT_DOCKED_DOCKED:direct
+
         lda # TXT_DOCKED_DOCKED
         jsr print_docked_str
 
@@ -3354,7 +3196,6 @@ txt_docked_token10:                                                     ;$2F22
 .export txt_docked_token10
 
         lda # 'a'
-
 
 print_char:                                                             ;$2F24
 ;===============================================================================

@@ -461,25 +461,25 @@ _77a3:  sta $d802,y
         cli 
 
         ; get the location of the HUD data from the linker configuration
-.import __GFX_HUD_LOAD__, __GFX_HUD_SIZE__
+.import __HUD_DATA_LOAD__, __HUD_DATA_SIZE__
 
         ; number of whole pages to copy. note that, the lack of a rounding-up
         ; divide is fixed by adding just shy of one page before dividing,
         ; instead of just adding one to the result. this means that a round
         ; number of bytes, e.g. $1000 would not calculate as one more page
         ; than necessary 
-        ldx #< ((__GFX_HUD_SIZE__ + 255) / 256)
+        ldx #< ((__HUD_DATA_SIZE__ + 255) / 256)
 
         ; get the location where the HUD data is to be copied to
-.import __GFX_HUD_RUN__
+.import __HUD_DATA_RUN__
 
-        lda #< __GFX_HUD_RUN__
+        lda #< __HUD_DATA_RUN__
         sta ZP_COPY_TO+0
-        lda #> __GFX_HUD_RUN__
+        lda #> __HUD_DATA_RUN__
         sta ZP_COPY_TO+1
-        lda #< __GFX_HUD_LOAD__
+        lda #< __HUD_DATA_LOAD__
         sta ZP_COPY_FROM+0
-        lda #> __GFX_HUD_LOAD__
+        lda #> __HUD_DATA_LOAD__
         jsr copy_bytes
 
         ;-----------------------------------------------------------------------

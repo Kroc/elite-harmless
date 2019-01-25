@@ -76,14 +76,14 @@ echo "- assemble 'table_bitmap.asm'"
 $ca65 $options -o build/orig-table_bitmap.o     src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"
 $ca65 $options -o build/orig-sound.o            src/sound.asm
-echo "- assemble 'gfx_font.asm'"
+echo "- assemble 'gfx-font.asm'"
 $ca65 $options -o build/orig-gfx_font.o         src/gfx/font.asm
-echo "- assemble 'gfx_sprites.asm'"
+echo "- assemble 'gfx-sprites.asm'"
 $ca65 $options -o build/orig-gfx_sprites.o      src/gfx/sprites.asm
-echo "- assemble 'gfx_hull_data.asm'"
+echo "- assemble 'gfx-hull_data.asm'"
 $ca65 $options -o build/orig-gfx_hull_data.o    src/gfx/hull_data.asm
-echo "- assemble 'gfx_hud.asm'"
-$ca65 $options -o build/orig-gfx_hud.o          src/gfx/hud.asm
+echo "- assemble 'gfx-hud_data.asm'"
+$ca65 $options -o build/orig-gfx_hud_data.o     src/gfx/hud_data.asm
 echo "- assemble 'var_polyobj.asm'"
 $ca65 $options -o build/orig-var_polyobj.o      src/var_polyobj.asm
 
@@ -138,7 +138,7 @@ $ld65 \
     --obj build/orig-sound.o \
     --obj build/orig-gfx_font.o \
     --obj build/orig-gfx_sprites.o \
-    --obj build/orig-gfx_hud.o \
+    --obj build/orig-gfx_hud_data.o \
     --obj build/orig-gfx_hull_data.o \
     --obj build/orig-var_polyobj.o
 
@@ -300,14 +300,14 @@ echo "- assemble 'table_bitmap.asm'"
 $ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"
 $ca65 $options -o build/sound.o             src/sound.asm
-echo "- assemble 'gfx_font.asm'"
-$ca65 $options -o build/gfx_font.o          src/gfx/font.asm
-echo "- assemble 'gfx_sprites.asm'"
-$ca65 $options -o build/gfx_sprites.o       src/gfx/sprites.asm
-echo "- assemble 'gfx_hull_data.asm'"
-$ca65 $options -o build/gfx_hull_data.o     src/gfx/hull_data.asm
-echo "- assemble 'gfx_hud.asm'"
-$ca65 $options -o build/gfx_hud.o           src/gfx/hud.asm
+echo "- assemble 'gfx-font.asm'"
+$ca65 $options -o build/gfx-font.o          src/gfx/font.asm
+echo "- assemble 'gfx-sprites.asm'"
+$ca65 $options -o build/gfx-sprites.o       src/gfx/sprites.asm
+echo "- assemble 'gfx-hull_data.asm'"
+$ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
+echo "- assemble 'gfx-hud_data.asm'"
+$ca65 $options -o build/gfx-hud_data.o      src/gfx/hud_data.asm
 echo "- assemble 'var_polyobj.asm'"
 $ca65 $options -o build/var_polyobj.o       src/var_polyobj.asm
 
@@ -334,10 +334,10 @@ $ld65 \
     --obj build/data_9300.o \
     --obj build/table_bitmap.o \
     --obj build/sound.o \
-    --obj build/gfx_font.o \
-    --obj build/gfx_sprites.o \
-    --obj build/gfx_hull_data.o \
-    --obj build/gfx_hud.o \
+    --obj build/gfx-font.o \
+    --obj build/gfx-sprites.o \
+    --obj build/gfx-hull_data.o \
+    --obj build/gfx-hud_data.o \
     --obj build/var_polyobj.o 
 
 #-------------------------------------------------------------------------------

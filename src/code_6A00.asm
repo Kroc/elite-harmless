@@ -5608,11 +5608,10 @@ _8920:                                                                  ;$8920
 .endif
         jsr set_cursor_col
 
-.ifdef  OPTION_ORIGINAL
 .import TXT_ELITE:direct
         lda # TXT_ELITE
         jsr _7773
-.endif
+
         lda # $0a
         jsr print_char
 
@@ -11740,7 +11739,7 @@ _b301:                                                                  ;$B301
         ; the HUD is a 256px wide bitmap (with borders on the outside though).
         ; this routine 'clears' the HUD by restoring a clean copy from RAM
         ;
-.import __GFX_HUD_RUN__
+.import __HUD_DATA_RUN__
 
         ; the original Elite code does a rather inefficient byte-by-byte copy
         ; -- for every byte copied, there's additional cycles spent on
@@ -11752,9 +11751,9 @@ _b301:                                                                  ;$B301
 .ifdef  OPTION_ORIGINAL
 
         ldx # 8                 ; numbe of pages to copy (8*256)
-        lda #< __GFX_HUD_RUN__
+        lda #< __HUD_DATA_RUN__
         sta ZP_TEMP_ADDR3_LO
-        lda #> __GFX_HUD_RUN__
+        lda #> __HUD_DATA_RUN__
         sta ZP_TEMP_ADDR3_HI
 
         hud_bmp = $4000 + .bmppos(18, 0)         ;=$5680
@@ -11787,19 +11786,19 @@ _b301:                                                                  ;$B301
         ;
         bmp = ELITE_BITMAP_ADDR
 
-:       lda __GFX_HUD_RUN__, x          ; read from row 1 of backup HUD
+:       lda __HUD_DATA_RUN__, x          ; read from row 1 of backup HUD
         sta bmp + .bmppos(18, 4), x     ; write to row 18 of bitmap screen
-        lda __GFX_HUD_RUN__ + $100 , x  ; read from row 2 of backup HUD
+        lda __HUD_DATA_RUN__ + $100 , x  ; read from row 2 of backup HUD
         sta bmp + .bmppos(19, 4), x     ; write to row 19 of bitmap screen
-        lda __GFX_HUD_RUN__ + $200, x   ; read from row 3 of backup HUD
+        lda __HUD_DATA_RUN__ + $200, x   ; read from row 3 of backup HUD
         sta bmp + .bmppos(20, 4), x     ; write to row 20 of bitmap screen
-        lda __GFX_HUD_RUN__ + $300, x   ; read from row 4 of backup HUD
+        lda __HUD_DATA_RUN__ + $300, x   ; read from row 4 of backup HUD
         sta bmp + .bmppos(21, 4), x     ; write to row 21 of bitmap screen
-        lda __GFX_HUD_RUN__ + $400, x   ; read from row 5 of backup HUD
+        lda __HUD_DATA_RUN__ + $400, x   ; read from row 5 of backup HUD
         sta bmp + .bmppos(22, 4), x     ; write to row 22 of bitmap screen
-        lda __GFX_HUD_RUN__ + $500, x   ; read from row 6 of backup HUD
+        lda __HUD_DATA_RUN__ + $500, x   ; read from row 6 of backup HUD
         sta bmp + .bmppos(23, 4), x     ; write to row 23 of bitmap screen
-        lda __GFX_HUD_RUN__ + $600, x   ; read from row 7 of backup HUD
+        lda __HUD_DATA_RUN__ + $600, x   ; read from row 7 of backup HUD
         sta bmp + .bmppos(24, 4), x
         dex 
        .bnz :-
