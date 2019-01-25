@@ -5564,6 +5564,7 @@ _8912:                                                                  ;$8912
         rts 
 
 ;===============================================================================
+; part of the title screen?
 
 _8920:                                                                  ;$8920
         sty $06fb
@@ -5598,17 +5599,20 @@ _8920:                                                                  ;$8920
         lda ZP_A5
         jsr _7c6b
 
+        ; print "--- E L I T E ---"
+
 .ifdef  OPTION_ORIGINAL
         lda # 6
 .else
         lda # 2
 .endif
         jsr set_cursor_col
-        
+
+.ifdef  OPTION_ORIGINAL
 .import TXT_ELITE:direct
         lda # TXT_ELITE
         jsr _7773
-
+.endif
         lda # $0a
         jsr print_char
 

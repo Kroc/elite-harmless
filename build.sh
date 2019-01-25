@@ -47,7 +47,7 @@ echo "* build original Elite"
 echo "  ======================================"
 
 echo "- assemble 'prgheader.asm'"
-$ca65 -o build/prgheader.o      src/prgheader.asm
+$ca65 -o build/prgheader.o      src/c64/prgheader.asm
 echo "- assemble 'elite_memory.asm'"
 $ca65 -o build/elite_memory.o   src/elite_memory.asm
 
@@ -59,11 +59,11 @@ options="-DOPTION_ORIGINAL"
 echo "- assemble 'elite_init.asm'"
 $ca65 $options -o build/orig-elite_init.o       src/orig/elite_init.asm
 echo "- assemble 'text_pairs.asm'"
-$ca65 $options -o build/orig-text_pairs.o       src/text_pairs.asm
+$ca65 $options -o build/orig-text_pairs.o       src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
-$ca65 $options -o build/orig-text_flight.o      src/text_flight.asm
+$ca65 $options -o build/orig-text_flight.o      src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
-$ca65 $options -o build/orig-text_docked.o      src/text_docked.asm
+$ca65 $options -o build/orig-text_docked.o      src/text/text_docked.asm
 echo "- assemble 'code_1D00.asm'"
 $ca65 $options -o build/orig-code_1D00.o        src/code_1D00.asm
 echo "- assemble 'code_1D81.asm'"
@@ -275,7 +275,7 @@ options="-DOPTION_MATHTABLES"
 
 echo
 echo "- assemble 'prgheader.asm'"
-$ca65 $options -o build/prgheader.o         src/prgheader.asm
+$ca65 $options -o build/prgheader.o         src/c64/prgheader.asm
 echo "- assemble 'elite_memory.asm'"
 $ca65 $options -o build/elite_memory.o      src/elite_memory.asm
 echo "- assemble 'code_boot.asm'"
@@ -283,11 +283,11 @@ $ca65 $options -o build/code_boot.o         src/code_boot.asm
 echo "- assemble 'code_init.asm'"
 $ca65 $options -o build/code_init.o         src/code_init.asm
 echo "- assemble 'text_pairs.asm'"
-$ca65 $options -o build/text_pairs.o        src/text_pairs.asm
+$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
-$ca65 $options -o build/text_flight.o       src/text_flight.asm
+$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
-$ca65 $options -o build/text_docked.o       src/text_docked.asm
+$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
 echo "- assemble 'code_1D00.asm'"
 $ca65 $options -o build/code_1D00.o         src/code_1D00.asm
 echo "- assemble 'code_1D81.asm'"

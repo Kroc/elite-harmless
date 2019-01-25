@@ -1311,10 +1311,8 @@ _0e00:                                                                  ;$0E00
         .define_msg "_DC"
         
         ; 221.
-        .byte   _I, _S, __, _BE, _L
-        .byte   _I, _E, _V, _ED, _TO, _H, _A, _VE
-        .byte   __, _J, _U, _M, _P, _ED, _TO, _THIS
-        .byte   _G, _AL, _A, _X, _Y, __end
+        .byte   _I, _S, __, _BE, _L, _I, _E, _V, _ED, _TO, _H, _A, _VE, __
+        .byte   _J, _U, _M, _P, _ED, _TO, _THIS, _G, _AL, _A, _X, _Y, __end
         .define_msg "_DD"
         
         ; 222.
@@ -1673,11 +1671,9 @@ _1a5c:                                                                  ;$1A5C
         .byte   __end
         
         ; 26.
-        .byte   _F01_, _W, _E, _L, _C, _O, _M
-        .byte   _E, __, _T, _O, __, _T, _H, _E
-        .byte   __, _S, _E, _V, _E, _N, _T, _E
-        .byte   _E, _N, _T, _H, __, _G, _A, _L
-        .byte   _A, _X, _Y, $76, __end
+        .byte   _F01_, _W, _E, _L, _C, _O, _M, _E, __, _T, _O, __
+        .byte   _T, _H, _E, __, _S, _E, _V, _E, _N, _T, _E, _E, _N, _T, _H, __
+        .byte   _G, _A, _L, _A, _X, _Y, $76, __end
         
         ; 27.
         .byte   $3a, _F1B_, _F13_
