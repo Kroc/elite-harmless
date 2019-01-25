@@ -56,8 +56,8 @@ $ca65 -o build/elite_memory.o   src/elite_memory.asm
 
 options="-DOPTION_ORIGINAL"
 
-echo "- assemble 'elite_init.asm'"
-$ca65 $options -o build/orig-elite_init.o       src/orig/elite_init.asm
+echo "- assemble 'orig_init.asm'"
+$ca65 $options -o build/orig-init.o             src/orig_init.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/orig-text_pairs.o       src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -130,7 +130,7 @@ $ld65 \
     --obj build/orig-text_flight.o \
     --obj build/orig-text_docked.o \
     --obj build/orig-code_1D00.o \
-    --obj build/orig-elite_init.o \
+    --obj build/orig-init.o \
     --obj build/orig-code_1D81.o \
     --obj build/orig-code_6A00.o \
     --obj build/orig-data_9300.o \
