@@ -62,8 +62,6 @@ _bmprow24 = ELITE_BITMAP_ADDR + .bmppos( 24, 4 ) ;=$5E20
 ; just keeps going! this is purely because the lo/hi tables are indexed and it
 ; makes it faster to have these aligned a page ($00..$FF)
 
-; TODO: this is 1'952 bytes going unused! (976 bytes x 2)
-
 _bmprow25 = ELITE_BITMAP_ADDR + .bmppos( 25, 4 ) ;=$5F60
 _bmprow26 = ELITE_BITMAP_ADDR + .bmppos( 26, 4 ) ;=$60A0
 _bmprow27 = ELITE_BITMAP_ADDR + .bmppos( 27, 4 ) ;=$61E0
@@ -152,9 +150,7 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
 
 .endif
 
-; write out separate 256-byte tables for lo-address / hi-address:
-; NOTE: these *must* be aligned by the linker!
-;       (especially if each table is not 256 bytes long)
+; write out separate tables for lo-address / hi-address:
 
 .segment        "TABLE_BITMAP_LO"
 
