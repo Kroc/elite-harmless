@@ -7266,33 +7266,33 @@ _927e:                                                                  ;$927E
 ; where that row starts -- note that Elite uses a 32-char (256 px) wide
 ; 'screen' so this equates the the 4th character in each 40-char row
 
-.import ELITE_MENUSCR_COLOR_ADDR
+.import ELITE_MENUSCR_ADDR
 .define menuscr_pos \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  0, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  1, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  2, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  3, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  4, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  5, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  6, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  7, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  8, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos(  9, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 10, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 11, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 12, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 13, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 14, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 15, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 16, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 17, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 18, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 19, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 20, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 21, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 22, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 23, 3 ), \
-        ELITE_MENUSCR_COLOR_ADDR + .scrpos( 24, 3 )
+        ELITE_MENUSCR_ADDR + .scrpos(  0, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  1, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  2, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  3, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  4, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  5, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  6, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  7, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  8, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos(  9, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 10, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 11, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 12, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 13, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 14, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 15, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 16, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 17, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 18, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 19, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 20, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 21, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 22, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 23, 3 ), \
+        ELITE_MENUSCR_ADDR + .scrpos( 24, 3 )
 
 menuscr_lo:                                                             ;$9900
         .lobytes menuscr_pos
@@ -11524,9 +11524,9 @@ _b210:  ; restore registers before returning                            ;$B210
 _b21a:                                                                  ;$B21A
         ; set starting position in top-left of the centred
         ; 32-char (256px) screen Elite uses
-        lda #< (ELITE_MENUSCR_COLOR_ADDR + .scrpos( 0, 4 ))
+        lda #< (ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ))
         sta ZP_TEMP_ADDR1_LO
-        lda #> (ELITE_MENUSCR_COLOR_ADDR + .scrpos( 0, 4 ))
+        lda #> (ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ))
         sta ZP_TEMP_ADDR1_HI
 
         ldx # 24                ; colour 24 rows

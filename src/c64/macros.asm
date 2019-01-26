@@ -24,7 +24,6 @@
         tay 
 .endmacro
 
-
 ; the 6502 CPU has very difficult to grasp semantics when it comes to
 ; comparisons and branching when compared to the Z80. this can make it
 ; very non-obvious whether a branch is `>`, `>=`, `<` or `<=`

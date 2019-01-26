@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "var_polyobj.asm" -- run-time storage of 3D polygon-objects in play.
+; "var_polyobj.asm" : run-time storage of 3D polygon-objects in play
 
 .include        "var_zeropage.asm"
 
@@ -21,6 +21,9 @@ POLYOBJECTS:
 ; there is a limit of 11 objects at the same time in the game.
 ; please see "var_zeropage.asm" for the PolyObject structure
 ; (unfortunately we can't export `.struct`s whole)
+;
+; with 11 objects this occupies 407 bytes; this could be expanded
+; to 13 objects (for 481 bytes of 37 bytes each) and remain page-aligned
 
 POLYOBJ_00:      .tag    PolyObject                                     ;$F900
 POLYOBJ_01:      .tag    PolyObject                                     ;$F925

@@ -6,6 +6,7 @@
 ; a series of lookup tables, purpose currently unknown
 
 .segment        "DATA_9300"
+.align  256
 
 _9300:                                                                  ;$9300
 .export _9300

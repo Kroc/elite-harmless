@@ -48,8 +48,6 @@ echo "  ======================================"
 
 echo "- assemble 'prgheader.asm'"
 $ca65 -o build/prgheader.o      src/c64/prgheader.asm
-echo "- assemble 'elite_memory.asm'"
-$ca65 -o build/elite_memory.o   src/elite_memory.asm
 
 # assemble 'original' version of the code; the `OPTION_ORIGINAL` symbol
 # is used within the files to exlcude changed code from the original
@@ -86,8 +84,10 @@ echo "- assemble 'gfx-hud_data.asm'"
 $ca65 $options -o build/orig-gfx_hud_data.o     src/gfx/hud_data.asm
 echo "- assemble 'var_polyobj.asm'"
 $ca65 $options -o build/orig-var_polyobj.o      src/var_polyobj.asm
+echo "- assemble 'elite_link.asm'"
+$ca65 $options -o build/orig-link.o             src/elite_link.asm
 
-#===============================================================================
+#-------------------------------------------------------------------------------
 
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
@@ -117,7 +117,7 @@ echo "-     link 'elite-original-gma86.cfg'"
 $ld65 \
        -C link/elite-original-gma86.cfg \
        -m build/elite-original-gma86.map -vm \
-    --obj build/elite_memory.o \
+    --obj build/orig-link.o \
     --obj build/loader/stage0.o \
     --obj build/loader/stage1.o \
     --obj build/loader/stage2.o \
@@ -276,8 +276,6 @@ options="-DOPTION_MATHTABLES"
 echo
 echo "- assemble 'prgheader.asm'"
 $ca65 $options -o build/prgheader.o         src/c64/prgheader.asm
-echo "- assemble 'elite_memory.asm'"
-$ca65 $options -o build/elite_memory.o      src/elite_memory.asm
 echo "- assemble 'code_boot.asm'"
 $ca65 $options -o build/code_boot.o         src/code_boot.asm
 echo "- assemble 'code_init.asm'"
@@ -310,6 +308,8 @@ echo "- assemble 'gfx-hud_data.asm'"
 $ca65 $options -o build/gfx-hud_data.o      src/gfx/hud_data.asm
 echo "- assemble 'var_polyobj.asm'"
 $ca65 $options -o build/var_polyobj.o       src/var_polyobj.asm
+echo "- assemble 'elite_link.asm'"
+$ca65 $options -o build/elite_link.o        src/elite_link.asm
 
 echo
 echo "* make 'elite-harmless.d64'"
@@ -323,7 +323,7 @@ $ld65 \
        -o bin/harmless.prg \
     --obj build/prgheader.o \
     --obj build/code_boot.o \
-    --obj build/elite_memory.o \
+    --obj build/elite_link.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
