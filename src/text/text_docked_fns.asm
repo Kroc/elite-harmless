@@ -294,14 +294,14 @@ txt_docked_token1D:                                                     ;$3E5A
 _3e65:                                                                  ;$3E65
         ;-----------------------------------------------------------------------
         lda # $50
-        sta ZP_POLYOBJ_YPOS_pt1
+        sta ZP_POLYOBJ_YPOS_LO
 
         lda # $00
-        sta ZP_POLYOBJ_XPOS_pt1
-        sta ZP_POLYOBJ_ZPOS_pt1
+        sta ZP_POLYOBJ_XPOS_LO
+        sta ZP_POLYOBJ_ZPOS_LO
         
         lda # $02
-        sta ZP_POLYOBJ_ZPOS_pt2
+        sta ZP_POLYOBJ_ZPOS_MI
         
         jsr _9a86
         jsr _a2a0

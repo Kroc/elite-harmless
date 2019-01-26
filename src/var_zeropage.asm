@@ -112,17 +112,17 @@ ZP_TEMP_ADDR1_HI        = $08
 
 ZP_POLYOBJ              = $09
 ZP_POLYOBJ_XPOS         = $09
-ZP_POLYOBJ_XPOS_pt1     = $09
-ZP_POLYOBJ_XPOS_pt2     = $0a
-ZP_POLYOBJ_XPOS_pt3     = $0b
+ZP_POLYOBJ_XPOS_LO      = $09
+ZP_POLYOBJ_XPOS_MI      = $0a
+ZP_POLYOBJ_XPOS_HI      = $0b
 ZP_POLYOBJ_YPOS         = $0c
-ZP_POLYOBJ_YPOS_pt1     = $0c
-ZP_POLYOBJ_YPOS_pt2     = $0d
-ZP_POLYOBJ_YPOS_pt3     = $0e
+ZP_POLYOBJ_YPOS_LO      = $0c
+ZP_POLYOBJ_YPOS_MI      = $0d
+ZP_POLYOBJ_YPOS_HI      = $0e
 ZP_POLYOBJ_ZPOS         = $0f
-ZP_POLYOBJ_ZPOS_pt1     = $0f
-ZP_POLYOBJ_ZPOS_pt2     = $10
-ZP_POLYOBJ_ZPOS_pt3     = $11
+ZP_POLYOBJ_ZPOS_LO      = $0f
+ZP_POLYOBJ_ZPOS_MI      = $10
+ZP_POLYOBJ_ZPOS_HI      = $11
 
 ; some math routines take parameters that are offsets
 ; from the start of the poly-object to the desired matrix row 
