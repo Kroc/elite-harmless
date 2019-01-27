@@ -282,9 +282,9 @@ _76e8:  stx ZP_COPY_TO+1
 
 .import __HUD_SCRCOLOR_LOAD__   ;=$783A
 
-        lda #< $66d0
+        lda #< (ELITE_BITMAP_ADDR + $26d0)
         sta ZP_COPY_TO+0
-        lda #> $66d0
+        lda #> (ELITE_BITMAP_ADDR + $26d0)
         sta ZP_COPY_TO+1
         lda #< __HUD_SCRCOLOR_LOAD__
         sta ZP_COPY_FROM+0

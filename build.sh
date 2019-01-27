@@ -56,6 +56,8 @@ options="-DOPTION_ORIGINAL"
 
 echo "- assemble 'orig_init.asm'"
 $ca65 $options -o build/orig-init.o             src/orig_init.asm
+echo "- assemble 'var_0400.asm'"
+$ca65 $options -o build/orig-var_0400.o         src/var_0400.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/orig-text_pairs.o       src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -126,6 +128,7 @@ $ld65 \
     --obj build/loader/stage5.o \
     --obj build/loader/stage6.o \
     --obj build/loader/gma4_7C3A.o \
+    --obj build/orig-var_0400.o \
     --obj build/orig-text_pairs.o \
     --obj build/orig-text_flight.o \
     --obj build/orig-text_docked.o \
@@ -274,12 +277,10 @@ echo "- OK"
 options="-DOPTION_MATHTABLES"
 
 echo
-echo "- assemble 'prgheader.asm'"
-$ca65 $options -o build/prgheader.o         src/c64/prgheader.asm
-echo "- assemble 'code_boot.asm'"
-$ca65 $options -o build/code_boot.o         src/code_boot.asm
 echo "- assemble 'code_init.asm'"
 $ca65 $options -o build/code_init.o         src/code_init.asm
+echo "- assemble 'var_0400.asm'"
+$ca65 $options -o build/var_0400.o          src/var_0400.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -314,16 +315,14 @@ $ca65 $options -o build/elite_link.o        src/elite_link.asm
 echo
 echo "* make 'elite-harmless.d64'"
 echo "  --------------------------------------"
-echo "- link 'load.prg'"
-echo "- link 'harmless.prg'"
+echo "- linking..."
 $ld65 \
        -C link/elite-harmless.cfg \
        -S \$0400 \
        -m build/elite-harmless.map -vm \
        -o bin/harmless.prg \
-    --obj build/prgheader.o \
-    --obj build/code_boot.o \
     --obj build/elite_link.o \
+    --obj build/var_0400.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
@@ -354,7 +353,11 @@ echo
 $exomizer \$0400 -B \
     -x3 -s "lda #\$00 sta \$d011" \
     -o "bin/harmless-exo.prg" \
-    "bin/harmless.prg"
+    -- \
+        "bin/init.prg" \
+        "bin/prg1.prg" \
+        "bin/prg2.prg" \
+        "bin/prg3.prg"
 
 echo
 echo "* write floppy disk image"

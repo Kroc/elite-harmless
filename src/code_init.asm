@@ -3,7 +3,8 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "code_init.asm" : contains intialisation code
+; "code_init.asm" : contains intialisation code for elite-harmless;
+; original Elite uses "orig_init.asm"
 
 .include        "c64/c64.asm"
 .include        "elite_consts.asm"
@@ -13,6 +14,26 @@
 
 ZP_COPY_TO      := $18
 ZP_COPY_FROM    := $1a
+
+.segment        "INIT_PRG"
+.export         __INIT_PRG__:absolute = 1
+
+        .addr   *+2
+
+.segment        "PRG1_PRG"
+.export         __PRG1_PRG__:absolute = 1
+
+        .addr   *+2
+
+.segment        "PRG2_PRG"
+.export         __PRG2_PRG__:absolute = 1
+
+        .addr   *+2
+
+.segment        "PRG3_PRG"
+.export         __PRG3_PRG__:absolute = 1
+
+        .addr   *+2
 
 .segment        "CODE_INIT"
 
@@ -203,9 +224,9 @@ _76e8:  stx ZP_COPY_TO+1
 
 .import __HUD_SCRCOLOR_LOAD__   ;=$783A
 
-        lda #< $66d0
+        lda #< (ELITE_BITMAP_ADDR + $26d0)
         sta ZP_COPY_TO+0
-        lda #> $66d0
+        lda #> (ELITE_BITMAP_ADDR + $26d0)
         sta ZP_COPY_TO+1
         lda #< __HUD_SCRCOLOR_LOAD__
         sta ZP_COPY_FROM+0
@@ -407,7 +428,7 @@ _76d8:  stx ZP_COPY_TO+1
         
         ; NOTE: calling `init_mem` clears variable storage from $0400..$0700
         ; *THIS VERY CODE IS WITHIN THAT REGION* -- ergo, we cannot return
-        ; from a subroutine here but will still need to send execution to
+        ; from a subroutine here but we will still need to send execution to
         ; `_88b3` after clearing variable storage. we do this by pushing the
         ; address we want to jump to (`_88b3`) on to the stack and then jump
         ; (*NOT* `jsr`) to the subroutine. when it hits `rts`, execution will

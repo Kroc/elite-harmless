@@ -10099,10 +10099,10 @@ _aaa2:                                                                  ;$AAA2
         ;=======================================================================
         ; erase $0400..$0700
 
-.import __VARS_START__
-.import __VARS_SIZE__
+.import __VARS_0400_LOAD__
+.import __VARS_0400_SIZE__
 
-        lda #> __VARS_START__
+        lda #> __VARS_0400_LOAD__
         sta ZP_TEMP_ADDR1_HI
 
         ; number of whole pages to copy; note that the lack of a rounding-up
@@ -10110,9 +10110,9 @@ _aaa2:                                                                  ;$AAA2
         ; instead of just adding one to the result. this means that a round
         ; number of bytes, e.g. $1000 would not calculate as one more page
         ; than necessary 
-        ldx #< ((__VARS_SIZE__ + 255) / 256)
+        ldx #< ((__VARS_0400_SIZE__ + 255) / 256)
 
-        lda #< __VARS_START__   ; address must be page aligned for A to be $00 
+        lda #< __VARS_0400_LOAD__   ; address must be page aligned for A to be $00 
         sta ZP_TEMP_ADDR1_LO
         tay                     ; =0
 

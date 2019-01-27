@@ -353,9 +353,11 @@
 ;
 .segment        "HUD_SCRCOLOR"
 
-        ; screen RAM colour
+; screen RAM colour
 
-_783a:
+; `proc` is used so that `.sizeof(_783a)` is available
+.proc   _783a                                                           ;$783A
+
         .byte   $00, $00, $00, $07, $17, $17, $74, $74
         .byte   $74, $74, $27, $27, $27, $27, $27, $27
         .byte   $27, $27, $27, $27, $27, $27, $27, $27
@@ -392,13 +394,18 @@ _783a:
         .byte   $27, $27, $27, $27, $07, $27, $24, $24
         .byte   $24, $24, $17, $17, $07, $00, $00, $00
         .byte   $60, $d3, $66, $1d, $a0, $40, $b3, $d3
-
+.endproc
 
 .segment        "HUD_COLORRAM"
 
-        ; colour RAM ($D800..) nybbles
+; colour RAM ($D800..) nybbles
 
-_795a:
+; TODO: we could save space in the .PRG by storing these by combining
+;       the nybbles into bytes and unpacking during initialization
+
+; `proc` is used so that `.sizeof(_795a)` is available
+.proc   _795a                                                           ;$795A
+
         .byte   $00, $00, $00, $00, $05, $05, $05, $05
         .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
         .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
@@ -435,3 +442,4 @@ _795a:
         .byte   $0d, $0d, $0d, $0d, $0d, $0d, $07, $07
         .byte   $07, $07, $05, $05, $00, $00, $00, $00
         .byte   $8d, $18, $8f, $50, $46, $7e, $a4, $f4
+.endproc
