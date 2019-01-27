@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "var_zeropage.asm" -- special variables in the Zero Page;
+; "vars_zeropage.asm" : special variables in the Zero Page;
 ; 256 bytes of slightly faster memory
 
 ; note that $00 & $01 are hard-wired to the CPU, so can't be used

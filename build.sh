@@ -56,8 +56,8 @@ options="-DOPTION_ORIGINAL"
 
 echo "- assemble 'orig_init.asm'"
 $ca65 $options -o build/orig-init.o             src/orig_init.asm
-echo "- assemble 'var_0400.asm'"
-$ca65 $options -o build/orig-var_0400.o         src/var_0400.asm
+echo "- assemble 'vars_0400.asm'"
+$ca65 $options -o build/orig-vars_0400.o        src/vars_0400.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/orig-text_pairs.o       src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -84,8 +84,8 @@ echo "- assemble 'gfx-hull_data.asm'"
 $ca65 $options -o build/orig-gfx_hull_data.o    src/gfx/hull_data.asm
 echo "- assemble 'gfx-hud_data.asm'"
 $ca65 $options -o build/orig-gfx_hud_data.o     src/gfx/hud_data.asm
-echo "- assemble 'var_polyobj.asm'"
-$ca65 $options -o build/orig-var_polyobj.o      src/var_polyobj.asm
+echo "- assemble 'vars_polyobj.asm'"
+$ca65 $options -o build/orig-vars_polyobj.o     src/vars_polyobj.asm
 echo "- assemble 'elite_link.asm'"
 $ca65 $options -o build/orig-link.o             src/elite_link.asm
 
@@ -128,7 +128,7 @@ $ld65 \
     --obj build/loader/stage5.o \
     --obj build/loader/stage6.o \
     --obj build/loader/gma4_7C3A.o \
-    --obj build/orig-var_0400.o \
+    --obj build/orig-vars_0400.o \
     --obj build/orig-text_pairs.o \
     --obj build/orig-text_flight.o \
     --obj build/orig-text_docked.o \
@@ -143,7 +143,7 @@ $ld65 \
     --obj build/orig-gfx_sprites.o \
     --obj build/orig-gfx_hud_data.o \
     --obj build/orig-gfx_hull_data.o \
-    --obj build/orig-var_polyobj.o
+    --obj build/orig-vars_polyobj.o
 
 # encrypt GMA4.PRG:
 #-------------------------------------------------------------------------------
@@ -279,8 +279,8 @@ options="-DOPTION_MATHTABLES"
 echo
 echo "- assemble 'code_init.asm'"
 $ca65 $options -o build/code_init.o         src/code_init.asm
-echo "- assemble 'var_0400.asm'"
-$ca65 $options -o build/var_0400.o          src/var_0400.asm
+echo "- assemble 'vars_0400.asm'"
+$ca65 $options -o build/vars_0400.o         src/vars_0400.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -307,8 +307,8 @@ echo "- assemble 'gfx-hull_data.asm'"
 $ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
 echo "- assemble 'gfx-hud_data.asm'"
 $ca65 $options -o build/gfx-hud_data.o      src/gfx/hud_data.asm
-echo "- assemble 'var_polyobj.asm'"
-$ca65 $options -o build/var_polyobj.o       src/var_polyobj.asm
+echo "- assemble 'vars_polyobj.asm'"
+$ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
 echo "- assemble 'elite_link.asm'"
 $ca65 $options -o build/elite_link.o        src/elite_link.asm
 
@@ -322,7 +322,7 @@ $ld65 \
        -m build/elite-harmless.map -vm \
        -o bin/harmless.prg \
     --obj build/elite_link.o \
-    --obj build/var_0400.o \
+    --obj build/vars_0400.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
@@ -337,7 +337,7 @@ $ld65 \
     --obj build/gfx-sprites.o \
     --obj build/gfx-hull_data.o \
     --obj build/gfx-hud_data.o \
-    --obj build/var_polyobj.o 
+    --obj build/vars_polyobj.o 
 
 #-------------------------------------------------------------------------------
 

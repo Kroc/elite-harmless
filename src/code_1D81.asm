@@ -4,8 +4,8 @@
 ;===============================================================================
 
 .include        "c64/c64.asm"
-.include        "elite_vars.asm"
-.include        "var_zeropage.asm"
+.include        "vars_elite.asm"
+.include        "vars_zeropage.asm"
 .include        "math_3d.asm"
 .include        "text/text_docked_fns.asm"
 .include        "gfx/hull_struct.asm"

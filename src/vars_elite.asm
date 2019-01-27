@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "elite_vars.asm" -- some common variables Elite stores in $0400..$0700
+; "vars_elite.asm" : some common variables Elite stores in $0400..$0700
 
 .include        "elite_consts.asm"
 
