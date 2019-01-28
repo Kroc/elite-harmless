@@ -280,15 +280,17 @@ _76e8:  stx ZP_COPY_TO+1
         ; copy 279 bytes of data to $66d0-$67E7
         ;-----------------------------------------------------------------------
 
-.import __HUD_SCRCOLOR_LOAD__   ;=$783A
+.import __HUD_COLORSCR_LOAD__
+.import __HUD_COLORSCR_SIZE__
 
-        lda #< (ELITE_BITMAP_ADDR + $26d0)
+        lda #< (ELITE_MAINSCR_ADDR + ($400 - __HUD_COLORSCR_SIZE__) - $10)
         sta ZP_COPY_TO+0
-        lda #> (ELITE_BITMAP_ADDR + $26d0)
+        lda #> (ELITE_MAINSCR_ADDR + ($400 - __HUD_COLORSCR_SIZE__) - $10)
         sta ZP_COPY_TO+1
-        lda #< __HUD_SCRCOLOR_LOAD__
+
+        lda #< __HUD_COLORSCR_LOAD__
         sta ZP_COPY_FROM+0
-        lda #> __HUD_SCRCOLOR_LOAD__
+        lda #> __HUD_COLORSCR_LOAD__
         jsr _7827
 
         ; set the screen-colours for the menu-screen:
@@ -307,7 +309,7 @@ _76e8:  stx ZP_COPY_TO+1
         ; colour the borders yellow down the sides of the view-port:
 
         ; yellow fore / black back colour
-_7711:  lda # .color_nybbles( YELLOW, BLACK )
+_7711:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 36                ; set the colour on column 37
         sta [ZP_COPY_TO], y
         ldy # 3                 ; set the colour on column 4
@@ -315,7 +317,7 @@ _7711:  lda # .color_nybbles( YELLOW, BLACK )
         dey
 
         ; colour the area outside the viewport black
-        lda # .color_nybbles( BLACK, BLACK )
+        lda # .color_nybble( BLACK, BLACK )
 :       sta [ZP_COPY_TO], y     ; set columns 2, 1 & 0 to black
         dey 
         bpl :-
@@ -351,7 +353,7 @@ _7711:  lda # .color_nybbles( YELLOW, BLACK )
 
         ldx # $12               ; 18 rows
 
-_7745:  lda # .color_nybbles( YELLOW, BLACK )
+_7745:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 36
         sta [ZP_COPY_TO], y
         ldy # 3
@@ -380,7 +382,7 @@ _776c:
 
         ; set yellow colour across the bottom row of the menu-screen
         ; write $70 from $63e4 to $63c4
-        lda # .color_nybbles( YELLOW, BLACK )
+        lda # .color_nybble( YELLOW, BLACK )
         ldy # $1f               ; we'll write 31 chars (colour-cells)
 :       sta ELITE_MENUSCR_ADDR + (24 * 40) + 4, y
         dey 
@@ -428,27 +430,32 @@ _77a3:  sta $d802,y
         dey 
         bne _77a3
 
+.import ELITE_SPRITES_INDEX:direct
+
         ; sprite indicies
-        lda # $a0
-        sta $63f8
-        sta $67f8
-        lda # $a4
-        sta $63f9
-        sta $67f9
-        lda # $a5
-        sta $63fa
-        sta $67fa
-        sta $63fc
-        sta $67fc
-        sta $63fe
-        sta $67fe
-        lda # $a6
-        sta $63fb
-        sta $67fb
-        sta $63fd
-        sta $67fd
-        sta $63ff
-        sta $67ff
+        ; TODO: define these indicies based on the acutal sprite patterns order
+        lda # ELITE_SPRITES_INDEX + 0
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE0_PTR
+        lda # ELITE_SPRITES_INDEX + 4
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE1_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE1_PTR
+
+        ; each of the Trumbles™ alternate patterns
+        lda # ELITE_SPRITES_INDEX + 5
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE2_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE2_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE4_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE4_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE6_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE6_PTR
+        lda # ELITE_SPRITES_INDEX + 6
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE3_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE3_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE5_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE5_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE7_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
 
         ;-----------------------------------------------------------------------
 
@@ -488,22 +495,23 @@ _77a3:  sta $d802,y
 
         ;-----------------------------------------------------------------------
 
-.import __GFX_SPRITES_LOAD__   ;=$7A7A
+.import __GFX_SPRITES_LOAD__    ;=$7A7A
+.import __GFX_SPRITES_RUN__     ;=$6800
 
         ; copy $7A7A..$7B7A to $6800..$6900
         ; SPRITES!
 
         ldy # $00
 _77ff:  lda __GFX_SPRITES_LOAD__, y
-        sta $6800, y
+        sta __GFX_SPRITES_RUN__, y
         dey 
         bne _77ff
 
         ; copy $7B7A..$7C7A to $6900..$6A00
         ; two sprites, plus a bunch of unknown data
 
-_7808:  lda __GFX_SPRITES_LOAD__+$100, y
-        sta $6900, y
+_7808:  lda __GFX_SPRITES_LOAD__ + $100, y
+        sta __GFX_SPRITES_RUN__  + $100, y
         dey 
         bne _7808
 

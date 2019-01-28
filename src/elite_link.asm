@@ -19,7 +19,8 @@
 ; this is used to position the segments that *must* be present within the 16K
 ; memory region that the VIC is limited to; this includes the bitmap screen,
 ; the text/colour screens and the sprites
-.export ELITE_VIC_ADDR :absolute = .vic_bank_addr(ELITE_VIC_BANK)
+.export ELITE_VIC_ADDR :absolute \
+        = .vic_bank_addr(ELITE_VIC_BANK)
 
 .export ELITE_BITMAP_ADDR :absolute \
         = ELITE_VIC_ADDR + ((ELITE_VIC_CHARBMP & %0000100) >> 2) * $2000
@@ -36,3 +37,12 @@
         ELITE_MAINSCR_ADDR)
 .out .sprintf("%s%04x", ": ELITE_MENUSCR_ADDR             = $", \
         ELITE_MENUSCR_ADDR)
+
+.import __GFX_SPRITES_RUN__
+.export ELITE_SPRITES_ADDR :absolute \
+        = __GFX_SPRITES_RUN__
+
+; defines the first sprite index
+; (offset from ELITE_VIC_ADDR, divided by 64)
+.export ELITE_SPRITES_INDEX :direct \
+        =< ((ELITE_SPRITES_ADDR - ELITE_VIC_ADDR) / 64)

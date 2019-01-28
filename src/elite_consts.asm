@@ -22,6 +22,12 @@ ELITE_VIEWPORT_HEIGHT   = 144
 
 ELITE_VIEWPORT_COLS     = ELITE_VIEWPORT_WIDTH / 8      ;=32
 
+; the HUD occupies 7 lines at the bottom of the screen; this fact is used in
+; a wide variety of calculations and implicit values in non-obvious ways
+
+ELITE_HUD_HEIGHT_ROWS   = 7
+ELITE_HUD_TOP_ROW       = 25 - ELITE_HUD_HEIGHT_ROWS
+
 ;-------------------------------------------------------------------------------
 
 ; the VIC-II bank, where Elite places graphics (bitmap, sprites)

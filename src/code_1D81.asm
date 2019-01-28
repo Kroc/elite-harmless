@@ -3441,22 +3441,28 @@ _2fee:                                                                  ;$2FEE
 
 _2ff3:                                                                  ;$2FF3
 .export _2ff3
+.import ELITE_BITMAP_ADDR
 
-        lda #< $5770
+        ; location of the speed bar on the HUD
+        dial_speed_addr = ELITE_BITMAP_ADDR + .bmppos(18, 30)
+
+        lda #< dial_speed_addr
         sta ZP_TEMP_ADDR1_LO
-        lda #> $5770
+        lda #> dial_speed_addr
         sta ZP_TEMP_ADDR1_HI
         
-        jsr _30bb
+        jsr _30bb               ; flashing?
         stx ZP_VALUE_pt2
         sta ZP_VALUE_pt1
         
-        lda # $0e               ; threshold to change colour?
+        lda # 14                ; threshold to change colour?
         sta ZP_TEMP_VAR
         
         lda PLAYER_SPEED
         jsr hud_drawbar_32
         
+        ;-----------------------------------------------------------------------
+
         lda # $00
         sta ZP_VAR_R
         sta ZP_VAR_P1
@@ -3518,15 +3524,20 @@ _3068:                                                                  ;$3068
         lda $0071, y
         sty ZP_VAR_P1
         jsr hud_drawbar
+
         ldy ZP_VAR_P1
         iny 
         cpy # $04
         bne _3068
-        lda #< $56b0
+
+        ; location of the fore-shield bar on the HUD
+        dial_fore_addr = ELITE_BITMAP_ADDR + .bmppos(18, 6)
+        
+        lda #< dial_fore_addr
         sta ZP_TEMP_ADDR1_LO
-        lda #> $56b0
+        lda #> dial_fore_addr
         sta ZP_TEMP_ADDR1_HI
-        lda # $aa
+        lda # .color_nybble(LTRED, LTRED)
         sta ZP_VALUE_pt1
         sta ZP_VALUE_pt2
 
@@ -3539,10 +3550,10 @@ _3068:                                                                  ;$3068
         lda PLAYER_FUEL
         jsr hud_drawbar_64
 
-        jsr _30bb
+        jsr _30bb               ; setup flashing colours
         stx ZP_VALUE_pt2
         sta ZP_VALUE_pt1
-        ldx # $0b
+        ldx # $0b               ; "threshold to change colour"
         stx ZP_TEMP_VAR
 
         lda PLAYER_TEMP_CABIN
@@ -3551,30 +3562,31 @@ _3068:                                                                  ;$3068
         lda PLAYER_TEMP_LASER
         jsr hud_drawbar_128
 
-        lda # $f0
+        lda # $f0               ; "threshold to change colour"
         sta ZP_TEMP_VAR
 
-        lda $06f3
+        lda $06f3               ; altitude?
         jsr hud_drawbar_128
         
         jmp _7b6f
 
 ;===============================================================================
-
+; decide to flash a dial?
+;
 _30bb:                                                                  ;$30BB
-        ldx # $aa
+        ldx # .color_nybble(LTRED, LTRED)
 
         lda ZP_A3               ; move counter?
-        and # %00001000
-        and _1d09
-        beq :+
+        and # %00001000         ; every 8th frame?
+        and _1d09               ; is flashing enabled?
+       .bze :+
 
         txa 
 
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit 
-:       lda # $55                                                       ;$30C8
+:       lda # .color_nybble(GREEN, GREEN)                                                       ;$30C8
         rts 
 
 ;===============================================================================
@@ -3599,7 +3611,7 @@ hud_drawbar_64:                                                         ;$3C0D
 
 hud_drawbar_32:                                                         ;$30CE
         ;-----------------------------------------------------------------------
-        ; divide balue by 2 before drawing the bar:
+        ; divide value by 2 before drawing the bar:
         ; 
         ;       A = value to represent on the bar, 0-31
         ;
@@ -3618,7 +3630,7 @@ hud_drawbar:                                                            ;$30CF
         bcs :+
         
         lda ZP_VALUE_pt2
-        bne :++                 ;SPEED: could use `.bit` here?
+        bne :++
 
 :       lda ZP_VALUE_pt1                                                ;$30DD
 
@@ -3648,10 +3660,10 @@ _30f1:                                                                  ;$30F1
         tya 
         clc 
         adc # $06
-        bcc _3103
+        bcc :+
         inc ZP_TEMP_ADDR1_HI
-_3103:                                                                  ;$3103
-        tay 
+
+:       tay                                                             ;$3103
         dex 
         bmi _next_row
         bpl _30e5
@@ -3659,11 +3671,11 @@ _3109:                                                                  ;$3109
         eor # %00000011
         sta ZP_VAR_Q
         lda ZP_VAR_R
-_310f:                                                                  ;$310F
-        asl 
+        
+:       asl                                                             ;$310F
         asl 
         dec ZP_VAR_Q
-        bpl _310f
+        bpl :-
         pha 
         lda # $00
         sta ZP_VAR_R

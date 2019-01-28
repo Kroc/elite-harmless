@@ -705,10 +705,12 @@ _6cb8:                                                                  ;$6CB8
 
 ;===============================================================================
 
+dial_addr = ELITE_BITMAP_ADDR + .bmppos(21, 5)
+
 _6cc3:                                                                  ;$6CC3
-        lda #< $5a68
+        lda #< dial_addr
         sta ZP_8E
-        lda #> $5a68
+        lda #> dial_addr
         sta ZP_8F
         lda # $10
         sta ZP_90
@@ -3636,9 +3638,9 @@ _7d62:                                                                  ;$7D62
         beq _7d57
         jsr _7d1f
         bcs _7d57
-        lda #> $6000
+        lda #> ELITE_MENUSCR_ADDR
         sta ZP_VAR_P2
-        lda #< $6000
+        lda #< ELITE_MENUSCR_ADDR
         sta ZP_VAR_P1
         jsr _3bc1
         lda ZP_VALUE_pt2
@@ -5381,8 +5383,9 @@ _87d0:                                                                  ;$87D0
         jsr set_page
         jsr _b2a5
         lda # $00
-        sta $5f1f
-        sta $4118
+
+        sta ELITE_BITMAP_ADDR + 7 + .bmppos(24, 35)
+        sta ELITE_BITMAP_ADDR + 0 + .bmppos(0, 35)
         jsr _7af7
 
         lda # 12
@@ -9458,19 +9461,27 @@ _a6d4:                                                                  ;$A6D4
         lda PLAYER_LASERS, y    ; get type of laser for current viewpoint
         beq _a700               ; no laser? skip ahead
 
-        ldy # $a0               ; a two-nybble colour?
+        ; the index of the first sprite is entirely dependent on where sprites
+        ; are located in the selected VIC bank; see "elite_link.asm" for where
+        ; this value is defined
+.import ELITE_SPRITES_INDEX:direct
+
+        ldy # ELITE_SPRITES_INDEX
         cmp # $0f               ; a type of laser?
-        beq _a6f2
-        iny 
+        beq :+
+        iny                     ; select next sprite index
         cmp # $8f               ; a type of laser?
-        beq _a6f2
-        iny 
+        beq :+
+        iny                     ; select next sprite index
         cmp # $97               ; a type of laser?
-        beq _a6f2
-        iny 
-_a6f2:                                                                  ;$A6F2
-        sty $63f8               ; somewhere in the HUD?
-        sty $67f8               ; somehwere in the HUD?
+        beq :+
+        iny                     ; select next sprite index
+
+.import ELITE_MENUSCR_ADDR
+.import ELITE_MAINSCR_ADDR
+
+:       sty ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR                        ;$A6F2
+        sty ELITE_MAINSCR_ADDR + VIC_SPRITE0_PTR
         
         ; set colour of cross-hairs according to type of laser
         ;
@@ -11186,23 +11197,27 @@ _b0f4:                                                                  ;$B0F4
         ldy # $09
         jsr _a858
 _b0fd:                                                                  ;$B0FD
-        lda $67a3               ;?
+        lda ELITE_MAINSCR_ADDR + .scrpos(23, 11)        ;=$67A3
         eor # %11100000
-        sta $67a3               ;?
-        lda $67cb
+        sta ELITE_MAINSCR_ADDR + .scrpos(23, 11)        ;=$67A3
+        
+        lda ELITE_MAINSCR_ADDR + .scrpos(24, 11)        ;=$67CB
         eor # %11100000
-        sta $67cb
+        sta ELITE_MAINSCR_ADDR + .scrpos(24, 11)        ;=$67CB
+        
         rts 
 
 ;===============================================================================
 
 _b10e:                                                                  ;$B10E
-        lda $67b4
+        lda ELITE_MAINSCR_ADDR + .scrpos(23, 28)        ;=$67B4
         eor # %11100000
-        sta $67b4
-        lda $67dc
+        sta ELITE_MAINSCR_ADDR + .scrpos(23, 28)        ;=$67B4
+
+        lda ELITE_MAINSCR_ADDR + .scrpos(24, 28)        ;=$67DC
         eor # %11100000
-        sta $67dc
+        sta ELITE_MAINSCR_ADDR + .scrpos(24, 28)        ;=$67DC
+
         rts 
 
 ;===============================================================================
@@ -11216,7 +11231,7 @@ _b11f:                                                                  ;$B11F
         sty ZP_TEMP_ADDR1_LO
         tay 
         lda ZP_TEMP_ADDR1_LO
-        sta $67c6, y
+        sta ELITE_MAINSCR_ADDR + .scrpos(24, 6), y      ;=$67C6
         ldy # $00
         rts 
 
@@ -11224,9 +11239,11 @@ _b11f:                                                                  ;$B11F
 
 ; unused / unreferenced?
 ;$b12f:
+        ; probably data rather than code?
         jsr $ffff               ;irq
         cmp # $80
         bcc _b13a
+
 _b136:                                                                  ;$B136
         lda # $07
         clc 
@@ -11531,7 +11548,7 @@ _b21a:                                                                  ;$B21A
 
         ldx # 24                ; colour 24 rows
 
-@row:   lda # .color_nybbles( WHITE, BLACK )                            ;$B224
+@row:   lda # .color_nybble( WHITE, BLACK )                            ;$B224
         ldy # 31                ; 32 columns (0-31)
 
 :       sta [ZP_TEMP_ADDR1], y                                          ;$B228
@@ -11551,19 +11568,24 @@ _b21a:                                                                  ;$B21A
 
         ;-----------------------------------------------------------------------
         
-        ; erase $4000..$5600
-        ; (the non-HUD portion of the bitmap)
+        ; erase the bitmap area above the HUD,
+        ; i.e. the viewport
 
-        ; TODO: this should be calculated based on the size of the HUD data?
+        ; calculate the number of bytes in the bitmap above the HUD
+        .export erase_bytes             = .bmppos(ELITE_HUD_TOP_ROW, 0)
+        ; from this calculate the number of bytes in *whole* pages
+        .export erase_bytes_pages       = (erase_bytes / 256) * 256
+        ; and the remaining bytes that don't fill one page
+        .export erase_bytes_remain      = erase_bytes - erase_bytes_pages
 
-        ldx # $40
+        ldx #> ELITE_BITMAP_ADDR
 :       jsr erase_page                                                  ;$B23D
         inx 
-        cpx # $56
+        cpx #> (ELITE_BITMAP_ADDR + erase_bytes_pages)
         bne :-
 
-        ; erase $5600..$567F?
-        ldy # $7f
+        ; erase the non-whole-page remainder
+        ldy #< (ELITE_BITMAP_ADDR + erase_bytes_pages + erase_bytes_remain - 1)
         jsr erase_page_from
         sta [ZP_TEMP_ADDR1], y
 
@@ -11609,7 +11631,7 @@ _b267:                                                                  ;$B267
         ldy # $1f
         lda # $70
 _b289:                                                                  ;$B289
-        sta $6004, y
+        sta ELITE_MENUSCR_ADDR + .scrpos(0, 4), y
         dey 
         bpl _b289
 
@@ -11623,14 +11645,16 @@ _b289:                                                                  ;$B289
         beq _b2a5
         ldy # $1f
 _b29f:                                                                  ;$B29F
-        sta $6054, y
+        sta ELITE_MENUSCR_ADDR + .scrpos(2, 4), y
         dey 
         bpl _b29f
 _b2a5:                                                                  ;$B2A5
         ldx # $c7
         jsr _b2d5
+
         lda # $ff
-        sta $5f1f
+        sta ELITE_BITMAP_ADDR + 7 + .bmppos(24, 35)     ;=$5F1F
+
         ldx # $19
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
@@ -11650,7 +11674,7 @@ _b2b2:                                                                  ;$B2B2
         ldx $c0
         jsr _b2e1
         lda # $01
-        sta $4118
+        sta ELITE_BITMAP_ADDR + .bmppos(0, 35)  ;=$4118
         ldx # $00
 _b2d5:                                                                  ;$B2D5
         stx ZP_VAR_Y
@@ -11705,8 +11729,8 @@ _b301:                                                                  ;$B301
         ;
 .import __HUD_DATA_RUN__
 
-        ; the original Elite code does a rather inefficient byte-by-byte copy
-        ; -- for every byte copied, there's additional cycles spent on
+        ; the original Elite code does a rather inefficient byte-by-byte
+        ; copy -- for every byte copied, there's additional cycles spent on
         ; decrementing the 16-bit address pointers and the slower indirect-X
         ; addressing mode is used -- but in a rather rediculous case of this
         ; being a rushed port from the BBC this routine also copies all the
@@ -11720,7 +11744,7 @@ _b301:                                                                  ;$B301
         lda #> __HUD_DATA_RUN__
         sta ZP_TEMP_ADDR3_HI
 
-        hud_bmp = $4000 + .bmppos(18, 0)         ;=$5680
+        hud_bmp = ELITE_BITMAP_ADDR + .bmppos(ELITE_HUD_TOP_ROW, 0)     ;=$5680
 
         lda #< hud_bmp
         sta ZP_TEMP_ADDR1_LO
@@ -11728,7 +11752,7 @@ _b301:                                                                  ;$B301
         sta ZP_TEMP_ADDR1_HI
         jsr block_copy
 
-        ldy # $c0
+        ldy # $c0               ; remainder bytes?
         ldx # $01
         jsr block_copy_from
 
@@ -11742,14 +11766,17 @@ _b301:                                                                  ;$B301
         ldx # $00
 
         ; here we copy one byte of 7 bitmap rows at a time. note that the
-        ; bitmap data is stored in 256px strips, not 320px. doing 7 copies
-        ; per loop reduces the cost of loop-testing (very slow to exit-test
-        ; for every byte copied!) and also allows us to use the absolute-X
-        ; adressing mode which costs 5 cycles each rather than 6 for the
-        ; original code's use of indirect-X addressing
+        ; bitmap data is stored in 256px strips (in Elite : Harmless),
+        ; not 320px. doing 7 copies per loop reduces the cost of loop-testing
+        ; (very slow to exit-test for every byte copied!) and also allows us
+        ; to use the absolute-X adressing mode which costs 5 cycles each rather
+        ; than 6 for the original code's use of indirect-X addressing
         ;
         bmp = ELITE_BITMAP_ADDR
 
+        ; TODO: we could `.repeat` this for the number of rows defined by
+        ; ELITE_HUD_HEIGHT_ROWS`
+        ;
 :       lda __HUD_DATA_RUN__, x          ; read from row 1 of backup HUD
         sta bmp + .bmppos(18, 4), x     ; write to row 18 of bitmap screen
         lda __HUD_DATA_RUN__ + $100 , x  ; read from row 2 of backup HUD
@@ -11839,8 +11866,9 @@ _b359:                                                                  ;$B359
         ldx # $00
         ldy # $40
         jsr _b364
-        ldx #< $4128
-        ldy #> $4128
+
+        ldx #< (ELITE_BITMAP_ADDR + .bmppos(0, 37))     ;=$4128
+        ldy #> (ELITE_BITMAP_ADDR + .bmppos(0, 37))     ;=$4128
 _b364:                                                                  ;$B364
         stx ZP_TEMP_ADDR1_LO
         sty ZP_TEMP_ADDR1_HI
@@ -11995,9 +12023,11 @@ txt_docked_token15:                                                     ;$B3D4
         lda # 1
         sta ZP_CURSOR_COL
         
-        lda #> $5a60
+        txt_bmp_addr = ELITE_BITMAP_ADDR + .bmppos( 21, 4 )
+
+        lda #> txt_bmp_addr     ;=$5A60
         sta ZP_TEMP_ADDR1_HI
-        lda #< $5a60
+        lda #< txt_bmp_addr     ;=$5A60
         sta ZP_TEMP_ADDR1_LO
         ldx # $03
 _b3f7:                                                                  ;$B3F7

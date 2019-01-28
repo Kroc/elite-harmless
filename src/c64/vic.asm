@@ -17,37 +17,57 @@
 ; colours
 ;===============================================================================
 
-.define BLACK   $00
-.define WHITE   $01
-.define RED     $02
-.define CYAN    $03
-.define PURPLE  $04
-.define GREEN   $05
-.define BLUE    $06
-.define YELLOW  $07
-.define ORANGE  $08
-.define BROWN   $09
-.define LTRED   $0a
-.define DKGREY  $0b
-.define GREY    $0c
-.define LTGREEN $0d
-.define LTBLUE  $0e
-.define LTGREY  $0f
+;               hex     ¦ nybble
+.define BLACK   $00     ; %0000
+.define WHITE   $01     ; %0001
+.define RED     $02     ; %0010
+.define CYAN    $03     ; %0011
+.define PURPLE  $04     ; %0100
+.define GREEN   $05     ; %0101
+.define BLUE    $06     ; %0110
+.define YELLOW  $07     ; %0111
+.define ORANGE  $08     ; %1000
+.define BROWN   $09     ; %1001
+.define LTRED   $0a     ; %1010
+.define DKGREY  $0b     ; %1011
+.define GREY    $0c     ; %1100
+.define LTGREEN $0d     ; %1101
+.define LTBLUE  $0e     ; %1110
+.define LTGREY  $0f     ; %1111
 
-.define .color_nybbles(fore, back) \
+.define .color_nybble(fore, back) \
         (fore & 15) << 4 | (back & 15)
 
-.define .scrpos(ypos, xpos) \
-        ((ypos * 40) + xpos)
+.define .scrpos(row, col) \
+        ((row * 40) + col)
 
 ; given a screen row + column, return a bitmap offset in bytes
 ; where 1 char = 8 bytes, therefore one row is 320 bytes
-.define .bmppos(ypos, xpos) \
-        ((ypos * 320) + (xpos * 8))
+.define .bmppos(row, col) \
+        (row * 320) + (col * 8)
 
 ;===============================================================================
 ; VIC-II registers:
 ;===============================================================================
+
+; the sprite pointers are stored in the unused space directly after the screen
+; RAM (default $0400) since the screen is 1'000 chars long and there are 24
+; bytes available there. these constants are offsets you should add to your
+; screen location. sprites in memory must be aligned to 64 bytes, so the value
+; used in the sprite pointers is the offset of the sprite from the beginning
+; of the selected VIC bank (see "vic.asm"), divided by 64
+;
+; for example, if the VIC bank is set to 1 ($4000..$8000) and sprites are
+; stored at $6800 then the first sprite index is $A0 (+$2800 / 64)
+
+.define VIC_SPRITE0_PTR         $03F8
+.define VIC_SPRITE1_PTR         $03F9
+.define VIC_SPRITE2_PTR         $03FA
+.define VIC_SPRITE3_PTR         $03FB
+.define VIC_SPRITE4_PTR         $03FC
+.define VIC_SPRITE5_PTR         $03FD
+.define VIC_SPRITE6_PTR         $03FE
+.define VIC_SPRITE7_PTR         $03FF
 
 .define VIC_SPRITE0_X           $d000
 .define VIC_SPRITE0_Y           $d001

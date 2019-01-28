@@ -207,7 +207,7 @@ init:
         lda # $00
         sta ZP_COPY_TO+0
         tay 
-        ldx #> $6000
+        ldx #> ELITE_MENUSCR_ADDR
 
         lda # $10               ;(white on black?)
 _76e8:  stx ZP_COPY_TO+1
@@ -216,21 +216,23 @@ _76e8:  stx ZP_COPY_TO+1
         bne :-
         ldx ZP_COPY_TO+1
         inx 
-        cpx #> $6800
+        cpx #> ELITE_MAINSCR_ADDR
         bne _76e8
 
         ; copy 279 bytes of data to $66D0-$67E7
         ;-----------------------------------------------------------------------
 
-.import __HUD_SCRCOLOR_LOAD__   ;=$783A
+.import ELITE_HUD_COLORSCR_ADDR
+.import _783a
 
-        lda #< (ELITE_BITMAP_ADDR + $26d0)
+        lda #< ELITE_HUD_COLORSCR_ADDR
         sta ZP_COPY_TO+0
-        lda #> (ELITE_BITMAP_ADDR + $26d0)
+        lda #> ELITE_HUD_COLORSCR_ADDR
         sta ZP_COPY_TO+1
-        lda #< __HUD_SCRCOLOR_LOAD__
+
+        lda #< _783a
         sta ZP_COPY_FROM+0
-        lda #> __HUD_SCRCOLOR_LOAD__
+        lda #> _783a
         jsr _7827
 
         ; set the screen-colours for the menu-screen:
@@ -249,7 +251,7 @@ _76e8:  stx ZP_COPY_TO+1
         ; colour the borders yellow down the sides of the view-port:
 
         ; yellow fore / black back colour
-_7711:  lda # .color_nybbles( YELLOW, BLACK )
+_7711:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 36                ; set the colour on column 37
         sta [ZP_COPY_TO], y
         ldy # 3                 ; set the colour on column 4
@@ -257,7 +259,7 @@ _7711:  lda # .color_nybbles( YELLOW, BLACK )
         dey
 
         ; colour the area outside the viewport black
-        lda # .color_nybbles( BLACK, BLACK )
+        lda # .color_nybble( BLACK, BLACK )
 :       sta [ZP_COPY_TO], y     ; set columns 2, 1 & 0 to black
         dey 
         bpl :-
@@ -293,7 +295,7 @@ _7711:  lda # .color_nybbles( YELLOW, BLACK )
 
         ldx # $12               ; 18 rows
 
-_7745:  lda # .color_nybbles( YELLOW, BLACK )
+_7745:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 36
         sta [ZP_COPY_TO], y
         ldy # 3
@@ -322,9 +324,9 @@ _776c:
 
         ; set yellow colour across the bottom row of the menu-screen
         ; write $70 from $63E4 to $63C4
-        lda # .color_nybbles( YELLOW, BLACK )
-        ldy # $1f               ; we'll write 31 chars (colour-cells)
-:       sta ELITE_MENUSCR_ADDR + (24 * 40) + 4, y
+        lda # .color_nybble( YELLOW, BLACK )
+        ldy # ELITE_VIEWPORT_COLS - 1
+:       sta ELITE_MENUSCR_ADDR + .scrpos(24, 4), y
         dey 
         bpl :-
 
@@ -357,6 +359,7 @@ _776c:
         sta ZP_COPY_TO+0
         lda #> $dad0
         sta ZP_COPY_TO+1
+        
         lda #< __HUD_COLORRAM_LOAD__
         sta ZP_COPY_FROM+0
         lda #> __HUD_COLORRAM_LOAD__
@@ -370,27 +373,32 @@ _77a3:  sta $d802, y
         dey 
         bne _77a3
 
+.import ELITE_SPRITES_INDEX:direct
+
         ; sprite indicies
-        lda # $a0
-        sta $63f8
-        sta $67f8
-        lda # $a4
-        sta $63f9
-        sta $67f9
-        lda # $a5
-        sta $63fa
-        sta $67fa
-        sta $63fc
-        sta $67fc
-        sta $63fe
-        sta $67fe
-        lda # $a6
-        sta $63fb
-        sta $67fb
-        sta $63fd
-        sta $67fd
-        sta $63ff
-        sta $67ff
+        ; TODO: define these indicies based on the acutal sprite patterns order
+        lda # ELITE_SPRITES_INDEX + 0
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE0_PTR
+        lda # ELITE_SPRITES_INDEX + 4
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE1_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE1_PTR
+
+        ; each of the Trumbles™ alternate patterns
+        lda # ELITE_SPRITES_INDEX + 5
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE2_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE2_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE4_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE4_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE6_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE6_PTR
+        lda # ELITE_SPRITES_INDEX + 6
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE3_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE3_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE5_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE5_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE7_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
 
         ; clear the bitmap screen:
         ;-----------------------------------------------------------------------

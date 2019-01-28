@@ -2,6 +2,9 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
+.linecont+
+
+.include        "c64/c64.asm"
 
 ; this is the multi-colour bitmap data for the HUD
 ; TODO: save this to a bitmap and convert during build
@@ -351,7 +354,13 @@
 ;===============================================================================
 ; TODO: like the HUD, there's wasted bytes here too
 ;
-.segment        "HUD_SCRCOLOR"
+.segment        "HUD_COLORSCR"
+
+.export _783a:absolute
+
+.import ELITE_MAINSCR_ADDR:absolute
+.export ELITE_HUD_COLORSCR_ADDR:absolute \
+        = ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 
 ; screen RAM colour
 
@@ -395,6 +404,7 @@
         .byte   $24, $24, $17, $17, $07, $00, $00, $00
         .byte   $60, $d3, $66, $1d, $a0, $40, $b3, $d3
 .endproc
+_sizeof_783a     = .sizeof(_783a)
 
 .segment        "HUD_COLORRAM"
 
