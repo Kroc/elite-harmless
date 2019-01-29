@@ -4,34 +4,10 @@
 ;===============================================================================
 .linecont+
 
-; "elite_link.asm" : exports some values for the linker to use. this is
-; designed to avoid having to define values both in the source and in
-; the linker configs (and keep them in sync)
-
 .include        "c64/c64.asm"
 .include        "elite_consts.asm"
 
-;-------------------------------------------------------------------------------
-
-; get from the linker the base address of the selected VIC bank. this is used
-; to position the segments that *must* be present within the 16K memory region
-; that the VIC is limited to; this includes the bitmap screen, the text/colour
-; screens and the sprites
-.import LINK_VIC_ADDR
-
-.export ELITE_MENUSCR_ADDR :absolute \
-        = LINK_VIC_ADDR + ELITE_VIC_MENUSCR * $0400
-.export ELITE_MAINSCR_ADDR :absolute \
-        = LINK_VIC_ADDR + ELITE_VIC_MAINSCR * $0400
-
-.import __GFX_SPRITES_RUN__
-.export ELITE_SPRITES_ADDR :absolute \
-        = __GFX_SPRITES_RUN__
-
-; defines the first sprite index
-; (offset from LINK_VIC_ADDR, divided by 64)
-.export ELITE_SPRITES_INDEX :direct \
-        =< ((ELITE_SPRITES_ADDR - LINK_VIC_ADDR) / 64)
+;===============================================================================
 
 .segment        "VIC_BITMAP"
 
@@ -40,3 +16,11 @@
 ;.align          $2000
 
 .res    $2000
+
+.segment        "VIC_SCR_MENU"
+
+.res    $0400
+
+.segment        "VIC_SCR_MAIN"
+
+.res    $0400

@@ -8,11 +8,16 @@
 ; bank -- the bits are inverted
 ;
 .define .vic_bank_bits(bank) \
-        (~bank & %00000011)
+        (<(~bank & %00000011))
 
-; returns the address of the given VIC bank
+; returns the address of the given VIC bank number
 .define .vic_bank_addr(bank) \
         (bank * $4000)
+
+; gives you the VIC bank number based on the bitmap address.
+; the bitmap is 8K so can appear at the lower or upper half of any bank
+.define .vic_bank_from_bitmap(addr) \
+        .min ( addr / $4000, (addr + $2000) / $4000 )
 
 ; colours
 ;===============================================================================

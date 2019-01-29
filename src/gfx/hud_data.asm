@@ -5,6 +5,7 @@
 .linecont+
 
 .include        "c64/c64.asm"
+.include        "elite_consts.asm"
 
 ; this is the multi-colour bitmap data for the HUD
 ; TODO: save this to a bitmap and convert during build
@@ -358,7 +359,6 @@
 
 .export _783a:absolute
 
-.import ELITE_MAINSCR_ADDR:absolute
 .export ELITE_HUD_COLORSCR_ADDR:absolute \
         = ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 

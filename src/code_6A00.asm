@@ -9462,10 +9462,8 @@ _a6d4:                                                                  ;$A6D4
         beq _a700               ; no laser? skip ahead
 
         ; the index of the first sprite is entirely dependent on where sprites
-        ; are located in the selected VIC bank; see "elite_link.asm" for where
-        ; this value is defined
-.import ELITE_SPRITES_INDEX:direct
-
+        ; are located in the selected VIC bank; see "elite_consts.asm" for
+        ; where this value is defined
         ldy # ELITE_SPRITES_INDEX
         cmp # $0f               ; a type of laser?
         beq :+
