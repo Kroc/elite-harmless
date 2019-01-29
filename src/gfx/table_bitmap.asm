@@ -5,8 +5,7 @@
 .linecont+
 
 .include        "c64/c64.asm"
-
-.import         ELITE_BITMAP_ADDR
+.include        "elite_consts.asm"
 
 ; the BBC Micro, unusually for an 8-bit, has programmable display circuitry
 ; allowing the developer to create custom display modes. On the BBC, Elite uses

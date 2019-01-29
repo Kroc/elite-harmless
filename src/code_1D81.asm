@@ -3441,7 +3441,6 @@ _2fee:                                                                  ;$2FEE
 
 _2ff3:                                                                  ;$2FF3
 .export _2ff3
-.import ELITE_BITMAP_ADDR
 
         ; location of the speed bar on the HUD
         dial_speed_addr = ELITE_BITMAP_ADDR + .bmppos(18, 30)

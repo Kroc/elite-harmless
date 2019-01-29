@@ -11464,7 +11464,6 @@ _b1a1:                                                                  ;$B1A1
         
         adc ZP_CURSOR_ROW
         ; re-base to the start of the bitmap screen
-.import ELITE_BITMAP_ADDR
         adc #> ELITE_BITMAP_ADDR
         sta ZP_CHROUT_DRAWADDR_HI
 

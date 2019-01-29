@@ -3,6 +3,16 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+; the linker script ("link/elite-*.cfg") defines the memory layout of the game
+; (since it will differ from the original, disk and cartridge versions) so we
+; import some memory addresses from there and uses these to configure the C64
+;
+.import __VIC_BITMAP_RUN__
+
+ELITE_BITMAP_ADDR       = __VIC_BITMAP_RUN__
+
+;-------------------------------------------------------------------------------
+
 ; "elite_consts.asm" : some core, structual values used throughout Elite,
 ; often tied directly to the structure of the source code -- CHANGING ANY
 ; OF THESE IS ALMOST CERTAINLY GOING TO RENDER THE GAME INOPERABLE
@@ -29,16 +39,6 @@ ELITE_HUD_HEIGHT_ROWS   = 7
 ELITE_HUD_TOP_ROW       = 25 - ELITE_HUD_HEIGHT_ROWS
 
 ;-------------------------------------------------------------------------------
-
-; the VIC-II bank, where Elite places graphics (bitmap, sprites)
-; it's a 16 KB block of memory selected from these choices:
-;
-; bank 0 - $0000...$3FFF        (conflict with CHARROM)
-; bank 1 - $4000...$7FFF
-; bank 2 - $8000...$BFFF        (conflict with CHARROM)
-; bank 3 - $C000...$FFFF
-;
-ELITE_VIC_BANK          = 1
 
 ; the VIC-II uses a 1 KB block of RAM for the text-screen (40x25 = 1'000 bytes)
 ; or, in the case of high-resolution bitmap mode, colour-cell information where
@@ -70,7 +70,7 @@ ELITE_VIC_MENUSCR       = 8
 ELITE_VIC_MAINSCR       = 9
 
 ; the upper bits of register $D018 select the location of the character set,
-; or the bitmap screen (if enabled). note that this is relative to the chosen
+; and the bitmap screen (if enabled). note that this is relative to the chosen
 ; VIC-II bank above
 ;
 ; 0 = charset: +$0000, bitmap: +$0000
