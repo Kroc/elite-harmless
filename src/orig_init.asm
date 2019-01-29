@@ -482,12 +482,14 @@ _77a3:  sta $d802,y
         ldx #< ((__HUD_DATA_SIZE__ + 255) / 256)
 
         ; get the location where the HUD data is to be copied to
+.import __HUD_DATA_LOAD__
 .import __HUD_DATA_RUN__
 
         lda #< __HUD_DATA_RUN__
         sta ZP_COPY_TO+0
         lda #> __HUD_DATA_RUN__
         sta ZP_COPY_TO+1
+        
         lda #< __HUD_DATA_LOAD__
         sta ZP_COPY_FROM+0
         lda #> __HUD_DATA_LOAD__

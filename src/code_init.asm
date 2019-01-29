@@ -493,3 +493,21 @@ _76d8:  stx ZP_COPY_TO+1
 
 ; insert the multiplication tables (2K) in "math_3d.asm"
 .multiply_tables
+
+;===============================================================================
+
+.segment        "VIC_BITMAP"
+
+; if we force the 8K alignment required by bitmap screens, the linker will
+; issue a warning that this is "suspiciously large"!
+;.align          $2000
+
+.res    $2000
+
+.segment        "SCR_MENU"
+
+.res    $0400
+
+.segment        "SCR_MAIN"
+
+.res    $0400

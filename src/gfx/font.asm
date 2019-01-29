@@ -7,6 +7,7 @@
 ; characters per page to calculate which page each character is in
 
 .segment        "GFX_FONT"
+.align          $0100
 
 _0b00:  ;                                                code asc  pet   addr
         ;-----------------------------------------------------------------------

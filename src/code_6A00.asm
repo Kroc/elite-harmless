@@ -5989,13 +5989,13 @@ _8b27:                                                                  ;$8B27
         
         ; save to disk:
 
-.import __DATA_SAVE_LOAD__
+.import __DATA_SAVE_RUN__
 .import __DATA_SAVE_SIZE__
 
         ; data is located at the pointer in $FD/$FE
         lda # ZP_FD
-        ldx #< (__DATA_SAVE_LOAD__ + __DATA_SAVE_SIZE__)
-        ldy #> (__DATA_SAVE_LOAD__ + __DATA_SAVE_SIZE__)
+        ldx #< (__DATA_SAVE_RUN__ + __DATA_SAVE_SIZE__)
+        ldy #> (__DATA_SAVE_RUN__ + __DATA_SAVE_SIZE__)
         jsr KERNAL_SAVE
         php 
         
@@ -10110,10 +10110,10 @@ _aaa2:                                                                  ;$AAA2
         ;=======================================================================
         ; erase $0400..$0700
 
-.import __VARS_0400_LOAD__
+.import __VARS_0400_RUN__
 .import __VARS_0400_SIZE__
 
-        lda #> __VARS_0400_LOAD__
+        lda #> __VARS_0400_RUN__
         sta ZP_TEMP_ADDR1_HI
 
         ; number of whole pages to copy; note that the lack of a rounding-up
@@ -10123,7 +10123,7 @@ _aaa2:                                                                  ;$AAA2
         ; than necessary 
         ldx #< ((__VARS_0400_SIZE__ + 255) / 256)
 
-        lda #< __VARS_0400_LOAD__   ; address must be page aligned for A to be $00 
+        lda #< __VARS_0400_RUN__ 
         sta ZP_TEMP_ADDR1_LO
         tay                     ; =0
 

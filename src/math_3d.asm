@@ -624,6 +624,7 @@ multiply_signed_into_RS:                                                ;$3AA8
 
 .pushseg
 .segment        "TABLE_SQR"
+.align          $0100
 
 ; Table generation: I:0..511
 ;       square1_lo = <((I*I)/4)
