@@ -115,7 +115,7 @@ start:
         ; the SCREEN routine which returns row/col count, i.e. does
         ; nothing of use -- this effectively disables the STOP key
         lda # $ff
-        sta $0329
+        sta KERNAL_VECTOR_STOP + 1
 
 .import init
         jmp init

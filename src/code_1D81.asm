@@ -291,9 +291,9 @@ debug_for_brk:                                                          ;$1E14
         ;
         lda #< debug_brk
         sei                     ; disable interrupts
-        sta $0316               ; vector for BRK routine 
+        sta KERNAL_VECTOR_BRK+0 
         lda #> debug_brk
-        sta $0317               ; vector for BRK routine
+        sta KERNAL_VECTOR_BRK+1
         cli                     ; enable interrupts
 
         rts 
@@ -353,7 +353,7 @@ _1e35:
         sta TRUMBLES_MOVE_X, y  ; set the Trumble™'s X direction
 
         lda _1e25, x
-        sta $0521, y
+        sta VAR_0521, y
 
         ; select a Y direction:
         ; 50% chance stay still, 25% go up, 25% go down
@@ -383,8 +383,8 @@ _1e35:
         adc TRUMBLES_MOVE_X, y
         sta ZP_VAR_T
         
-        lda $0531, y
-        adc $0521, y
+        lda VAR_0531, y
+        adc VAR_0521, y
         bpl :+
         
         lda # $48               ;=72 / %01001000
@@ -402,7 +402,7 @@ _1e35:
         lda # $00
         sta ZP_VAR_T
 _1ea4:                                                                  ;$1EA4
-        sta $0531, y
+        sta VAR_0531, y
         beq _1eb3
 
         ; MSBs?
@@ -443,7 +443,7 @@ _1ec1:                                                                  ;$1EC1
 
 _1ece:                                                                  ;$1ECE
         ;-----------------------------------------------------------------------
-        ldx $048d
+        ldx VAR_048D
         jsr _3c58
         jsr _3c58
         txa 
@@ -451,7 +451,7 @@ _1ece:                                                                  ;$1ECE
         tay 
         and # %10000000
         sta ZP_69               ; roll sign?
-        stx $048d
+        stx VAR_048D
         eor # %10000000
         sta ZP_6A               ; move count?
         tya 
@@ -471,13 +471,13 @@ _1ef5:                                                                  ;$1EF5
         ora ZP_69               ; add sign
         sta ZP_ALPHA            ; put aside for use in the matrix math
 
-        ldx $048e
+        ldx VAR_048E
         jsr _3c58
         txa 
         eor # %10000000
         tay 
         and # %10000000
-        stx $048e
+        stx VAR_048E
         sta ZP_95
         eor # %10000000
         sta ZP_94
@@ -591,7 +591,7 @@ _1f33:                                                                  ;$1F33
         lda ZP_67
         bne _1fc2
 
-        dec $0481
+        dec VAR_0481
         jsr _b0f4
 
 _1fc2:                                                                  ;$1FC2
@@ -615,7 +615,7 @@ _1fc2:                                                                  ;$1FC2
         ror ZP_97
         sta ZP_98
         
-        lda $0487
+        lda VAR_0487
         bne _202d
         
         lda joy_fire
@@ -625,14 +625,14 @@ _1fc2:                                                                  ;$1FC2
         cmp # $f2
         bcs _202d
         
-        ldx $0486
+        ldx VAR_0486
         lda PLAYER_LASERS, x
         beq _202d
         
         pha 
         and # %01111111
         sta ZP_7B
-        sta $0484
+        sta VAR_0484
         
         ldy # $00
         pla 
@@ -661,7 +661,7 @@ _201d:                                                                  ;$201D
         lda # $00
 _2028:                                                                  ;$2028
         and # %11111010
-        sta $0487
+        sta VAR_0487
 _202d:                                                                  ;$202D
         ldx # $00
 _202f:                                                                  ;$202F
@@ -759,7 +759,7 @@ _2039:                                                                  ;$2039
         
         cpx # $01
         beq _20e0
-        lda $04c2
+        lda VAR_04C2
         and ZP_POLYOBJ_YPOS_HI  ;=$0E
         bpl _2122
         cpx # $05
@@ -781,9 +781,9 @@ _20c5:                                                                  ;$20C5
         jsr _6a00
         ldy # $4e
         bcs _2110
-        ldy $04ef               ; item index?
-        adc $04b0, y            ; cargo qty?
-        sta $04b0, y            ; cargo qty?
+        ldy VAR_04EF            ; item index?
+        adc VAR_04B0, y         ; cargo qty?
+        sta VAR_04B0, y         ; cargo qty?
         tya 
         adc # $d0
         jsr _900d
@@ -937,7 +937,7 @@ _21ab:                                                                  ;$21AB
         and # behaviour::police
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
-        lda $048b
+        lda VAR_048B
         ora IS_MISJUMP
         bne _21e2
 
@@ -996,7 +996,7 @@ _2207:                                                                  ;$2207
         stx PLAYER_SHIELD_FRONT
 _2224:                                                                  ;$2224
         sec 
-        lda $04c4               ; energy charge rate?
+        lda VAR_04C4            ; energy charge rate?
         adc PLAYER_ENERGY
         bcs _2230
         sta PLAYER_ENERGY
@@ -1008,7 +1008,7 @@ _2230:                                                                  ;$2230
         and # %00011111
         bne _2283
         
-        lda $045f
+        lda VAR_045F
         bne _2277
         
         tay 
@@ -1089,7 +1089,7 @@ _2283:                                                                  ;$2283
         jsr _900d
 _2292:                                                                  ;$2292
         ldy # $ff
-        sty $06f3
+        sty VAR_06F3
         iny 
         jsr _2c4e
         bne _231c
@@ -1100,7 +1100,7 @@ _2292:                                                                  ;$2292
         sta ZP_VAR_R
         jsr _9978
         lda ZP_VAR_Q
-        sta $06f3
+        sta VAR_06F3
         bne _231c
 _22b2:                                                                  ;$22B2
         jmp _87d0
@@ -1123,7 +1123,7 @@ _22c2:                                                                  ;$22C2
         lda # $1e
         sta PLAYER_TEMP_CABIN
         
-        lda $045f
+        lda VAR_045F
         bne _231c
         
         ldy # $25
@@ -1159,7 +1159,7 @@ _22c2:                                                                  ;$22C2
 .endif
 
 _2303:                                                                  ;$2303
-        lda $04c2
+        lda VAR_04C2
         beq _231c
         lda ZP_98
         lsr 
@@ -1174,16 +1174,16 @@ _2314:                                                                  ;$2314
 _2319:                                                                  ;$2319
         jsr _900d
 _231c:                                                                  ;$231C
-        lda $0484
+        lda VAR_0484
         beq _2330
-        lda $0487
+        lda VAR_0487
         cmp # $08
         bcs _2330
         jsr _3cfa
         lda # $00
-        sta $0484
+        sta VAR_0484
 _2330:                                                                  ;$2330
-        lda $0481
+        lda VAR_0481
         beq _233a
         
         jsr _7b64
@@ -2007,7 +2007,7 @@ _28f3:                                                                  ;$28F3
         jsr _811e
         sty ZP_VAR_Y
         lda # $00
-        sta $0580, y
+        sta VAR_0580, y
         jmp _affa
 
 ;===============================================================================
@@ -2038,7 +2038,7 @@ _290f:                                                                  ;$209F
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         txa 
-        sta $06c9, y            ; "dust y-lo"
+        sta VAR_06C9, y         ; within "dust y-lo" ???
 
 draw_particle:                                                          ;$2918
 ;===============================================================================
@@ -2202,7 +2202,7 @@ _2998:                                                                  ;$2998
         sta ZP_72
         jsr _a013
         bcs _2988
-        lda $06f4
+        lda VAR_06F4
         beq _29d2
         lda ZP_VAR_X
         ldy ZP_VAR_X2
@@ -2273,7 +2273,7 @@ dust_swap_xy:                                                           ;$2A12
 ;===============================================================================
 
 _2a32:                                                                  ;$2A32
-        ldx $0486
+        ldx VAR_0486
         beq _2a40
         dex 
         bne _2a3d
@@ -2297,9 +2297,9 @@ _2a43:                                                                  ;$2A43
         ror 
         ora # %00000001
         sta ZP_VAR_Q
-        lda $06e3, y
+        lda VAR_06E3, y
         sbc ZP_97
-        sta $06e3, y
+        sta VAR_06E3, y
         lda DUST_Z, y
         sta ZP_VAR_Z
         sbc ZP_98
@@ -2307,7 +2307,7 @@ _2a43:                                                                  ;$2A43
         jsr _3992
         sta ZP_VAR_YY_HI
         lda ZP_VAR_P1
-        adc $06c9, y
+        adc VAR_06C9, y         ; inside `DUST_Y` array
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_Y
@@ -2319,7 +2319,7 @@ _2a43:                                                                  ;$2A43
         jsr _3997
         sta ZP_VAR_XX_HI
         lda ZP_VAR_P1
-        adc $06af, y
+        adc VAR_06AF, y         ; inside `DUST_X` array
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X
         adc ZP_VAR_XX_HI
@@ -2349,7 +2349,7 @@ _2a43:                                                                  ;$2A43
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         txa 
-        sta $06af, y
+        sta VAR_06AF, y         ; inside `DUST_X` array
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -2422,7 +2422,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_X
         jsr _3997
         sta ZP_VAR_XX_HI
-        lda $06af, y
+        lda VAR_06AF, y         ; inside `DUST_X` array
         sbc ZP_VAR_P1
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X
@@ -2430,7 +2430,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_XX_HI
         jsr _3992
         sta ZP_VAR_YY_HI
-        lda $06c9, y
+        lda VAR_06C9, y         ; inside `DUST_Y` array
         sbc ZP_VAR_P1
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
@@ -2438,9 +2438,9 @@ _2b30:                                                                  ;$2B30
         sbc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
-        lda $06e3, y
+        lda VAR_06E3, y
         adc ZP_97
-        sta $06e3, y
+        sta VAR_06E3, y
         lda DUST_Z, y
         sta ZP_VAR_Z
         adc ZP_98
@@ -2474,7 +2474,7 @@ _2b30:                                                                  ;$2B30
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         txa 
-        sta $06af, y
+        sta VAR_06AF, y         ; inside `DUST_X` array
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -2640,8 +2640,8 @@ _2c9b:                                                                  ;$2C9B
         ldy ZP_A7
         bne _2c7d
         lda # $e6
-        ldy $047f
-        ldx $0454, y
+        ldy VAR_047F
+        ldx SHIP_SLOT2, y
         beq _2cc4
         ldy PLAYER_ENERGY
         cpy # $80
@@ -2666,7 +2666,7 @@ _2cd7:                                                                  ;$2CD7
         bne _2c88
         
         tax 
-        lda $04e0
+        lda VAR_04E0
         lsr 
         lsr 
 _2cea:                                                                  ;$2CEA
@@ -2687,7 +2687,7 @@ _2cee:                                                                  ;$2CEE
         lda # $70
         jsr _2d61
 _2d04:                                                                  ;$2D04
-        lda $04c2
+        lda VAR_04C2
         beq _2d0e
         lda # $6f
         jsr _2d61
@@ -3520,7 +3520,7 @@ _3064:                                                                  ;$3064
         lda ZP_VAR_Q
         sta ZP_71, x
 _3068:                                                                  ;$3068
-        lda $0071, y
+        lda ZP_71, y
         sty ZP_VAR_P1
         jsr hud_drawbar
 
@@ -3564,7 +3564,7 @@ _3068:                                                                  ;$3068
         lda # $f0               ; "threshold to change colour"
         sta ZP_TEMP_VAR
 
-        lda $06f3               ; altitude?
+        lda VAR_06F3            ; altitude?
         jsr hud_drawbar_128
         
         jmp _7b6f
@@ -3776,7 +3776,7 @@ _318a:                                                                  ;$318A
         lda # $00
         ldx # $10
 _319b:                                                                  ;$319B
-        sta $04b0, x            ; cargo qty?
+        sta VAR_04B0, x         ; cargo qty?
         dex 
         bpl _319b
         sta PLAYER_LEGAL
@@ -3829,7 +3829,7 @@ _31e4:                                                                  ;$31E4
         dex 
         lda ZP_POLYOBJ_YPOS_HI, x       ;=$0E?
         ora # %00100000
-        cmp $0648, x
+        cmp VAR_0648, x
         beq _31e4
         txa 
         bmi _3208
@@ -3965,9 +3965,9 @@ _32aa:                                                                  ;$32AA
 _32ad:                                                                  ;$32AD
 .export _32ad
 
-        lda #< $0403
+        lda #< VAR_0403
         sta ZP_B0
-        lda #> $0403
+        lda #> VAR_0403
         sta ZP_B1
         lda # $16
         sta ZP_AB
@@ -3980,7 +3980,7 @@ _32ad:                                                                  ;$32AD
         and # behaviour::angry
         bne _32da
         
-        lda $0467
+        lda VAR_0467
         bne _3298
         jsr get_random_number
         cmp # $fd
@@ -3993,7 +3993,7 @@ _32da:                                                                  ;$32DA
         jsr get_random_number
         cmp # $f0
         bcc _3298
-        lda $046d
+        lda VAR_046D
         cmp # $04
         bcs _3328
         ldx # $10
@@ -4037,7 +4037,7 @@ _3319:                                                                  ;$3319
         cpx # $1e
         bne _3329
 
-        lda $047a
+        lda VAR_047A
         bne _3329
         
         lsr ZP_POLYOBJ_ATTACK
@@ -4086,7 +4086,7 @@ _3357:                                                                  ;$3357
         lsr 
         bcc _3365
         
-        lda $045f
+        lda VAR_045F
         beq _3365
 
         lda ZP_POLYOBJ_ATTACK
@@ -4332,7 +4332,7 @@ _34bc:                                                                  ;$34BC
         sta ZP_B0
         lda # $1d
         sta ZP_AB
-        lda $045f
+        lda VAR_045F
         bne _34cf
 _34cc:                                                                  ;$34CC
         jmp _3351
@@ -4911,7 +4911,7 @@ _37fa:                                                                  ;$37FA
         sta ZP_BA
         eor ZP_B1
         sta ZP_VAR_S
-        lda $06af, y
+        lda VAR_06AF, y         ; inside `DUST_X` array
         sta ZP_VAR_P1
         lda DUST_X, y
         sta ZP_VAR_X
@@ -4926,7 +4926,7 @@ _37fa:                                                                  ;$37FA
         jsr multiplied_now_add
         stx ZP_VAR_XX_LO
         sta ZP_VAR_XX_HI
-        ldx $06c9, y
+        ldx VAR_06C9, y         ; inside `DUST_Y` array
         stx ZP_VAR_R
         ldx ZP_VAR_Y
         stx ZP_VAR_S
@@ -4948,7 +4948,7 @@ _37fa:                                                                  ;$37FA
         jsr multiply_and_add
         sta ZP_VAR_XX_HI
         txa 
-        sta $06af, y
+        sta VAR_06AF, y         ; inside `DUST_X` array
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -5704,12 +5704,12 @@ _3cdb:                                                                  ;$3CDB
         jsr get_random_number
         and # %00000111
         adc # $44
-        sta $06f1               ;?
+        sta VAR_06F1
 
         jsr get_random_number
         and # %00000111
         adc # $7C
-        sta $06f0               ;?
+        sta VAR_06F0
         
         lda PLAYER_TEMP_LASER
         adc # $08
@@ -5727,16 +5727,16 @@ _3cfa:                                                                  ;$3CFA
         ldy # $d0
 _3d09:                                                                  ;$3D09
         sta ZP_VAR_X2
-        lda $06f0               ;?
+        lda VAR_06F0
         sta ZP_VAR_X
-        lda $06f1               ;?
+        lda VAR_06F1
         sta ZP_VAR_Y
         lda # $8f
         sta ZP_VAR_Y2
         jsr _ab91
-        lda $06f0               ;?
+        lda VAR_06F0
         sta ZP_VAR_X
-        lda $06f1               ;?
+        lda VAR_06F1
         sta ZP_VAR_Y
         sty ZP_VAR_X2
         lda # $8f
@@ -5837,7 +5837,7 @@ mission_blueprints_birera:                                              ;$3D9B
 
         ; give the player the military energy unit?
         lda # 2
-        sta $04c4               ; energy charge rate?
+        sta VAR_04C4            ; energy charge rate?
 
         inc PLAYER_KILLS
         

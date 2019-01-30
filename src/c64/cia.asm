@@ -22,10 +22,6 @@
         TIMER_TOD               = %100
 .endenum
 
-.define VECTOR_NMI              $fffa
-.define VECTOR_RESET            $fffc
-.define VECTOR_IRQ              $fffe
-
 ; CIA2 - VIC memory bank, IEC serial & userport RS232 I/O
 ;-------------------------------------------------------------------------------
 .define CIA2_PORTA              $dd00

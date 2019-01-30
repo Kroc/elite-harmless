@@ -89,6 +89,9 @@ ELITE_TXTSCR_D018       = \
 ; (offset from ELITE_VIC_ADDR, divided by 64)
 ELITE_SPRITES_INDEX     = <((ELITE_SPRITES_ADDR - ELITE_VIC_ADDR) / 64)
 
+; get the address of the bitmap font from the linker
+.import ELITE_FONT_ADDR
+
 ;-------------------------------------------------------------------------------
 
 ; "elite_consts.asm" : some core, structual values used throughout Elite,

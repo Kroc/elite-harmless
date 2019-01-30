@@ -186,7 +186,7 @@ txt_docked_token11:                                                     ;$24B0
         jsr print_flight_token
         
         ldx txt_buffer_index
-        lda $0647, x
+        lda VAR_0647, x
         jsr is_vowel
         bcc _24c9
         dec txt_buffer_index

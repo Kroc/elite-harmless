@@ -7,6 +7,10 @@
 
 .include        "elite_consts.asm"
 
+VAR_0403                = $0403
+
+VAR_0441                = $0441 ;?
+
 ; up to 11 3D-objects ("poly objcets") can be in the game at a time.
 ; these are the 11 available slots; a value of $00 represents an unused slot,
 ; otherwise the value is a hull index (see "hull_data.asm") 
@@ -25,12 +29,44 @@ SHIP_SLOT8              = $045a
 SHIP_SLOT9              = $045b
 SHIP_SLOT10             = $045c
 
+VAR_045D                = $045d ;? (indexed by X)
+
+VAR_045F                = $045f ;?
+
+VAR_0467                = $0467 ;?
+
+VAR_046D                = $046d ;?
+
+VAR_047A                = $047a ;?
+
+VAR_047C                = $047c ;?
+
+VAR_047F                = $047f ;?
+
 ;-------------------------------------------------------------------------------
 
 DOCKCOM_STATE           = $0480 ; docking computer state: $00 = OFF, $FF = ON
+
+VAR_0481                = $0481 ;?
+
 IS_MISJUMP              = $0482 ; has misjump occurred?
 
+VAR_0484                = $0484 ;?
+VAR_0486                = $0486 ;?
+VAR_0487                = $0487 ;?
+
+VAR_048A                = $048a ;?
+VAR_048B                = $048b ;?
+VAR_048C                = $048c ;?
+VAR_048D                = $048d ;?
+VAR_048E                = $048e ;?
+VAR_048F                = $048f ;?
+VAR_0490                = $0490 ;? (indexed by X)
+VAR_0491                = $0491 ;?
+
 MISSION_FLAGS           = $0499
+
+VAR_04C4                = $04c4 ;?
 
 .enum   missions
         constrictor_begin       = %00000001
@@ -75,13 +111,11 @@ TRUMBLES_MOVE_Y6        = $051E
 TRUMBLES_MOVE_X7        = $051F ; UNUSED! There is no 7th Trumble™ on-screen!
 TRUMBLES_MOVE_Y7        = $0520 ; UNUSED! There is no 7th Trumble™ on-screen!
 
-;                       = $0521
-;                       = $0522 ; UNUSED!
-
-;                       = $0531
-;                       = $0532 ; UNUSED!
+VAR_0521                = $0521 ;? (indexed by Y) -- Trumble™ related
 
 .endif
+
+VAR_0531                = $0531 ;? (indexed by Y)
 
 ;-------------------------------------------------------------------------------
 
@@ -104,26 +138,56 @@ PLAYER_LASER_2          = $04aa ;TODO: is this left, right, or rear?
 PLAYER_LASER_3          = $04ab ;TODO: is this left, right, or rear?
 PLAYER_LASER_4          = $04ac ;TODO: is this left, right, or rear?
 
+VAR_04AF                = $04af ;?
+VAR_04B0                = $04b0 ;? (indexed by Y)
+
+VAR_04B3                = $04b3 ;?
+VAR_04B6                = $04b6 ;?
+
+VAR_04BA                = $04ba ;?
+
 PLAYER_ECM              = $04c1 ; player has an E.C.M.?
+
+VAR_04C2                = $04c2 ;?
+
 PLAYER_EBOMB            = $04c3 ; player has energy bomb?
 PLAYER_DOCKCOM          = $04c5 ; player has a docking computer?
 PLAYER_GDRIVE           = $04c6 ; player has a galactic hyper-drive?
 PLAYER_ESCAPEPOD        = $04c7 ; player has an escape pod?
+
+VAR_04CB                = $04cb ;?
 
 PLAYER_MISSILES         = $04cc ; number of missiles the player has
 PLAYER_MISSILE_ARMED    = $0485 ; armed state of missile
 
 PLAYER_LEGAL            = $04cd ; player's legal status
 
-;                       = $04e0 ; number of kills (lo byte?)
+VAR_04CE                = $04ce ;? (indexed by Y)
+
+VAR_04DE                = $04de ;?
+VAR_04DF                = $04df ;?
+
+VAR_04E0                = $04e0 ; number of kills (lo byte?)
 PLAYER_KILLS            = $04e1 ; number of kills (hi byte?)
+
+VAR_04E2                = $04e2 ;?
+
+VAR_04E6                = $04e6 ;?
 
 PLAYER_SHIELD_FRONT     = $04e7
 PLAYER_SHIELD_REAR      = $04e8
 PLAYER_ENERGY           = $04e9
 
+VAR_04EA                = $04ea ;?
+VAR_04EB                = $04eb ;?
+
 PLAYER_TEMP_LASER       = $0488 ; laser temperature
 PLAYER_TEMP_CABIN       = $0483 ; cabin temperature
+
+VAR_04F2                = $04f2 ;?
+VAR_04F3                = $04f3 ;?
+VAR_04F4                = $04f4 ;? (indexed by X)
+VAR_04FA                = $04fa ;? (indexed by X)
 
 ;-------------------------------------------------------------------------------
 
@@ -143,13 +207,26 @@ TSYSTEM_POS             = $0509
 TSYSTEM_POS_X           = $0509
 TSYSTEM_POS_Y           = $050a
 
+VAR_050C                = $050c ;?
+VAR_050D                = $050d ;?
+VAR_050E                = $050e ;?
+VAR_050F                = $050f ;?
+
 ; present system:
 PSYSTEM_ECONOMY         = $04ee
+
+VAR_04EC                = $04ec
+VAR_04ED                = $04ed
+
+VAR_04EF                = $04ef
+
 PSYSTEM_GOVERNMENT      = $04f0
 PSYSTEM_TECHLEVEL       = $04f1
 PSYSTEM_POS             = $049a
 PSYSTEM_POS_X           = $049a
 PSYSTEM_POS_Y           = $049b
+
+VAR_049C                = $049c ;? (indexed by X)
 
 ;-------------------------------------------------------------------------------
 
@@ -158,8 +235,25 @@ PSYSTEM_POS_Y           = $049b
 DUST_MAX                = 25
 
 DUST_COUNT              = $050b ; number of dust particles
-DUST_X                  = $06a2 ; X-positions of dust-particles
-DUST_Y                  = $06bc ; Y-positions of dust-particles
-DUST_Z                  = $06d6 ; Z-positions of dust-particles
+DUST_X                  = $06a2 ;..$06BB: X-positions of dust-particles
+DUST_Y                  = $06bc ;..$06D5: Y-positions of dust-particles
+DUST_Z                  = $06d6 ;..$06EF: Z-positions of dust-particles
 
-                        ; $06EF
+VAR_06AF                = $06af ; within `DUST_X`?
+VAR_06C9                = $06c9 ; within `DUST_Y`?
+
+;-------------------------------------------------------------------------------
+
+VAR_0580                = $0580 ;? (indexed by Y)
+
+VAR_0647                = $0647 ;? (indexed by X)
+VAR_0648                = $0648 ;? (indexed by X)
+
+VAR_06E3                = $06e3 ;? (indexed by Y)
+
+VAR_06F0                = $06f0 ;?
+VAR_06F1                = $06f1 ;?
+VAR_06F3                = $06f3 ;?
+VAR_06F4                = $06f4 ;?
+
+VAR_06FB                = $06fb ;?
