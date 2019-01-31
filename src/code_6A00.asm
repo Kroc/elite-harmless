@@ -9882,11 +9882,11 @@ _a8e1:                                                                  ;$A8E1
 
 ; these are VIC_SPRITE_MULTICOLOR states
 _a8e2:                                                                  ;$A8E2
-        .byte   $fe, $fc
+        .byte   %11111110, %11111100
 
 ; these are VIC_SPRITE1_COLOR states
 _a8e4:                                                                  ;$A8E4
-        .byte   $02, $00
+        .byte   RED, BLACK
 _a8e6:                                                                  ;$A8E6
 .export _a8e6
         .byte   $00, $00

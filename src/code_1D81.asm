@@ -2838,80 +2838,105 @@ _2dc4:                                                                  ;$2DC4
 ;       X = offset from `ZP_POLYOBJECT` to the desired matrix row;
 ;           that is, a `MATRIX_ROW_?` constant
 ;
+;       Y = offset from `ZP_POLYOBJECT` to the desired matrix row;
+;           that is, a `MATRIX_ROW_?` constant
+;
+
+COL0    = $00           ; column 0 of the matrix row
+COL0_LO = $00
+COL0_HI = $01
+COL1    = $02           ; column 1 of the matrix row
+COL1_LO = $02
+COL1_HI = $03
+COL2    = $04           ; column 2 of the matrix row
+COL2_LO = $04
+COL2_HI = $05
+
 _2dc5:                                                                  ;$2DC5
 .export _2dc5
+        ; ROW X
+        ;-----------------------------------------------------------------------
 
-        lda ZP_POLYOBJ_XPOS_MI, x
-        and # %01111111
-        lsr 
+        lda ZP_POLYOBJ + COL0_HI, x
+        and # %01111111         ; extract HI byte without sign
+        lsr                     ; divide by 2
         sta ZP_VAR_T
-        lda ZP_POLYOBJ_XPOS_LO, x
+
+        lda ZP_POLYOBJ + COL0_LO, x
         sec 
         sbc ZP_VAR_T
         sta ZP_VAR_R
-        lda ZP_POLYOBJ_XPOS_MI, x
+        
+        lda ZP_POLYOBJ + COL0_HI, x
         sbc # $00
         sta ZP_VAR_S
-        lda ZP_POLYOBJ_XPOS_LO, y
-        sta ZP_VAR_P1
-        lda ZP_POLYOBJ_XPOS_MI, y
-        and # %10000000
-        sta ZP_VAR_T
-        lda ZP_POLYOBJ_XPOS_MI, y
-        and # %01111111
+
+        ; ROW Y
+        ;-----------------------------------------------------------------------
+
+        lda ZP_POLYOBJ + COL0_LO, y
+        sta ZP_VAR_P
+        
+        lda ZP_POLYOBJ + COL0_HI, y
+        and # %10000000         ; extract sign
+        sta ZP_VAR_T            ; put sign aside
+        
+        lda ZP_POLYOBJ + COL0_HI, y
+        and # %01111111         ; extract magnitude
+        lsr                     ; divide by 2
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
-        lsr 
-        ror ZP_VAR_P1
-        ora ZP_VAR_T
-        eor ZP_B1
+        ror ZP_VAR_P
+        ora ZP_VAR_T            ; restore sign
+        eor ZP_B1               ; rotation sign?
         stx ZP_VAR_Q
+        
         jsr multiplied_now_add
         sta ZP_VALUE_pt2
         stx ZP_VALUE_pt1
         ldx ZP_VAR_Q
-        lda ZP_POLYOBJ_XPOS_MI, y
+        lda ZP_POLYOBJ + COL0_HI, y
         and # %01111111
         lsr 
         sta ZP_VAR_T
-        lda ZP_POLYOBJ_XPOS_LO, y
+        lda ZP_POLYOBJ + COL0_LO, y
         sec 
         sbc ZP_VAR_T
         sta ZP_VAR_R
-        lda ZP_POLYOBJ_XPOS_MI, y
+        lda ZP_POLYOBJ + COL0_HI, y
         sbc # $00
         sta ZP_VAR_S
-        lda ZP_POLYOBJ_XPOS_LO, x
-        sta ZP_VAR_P1
-        lda ZP_POLYOBJ_XPOS_MI, x
+        lda ZP_POLYOBJ + COL0_LO, x
+        sta ZP_VAR_P
+        lda ZP_POLYOBJ + COL0_HI, x
         and # %10000000
         sta ZP_VAR_T
-        lda ZP_POLYOBJ_XPOS_MI, x
+        lda ZP_POLYOBJ + COL0_HI, x
         and # %01111111
         lsr 
-        ror ZP_VAR_P1
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
+        ror ZP_VAR_P
         ora ZP_VAR_T
         eor # %10000000
         eor ZP_B1
         stx ZP_VAR_Q
         jsr multiplied_now_add
-        sta ZP_POLYOBJ_XPOS_MI, y
-        stx ZP_POLYOBJ_XPOS_LO, y
+        sta ZP_POLYOBJ + COL0_HI, y
+        stx ZP_POLYOBJ + COL0_LO, y
         ldx ZP_VAR_Q
         lda ZP_VALUE_pt1
-        sta ZP_POLYOBJ_XPOS_LO, x
+        sta ZP_POLYOBJ + COL0_LO, x
         lda ZP_VALUE_pt2
-        sta ZP_POLYOBJ_XPOS_MI, x
+        sta ZP_POLYOBJ + COL0_HI, x
 
         rts 
 
