@@ -2758,19 +2758,20 @@ print_flight_token_string:                                              ;$7834
 
 _784e:  rts                                                             ;$784E 
 
-;===============================================================================
-; restore zero-page backup?
-; part of loader / unused?
-;
-_784f:                                                                  ;$784F
+
+swap_zp_shadow:                                                         ;$784F
+        ;=======================================================================
+        ; swap zero-page with its shadow
+        ; (copies $36...$FF to $CE36...$CEFF)
+        ;
         ldx # $36
-_7851:                                                                  ;$7851
-        lda $00, x
-        ldy $ce00, x
-        sta $ce00, x
+:       lda $00, x                                                      ;$7851
+        ldy ELITE_ZP_SHADOW, x
+        sta ELITE_ZP_SHADOW, x
         sty $00, x
         inx 
-        bne _7851
+       .bnz :-
+        
         rts 
 
 ;===============================================================================
@@ -3158,7 +3159,7 @@ _7a9f:                                                                  ;$7A9F
         ror PLAYER_TRUMBLES_HI
 _7ac2:                                                                  ;$7AC2
         lsr PLAYER_LEGAL
-        jsr _8447
+        jsr clear_zp_polyobj
         lda ZP_SEED_pt2
         and # %00000011
         adc # $03
@@ -4480,7 +4481,7 @@ _829a:                                                                  ;$829A
 ;===============================================================================
 
 _82a4:                                                                  ;$82A4
-        jsr _8447
+        jsr clear_zp_polyobj
         jsr _7b4f
         sta SHIP_SLOT1
         sta VAR_045F
@@ -4725,7 +4726,7 @@ _83ed:                                                                  ;$83ED
 
         lda # $80
         sta VAR_048E
-        sta ZP_69               ; roll sign?
+        sta ZP_ROLL_SIGN        ; roll sign?
         sta ZP_94
 
         asl                     ;=0
@@ -4739,7 +4740,7 @@ _83ed:                                                                  ;$83ED
         lda # $03
         sta PLAYER_SPEED
         sta ZP_ALPHA
-        sta ZP_68               ; roll magnitude?
+        sta ZP_ROLL_MAGNITUDE
         
         lda # $10
         sta VAR_050C
@@ -4764,17 +4765,20 @@ _8437:                                                                  ;$8437
         sta VAR_04F2
         lda #> $ffc0            ;=KERNAL_OPEN?
         sta VAR_04F3
-_8447:                                                                  ;$8447
-.export _8447
 
-        ; erase $09...$2D:
+clear_zp_polyobj:                                                                  ;$8447
+        ;-----------------------------------------------------------------------
+        ; clear the zero-page PolyObject storage
+        ;
+.export clear_zp_polyobj
 
-        ldy # $24
+        ldy # .sizeof(PolyObject) - 1
         lda # $00
 :       sta ZP_POLYOBJ_XPOS_LO, y                                      ;$844B
         dey 
         bpl :-
 
+        ; set the default $6000 vector scale?
         lda # $60
         sta ZP_POLYOBJ_M1x1_HI
         sta ZP_POLYOBJ_M2x0_HI
@@ -4823,7 +4827,7 @@ _8487:                                                                  ;$8487
 ;===============================================================================
 
 _848d:                                                                  ;$848D
-        jsr _8447
+        jsr clear_zp_polyobj
         jsr get_random_number
         sta ZP_TEMP_VAR
         and # %10000000
@@ -4888,9 +4892,12 @@ _84e2:                                                                  ;$84E2
         cmp # $0f
         beq _84ed
         jsr _7c6b
+
+; main loop?
+;
 _84ed:                                                                  ;$84ED
         jsr _1ec1
-        dec VAR_048B
+        dec VAR_048B            ; reduce delay?
         beq _8475
         bpl _84fa
         inc VAR_048B
@@ -4898,30 +4905,34 @@ _84fa:                                                                  ;$84FA
         dec ZP_A3               ; move counter?
         beq _8501
 _84fe:                                                                  ;$84FE
-        jmp _8627
+        jmp _8627               ; jump down to main loop?
 
 _8501:                                                                  ;$8501
-        lda IS_MISJUMP
-        bne _84fe
+        lda IS_MISJUMP          ; are we in witchspace?
+       .bnz _84fe               ; yes -- skip to the main loop
+
         jsr get_random_number
         cmp # $23
         bcs _8562
-        lda VAR_047F
-        cmp # $03
+        lda VAR_047F            ; number of asteroids?
+        cmp # $03               ; more than 2?
         bcs _8562
-        jsr _8447
+
+        jsr clear_zp_polyobj    ; clear the temp polyobject ready for spawning
+
         lda # $26
-        sta ZP_POLYOBJ_ZPOS_MI
-        jsr get_random_number
-        sta ZP_POLYOBJ_XPOS_LO
-        stx ZP_POLYOBJ_YPOS_LO
-        and # %10000000
-        sta ZP_POLYOBJ_XPOS_HI
+        sta ZP_POLYOBJ_ZPOS_MI  ; set the middle distance
+        jsr get_random_number   ; vary the distance a little
+        sta ZP_POLYOBJ_XPOS_LO  ; spread the objects about horionzontally...
+        stx ZP_POLYOBJ_YPOS_LO  ; ...and vertically
+        and # %10000000         ; pick the sign from the random number
+        sta ZP_POLYOBJ_XPOS_HI  ; position object either left or right of us
         txa 
-        and # %10000000
-        sta ZP_POLYOBJ_YPOS_HI
-        rol ZP_POLYOBJ_XPOS_MI
-        rol ZP_POLYOBJ_XPOS_MI
+        and # %10000000         ; pick another sign from the random number
+        sta ZP_POLYOBJ_YPOS_HI  ; position the object either above or below
+        rol ZP_POLYOBJ_XPOS_MI  ; increase the scale of the left/right spread
+        rol ZP_POLYOBJ_XPOS_MI  ; now, with more feeling
+
         jsr get_random_number
         bvs _84c3
         ora # %01101111
@@ -6020,7 +6031,7 @@ _8b27:                                                                  ;$8B27
         jsr set_memory_layout
         
         cli 
-        jsr _784f
+        jsr swap_zp_shadow
         plp 
         cli 
         bcs _8bbb
@@ -6040,7 +6051,7 @@ _8bbf:                                                                  ;$8BBF
         .byte   $07
 
 _8bc0:                                                                  ;$8BC0
-        jsr _784f
+        jsr swap_zp_shadow
         
         lda # MEM_IO_KERNAL
         sei 
@@ -6111,7 +6122,7 @@ _8c0d:                                                                  ;$8C0D
         jsr set_memory_layout
         
         cli 
-        jsr _784f
+        jsr swap_zp_shadow
         plp 
         cli 
         bcs _8c61
@@ -6703,7 +6714,7 @@ _8ee3:                                                                  ;$8EE3
         
         lda DOCKCOM_STATE
         beq _8f4d
-        jsr _8447
+        jsr clear_zp_polyobj
 
         lda # $60               ; this is the $6000 vector scale?
         sta ZP_POLYOBJ_M0x2_HI
@@ -8944,7 +8955,7 @@ _a2cb:                                                                  ;$A2CB
         lda # $00
         sta ZP_POLYOBJ_VERTX_HI
         
-        ldx ZP_68               ; roll magnitude?
+        ldx ZP_ROLL_MAGNITUDE
 
         lda ZP_POLYOBJ_XPOS_LO
         eor # %11111111
@@ -9021,14 +9032,14 @@ _a2cb:                                                                  ;$A2CB
         eor # %10000000
         sta ZP_POLYOBJ_YPOS_HI
 _a39d:                                                                  ;$A39D
-        ldx ZP_68               ; roll magnitude?
+        ldx ZP_ROLL_MAGNITUDE
         lda ZP_POLYOBJ_YPOS_LO
         eor # %11111111
         sta ZP_VAR_P1
         lda ZP_POLYOBJ_YPOS_MI
         jsr _3a25
         sta ZP_VAR_P3
-        lda ZP_69               ; roll sign?
+        lda ZP_ROLL_SIGN        ; roll sign?
         eor ZP_POLYOBJ_YPOS_HI
         ldx # $00
         jsr _a508

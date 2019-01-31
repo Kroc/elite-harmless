@@ -32,7 +32,8 @@
 .segment        "CODE_GMA5"
 
         ; another bloody decryption routine
-        
+.import ELITE_ZP_SHADOW
+
 _1d22:
         cld                     ; clear decimal mode (why?)
 
@@ -40,7 +41,7 @@ _1d22:
         ; -- this was already done by the loader before jumping here 
         ldx # $02
 :       lda $00, x
-        sta $ce00, x
+        sta ELITE_ZP_SHADOW, x
         inx 
         bne :-
 

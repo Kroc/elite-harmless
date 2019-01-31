@@ -55,7 +55,7 @@
 .import set_memory_layout:absolute
 .import _829a:absolute
 .import _83df:absolute
-.import _8447:absolute
+.import clear_zp_polyobj:absolute
 .import get_random_number:absolute
 .import _872f:absolute
 .import _877e:absolute
@@ -431,7 +431,9 @@ _1ec1:                                                                  ;$1EC1
 .import POLYOBJ_00
 
         lda POLYOBJ_00          ;=$F900?
-        sta ZP_GOATSOUP_pt1     ;?
+        sta ZP_GOATSOUP_pt1     ;? randomize?
+
+.ifndef OPTION_NOTRUMBLES
 
         ; are there any Trumbles™ on-screen?
         lda TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
@@ -440,6 +442,7 @@ _1ec1:                                                                  ;$1EC1
         ; process Trumbles™
         ; (move them about, breed them)
         jmp _1e35
+.endif
 
 _1ece:                                                                  ;$1ECE
         ;-----------------------------------------------------------------------
@@ -447,16 +450,19 @@ _1ece:                                                                  ;$1ECE
         jsr _3c58
         jsr _3c58
         txa 
-        eor # %10000000
-        tay 
-        and # %10000000
-        sta ZP_69               ; roll sign?
-        stx VAR_048D
+        eor # %10000000         ; flip the sign bit
+        tay                     ; put aside
+        and # %10000000         ; strip down to just the sign bit
+        sta ZP_ROLL_SIGN
+
+        stx VAR_048D            ; X-dampen?
         eor # %10000000
         sta ZP_6A               ; move count?
+        
         tya 
         bpl _1eee
 
+        ; negate
         eor # %11111111
         clc 
         adc # $01
@@ -467,8 +473,8 @@ _1eee:                                                                  ;$1EEE
         bcs _1ef5
         lsr 
 _1ef5:                                                                  ;$1EF5
-        sta ZP_68               ; roll magnitude
-        ora ZP_69               ; add sign
+        sta ZP_ROLL_MAGNITUDE
+        ora ZP_ROLL_SIGN        ; add sign
         sta ZP_ALPHA            ; put aside for use in the matrix math
 
         ldx VAR_048E
@@ -498,16 +504,19 @@ _1f20:                                                                  ;$1F20
         ora ZP_94
         sta ZP_BETA
         
+        ; accelerate?
+        ;-----------------------------------------------------------------------
         lda key_accelerate      ; is accelerate being held?
-       .bze _1f33               ; if not, continue
+       .bze :+                  ; if not, continue
         
         lda PLAYER_SPEED        ; current speed
         cmp # $28               ; are we at maximum speed?
-        bcs _1f33
+        bcs :+
         
         inc PLAYER_SPEED        ; increase player's speed
 
-_1f33:                                                                  ;$1F33
+:       ; decelerate?                                                   ;$1F33
+        ;-----------------------------------------------------------------------
         lda key_decelerate      ; is decelerate being held?
        .bze :+
 
@@ -515,6 +524,8 @@ _1f33:                                                                  ;$1F33
         bne :+
         inc PLAYER_SPEED        ; player's ship speed?
 
+        ; disarm missile?
+        ;-----------------------------------------------------------------------
 :       lda key_missile_disarm  ; is disarm missile key being pressed?  ;$1F3E
         and PLAYER_MISSILES     ; does the player have any missiles?
        .bze :+                  ; no? skip ahead
@@ -530,6 +541,8 @@ _1f33:                                                                  ;$1F33
 :       lda ZP_7C                                                       ;$1F55
         bpl :+
 
+        ; target missile?
+        ;-----------------------------------------------------------------------
         lda key_missile_target  ; target missile key pressed?
        .bze :+
 
@@ -543,6 +556,8 @@ _1f33:                                                                  ;$1F33
         ldy # $87
         jsr _b11f
 
+        ; fire missile?
+        ;-----------------------------------------------------------------------
 :       lda key_missile_fire    ; fire missile key held?                ;$1F6B
        .bze :+                  ; no, skip ahead
 
@@ -550,6 +565,8 @@ _1f33:                                                                  ;$1F33
         bmi _1fc2
         jsr _36a6
 
+        ; energy bomb?
+        ;-----------------------------------------------------------------------
 :       lda key_bomb            ; energy bomb key held?                 ;$1F77
        .bze :+
 
@@ -560,8 +577,10 @@ _1f33:                                                                  ;$1F33
         sty _a8e0
         
         ldy # $0d
-        jsr _a858
+        jsr _a858               ; handle e-bomb?
 
+        ; turn docking computer off?
+        ;-----------------------------------------------------------------------
 :       lda key_docking_off     ; docking-computer off pressed?         ;$1F8B
        .bze :+                  ; no? skip ahead
 
@@ -570,6 +589,8 @@ _1f33:                                                                  ;$1F33
         
         jsr _923b
 
+        ; activate escape pod?
+        ;-----------------------------------------------------------------------
 :       lda key_escape_pod      ; escape pod key pressed?               ;$1F98
         and PLAYER_ESCAPEPOD    ; does the player have an escape pod?
        .bze :+                  ; no? keep moving
@@ -579,11 +600,15 @@ _1f33:                                                                  ;$1F33
 
         jmp _316e               ; no: eject escpae pod
 
+        ; quick-jump?
+        ;-----------------------------------------------------------------------
 :       lda key_jump            ; quick-jump key pressed?               ;$1FA8
         beq :+                  ; no? skip ahead
         
         jsr _8e29               ; handle quick-jump?
 
+        ; activate E.C.M.?
+        ;-----------------------------------------------------------------------
 :       lda key_ecm             ; E.C.M. key pressed?                   ;$1FB0
         and PLAYER_ECM          ; does the player have an E.C.M.?
         beq _1fc2
@@ -594,7 +619,8 @@ _1f33:                                                                  ;$1F33
         dec VAR_0481
         jsr _b0f4
 
-_1fc2:                                                                  ;$1FC2
+_1fc2:  ; turn docking computer on?                                     ;$1FC2
+        ;-----------------------------------------------------------------------
         lda key_docking_on      ; key for docking computers pressed?
         and PLAYER_DOCKCOM      ; does the player have a docking computer?
        .bze :+                  ; no, skip
@@ -2329,7 +2355,7 @@ _2a43:                                                                  ;$2A43
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         stx ZP_VAR_YY_LO
-        eor ZP_69               ; roll sign?
+        eor ZP_ROLL_SIGN        ; roll sign?
         jsr _3934
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
@@ -2446,7 +2472,7 @@ _2b30:                                                                  ;$2B30
         adc ZP_98
         sta DUST_Z, y
         lda ZP_VAR_XX_HI
-        eor ZP_69               ; roll sign?
+        eor ZP_ROLL_SIGN        ; roll sign?
         jsr _393c
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
@@ -3469,10 +3495,10 @@ _2ff3:                                                                  ;$2FF3
         lda # $08
         sta ZP_VAR_S
         
-        lda ZP_68               ; roll magnitude?
+        lda ZP_ROLL_MAGNITUDE
         lsr 
         lsr 
-        ora ZP_69               ; roll sign?
+        ora ZP_ROLL_SIGN
         eor # %10000000
         jsr multiplied_now_add
         jsr _3130
@@ -4619,7 +4645,7 @@ _367e:                                                                  ;$367E
 ;===============================================================================
 
 _3680:                                                                  ;$3680
-        jsr _8447
+        jsr clear_zp_polyobj
         lda # $1c
         sta ZP_POLYOBJ_YPOS_LO
         lsr 
@@ -4936,8 +4962,8 @@ _37fa:                                                                  ;$37FA
         jsr multiplied_now_add
         stx ZP_VAR_YY_LO
         sta ZP_VAR_YY_HI
-        ldx ZP_68               ; roll magnitude?
-        eor ZP_69               ; roll sign?
+        ldx ZP_ROLL_MAGNITUDE
+        eor ZP_ROLL_SIGN
         jsr _393e
         sta ZP_VAR_Q
         lda ZP_VAR_XX_LO
@@ -4989,9 +5015,9 @@ _38a3:                                                                  ;$38A3
         lda ZP_ALPHA
         eor ZP_B0
         sta ZP_ALPHA
-        lda ZP_69               ; roll sign?
+        lda ZP_ROLL_SIGN        ; roll sign?
         eor ZP_B0
-        sta ZP_69               ; roll sign?
+        sta ZP_ROLL_SIGN        ; roll sign?
         eor # %10000000
         sta ZP_6A               ; move count?
         lda ZP_94
@@ -5083,7 +5109,7 @@ _3934:                                                                  ;$3934
         ldx ZP_VAR_XX_HI
         stx ZP_VAR_S
 _393c:                                                                  ;$393C
-        ldx ZP_68               ; roll magnitude?
+        ldx ZP_ROLL_MAGNITUDE
 _393e:                                                                  ;$393E
         stx ZP_VAR_P1
         tax 
@@ -5580,24 +5606,27 @@ _3c4d:                                                                  ;$3C4D
         rts 
 
 ;===============================================================================
+; BBC code says "centre ship indicators"
 ; roll dampening? -- slowly reduces roll to 0
 ;
-; X = an index?
+;       X :  
 
 _3c58:                                                                  ;$3C58
         lda DOCKCOM_STATE       ; is docking computer enabled?
-        bne :+
+       .bnz :+                  ; yes, skip over the following
 
         lda _1d06               ; is this the dampening flag?
-        bne @rts
+        bne @rts                ; do not dampen
 
 :       txa                                                             ;$3C62 
-        bpl :+
-        dex 
-        bmi @rts
+        bpl :+                  ; >= 0?
 
-:       inx                                                             ;$3C68 
-        bne @rts
+        dex                     ; decrease negative number towards zero
+        bmi @rts                ; if still negative, finish
+
+:       inx                     ; increase counter                      ;$3C68 
+       .bnz @rts                ; do nothing 255/256 times
+        
         dex 
         beq :-
 
@@ -5899,7 +5928,7 @@ _3dff:                                                                  ;$3DFF
         rol MISSION_FLAGS       ; push the carry into bit 0
 
         jsr txt_docked_incoming_message
-        jsr _8447
+        jsr clear_zp_polyobj
         
         lda # $1f
         sta ZP_A5

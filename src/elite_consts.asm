@@ -92,6 +92,8 @@ ELITE_SPRITES_INDEX     = <((ELITE_SPRITES_ADDR - ELITE_VIC_ADDR) / 64)
 ; get the address of the bitmap font from the linker
 .import ELITE_FONT_ADDR
 
+.import ELITE_ZP_SHADOW
+
 ;-------------------------------------------------------------------------------
 
 ; "elite_consts.asm" : some core, structual values used throughout Elite,

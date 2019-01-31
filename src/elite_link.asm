@@ -24,3 +24,7 @@
 .segment        "VIC_SCR_MAIN"
 
 .res    $0400
+
+.segment        "ZP_SHADOW"
+
+.res    $0100

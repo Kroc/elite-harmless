@@ -596,14 +596,15 @@ _0618:                                                                  ;$0618
 ;-------------------------------------------------------------------------------
 
         ; backup $02-$FF to $CE02-$CEFF
+.import ELITE_ZP_SHADOW
 
         ; carry is a flag
 _0619:  ldx # $02
 _061b:  lda $00, x
         bcc :+
-        lda $ce00, x
+        lda ELITE_ZP_SHADOW, x
 :       sta $00, x
-        sta $ce00, x
+        sta ELITE_ZP_SHADOW, x
         inx 
         bne _061b
         rts
