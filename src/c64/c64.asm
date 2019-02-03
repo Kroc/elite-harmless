@@ -5,10 +5,11 @@
 .linecont+
 
 .include        "macros.asm"
+.include        "kernal.asm"
+.include        "cart.asm"
 .include        "vic.asm"
 .include        "sid.asm"
 .include        "cia.asm"
-.include        "kernal.asm"
 
 ;===============================================================================
 ; CPU port: memory layout & Datasette

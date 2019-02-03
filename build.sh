@@ -258,9 +258,8 @@ cd ..
 #===============================================================================
 
 echo
-echo "* build Elite : Harmless"
+echo "* build Elite : Harmless (disk images)"
 echo "  ======================================"
-
 echo "* cleaning up:"
 
 rm -rf build/*.o
@@ -277,6 +276,8 @@ echo "- OK"
 options="-DOPTION_MATHTABLES"
 
 echo
+echo "- assemble 'disk_boot_exo.asm'"
+$ca65 $options -o build/disk_boot_exo.o     src/disk_boot_exo.asm
 echo "- assemble 'code_init.asm'"
 $ca65 $options -o build/code_init.o         src/code_init.asm
 echo "- assemble 'vars_0400.asm'"
@@ -317,11 +318,12 @@ echo "* make 'elite-harmless.d64'"
 echo "  --------------------------------------"
 echo "- linking..."
 $ld65 \
-       -C link/elite-harmless.cfg \
+       -C link/elite-harmless-d64.cfg \
        -S \$0400 \
        -m build/elite-harmless.map -vm \
        -o bin/harmless.prg \
     --obj build/elite_link.o \
+    --obj build/disk_boot_exo.o \
     --obj build/vars_0400.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
@@ -367,6 +369,77 @@ $mkd64 \
     -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
     1>/dev/null
 echo "- OK"
+echo
+
+#===============================================================================
+
+echo "* build Elite : Harmless (cartridges)"
+echo "  ======================================"
+echo "* cleaning up:"
+
+rm -rf build/*.o
+rm -rf build/*.s
+rm -rf build/*.bin
+rm -rf build/*.prg
+rm -rf build/*.d64
+
+rm -f bin/*.prg
+rm -f bin/*.d64
+
+echo "- OK"
+
+options="-DOPTION_MATHTABLES"
+
+echo
+echo "- assemble 'elite_link.asm'"
+$ca65 $options -o build/elite_link.o        src/elite_link.asm
+echo "- assemble 'code_init.asm'"
+$ca65 $options -o build/code_init.o         src/code_init.asm
+echo "- assemble 'vars_0400.asm'"
+$ca65 $options -o build/vars_0400.o         src/vars_0400.asm
+echo "- assemble 'text_pairs.asm'"
+$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
+echo "- assemble 'text_flight.asm'"
+$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
+echo "- assemble 'text_docked.asm'"
+$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
+echo "- assemble 'code_1D00.asm'"
+$ca65 $options -o build/code_1D00.o         src/code_1D00.asm
+echo "- assemble 'code_1D81.asm'"
+$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
+echo "- assemble 'code_6A00.asm'"
+$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
+echo "- assemble 'data_9300.asm'"
+$ca65 $options -o build/data_9300.o         src/data_9300.asm
+echo "- assemble 'table_bitmap.asm'"
+$ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
+echo "- assemble 'sound.asm'"
+$ca65 $options -o build/sound.o             src/sound.asm
+echo "- assemble 'gfx-font.asm'"
+$ca65 $options -o build/gfx-font.o          src/gfx/font.asm
+echo "- assemble 'gfx-sprites.asm'"
+$ca65 $options -o build/gfx-sprites.o       src/gfx/sprites.asm
+echo "- assemble 'gfx-hull_data.asm'"
+$ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
+echo "- assemble 'gfx-hud_data.asm'"
+$ca65 $options -o build/gfx-hud_data.o      src/gfx/hud_data.asm
+echo "- assemble 'vars_polyobj.asm'"
+$ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
+echo
+
+echo "* make 'elite-harmless-ocean.crt'"
+echo "  --------------------------------------"
+echo "- assemble 'cart_boot.asm'"
+$ca65 $options -o build/cart_boot.o         src/cart_boot.asm
+echo "- linking..."
+$ld65 \
+       -C link/elite-harmless-crt-ocean.cfg \
+       -S \$0400 \
+       -m build/elite-harmless-crt-ocean.map -vm \
+       -o release/elite-harmless-ocean.crt \
+    --obj build/cart_boot.o \
+    --obj build/elite_link.o \
+    --obj build/vars_0400.o
 
 #===============================================================================
 

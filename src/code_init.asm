@@ -15,26 +15,6 @@
 ZP_COPY_TO      := $18
 ZP_COPY_FROM    := $1a
 
-.segment        "INIT_PRG"
-.export         __INIT_PRG__:absolute = 1
-
-        .addr   *+2
-
-.segment        "PRG1_PRG"
-.export         __PRG1_PRG__:absolute = 1
-
-        .addr   *+2
-
-.segment        "PRG2_PRG"
-.export         __PRG2_PRG__:absolute = 1
-
-        .addr   *+2
-
-.segment        "PRG3_PRG"
-.export         __PRG3_PRG__:absolute = 1
-
-        .addr   *+2
-
 .segment        "CODE_INIT"
 
 init:

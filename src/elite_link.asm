@@ -4,11 +4,6 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64/c64.asm"
-.include        "elite_consts.asm"
-
-;===============================================================================
-
 .segment        "VIC_BITMAP"
 
 ; if we force the 8K alignment required by bitmap screens, the linker will
@@ -26,5 +21,9 @@
 .res    $0400
 
 .segment        "ZP_SHADOW"
+
+.res    $0100
+
+.segment        "SAVE_SHADOW"
 
 .res    $0100

@@ -2887,7 +2887,7 @@ _7903:                                                                  ;$7903
         iny 
         lda [ZP_TEMP_ADDR2], y
         eor ZP_AA
-        sta $ffff, y            ;irq
+        sta $ffff, y
         cpy # $06
         bne _7903
         ldy ZP_VAR_U
@@ -3081,7 +3081,7 @@ _7a38:                                                                  ;$7A38
         iny 
         lda [ZP_TEMP_ADDR2], y
         eor ZP_AA
-        sta $ffff, y            ;irq
+        sta $ffff, y
         cpy # $06
         bne _7a38
         ldy ZP_VAR_U
@@ -4692,7 +4692,7 @@ _83ca:                                                                  ;$83CA
         ; erase $63...$69
 
         ldx # $06
-:       sta $63, x                                                      ;$83CF
+:       sta ZP_BETA, x                                                  ;$83CF
         dex 
         bpl :-
 
@@ -4730,7 +4730,7 @@ _83ed:                                                                  ;$83ED
         sta ZP_94
 
         asl                     ;=0
-        sta $63
+        sta ZP_BETA
         sta ZP_64
         sta ZP_6A               ; move count?
         sta ZP_95
@@ -5960,7 +5960,8 @@ _8b27:                                                                  ;$8B27
         jsr _8a1d
         lsr VAR_04E2
 
-        lda # $04
+.import TXT_DOCKED_COMPETITION_NUMBER:direct
+        lda # TXT_DOCKED_COMPETITION_NUMBER     ;=$04
         jsr print_docked_str
         
         ; copy $0499..$04E5 (data to be saved?)
@@ -6128,6 +6129,8 @@ _8c0d:                                                                  ;$8C0D
         bcs _8c61
         lda $cf00               ;?
         bmi _8c55
+
+        ; copy $CF00...$CF4C to $25B3...$25FF
         ldy # $4c
 _8c4a:                                                                  ;$8C4A
         lda $cf00, y            ;?
@@ -6581,7 +6584,7 @@ _8e29:                                                                  ;$8E29
         cmp # $02
         bcc _8e7c
 _8e44:                                                                  ;$8E44
-        ldy $f92d
+        ldy POLYOBJ_01 + PolyObject::zpos + 2
         bmi _8e52
         ldy # $25
         jsr _2c4e
@@ -6662,6 +6665,7 @@ _8eab:                                                                  ;$8EAB
 ;$8eb3: unused / unreferenced?
         lda _9274, x
         eor opt_flipaxis
+
         rts 
 
 ;===============================================================================
@@ -6714,6 +6718,7 @@ _8ee3:                                                                  ;$8EE3
         
         lda DOCKCOM_STATE
         beq _8f4d
+
         jsr clear_zp_polyobj
 
         lda # $60               ; this is the $6000 vector scale?
@@ -6860,7 +6865,7 @@ _8fe9:                                                                  ;$8FE9
 ;===============================================================================
 
 _8fea:                                                                  ;$8FEA
-        sty $9e                 ; backup Y
+        sty ZP_9E               ; backup Y
 
 wait_for_input:                                                         ;$8FEC
         ;-----------------------------------------------------------------------
@@ -6875,7 +6880,7 @@ wait_for_input:                                                         ;$8FEC
 
         lda _927e, x
         
-        ldy $9e                 ; restore Y
+        ldy ZP_9E               ; restore Y
         tax 
 _9001:                                                                  ;$9001
         rts 
