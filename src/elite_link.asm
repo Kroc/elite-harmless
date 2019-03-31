@@ -24,6 +24,6 @@
 
 .res    $0100
 
-.segment        "SAVE_SHADOW"
+.segment        "DISK_BUFFER"
 
 .res    $0100

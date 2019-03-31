@@ -6,7 +6,7 @@
 ; the stage-4 loader ("GMA4.PRG") consists of two large blocks of scrambled
 ; code/data with the decryption routine wedged between. after decryption, most
 ; of this data is relocated in RAM, which is why DATA1 is split into A/B parts
-
+;
 ; $4000 +---------+
 ;       | DATA1A  |
 ;       |         |
@@ -20,16 +20,16 @@
 ;       |         |
 ;       |         |
 ; $8660 +---------+
-
+;
 ; a python script "link/encrypt.py" will handle encrypting the data blocks.
 ; the 'encryption' is done by simply adding one byte to the next and saving
 ; the resultant byte. for example, the following original data:
-
+;
 ;   $4c, $32, $24, $00, $03, $60, $6b, $a9, ...
-
+;
 ; is encoded by adding $4c and $32 = $7e, then $32 + $24, $24 + $00,
 ; and so on giving: (values > $ff just wrap-around)
-
+;
 ;   $7e, $56, $24, $03, $63, $cb, $14, ...
 
 ;===============================================================================

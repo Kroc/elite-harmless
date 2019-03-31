@@ -22,23 +22,23 @@
 ; colours
 ;===============================================================================
 
-;               hex     ¦ nybble
-.define BLACK   $00     ; %0000
-.define WHITE   $01     ; %0001
-.define RED     $02     ; %0010
-.define CYAN    $03     ; %0011
-.define PURPLE  $04     ; %0100
-.define GREEN   $05     ; %0101
-.define BLUE    $06     ; %0110
-.define YELLOW  $07     ; %0111
-.define ORANGE  $08     ; %1000
-.define BROWN   $09     ; %1001
-.define LTRED   $0a     ; %1010
-.define DKGREY  $0b     ; %1011
-.define GREY    $0c     ; %1100
-.define LTGREEN $0d     ; %1101
-.define LTBLUE  $0e     ; %1110
-.define LTGREY  $0f     ; %1111
+;                 hex     ¦ nybble
+BLACK           = $00     ; %0000
+WHITE           = $01     ; %0001
+RED             = $02     ; %0010
+CYAN            = $03     ; %0011
+PURPLE          = $04     ; %0100
+GREEN           = $05     ; %0101
+BLUE            = $06     ; %0110
+YELLOW          = $07     ; %0111
+ORANGE          = $08     ; %1000
+BROWN           = $09     ; %1001
+LTRED           = $0a     ; %1010
+DKGREY          = $0b     ; %1011
+GREY            = $0c     ; %1100
+LTGREEN         = $0d     ; %1101
+LTBLUE          = $0e     ; %1110
+LTGREY          = $0f     ; %1111
 
 .define .color_nybble(fore, back) \
         (fore & 15) << 4 | (back & 15)
@@ -65,35 +65,35 @@
 ; for example, if the VIC bank is set to 1 ($4000..$8000) and sprites are
 ; stored at $6800 then the first sprite index is $A0 (+$2800 / 64)
 
-.define VIC_SPRITE0_PTR         $03F8
-.define VIC_SPRITE1_PTR         $03F9
-.define VIC_SPRITE2_PTR         $03FA
-.define VIC_SPRITE3_PTR         $03FB
-.define VIC_SPRITE4_PTR         $03FC
-.define VIC_SPRITE5_PTR         $03FD
-.define VIC_SPRITE6_PTR         $03FE
-.define VIC_SPRITE7_PTR         $03FF
+VIC_SPRITE0_PTR                 = $03F8
+VIC_SPRITE1_PTR                 = $03F9
+VIC_SPRITE2_PTR                 = $03FA
+VIC_SPRITE3_PTR                 = $03FB
+VIC_SPRITE4_PTR                 = $03FC
+VIC_SPRITE5_PTR                 = $03FD
+VIC_SPRITE6_PTR                 = $03FE
+VIC_SPRITE7_PTR                 = $03FF
 
-.define VIC_SPRITE0_X           $d000
-.define VIC_SPRITE0_Y           $d001
-.define VIC_SPRITE1_X           $d002
-.define VIC_SPRITE1_Y           $d003
-.define VIC_SPRITE2_X           $d004
-.define VIC_SPRITE2_Y           $d005
-.define VIC_SPRITE3_X           $d006
-.define VIC_SPRITE3_Y           $d007
-.define VIC_SPRITE4_X           $d008
-.define VIC_SPRITE4_Y           $d009
-.define VIC_SPRITE5_X           $d00a
-.define VIC_SPRITE5_Y           $d00b
-.define VIC_SPRITE6_X           $d00c
-.define VIC_SPRITE6_Y           $d00d
-.define VIC_SPRITE7_X           $d00e
-.define VIC_SPRITE7_Y           $d00f
+VIC_SPRITE0_X                   = $d000
+VIC_SPRITE0_Y                   = $d001
+VIC_SPRITE1_X                   = $d002
+VIC_SPRITE1_Y                   = $d003
+VIC_SPRITE2_X                   = $d004
+VIC_SPRITE2_Y                   = $d005
+VIC_SPRITE3_X                   = $d006
+VIC_SPRITE3_Y                   = $d007
+VIC_SPRITE4_X                   = $d008
+VIC_SPRITE4_Y                   = $d009
+VIC_SPRITE5_X                   = $d00a
+VIC_SPRITE5_Y                   = $d00b
+VIC_SPRITE6_X                   = $d00c
+VIC_SPRITE6_Y                   = $d00d
+VIC_SPRITE7_X                   = $d00e
+VIC_SPRITE7_Y                   = $d00f
 
-.define VIC_SPRITES_X           $d010
+VIC_SPRITES_X                   = $d010
 
-.define VIC_SCREEN_CTL1         $d011   ; screen-control register
+VIC_SCREEN_CTL1                 = $d011 ; screen-control register
 
 .enum   screen_ctl1
         scroll_vert     = %00000111     ; vertical scroll offset
@@ -104,7 +104,7 @@
         raster_line     = %10000000     ; hi-bit of the raster line
 .endenum
 
-.define VIC_SCREEN_CTL2         $d016
+VIC_SCREEN_CTL2                 = $d016
 
 .enum   screen_ctl2
         scroll_horz     = %00000111     ; horizontal scroll offset
@@ -112,54 +112,54 @@
         multicolor      = %00010000     ; 1 = multi-color mode on
 .endenum
 
-.define VIC_SCREEN_VERT         $d011   ; vertical scroll offset (bits 0-2)
-.define VIC_SCREEN_HORZ         $d016   ; horizontal scroll offset (bits 0-2)
+VIC_SCREEN_VERT                 = $d011 ; vertical scroll offset (bits 0-2)
+VIC_SCREEN_HORZ                 = $d016 ; horizontal scroll offset (bits 0-2)
 
-.define VIC_RASTER              $d012
+VIC_RASTER                      = $d012
 
-.define VIC_LIGHT_X             $d013
-.define VIC_LIGHT_Y             $d014
+VIC_LIGHT_X                     = $d013
+VIC_LIGHT_Y                     = $d014
 
-.define VIC_SPRITE_ENABLE       $d015
+VIC_SPRITE_ENABLE               = $d015
 
-.define VIC_SPRITE_DBLHEIGHT    $d017
-.define VIC_SPRITE_DBLWIDTH     $d01d
+VIC_SPRITE_DBLHEIGHT            = $d017
+VIC_SPRITE_DBLWIDTH             = $d01d
 
-.define VIC_MEMORY              $d018
+VIC_MEMORY                      = $d018
 
-.define VIC_INTERRUPT_STATUS    $d019
-.define VIC_INTERRUPT_CONTROL   $d01a
+VIC_INTERRUPT_STATUS            = $d019
+VIC_INTERRUPT_CONTROL           = $d01a
 
-.define INTERRUPT_RASTER        %0001
-.define INTERRUPT_BGCOLLISION   %0010
-.define INTERRUPT_SPCOLLISION   %0100
-.define INTERRUPT_LIGHTPEN      %1000
+INTERRUPT_RASTER                = %0001
+INTERRUPT_BGCOLLISION           = %0010
+INTERRUPT_SPCOLLISION           = %0100
+INTERRUPT_LIGHTPEN              = %1000
 
-.define VIC_SPRITE_PRIORITY     $d01b
+VIC_SPRITE_PRIORITY             = $d01b
 
-.define VIC_SPRITE_MULTICOLOR   $d01c
+VIC_SPRITE_MULTICOLOR           = $d01c
 
-.define VIC_SPRITE_SPCOLLISION  $d01e
-.define VIC_SPRITE_BGCOLLISION  $d01f
+VIC_SPRITE_SPCOLLISION          = $d01e
+VIC_SPRITE_BGCOLLISION          = $d01f
 
-.define VIC_BORDER              $d020
-.define VIC_BACKGROUND          $d021
+VIC_BORDER                      = $d020
+VIC_BACKGROUND                  = $d021
 
-.define VIC_BKGND_EXTRA1        $d022   ; extended background colour 1
-.define VIC_BKGND_EXTRA2        $d023   ; extended background colour 2
-.define VIC_BKGND_EXTRA3        $d024   ; extended background colour 3
+VIC_BKGND_EXTRA1                = $d022 ; extended background colour 1
+VIC_BKGND_EXTRA2                = $d023 ; extended background colour 2
+VIC_BKGND_EXTRA3                = $d024 ; extended background colour 3
 
-.define VIC_SPRITE_EXTRA1       $d025   ; sprite extra colour 1
-.define VIC_SPRITE_EXTRA2       $d026   ; sprite extra colour 2
+VIC_SPRITE_EXTRA1               = $d025 ; sprite extra colour 1
+VIC_SPRITE_EXTRA2               = $d026 ; sprite extra colour 2
 
-.define VIC_SPRITE0_COLOR       $d027
-.define VIC_SPRITE1_COLOR       $d028
-.define VIC_SPRITE2_COLOR       $d029
-.define VIC_SPRITE3_COLOR       $d02a
-.define VIC_SPRITE4_COLOR       $d02b
-.define VIC_SPRITE5_COLOR       $d02c
-.define VIC_SPRITE6_COLOR       $d02d
-.define VIC_SPRITE7_COLOR       $d02e
+VIC_SPRITE0_COLOR               = $d027
+VIC_SPRITE1_COLOR               = $d028
+VIC_SPRITE2_COLOR               = $d029
+VIC_SPRITE3_COLOR               = $d02a
+VIC_SPRITE4_COLOR               = $d02b
+VIC_SPRITE5_COLOR               = $d02c
+VIC_SPRITE6_COLOR               = $d02d
+VIC_SPRITE7_COLOR               = $d02e
 
 ; $D02F..$D040 are unused
 ; $D040..$D400 are repeats of the VIC registers (every $40/64 bytes)

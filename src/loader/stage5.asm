@@ -22,7 +22,7 @@
 .import _8863:absolute
 
 ; populate the .PRG header using the address given
-; by the linker config (see "link/elite-gma86.cfg")
+; by the linker config (see "link/elite-original-gma86.cfg")
 .segment        "HEAD_STAGE5"
 .import         __GMA5_PRG_START__
         .addr   __GMA5_PRG_START__+2

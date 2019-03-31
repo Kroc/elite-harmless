@@ -9,6 +9,7 @@
 
 .include        "c64/c64.asm"
 .include        "c64/c1541.asm"
+.include        "elite_consts.asm"
 
 ;===============================================================================
 ; populate the "GMA1.PRG" header using the address given
@@ -22,7 +23,7 @@
 
 .segment        "CODE_STAGE1A"
 
-; eight bytes of unused (by the Kernal) RAM exist at $0334, followed by
+; eight bytes of unused (by the KERNAL) RAM exist at $0334, followed by
 ; the 192 byte Datasette buffer (no use to us here), another 4 unused bytes
 ; and then the text screen. since the text screen gets moved to $0800,
 ; this gives us plenty of space in low-memory for the loader
@@ -30,7 +31,9 @@
         jmp     gma1_start                                              ;$0334
 
 gma_trksec:                                                             ;$0337
-        ; track & sector numbers (for the fast-loader)
+        ;=======================================================================
+        ; table of track & sector numbers
+        ; (for the fast-loader)
 
         .byte   0,  0           ; "GMA0" (invalid)
         .byte   0,  0           ; "GMA1" (invalid)
@@ -41,9 +44,9 @@ gma_trksec:                                                             ;$0337
         .byte   20, 8           ; "GMA6"
 
 gma1_start:                                                             ;$0345
-        ; call Kernel SETMSG, "Set system error display switch at
-        ; memory address $009D". A = the switch value.
-        ; i.e. disable error messages?
+        ;=======================================================================
+        ; call KERNAL `SETMSG`, "Set system error display switch at memory
+        ; address $009D". A = the switch value. i.e. disable error messages?
         lda # $00
         jsr KERNAL_SETMSG
 
@@ -51,11 +54,12 @@ gma1_start:                                                             ;$0345
         ; to $FFED: the SCREEN routine which returns row/col count
         ; i.e. does nothing of use -- this effectively disables the STOP key
         lda #> KERNAL_SCREEN
-        sta $0329
+        sta KERNAL_VECTOR_STOP+1
 
         ; set up the screen, display the "use the fast loader?" message.
-        ; if fast-loader is selected, control will have gone to `_03fc`,
-        ; if slow-loader is selected, we will have returned here
+        ; if fast-loader is selected, the KERNAL `LOAD` routine is hijacked
+        ; with a wedge that uploads a fast-loader into the 1541; therefore
+        ; the code that follows is the same with or without fast loading
         jsr _062b
 
         ; * * *   C O P Y   P R O T E C T I O N !  * * *
@@ -67,8 +71,7 @@ gma1_start:                                                             ;$0345
 .ifdef  OPTION_NOCOPY
         ; start GMA3's code -- note that the current X & Y
         ; (pointer to filename) are re-used in here
-.import __CODE_STAGE3_START__:absolute
-        jsr __CODE_STAGE3_START__
+        jsr _c800
 .else
         ; "crack" the loader by jumping over the copy-protection check
         jmp :+
@@ -79,7 +82,7 @@ gma1_start:                                                             ;$0345
         lda $02
         eor # $97
         beq :+                  ; skip ahead if [$02] = $97
-        jmp [$fffc]             ; hard reset!
+        jmp [HW_VECTOR_RESET]   ; hard reset!
 
         ; * * * * * *
 
@@ -153,7 +156,7 @@ _03b5:                                                                  ;$03B5
 
         ; set file parameters:
         lda # $01       ; file number
-        ldx # $08       ; drive number
+        ldx # DEV_DRV8  ; drive number
         ldy # $01       ; "secondary address"
         jsr KERNAL_SETLFS
 
@@ -169,17 +172,17 @@ _03c7:                                                                  ;$03C7
         ;
         ;     A = number of file to load, i.e. $03 = "GMA3"
         ;
-        tax                 ; put the current A value aside
+        tax                     ; put the current A value aside
 
-        clc                 ; clear carry flag (before doing add)
-        adc # '0'           ; convert A to a PETSCII numeral, i.e. "0"+A
-        sta _filename_num   ; change the filename to load, e.g. "GMA3"
+        clc                     ; clear carry flag (before doing add)
+        adc # '0'               ; convert A to a PETSCII numeral, i.e. "0"+A
+        sta _filename_num       ; change the filename to load, e.g. "GMA3"
         
         ; for the fast-loader, find the track / sector:
 
-        txa                 ; get the original file number back
-        asl                 ; shift-left, i.e. multiply by 2
-        tax                 ; use it as the index
+        txa                     ; get the original file number back
+        asl                     ; shift-left, i.e. multiply by 2
+        tax                     ; use it as the index
 
         ; get the address of the block of 1541 code *here on the C64*
         ; (not its address within the 1541, when it gets copied there)
@@ -189,17 +192,19 @@ _03c7:                                                                  ;$03C7
         ; MODIFY THE 1541 PROGRAM, HERE ON THE C64,
         ; BEFORE IT GETS SENT TO THE 1541 DRIVE!
 
-        ; write the track and sector to the fast-loader code:
+        ; write the track and sector to the fast-loader
+        ; code before it gets uploaded to the drive:
         lda gma_trksec+0, x     ; track
-        sta __CODE_1541_LOAD__ + (_04b9 - __CODE_1541_RUN__)
+        sta __CODE_1541_LOAD__ + (lda_track  + 1 - __CODE_1541_RUN__)
         lda gma_trksec+1, x     ; sector
-        sta __CODE_1541_LOAD__ + (_04bd - __CODE_1541_RUN__)
+        sta __CODE_1541_LOAD__ + (lda_sector + 1 - __CODE_1541_RUN__)
 
         ; set file name
         ldx #< _filename
         ldy #> _filename
-        lda # $04           ; file name length
+        lda # $04               ; file name length
         jsr KERNAL_SETNAM
+        
         rts 
 
 _filename:
@@ -207,150 +212,203 @@ _filename:
 _filename_num:
         .byte   " "
 
-        ;$03EB: hidden message (not part of the filename)
-        .byte   " was here 1985 ok"
+        ; hidden message (not part of the filename)
+        .byte   " was here 1985 ok"                                     ;$03EB
 
 _03fc:
         ;=======================================================================
-        ; fast-loader:
-        ; (to be decompiled later)
-
+        ; use fast-loader
+        ;
         jsr _05da
-        jsr _05cf
+        jsr fastload_hijack             ; change KERNAL `LOAD` to our routine
+        
         rts 
 
 ;===============================================================================
+; "it belongs in a 1541!"
 
 .segment        "CODE_1541"
 
-_0403:
+read_sector:                                            ;C64:$0403, 1541:$0300
         ;=======================================================================
-        ; change buffer to $0600
+        ; reads a sector from the disk; this is 324 GCR-encoded bytes
+        ; which get decoded to 256 bytes of actual data
+
+        ; change the selected buffer to $0600
+        ; (buffer 0, $0300, contains this code)
         lda #> C1541_BUFF3
         sta C1541_ZP_CURBUFF_HI
 
-        ; read 256 bytes?
-_0407:
-        ; "find start of data block"?
+@get_sector:                                                            ;$0407
+        ;-----------------------------------------------------------------------
+        ; read 324 GCR-encoded bytes from the disk surface:
+
+        ; "find start of data block"; this locates the selected
+        ; track / sector on the disk and reads the header
         jsr $f50a
-_040a:
-        bvc *                   ; wait for completion
-        clv                     ; clear overflow flag
 
-        lda $1c01
-        sta C1541_BUFF3, y
-        iny 
-        bne _040a
+        ; read the first 256 bytes
 
-        ldy # $ba
-_0418:
-        bvc *
-        clv 
+:       bvc *                           ; wait for drive head "ready"   ;$040A
+        clv                             ; (clear overflow flag)
 
-        lda $1c01
-        sta $0100, y
-        iny 
-        bne _0418
+        lda C1541_VIA2_PORTA            ; read byte from the magnet
+        sta C1541_BUFF3, y              ; put it into the data buffer
+        iny                             ; move to next buffer byte,
+       .bnz :-                          ; and wait for next byte to come in
+
+        ; now read the remaining 69 bytes
+        ; (these go onto the "overflow buffer", $01BF...$01FF)
+
+        ldy # 255 - 69
+
+:       bvc *                           ; wait for drive head "ready"   ;$0418
+        clv                             ; (clear overflow flag)
+
+        lda C1541_VIA2_PORTA            ; read byte from the magnet
+        sta $0100, y                    ; put it on the overflow-buffer
+        iny                             ; move to next overflow-buffer byte,
+       .bnz :-                          ; and wait for next byte to come in
         
-        ; decode GCR bytes
-        .byte   $20, $e0, $f8   ;0424 20 e0 f8 jsr $f8e0
-        .byte   $a5, $38        ;0427 a5 38    lda $38
-        .byte   $c5, $47        ;0429 c5 47    cmp $47
-        .byte   $f0, $04        ;042b f0 04    beq _0431
-        .byte   $a9, $04        ;042d a9 04    lda # $04
-        .byte   $d0, $3f        ;042f d0 3f    bne _0470
-_0431:
-        .byte   $20, $e9, $f5   ;0431 20 e9 f5 jsr $f5e9
-        .byte   $c5, $3a        ;0434 c5 3a    cmp $3a
-        .byte   $f0, $04        ;0436 f0 04    beq _043c
-        .byte   $a9, $05        ;0438 a9 05    lda # $05
-        .byte   $d0, $34        ;043a d0 34    bne _0470
-_043c:
-        .byte   $ad, $01, $06   ;043c ad 01 06 lda $0601
-        .byte   $85, $07        ;043f 85 07    sta $07
-        .byte   $a0, $02        ;0441 a0 02    ldy # $02
-        .byte   $a2, $ff        ;0443 a2 ff    ldx # $ff
-        .byte   $ad, $00, $06   ;0445 ad 00 06 lda C1541_BUFF3
-        .byte   $f0, $03        ;0448 f0 03    beq _044d
-        .byte   $8e, $01, $06   ;044a 8e 01 06 stx C1541_BUFF3+1
-_044d:
-        .byte   $ee, $01, $06   ;044d ee 01 06 inc C1541_BUFF3+1
-_0450:
-        .byte   $be, $00, $06   ;0450 be 00 06 ldx C1541_BUFF3, y
-        .byte   $e0, $01        ;0453 e0 01    cpx # $01
-        .byte   $d0, $03        ;0455 d0 03    bne _045a
-        .byte   $20, $82, $03   ;0457 20 82 03 jsr _0485
-_045a:
-        .byte   $20, $82, $03   ;045a 20 82 03 jsr _0485
-        .byte   $c8             ;045d c8       iny 
-        .byte   $cc, $01, $06   ;045e cc 01 06 cpy C1541_BUFF3+1
-        .byte   $d0, $ed        ;0461 d0 ed    bne _0450
-        .byte   $ad, $00, $06   ;0463 ad 00 06 lda C1541_BUFF3
-        .byte   $f0, $0e        ;0466 f0 0e    beq _0476
-        .byte   $c5, $06        ;0468 c5 06    cmp $06
-        .byte   $85, $06        ;046a 85 06    sta $06
-        .byte   $f0, $05        ;046c f0 05    beq _0473
-        .byte   $a9, $01        ;046e a9 01    lda # $01
-_0470:
-        .byte   $4c, $69, $f9   ;0470 4c 69 f9 jmp $f969
+        jsr $f8e0                       ; 'decode 69 GCR bytes'
+        
+        ; get the "data block signature" byte of sector just read
+        lda $38
+        cmp $47                         ; check against the expected value
+        beq :+                          ; OK?
 
-_0473:
-        .byte   $4c, $04, $03   ;0473 4c 04 03 jmp _0407
+        lda # C1541_ERR::READ_ERROR_22
+        bne @_0470
+
+        ; 'calculate parity of the data buffer'
+:       jsr $f5e9                                                       ;$0431
+        ; test against the checksum
+        cmp $3a
+        beq :+
+
+        lda # C1541_ERR::READ_ERROR_23
+        bne @_0470
+
+        ; is there more data to read for this file?
+        ; (the first two bytes of sector data are the track + sector numbers
+        ;  for additional file data. "$00, $FF" indicates no further data)
+:       lda C1541_BUFF3+1               ; get next sector               ;$043C
+        sta C1541_ZP_BUFF0_SEC          ; set next sector to load
+        
+        ; use of the actual data in the sector begins
+        ; at offset 2 due to the track / sector numbers
+        ldy # $02
+        
+        ldx # $ff
+
+        ; if the track number is 0, 
+        ; there is no further data
+        lda C1541_BUFF3
+       .bze :+
+
+        stx C1541_BUFF3+1
+:       inc C1541_BUFF3+1                                               ;$044D
+
+@_0450:
+        ldx C1541_BUFF3, y
+        cpx # $01
+        bne :+
+
+        jsr _0485                       ; send two bytes (inc. the one below)
+:       jsr _0485                       ; send one byte                 ;$045A
+        iny 
+        cpy C1541_BUFF3+1
+        bne @_0450
+        lda C1541_BUFF3
+        beq _0476
+        cmp $06
+        sta $06
+        beq @_0473                      ; read the next sector
+        
+        lda # C1541_ERR::OK
+
+@_0470:
+        ; finish the job; `A` will be the error code, 1 = OK (no error)
+        jmp C1541_KERNAL_error
+
+@_0473:
+        ;-----------------------------------------------------------------------
+        jmp @get_sector
 
 _0476:
-        .byte   $a2, $01        ;0476 a2 01    ldx # $01
-        .byte   $20, $82, $03   ;0478 20 82 03 jsr _0485
-        .byte   $a2, $02        ;047b a2 02    ldx # $02
-        .byte   $20, $82, $03   ;047d 20 82 03 jsr _0485
-        .byte   $a9, $7f        ;0480 a9 7f    lda # $7f
-        .byte   $4c, $69, $f9   ;0482 4c 69 f9 jmp $f969
-_0485:
-        .byte   $2c, $00, $18   ;0485 2c 00 18 bit $1800
-        .byte   $10, $fb        ;0488 10 fb    bpl _0485
-        .byte   $a9, $10        ;048a a9 10    lda # $10
-        .byte   $8d, $00, $18   ;048c 8d 00 18 sta $1800
-_048f:
-        .byte   $2c, $00, $18   ;048f 2c 00 18 bit $1800
-        .byte   $30, $fb        ;0492 30 fb    bmi _048f
-        .byte   $8a             ;0494 8a       txa 
-        .byte   $4a             ;0495 4a       lsr a
-        .byte   $4a             ;0496 4a       lsr a
-        .byte   $4a             ;0497 4a       lsr a
-        .byte   $4a             ;0498 4a       lsr a
-        .byte   $8d, $00, $18   ;0499 8d 00 18 sta $1800
-        .byte   $0a             ;049c 0a       asl a
-        .byte   $29, $0f        ;049d 29 0f    and # $0f
-        .byte   $8d, $00, $18   ;049f 8d 00 18 sta $1800
-        .byte   $8a             ;04a2 8a       txa 
-        .byte   $29, $0f        ;04a3 29 0f    and # $0f
-        .byte   $8d, $00, $18   ;04a5 8d 00 18 sta $1800
-        .byte   $0a             ;04a8 0a       asl a
-        .byte   $29, $0f        ;04a9 29 0f    and # $0f
-        .byte   $8d, $00, $18   ;04ab 8d 00 18 sta $1800
-        .byte   $a9, $0f        ;04ae a9 0f    lda # $0f
-        .byte   $ea             ;04b0 ea       nop 
-        .byte   $8d, $00, $18   ;04b1 8d 00 18 sta $1800
-        .byte   $60             ;04b4 60       rts 
+        ;-----------------------------------------------------------------------
+        ldx # $01
+        jsr _0485
+        ldx # $02
+        jsr _0485
+        
+        lda # $7f                       ;?
+        jmp C1541_KERNAL_error
+
+        
+_0485:                                                                  ;$0485
+        ;-----------------------------------------------------------------------
+        ; check bits 6 & 7 of the serial port
+        bit C1541_VIA1_PORTB
+        ; wait for the ATN ("attention") line to go high
+        bpl _0485
+
+        ; send the ATN ("attention") signal to the C64
+        lda # %00010000
+        sta C1541_VIA1_PORTB
+        
+_048f:  ; send byte to the C64?                                         ;$048F
+        ;-----------------------------------------------------------------------
+        ; check bits 6 & 7 of the serial port
+        bit C1541_VIA1_PORTB
+        ; wait for the ATN ("attention") line to go low,
+        ; this indicates a "ready" signal from the C64
+        bmi _048f
+
+        txa 
+        lsr a
+        lsr a
+        lsr a
+        lsr a
+        sta C1541_VIA1_PORTB
+
+        asl a
+        and # $0f
+        sta C1541_VIA1_PORTB
+        
+        txa 
+        and # $0f
+        sta C1541_VIA1_PORTB
+        
+        asl a
+        and # $0f
+        sta C1541_VIA1_PORTB
+        
+        lda # $0f
+        nop 
+        sta C1541_VIA1_PORTB
+        
+        rts 
 
 _04b5:
         ;=======================================================================
-        ; this is where program execution begins
+        ; this is where the 1541 program execution begins
+        ;
+        jsr C1541_KERNAL_loadBAM        ; load the disk's Block Allocation Map
 
-        jsr $d042               ;load BAM
-
-        ; set track and sector
-
-        .byte   $a9             ;04b8 a9 ff    lda # $ff
-_04b9:  .byte   $ff
-
+        ; set track and sector:
+        ; note that the values of these `LDA`s are modified
+        ; prior to this code being uploaded to the 1541
+lda_track:
+        lda # $ff
         sta C1541_ZP_BUFF0_TRK
-        
-        .byte   $a9             ;04bc a9 ff    lda # $ff
-_04bd:  .byte   $ff
 
+lda_sector:
+        lda # $ff
         sta C1541_ZP_BUFF0_SEC
-_04c0:
-        lda # C1541_JOB::EXECUTE
+
+        ; execute the scheduled job
+@exec:  lda # C1541_JOB::EXECUTE                                        ;$04C0
         sta C1541_ZP_JOB0
 
         ; wait for the job to complete
@@ -359,56 +417,59 @@ _04c0:
 
         ;-----------------------------------------------------------------------
 
-        cmp # $7f
-        beq _04ce
-        bcc _04c0
-_04ce:
-        jmp $d048               ; ; re-read BAM!??
+        ; bit 7 will be 0 for "job finished", the rest of the bits
+        ; determine result. 1 = OK, all other values are errors
+        cmp # %01111111
+        beq :+
+        bcc @exec
+
+:       jmp $d048               ; re-read BAM!??                        ;$04CE
 
 ;===============================================================================
 
 .segment        "CODE_STAGE1B"
 
 _04d1:
-        .byte   $a5, $a4        ;04d1 a5 a4    lda %10100100    ;=$A4
-        .byte   $8d, $00, $dd   ;04d3 8d 00 dd sta CIA2_PORTA
-_04d6:
-        .byte   $ad, $00, $dd   ;04d6 ad 00 dd lda CIA2_PORTA
-        .byte   $10, $fb        ;04d9 10 fb    bpl _04d6
-_04db:
-        .byte   $ad, $12, $d0   ;04db ad 12 d0 lda VIC_RASTER
-        .byte   $c9, $31        ;04de c9 31    cmp # $31
-        .byte   $90, $06        ;04e0 90 06    bcc _04e8
-        .byte   $29, $06        ;04e2 29 06    and # $06
-        .byte   $c9, $02        ;04e4 c9 02    cmp # $02
-        .byte   $f0, $f3        ;04e6 f0 f3    beq _04db
-_04e8:
-        .byte   $a5, $a5        ;04e8 a5 a5    lda $a5
-        .byte   $8d, $00, $dd   ;04ea 8d 00 dd sta CIA2_PORTA
-        .byte   $ea             ;04ed ea       nop 
-        .byte   $ea             ;04ee ea       nop 
-        .byte   $ea             ;04ef ea       nop 
-        .byte   $ea             ;04f0 ea       nop 
-        .byte   $ea             ;04f1 ea       nop 
-        .byte   $ea             ;04f2 ea       nop 
-        .byte   $ea             ;04f3 ea       nop 
-        .byte   $ea             ;04f4 ea       nop 
-        .byte   $ea             ;04f5 ea       nop 
-        .byte   $ea             ;04f6 ea       nop 
-        .byte   $ae, $00, $dd   ;04f7 ae 00 dd ldx CIA2_PORTA
-        .byte   $bd, $00, $cf   ;04fa bd 00 cf lda $cf00, x
-        .byte   $ae, $00, $dd   ;04fd ae 00 dd ldx CIA2_PORTA
-        .byte   $1d, $08, $cf   ;0500 1d 08 cf ora $cf08, x
-        .byte   $ae, $00, $dd   ;0503 ae 00 dd ldx CIA2_PORTA
-        .byte   $1d, $10, $cf   ;0506 1d 10 cf ora $cf10, x
-        .byte   $ae, $00, $dd   ;0509 ae 00 dd ldx CIA2_PORTA
-        .byte   $1d, $18, $cf   ;050c 1d 18 cf ora $cf18, x
-        .byte   $60             ;050f 60       rts 
+        lda $a4                         ; get buffered byte
+        sta CIA2_PORTA                  ; write it to the serial port
+:       lda CIA2_PORTA                  ; read the serial port          ;$04D6
+        bpl :-                          ; wait for ATN to go high
+
+:       lda VIC_RASTER                  ; get current raster-line       ;$04DB
+        cmp # $31                       ; 0-31?
+       .blt :+                          ; skip unless every 32nd raster-line
+        
+        and # %00000110                 ; "2, 2, 4, 4, 6, 6, 2, 2, ..."
+        cmp # %00000010                 ; for every 2 lines out of 6...
+        beq :-                          ; 
+
+:       lda $a5                                                         ;$04E8
+        sta CIA2_PORTA
+        nop 
+        nop 
+        nop 
+        nop 
+        nop 
+        nop 
+        nop 
+        nop 
+        nop 
+        nop 
+        ldx CIA2_PORTA
+        lda ELITE_DISK_BUFFER, x
+        ldx CIA2_PORTA
+        ora ELITE_DISK_BUFFER+$08, x
+        ldx CIA2_PORTA
+        ora ELITE_DISK_BUFFER+$10, x
+        ldx CIA2_PORTA
+        ora ELITE_DISK_BUFFER+$18, x
+        
+        rts 
 
         ;=======================================================================
         ; hijack of the KERNAL `LOAD` routine
         ;
-_0510:
+fastload:
         lda #< C1541_BUFF0      ; low-byte of write address in 1541 RAM
         sta $a4                 ; byte-buffer for serial communication  
 _0514:
@@ -418,17 +479,17 @@ _0514:
 
         ; append the "W" to make a Memory-Write command
         lda # 'w'
-        jsr $eddd               ;=KERNAL_IECOUT
+        jsr KERNAL_IECOUT_ADDR
         
         ; set the write-address within 1541 RAM
         lda $a4
-        jsr $eddd               ;=KERNAL_IECOUT
+        jsr KERNAL_IECOUT_ADDR
         lda #> C1541_BUFF0
-        jsr $eddd               ;=KERNAL_IECOUT
+        jsr KERNAL_IECOUT_ADDR
         
         ; "sending 32-bytes"
         lda # 32
-        jsr $eddd               ;=KERNAL_IECOUT
+        jsr KERNAL_IECOUT_ADDR
 
         ; move the write cursor forward 32-bytes
         ldy $a4
@@ -444,7 +505,7 @@ _0534:
 .import __CODE_1541_LOAD__
         ; read a byte of program code
         lda __CODE_1541_LOAD__, y
-        jsr $eddd               ;=KERNAL_IECOUT
+        jsr KERNAL_IECOUT_ADDR
         iny 
         cpy $a4
         bne _0534
@@ -458,32 +519,34 @@ _0534:
         cmp # $ce
         bcc _0514
 
+        ;-----------------------------------------------------------------------
         ; open the command channel again
         jsr _05a4
         ; start a memory-exexute command
         lda # 'e'
-        jsr $eddd               ;=KERNAL_IECOUT
+        jsr KERNAL_IECOUT_ADDR
 
         ; send the address (lo-hi) to execute inside the 1541.
         ; the code inside the 1541 will begin executing independently!
-        lda #< $03b2            ;=$04B5 here
-        jsr $eddd               ;=KERNAL_IECOUT
-        lda #> $03b2            ;=$04B5 here
-        jsr $eddd               ;=KERNAL_IECOUT
+
+        lda #< _04b5
+        jsr KERNAL_IECOUT_ADDR
+        lda #> _04b5
+        jsr KERNAL_IECOUT_ADDR
 
         ; close the command-channel
         jsr KERNAL_CLRCHN
 
-        ; query the serial port; this will signal to the 1541's code that
-        ; the C64 is ready?
-        .byte   $ad, $00, $dd   ;055d ad 00 dd lda $dd00
-        .byte   $29, $07        ;0560 29 07    and # $07
-        .byte   $85, $a5        ;0562 85 a5    sta $a5
-        .byte   $09, $08        ;0564 09 08    ora # $08
-        .byte   $85, $a4        ;0566 85 a4    sta $a4
-        .byte   $78             ;0568 78       sei 
-        .byte   $20, $c4, $05   ;0569 20 c4 05 jsr _05c4
-        .byte   $a0, $00        ;056c a0 00    ldy # $00
+        lda $dd00               ; read the C64 serial port
+        and # %00000111         ; mask out VIC-bank and RS232 bits
+        sta $a5                 ; "Bit counter during serial bus input/output"
+        ora # %00001000         ; pull ATN ("attention") line high
+        sta $a4
+        
+        sei                     ; disable interrupts 
+        jsr _05c4
+        
+        ldy # $00
 _056e:
         .byte   $20, $f5, $05   ;056e 20 f5 05 jsr _05f5
         .byte   $20, $d1, $04   ;0571 20 d1 04 jsr _04d1
@@ -524,7 +587,7 @@ _05a4:                                                                  ;$05A4
         
         lda # 15                ; logical number
         tay                     ; secondary-address (channel)
-        ldx # $08               ; device number
+        ldx # DEV_DRV8          ; device number
         jsr KERNAL_SETLFS
         jsr KERNAL_OPEN
         
@@ -539,22 +602,25 @@ _05a4:                                                                  ;$05A4
         
         rts 
 
-        ;=======================================================================
-
 _05c4:
-        .byte   $20, $d1, $04   ;05c4 20 d1 04 jsr _04d1
-        .byte   $85, $ae        ;05c7 85 ae    sta $ae
-        .byte   $20, $d1, $04   ;05c9 20 d1 04 jsr _04d1
-        .byte   $85, $af        ;05cc 85 af    sta $af
-        .byte   $60             ;05ce 60       rts 
+        ;-----------------------------------------------------------------------
+        jsr _04d1
+        sta $ae
+        
+        jsr _04d1
+        sta $af
+        
+        rts 
 
+fastload_hijack:                                                        ;$05CF
         ;=======================================================================
+        ; hijack the C64 KERNAL's `LOAD` routine
+        ;
+        lda #< fastload
+        sta KERNAL_VECTOR_LOAD+0
+        lda #> fastload
+        sta KERNAL_VECTOR_LOAD+1
 
-_05cf:                                                                  ;$05CF
-        lda #< _0510
-        sta $0330               ; vector for `LOAD` routine
-        lda #> _0510
-        sta $0331               ; vector for `LOAD` routine
         rts 
 
         ;=======================================================================
@@ -563,14 +629,16 @@ _05da:                                                                  ;$05DA
         ldx # $00
         ldy # $00
 _05de:                                                                  ;$05DE
-        lda # $08
+        lda # $08               ; no. of bytes to copy?
         sta _0618               ; counter?
 
+.import ELITE_DISK_BUFFER
+
         lda _05fc, x
-:       sta $cf00, y            ; decode buffer?                        ;$05E6
+:       sta ELITE_DISK_BUFFER, y                                        ;$05E6
         iny 
         dec _0618
-        bne :-
+       .bnz :-
         inx 
         cpx # $1c               ;=28
         bcc _05de
@@ -596,7 +664,6 @@ _0618:                                                                  ;$0618
 ;-------------------------------------------------------------------------------
 
         ; backup $02-$FF to $CE02-$CEFF
-.import ELITE_ZP_SHADOW
 
         ; carry is a flag
 _0619:  ldx # $02

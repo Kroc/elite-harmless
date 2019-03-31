@@ -255,6 +255,8 @@ md5sum --ignore-missing --quiet --check checksums.md5
 if [ $? -eq 0 ]; then echo "- OK"; fi
 cd ..
 
+##exit 0
+
 #===============================================================================
 
 echo

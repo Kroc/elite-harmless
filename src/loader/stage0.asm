@@ -122,8 +122,8 @@ start:                                                                  ;$02c1
         ; change the address of STOP key routine from $F6ED, to $FFED:
         ; the SCREEN routine which returns row/col count, i.e. does
         ; nothing of use -- this effectively disables the STOP key
-        lda # $ff
-        sta $0329
+        lda #> KERNAL_SCREEN
+        sta KERNAL_VECTOR_STOP+1
 
         .repeat 24
         nop 

@@ -1,5 +1,6 @@
-# ignore any folder beginning with "!" (used to hide stuff from the repository)
-\!*
-**\!*
+# ignore anything beginning with "__"
+# (used to hide stuff from the repository)
+__*
+**\__*
 
 ca65_plugin_build.sh
