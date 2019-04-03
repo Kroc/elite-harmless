@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; a series of lookup tables, purpose currently unknown
+; a series of lookup tables. something to do with line drawing
 
 .segment        "DATA_9300"
 .align  256
@@ -45,6 +45,7 @@ _9300:                                                                  ;$9300
 
 
 ;===============================================================================
+; a lookup table of line-heights to slopes?
 
 _9400:                                                                  ;$9400
 .export _9400

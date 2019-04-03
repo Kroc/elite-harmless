@@ -37,12 +37,8 @@ _75e4:                                                                  ;$75E4
 .import __GMA4_DATA1A_START__
 .import __GMA4_DATA1A_LAST__
 
-        ; number of whole pages to copy. note that the lack of a rounding-up
-        ; divide is fixed by adding just shy of one page before dividing,
-        ; instead of just adding one to the result. this means that a round
-        ; number of bytes, e.g. $1000 would not calculate as one more page
-        ; than necessary 
-        ldx #< (((__GMA4_DATA1A_LAST__ - __GMA4_DATA1A_START__) + 255) / 256)
+        ; number of whole pages to copy
+        ldx #< .page_count(__GMA4_DATA1A_LAST__ - __GMA4_DATA1A_START__)
         
         ;TODO: this is not ideal as an import        
 .import __TEXT_FLIGHT_RUN__
@@ -71,7 +67,7 @@ _75e4:                                                                  ;$75E4
         ; and character ROM) enabling all 64 KB RAM for use
         lda CPU_CONTROL         ; get the current processor port value
         and # %11111000         ; reset bottom 3 bits and keep top 5 unchanged
-        ora # MEM_64K           ; turn all ROM shadows off, gives 64K of RAM
+        ora # C64_MEM::ALL      ; turn all ROM shadows off, gives 64K of RAM
         sta CPU_CONTROL
 
         ; relocate part of the binary payload in "gma4.prg" --
@@ -98,7 +94,7 @@ _75e4:                                                                  ;$75E4
         ; switch the I/O area back on:
         lda CPU_CONTROL         ; get the current processor port value
         and # %11111000         ; reset bottom 3 bits, top 5 unchanged 
-        ora # MEM_IO_ONLY       ; switch I/O on, BASIC & KERNAL ROM off
+        ora # C64_MEM::IO_ONLY  ; switch I/O on, BASIC & KERNAL ROM off
         sta CPU_CONTROL
 
         lda CIA2_PORTA_DDR      ; read Port A ($DD00) data-direction register
@@ -455,9 +451,9 @@ _77a3:  sta $d802,y
 
         ;-----------------------------------------------------------------------
 
-        lda CPU_CONTROL         ; get processor port state
-        and # %11111000         ; retain everything except bits 0-2 
-        ora # MEM_IO_KERNAL     ; I/O & KERNAL ON, BASIC OFF
+        lda CPU_CONTROL                 ; get processor port state
+        and # %11111000                 ; retain everything except bits 0-2 
+        ora # C64_MEM::IO_KERNAL        ; I/O & KERNAL ON, BASIC OFF
         sta CPU_CONTROL
 
         ;-----------------------------------------------------------------------
@@ -470,12 +466,8 @@ _77a3:  sta $d802,y
         ; get the location of the HUD data from the linker configuration
 .import __HUD_DATA_LOAD__, __HUD_DATA_SIZE__
 
-        ; number of whole pages to copy. note that, the lack of a rounding-up
-        ; divide is fixed by adding just shy of one page before dividing,
-        ; instead of just adding one to the result. this means that a round
-        ; number of bytes, e.g. $1000 would not calculate as one more page
-        ; than necessary 
-        ldx #< ((__HUD_DATA_SIZE__ + 255) / 256)
+        ; number of whole pages to copy
+        ldx #< .page_count(__HUD_DATA_SIZE__)
 
         ; get the location where the HUD data is to be copied to
 .import __HUD_DATA_LOAD__

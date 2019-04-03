@@ -120,7 +120,7 @@
 .import _a858:absolute
 .import _a8e0:absolute
 .import _a8e6:absolute
-.import _ab91:absolute
+.import draw_line:absolute
 .import _affa:absolute
 .import _b0f4:absolute
 .import _b11f:absolute
@@ -334,7 +334,7 @@ _1e35:
         tay 
 
         ; turn the I/O area on to manage the sprites
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
         
         ; should the Trumbles™ change direction?
@@ -416,7 +416,7 @@ _1eb3:                                                                  ;$1EB3
         cli                     ; re-enable interrupts
 
         ; turn I/O off, go back to 64K RAM
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         jsr set_memory_layout
         
         jmp _1ece
@@ -1167,14 +1167,14 @@ _22c2:                                                                  ;$22C2
         cmp # $f0
         bcc _2303
 
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
         
         lda VIC_SPRITE_ENABLE
         and # %00000011
         sta VIC_SPRITE_ENABLE
         
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         jsr set_memory_layout
         
 .ifndef OPTION_NOTRUMBLES
@@ -2017,20 +2017,28 @@ _28e0:                                                                  ;$28E0
 ;===============================================================================
 .export _28e0
 
-        lda # $17
+        lda # 23
         jsr cursor_down
 
 _28e5:                                                                  ;$28E5
 ;===============================================================================
+; called from galactic chart screen;
+; draws a line across the screen
+;
+;       A = Y-position of line
+;
 .export _28e5
 
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y1
         sta ZP_VAR_Y2
-        ldx # $00
-        stx ZP_VAR_X
-        dex 
-        stx ZP_VAR_X2
-        jmp _ab91
+
+        ; set X to go from 0 to 255
+        ldx # $00                       ; begin with zero
+        stx ZP_VAR_X1                   ; set line-begin
+        dex                             ; roll around to 255
+        stx ZP_VAR_X2                   ; set line-end
+        
+        jmp draw_line
 
 _28f3:                                                                  ;$28F3
 ;===============================================================================
@@ -2261,7 +2269,7 @@ _29e6:                                                                  ;$2936
         sta _27a4, y            ; writing to code??
         iny 
         sty ZP_7E
-        jsr _ab91
+        jsr draw_line
         lda ZP_A2
         bne _2988
 _29fa:                                                                  ;$29FA
@@ -5793,7 +5801,7 @@ _3d09:                                                                  ;$3D09
         sta ZP_VAR_Y
         lda # $8f
         sta ZP_VAR_Y2
-        jsr _ab91
+        jsr draw_line
         lda VAR_06F0
         sta ZP_VAR_X
         lda VAR_06F1
@@ -5801,7 +5809,7 @@ _3d09:                                                                  ;$3D09
         sty ZP_VAR_X2
         lda # $8f
         sta ZP_VAR_Y2
-        jmp _ab91
+        jmp draw_line
 
 ;===============================================================================
 

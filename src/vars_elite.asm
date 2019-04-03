@@ -82,6 +82,7 @@ VAR_04C4                = $04c4 ;?
 
 ; got Trumbles™?
 .ifndef OPTION_NOTRUMBLES
+;///////////////////////////////////////////////////////////////////////////////
 
 PLAYER_TRUMBLES         = $04c9 ; number of Trumbles™ in the player's hold
 PLAYER_TRUMBLES_LO      = $04c9
@@ -113,6 +114,7 @@ TRUMBLES_MOVE_Y7        = $0520 ; UNUSED! There is no 7th Trumble™ on-screen!
 
 VAR_0521                = $0521 ;? (indexed by Y) -- Trumble™ related
 
+;///////////////////////////////////////////////////////////////////////////////
 .endif
 
 VAR_0531                = $0531 ;? (indexed by Y)

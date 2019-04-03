@@ -34,7 +34,7 @@ init:
         ; switch the I/O area on:
         lda CPU_CONTROL         ; get the current processor port value
         and # %11111000         ; reset bottom 3 bits, top 5 unchanged 
-        ora # MEM_IO_ONLY       ; switch I/O on, BASIC & KERNAL ROM off
+        ora # C64_MEM::IO_ONLY  ; switch I/O on, BASIC & KERNAL ROM off
         sta CPU_CONTROL
 
         lda CIA2_PORTA_DDR      ; read Port A ($DD00) data-direction register
@@ -399,9 +399,9 @@ _76d8:  stx ZP_COPY_TO+1
 
         ;-----------------------------------------------------------------------
 
-        lda CPU_CONTROL         ; get processor port state
-        and # %11111000         ; retain everything except bits 0-2 
-        ora # MEM_IO_KERNAL     ; I/O & KERNAL ON, BASIC OFF
+        lda CPU_CONTROL                 ; get processor port state
+        and # %11111000                 ; retain everything except bits 0-2 
+        ora # C64_MEM::IO_KERNAL        ; I/O & KERNAL ON, BASIC OFF
         sta CPU_CONTROL
 
         cli 

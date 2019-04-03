@@ -157,6 +157,7 @@
 
 _6a00:                                                                  ;$6A00
 .export _6a00
+
         sta VAR_04EF            ; item index?
         lda # $01
 _6a05:  pha                                                             ;$6A05
@@ -178,40 +179,37 @@ _6a1b:                                                                  ;$6A1B
         pla 
         rts 
 
-
-.proc   set_cursor_col                                                  ;$6A25
-        ;=======================================================================
-        ; set the cursor column (where text printing occurs)
-        ;
-        ;     A = column number
-        ;
+set_cursor_col:                                                         ;$6A25
+;===============================================================================
+; set the cursor column (where text printing occurs)
+;
+;     A = column number
+;
 .export set_cursor_col
 
         sta ZP_CURSOR_COL
         rts 
-.endproc
 
-.proc   set_cursor_row                                                  ;$6A28
-        ;=======================================================================
-        ; set the cursor row (where text printing occurs)
-        ;
-        ;     A = row number
-        ;
+set_cursor_row:                                                         ;$6A28
+;===============================================================================
+; set the cursor row (where text printing occurs)
+;
+;     A = row number
+;
 .export set_cursor_row
 
         sta ZP_CURSOR_ROW
         rts 
-.endproc
 
-.proc   cursor_down                                                     ;$6A2b
-        ;=======================================================================
-        ; move the cursor down a row (does not change column!)
-        ;
+cursor_down:                                                            ;$6A2b
+;===============================================================================
+; move the cursor down a row (does not change column!)
+;
 .export cursor_down
 
         inc ZP_CURSOR_ROW
         rts 
-.endproc
+
 
 ;===============================================================================
 
@@ -281,7 +279,7 @@ _6a68:                                                                  ;$6A68
 
         ;-----------------------------------------------------------------------
         ; print "DISTANCE:"
-
+        ;
 .import TXT_DISTANCE:direct
 
 :       lda # TXT_DISTANCE                                              ;$6A73
@@ -605,14 +603,15 @@ _6ba9:                                                                  ;$6BA9
 
 ;===============================================================================
 ; galactic chart
-
+;
 _6c1c:                                                                  ;$6C1C
         lda # $40               ; page-ID for galactic chart
         jsr set_page            ; switch pages, clearing the screen
         
+.ifdef  OPTION_ORIGINAL
         lda # $10
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
-
+.endif
         lda # 7
         jsr set_cursor_col
         
@@ -622,10 +621,16 @@ _6c1c:                                                                  ;$6C1C
         lda # TXT_GALACTIC_CHART
         jsr print_flight_token
         
-        jsr _28e0
-        lda # $98
+        jsr _28e0               ; cursor down 23 times!!!
+                                ; (clear HUD colours off screen?)
+        
+        ; draw line across bottom of chart?
+        ;
+        lda # $98               ; Y=152
         jsr _28e5
+
         jsr _6cda
+
         ldx # $00
 _6c40:                                                                  ;$6C40
         stx ZP_9D
@@ -677,7 +682,7 @@ _6c8b:                                                                  ;$6C8B
         adc ZP_93
         sta ZP_VAR_Y
         sta ZP_VAR_Y2
-        jsr _ab91
+        jsr draw_line
         lda ZP_8F
         sec 
         sbc ZP_90
@@ -701,7 +706,7 @@ _6cb8:                                                                  ;$6CB8
         lda ZP_8E
         sta ZP_VAR_X
         sta ZP_VAR_X2
-        jmp _ab91
+        jmp draw_line
 
 ;===============================================================================
 
@@ -1217,9 +1222,10 @@ _6fdb:                                                                  ;$6FDB
         lda # $80               ; page-ID for short-range (local) chart
         jsr set_page            ; switch pages, clearing the screen
         
+.ifdef  OPTION_ORIGINAL
         lda # $10
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
-
+.endif
         lda # 7
         jsr set_cursor_col
         
@@ -3000,7 +3006,7 @@ _79a7:                                                                  ;$79A7
 ;===============================================================================
 
 _79a9:                                                                  ;$79A9
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
 
         lda ZP_POLYOBJ_ZPOS_MI
@@ -3115,7 +3121,7 @@ _7a78:                                                                  ;$7A78
         pla 
         sta ZP_GOATSOUP_pt2     ;?
         
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         jsr set_memory_layout
 
         lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
@@ -4141,7 +4147,7 @@ _80c0:                                                                  ;$80C0
         sta ZP_VAR_Y2
         lda _26a4, y
         sta ZP_VAR_X2
-        jsr _ab91
+        jsr draw_line
         iny 
         lda VAR_06F4
         bne _80c0
@@ -4427,7 +4433,7 @@ disable_sprites:                                                        ;$8273
 
         ; ensure the I/O is enabled so we can talk to the VIC-II:
 
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
 
         ; disable all sprites
@@ -4435,7 +4441,7 @@ disable_sprites:                                                        ;$8273
         sta VIC_SPRITE_ENABLE
 
         ; switch back to 64K RAM layout
-        lda # MEM_64K
+        lda # C64_MEM::ALL
 
 set_memory_layout:                                                      ;$827F
         ;=======================================================================
@@ -4457,7 +4463,7 @@ set_memory_layout:                                                      ;$827F
         rts 
 
 current_memory_layout:                                                  ;$828E
-        .byte   MEM_64K
+        .byte   C64_MEM::ALL
 
 ;===============================================================================
 
@@ -5592,9 +5598,10 @@ _8920:                                                                  ;$8920
 
         jsr clear_keyboard
 
+.ifdef  OPTION_ORIGINAL
         lda # $20
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
-
+.endif
         lda # $0d
         jsr set_page
         
@@ -6028,7 +6035,7 @@ _8b27:                                                                  ;$8B27
         lda # 40                ; raster line 40
         sta VIC_RASTER
 
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         jsr set_memory_layout
         
         cli 
@@ -6054,7 +6061,7 @@ _8bbf:                                                                  ;$8BBF
 _8bc0:                                                                  ;$8BC0
         jsr swap_zp_shadow
         
-        lda # MEM_IO_KERNAL
+        lda # C64_MEM::IO_KERNAL
         sei 
         jsr set_memory_layout
         
@@ -6119,7 +6126,7 @@ _8c0d:                                                                  ;$8C0D
         lda # 40                ; raster line 40
         sta VIC_RASTER
         
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         jsr set_memory_layout
         
         cli 
@@ -6405,7 +6412,7 @@ get_input:                                                              ;$8D53
 
        .phy                     ; preserve Y
         
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
 
         ; hide sprite 1: why?
@@ -6558,7 +6565,7 @@ get_input:                                                              ;$8D53
 
         ; turn the I/O shield off and
         ; return to 'game' memory layout
-:       lda # MEM_64K                                                   ;$8E1E
+:       lda # C64_MEM::ALL                                              ;$8E1E
         jsr set_memory_layout
 
        .ply                     ; restore Y
@@ -6640,7 +6647,7 @@ get_ctrl:                                                               ;$8E92
 
 ; ununsed / unreferenced?
 ; $8e99:
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
         
         sei 
@@ -6651,7 +6658,7 @@ get_ctrl:                                                               ;$8E92
         beq _8eab
         ldx # $ff
 _8eab:                                                                  ;$8EAB
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         jsr set_memory_layout
 
         txa 
@@ -7198,7 +7205,7 @@ _920d:                                                                  ;$920D
         bit _1d0d
         bmi _91fd
 _9222:                                                                  ;$9222
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
 
         jsr sound_stop
@@ -7222,7 +7229,7 @@ _9245:                                                                  ;$9245
 
         jsr _a817
 
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
         
         lda # $00
@@ -7239,7 +7246,7 @@ _925a:                                                                  ;$925A
         
         cli 
 _9266:                                                                  ;$9266
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         jmp set_memory_layout
 
 ;===============================================================================
@@ -8678,7 +8685,7 @@ _a183:                                                                  ;$A183
         iny 
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_Y2
-        jsr _ab91
+        jsr draw_line
         iny 
         cpy ZP_AE
         bcc _a183
@@ -9469,7 +9476,7 @@ _a6ba:                                                                  ;$A6BA
         jsr dust_swap_xy
         jsr _7b1a
 _a6d4:                                                                  ;$A6D4
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
 
         ldy VAR_0486            ; current viewpoint? (front, rear, left, right)
@@ -9524,7 +9531,7 @@ _a700:                                                                  ;$A700
         sta VIC_SPRITE_ENABLE
 .endif
         ; turn off the I/O and go back to 64K RAM
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         jmp set_memory_layout
 
 .ifndef OPTION_NOTRUMBLES
@@ -9923,7 +9930,7 @@ _a8fa:                                                                  ;$A8FA
         
         lda CPU_CONTROL
         and # %11111000
-        ora # MEM_IO_ONLY
+        ora # C64_MEM::IO_ONLY
         sta CPU_CONTROL
 
         lda VIC_INTERRUPT_STATUS
@@ -10140,12 +10147,8 @@ _aaa2:                                                                  ;$AAA2
         lda #> __VARS_0400_RUN__
         sta ZP_TEMP_ADDR1_HI
 
-        ; number of whole pages to copy; note that the lack of a rounding-up
-        ; divide is fixed by adding just shy of one page before dividing,
-        ; instead of just adding one to the result. this means that a round
-        ; number of bytes, e.g. $1000 would not calculate as one more page
-        ; than necessary 
-        ldx #< ((__VARS_0400_SIZE__ + 255) / 256)
+        ; number of whole pages to copy
+        ldx #< .page_count(__VARS_0400_SIZE__)
 
         lda #< __VARS_0400_RUN__ 
         sta ZP_TEMP_ADDR1_LO
@@ -10180,7 +10183,7 @@ _aaa2:                                                                  ;$AAA2
 
         ; change the C64's memory layout, turn off the BASIC & KERNAL ROMs
         ; leaving just the I/O registers ($D000...)
-        lda # MEM_IO_ONLY
+        lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
 
         sei 
@@ -10212,15 +10215,16 @@ _aaa2:                                                                  ;$AAA2
         
         lda CPU_CONTROL
         and # %11111000
-        ora # MEM_64K
+        ora # C64_MEM::ALL
         sta CPU_CONTROL
         
         ; record this as the game's
         ; current memory-layout state
-        lda # MEM_64K
+        lda # C64_MEM::ALL
         sta current_memory_layout
         
         ; set up the routines for the interrupts:
+        ;
         ; NOTE: with the KERNAL ROM off, the hardware vectors at $FFFA...$FFFF
         ;       are now being defined by empty RAM -- we need to set something
         ;       there to prevent crashes when KERNAL ROM is off 
@@ -10266,7 +10270,8 @@ _aaa2:                                                                  ;$AAA2
         rts 
 
 ;===============================================================================
-
+; line-drawing data
+;
 _ab31:                                                                  ;$AB31
         .byte   %10000000
         .byte   %01000000
@@ -10299,17 +10304,37 @@ _ab47:                                                                  ;$AB47
 _ab49:                                                                  ;$AB49
         .byte   $30, $30, $0c, $0c, $03, $03, $c0, $c0
 
+;-------------------------------------------------------------------------------
+; routines to draw a line-segment beginning
+; from each column 0...7 of a char-cell row
+; 
 .define _ab51_addrs \
-        _ac60, _ac83, _aca6, _acc9, _acec, _ad0f, _ad32, _ad55
+        draw_pixel_col0, \
+        draw_pixel_col1, \
+        draw_pixel_col2, \
+        draw_pixel_col3, \
+        draw_pixel_col4, \
+        draw_pixel_col5, \
+        draw_pixel_col6, \
+        draw_pixel_col7
 
 _ab51:  .lobytes _ab51_addrs                                            ;$AB51
 _ab59:  .hibytes _ab51_addrs                                            ;$AB59
 
 .define _ab61_addrs \
-        _ac66, _ac89, _acac, _accf, _acf2, _ad15, _ad38, _ad5b
+        col0_next, \
+        col1_next, \
+        col2_next, \
+        col3_next, \
+        col4_next, \
+        col5_next, \
+        col6_next, \
+        col7_next
 
 _ab61:  .lobytes _ab61_addrs                                            ;$AB61
 _ab69:  .hibytes _ab61_addrs                                            ;$AB69
+
+;-------------------------------------------------------------------------------
 
 .define _ab71_addrs \
         _ade0, _ae03, _ae26, _ae49, _ae6c, _ae8f, _aeb2, _aed5
@@ -10323,325 +10348,539 @@ _ab79:  .hibytes _ab71_addrs                                            ;$AB79
 _ab81:  .lobytes _ab81_addrs                                            ;$AB81
 _ab89:  .hibytes _ab81_addrs                                            ;$AB89
 
+draw_line:                                                              ;$AB91
 ;===============================================================================
+; draw a line
+;
+; lines are drawn right-to-left as it is faster in practice to count downwards
+; (compare against zero) than upwards.
+;
+; TODO: since every line is drawn twice (drawn once, then erased the
+;       next frame), the line-flipping checks here should really be
+;       done when building the list of lines to draw, rather than
+;       every time a line is drawn
+;
+.export draw_line
 
-_ab91:                                                                  ;$AB91
-.export _ab91
-        sty $9e
-        lda # $80
+        sty ZP_9E                       ; preserve Y
+
+        lda # $80                       ; -1
         sta ZP_BF
         asl 
         sta VAR_06F4
-        lda ZP_VAR_X2
-        sbc ZP_VAR_X
-        bcs _aba5
-        eor # %11111111
-        adc # $01
-_aba5:                                                                  ;$ABA5
-        sta ZP_BC
+
+        ; "dx = abs(x2 - x1)"?
+
+        ; check horizontal direction of the line
+        ;
+        lda ZP_VAR_X2                   ; is the line-end,
+        sbc ZP_VAR_X1                   ; after the line-start?
+       .bge :+                          ; if so, continue as is
+
+        ; line is negative,
+        ; invert the result
+        eor # %11111111                 ; flip all bits,
+        adc # $01                       ; and add 1 (two's compliment)
+
+:       sta ZP_BC                       ; store line-width              ;$ABA5
+
+        ; "dy = abs(y2 - y1)"?
+
+        ; check vertical direction of the line
+        ;
         sec 
-        lda ZP_VAR_Y2
-        sbc ZP_VAR_Y
-        bcs _abb2
-        eor # %11111111
-        adc # $01
-_abb2:                                                                  ;$ABB2
-        sta ZP_BD
-        cmp ZP_BC
-        bcc _abbb
+        lda ZP_VAR_Y2                   ; is the line-bottom,
+        sbc ZP_VAR_Y1                   ; below the line-top?
+       .bge :+                          ; if so, continue as is
+
+        eor # %11111111                 ; flip all bits,
+        adc # $01                       ; and add 1 (two's compliment)
+
+:       sta ZP_BD                       ; store line-height             ;$ABB2
+        
+        ; is the line wider than it is tall?
+        cmp ZP_BC                       
+       .blt :+
+
+        ; handle vertical line
         jmp _af08
 
-_abbb:                                                                  ;$ABBB
-        ldx ZP_VAR_X
+        ; draw horizontal line:
+        ;=======================================================================
+        ; which direction does the line go?
+:       ldx ZP_VAR_X1                                                   ;$ABBB
         cpx ZP_VAR_X2
-        bcc _abd3
+       .blt :+                          ; if line is left-to-right, skip ahead
+        
+        ; line is the wrong way around (end is before start),
+        ; flip the line's direction
         dec VAR_06F4
+
         lda ZP_VAR_X2
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
         stx ZP_VAR_X2
         tax 
         lda ZP_VAR_Y2
-        ldy ZP_VAR_Y
-        sta ZP_VAR_Y
+        ldy ZP_VAR_Y1
+        sta ZP_VAR_Y1
         sty ZP_VAR_Y2
-_abd3:                                                                  ;$ABD3
-        ldx ZP_BD
-        beq _abf9
-        lda _9400, x
-        ldx ZP_BC
+
+        ; given a horizontal line that can only adjust one pixel vertically
+        ; at a time, we must get the 'step' value that tells us how often
+        ; the horizontal line takes a step vertically
+
+:       ldx ZP_BD                       ; get line height               ;$ABD3
+       .bze @_abf9                       ; if zero, line is straight!
+
+        lda _9400, x                    ; get slope?
+
+        ldx ZP_BC                       ; get line width
         sec 
         sbc _9400, x
-        bmi _abfd
-        ldx ZP_BD
+        bmi @_abfd
+
+        ldx ZP_BD                       ; get line height
         lda _9300, x
         ldx ZP_BC
         sbc _9300, x
-        bcs _abf5
+        bcs @_abf5
+        
         tax 
         lda _9500, x
-        jmp _ac0d
+        jmp @_ac0d
 
-_abf5:                                                                  ;$ABF5
+@_abf5:                                                                 ;$ABF5
+        ;-----------------------------------------------------------------------
         lda # $ff
-        bne _ac0d
-_abf9:                                                                  ;$ABF9
-        lda # $00
-        beq _ac0d
-_abfd:                                                                  ;$ABFD
+       .bnz @_ac0d                      ; always branches
+
+@_abf9: ; straight line                                                 ;$ABF9
+        ;-----------------------------------------------------------------------
+        lda # $00                       ; no slope / step?
+       .bze @_ac0d                      ; always branches
+
+@_abfd:                                                                 ;$ABFD
+        ;-----------------------------------------------------------------------
         ldx ZP_BD
         lda _9300, x
         ldx ZP_BC
         sbc _9300, x
-        bcs _abf5
+        bcs @_abf5
         tax 
         lda _9600, x
-_ac0d:                                                                  ;$AC0D
-        sta ZP_BD
+
+@_ac0d:                                                                 ;$AC0D
+        sta ZP_BD                       ; slope / step?
         clc 
-        ldy ZP_VAR_Y
+        ldy ZP_VAR_Y1
         cpy ZP_VAR_Y2
-        bcs _ac19
+       .bge @_ac19
+
         jmp _ad8b
 
+@_ac19:                                                                 ;$AC19
         ;-----------------------------------------------------------------------
-
-_ac19:                                                                  ;$AC19
-        lda ZP_VAR_X
-        and # %11111000
+        ; get the address within the bitmap where we will be drawing,
+        ; stored into `ZP_TEMP_ADDR1`
+        ;
+        lda ZP_VAR_X                    ; horizontal pixel column
+        and # %11111000                 ; round to 8-bits, i.e. per char cell
         clc 
-        adc row_to_bitmap_lo, y
+        adc row_to_bitmap_lo, y         ; get bitmap address low-byte
         sta ZP_TEMP_ADDR1_LO
-        lda row_to_bitmap_hi, y
+        lda row_to_bitmap_hi, y         ; get bitmap address high-byte
         adc # $00
         sta ZP_TEMP_ADDR1_HI
-        tya 
-        and # %00000111
-        tay 
-        lda ZP_VAR_X
-        and # %00000111
-        tax 
+
+        tya                             ; get the pixel row again
+        and # %00000111                 ; mod 8 (0...7), i.e. row within cell
+        tay                             ; Y = char cell row index
+
+        lda ZP_VAR_X                    ; again, the horizontal pixel column
+        and # %00000111                 ; mod 8 (0...7)
+        tax                             ; X = char cell pixel column no.
+
         bit VAR_06F4
-        bmi _ac49
+        bmi @_ac49
+
+        ; each pixel column has its own routine for drawing for speed purposes,
+        ; get the address to jump to based on the column number 0...7 
         lda _ab51, x
-        sta _ac46+1
+        sta @_ac46+1
         lda _ab59, x
-        sta _ac46+2
+        sta @_ac46+2
         ldx ZP_BC
-_ac46:                                                                  ;$AC46
+@_ac46:                                                                 ;$AC46
         jmp $8888
 
-_ac49:                                                                  ;$AC49
+@_ac49:                                                                 ;$AC49
         lda _ab61, x
-        sta _ac5a+1
+        sta @_ac5a+1
         lda _ab69, x
-        sta _ac5a+2
+        sta @_ac5a+2
         ldx ZP_BC
         inx 
-        beq _ac5d
-_ac5a:                                                                  ;$AC5A
+        beq line_done_rel1
+@_ac5a:                                                                 ;$AC5A
         jmp $8888
 
-_ac5d:                                                                  ;$AC5D
-        ldy $9e
-        rts 
+line_done_rel1:                                                         ;$AC5D
+        ;-----------------------------------------------------------------------
+        ldy ZP_9E                       ; restore Y
+        rts                             ; line has been drawn!
 
-;===============================================================================
+; this series of routines represent an unrolled loop to draw pixels of the
+; line beginning at a particular column numbers, and proceeding to the next
+;
+draw_pixel_col0:                                                        ;$AC60
+        ;=======================================================================
+        ; draw a pixel in column 0 of a char-cell and
+        ; move to the next pixel, and row if necessary
+        ;
+        ;       X = remaining no. of pixels of line to draw
+        ;       Y = char cell row no. 0...7
+        ;
+        lda # %10000000                 ; we will set the first pixel
+        eor [ZP_TEMP_ADDR1], y          ; flip all pixels
+        sta [ZP_TEMP_ADDR1], y          ; flip back, masking the one we want
 
-_ac60:                                                                  ;$AC60
-        lda # %10000000
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
-_ac66:                                                                  ;$AC66
-        dex 
-        beq _ac5d
+col0_next:                                                              ;$AC66
+        dex                             ; one less pixel to draw
+       .bze line_done_rel1              ; no more pixels to draw?
+
+        lda ZP_BF                       ; (initialy $80?)
+        adc ZP_BD                       ; slope?
+        sta ZP_BF                       ; negative slope?
+        bcc draw_pixel_col1             ; remains negative?
+
+        ; move up one row in the character cell ( 8 rows).
+        ; if we're at the top of the cell, move to the next cell above
+        ;
+        dey                             ; move to the previous row
+        bpl :+                          ; still within the char-cell?
+        
+        ; subtract 320 from the current bitmap address
+        ; i.e. move up one pixel row on the screen
+        lda ZP_TEMP_ADDR1_LO
+        sbc # < 320
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
+        sbc # > 320
+        sta ZP_TEMP_ADDR1_HI
+
+        ; begin at bottom of char-cell, row 7
+        ldy # $07
+
+:       clc                                                             ;$AC82
+
+draw_pixel_col1:                                                        ;$AC83
+        ;-----------------------------------------------------------------------
+        ; draw a pixel in column 1 of a char-cell and
+        ; move to the next pixel, and row if necessary
+        ;
+        ;       X = remaining no. of pixels of line to draw
+        ;       Y = char cell row no. 0...7
+        ;
+        lda # %01000000                 ; we will set the second pixel
+        eor [ZP_TEMP_ADDR1], y          ; flip all pixels
+        sta [ZP_TEMP_ADDR1], y          ; flip back, masking the one we want
+
+col1_next:                                                              ;$AC89
+        dex                             ; one less pixel to draw
+        beq line_done_rel1              ; no more pixels to draw?
+
         lda ZP_BF
         adc ZP_BD
         sta ZP_BF
-        bcc _ac83
-        dey 
-        bpl _ac82
+        bcc draw_pixel_col2
+
+        ; move up one row in the character cell ( 8 rows).
+        ; if we're at the top of the cell, move to the next cell above
+        ;
+        dey                             ; move to the previous row
+        bpl :+                          ; still within the char-cell?
+
+        ; subtract 320 from the current bitmap address
+        ; i.e. move up one pixel row on the screen
         lda ZP_TEMP_ADDR1_LO
-        sbc # $40
+        sbc # < 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 320
         sta ZP_TEMP_ADDR1_HI
+
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_ac82:                                                                  ;$AC82
-        clc 
-_ac83:                                                                  ;$AC83
-        lda # $40
+     
+:       clc                                                             ;$ACA5
+
+draw_pixel_col2:                                                        ;$ACA6
+        ;-----------------------------------------------------------------------
+        ; draw a pixel in column 2 of a char-cell and
+        ; move to the next pixel, and row if necessary
+        ;
+        ;       X = remaining no. of pixels of line to draw
+        ;       Y = char cell row no. 0...7
+        ;
+        lda # %00100000                 ; we will set the third pixel
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-_ac89:                                                                  ;$AC89
-        dex 
-        beq _ac5d
+
+col2_next:                                                              ;$ACAC
+        dex                             ; one less pixel to draw
+        beq line_done_rel1              ; no more pixels to draw?
+
         lda ZP_BF
         adc ZP_BD
         sta ZP_BF
-        bcc _aca6
-        dey 
-        bpl _aca5
+        bcc draw_pixel_col3
+
+        ; move up one row in the character cell ( 8 rows).
+        ; if we're at the top of the cell, move to the next cell above
+        ;
+        dey                             ; move to the previous row
+        bpl :+                          ; still within the char-cell?
+        
+        ; subtract 320 from the current bitmap address
+        ; i.e. move up one pixel row on the screen
         lda ZP_TEMP_ADDR1_LO
-        sbc # $40
+        sbc # < 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 320
         sta ZP_TEMP_ADDR1_HI
+
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_aca5:                                                                  ;$ACA5
-        clc 
-_aca6:                                                                  ;$ACA6
-        lda # $20
+
+:       clc                                                             ;$ACC8
+
+draw_pixel_col3:                                                        ;$ACC9
+        ;-----------------------------------------------------------------------
+        ; draw a pixel in column 3 of a char-cell and
+        ; move to the next pixel, and row if necessary
+        ;
+        ;       X = remaining no. of pixels of line to draw
+        ;       Y = char cell row no. 0...7
+        ;
+        lda # %00010000                 ; we will set the fourth pixel
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-_acac:                                                                  ;$ACAC
-        dex 
-        beq _ac5d
+
+col3_next:                                                              ;$ACCF
+        dex                             ; one less pixel to draw
+        beq line_done_rel1              ; no more pixels to draw?
+
         lda ZP_BF
         adc ZP_BD
         sta ZP_BF
-        bcc _acc9
-        dey 
-        bpl _acc8
+        bcc draw_pixel_col4
+
+        ; move up one row in the character cell ( 8 rows).
+        ; if we're at the top of the cell, move to the next cell above
+        ;
+        dey                             ; move to the previous row
+        bpl :+                          ; still within the char-cell?
+        
+        ; subtract 320 from the current bitmap address
+        ; i.e. move up one pixel row on the screen
         lda ZP_TEMP_ADDR1_LO
-        sbc # $40
+        sbc # < 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 320
         sta ZP_TEMP_ADDR1_HI
+
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_acc8:                                                                  ;$ACC8
-        clc 
-_acc9:                                                                  ;$ACC9
-        lda # $10
+
+:       clc                                                             ;$ACEB
+
+draw_pixel_col4:                                                        ;$ACEC
+        ;-----------------------------------------------------------------------
+        ; draw a pixel in column 4 of a char-cell and
+        ; move to the next pixel, and row if necessary
+        ;
+        ;       X = remaining no. of pixels of line to draw
+        ;       Y = char cell row no. 0...7
+        ;
+        lda # %00001000                 ; we will set the fifth pixel
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-_accf:                                                                  ;$ACCF
-        dex 
-        beq _ac5d
+
+col4_next:                                                              ;$ACF2
+        dex                             ; one less pixel to draw
+        beq col6_next_done              ; no more pixels to draw?
+                                        ; note that the relative branch will
+                                        ; not reach `line_done_rel1` above,
+                                        ; so trampolines downward
+
         lda ZP_BF
         adc ZP_BD
         sta ZP_BF
-        bcc _acec
-        dey 
-        bpl _aceb
+        bcc draw_pixel_col5
+
+        ; move up one row in the character cell ( 8 rows).
+        ; if we're at the top of the cell, move to the next cell above
+        ;
+        dey                             ; move to the previous row
+        bpl :+                          ; still within the char-cell?
+        
+        ; subtract 320 from the current bitmap address
+        ; i.e. move up one pixel row on the screen
         lda ZP_TEMP_ADDR1_LO
-        sbc # $40
+        sbc # < 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 320
         sta ZP_TEMP_ADDR1_HI
+        
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_aceb:                                                                  ;$ACEB
-        clc 
-_acec:                                                                  ;$ACEC
-        lda # $08
+
+:       clc                                                             ;$AD0E
+
+draw_pixel_col5:                                                        ;$AD0F
+        ;-----------------------------------------------------------------------
+        ; draw a pixel in column 5 of a char-cell and
+        ; move to the next pixel, and row if necessary
+        ;
+        ;       X = remaining no. of pixels of line to draw
+        ;       Y = char cell row no. 0...7
+        ;
+        lda # %00000100                 ; we will set the sixth pixel
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-_acf2:                                                                  ;$ACF2
-        dex 
-        beq _ad39
+
+col5_next:                                                              ;$AD15
+        dex                             ; one less pixel to draw
+        beq line_done_rel2              ; no more pixels to draw?
+
         lda ZP_BF
         adc ZP_BD
         sta ZP_BF
-        bcc _ad0f
-        dey 
-        bpl _ad0e
+        bcc draw_pixel_col6
+
+        ; move up one row in the character cell ( 8 rows).
+        ; if we're at the top of the cell, move to the next cell above
+        ;
+        dey                             ; move to the previous row
+        bpl :+                          ; still within the char-cell?
+        
+        ; subtract 320 from the current bitmap address
+        ; i.e. move up one pixel row on the screen
         lda ZP_TEMP_ADDR1_LO
-        sbc # $40
+        sbc # < 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 320
         sta ZP_TEMP_ADDR1_HI
+        
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_ad0e:                                                                  ;$AD0E
-        clc 
-_ad0f:                                                                  ;$AD0F
-        lda # $04
+
+:       clc                                                             ;$AD31
+
+draw_pixel_col6:                                                        ;$AD32
+        ;-----------------------------------------------------------------------
+        ; draw a pixel in column 6 of a char-cell and
+        ; move to the next pixel, and row if necessary
+        ;
+        ;       X = remaining no. of pixels of line to draw
+        ;       Y = char cell row no. 0...7
+        ;
+        lda # %00000010                 ; we will set the seventh pixel
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-_ad15:                                                                  ;$AD15
-        dex 
-        beq _ad88
+
+col6_next:                                                              ;$AD38
+        dex                             ; one less pixel to draw
+col6_next_done:                                                         ;$AD39
+        beq line_done_rel2              ; no more pixels to draw?
+
         lda ZP_BF
         adc ZP_BD
         sta ZP_BF
-        bcc _ad32
-        dey 
-        bpl _ad31
+        bcc draw_pixel_col7
+
+        ; move up one row in the character cell ( 8 rows).
+        ; if we're at the top of the cell, move to the next cell above
+        ;
+        dey                             ; move to the previous row
+        bpl :+                          ; still within the char-cell?
+        
+        ; subtract 320 from the current bitmap address
+        ; i.e. move up one pixel row on the screen
         lda ZP_TEMP_ADDR1_LO
-        sbc # $40
+        sbc # < 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 320
         sta ZP_TEMP_ADDR1_HI
+        
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_ad31:                                                                  ;$AD31
-        clc 
-_ad32:                                                                  ;$AD32
-        lda # $02
+
+:       clc                                                             ;$AD54
+
+draw_pixel_col7:                                                        ;$AD55
+        ;-----------------------------------------------------------------------
+        ; draw a pixel in column 7 of a char-cell and
+        ; move to the next pixel, and row if necessary
+        ;
+        ;       X = remaining no. of pixels of line to draw
+        ;       Y = char cell row no. 0...7
+        ;
+        lda # %00000001                 ; we will set the eighth pixel
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-_ad38:                                                                  ;$AD38
-        dex 
-_ad39:                                                                  ;$AD39
-        beq _ad88
+
+col7_next:                                                              ;$AD5B
+        dex                             ; one less pixel to draw
+        beq line_done_rel2              ; no more pixels to draw?
+
         lda ZP_BF
         adc ZP_BD
         sta ZP_BF
-        bcc _ad55
-        dey 
-        bpl _ad54
+        bcc next_char
+        
+        ; move up one row in the character cell ( 8 rows).
+        ; if we're at the top of the cell, move to the next cell above
+        ;
+        dey                             ; move to the previous row
+        bpl :+                          ; still within the char-cell?
+        
+        ; subtract 320 from the current bitmap address
+        ; i.e. move up one pixel row on the screen
         lda ZP_TEMP_ADDR1_LO
-        sbc # $40
+        sbc # < 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 320
         sta ZP_TEMP_ADDR1_HI
+        
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_ad54:                                                                  ;$AD54
-        clc 
-_ad55:                                                                  ;$AD55
-        lda # $01
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
-_ad5b:                                                                  ;$AD5B
-        dex 
-        beq _ad88
-        lda ZP_BF
-        adc ZP_BD
-        sta ZP_BF
-        bcc _ad78
-        dey 
-        bpl _ad77
-        lda ZP_TEMP_ADDR1_LO
-        sbc # $40
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
-        sbc # $01
-        sta ZP_TEMP_ADDR1_HI
-        ldy # $07
-_ad77:                                                                  ;$AD77
-        clc 
-_ad78:                                                                  ;$AD78
+
+:       clc                                                             ;$AD77
+
+next_char:                                                              ;$AD78
+        ; move one char-cell to the right
+        ; (add 8-bytes to the bitmap address)
         lda ZP_TEMP_ADDR1_LO
         adc # $08
         sta ZP_TEMP_ADDR1_LO
-        bcs _ad83
-        jmp _ac60
+        bcs :+                          ; moved to the next page?
 
+        jmp draw_pixel_col0             ; begin drawing at column 0
+
+:       inc ZP_TEMP_ADDR1_HI            ; increase bitmap hi-byte       ;$AD83
+        jmp draw_pixel_col0             ; begin drawing at column 0
+
+line_done_rel2:                                                         ;$AD88
         ;-----------------------------------------------------------------------
-
-_ad83:                                                                  ;$AD83
-        inc ZP_TEMP_ADDR1_HI
-        jmp _ac60
-
-        ;-----------------------------------------------------------------------
-
-_ad88:                                                                  ;$AD88
-        ldy $9e
-        rts 
+        ldy ZP_9E                       ; restore Y
+        rts                             ; line has been drawn!
 
 ;===============================================================================
 
@@ -10676,7 +10915,7 @@ _ada6:                                                                  ;$ADA6
         lda _ab79, x
         sta _adc6+2
         ldx ZP_BC
-        beq _ad88
+        beq line_done_rel2
 _adc6:                                                                  ;$ADC6
         jmp $8888
 
@@ -10689,7 +10928,7 @@ _adc9:                                                                  ;$ADC9
         sta _adda+2
         ldx ZP_BC
         inx 
-        beq _ad88
+        beq line_done_rel2
 _adda:                                                                  ;$ADDA
         jmp $8888
 
@@ -10893,8 +11132,8 @@ _af05:                                                                  ;$AF05
         ldy $9e
         rts 
 
-;===============================================================================
-
+        ; draw vertical line:
+        ;=======================================================================
 _af08:                                                                  ;$AF08
         ldy ZP_VAR_Y
         tya 
@@ -11308,16 +11547,16 @@ wait_for_frame:                                                         ;$B148
         rts 
 
 
-.proc   chrout                                                          ;$B155
-        ;=======================================================================
-        ; replaces the KERNAL's `CHROUT` routine for printing text to screen
-        ; (since Elite uses only the bitmap screen)
-        ;
-        ; IMPORTANT NOTE: Elite stores its text in ASCII, not PETSCII!
-        ; this is due to the data being copied over as-is from the BBC
-        ;
-        ;       A = ASCII code of character to print
-
+chrout:                                                                 ;$B155
+;===============================================================================
+; replaces the KERNAL's `CHROUT` routine for printing text to screen
+; (since Elite uses only the bitmap screen)
+;
+; IMPORTANT NOTE: Elite stores its text in ASCII, not PETSCII!
+; this is due to the data being copied over as-is from the BBC
+;
+;       A = ASCII code of character to print
+;
         cmp # $7b               ; is code greater than or equal to $7B?
         bcs :+                  ; if yes, skip it
         cmp # $0d               ; is code less than $0D? (RETURN)
@@ -11331,7 +11570,6 @@ wait_for_frame:                                                         ;$B148
 
 :       clc                     ; clear carry flag before returning     ;$B166 
         rts 
-.endproc
 
 ;define the use of some zero-page variables for this routine
 .exportzp       ZP_CHROUT_CHARADDR      := $2f  ; $2F/$30
@@ -11554,11 +11792,12 @@ _b210:  ; restore registers before returning                            ;$B210
         clc 
         rts 
 
-;===============================================================================
 
-; clear screen
 
 _b21a:                                                                  ;$B21A
+;===============================================================================
+; clear screen
+;
         ; set starting position in top-left of the centred
         ; 32-char (256px) screen Elite uses
         lda #< (ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ))
@@ -11749,6 +11988,10 @@ _b301:                                                                  ;$B301
         ;
 .import __HUD_DATA_RUN__
 
+        
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ;
         ; the original Elite code does a rather inefficient byte-by-byte
         ; copy -- for every byte copied, there's additional cycles spent on
         ; decrementing the 16-bit address pointers and the slower indirect-X
@@ -11756,8 +11999,6 @@ _b301:                                                                  ;$B301
         ; being a rushed port from the BBC this routine also copies all the
         ; blank space left and right of the HUD *every frame*!
         ;
-.ifdef  OPTION_ORIGINAL
-
         ldx # 8                 ; numbe of pages to copy (8*256)
         lda #< __HUD_DATA_RUN__
         sta ZP_TEMP_ADDR3_LO
@@ -11776,13 +12017,17 @@ _b301:                                                                  ;$B301
         ldx # $01
         jsr block_copy_from
 
-.else
+.else   ;///////////////////////////////////////////////////////////////////////
+        ;
+        ; improved HUD-copy for Elite : Harmless
+        ;
         ; we need to loop a full 256 times and we want to keep the exit check
         ; fast (so testing for zero/non-zero). starting at $FF won't do, as a
         ; zero-check at the bottom will exit out before the 0'th loop has been
         ; done. ergo, we start at 0, the `dex` at the bottom will underflow
         ; back to $FF and we loop around until back to $00 where the loop will
         ; exit without repeating the 0'th iteration
+        ;
         ldx # $00
 
         ; here we copy one byte of 7 bitmap rows at a time. note that the
@@ -11797,19 +12042,19 @@ _b301:                                                                  ;$B301
         ; TODO: we could `.repeat` this for the number of rows defined by
         ; ELITE_HUD_HEIGHT_ROWS`
         ;
-:       lda __HUD_DATA_RUN__, x          ; read from row 1 of backup HUD
+:       lda __HUD_DATA_RUN__, x         ; read from row 1 of backup HUD
         sta bmp + .bmppos(18, 4), x     ; write to row 18 of bitmap screen
-        lda __HUD_DATA_RUN__ + $100 , x  ; read from row 2 of backup HUD
+        lda __HUD_DATA_RUN__ + $100 , x ; read from row 2 of backup HUD
         sta bmp + .bmppos(19, 4), x     ; write to row 19 of bitmap screen
-        lda __HUD_DATA_RUN__ + $200, x   ; read from row 3 of backup HUD
+        lda __HUD_DATA_RUN__ + $200, x  ; read from row 3 of backup HUD
         sta bmp + .bmppos(20, 4), x     ; write to row 20 of bitmap screen
-        lda __HUD_DATA_RUN__ + $300, x   ; read from row 4 of backup HUD
+        lda __HUD_DATA_RUN__ + $300, x  ; read from row 4 of backup HUD
         sta bmp + .bmppos(21, 4), x     ; write to row 21 of bitmap screen
-        lda __HUD_DATA_RUN__ + $400, x   ; read from row 5 of backup HUD
+        lda __HUD_DATA_RUN__ + $400, x  ; read from row 5 of backup HUD
         sta bmp + .bmppos(22, 4), x     ; write to row 22 of bitmap screen
-        lda __HUD_DATA_RUN__ + $500, x   ; read from row 6 of backup HUD
+        lda __HUD_DATA_RUN__ + $500, x  ; read from row 6 of backup HUD
         sta bmp + .bmppos(23, 4), x     ; write to row 23 of bitmap screen
-        lda __HUD_DATA_RUN__ + $600, x   ; read from row 7 of backup HUD
+        lda __HUD_DATA_RUN__ + $600, x  ; read from row 7 of backup HUD
         sta bmp + .bmppos(24, 4), x
         dex 
        .bnz :-
@@ -11818,7 +12063,7 @@ _b301:                                                                  ;$B301
         ; centred HUD. 
         ;
         ; TODO: this should be drawn only once during initialisation,
-        ; as with the new HUD-copying method it never gets erased
+        ;       as with the new HUD-copying method it never gets erased
         ;
         ldx # $08
 :       dex 
@@ -11840,8 +12085,8 @@ _b301:                                                                  ;$B301
         sta bmp + .bmppos(24, 36), x    ; draw right-border on bitmap row 24
         txa 
         bne :-
-.endif
-        ;-----------------------------------------------------------------------
+
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         jsr hide_all_ships
         jsr _2ff3
@@ -11854,11 +12099,10 @@ _b335:  jsr _b359                                                       ;$B335
         
         rts 
 
+hide_all_ships:                                                         ;$B341
 ;===============================================================================
 ; appears to make all entities invisible to the radar scanner.
-
-hide_all_ships:                                                         ;$B341
-
+;
         ; search through the poly objects in-play
         ldx # $00
 
@@ -11978,22 +12222,22 @@ erase_page_to_end:                                                      ;$B3B5
 
         rts 
 
-;===============================================================================
-
 ; unreferenced / unused?
 ;$b3bd:
         sta ZP_CURSOR_COL
         rts 
 
-;===============================================================================
-
 _b3c0:                                                                  ;$B3C0
         sta ZP_CURSOR_ROW
         rts 
 
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
+
+block_copy:                                                             ;$B3C3
 ;===============================================================================
-; does a large block-copy of bytes. used to wipe the HUD by copying over a
-; clean copy of the HUD in RAM.
+; does a large block-copy of bytes. used to wipe the HUD
+; by copying over a clean copy of the HUD in RAM.
 ;
 ; [ZP_TEMP_ADDR3] = from address
 ; [ZP_TEMP_ADDR1] = to address
@@ -12002,9 +12246,7 @@ _b3c0:                                                                  ;$B3C0
 ; the copy method is replaced with a faster alternative in elite-harmless,
 ; so this code is no longer used there
 ; 
-.ifdef  OPTION_ORIGINAL
-
-block_copy:                                                             ;$B3C3
+;-------------------------------------------------------------------------------
         ; start copying from the beginning of the page
         ldy # $00
 
@@ -12022,10 +12264,12 @@ block_copy_from:                                                        ;$B3C5
        .bnz block_copy_from     ; still pages to do?
         
         rts 
+
+;///////////////////////////////////////////////////////////////////////////////  
 .endif
 
 txt_docked_token15:                                                     ;$B3D4
-        ;=======================================================================
+;===============================================================================
 .export txt_docked_token15
         
         lda # $00

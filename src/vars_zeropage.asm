@@ -320,7 +320,9 @@ ZP_6A                   = $6a   ; "move count"?
 ;-------------------------------------------------------------------------------
 
 ZP_VAR_X                = $6b   ; a common "X" variable
+ZP_VAR_X1               = $6b   ; also referred to as X1 when used with X2
 ZP_VAR_Y                = $6c   ; a common "Y" variable
+ZP_VAR_Y1               = $6c   ; also referred to as Y1 when used with Y2
 
 ZP_VAR_X2               = $6d   ; a secondary "X" variable
 ZP_VAR_Y2               = $6e   ; a secondary "Y" variable

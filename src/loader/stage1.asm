@@ -134,7 +134,7 @@ _038a:  clc
         
         lda CPU_CONTROL
         and # %11111000
-        ora # MEM_IO_KERNAL     ; I/O & KERNAL ROM on
+        ora # C64_MEM::IO_KERNAL
         sta CPU_CONTROL
 
         sec 

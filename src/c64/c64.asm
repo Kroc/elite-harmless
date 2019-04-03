@@ -11,6 +11,16 @@
 .include        "sid.asm"
 .include        "cia.asm"
 
+; calculate the number of *whole* pages from a given byte-size:
+;-------------------------------------------------------------------------------
+; note that the lack of a rounding-up divide is fixed by adding just shy of
+; one page before dividing, instead of just adding one to the result. this
+; means that a round number of bytes, e.g. $1000 would not calculate as one
+; more page than necessary
+; 
+.define  .page_count(size) \
+        ((size + 255) / 256)
+
 ;===============================================================================
 ; CPU port: memory layout & Datasette
 ;===============================================================================
@@ -21,18 +31,19 @@
 ; processor port can be written to, allowing you to mask out writes to certain
 ; bits -- e.g. ignore writes to the Datasette when changing memory layout
 
-.define CPU_MASK        $00     ; data direction register
-.define CPU_CONTROL     $01     ; processor port (memory layout and Datasette)
+CPU_MASK                = $00   ; data direction register
+CPU_CONTROL             = $01   ; processor port (memory layout and Datasette)
 
 ; C64 memory layout:
 ;-------------------------------------------------------------------------------
 
 ;                                     BASIC | I/O or CHAR | KERNAL
-;                               ;-----------+-------------+---------
-.define MEM_CHAR_ONLY   %001    ; 1:  OFF   |     CHAR    |  OFF
-.define MEM_CHAR_KERNAL %010    ; 2:  OFF   |     CHAR    |  KERNAL    
-.define MEM_IO_OFF      %011    ; 3:  BASIC |     CHAR    |  KERNAL
-.define MEM_64K         %100    ; 4:  OFF   |     OFF     |  OFF
-.define MEM_IO_ONLY     %101    ; 5:  OFF   |     I/O     |  OFF
-.define MEM_IO_KERNAL   %110    ; 6:  OFF   |     I/O     |  KERNAL
-.define MEM_DEFAULT     %111    ; 7 : BASIC |     I/O     |  KERNAL
+.enum   C64_MEM                 ;-----------+-------------+---------
+        CHAR_ONLY       = %001  ; 1:  OFF   |     CHAR    |  OFF
+        CHAR_KERNAL     = %010  ; 2:  OFF   |     CHAR    |  KERNAL    
+        IO_OFF          = %011  ; 3:  BASIC |     CHAR    |  KERNAL
+        ALL             = %100  ; 4:  OFF   |     OFF     |  OFF
+        IO_ONLY         = %101  ; 5:  OFF   |     I/O     |  OFF
+        IO_KERNAL       = %110  ; 6:  OFF   |     I/O     |  KERNAL
+        DEFAULT         = %111  ; 7 : BASIC |     I/O     |  KERNAL
+.endenum
