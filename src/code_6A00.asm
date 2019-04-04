@@ -7598,10 +7598,10 @@ _9a86:                                                                  ;$9A86
         lda # $12
         sta [ZP_TEMP_ADDR2], y
 
-        ldy # Hull::_07         ;=$07: "explosion count"?
+        ldy # Hull::_07                  ;=$07: "explosion count"?
         lda [ZP_HULL_ADDR], y
         
-        ldy # $02               ;?
+        ldy # $02                       ;?
         sta [ZP_TEMP_ADDR2], y
 _9abb:                                                                  ;$9ABB
         iny 
@@ -7648,7 +7648,7 @@ _9ae6:                                                                  ;$9AE6
         sbc ZP_POLYOBJ_ZPOS_MI
         bcs _9ac9
 
-        ldy # Hull::_06         ;=$06: "gun vertex"?
+        ldy # Hull::_06                 ;=$06: "gun vertex"?
         lda [ZP_HULL_ADDR], y
         tax 
         
@@ -7674,7 +7674,7 @@ _9ae6:                                                                  ;$9AE6
         sta ZP_AD
         bpl _9b3a
 _9b29:                                                                  ;$9B29
-        ldy # Hull::_0d         ;=$0D: level-of-detail distance
+        ldy # Hull::_0d                 ;=$0D: level-of-detail distance
         lda [ZP_HULL_ADDR], y
         cmp ZP_POLYOBJ_ZPOS_MI
         bcs _9b3a
@@ -7685,7 +7685,7 @@ _9b29:                                                                  ;$9B29
         jmp _9932
 
 _9b3a:                                                                  ;$9B3A
-        ldx # $05               ; 6-byte counter
+        ldx # $05                       ; 6-byte counter
 
         ; take a copy of matrix 2x0, 2x1 & 2x2
 :       lda ZP_POLYOBJ_M2x0, x                                          ;$9B3C
@@ -7723,7 +7723,7 @@ _9b66:                                                                  ;$9B66
         lda # $ff
         sta ZP_44
         
-        ldy # Hull::face_count  ;=$0C: face count
+        ldy # Hull::face_count          ;=$0C: face count
         lda ZP_POLYOBJ_VISIBILITY
         and # visibility::display
         beq _9b8b
@@ -7746,7 +7746,7 @@ _9b8b:                                                                  ;$9B8B
         beq _9b88
         sta ZP_AE
 
-        ldy # Hull::_12         ;=$12: "scaling of normals"?
+        ldy # Hull::_12                 ;=$12: "scaling of normals"?
         lda [ZP_HULL_ADDR], y
         tax 
         lda ZP_8C
@@ -10305,8 +10305,8 @@ _ab49:                                                                  ;$AB49
         .byte   $30, $30, $0c, $0c, $03, $03, $c0, $c0
 
 ;-------------------------------------------------------------------------------
-; routines to draw a line-segment beginning
-; from each column 0...7 of a char-cell row
+; lookup-table of routines to draw a line-segment
+; beginning from each column 0...7 of a char-cell row
 ; 
 .define _ab51_addrs \
         draw_pixel_col0, \
@@ -10318,8 +10318,8 @@ _ab49:                                                                  ;$AB49
         draw_pixel_col6, \
         draw_pixel_col7
 
-_ab51:  .lobytes _ab51_addrs                                            ;$AB51
-_ab59:  .hibytes _ab51_addrs                                            ;$AB59
+_ab51:  .lobytes _ab51_addrs            ; just the lo-bytes             ;$AB51
+_ab59:  .hibytes _ab51_addrs            ; just the hi-bytes             ;$AB59
 
 .define _ab61_addrs \
         col0_next, \
@@ -10352,87 +10352,110 @@ draw_line:                                                              ;$AB91
 ;===============================================================================
 ; draw a line
 ;
-; lines are drawn right-to-left as it is faster in practice to count downwards
-; (compare against zero) than upwards.
+; lines are drawn bottom-to-top as it is faster in practice to count downwards
+; (compare against zero) than upwards, but are drawn left-to-right as the
+; "remaining line length" is used to determine when to stop (compare zero)
 ;
-; TODO: since every line is drawn twice (drawn once, then erased the
-;       next frame), the line-flipping checks here should really be
-;       done when building the list of lines to draw, rather than
-;       every time a line is drawn
+;       ZP_VAR_X1 = horizontal "beginning" of line in viewport, in pixels
+;       ZP_VAR_X2 = horizontal "end" of line in viewport, in pixels
+;       ZP_VAR_Y1 = vertical "beginning" of line in viewport, in pixels
+;       ZP_VAR_Y2 = vertical "end" of line in viewport, in pixels
+;       Y is preserved
+;
+; note that the "beginning" and "end" of the line is not necessarily
+; left-to-right, top-to-bottom; the routine flips these as is necessary
+;
+; also, the X/Y values are viewport-coordinates (0..255),
+; not screen-coordinates (0..320); the routine does the 
+; centring of the viewport automatically
 ;
 .export draw_line
-
+        ; TODO: since every line is drawn twice (drawn once, then erased next
+        ;       frame), the line-flipping checks here should really be done
+        ;       when building the list of lines to draw, rather than every
+        ;       time a line is drawn
+        ;
         sty ZP_9E                       ; preserve Y
 
-        lda # $80                       ; -1
-        sta ZP_BF
-        asl 
-        sta VAR_06F4
-
-        ; "dx = abs(x2 - x1)"?
+        ; how do we know when to take a step vertically? an 'error' counter
+        ; increments a set amount (here named "step fraction") based on the
+        ; 'slope' of the line, whenever it overflows a vertical step is taken
+        ;
+        ; we begin with a step fraction of 1/2,
+        ; i.e. the centre of a pixel
+        ;
+        lda # $80                       ; = 128/256 (1/2, or "0.5")                        
+        sta ZP_BF                       ; this will be the incremental counter
+        asl                             ; this just sets A to 0
+        sta VAR_06F4                    
 
         ; check horizontal direction of the line
+        ; (we want to draw lines left-to-right)
         ;
         lda ZP_VAR_X2                   ; is the line-end,
         sbc ZP_VAR_X1                   ; after the line-start?
        .bge :+                          ; if so, continue as is
 
-        ; line is negative,
+        ; line coords are right-to-left,
         ; invert the result
         eor # %11111111                 ; flip all bits,
         adc # $01                       ; and add 1 (two's compliment)
 
 :       sta ZP_BC                       ; store line-width              ;$ABA5
 
-        ; "dy = abs(y2 - y1)"?
-
         ; check vertical direction of the line
+        ; (we want to draw lines bottom-to-top)
         ;
         sec 
         lda ZP_VAR_Y2                   ; is the line-bottom,
         sbc ZP_VAR_Y1                   ; below the line-top?
        .bge :+                          ; if so, continue as is
 
+        ; line co-ords are top to bottom,
+        ; invert the result
         eor # %11111111                 ; flip all bits,
         adc # $01                       ; and add 1 (two's compliment)
 
 :       sta ZP_BD                       ; store line-height             ;$ABB2
         
-        ; is the line wider than it is tall?
+        ; is the line taller than it is wide?
         cmp ZP_BC                       
-       .blt :+
+       .blt draw_line_horz
 
         ; handle vertical line
-        jmp _af08
+        jmp draw_line_vert
 
-        ; draw horizontal line:
+draw_line_horz:                                                         ;$ABBB
         ;=======================================================================
         ; which direction does the line go?
-:       ldx ZP_VAR_X1                                                   ;$ABBB
+        ;
+        ldx ZP_VAR_X1
         cpx ZP_VAR_X2
-       .blt :+                          ; if line is left-to-right, skip ahead
+       .blt :+                          ; line is left-to-right, skip ahead.
+                                        ; note that the use of `ldx` means that
+                                        ; X = horizontal start point (pixels)
         
-        ; line is the wrong way around (end is before start),
+        ; line is the wrong way around,
         ; flip the line's direction
-        dec VAR_06F4
+        dec VAR_06F4                    ;? 
 
-        lda ZP_VAR_X2
-        sta ZP_VAR_X1
-        stx ZP_VAR_X2
-        tax 
-        lda ZP_VAR_Y2
-        ldy ZP_VAR_Y1
-        sta ZP_VAR_Y1
-        sty ZP_VAR_Y2
+        lda ZP_VAR_X2                   ; flip beginning and end points;
+        sta ZP_VAR_X1                   ; line-drawing will proceed
+        stx ZP_VAR_X2                   ; left-to-right
+        tax                             ; X = horizontal start point (pixels)
+        lda ZP_VAR_Y2                   ; also flip vertically, so that the
+        ldy ZP_VAR_Y1                   ; line proceeds from the higher to
+        sta ZP_VAR_Y1                   ; the lower Y-coordinate
+        sty ZP_VAR_Y2                   ; Y = vertical start point (pixels)
 
         ; given a horizontal line that can only adjust one pixel vertically
         ; at a time, we must get the 'step' value that tells us how often
         ; the horizontal line takes a step vertically
-
+        ;
 :       ldx ZP_BD                       ; get line height               ;$ABD3
-       .bze @_abf9                       ; if zero, line is straight!
+       .bze @flat                       ; if zero, line is straight!
 
-        lda _9400, x                    ; get slope?
+        lda _9400, x                    ;?
 
         ldx ZP_BC                       ; get line width
         sec 
@@ -10443,34 +10466,38 @@ draw_line:                                                              ;$AB91
         lda _9300, x
         ldx ZP_BC
         sbc _9300, x
-        bcs @_abf5
+        bcs @deg45                      ; is the line 45-degrees?
         
         tax 
         lda _9500, x
         jmp @_ac0d
 
-@_abf5:                                                                 ;$ABF5
+@deg45: ; 45-degree line...                                             ;$ABF5
         ;-----------------------------------------------------------------------
-        lda # $ff
+        lda # $ff                       ; 1:1 step increment (i.e. 45-degrees)
        .bnz @_ac0d                      ; always branches
 
-@_abf9: ; straight line                                                 ;$ABF9
+@flat:  ; straight line...                                              ;$ABF9
         ;-----------------------------------------------------------------------
-        lda # $00                       ; no slope / step?
+        lda # $00                       ; no step increment!
        .bze @_ac0d                      ; always branches
 
 @_abfd:                                                                 ;$ABFD
         ;-----------------------------------------------------------------------
-        ldx ZP_BD
+        ldx ZP_BD                       
         lda _9300, x
         ldx ZP_BC
         sbc _9300, x
-        bcs @_abf5
+        bcs @deg45
         tax 
         lda _9600, x
 
 @_ac0d:                                                                 ;$AC0D
-        sta ZP_BD                       ; slope / step?
+        ; set the step-fraction. for every pixel horizontal, this fractional
+        ; amount will be added to the incremental counter, every time it
+        ; overflows a step vertically will be taken
+        sta ZP_BD
+
         clc 
         ldy ZP_VAR_Y1
         cpy ZP_VAR_Y2
@@ -10483,7 +10510,7 @@ draw_line:                                                              ;$AB91
         ; get the address within the bitmap where we will be drawing,
         ; stored into `ZP_TEMP_ADDR1`
         ;
-        lda ZP_VAR_X                    ; horizontal pixel column
+        lda ZP_VAR_X1                   ; horizontal pixel column
         and # %11111000                 ; round to 8-bits, i.e. per char cell
         clc 
         adc row_to_bitmap_lo, y         ; get bitmap address low-byte
@@ -10496,7 +10523,7 @@ draw_line:                                                              ;$AB91
         and # %00000111                 ; mod 8 (0...7), i.e. row within cell
         tay                             ; Y = char cell row index
 
-        lda ZP_VAR_X                    ; again, the horizontal pixel column
+        lda ZP_VAR_X1                   ; again, the horizontal pixel column
         and # %00000111                 ; mod 8 (0...7)
         tax                             ; X = char cell pixel column no.
 
@@ -10589,11 +10616,12 @@ col1_next:                                                              ;$AC89
         dex                             ; one less pixel to draw
         beq line_done_rel1              ; no more pixels to draw?
 
-        lda ZP_BF
-        adc ZP_BD
-        sta ZP_BF
-        bcc draw_pixel_col2
+        lda ZP_BF                       ; current line fraction
+        adc ZP_BD                       ; add step count?
+        sta ZP_BF                       ; update line fraction
+        bcc draw_pixel_col2             ; draw next pixel if step continues
 
+        ; we have stepped vertically:
         ; move up one row in the character cell ( 8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
@@ -10935,7 +10963,7 @@ _adda:                                                                  ;$ADDA
 ;===============================================================================
 
 _addd:                                                                  ;$ADDD
-        ldy $9e
+        ldy ZP_9E
         rts 
 
         ;-----------------------------------------------------------------------
@@ -11129,12 +11157,11 @@ _af02:                                                                  ;$AF02
         ;-----------------------------------------------------------------------
 
 _af05:                                                                  ;$AF05
-        ldy $9e
+        ldy ZP_9E
         rts 
 
-        ; draw vertical line:
+draw_line_vert:                                                         ;$AF08
         ;=======================================================================
-_af08:                                                                  ;$AF08
         ldy ZP_VAR_Y
         tya 
         ldx ZP_VAR_X
@@ -11237,7 +11264,7 @@ _af9f:                                                                  ;$AF9F
 _afb8:                                                                  ;$AFB8
         dex 
         bne _af88
-        ldy $9e
+        ldy ZP_9E
         rts 
 
         ;-----------------------------------------------------------------------
@@ -11278,7 +11305,7 @@ _aff3:                                                                  ;$AFF3
 _aff4:                                                                  ;$AFF4
         dex 
         bne _afc4
-        ldy $9e
+        ldy ZP_9E
 _aff9:                                                                  ;$AFF9
         rts 
 
@@ -11286,7 +11313,7 @@ _aff9:                                                                  ;$AFF9
 
 _affa:                                                                  ;$AFFA
 .export _affa
-        sty $9e
+        sty ZP_9E
         ldx ZP_VAR_X
         cpx ZP_VAR_X2
         beq _aff9
@@ -11359,7 +11386,7 @@ _b064:                                                                  ;$B064
         lda _2900, x
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-        ldy $9e
+        ldy ZP_9E
         rts 
 
         ;-----------------------------------------------------------------------
@@ -11377,7 +11404,7 @@ _b073:                                                                  ;$B073
         and $c0
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-        ldy $9e
+        ldy ZP_9E
         rts 
 
 ;===============================================================================
@@ -11650,7 +11677,7 @@ _b1a1:                                                                  ;$B1A1
         ; at 8 bytes per character, each page (256 bytes) occupies 32 chars,
         ; so the initial part of this routine is concerned with finding what
         ; the high-address of the character will be
-
+        ;
         ; Elite's font defines 96 characters (3 usable pages),
         ; consisting (roughly) of:
         ;
@@ -11658,9 +11685,10 @@ _b1a1:                                                                  ;$B1A1
         ; page 1 = codes 32-63  : most punctuation and numbers
         ; page 2 = codes 64-95  : "@", "A" to "Z", "[", "\", "]", "^", "_"
         ; page 3 = codes 96-127 : "£", "a" to "z", "{", "|", "}", "~"
-
+        ;
         ; default to 0th page since character codes begin from 0,
         ; but in practice we'll only see codes 32-128
+        ;
         ldx # (>ELITE_FONT_ADDR) - 1
         
         ; if you shift any number twice to the left
