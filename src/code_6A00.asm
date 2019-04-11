@@ -10272,6 +10272,9 @@ _aaa2:                                                                  ;$AAA2
 ;===============================================================================
 ; line-drawing data
 ;
+; for drawing vertical lines, this is a pixel mask
+; for each particular column in a character cell
+;
 _ab31:                                                                  ;$AB31
         .byte   %10000000
         .byte   %01000000
@@ -10388,11 +10391,11 @@ draw_line:                                                              ;$AB91
 ; ever step 1 pixel at a time in one of the directions but potentially multiple
 ; pixles in the other. therefore, there are two distinct types of lines --
 ; "horizontal" lines are wider than they are tall, thus step multiple pixels
-; across X, but only one a time in Y. "vertical" lines are taller than they
+; across X, but only one at a time in Y. "vertical" lines are taller than they
 ; are wide and step multiple pixels across Y, but only one at a time in X
 ;
-; this routine determines what type of line the coordinates describe and uses
-; either a horizontal or vertical algorithm accordingly
+; this routine determines what type of line the coordinates describe
+; and uses either a horizontal or vertical algorithm accordingly
 ;
 .export draw_line
         ; TODO: since every line is drawn twice (drawn once, then erased next
@@ -10414,45 +10417,50 @@ draw_line:                                                              ;$AB91
         asl                             ; this just sets A to 0
         sta VAR_06F4                    ;?
 
-        ; check horizontal direction of the line
-        ; (we want to draw lines left-to-right)
-        ;
-        lda ZP_VAR_X2                   ; is the line-end,
-        sbc ZP_VAR_X1                   ; after the line-start?
-       .bge :+                          ; if so, continue as is
+        ; get width of the line:
+        lda ZP_VAR_X2                   ; take line-starting X pos
+        sbc ZP_VAR_X1                   ; and subtract line-ending X pos
+       .bge :+                          ; if line is left-to-right, skip ahead
 
-        ; line coords are right-to-left,
-        ; invert the result
+        ; line coords are right-to-left, so the result underflowed
+        ; invert the result to get the positive length
+        ; 
         eor # %11111111                 ; flip all bits,
         adc # $01                       ; and add 1 (two's compliment)
 
 :       sta ZP_BC                       ; store line-width              ;$ABA5
 
-        ; check vertical direction of the line
-        ; (we want to draw lines bottom-to-top)
-        ;
+        ; get height of line:
         sec 
-        lda ZP_VAR_Y2                   ; is the line-bottom,
-        sbc ZP_VAR_Y1                   ; below the line-top?
-       .bge :+                          ; if so, continue as is
+        lda ZP_VAR_Y2                   ; take line-ending Y pos
+        sbc ZP_VAR_Y1                   ; subtract the line-starting Y pos
+       .bge :+                          ; if line is top-to-bottom, skip ahead
 
-        ; line co-ords are top to bottom,
-        ; invert the result
+        ; line co-ords are bottom-to-top, so the result underflowed
+        ; invert the result to get the positive height
+        ;
         eor # %11111111                 ; flip all bits,
         adc # $01                       ; and add 1 (two's compliment)
 
 :       sta ZP_BD                       ; store line-height             ;$ABB2
         
-        ; is the line taller than it is wide?
-        cmp ZP_BC                       
-       .blt draw_line_horz
+        ; is the line "horizontal" or "vertical"?
+        ; note: A = line-height
+        ;
+        cmp ZP_BC                       ; compare line-height with width                       
+       .blt draw_line_horz              ; a "horiztonal" line?
 
-        ; handle vertical line
+        ; handle "vertical" line
         jmp draw_line_vert
 
 draw_line_horz:                                                         ;$ABBB
         ;=======================================================================
-        ; which direction does the line go?
+        ; a "horizontal" line is one which is wider than it is tall, having the
+        ; property that the line only ever steps one pixel vertically at a time
+        ; (for any given number of steps horizontally, depending on width)
+        ;
+        ; for drawing and speed purposes, there are two kinds of horizontal
+        ; lines: top-down, i.e. "\", and bottom-up, i.e. "/"
         ;
         ldx ZP_VAR_X1
         cpx ZP_VAR_X2
@@ -11383,14 +11391,28 @@ line_done4:                                                             ;$AF05
         ldy ZP_9E                       ; restore Y
         rts                             ; line has been drawn!
 
+
 draw_line_vert:                                                         ;$AF08
         ;=======================================================================
-        ldy ZP_VAR_Y1
+        ; a "vertical" line is one which is taller than it is wide, having the
+        ; property that the line only ever steps one pixel horizontally at a
+        ; time (for any given number of steps vertically, depending on height)
+        ;
+        ; for speed, all vertical lines are drawn top-to-bottom and a different
+        ; routine is used for left-to-right ("/") vs. right-to-left ("\") lines
+        ;
+        ; the first thing we have to do is determine which way the line goes
+        ; and flip top-down lines so we always work bottom-up
+        ;
+        ldy ZP_VAR_Y1                   ; get "starting" Y-position
         tya 
-        ldx ZP_VAR_X1
-        cpy ZP_VAR_Y2
-        bcs _af22
-        dec VAR_06F4
+        ldx ZP_VAR_X1                   ; (get starting X-position, for later)
+        cpy ZP_VAR_Y2                   ; is line top-down, or bottom up?
+       .bge :+                          ; if line is bottom-up, skip ahead
+
+        ; the line is top-down; we need to flip it
+        dec VAR_06F4                    ;?
+        
         lda ZP_VAR_X2
         sta ZP_VAR_X1
         stx ZP_VAR_X2
@@ -11399,125 +11421,178 @@ draw_line_vert:                                                         ;$AF08
         sta ZP_VAR_Y1
         sty ZP_VAR_Y2
         tay 
-_af22:                                                                  ;$AF22
-        txa 
-        and # %11111000
+
+        ; work out the bitmap address to begin line drawing
+        ;
+:       txa                             ; retrieve starting X-position  ;$AF22
+        and # %11111000                 ; clip to nearest char-cell (8px each)
         clc 
-        adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR1_LO
-        lda row_to_bitmap_hi, y
-        adc # $00
+        adc row_to_bitmap_lo, y         ; use the lookup-table to get bitmap
+        sta ZP_TEMP_ADDR1_LO            ; address based on the pixel row
+        lda row_to_bitmap_hi, y         ; and store in [ZP_TEMP_ADDR1]
+        adc # $00                       ; (propogate any overflow from X)
         sta ZP_TEMP_ADDR1_HI
+        
+        ; get the row number (0-7)
+        ; within the character cell
         tya 
         and # %00000111
         tay 
+
+        ; get the column number (0-7)
+        ; within the character cell
         txa 
         and # %00000111
         tax 
+
+        ; get a pixel mask for that column
         lda _ab31, x
         sta ZP_BE
-        ldx ZP_BC
-        beq _af77
+
+        ; is the line straight? (completely vertical)
+        ldx ZP_BC                       ; get line-width
+       .bze @_af77                      ; if zero, skip ahead
+        
         lda _9400, x
         ldx ZP_BD
         sec 
         sbc _9400, x
-        bmi _af65
+        bmi @_af65
+        
         ldx ZP_BC
         lda _9300, x
         ldx ZP_BD
         sbc _9300, x
-        bcs _af61
+        bcs @deg45
+        
         tax 
         lda _9500, x
-        jmp _af75
+        jmp @_af75
 
-_af61:                                                                  ;$AF61
-        lda # $ff
-        bne _af75
-_af65:                                                                  ;$AF65
-        ldx ZP_BC
-        lda _9300, x
-        ldx ZP_BD
-        sbc _9300, x
-        bcs _af61
+@deg45: ; 45-degree line...                                             ;$AF61
+        ;-----------------------------------------------------------------------
+        lda # $ff                       ; 1:1 step increment, i.e. 45-degrees
+        bne @_af75                      ; (always branches)
+
+@_af65:                                                                 ;$AF65
+        ;-----------------------------------------------------------------------
+        ldx ZP_BC                       ; get line-width
+        lda _9300, x                    ;?
+        ldx ZP_BD                       ; get line-height
+        sbc _9300, x                    ;?
+        bcs @deg45                      ; is the line 45-degrees?
+        
         tax 
         lda _9600, x
-_af75:                                                                  ;$AF75
+
+@_af75:                                                                 ;$AF75
+        ; set the step-fraction. for every pixel vertical, this fractional
+        ; amount will be added to the incremental counter. every time it
+        ; overflows a step horizontally will be taken
         sta ZP_BC
-_af77:                                                                  ;$AF77
+@_af77:                                                                 ;$AF77
         sec 
         ldx ZP_BD
         inx 
+        
         lda ZP_VAR_X2
-        sbc ZP_VAR_X
-        bcc _afbe
+        sbc ZP_VAR_X1
+        bcc _vertlt                     ; handle bottom-up, left-to-right line
+
         clc 
         lda VAR_06F4
-        beq _af8e
+        beq _vertrt_pixel_next
+        
         dex 
-_af88:                                                                  ;$AF88
-        lda ZP_BE
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
-_af8e:                                                                  ;$AF8E
-        dey 
-        bpl _af9f
+
+_vertrt_pixel:                                                          ;$AF88
+        ;-----------------------------------------------------------------------
+        lda ZP_BE                       ; get the current pixel mask
+        eor [ZP_TEMP_ADDR1], y          ; mask against the existing pixels
+        sta [ZP_TEMP_ADDR1], y          ; write back the new pixels
+
+_vertrt_pixel_next:                                                     ;$AF8E
+
+        dey                             ; move up a row in the char-cell
+        bpl :+                          ; if still within char-cell, skip
+
+        ; subtract 320 from the current bitmap address, i.e. move up one
+        ; char-cell on the screen (note that carry is set, so 319 is used)
         lda ZP_TEMP_ADDR1_LO
-        sbc # $3f
+        sbc # < 319
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 319
         sta ZP_TEMP_ADDR1_HI
+
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_af9f:                                                                  ;$AF9F
-        lda ZP_BF
-        adc ZP_BC
-        sta ZP_BF
-        bcc _afb8
-        lsr ZP_BE
-        bcc _afb8
-        ror ZP_BE
+
+:       lda ZP_BF                       ; current step counter          ;$AF9F
+        adc ZP_BC                       ; add the step fraction
+        sta ZP_BF                       ; update step counter
+        bcc :+                          ; draw next pixel if step continues
+
+        lsr ZP_BE                       ; mask the next pixel to the right
+        bcc :+                          ; still within char-cell? 
+
+        ; we have left the char-cell on the right.
+        ; reset the mask to the left-most pixel
+        ;
+        ror ZP_BE                       ; this just pushes the carry in
+
+        ; now move to the char-cell to the right
         lda ZP_TEMP_ADDR1_LO
         adc # $08
         sta ZP_TEMP_ADDR1_LO
-        bcc _afb8
+        bcc :+
         inc ZP_TEMP_ADDR1_HI
+
         clc 
-_afb8:                                                                  ;$AFB8
-        dex 
-        bne _af88
-        ldy ZP_9E
-        rts 
+        
+:       dex                             ; one less pixel to draw        ;$AFB8
+       .bnz _vertrt_pixel               ; any remaining?
+
+        ldy ZP_9E                       ; restore Y
+        rts                             ; line has been drawn!
 
         ;-----------------------------------------------------------------------
 
-_afbe:                                                                  ;$AFBE
+_vertlt:                                                                ;$AFBE
         lda VAR_06F4
-        beq _afca
+        beq _vertlt_pixel_next
         dex 
-_afc4:                                                                  ;$AFC4
-        lda ZP_BE
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
-_afca:                                                                  ;$AFCA
+
+_vertlt_pixel:                                                          ;$AFC4
+        
+        lda ZP_BE                       ; get the current pixel mas
+        eor [ZP_TEMP_ADDR1], y          ; mask against the existing
+        sta [ZP_TEMP_ADDR1], y          ; write back the new pixels
+
+_vertlt_pixel_next:                                                     ;$AFCA
+        
         dey 
         bpl _afdb
+
         lda ZP_TEMP_ADDR1_LO
         sbc # $3f
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
         sbc # $01
         sta ZP_TEMP_ADDR1_HI
+
         ldy # $07
 _afdb:                                                                  ;$AFDB
-        lda ZP_BF
-        adc ZP_BC
-        sta ZP_BF
-        bcc _aff4
+        lda ZP_BF                       ; current step counter
+        adc ZP_BC                       ; add the step fraction
+        sta ZP_BF                       ; update step counter
+        bcc _aff4                       ; draw next pixel if step continues
+
         asl ZP_BE
         bcc _aff4
+
         rol ZP_BE
+
         lda ZP_TEMP_ADDR1_LO
         sbc # $07
         sta ZP_TEMP_ADDR1_LO
@@ -11527,27 +11602,28 @@ _aff3:                                                                  ;$AFF3
         clc 
 _aff4:                                                                  ;$AFF4
         dex 
-        bne _afc4
-        ldy ZP_9E
+        bne _vertlt_pixel
+
+        ldy ZP_9E               ; restore Y
 _aff9:                                                                  ;$AFF9
-        rts 
+        rts                     ; line has been drawn!
 
 ;===============================================================================
 
 _affa:                                                                  ;$AFFA
 .export _affa
         sty ZP_9E
-        ldx ZP_VAR_X
+        ldx ZP_VAR_X1
         cpx ZP_VAR_X2
         beq _aff9
         bcc _b00b
         lda ZP_VAR_X2
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
         stx ZP_VAR_X2
         tax 
 _b00b:                                                                  ;$B00B
         dec ZP_VAR_X2
-        lda ZP_VAR_Y
+        lda ZP_VAR_Y1
         tay 
         and # %00000111
         sta ZP_TEMP_ADDR1_LO
@@ -11609,6 +11685,7 @@ _b064:                                                                  ;$B064
         lda _2900, x
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+        
         ldy ZP_9E
         rts 
 
