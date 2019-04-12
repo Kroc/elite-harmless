@@ -448,12 +448,17 @@ ZP_BA                   = $ba   ;? x2
 
 ZP_VAR_T                = $bb   ; a common variable named "T"
 
+; used in line-drawing:
+;
 ZP_BC                   = $bc   ;? x15
 ZP_BD                   = $bd   ;? x25
 ZP_BE                   = $be   ;? x11
 ZP_BF                   = $bf   ;? x37 "S"?
+ZP_C0                   = $c0   ; stores a mask for < 8px-length lines
 
-; sound: $C0-$D1
+;                       = $c1   ;UNUSED?
+
+; sound: $C2-$D1
 ; (defined in "sound.asm" rather than here)
 
 ;                       = $d2   ;UNUSED?

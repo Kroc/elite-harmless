@@ -364,6 +364,7 @@ _77a3:  sta $d802, y
 
         ; each of the Trumbles™ alternate patterns
 .ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
         lda # ELITE_SPRITES_INDEX + 5
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE2_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE2_PTR
@@ -378,7 +379,8 @@ _77a3:  sta $d802, y
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE5_PTR
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE7_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
+        
         ; clear the bitmap screen:
         ;-----------------------------------------------------------------------
         ; erase $4000-$6000

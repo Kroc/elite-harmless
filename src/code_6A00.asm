@@ -609,9 +609,10 @@ _6c1c:                                                                  ;$6C1C
         jsr set_page            ; switch pages, clearing the screen
         
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # $10
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
         lda # 7
         jsr set_cursor_col
         
@@ -631,24 +632,32 @@ _6c1c:                                                                  ;$6C1C
 
         jsr _6cda
 
+        ; draw stars on galactic chart
         ldx # $00
 _6c40:                                                                  ;$6C40
-        stx ZP_9D
+        ;-----------------------------------------------------------------------
+        stx ZP_9D               ; current star index?
         ldx ZP_SEED_pt4
         ldy ZP_SEED_pt5
         tya 
         ora # %01010000
-        sta ZP_VAR_Z
+        sta ZP_VAR_Z            ; star size?
+
         lda ZP_SEED_pt2
         lsr 
         clc 
         adc # $18
         sta ZP_VAR_Y
+        
         jsr paint_particle
-        jsr _6a3b
-        ldx ZP_9D
-        inx 
-        bne _6c40
+
+        jsr _6a3b               ; randomize
+        ldx ZP_9D               ; retrieve star index
+        inx                     ; move to next star
+       .bnz _6c40               ; more stars to draw?
+
+        ;-----------------------------------------------------------------------
+
         lda TSYSTEM_POS_X
         sta ZP_8E
         lda TSYSTEM_POS_Y
@@ -680,7 +689,7 @@ _6c8b:                                                                  ;$6C8B
         lda ZP_8F
         clc 
         adc ZP_93
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y1
         sta ZP_VAR_Y2
         jsr draw_line
         lda ZP_8F
@@ -704,7 +713,7 @@ _6ca2:                                                                  ;$6CA2
 _6cb8:                                                                  ;$6CB8
         sta ZP_VAR_Y2
         lda ZP_8E
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
         sta ZP_VAR_X2
         jmp draw_line
 
@@ -1223,9 +1232,11 @@ _6fdb:                                                                  ;$6FDB
         jsr set_page            ; switch pages, clearing the screen
         
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # $10
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         lda # 7
         jsr set_cursor_col
         
@@ -4004,14 +4015,14 @@ _7fb6:                                                                  ;$7FB6
         ldx ZP_VAR_XX_LO
         stx ZP_VAR_X2
         sta ZP_VAR_XX_LO
-        jsr _affa
+        jsr draw_straight_line
 _7fed:                                                                  ;$7FED
         lda ZP_VAR_XX_LO
         sta ZP_VAR_X
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X2
 _7ff5:                                                                  ;$7FF5
-        jsr _affa
+        jsr draw_straight_line
 _7ff8:                                                                  ;$7FF8
         dey 
         beq _803a
@@ -4767,9 +4778,9 @@ _8437:                                                                  ;$8437
         jsr _7b1a
         jsr _8ac7
         
-        lda #< $ffc0            ;=KERNAL_OPEN?
+        lda #< KERNAL_OPEN
         sta VAR_04F2
-        lda #> $ffc0            ;=KERNAL_OPEN?
+        lda #> KERNAL_OPEN
         sta VAR_04F3
 
 clear_zp_polyobj:                                                                  ;$8447
@@ -5599,9 +5610,11 @@ _8920:                                                                  ;$8920
         jsr clear_keyboard
 
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # $20
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
+        
         lda # $0d
         jsr set_page
         
@@ -6140,7 +6153,7 @@ _8c0d:                                                                  ;$8C0D
         ; copy $CF00...$CF4C to $25B3...$25FF
         ldy # $4c
 _8c4a:                                                                  ;$8C4A
-        lda $cf00, y            ;?
+        lda ELITE_DISK_BUFFER, y        ;=$CF00
         sta _25b3, y
         dey 
         bpl _8c4a
@@ -9512,9 +9525,8 @@ _a6d4:                                                                  ;$A6D4
         lda # %00000001
 
 _a700:                                                                  ;$A700
-        ;-----------------------------------------------------------------------
 .ifndef OPTION_NOTRUMBLES
-
+        ;///////////////////////////////////////////////////////////////////////
         sta ZP_VAR_T
 
         lda PLAYER_TRUMBLES_HI
@@ -9529,12 +9541,14 @@ _a700:                                                                  ;$A700
         lda trumbles_sprite_mask, x
         ora ZP_VAR_T            ; other sprites mask?
         sta VIC_SPRITE_ENABLE
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         ; turn off the I/O and go back to 64K RAM
         lda # C64_MEM::ALL
         jmp set_memory_layout
 
 .ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
 
 trumbles_sprite_count:                                                  ;$A71F
         ;-----------------------------------------------------------------------
@@ -9554,7 +9568,7 @@ trumbles_sprite_mask:                                                   ;$A727
         .byte   %11111100
         .byte   %11111100
 
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ;===============================================================================
 ; switch screen page?
@@ -10302,10 +10316,27 @@ _ab31:                                                                  ;$AB31
         .byte   %00000110
         .byte   %00000011
 
+; multi-color pixels are made from pairs of pixels. this lookup table
+; translates a pixel from 0-7 to the nearest multi-color pixel pair
+; e.g.
+;
+;       %10------ & %01------ = %11000000
+;       %--10---- & %--01---- = %00110000
+;       %----10-- & %----01-- = %00001100
+;       %------10 & %------01 = %00000011
+;
 _ab47:                                                                  ;$AB47
-        .byte   $c0, $c0
+        .byte   %11000000
+        .byte   %11000000
 _ab49:                                                                  ;$AB49
-        .byte   $30, $30, $0c, $0c, $03, $03, $c0, $c0
+        .byte   %00110000
+        .byte   %00110000
+        .byte   %00001100
+        .byte   %00001100
+        .byte   %00000011
+        .byte   %00000011
+        .byte   %11000000
+        .byte   %11000000
 
 ;-------------------------------------------------------------------------------
 ; lookup-table of routines to draw a line-segment beginning from each column
@@ -11534,7 +11565,7 @@ _vertrt_pixel_next:                                                     ;$AF8E
         bcc :+                          ; draw next pixel if step continues
 
         lsr ZP_BE                       ; mask the next pixel to the right
-        bcc :+                          ; still within char-cell? 
+        bcc :+                          ; still within char-cell?
 
         ; we have left the char-cell on the right.
         ; reset the mask to the left-most pixel
@@ -11542,12 +11573,12 @@ _vertrt_pixel_next:                                                     ;$AF8E
         ror ZP_BE                       ; this just pushes the carry in
 
         ; now move to the char-cell to the right
+        ; (add 8 to the bitmap address)
         lda ZP_TEMP_ADDR1_LO
         adc # $08
         sta ZP_TEMP_ADDR1_LO
         bcc :+
         inc ZP_TEMP_ADDR1_HI
-
         clc 
         
 :       dex                             ; one less pixel to draw        ;$AFB8
@@ -11556,75 +11587,96 @@ _vertrt_pixel_next:                                                     ;$AF8E
         ldy ZP_9E                       ; restore Y
         rts                             ; line has been drawn!
 
-        ;-----------------------------------------------------------------------
-
 _vertlt:                                                                ;$AFBE
+        ;=======================================================================
         lda VAR_06F4
         beq _vertlt_pixel_next
         dex 
 
 _vertlt_pixel:                                                          ;$AFC4
-        
+        ;-----------------------------------------------------------------------
         lda ZP_BE                       ; get the current pixel mas
         eor [ZP_TEMP_ADDR1], y          ; mask against the existing
         sta [ZP_TEMP_ADDR1], y          ; write back the new pixels
 
 _vertlt_pixel_next:                                                     ;$AFCA
         
-        dey 
-        bpl _afdb
+        dey                             ; move up a row in the char-cell
+        bpl :+                          ; if still within char-cell, skip
 
+        ; subtract 320 from the current bitmap address, i.e. move up one
+        ; char-cell on the screen (note that carry is set, so 319 is used)
         lda ZP_TEMP_ADDR1_LO
-        sbc # $3f
+        sbc # < 319
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        sbc # $01
+        sbc # > 319
         sta ZP_TEMP_ADDR1_HI
 
+        ; begin at bottom of char-cell, row 7
         ldy # $07
-_afdb:                                                                  ;$AFDB
-        lda ZP_BF                       ; current step counter
+
+:       lda ZP_BF                       ; current step counter          ;$AFDB
         adc ZP_BC                       ; add the step fraction
         sta ZP_BF                       ; update step counter
-        bcc _aff4                       ; draw next pixel if step continues
+        bcc @next                       ; draw next pixel if step continues
 
-        asl ZP_BE
-        bcc _aff4
+        asl ZP_BE                       ; mask the next pixel to the left
+        bcc @next                       ; still within char-cell?
 
-        rol ZP_BE
+        ; we have left the char-cell on the left.
+        ; reset the mask to the right-most pixel
+        ;
+        rol ZP_BE                       ; this just pushes the carry in
 
+        ; now move to the char-cell to the left
+        ; (add 8 to the bitmap address)
         lda ZP_TEMP_ADDR1_LO
         sbc # $07
         sta ZP_TEMP_ADDR1_LO
-        bcs _aff3
+        bcs :+
         dec ZP_TEMP_ADDR1_HI
-_aff3:                                                                  ;$AFF3
-        clc 
-_aff4:                                                                  ;$AFF4
-        dex 
-        bne _vertlt_pixel
+
+:       clc                                                             ;$AFF3
+
+@next:                                                                  ;$AFF4
+        dex                     ; one less pixel to draw
+        bne _vertlt_pixel       ; any remaining?
 
         ldy ZP_9E               ; restore Y
-_aff9:                                                                  ;$AFF9
-        rts                     ; line has been drawn!
+:       rts                     ; line has been drawn!                  ;$AFF9
 
+draw_straight_line:                                                     ;$AFFA
 ;===============================================================================
+; draws a straight, horizontal line:
+;
+;       ZP_VAR_Y  = Y-position
+;       ZP_VAR_X1 = starting X-position, in viewport pixels (0-255)
+;       ZP_VAR_X2 = ending X-position, in viewport pixels (0-255)
+;       preserves Y
+;
+; this is reasonably fast as it marches 8-pixels
+; at a time in the middle of the line
+;
+.export draw_straight_line
 
-_affa:                                                                  ;$AFFA
-.export _affa
-        sty ZP_9E
+        sty ZP_9E               ; preserve Y
+
         ldx ZP_VAR_X1
         cpx ZP_VAR_X2
-        beq _aff9
-        bcc _b00b
+       .bze :-
+        bcc :+
+
         lda ZP_VAR_X2
         sta ZP_VAR_X1
         stx ZP_VAR_X2
         tax 
-_b00b:                                                                  ;$B00B
-        dec ZP_VAR_X2
-        lda ZP_VAR_Y1
+
+:       dec ZP_VAR_X2                                                   ;$B00B
+        lda ZP_VAR_Y
         tay 
+
+        ; get bitmap address
         and # %00000111
         sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
@@ -11634,51 +11686,73 @@ _b00b:                                                                  ;$B00B
         clc 
         adc row_to_bitmap_lo, y
         tay 
-        bcc _b025
+        bcc :+
         inc ZP_TEMP_ADDR1_HI
-_b025:                                                                  ;$B025
-        txa 
+
+:       txa                                                             ;$B025 
         and # %11111000
-        sta $c0
+        sta ZP_C0
+
         lda ZP_VAR_X2
         and # %11111000
         sec 
-        sbc $c0
-        beq _b073
+        sbc ZP_C0
+        beq @tiny_line
         lsr 
         lsr 
         lsr 
         sta ZP_BE
-        lda ZP_VAR_X
+        
+        lda ZP_VAR_X1
         and # %00000111
         tax 
+
+        ; draw left-hand side
         lda _2907, x
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+        ; move to the next char-cell
+        ; (add 8 to the bitmap address)
         tya 
         adc # $08
         tay 
-        bcc _b04c
+        
+        bcc :+
         inc ZP_TEMP_ADDR1_HI
-_b04c:                                                                  ;$B04C
-        ldx ZP_BE
+
+:       ldx ZP_BE                                                       ;$B04C
         dex 
-        beq _b064
+       .bze @_b064
+        
         clc 
-_b052:                                                                  ;$B052
-        lda # $ff
+
+@fill:                                                                  ;$B052
+        ;-----------------------------------------------------------------------
+        ; set a full char-cell row (8px) in one go
+        ; i.e. fast-scan through the body of the sun
+        ;
+        ;       X = number of char-cells wide to fill
+        ;
+        lda # %11111111
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
+        
+        ; add 8 to the bitmap address
+        ; i.e. move one char-cell to the right
         tya 
         adc # $08
         tay 
-        bcc _b061
+        
+        ; catch overflow in the address low-byte
+        bcc :+
         inc ZP_TEMP_ADDR1_HI
         clc 
-_b061:                                                                  ;$B061
-        dex 
-        bne _b052
-_b064:                                                                  ;$B064
+
+:       dex                                                             ;$B061 
+       .bnz @fill
+
+@_b064:                                                                 ;$B064
+        ; draw right-hand-side
         lda ZP_VAR_X2
         and # %00000111
         tax 
@@ -11686,30 +11760,38 @@ _b064:                                                                  ;$B064
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
         
-        ldy ZP_9E
-        rts 
+        ldy ZP_9E                       ; restore Y
+        rts                             ; line has been drawn!
 
+@tiny_line:                                                             ;$B073
         ;-----------------------------------------------------------------------
+        ; line begins and ends within the same char-cell!
+        ;
+        ; we draw this by combining a left-fill and right-fill pattern to
+        ; produce a set of pixels in the middle that corresponds to our line
+        ;
+        lda ZP_VAR_X1                   ; starting X position
+        and # %00000111                 ; where within a char-cell? (0-7)
+        tax 
+        lda _2907, x                    ; get a pixel mask to fill right
+        sta ZP_C0
 
-_b073:                                                                  ;$B073
-        lda ZP_VAR_X
-        and # %00000111
+        lda ZP_VAR_X2                   ; ending X position
+        and # %00000111                 ; where within a char-cell? (0-7)
         tax 
-        lda _2907, x
-        sta $c0
-        lda ZP_VAR_X2
-        and # %00000111
-        tax 
-        lda _2900, x
-        and $c0
+        lda _2900, x                    ; get a pixel mask to fill left
+        and ZP_C0                       ; merge the two masks
+
+        ; draw the "line" to screen
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-        ldy ZP_9E
-        rts 
 
-;===============================================================================
+        ldy ZP_9E                       ; restore Y
+        rts                             ; line has been drawn!
 
 ; unused / unreferenced?
+; duplicate of $2900 / $2907. intended for `draw_straight_line` above
+;
 ;$b08e:
         .byte   %10000000
         .byte   %11000000
@@ -11719,7 +11801,6 @@ _b073:                                                                  ;$B073
         .byte   %11111100
         .byte   %11111110
         .byte   %11111111
-
         .byte   %01111111
         .byte   %00111111
         .byte   %00011111
@@ -11733,46 +11814,67 @@ _b073:                                                                  ;$B073
 _b09d:                                                                  ;$B09D
         lda VAR_04EB
         sta ZP_VAR_Y
+
         lda VAR_04EA
         sta ZP_VAR_X
-        lda _1d01
+        
+        lda _1d01                       ;?
         sta ZP_32
         cmp # $aa
-        bne _b0b5
+        bne :+
+
 _b0b0:                                                                  ;$B0B0
-        jsr _b0b5
+        jsr :+
         dec ZP_VAR_Y
-_b0b5:                                                                  ;$B0B5
-        ldy ZP_VAR_Y
-        lda ZP_VAR_X
-        and # %11111000
+
+        ; get bitmap address from X & Y co-ords
+        ;
+:       ldy ZP_VAR_Y                                                    ;$B0B5
+        lda ZP_VAR_X                    ; X-position, in pixels
+        and # %11111000                 ; clip X to a char-cell
         clc 
-        adc row_to_bitmap_lo, y
+        adc row_to_bitmap_lo, y         ; add X to the bitmap address by row
         sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
         adc # $00
         sta ZP_TEMP_ADDR1_HI
+        
+        ; let Y be the row within the char-cell (0-7)
         tya 
         and # %00000111
         tay 
+        
+        ; let X be the column within the char-cell (0-7)
         lda ZP_VAR_X
         and # %00000111
         tax 
-        lda _ab47, x
-        and ZP_32
+
+        ; multi-color pixels are made from pairs of pixels. this lookup
+        ; translates a pixel from 0-7 to the nearest multi-color pixel
+        ; e.g.
+        ;
+        ;       %10------ & %01------ = %11000000
+        ;       %--10---- & %--01---- = %00110000
+        ;       %----10-- & %----01-- = %00001100
+        ;       %------10 & %------01 = %00000011
+        ;
+        lda _ab47, x                    
+        and ZP_32                       ; set colour, i.e. %11, %10, %01
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-        lda _ab49, x
-        bpl _b0ed
+        
+        lda _ab49, x                    ; look ahead to the next pixel
+        bpl @_b0ed
+        
         lda ZP_TEMP_ADDR1_LO
         clc 
         adc # $08
         sta ZP_TEMP_ADDR1_LO
-        bcc _b0ea
+        bcc :+
         inc ZP_TEMP_ADDR1_HI
-_b0ea:                                                                  ;$B0EA
-        lda _ab49, x
-_b0ed:                                                                  ;$B0ED
+:       lda _ab49, x                                                    ;$B0EA
+
+@_b0ed:                                                                 ;$B0ED
         and ZP_32
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -12266,10 +12368,10 @@ _b2b2:                                                                  ;$B2B2
 _b2d5:                                                                  ;$B2D5
         stx ZP_VAR_Y
         ldx # $00
-        stx ZP_VAR_X
+        stx ZP_VAR_X1
         dex 
         stx ZP_VAR_X2
-        jmp _affa
+        jmp draw_straight_line
 
 ;===============================================================================
 

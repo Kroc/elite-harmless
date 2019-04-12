@@ -42,10 +42,10 @@ _9300:                                                                  ;$9300
         .byte   $fb, $fb, $fb, $fc, $fc, $fc, $fc, $fc                  ;$93E8
         .byte   $fd, $fd, $fd, $fd, $fd, $fd, $fe, $fe                  ;$93F0
         .byte   $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff                  ;$93F8
-
+;;.endif
 
 ;===============================================================================
-; a lookup table of line-heights to slopes?
+; a lookup table of line height / width (signed)?
 
 _9400:                                                                  ;$9400
 .export _9400
@@ -86,6 +86,16 @@ _9400:                                                                  ;$9400
 
 _9500:                                                                  ;$9500
 .export _9500
+
+        ; this looks like slopes, where the line length increases,
+        ; at the same time the angle increases 0 to 45-degrees
+        ; (sans 45-degrees itself),
+        ;
+        ; e.g. $FA = 250/256 = 0.9765625 (almost 1:1)
+        ;
+        ; imagine a line from (0,0) to (y,255) where y is 1-255
+        ; (could be degrees rather than pixels)
+        ;
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9500
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9508
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9510

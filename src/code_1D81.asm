@@ -121,7 +121,7 @@
 .import _a8e0:absolute
 .import _a8e6:absolute
 .import draw_line:absolute
-.import _affa:absolute
+.import draw_straight_line:absolute
 .import _b0f4:absolute
 .import _b11f:absolute
 .import wait_for_frame:absolute
@@ -165,7 +165,8 @@ _1d81:                                                                  ;$1D81
         ; will not function as they rely on specific planet name / placement
         ;
 .ifndef OPTION_CUSTOMSEED
-
+        ;///////////////////////////////////////////////////////////////////////
+        
         ; check eligibility for the Constrictor mission:
         ;-----------------------------------------------------------------------
         ; available on the first galaxy after 256 or more kills. your job is
@@ -260,12 +261,13 @@ _1d81:                                                                  ;$1D81
         
         jmp mission_blueprints_birera
 
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 @skip:  ; check for Trumbles™ mission                                   ;$1E00
         ;-----------------------------------------------------------------------
 .ifndef OPTION_NOTRUMBLES
-        
+        ;///////////////////////////////////////////////////////////////////////
+
         ; at least 6'553.5 cash?
         lda PLAYER_CASH_pt3
         cmp # $c4               ;TODO: not sure how this works out as 6'553.5?
@@ -278,11 +280,16 @@ _1d81:                                                                  ;$1D81
 
         ; initiate Trumbles™ mission
         jmp mission_trumbles
-.endif
+
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 :       jmp _88e7                                                       ;$1E11
 
+; the unused and incomplete debug code can be removed
+; in non-original builds
+;
 .ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
 
 debug_for_brk:                                                          ;$1E14
         ;=======================================================================
@@ -297,6 +304,8 @@ debug_for_brk:                                                          ;$1E14
         cli                     ; enable interrupts
 
         rts 
+
+;///////////////////////////////////////////////////////////////////////////////
 .endif
 
 ;===============================================================================
@@ -434,6 +443,7 @@ _1ec1:                                                                  ;$1EC1
         sta ZP_GOATSOUP_pt1     ;? randomize?
 
 .ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
 
         ; are there any Trumbles™ on-screen?
         lda TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
@@ -442,7 +452,8 @@ _1ec1:                                                                  ;$1EC1
         ; process Trumbles™
         ; (move them about, breed them)
         jmp _1e35
-.endif
+
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _1ece:                                                                  ;$1ECE
         ;-----------------------------------------------------------------------
@@ -681,7 +692,7 @@ _201b:                                                                  ;$201B
         ldy # $0b
 _201d:                                                                  ;$201D
         jsr _a858
-        jsr _3cdb
+        jsr _3cdb                       ; draw laser-beam
         pla 
         bpl _2028
         lda # $00
@@ -1178,11 +1189,13 @@ _22c2:                                                                  ;$22C2
         jsr set_memory_layout
         
 .ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
 
         ; reduce number of Trumbles™
         lsr PLAYER_TRUMBLES_HI
         ror PLAYER_TRUMBLES_LO
-.endif
+
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _2303:                                                                  ;$2303
         lda VAR_04C2
@@ -2029,8 +2042,8 @@ _28e5:                                                                  ;$28E5
 ;
 .export _28e5
 
-        sta ZP_VAR_Y1
-        sta ZP_VAR_Y2
+        sta ZP_VAR_Y1                   ; set Y-position of line,
+        sta ZP_VAR_Y2                   ; both start and end (straight)
 
         ; set X to go from 0 to 255
         ldx # $00                       ; begin with zero
@@ -2048,7 +2061,7 @@ _28f3:                                                                  ;$28F3
         sty ZP_VAR_Y
         lda # $00
         sta VAR_0580, y
-        jmp _affa
+        jmp draw_straight_line
 
 ;===============================================================================
 
@@ -2225,9 +2238,9 @@ _2988:                                                                  ;$2988
         bne _29fa
 _2998:                                                                  ;$2998
         lda ZP_85
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
         lda ZP_86
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y1
         lda ZP_87
         sta ZP_VAR_X2
         lda ZP_88
@@ -2244,22 +2257,22 @@ _2998:                                                                  ;$2998
         bcs _2988
         lda VAR_06F4
         beq _29d2
-        lda ZP_VAR_X
+        lda ZP_VAR_X1
         ldy ZP_VAR_X2
         sta ZP_VAR_X2
-        sty ZP_VAR_X
-        lda ZP_VAR_Y
+        sty ZP_VAR_X1
+        lda ZP_VAR_Y1
         ldy ZP_VAR_Y2
         sta ZP_VAR_Y2
-        sty ZP_VAR_Y
+        sty ZP_VAR_Y1
 _29d2:                                                                  ;$29D2
         ldy ZP_7E
         lda _27a3, y
         cmp # $ff
         bne _29e6
-        lda ZP_VAR_X
+        lda ZP_VAR_X1
         sta _26a4, y
-        lda ZP_VAR_Y
+        lda ZP_VAR_Y1
         sta _27a4, y            ; writing to code??
         iny 
 _29e6:                                                                  ;$2936
@@ -3850,6 +3863,7 @@ _319b:                                                                  ;$319B
         ; some Trumbles™ will slip away
         ; with you, the sneaky things!
 .ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
 
         ; does the player have any Trumbles™?
         lda PLAYER_TRUMBLES_LO
@@ -3863,7 +3877,8 @@ _319b:                                                                  ;$319B
         sta PLAYER_TRUMBLES_LO
         lda # $00
         sta PLAYER_TRUMBLES_HI
-.endif
+
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _31be:                                                                  ;$31BE
         lda # $46
@@ -5767,16 +5782,19 @@ _3cda:                                                                  ;$3CDA
         rts 
 
 ;===============================================================================
-
+; draw lasers?
+;
 _3cdb:                                                                  ;$3CDB
+        ; jitter the laser beam's position a bit
+        ;
         jsr get_random_number
-        and # %00000111
-        adc # $44
+        and # %00000111                 ; clip to 0-7
+        adc # $44                       ; offset by 68px
         sta VAR_06F1
 
         jsr get_random_number
-        and # %00000111
-        adc # $7C
+        and # %00000111                 ; clip to 0-7
+        adc # $7C                       ; offset by 124 (256-8 / 2?)
         sta VAR_06F0
         
         lda PLAYER_TEMP_LASER
@@ -5796,18 +5814,19 @@ _3cfa:                                                                  ;$3CFA
 _3d09:                                                                  ;$3D09
         sta ZP_VAR_X2
         lda VAR_06F0
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
         lda VAR_06F1
-        sta ZP_VAR_Y
-        lda # $8f
+        sta ZP_VAR_Y1
+        lda # ELITE_VIEWPORT_HEIGHT - 1
         sta ZP_VAR_Y2
         jsr draw_line
+
         lda VAR_06F0
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
         lda VAR_06F1
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y1
         sty ZP_VAR_X2
-        lda # $8f
+        lda # ELITE_VIEWPORT_HEIGHT - 1
         sta ZP_VAR_Y2
         jmp draw_line
 
@@ -5923,9 +5942,10 @@ _3daf:                                                                  ;$3DAF
         
         lda # $0f
 _3dbe:                                                                  ;$3DBE
-        bne _3d87               ; always branches
+        bne _3d87               ; (always branches)
 
 .ifndef OPTION_NOTRUMBLES
+;///////////////////////////////////////////////////////////////////////////////
 
 mission_trumbles:                                                       ;$3DC0
         ;=======================================================================
@@ -5955,6 +5975,7 @@ mission_trumbles:                                                       ;$3DC0
         ; start the normal docked screen?
         jmp _88e7
 
+;///////////////////////////////////////////////////////////////////////////////
 .endif
 
 ;===============================================================================
