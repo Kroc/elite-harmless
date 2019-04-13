@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 ;
-; "math_3d.asm" : hello and welcome to disassembly hell!
+; "math_3d.asm" -- hello and welcome to disassembly hell!
 ;
 ; I didn't know a thing about 3D math when I started disassembling this game,
 ; so the commentary below represents eveything I've learned along the way.

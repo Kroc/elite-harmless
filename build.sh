@@ -70,8 +70,6 @@ echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/orig-code_1D81.o        src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 $options -o build/orig-code_6A00.o        src/code_6A00.asm
-echo "- assemble 'data_9300.asm'"
-$ca65 $options -o build/orig-data_9300.o        src/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
 $ca65 $options -o build/orig-table_bitmap.o     src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"
@@ -136,7 +134,6 @@ $ld65 \
     --obj build/orig-init.o \
     --obj build/orig-code_1D81.o \
     --obj build/orig-code_6A00.o \
-    --obj build/orig-data_9300.o \
     --obj build/orig-table_bitmap.o \
     --obj build/orig-sound.o \
     --obj build/orig-gfx_font.o \
@@ -296,8 +293,6 @@ echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/code_1D81.o         src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-echo "- assemble 'data_9300.asm'"
-$ca65 $options -o build/data_9300.o         src/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
 $ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"
@@ -334,7 +329,6 @@ $ld65 \
     --obj build/code_init.o \
     --obj build/code_1D81.o \
     --obj build/code_6A00.o \
-    --obj build/data_9300.o \
     --obj build/table_bitmap.o \
     --obj build/sound.o \
     --obj build/gfx-font.o \
@@ -411,8 +405,6 @@ echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/code_1D81.o         src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-echo "- assemble 'data_9300.asm'"
-$ca65 $options -o build/data_9300.o         src/data_9300.asm
 echo "- assemble 'table_bitmap.asm'"
 $ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
 echo "- assemble 'sound.asm'"
