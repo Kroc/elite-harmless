@@ -7,6 +7,8 @@
 .include        "c64/c64.asm"
 .include        "vars_elite.asm"
 .include        "vars_zeropage.asm"
+.include        "text/text.asm"
+.include        "text/text_docked_fns.asm"
 .include        "gfx/hull_struct.asm"
 .include        "math_3d.asm"
 .include        "draw_lines.asm"
@@ -146,24 +148,30 @@
 .import hull_d062:absolute
 .import hull_d083:absolute
 
-;===============================================================================
-
 .segment        "CODE_6A00"
 
 _6a00:                                                                  ;$6A00
+;===============================================================================
+; some kind of cargo quantity check?
+;
 .export _6a00
 
         sta VAR_04EF            ; item index?
+
         lda # $01
 _6a05:  pha                                                             ;$6A05
+        
         ldx # $0c
         cpx VAR_04EF            ; item index?
-        bcc _6a1b                                                       
+        bcc _6a1b
+
 _6a0d:  adc VAR_04B0, x         ; cargo qty?                            ;$6A0D
         dex 
         bpl _6a0d
+
         adc PLAYER_TRUMBLES_HI
         cmp VAR_04AF            ; inside `DUST_X` array
+        
         pla 
         rts
 
@@ -171,6 +179,7 @@ _6a1b:                                                                  ;$6A1B
         ldy VAR_04EF            ; item index?
         adc VAR_04B0, y         ; cargo qty?
         cmp # $c8
+
         pla 
         rts 
 
@@ -205,37 +214,47 @@ cursor_down:                                                            ;$6A2b
         inc ZP_CURSOR_ROW
         rts 
 
-
-;===============================================================================
-
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
+; stubbed-out routine in the original code
+;
 _6a2e:                                                                  ;$62AE
-        ; !
         rts 
+;///////////////////////////////////////////////////////////////////////////////
+.endif 
 
 _6a2f:                                                                  ;$6A2F
-        ; changes page and does some other pre-emptive work?
-
+;===============================================================================
+; changes page and does some other pre-emptive work?
+;
 .export _6a2f
 
         jsr set_page
 
         jsr _28d5               ; loads A & X with $0F
         lda # $30
-        jsr _6a2e               ; DEAD CODE! this is just an RTS!
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        jsr _6a2e               ; DEAD CODE! this is just an RTS!
+.endif  ;///////////////////////////////////////////////////////////////////////
+        
         rts 
 
-_6a3b:  ; roll RNG seed four times?                                     ;$6A3B
+randomize:                                                              ;$6A3B
 ;===============================================================================
-.export _6a3b
+; moves the random number generator along 4 steps to produce
+; fresh random numbers, but does not return a random number
+;
+.export randomize
 
         ; this routine calls itself 4 times to ensure
         ; enough scrambling of the random number
 
         jsr :+                  ; do this twice,
-:       jsr _6a41               ; and that twice                        ;$6A3E
+:       jsr randomize_once      ; and that twice                        ;$6A3E
 
-_6a41:  ; roll the RNG seed once?                                       ;$6A41
+randomize_once:                                                         ;$6A41
         ;=======================================================================
         lda ZP_SEED_pt1
         clc 
@@ -262,9 +281,8 @@ _6a41:  ; roll the RNG seed once?                                       ;$6A41
         
         rts 
 
-;===============================================================================
-
 _6a68:                                                                  ;$6A68
+;===============================================================================
         ; is target system distance > 0
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
@@ -280,11 +298,14 @@ _6a68:                                                                  ;$6A68
 :       lda # TXT_DISTANCE                                              ;$6A73
         jsr print_flight_token_with_colon
 
+        ; print the distance as a fixed-point decimal, e.g. "6.4"
         ldx TSYSTEM_DISTANCE_LO
         ldy TSYSTEM_DISTANCE_HI
-        sec 
-        jsr _7235
+        sec                             ; carry set = use decimal point
+        jsr print_num16                 ; print number in X/Y
 
+        ; print "LIGHT YEARS"
+        ;
 .import TXT_LIGHT_YEARS:direct
         lda # TXT_LIGHT_YEARS
 
@@ -297,10 +318,10 @@ _6a8a:                                                                  ;$6A8A
         lda # %10000000
         sta ZP_34
 
-_6a8e:                                                                  ;$6A8E
-        lda # $0c
+print_newline:                                                          ;$6A8E
+        ;-----------------------------------------------------------------------
+        lda # TXT_NEWLINE
         jmp print_flight_token
-
 
 _6a93:                                                                  ;$6A93
         ;=======================================================================
@@ -311,16 +332,14 @@ _6a93:                                                                  ;$6A93
         jsr print_flight_token
         jmp _6ad3
 
-;===============================================================================
-
 _6a9b:                                                                  ;$6A9B
+;===============================================================================
 .export _6a9b
         jsr print_flight_token
-        jmp _72c5
-
-;===============================================================================
+        jmp print_space
 
 _6aa1:                                                                  ;$6AA1
+;===============================================================================
         ; switch to page "1"(?)
         lda # $01
         jsr _6a2f
@@ -489,8 +508,8 @@ _6b5a:                                                                  ;$6B5A
         
         ldx TSYSTEM_PRODUCTIVITY_LO
         ldy TSYSTEM_PRODUCTIVITY_HI
-        jsr _7234
-        jsr _72c5
+        jsr print_int16
+        jsr print_space
         lda # $00
         sta ZP_34
         
@@ -505,18 +524,25 @@ _6b5a:                                                                  ;$6B5A
         lda # TXT_AVERAGE_RADIUS
         jsr print_flight_token_with_colon
         
+        ; extract the avergae planet radius from the seed
+        ;
         lda ZP_SEED_pt6
         ldx ZP_SEED_pt4
         and # %00001111
+        
+        ; add the minimum scale factor; this ensures that all planets
+        ; have a radius of at least 256*11, avoiding a planet of radius 0!
         clc 
-        adc # $0b
+        adc # 11
+        
         tay 
-        jsr _7235
-        jsr _72c5
+        jsr print_num16
+        jsr print_space
 
+        ; print "KM" (Kilometers)
+        ;
         lda # $6b               ;="K"
         jsr print_char
-        
         lda # $6d               ;="M"
         jsr print_char
         
@@ -646,7 +672,7 @@ _6c40:                                                                  ;$6C40
         
         jsr paint_particle
 
-        jsr _6a3b               ; randomize
+        jsr randomize
         ldx ZP_9D               ; retrieve star index
         inx                     ; move to next star
        .bnz _6c40               ; more stars to draw?
@@ -780,8 +806,10 @@ _6d16:                                                                  ;$6D16
         jsr _6a2f
 
         jsr _72db
+
         lda # $80
         sta ZP_34
+        
         lda # $00
         sta VAR_04EF            ; item index?
 _6d27:                                                                  ;$6D27
@@ -793,7 +821,7 @@ _6d27:                                                                  ;$6D27
 _6d32:                                                                  ;$6D32
         ldy # $b0
 _6d34:                                                                  ;$6D34
-        jsr _72c5
+        jsr print_space
         tya 
         jsr _723c
         jsr _7627
@@ -822,7 +850,7 @@ _6d3e:                                                                  ;$6D3E
         lda # $3f
         jsr print_flight_token
         
-        jsr _6a8e
+        jsr print_newline
         ldx # $00
         stx ZP_VAR_R
         ldx # $0c
@@ -932,7 +960,7 @@ _6e26:                                                                  ;$6E26
         sta ZP_VAR_R
         jmp _6e13
 _6e30:                                                                  ;$6E30
-        jsr _6a8e
+        jsr print_newline
 
 .import TXT_QUANTITY:direct
         lda # TXT_QUANTITY
@@ -957,7 +985,7 @@ _6e41:                                                                  ;$6E41
         lda # TXT_CARGO
         jsr _28d9
 
-        jsr _6a8e
+        jsr print_newline
 _6e58:                                                                  ;$6E58
         ldy # $00
 _6e5a:                                                                  ;$6E5a
@@ -1010,6 +1038,7 @@ _6e5d:                                                                  ;$6E5d
         beq _6eca
         bcs _6e30
         lda VAR_04EF            ; item index?
+        
         ldx # $ff
         stx ZP_34
         jsr _7246
@@ -1024,6 +1053,7 @@ _6e5d:                                                                  ;$6E5d
         sta ZP_VAR_Q
         jsr _74a2
         jsr _7481
+        
         lda # $00
         sta ZP_34
 _6eca:                                                                  ;$6ECA
@@ -1049,7 +1079,7 @@ _6ee9:                                                                  ;$6EE9
 _6eea:                                                                  ;$6EEA
         ;-----------------------------------------------------------------------
         ; have you got Trumbles™ in your hold?
-
+        ;
         clc                     ; "no decimal point"
         lda # $00               ; "no padding"
         ldx PLAYER_TRUMBLES_LO
@@ -1067,17 +1097,19 @@ _6eea:                                                                  ;$6EEA
         adc # TXT_DOCKED_CUDDLY
         jsr print_docked_str
         
+        ; print "LITTLE TRUMBLE"
 .import TXT_DOCKED_LITTLE_TRUMBLE:direct
         lda # TXT_DOCKED_LITTLE_TRUMBLE
         jsr print_docked_str
         
+        ; more than 1?
         lda PLAYER_TRUMBLES_HI
-        bne _6f11
+       .bnz :+
         ldx PLAYER_TRUMBLES_LO
         dex 
         beq _6ee9
-_6f11:                                                                  ;$6F11
-        lda # $73               ;="S"
+        
+:       lda # $73               ;="S"                                   ;$6F11
         jmp print_char
 
 ;===============================================================================
@@ -1094,7 +1126,7 @@ _6f16:                                                                  ;$6F16
         jsr _6a84
 
         jsr txt_docked_token0B
-        jsr _774a
+        jsr print_fuel_and_cash
         lda VAR_04AF            ; inside `DUST_X` array
         cmp # $1a
         bcc _6f37
@@ -1217,7 +1249,7 @@ _6fce:                                                                  ;$6FCE
 
 ;===============================================================================
 ; short-range (local) chart
-
+;
 _6fdb:                                                                  ;$6FDB
         lda # $c7
         sta ZP_B8
@@ -1310,8 +1342,10 @@ _705c:                                                                  ;$705C
         bcc _708d
         lda # $ff
         sta ZP_POLYOBJ_XPOS_LO, y
+        
         lda # $80
         sta ZP_34
+        
         jsr _76e9
 _7070:                                                                  ;$7070
         lda # $00
@@ -1329,7 +1363,7 @@ _7070:                                                                  ;$7070
         jsr _7f22
         jsr _7b4f
 _708d:                                                                  ;$708D
-        jsr _6a3b
+        jsr randomize
         inc ZP_AE
         beq _7097
         jmp _7009
@@ -1396,7 +1430,7 @@ _70dd:                                                                  ;$70DD
         lda ZP_VAR_U
         sta ZP_VAR_Z
 _70e8:                                                                  ;$70E8
-        jsr _6a3b
+        jsr randomize
         inc ZP_VAR_U
         bne _70b6
         ldx # $05
@@ -1591,9 +1625,8 @@ _7217:                                                                  ;$7217
         sta PSYSTEM_POS_Y
         rts 
 
-;===============================================================================
-
 _7224:                                                                  ;$7224
+;===============================================================================
         lda # 1
         jsr set_cursor_col
         jsr set_cursor_row
@@ -1604,12 +1637,13 @@ _7224:                                                                  ;$7224
         jmp print_medium_value
 
 
-_7234:                                                                  ;$7234
+print_int16:                                                            ;$7234
         ;=======================================================================
         ; print 16-bit value in X/Y, without decimal point
         ;
         clc 
-_7235:                                                                  ;$7235
+
+print_num16:                                                            ;$7235
         ;=======================================================================
         ; print 16-bit value in X/Y -- decimal point included if carry set
         ;
@@ -1638,7 +1672,7 @@ _7246:                                                                  ;$7246
         asl 
         asl 
         sta ZP_8E
-        lda IS_MISJUMP
+        lda IS_WITCHSPACE
         bne _7244
 
         lda # 1
@@ -1682,7 +1716,8 @@ _728e:                                                                  ;$728E
         lda # $00
         jsr _74a5
         sec 
-        jsr _7235
+        jsr print_num16
+
         ldy ZP_92
         lda # $05
         ldx VAR_04CE, y
@@ -1704,7 +1739,8 @@ _72b8:                                                                  ;$72B8
         cmp # $20
         beq _72d1
         jsr _72d6
-_72c5:                                                                  ;$72C5
+
+print_space:                                                            ;$72C5
         lda # $20
 _72c7:                                                                  ;$72C7
         jmp print_flight_token
@@ -1712,7 +1748,7 @@ _72c7:                                                                  ;$72C7
 _72ca:                                                                  ;$72CA
         lda # $74               ;="T"
         jsr print_char
-        bcc _72c5
+        bcc print_space
 _72d1:                                                                  ;$72D1
         lda # $6b               ;="K"
         jsr print_char
@@ -1868,7 +1904,7 @@ _73b3:                                                                  ;$73B3
 
         jsr _3795
         jsr _83df
-        sty IS_MISJUMP
+        sty IS_WITCHSPACE
 _73c1:                                                                  ;$73C1
         jsr _739b
         lda # $03
@@ -2058,11 +2094,11 @@ _74e2:                                                                  ;$74E2
         ldx # $01
 _74f5:                                                                  ;$74F5
         stx ZP_A2
-        jsr _6a8e
+        jsr print_newline
         ldx ZP_A2
         clc 
         jsr print_tiny_value
-        jsr _72c5
+        jsr print_space
         
         lda ZP_A2
         clc 
@@ -2227,7 +2263,8 @@ _7619:                                                                  ;$7619
         jmp _74bb
 
 _761f:                                                                  ;$761F
-        jsr _72c5
+        jsr print_space
+
         lda # $77
         jsr _6a9b
 _7627:                                                                  ;$7627
@@ -2359,33 +2396,36 @@ _76cd:                                                                  ;$76CD
 _76e9:                                                                  ;$76E9
 .export _76e9
         ldx # $05
-_76eb:                                                                  ;$76EB
-        lda ZP_SEED, x
+
+:       lda ZP_SEED, x                                                  ;$76EB
         sta ZP_8E, x
         dex 
-        bpl _76eb
+        bpl :-
+        
         ldy # $03
         bit ZP_SEED_pt1
-        bvs _76f9
+        bvs :+
         dey 
-_76f9:                                                                  ;$76F9
-        sty ZP_VAR_T
-_76fb:                                                                  ;$76FB
+
+:       sty ZP_VAR_T                                                    ;$76F9
+
+@_76fb:                                                                 ;$76FB
         lda ZP_SEED_pt6
         and # %00011111
-        beq _7706
+        beq :+
         ora # %10000000
         jsr print_flight_token
-_7706:                                                                  ;$7706
-        jsr _6a41
+
+:       jsr randomize_once                                              ;$7706
         dec ZP_VAR_T
-        bpl _76fb
+        bpl @_76fb
         ldx # $05
-_770f:                                                                  ;$770F
-        lda ZP_8E, x
+
+:       lda ZP_8E, x                                                    ;$770F
         sta ZP_SEED, x
         dex 
-        bpl _770f
+        bpl :-
+
         rts
 
 ;===============================================================================
@@ -2402,24 +2442,27 @@ _7719:                                                                  ;$7719
 _7726:                                                                  ;$7726
         rts 
 
+print_local_planet_name:                                                ;$7727
 ;===============================================================================
+; print planet name for the system the player is currently in
+;
+        ; if the player is in witchspace, there is no planet!
+        bit IS_WITCHSPACE
+        bmi @rts
 
-_7727:                                                                  ;$7727
-        bit IS_MISJUMP
-        bmi _7741
-        jsr _7732
+        jsr :+                          ; copy the seed for name-expansion
         jsr _76e9
-_7732:                                                                  ;$7732
-        ldx # $05
-_7734:                                                                  ;$7734
-        lda ZP_SEED, x
+
+:       ldx # $05                                                       ;$7732
+
+:       lda ZP_SEED, x                                                  ;$7734
         ldy VAR_04F4, x
         sta VAR_04F4, x
         sty ZP_SEED, x
         dex 
-        bpl _7734
-_7741:                                                                  ;$7741
-        rts 
+        bpl :-
+
+@rts:   rts                                                             ;$7741
 
 print_galaxy_no:                                                        ;$7742
 ;===============================================================================
@@ -2430,24 +2473,28 @@ print_galaxy_no:                                                        ;$7742
         inx                     ; print as 1-8, not 0-7
         jmp print_tiny_value
 
+print_fuel_and_cash:                                                    ;$774A
 ;===============================================================================
-
-_774a:                                                                  ;$774A
+; print fuel & cash totals
+;
 .import TXT_FUEL:direct
 
+        ; print "FUEL:"
         lda # TXT_FUEL
         jsr print_flight_token_with_colon
 
+        ; print the player's fuel quantity
         ldx PLAYER_FUEL
-        sec 
+        sec                             ; use decimal point
         jsr print_tiny_value
 
+        ; print "LIGHT YEARS"
 .import TXT_LIGHT_YEARS:direct
         lda # TXT_LIGHT_YEARS
-        jsr _7773
+        jsr print_flight_token_and_newline
         
 .import TXT_CASH_:direct
-        lda # TXT_CASH_         ; "CASH:" (colon in the string)
+        lda # TXT_CASH_                 ; "CASH:" (colon in the string)
         bne print_flight_token
 
         ; print cash value?  
@@ -2469,10 +2516,16 @@ _775f:                                                                  ;$775F
         ; print "CR" ("credits") after the cash value
 .import TXT_CR:direct
         lda # TXT_CR
-_7773:                                                                  ;$7773
-.export _7773
+        ;
+        ; fall-through below to print "CR" and new-line
+        ;
+
+print_flight_token_and_newline:                                         ;$7773
+        ;=======================================================================
+.export print_flight_token_and_newline
+
         jsr print_flight_token
-        jmp _6a8e
+        jmp print_newline
 
 
 print_flight_token_with_colon:                                          ;$7779
@@ -2499,7 +2552,7 @@ print_flight_token:                                                     ;$777E
         ;
         ; brief token breakdown:
         ;
-        ;      $00 = ?
+        ;      $00 = print "cash:" & cash value
         ;      $01 = print current galaxy number?
         ;      $02 = ?
         ;      $03 = ?
@@ -2511,47 +2564,46 @@ print_flight_token:                                                     ;$777E
         ;      $09 = ?
         ;      $0A = ?
         ;      $0B = ?
-        ;      $0C = ?
-        ;      $0D = ?
-        ;      $0E = ?
+        ;      $0C = newline
+        ;      $0D = (also newline)
         ;  $0E-$20 = canned messages 128-146
         ;  $21-$5F = ASCII characters $21-$5F -- see "gfx/font.asm"
         ;  $60-$7F = canned messages  96-127
         ;  $80-$BF = canned messages   0-95
-
+        ;
 .export print_flight_token
 
         tax                     ; put aside token for later test
 
         ; handle variables / meta-commands:
         ;-----------------------------------------------------------------------
-
         ; token $00:
         ;
-        beq _775f               ; is A 0? -- print "Cash: " and credit count
+       .bze _775f               ; is A 0? -- print "Cash: " and credit count
         
         ; token $80-$FF:
         ;
-        ; any token value 128 or higher (i.e. bit 7 set) is a canned-message,
-        ; the index of which is in the remaining 6 bits
+        ; any token value 128 or higher (i.e. bit 7 set) is a
+        ; canned-message, the index of which is in the remaining bits
         ;
         bmi _print_str          ; is bit 7 set? (i.e. is token)
         
         ; token $01:
         ;
         dex                     ; decrement token value
-       .bze print_galaxy_no     ; if now 0, it was 1 -- process 'tally'(?)
+       .bze print_galaxy_no     ; if now 0, it was 1 -- print galaxy number
         
         ; token $02:
         ;
         dex                     ; decrement token value
-       .bze _7727               ; if now 0, it was 2 -- current planet name
+                                ; if now 0, it was 2 -- print local planet name
+       .bze print_local_planet_name
         
         ; token $03:
         ;
         dex                     ; decrement token value 
        .bnz :+                  ; skip ahead if it isn't now zero
-        jmp _76e9               ; it was 3 -- selected planet name
+        jmp _76e9               ; it was 3 -- print target planet name
 
         ; token $04:
         ;
@@ -2559,8 +2611,9 @@ print_flight_token:                                                     ;$777E
        .bze _7717               ; if now 0, it was 4 -- commander's name
 
         ; token $05:
+        ;
         dex                     ; decrement token value
-       .bze _774a               ; if now 0, it was 5 -- cash value only
+       .bze print_fuel_and_cash ; if now 0, it was 5 -- print fuel & cash
         
         dex                     ; decrement token value
        .bnz :+                  ; skip ahead if not 0
@@ -2578,38 +2631,47 @@ print_flight_token:                                                     ;$777E
         ;
 :       dex                     ; decrement token value twice more      ;$779D
         dex                     ; i.e. if it was 8, it would be 0
-        bne :+                  ; skip ahead if token was not originally 8
+       .bnz :+                  ; skip ahead if token was not originally 8
         stx ZP_34               ; token was 8, store the 0 in the case-switch
         rts                     ; flag and return
 
         ; token $09:
         ;
 :       dex                     ; decrement token again                 ;$77A4
-        beq _indent             ; if token was 9, process a tab
+       .bze _indent             ; if token was 9, process a tab
 
+        ; NOTE: A is still the original token number,
+        ;       only X has been decremented!
+        
         ; tokens 96...127 are canned messages
         ; (tokens 128...255 have already been checked for above)
         cmp # $60
        .bge print_canned_message
 
-        cmp # $0e               ; < $0E? -- i.e. only token $07
-       .blt :+                  ; skip ahead -- switch case?
+        ; tokens $0A-$0D will be passed through to the character printing
+        ; routine where they are special-cased as ASCII codes $09-$0D are
+        ; not printable characters!
+        ;
+        cmp # $0e               ; tokens < $0E that have not already been done
+       .blt :+                  ; skip ahead
         
-        cmp # $20               ; < 32?
+        cmp # $20               ; tokens < 32?
        .blt _77db               ; treat as token A+114
 
         ; switch case?
-
+        ;
 :       ldx ZP_34               ; check case-switch flag                ;$77B3
-        beq _77f6               ; =0, leave case as-is
+        beq _77f6               ; =0, leave case as-is and print char
         bmi _is_captial         ; or bit 7 set, switch case
         
         bit ZP_34               ; check bits 7 & 6 (bit 7 already handled)
         bvs _77ef               ; bit 6 set -- print char and reset bit 6
 
-        ;-----------------------------------------------------------------------
-
 _77bd:                                                                  ;$77BD
+        ;-----------------------------------------------------------------------
+        ; print in lower-case:
+        ; first though, print any non A-Z character without changing case
+        ;
         cmp # 'a'               ; less than 'A'?
         bcc _goto_print_char    ; yes: print as is
         
@@ -2647,7 +2709,7 @@ _77db:  ; add 114 to the token number and print the canned message:     ;$77DB
 _indent:                                                                ;$77DF
         ;-----------------------------------------------------------------------
         ; set cursor to column 22
-
+        ;
         lda # 21
         jsr set_cursor_col
         jmp print_colon
@@ -2677,21 +2739,21 @@ _print_str:                                                             ;$77F9
         ; note that canned message tokens have bit 7 set, so really this is
         ; asking if the message index is > 32 -- the first 32 canned messages
         ; are letter pairs
-
+        ;
         cmp # 160               ; is token >= 160?
        .bge @canned_token       ; if yes, go to canned messages 33+ 
         
         ; token is a character pair
-
+        ;
         and # %01111111         ; clear token flag, leave message index
         asl                     ; double it for a lookup-table offset,
         tay                     ; this would have cleared bit 7 anyway!
         lda txt_flight_pair1, y ; read the first character,
-        jsr print_flight_token         ; print it
+        jsr print_flight_token  ; print it
         lda txt_flight_pair2, y ; read second character
         cmp # $3f               ; is it 63? (some kind of continuation token?)
         beq _784e               ; yes, skip -- although never seen in practice
-        jmp print_flight_token         ; print second character (and return)
+        jmp print_flight_token  ; print second character (and return)
 
 @canned_token:                                                          ;$7811  
         ; token messages 160+; subtract 160 for the message index
@@ -2702,7 +2764,7 @@ print_canned_message:                                                   ;$7813
         ; prints a canned message from the messages table
         ;
         ;    A = message index 
-        
+        ;
         tax                     ; put the message index aside 
 
         ; select the table of canned-messages
@@ -2772,10 +2834,10 @@ _784e:  rts                                                             ;$784E
 
 
 swap_zp_shadow:                                                         ;$784F
-        ;=======================================================================
-        ; swap zero-page with its shadow
-        ; (copies $36...$FF to $CE36...$CEFF)
-        ;
+;===============================================================================
+; swap zero-page with its shadow
+; (copies $36...$FF to $CE36...$CEFF)
+;
         ldx # $36
 :       lda $00, x                                                      ;$7851
         ldy ELITE_ZP_SHADOW, x
@@ -3260,10 +3322,12 @@ _7b53:                                                                  ;$7B53
         sty VAR_0580
         rts 
 
-;===============================================================================
-
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
         ; dummied-out code
 _7b5e:  rts                                                             ;$75BE
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 ;===============================================================================
 
@@ -4443,11 +4507,10 @@ _826f:                                                                  ;$826F
 
 
 disable_sprites:                                                        ;$8273
-        ;=======================================================================
-        ; disable all sprites: (for example, when switching to menu screen)
-
+;===============================================================================
+; disable all sprites: (for example, when switching to menu screen)
+;
         ; ensure the I/O is enabled so we can talk to the VIC-II:
-
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
 
@@ -4459,7 +4522,7 @@ disable_sprites:                                                        ;$8273
         lda # C64_MEM::ALL
 
 set_memory_layout:                                                      ;$827F
-        ;=======================================================================
+;===============================================================================
 .export set_memory_layout
 
         sei                     ; disable interrupts
@@ -4787,7 +4850,7 @@ _8437:                                                                  ;$8437
         lda #> KERNAL_OPEN
         sta VAR_04F3
 
-clear_zp_polyobj:                                                                  ;$8447
+clear_zp_polyobj:                                                       ;$8447
         ;-----------------------------------------------------------------------
         ; clear the zero-page PolyObject storage
         ;
@@ -4795,7 +4858,7 @@ clear_zp_polyobj:                                                               
 
         ldy # .sizeof(PolyObject) - 1
         lda # $00
-:       sta ZP_POLYOBJ_XPOS_LO, y                                      ;$844B
+:       sta ZP_POLYOBJ_XPOS_LO, y                                       ;$844B
         dey 
         bpl :-
 
@@ -4929,7 +4992,7 @@ _84fe:                                                                  ;$84FE
         jmp _8627               ; jump down to main loop?
 
 _8501:                                                                  ;$8501
-        lda IS_MISJUMP          ; are we in witchspace?
+        lda IS_WITCHSPACE       ; are we in witchspace?
        .bnz _84fe               ; yes -- skip to the main loop
 
         jsr get_random_number
@@ -5333,7 +5396,7 @@ _877e:                                                                  ;$877E
         lda # $80
         sta ZP_34
 
-        lda # $0c
+        lda # TXT_NEWLINE
         jsr print_char
         
         jmp _6a68
@@ -5363,14 +5426,14 @@ _87a6:                                                                  ;$87A6
 _87b0:                                                                  ;$87B0
         rts 
 
-;===============================================================================
-
 _87b1:                                                                  ;$87B1
+;===============================================================================
 .export _87b1
-         ora ZP_POLYOBJ_XPOS_MI
-         ora ZP_POLYOBJ_YPOS_MI
-         ora ZP_POLYOBJ_ZPOS_MI
-         rts 
+        ora ZP_POLYOBJ_XPOS_MI
+        ora ZP_POLYOBJ_YPOS_MI
+        ora ZP_POLYOBJ_ZPOS_MI
+
+        rts 
 
 ;===============================================================================
 ; a debugging error? `brk` causes a beep and a message to be printed
@@ -5411,7 +5474,10 @@ _87d0:                                                                  ;$87D0
         asl PLAYER_SPEED        ;?
         asl PLAYER_SPEED        ;?
         ldx # $18
-        jsr _7b5e
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        jsr _7b5e               ; dead code, just an rts
+.endif  ;///////////////////////////////////////////////////////////////////////
         jsr set_page
         jsr _b2a5
         lda # $00
@@ -5477,11 +5543,17 @@ _8851:                                                                  ;$8851
         dec VAR_0487
         bne _8851
         ldx # $1f
-        jsr _7b5e
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        jsr _7b5e               ; dead code, just an rts
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         jmp _8882
 
 ;===============================================================================
-
+; pointer to the 3D hull to show on the title screen
+;
 _8861:                                                                  ;$8861
         .byte   $88
 _8862:                                                                  ;$8862
@@ -5495,7 +5567,7 @@ _8863:                                                                  ;$8863
 .export _8863
 
         ; erase $1D12..$1D01
-
+        ; (user settings?)
         ldx # $11
         lda # $00
 :       sta _1d01, x                                                    ;$8867
@@ -5509,11 +5581,15 @@ _8863:                                                                  ;$8863
         
         jsr _8a0c
 
+        ; set the stack pointer to the top ($01FF),
+        ; (i.e. disregard all stack-use prior to this point)
         ldx # $ff
         txs 
 
         jsr _83ca
 _8882:                                                                  ;$8882
+        ; set the stack pointer to the top ($01FF),
+        ; (i.e. disregard all stack-use prior to this point)
         ldx # $ff
         txs 
 
@@ -5567,6 +5643,7 @@ _88e7:                                                                  ;$88E7
 .export _88e7
         lda # $ff
         sta ZP_A7
+
         lda # $25
         jmp _86a4
 
@@ -5648,7 +5725,7 @@ _8920:                                                                  ;$8920
 
 .import TXT_ELITE:direct
         lda # TXT_ELITE
-        jsr _7773
+        jsr print_flight_token_and_newline
 
         lda # $0a
         jsr print_char
@@ -5693,7 +5770,7 @@ _8994:                                                                  ;$8994
         lda # 3
         jsr set_cursor_col
         
-        lda # $0c
+        lda # TXT_NEWLINE
         jsr print_docked_str
         
         lda # $0c
@@ -5763,11 +5840,13 @@ _89fd:                                                                  ;$89FD
         rts 
 
 ;===============================================================================
-
+; reset the current save-game -- copies a dummy save game
+; over the current save game data
+;
 _8a0c:                                                                  ;$8A0C
         ; copy $2619..$267A to $25AB..$260C
 
-        ldy # $61
+        ldy # $61               ;=97; length of the save-data
 
 :       lda _2619, y                                                    ;$8A0E
         sta _25ab, y            ; seed would be in $25B6?
@@ -5835,45 +5914,50 @@ txt_docked_token1A:                                                     ;$8A5B
 _8a6a:                                                                  ;$8A6A
         jsr _8fea
         cmp # $0d
-        beq _8a94
+        beq @_8a94
         cmp # $1b
-        beq _8aa1
+        beq @_8aa1
         cmp # $7f
-        beq _8aa8
+        beq @_8aa8
         cpy _8ab2
-        bcs _8a8d
+        bcs @_8a8d
         cmp _8ab3
-        bcc _8a8d
+        bcc @_8a8d
         cmp _8ab4
-        bcs _8a8d
+        bcs @_8a8d
         sta ZP_POLYOBJ_YPOS_HI, y       ;?
         iny 
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit 
-_8a8d:  lda # $07               ; BEEP?                                 ;$8A8D
-_8a8f:                                                                  ;$8A8F
-        jsr paint_char
+@_8a8d:
+        lda # $07               ; BEEP?                                 ;$8A8D
+@_8a8f:
+        jsr paint_char                                                  ;$8A8F
         bcc _8a6a
-_8a94:                                                                  ;$8A94
+@_8a94:                                                                 ;$8A94
         sta ZP_POLYOBJ_YPOS_HI, y       ;?
 
         lda # $10
         sta VAR_050C
         
-        lda # $0c
+        lda # TXT_NEWLINE
         jmp paint_char
 
-_8aa1:                                                                  ;$8AA1
+@_8aa1:                                                                 ;$8AA1
         lda # $10
         sta VAR_050C
         sec 
         rts 
 
-;===============================================================================
+@_8aa8:                                                                 ;$8AA8
+        tya 
+        beq @_8a8d
+        dey 
 
-_8aa8:                                                                  ;$8AA8
-        .byte   $98, $f0, $e2, $88, $a9, $7f, $d0, $df
+        lda # $7f
+        bne @_8a8f                      ; (always branches)
+
         .byte   $0e, $00
 _8ab2:                                                                  ;$8AB2
         .byte   $09
@@ -5882,28 +5966,15 @@ _8ab3:                                                                  ;$8AB3
 _8ab4:                                                                  ;$8AB4
         .byte   $7b
 
-txt_docked_token1E:                                                     ;$8AB5
-        ;=======================================================================
-.export txt_docked_token1E
-
-        lda # $03
-        clc 
-        adc _1d0e
-        jmp print_docked_str
-
-txt_docked_token1F:                                                     ;$8ABE
-        ;=======================================================================
-.export txt_docked_token1F
-        
-        lda # $02
-        sec 
-        sbc _1d0e
-        jmp print_docked_str
+;===============================================================================
+; insert from "text/text_docked_fns.asm"
+;
+.txt_docked_token1E
+.txt_docked_token1F
 
 ;===============================================================================
-
 ; erase $0452...$048C
-
+;
 _8ac7:                                                                  ;$8AC7
         ldx # $3a
         lda # $00
@@ -6011,8 +6082,8 @@ _8b27:                                                                  ;$8B27
         sta ZP_VALUE_pt4
         clc 
         jsr print_large_value
-        jsr _6a8e
-        jsr _6a8e
+        jsr print_newline
+        jsr print_newline
         pla 
         eor # %10101001
         sta _25fd
@@ -6592,14 +6663,14 @@ get_input:                                                              ;$8D53
 
         rts 
 
-;===============================================================================
-
 _8e29:                                                                  ;$8E29
+;===============================================================================
 .export _8e29
+
         ldx VAR_047F
         lda SHIP_SLOT2, x
         ora VAR_045F
-        ora IS_MISJUMP
+        ora IS_WITCHSPACE
         bne _8e7c
         ldy POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
         bmi _8e44
@@ -9480,7 +9551,11 @@ _a6ae:                                                                  ;$A6AE
 
 _a6ba:                                                                  ;$A6BA
         lda # $00
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ldy ZP_MENU_PAGE
         bne _a6ae
@@ -9627,7 +9702,7 @@ _a75d:                                                                  ;$A75D
         lda VAR_0486
         ora # %01100000
         jsr print_flight_token
-        jsr _72c5
+        jsr print_space
 
 .import TXT_VIEW:direct
 
@@ -10507,10 +10582,10 @@ chrout:                                                                 ;$B155
         bne paint_char          ; if it's not RETURN, process it
 
         ; handle the RETURN code
-        lda # $0c
+        lda # TXT_NEWLINE
         jsr paint_char
-        lda # $0d
 
+        lda # $0d
 :       clc                     ; clear carry flag before returning     ;$B166 
         rts 
 
@@ -10542,7 +10617,7 @@ _b176:  jmp _b210                                                       ;B176
 
 _b179:  ; NOTE: called only ever by `_2c7d`!                            ;$B179
 .export _b179
-        lda # $0c
+        lda # TXT_NEWLINE
 
 paint_char:                                                             ;$B17B
 ;===============================================================================

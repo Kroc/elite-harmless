@@ -6,13 +6,14 @@
 ; this file stores the strings typically used when docked (as well as the title
 ; screen), but also the planet descriptions as those are highly complex and
 ; there wasn't any room left in the commonly shared 'flight' strings
-
+;
 ; it's important to note that these strings use an entirely different set of
 ; encrypted, compressed tokens than the flight strings, but can also include
 ; flight strings when needed. needless to say, it's complex
-
+;
 ; this is the 'key' used to scramble / unscramble the docked token symbols
 ; https://xania.org/201406/elites-crazy-string-format
+;
 .export TXT_DOCKED_XOR := $57
 
 ; all tokens on disk are scrambled in this way:
@@ -127,7 +128,7 @@ _250c:                                                                  ;$250C
 ; import the token numbers for the common charcter pairs used by docked
 ; strings ("txt_pairs.asm"). these come unencrypted; we encrypt them for
 ; the on-disk format
-
+;
 .import txt_docked_ab:direct
 _AB     = .encrypt( txt_docked_ab )     ;=$8F
 .import txt_docked_ou:direct
@@ -247,6 +248,7 @@ _COLON  = .encrypt ( $3a )              ;=$6D
 _msg_index     .set 0
 
 .macro  .define_msg     msg_id
+;///////////////////////////////////////////////////////////////////////////////
         
         .local  _value
         _value  .set 0
@@ -266,6 +268,8 @@ _msg_index     .set 0
         ; move to the next index number:
         ; doing this afterwards ensures that there is an index 0
         _msg_index .set _msg_index + 1
+
+;///////////////////////////////////////////////////////////////////////////////
 .endmacro
 
 .define .skip_msg       _msg_index .set _msg_index + 1

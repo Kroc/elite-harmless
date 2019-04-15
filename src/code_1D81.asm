@@ -6,6 +6,7 @@
 .include        "c64/c64.asm"
 .include        "vars_elite.asm"
 .include        "vars_zeropage.asm"
+.include        "text/text.asm"
 .include        "math_3d.asm"
 .include        "text/text_docked_fns.asm"
 .include        "gfx/hull_struct.asm"
@@ -30,7 +31,7 @@
 .import set_cursor_row:absolute
 .import cursor_down:absolute
 .import _6a2f:absolute
-.import _6a3b:absolute
+.import randomize:absolute
 .import _6a9b:absolute
 .import _6f82:absolute
 .import _70a0:absolute
@@ -38,7 +39,7 @@
 .import _745a:absolute
 .import _7481:absolute
 .import _76e9:absolute
-.import _7773:absolute
+.import print_flight_token_and_newline:absolute
 .import print_flight_token:absolute
 .import _7b61:absolute
 .import _7b64:absolute
@@ -606,7 +607,7 @@ _1f20:                                                                  ;$1F20
         and PLAYER_ESCAPEPOD    ; does the player have an escape pod?
        .bze :+                  ; no? keep moving
 
-        lda IS_MISJUMP          ; is the player stuck in witchspace?
+        lda IS_WITCHSPACE       ; is the player stuck in witchspace?
        .bnz :+                  ; yes...
 
         jmp _316e               ; no: eject escpae pod
@@ -975,7 +976,7 @@ _21ab:                                                                  ;$21AB
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
         lda VAR_048B
-        ora IS_MISJUMP
+        ora IS_WITCHSPACE
         bne _21e2
 
         ldy # Hull::bounty      ;=$0A: (bounty lo-byte)
@@ -1038,7 +1039,7 @@ _2224:                                                                  ;$2224
         bcs _2230
         sta PLAYER_ENERGY
 _2230:                                                                  ;$2230
-        lda IS_MISJUMP
+        lda IS_WITCHSPACE
         bne _2277
         
         lda ZP_A3               ; move counter?
@@ -1111,7 +1112,7 @@ _2277:                                                                  ;$2277
         ;-----------------------------------------------------------------------
 
 _227a:                                                                  ;$227A
-        lda IS_MISJUMP
+        lda IS_WITCHSPACE
         bne _2277
         
         lda ZP_A3               ; move counter?
@@ -1632,6 +1633,9 @@ _25a6:                                                                  ;$25A6
 _25aa:                                                                  ;$25AA
 .export _25aa
         .byte   $2e                                     ;"."?
+
+; save data; length might be 97 bytes
+;
 _25ab:                                                                  ;$25AB
 .export _25ab
         .byte   $6a, $61, $6d, $65, $73, $6f, $6e       ;"jameson"?
@@ -1674,31 +1678,36 @@ _25ff:                                                                  ;$25FF
 
 ;$2600: unreferenced / unused data?
 
-        .byte   $00, $00, $00, $00, $00, $00, $00
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00
         
         .byte   $3a, $30, $2e  ;":0.E."?
         .byte   $45, $2e
+
+; dummy/default save-data. this gets copied over the 'current'
+; save data during game initialisation. length: 97 bytes
+;
 _2619:                                                                  ;$2619
 .export _2619
+        ; commander name
         .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d  ;"JAMESON"
         .byte   $00 ,$14, $ad
         
         ; universe seed -- see "elite_consts.asm"
         .byte   ELITE_SEED
         
-        .byte   $00, $00, $03, $e8, $46, $00, $00
-        .byte   $0f ,$00, $00, $00, $00, $00, $16, $00
-        .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
-        .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
-        .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
-        .byte   $00 ,$00, $00, $03, $00, $10, $0f, $11
-        .byte   $00 ,$03, $1c, $0e, $00, $00, $0a, $00
-        .byte   $11 ,$3a, $07, $09, $08, $00, $00, $00
-        .byte   $00 ,$80, $aa, $27, $03, $00, $00, $00
-        .byte   $00 ,$00, $00, $00, $00, $00, $00, $00
-        .byte   $00 ,$00, $00, $00, $00
+        .byte   $00, $00, $03, $e8, $46, $00, $00, $0f
+        .byte   $00, $00, $00, $00, $00, $16, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $03, $00, $10, $0f, $11, $00
+        .byte   $03, $1c, $0e, $00, $00, $0a, $00, $11
+        .byte   $3a, $07, $09, $08, $00, $00, $00, $00
+        .byte   $80, $aa, $27, $03, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+        .byte   $00, $00, $00, $00
 _267e:                                                                  ;$267E
 .export _267e
         .byte   $00, $ff, $ff, $aa, $aa, $aa, $55, $55
@@ -2700,7 +2709,7 @@ _2c9b:                                                                  ;$2C9B
         cpy # $80
         adc # $01
 _2cc4:                                                                  ;$2CC4
-        jsr _7773
+        jsr print_flight_token_and_newline
 _2cc7:                                                                  ;$2CC7
         lda # $7d
         jsr _6a9b
@@ -2710,7 +2719,7 @@ _2cc7:                                                                  ;$2CC7
         cpy # $32
         adc # $01
 _2cd7:                                                                  ;$2CD7
-        jsr _7773
+        jsr print_flight_token_and_newline
 
         lda # $10
         jsr _6a9b
@@ -2731,7 +2740,7 @@ _2cee:                                                                  ;$2CEE
         
         clc 
         adc # $15
-        jsr _7773
+        jsr print_flight_token_and_newline
 
         lda # $12
         jsr _2d61
@@ -2797,7 +2806,7 @@ _2d59:                                                                  ;$2D59
 ;===============================================================================
 
 _2d61:                                                                  ;$2D61
-        jsr _7773
+        jsr print_flight_token_and_newline
         lda # 6
         jmp set_cursor_col
 
@@ -3261,7 +3270,7 @@ print_crlf:                                                             ;$2F1F
 ;
 .export print_crlf
 
-        lda # $0c
+        lda # TXT_NEWLINE
 
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
@@ -3308,7 +3317,7 @@ TXT_BUFFER = $0648              ; $0648..$06A2? -- 3 lines
         cmp # $0a               ;?
         beq :+
         
-        cmp # $0c               ;?
+        cmp # TXT_NEWLINE
         beq :+
         
         cmp # ' '
@@ -3337,7 +3346,7 @@ _add_to_buffer:                                                         ;$2F4D
         bit txt_buffer_flag     ; check bit 6
         bvs :+                  ; skip if bit 6 set
 
-        cmp # $0c               ; new-line character?
+        cmp # TXT_NEWLINE       ; new-line character?
         beq _flush_buffer       ; flush buffer
 
 :       ldx txt_buffer_index                                            ;$2F56
@@ -3364,29 +3373,30 @@ _flush_line:                                                            ;$2F67
        .bze _exit               ; if buffer is empty, exit
 
         ; does the buffer need to be justified?
-
+        ;
         cpx # 31                ; is the buffer <= 30 chars?
        .blt _print_all          ; if so, the buffer is one line, print as-is
 
         ; there is more than one line to print, ergo all but the last line
         ; must be justified -- insert extra spaces until the text reaches
         ; the full length of the line
-
+        ;
         ; since we must insert spaces evenly between words, a 'space-counter'
         ; is used to ensure that we ignore an increasing number of spaces
         ; so that new spaces are added further and further down the line,
         ; providing even distribution
-
+        ;
         ; for speed optimisation, the space-counter is implemented as
         ; a 'walking bit', a single bit in a byte that is shifted along
         ; at each step. when the bit falls off the end it gets reset
-
+        ;
         ; the space-counter begins at bit 6; this is so that the first
         ; space encountered triggers justification
-
+        ;
         ; note that whatever the value of $08 prior to calling this routine,
         ; shifting it right once will ensure that the 'minus' check below will
         ; always fail, so $08 will be 'reset' to %01000000 for this routine
+        ;
         lsr ZP_TEMP_ADDR1_HI
 
 _justify_line:                                                          ;$2F72
@@ -3450,7 +3460,7 @@ _justify_line:                                                          ;$2F72
         jsr _print_chars
 
         ; move to the next line
-        lda # $0c
+        lda # TXT_NEWLINE
         jsr paint_char
         
         lda txt_buffer_index
@@ -3501,7 +3511,7 @@ _exit:  stx txt_buffer_index    ; save remaining buffer length          ;$2FE4
         tax 
 
         ; 'paint' a carriage return, which will move the cursor accordingly
-        lda # $0c
+        lda # TXT_NEWLINE
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
@@ -3914,7 +3924,7 @@ _31e4:                                                                  ;$31E4
         txa 
         bmi _3208
 _31f1:                                                                  ;$31F1
-        jsr _6a3b
+        jsr randomize
         inc ZP_AE
         bne _31d5
         jsr _70ab

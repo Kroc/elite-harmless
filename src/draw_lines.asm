@@ -1520,8 +1520,7 @@ draw_straight_line:                                                     ;$AFFA
 ; duplicate of $2900 / $2907 -- 
 ; likely intended for `draw_straight_line` above
 ;
-;$b08e:
-        .byte   %10000000
+        .byte   %10000000                                               ;$B08E
         .byte   %11000000
         .byte   %11100000
         .byte   %11110000

@@ -120,6 +120,7 @@ _COLON          = .encrypt ( $3a )              ;=$19
 _word_index     .set 0
 
 .macro  .define_word    word_id
+;///////////////////////////////////////////////////////////////////////////////
         
         .local  _value
         _value  .set 0
@@ -139,6 +140,8 @@ _word_index     .set 0
         .ident(word_id) = _value
 
         .export .ident(.concat("TXT", word_id)) = .encrypt( _value )
+
+;///////////////////////////////////////////////////////////////////////////////
 .endmacro
 
 .define .skip_word      _word_index .set _word_index + 1
@@ -600,7 +603,8 @@ _0958:  ;95.                                                            ;$0958
         .skip_word              ; $FF^35 = $DC
 
 ;-------------------------------------------------------------------------------
-
+; at this point a different set of token numbers are used
+;
 _096f:  ;96.                                                            ;$096F
         .byte   F_, R_, _ON, T_, __end
         .skip_word              ; $60^35 = $43

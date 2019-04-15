@@ -8,6 +8,8 @@
 ; 'flight' strings and the 'docked' strings, even if most of the pairs are
 ; used by both
 
+.include        "text.asm"
+
 .segment        "TEXT_PAIRS"
 
 index_docked    .set    $d8     ; pair tokens for docked-text begin at $D8
@@ -19,7 +21,8 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 ; correct token number (once scrambled) into the text data
 
 .macro  .docked_pair    str
-;===============================================================================
+;///////////////////////////////////////////////////////////////////////////////
+
         ; export the pair's token name
         .export .ident( .concat( "txt_docked_", str ) ) = index_docked
         ; move to the next token number
@@ -27,6 +30,8 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 
         ; write the pair of characters to the disk
         .byte   str
+
+;///////////////////////////////////////////////////////////////////////////////
 .endmacro
 
 txt_docked_pairs:                                                       ;$254C
@@ -36,8 +41,8 @@ txt_docked_pairs:                                                       ;$254C
 .export txt_docked_pair1 := txt_docked_pairs+0
 .export txt_docked_pair2 := txt_docked_pairs+1
 
-        ; TODO: decode the meaning of these
-        .byte   $0c, $0a
+        .byte           TXT_NEWLINE
+        .byte           $0a
 
 _254e:
 .export _254e
@@ -65,7 +70,8 @@ _254e:
 ; flight token whilst writing only the two chars to file once
 
 .macro  .shared_pair    str
-;===============================================================================
+;///////////////////////////////////////////////////////////////////////////////
+
         .local  idstr
 
         ; it's annoying, but we have to special case "a?", which wouldn't
@@ -88,6 +94,8 @@ _254e:
         
         ; write the pair of characters to the disk
         .byte   str
+
+;///////////////////////////////////////////////////////////////////////////////
 .endmacro
 
 ; now continue the table, where the flight pairs

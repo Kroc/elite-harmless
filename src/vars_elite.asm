@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "vars_elite.asm" : some common variables Elite stores in $0400..$0700
+; "vars_elite.asm" -- some common variables Elite stores in $0400..$0700
 
 .include        "elite_consts.asm"
 
@@ -49,7 +49,7 @@ DOCKCOM_STATE           = $0480 ; docking computer state: $00 = OFF, $FF = ON
 
 VAR_0481                = $0481 ;?
 
-IS_MISJUMP              = $0482 ; has misjump occurred?
+IS_WITCHSPACE           = $0482 ; has misjump occurred?
 
 VAR_0484                = $0484 ;?
 VAR_0486                = $0486 ;?
@@ -81,6 +81,7 @@ VAR_04C4                = $04c4 ;?
 .endenum
 
 ; got Trumbles™?
+;
 .ifndef OPTION_NOTRUMBLES
 ;///////////////////////////////////////////////////////////////////////////////
 
