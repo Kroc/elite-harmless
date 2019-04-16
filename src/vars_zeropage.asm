@@ -353,14 +353,19 @@ ZP_7D                   = $7d   ;? x6
 ZP_7E                   = $7e   ;? x10
 
 ;-------------------------------------------------------------------------------
-
+; Elite's random-number seed that defines the entire universe
+; see: http://wiki.alioth.net/index.php/Random_number_generator
+;
 ZP_SEED                 = $7f
-ZP_SEED_pt1             = $7f
-ZP_SEED_pt2             = $80
-ZP_SEED_pt3             = $81
-ZP_SEED_pt4             = $82
-ZP_SEED_pt5             = $83
-ZP_SEED_pt6             = $84
+ZP_SEED_W0              = $7f   ; first word
+ZP_SEED_W0_LO           = $7f   ; lo-byte of first word
+ZP_SEED_W0_HI           = $80   ; hi-byte of first word
+ZP_SEED_W1              = $81   ; second word
+ZP_SEED_W1_LO           = $81   ; lo-byte of second word
+ZP_SEED_W1_HI           = $82   ; hi-byte of second word
+ZP_SEED_W2              = $83   ; third word
+ZP_SEED_W2_LO           = $83   ; lo-byte of third word
+ZP_SEED_W2_HI           = $84   ; hi-byte of third word
 
 ;-------------------------------------------------------------------------------
 

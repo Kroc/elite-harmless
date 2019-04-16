@@ -126,7 +126,7 @@
 .import _b0f4:absolute
 .import _b11f:absolute
 .import wait_for_frame:absolute
-.import _b179:absolute
+.import paint_newline:absolute
 .import paint_char:absolute
 .import txt_docked_token15:absolute
 .import _b410:absolute
@@ -1695,7 +1695,7 @@ _2619:                                                                  ;$2619
         .byte   $00 ,$14, $ad
         
         ; universe seed -- see "elite_consts.asm"
-        .byte   ELITE_SEED
+        .word   ELITE_SEED
         
         .byte   $00, $00, $03, $e8, $46, $00, $00, $0f
         .byte   $00, $00, $00, $00, $00, $16, $00, $00
@@ -2666,7 +2666,7 @@ _2c7d:                                                                  ;$2C7D
         lda # TXT_DOCKED_DOCKED
         jsr print_docked_str
 
-        jsr _b179
+        jsr paint_newline
         jmp _2cc7
 
 _2c88:                                                                  ;$2C88
@@ -3531,6 +3531,7 @@ _2ff3:                                                                  ;$2FF3
 .export _2ff3
 
         ; location of the speed bar on the HUD
+        ; TODO: this should be defined in the file with the HUD graphics
         dial_speed_addr = ELITE_BITMAP_ADDR + .bmppos(18, 30)
 
         lda #< dial_speed_addr
@@ -3673,11 +3674,13 @@ _30bb:                                                                  ;$30BB
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit 
-:       lda # .color_nybble(GREEN, GREEN)                                                       ;$30C8
+:       lda # .color_nybble(GREEN, GREEN)                               ;$30C8
+        
         rts 
 
 ;===============================================================================
-
+; draw a bar on the HUD. e.g. for speed, temperature, shield etc.
+;
 hud_drawbar_128:                                                        ;$30CB
         ;-----------------------------------------------------------------------
         ; divide value by 8 before drawing the bar:
@@ -3938,9 +3941,9 @@ _31f1:                                                                  ;$31F1
         ;-----------------------------------------------------------------------
 
 _3208:                                                                  ;$3208
-        lda ZP_SEED_pt4
+        lda ZP_SEED_W1_HI
         sta TSYSTEM_POS_X
-        lda ZP_SEED_pt2
+        lda ZP_SEED_W0_HI
         sta TSYSTEM_POS_Y
         jsr _70ab
         jsr _6f82
@@ -5889,7 +5892,7 @@ _3d6f:                                                                  ;$3D6F
         ; copy the last four bytes of the main seed to the "goat soup"
         ; seed, used for generating the planet descriptions
         ldx # $03
-:       lda ZP_SEED_pt3, x                                              ;3D71
+:       lda ZP_SEED_W1_LO, x                                            ;3D71
         sta ZP_GOATSOUP, x
         dex 
         bpl :-

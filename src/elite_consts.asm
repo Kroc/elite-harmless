@@ -100,14 +100,14 @@ ELITE_SPRITES_INDEX     = <((ELITE_SPRITES_ADDR - ELITE_VIC_ADDR) / 64)
 ; to the structure of the source code -- CHANGING ANY OF THESE IS ALMOST
 ; CERTAINLY GOING TO RENDER THE GAME INOPERABLE
 
-.define ELITE_SEED      $4a, $5a, $48, $02, $53, $B7
+.define ELITE_SEED      $5a4a, $0248, $B753
 
 ; the BBC micro used a 256-px wide screen mode, but the C64 has a 320-px wide
 ; screen. therefore the C64 only draws in a 256-px wide centered 'screen'.
 ; the dimensions of this viewport are given here:
-
+;
 ; (DON'T change this, the code is inextricably tied to this size)
-
+;
 ELITE_VIEWPORT_WIDTH    = 256
 ELITE_VIEWPORT_HEIGHT   = 144
 
@@ -115,6 +115,6 @@ ELITE_VIEWPORT_COLS     = ELITE_VIEWPORT_WIDTH / 8      ;=32
 
 ; the HUD occupies 7 lines at the bottom of the screen; this fact is used in
 ; a wide variety of calculations and implicit values in non-obvious ways
-
+;
 ELITE_HUD_HEIGHT_ROWS   = 7
 ELITE_HUD_TOP_ROW       = 25 - ELITE_HUD_HEIGHT_ROWS

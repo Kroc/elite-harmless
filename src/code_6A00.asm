@@ -227,6 +227,8 @@ _6a2f:                                                                  ;$6A2F
 ;===============================================================================
 ; changes page and does some other pre-emptive work?
 ;
+;       A = page ID to change to
+;
 .export _6a2f
 
         jsr set_page
@@ -256,28 +258,28 @@ randomize:                                                              ;$6A3B
 
 randomize_once:                                                         ;$6A41
         ;=======================================================================
-        lda ZP_SEED_pt1
+        lda ZP_SEED_W0_LO
         clc 
-        adc ZP_SEED_pt3
+        adc ZP_SEED_W1_LO
         tax 
-        lda ZP_SEED_pt2
-        adc ZP_SEED_pt4
+        lda ZP_SEED_W0_HI
+        adc ZP_SEED_W1_HI
         tay 
-        lda ZP_SEED_pt3
-        sta ZP_SEED_pt1
-        lda ZP_SEED_pt4
-        sta ZP_SEED_pt2
-        lda ZP_SEED_pt6
-        sta ZP_SEED_pt4
-        lda ZP_SEED_pt5
-        sta ZP_SEED_pt3
+        lda ZP_SEED_W1_LO
+        sta ZP_SEED_W0_LO
+        lda ZP_SEED_W1_HI
+        sta ZP_SEED_W0_HI
+        lda ZP_SEED_W2_HI
+        sta ZP_SEED_W1_HI
+        lda ZP_SEED_W2_LO
+        sta ZP_SEED_W1_LO
         clc 
         txa 
-        adc ZP_SEED_pt3
-        sta ZP_SEED_pt5
+        adc ZP_SEED_W1_LO
+        sta ZP_SEED_W2_LO
         tya 
-        adc ZP_SEED_pt4
-        sta ZP_SEED_pt6
+        adc ZP_SEED_W1_HI
+        sta ZP_SEED_W2_HI
         
         rts 
 
@@ -360,21 +362,24 @@ _6aa1:                                                                  ;$6AA1
         lda # TXT_ECONOMY
         jsr print_flight_token_with_colon
 
+        ; is this a "MAINLY" economy?
         lda TSYSTEM_ECONOMY
         clc 
         adc # $01
         lsr 
         cmp # $02
         beq _6a93
+
         lda TSYSTEM_ECONOMY
         bcc _6ace
+        
         sbc # $05
         clc 
 _6ace:                                                                  ;$6ACE
 .import TXT_RICH:direct
         
         ; "RICH" / "AVERAGE" / "POOR"
-        
+        ;
         adc # TXT_RICH
         jsr print_flight_token
 _6ad3:                                                                  ;$6AD3
@@ -429,7 +434,7 @@ _6ad3:                                                                  ;$6AD3
         lda # '('
         jsr print_flight_token
         
-        lda ZP_SEED_pt5
+        lda ZP_SEED_W2_LO
         bmi :+
 
 .import TXT_HUMAN_COLONIAL:direct
@@ -438,7 +443,7 @@ _6ad3:                                                                  ;$6AD3
         
         jmp _6b5a
 
-:       lda ZP_SEED_pt6                                                 ;$61BE
+:       lda ZP_SEED_W2_HI                                               ;$61BE
         lsr 
         lsr 
         pha 
@@ -466,8 +471,8 @@ _6ad3:                                                                  ;$6AD3
         adc # TXT_COLORS
         jsr _6a9b
 _6b3b:                                                                  ;$6B3B
-        lda ZP_SEED_pt4
-        eor ZP_SEED_pt2
+        lda ZP_SEED_W1_HI
+        eor ZP_SEED_W0_HI
         and # %00000111
         sta ZP_8E
         cmp # $06
@@ -481,7 +486,7 @@ _6b3b:                                                                  ;$6B3B
         adc # TXT_ADJECTIVES+1  ; +1, because of borrow?
         jsr _6a9b
 _6b4c:                                                                  ;$6B4C
-        lda ZP_SEED_pt6
+        lda ZP_SEED_W2_HI
         and # %00000011
         clc 
         adc ZP_8E
@@ -526,8 +531,8 @@ _6b5a:                                                                  ;$6B5A
         
         ; extract the avergae planet radius from the seed
         ;
-        lda ZP_SEED_pt6
-        ldx ZP_SEED_pt4
+        lda ZP_SEED_W2_HI
+        ldx ZP_SEED_W1_HI
         and # %00001111
         
         ; add the minimum scale factor; this ensures that all planets
@@ -553,13 +558,18 @@ _6b5a:                                                                  ;$6B5A
         rts 
 
 ;===============================================================================
-
+; extract target planet information
+;
+; a more visual guide to the way planet information
+; is generated from the seed can be seen here:
+; http://wiki.alioth.net/index.php/Random_number_generator
+; 
 _6ba9:                                                                  ;$6BA9
-        lda ZP_SEED_pt2
+        lda ZP_SEED_W0_HI
         and # %00000111
         sta TSYSTEM_ECONOMY
 
-        lda ZP_SEED_pt3
+        lda ZP_SEED_W1_LO
         lsr 
         lsr 
         lsr 
@@ -576,7 +586,7 @@ _6ba9:                                                                  ;$6BA9
         clc 
         sta TSYSTEM_TECHLEVEL
 
-        lda ZP_SEED_pt4
+        lda ZP_SEED_W1_HI
         and # %00000011
         adc TSYSTEM_TECHLEVEL
         sta TSYSTEM_TECHLEVEL
@@ -596,7 +606,7 @@ _6ba9:                                                                  ;$6BA9
         lda TSYSTEM_ECONOMY
         eor # %00000111
         adc # $03
-        sta ZP_VAR_P1
+        sta ZP_VAR_P
         
         lda TSYSTEM_GOVERNMENT
         adc # $04
@@ -609,15 +619,15 @@ _6ba9:                                                                  ;$6BA9
         
         jsr _399b
         
-        asl ZP_VAR_P1
+        asl ZP_VAR_P
         rol 
-        asl ZP_VAR_P1
+        asl ZP_VAR_P
         rol 
-        asl ZP_VAR_P1
+        asl ZP_VAR_P
         rol 
         sta TSYSTEM_PRODUCTIVITY_HI
         
-        lda ZP_VAR_P1
+        lda ZP_VAR_P
         sta TSYSTEM_PRODUCTIVITY_LO
         
         rts 
@@ -658,13 +668,13 @@ _6c1c:                                                                  ;$6C1C
 _6c40:                                                                  ;$6C40
         ;-----------------------------------------------------------------------
         stx ZP_9D               ; current star index?
-        ldx ZP_SEED_pt4
-        ldy ZP_SEED_pt5
+        ldx ZP_SEED_W1_HI
+        ldy ZP_SEED_W2_LO
         tya 
         ora # %01010000
         sta ZP_VAR_Z            ; star size?
 
-        lda ZP_SEED_pt2
+        lda ZP_SEED_W0_HI
         lsr 
         clc 
         adc # $18
@@ -1282,7 +1292,7 @@ _7004:                                                                  ;$7004
         dex 
         bpl _7004
 _7009:                                                                  ;$7009
-        lda ZP_SEED_pt4
+        lda ZP_SEED_W1_HI
         sec 
         sbc PSYSTEM_POS_X
         bcs _7015
@@ -1291,7 +1301,7 @@ _7009:                                                                  ;$7009
 _7015:                                                                  ;$7015
         cmp # $14
         bcs _708d
-        lda ZP_SEED_pt2
+        lda ZP_SEED_W0_HI
         sec 
         sbc PSYSTEM_POS_Y
         bcs _7025
@@ -1300,7 +1310,7 @@ _7015:                                                                  ;$7015
 _7025:                                                                  ;$7025
         cmp # $26
         bcs _708d
-        lda ZP_SEED_pt4
+        lda ZP_SEED_W1_HI
         sec 
         sbc PSYSTEM_POS_X
         asl 
@@ -1314,7 +1324,7 @@ _7025:                                                                  ;$7025
         adc # 1
         jsr set_cursor_col
 
-        lda ZP_SEED_pt2
+        lda ZP_SEED_W0_HI
         sec 
         sbc PSYSTEM_POS_Y
         asl 
@@ -1355,7 +1365,7 @@ _7070:                                                                  ;$7070
 
         lda ZP_71
         sta ZP_POLYOBJ01_XPOS_pt1
-        lda ZP_SEED_pt6
+        lda ZP_SEED_W2_HI
         and # %00000001
         adc # $02
         sta ZP_VALUE_pt1
@@ -1399,7 +1409,7 @@ _70ab:                                                                  ;$70AB
         lda # $00
         sta ZP_VAR_U
 _70b6:                                                                  ;$70B6
-        lda ZP_SEED_pt4
+        lda ZP_SEED_W1_HI
         sec 
         sbc TSYSTEM_POS_X
         bcs _70c2
@@ -1408,7 +1418,7 @@ _70b6:                                                                  ;$70B6
 _70c2:                                                                  ;$70C2
         lsr 
         sta ZP_VAR_S
-        lda ZP_SEED_pt2
+        lda ZP_SEED_W0_HI
         sec 
         sbc TSYSTEM_POS_Y
         bcs _70d1
@@ -1442,9 +1452,9 @@ _70f1:                                                                  ;$70F1
 
         ; select a random planet?
 
-        lda ZP_SEED_pt2
+        lda ZP_SEED_W0_HI
         sta TSYSTEM_POS_Y
-        lda ZP_SEED_pt4
+        lda ZP_SEED_W1_HI
         sta TSYSTEM_POS_X
         
         sec 
@@ -2403,14 +2413,14 @@ _76e9:                                                                  ;$76E9
         bpl :-
         
         ldy # $03
-        bit ZP_SEED_pt1
+        bit ZP_SEED_W0_LO
         bvs :+
         dey 
 
 :       sty ZP_VAR_T                                                    ;$76F9
 
 @_76fb:                                                                 ;$76FB
-        lda ZP_SEED_pt6
+        lda ZP_SEED_W2_HI
         and # %00011111
         beq :+
         ora # %10000000
@@ -3234,7 +3244,7 @@ _7a9f:                                                                  ;$7A9F
 _7ac2:                                                                  ;$7AC2
         lsr PLAYER_LEGAL
         jsr clear_zp_polyobj
-        lda ZP_SEED_pt2
+        lda ZP_SEED_W0_HI
         and # %00000011
         adc # $03
         sta ZP_POLYOBJ_ZPOS_HI
@@ -3242,11 +3252,11 @@ _7ac2:                                                                  ;$7AC2
         sta ZP_POLYOBJ_XPOS_HI
         sta ZP_POLYOBJ_YPOS_HI
         jsr _7a8c
-        lda ZP_SEED_pt4
+        lda ZP_SEED_W1_HI
         and # %00000111
         ora # %10000001
         sta ZP_POLYOBJ_ZPOS_HI
-        lda ZP_SEED_pt6
+        lda ZP_SEED_W2_HI
         and # %00000011
         sta ZP_POLYOBJ_XPOS_HI
         sta ZP_POLYOBJ_XPOS_MI
@@ -6362,10 +6372,10 @@ _8cc2:                                                                  ;$8CC2
 
 ;===============================================================================
 ; keyboard keys:
-
+;
 ; map semantic names to the desired key-state memory locations.
 ; this lets you very easily remap controls for compile time
-
+;
 .export joy_up                  = key_s
 .export joy_down                = key_x
 .export joy_left                = key_comma
@@ -6766,8 +6776,8 @@ _8eab:                                                                  ;$8EAB
 ;===============================================================================
 ; flip flags?
 ;
-; Y = some index
-; X = some comparison value
+;       Y = some index
+;       X = some comparison value
 ;
 _8eba:                                                                  ;$8EBA
         txa 
@@ -6794,7 +6804,7 @@ _8eba:                                                                  ;$8EBA
 
 ;===============================================================================
 ; clears the key-states for 56 keys, not 64
-
+;
 _8ed5:                                                                  ;$8ED5
         lda # $00
         ldy # 56                ; only 56 keys, not 64
@@ -9265,8 +9275,10 @@ _a3bf:                                                                  ;$A3BF
         sta ZP_POLYOBJ_VISIBILITY
         rts 
 
+;===============================================================================
 ; insert these routines from "math_3d.asm"
-.move_polyobj_x                                                                  ;$A44A
+;
+.move_polyobj_x                                                         ;$A44A
 .rotate_polyobj_axis                                                    ;$A4A1
 
 ;===============================================================================
@@ -9589,15 +9601,18 @@ _a6d4:                                                                  ;$A6D4
         beq :+
         iny                     ; select next sprite index
 
-.import ELITE_MENUSCR_ADDR
-.import ELITE_MAINSCR_ADDR
-
+        ; the indices for the 8 hardware sprites are stored just after
+        ; the 1'000 bytes used for the screen RAM. since Elite has two
+        ; screens (flight or docked+menus), the sprite index needs to
+        ; be set for both screens
+        ;
 :       sty ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR                        ;$A6F2
         sty ELITE_MAINSCR_ADDR + VIC_SPRITE0_PTR
         
-        ; set colour of cross-hairs according to type of laser
+        ; set colour of cross-hairs
+        ; according to type of laser
         ;
-        lda _3ea8 - $a0, y      ; Y is $A0+ ..?
+        lda _3ea8 - ELITE_SPRITES_INDEX, y
         sta VIC_SPRITE0_COLOR
         
         ; mark the cross-hairs sprite as enabled
@@ -9627,7 +9642,7 @@ _a700:                                                                  ;$A700
         jmp set_memory_layout
 
 .ifndef OPTION_NOTRUMBLES
-        ;///////////////////////////////////////////////////////////////////////
+;///////////////////////////////////////////////////////////////////////////////
 
 trumbles_sprite_count:                                                  ;$A71F
         ;-----------------------------------------------------------------------
@@ -9638,6 +9653,7 @@ trumbles_sprite_mask:                                                   ;$A727
         ; table of bit-masks for which sprites to enable for Trumbles™.
         ; up to six Trumbles™ can appear on-screen, two sprites are always
         ; reserved for other uses (cross-hair and explosion-sprite)
+        ;
         .byte   %00000000
         .byte   %00000100
         .byte   %00001100
@@ -9647,7 +9663,8 @@ trumbles_sprite_mask:                                                   ;$A727
         .byte   %11111100
         .byte   %11111100
 
-.endif  ;///////////////////////////////////////////////////////////////////////
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 ;===============================================================================
 ; switch screen page?
@@ -10364,13 +10381,14 @@ _aaa2:                                                                  ;$AAA2
 
 ;===============================================================================
 ; from "draw_lines.asm" insert the line-drawing code
+;
 .draw_lines                                                             ;$AB31
 ;===============================================================================
 
 
 _b09d:                                                                  ;$B09D
 ;===============================================================================
-; plots a multi-color pixel
+; plot a multi-color pixel
 ;
 ;       VAR_04EB        = Y position, in view-port pixels (0-255). adjusted
 ;                         automatically to nearest multi-color pixel (0-127)
@@ -10448,9 +10466,9 @@ _b0b5:                                                                  ;$B0B5
         ;       %00001100 AND %10101010 = %----10-- (screen RAM lower-nybble)
         ;       %00000011 AND %11111111 = %------11 (colour RAM)
         ;                    
-        and ZP_32                       ; set colour, i.e. %11, %10, %01
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
+        and ZP_32                       ; set colour, i.e. %11, %10, %01, %00
+        eor [ZP_TEMP_ADDR1], y          ; mask new pixel against existing ones
+        sta [ZP_TEMP_ADDR1], y          ; update the screen
         
         lda _ab49, x                    ; look ahead to the next pixel
         bpl @_b0ed
@@ -10465,8 +10483,8 @@ _b0b5:                                                                  ;$B0B5
 
 @_b0ed:                                                                 ;$B0ED
         and ZP_32                       ; apply the colour-mask to the pixel
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
+        eor [ZP_TEMP_ADDR1], y          ; mask new pixel against existing ones
+        sta [ZP_TEMP_ADDR1], y          ; update the screen
         rts 
 
 ;===============================================================================
@@ -10565,8 +10583,9 @@ wait_for_frame:                                                         ;$B148
         rts 
 
 
-chrout:                                                                 ;$B155
 ;===============================================================================
+; print a charcter to the bitmap screen
+;
 ; replaces the KERNAL's `CHROUT` routine for printing text to screen
 ; (since Elite uses only the bitmap screen)
 ;
@@ -10575,6 +10594,8 @@ chrout:                                                                 ;$B155
 ;
 ;       A = ASCII code of character to print
 ;
+chrout:                                                                 ;$B155
+
         cmp # $7b               ; is code greater than or equal to $7B?
         bcs :+                  ; if yes, skip it
         cmp # $0d               ; is code less than $0D? (RETURN)
@@ -10613,10 +10634,12 @@ _b16e:                                                                  ;$B16E
         ;
 _b176:  jmp _b210                                                       ;B176
 
+paint_newline:                                                          ;$B179
         ;-----------------------------------------------------------------------
+        ; NOTE: called only ever by `_2c7d`!
+        ;
+.export paint_newline
 
-_b179:  ; NOTE: called only ever by `_2c7d`!                            ;$B179
-.export _b179
         lda # TXT_NEWLINE
 
 paint_char:                                                             ;$B17B
@@ -10662,7 +10685,7 @@ _b1a1:                                                                  ;$B1A1
         ; note that the font is ASCII so a few characters appear different
         ; and font graphics are only provided for 96 characters, from space
         ; (32 / $20) onwards
-
+        ;
         tay                     ; put aside the ASCII code
         
         ; at 8 bytes per character, each page (256 bytes) occupies 32 chars,
@@ -11011,12 +11034,12 @@ _b301:                                                                  ;$B301
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ;
-        ; the original Elite code does a rather inefficient byte-by-byte
-        ; copy -- for every byte copied, there's additional cycles spent on
-        ; decrementing the 16-bit address pointers and the slower indirect-X
-        ; addressing mode is used -- but in a rather rediculous case of this
-        ; being a rushed port from the BBC this routine also copies all the
-        ; blank space left and right of the HUD *every frame*!
+        ; the original Elite code does a rather inefficient byte-by-byte copy.
+        ; for every byte copied, additional cycles are spent on decrementing
+        ; the 16-bit address pointers and the slower indirect-X addressing
+        ; mode is used -- but in a rather rediculous case of this being a
+        ; rushed port from the BBC this routine also copies all the blank
+        ; space left and right of the HUD *every frame*!
         ;
         ldx # 8                 ; numbe of pages to copy (8*256)
         lda #< __HUD_DATA_RUN__
@@ -11044,8 +11067,8 @@ _b301:                                                                  ;$B301
         ; fast (so testing for zero/non-zero). starting at $FF won't do, as a
         ; zero-check at the bottom will exit out before the 0'th loop has been
         ; done. ergo, we start at 0, the `dex` at the bottom will underflow
-        ; back to $FF and we loop around until back to $00 where the loop will
-        ; exit without repeating the 0'th iteration
+        ; back to $FF and we loop around until back to $00 where the loop
+        ; will exit without repeating the 0'th iteration
         ;
         ldx # $00
 
@@ -11262,8 +11285,8 @@ block_copy:                                                             ;$B3C3
 ; [ZP_TEMP_ADDR1] = to address
 ;               X = number of pages to copy
 ;
-; the copy method is replaced with a faster alternative in elite-harmless,
-; so this code is no longer used there
+; the copy method is replaced with a faster alternative
+; in elite-harmless, so this code is no longer used there
 ; 
 ;-------------------------------------------------------------------------------
         ; start copying from the beginning of the page
