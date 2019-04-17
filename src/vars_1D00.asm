@@ -27,7 +27,7 @@
 .export _1d14
 .export _1d21
 
-.segment        "CODE_1D00"
+.segment        "VARS_1D00"
 
 
 _1d00:  ; nothing appears to actually reference $1D00 itself            ;$1D00

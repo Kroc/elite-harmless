@@ -64,8 +64,8 @@ echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/orig-text_flight.o      src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/orig-text_docked.o      src/text/text_docked.asm
-echo "- assemble 'code_1D00.asm'"
-$ca65 $options -o build/orig-code_1D00.o        src/code_1D00.asm
+echo "- assemble 'vars_1D00.asm'"
+$ca65 $options -o build/orig-vars_1D00.o        src/vars_1D00.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/orig-code_1D81.o        src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
@@ -132,7 +132,7 @@ $ld65 \
     --obj build/orig-text_pairs.o \
     --obj build/orig-text_flight.o \
     --obj build/orig-text_docked.o \
-    --obj build/orig-code_1D00.o \
+    --obj build/orig-vars_1D00.o \
     --obj build/orig-init.o \
     --obj build/orig-code_1D81.o \
     --obj build/orig-code_6A00.o \
@@ -291,8 +291,8 @@ echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-echo "- assemble 'code_1D00.asm'"
-$ca65 $options -o build/code_1D00.o         src/code_1D00.asm
+echo "- assemble 'vars_1D00.asm'"
+$ca65 $options -o build/vars_1D00.o         src/vars_1D00.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/code_1D81.o         src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
@@ -329,7 +329,7 @@ $ld65 \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
-    --obj build/code_1D00.o \
+    --obj build/vars_1D00.o \
     --obj build/code_init.o \
     --obj build/code_1D81.o \
     --obj build/code_6A00.o \
@@ -403,8 +403,8 @@ echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-echo "- assemble 'code_1D00.asm'"
-$ca65 $options -o build/code_1D00.o         src/code_1D00.asm
+echo "- assemble 'vars_1D00.asm'"
+$ca65 $options -o build/vars_1D00.o         src/vars_1D00.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/code_1D81.o         src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
