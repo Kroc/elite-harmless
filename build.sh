@@ -95,20 +95,22 @@ $ca65 $options -o build/orig-link.o             src/elite_link.asm
 echo
 echo "* assemble GMA86 loader"
 echo "  --------------------------------------"
-echo "- assemble 'loader/stage0.asm'"
-$ca65 -o build/loader/stage0.o  src/loader/stage0.asm
-echo "- assemble 'loader/stage1.asm'"
-$ca65 -o build/loader/stage1.o  src/loader/stage1.asm
-echo "- assemble 'loader/stage2.asm'"
-$ca65 -o build/loader/stage2.o  src/loader/stage2.asm
-echo "- assemble 'loader/stage3.asm'"
-$ca65 -o build/loader/stage3.o  src/loader/stage3.asm
-echo "- assemble 'loader/stage4.asm'"
-$ca65 -o build/loader/stage4.o  src/loader/stage4.asm
-echo "- assemble 'loader/stage5.asm'"
-$ca65 -o build/loader/stage5.o  src/loader/stage5.asm
-echo "- assemble 'loader/stage6.asm'"
-$ca65 -o build/loader/stage6.o  src/loader/stage6.asm
+echo "- assemble 'loader/gma/stage0.asm'"
+$ca65 -o build/loader_gma_stage0.o      src/loader/gma/stage0.asm
+echo "- assemble 'loader/gma/stage1.asm'"
+$ca65 -o build/loader_gma_stage1.o      src/loader/gma/stage1.asm
+echo "- assemble 'loader/gma/stage2.asm'"
+$ca65 -o build/loader_gma_stage2.o      src/loader/gma/stage2.asm
+echo "- assemble 'loader/gma/stage3.asm'"
+$ca65 -o build/loader_gma_stage3.o      src/loader/gma/stage3.asm
+echo "- assemble 'loader/gma/stage4.asm'"
+$ca65 -o build/loader_gma_stage4.o      src/loader/gma/stage4.asm
+echo "- assemble 'loader/gma/gma4_7C3A.asm'"
+$ca65 -o build/loader_gma_stage4_7C3A.o src/loader/gma/stage4_7C3A.asm
+echo "- assemble 'loader/gma/stage5.asm'"
+$ca65 -o build/loader_gma_stage5.o      src/loader/gma/stage5.asm
+echo "- assemble 'loader/gma/stage6.asm'"
+$ca65 -o build/loader_gma_stage6.o      src/loader/gma/stage6.asm
 
 echo
 echo "* make 'elite-original-gma86.d64'"
@@ -118,14 +120,14 @@ $ld65 \
        -C link/elite-original-gma86.cfg \
        -m build/elite-original-gma86.map -vm \
     --obj build/orig-link.o \
-    --obj build/loader/stage0.o \
-    --obj build/loader/stage1.o \
-    --obj build/loader/stage2.o \
-    --obj build/loader/stage3.o \
-    --obj build/loader/stage4.o \
-    --obj build/loader/stage5.o \
-    --obj build/loader/stage6.o \
-    --obj build/loader/gma4_7C3A.o \
+    --obj build/loader_gma_stage0.o \
+    --obj build/loader_gma_stage1.o \
+    --obj build/loader_gma_stage2.o \
+    --obj build/loader_gma_stage3.o \
+    --obj build/loader_gma_stage4.o \
+    --obj build/loader_gma_stage5.o \
+    --obj build/loader_gma_stage6.o \
+    --obj build/loader_gma_stage4_7C3A.o \
     --obj build/orig-vars_0400.o \
     --obj build/orig-text_pairs.o \
     --obj build/orig-text_flight.o \
@@ -151,7 +153,7 @@ echo -n "-   verify 'gma4_data1.bin' "
 if [[
     # note that this hash was produced by dumping $4000...$758F,
     # just after decryption (but before relocation)
-    $(md5sum -b < build/loader/gma4_data1.bin) \
+    $(md5sum -b < build/gma4_data1.bin) \
  == "049a1004768ed1de4e220923ea865f78 *-"
 ]]; then
     echo "[OK]"
@@ -164,8 +166,8 @@ fi
 # file we can then re-link into the stage 4 loader ("GMA4.PRG")
 echo "-  encrypt 'gma4_data1.bin'"
 $encrypt 6C \
-    build/loader/gma4_data1.bin \
-    build/loader/gma4_data1.bin
+    build/gma4_data1.bin \
+    build/gma4_data1.bin
 
 # verify that the packed data is correct:
 # (this will be harder to debug once encrypted)
@@ -173,7 +175,7 @@ echo -n "-   verify 'gma4_data2.bin' "
 if [[
     # note that this hash was produced by dumping $75E4...$865F,
     # just after decryption (but before relocation)
-    $(md5sum -b < build/loader/gma4_data2.bin) \
+    $(md5sum -b < build/gma4_data2.bin) \
  == "32cba4aa5d3ee363c0bdfb77e95c1fc3 *-"
 ]]; then
     echo "[OK]"
@@ -185,16 +187,16 @@ fi
 # encrypt the second block
 echo "-  encrypt 'gma4_data2.bin'"
 $encrypt 8E \
-    build/loader/gma4_data2.bin \
-    build/loader/gma4_data2.bin
+    build/gma4_data2.bin \
+    build/gma4_data2.bin
 
 echo "-   concat 'gma4.prg'"
-cat "build/loader/gma4_prg.bin" \
-    "build/loader/gma4_data1.bin" \
-    "build/loader/gma4_junk1.bin" \
-    "build/loader/gma4_code.bin" \
-    "build/loader/gma4_data2.bin" \
-    "build/loader/gma4_junk2.bin" \
+cat "build/gma4_prg.bin" \
+    "build/gma4_data1.bin" \
+    "build/gma4_junk1.bin" \
+    "build/gma4_code.bin" \
+    "build/gma4_data2.bin" \
+    "build/gma4_junk2.bin" \
 >   "bin/gma4.prg"
 
 # encrypt GMA5.PRG:
@@ -202,13 +204,13 @@ cat "build/loader/gma4_prg.bin" \
 
 echo "-  encrypt 'gma5_data.bin'"
 $encrypt 36 \
-    build/loader/gma5_data.bin \
-    build/loader/gma5_data.bin
+    build/gma5_data.bin \
+    build/gma5_data.bin
 
 echo "-   concat 'gma5.prg'"
-cat "build/loader/gma5_code.prg" \
-    "build/loader/gma5_data.bin" \
-    "build/loader/gma5_junk.bin" \
+cat "build/gma5_code.prg" \
+    "build/gma5_data.bin" \
+    "build/gma5_junk.bin" \
 >   "bin/gma5.prg"
 
 # encrypt GMA6.PRG:
@@ -216,13 +218,13 @@ cat "build/loader/gma5_code.prg" \
 
 echo "-  encrypt 'gma6_data.bin'"
 $encrypt 49 \
-    build/loader/gma6_data.bin \
-    build/loader/gma6_data.bin
+    build/gma6_data.bin \
+    build/gma6_data.bin
 
 echo "-   concat 'gma6.prg'"
-cat "build/loader/gma6_prg.bin" \
-    "build/loader/gma6_data.bin" \
-    "build/loader/gma6_junk.bin" \
+cat "build/gma6_prg.bin" \
+    "build/gma6_data.bin" \
+    "build/gma6_junk.bin" \
 >   "bin/gma6.prg"
 
 #-------------------------------------------------------------------------------
@@ -252,7 +254,9 @@ md5sum --ignore-missing --quiet --check checksums.md5
 if [ $? -eq 0 ]; then echo "- OK"; fi
 cd ..
 
+##
 ##exit 0
+##
 
 #===============================================================================
 
@@ -275,8 +279,8 @@ echo "- OK"
 options="-DOPTION_MATHTABLES"
 
 echo
-echo "- assemble 'disk_boot_exo.asm'"
-$ca65 $options -o build/disk_boot_exo.o     src/disk_boot_exo.asm
+echo "- assemble '/loader/disk_boot_exo.asm'"
+$ca65 $options -o build/disk_boot_exo.o     src/loader/disk_boot_exo.asm
 echo "- assemble 'code_init.asm'"
 $ca65 $options -o build/code_init.o         src/code_init.asm
 echo "- assemble 'vars_0400.asm'"
@@ -423,8 +427,8 @@ echo
 
 echo "* make 'elite-harmless-ocean.crt'"
 echo "  --------------------------------------"
-echo "- assemble 'cart_boot.asm'"
-$ca65 $options -o build/cart_boot.o         src/cart_boot.asm
+echo "- assemble 'loader/cart_boot.asm'"
+$ca65 $options -o build/cart_boot.o         src/loader/cart_boot.asm
 echo "- linking..."
 $ld65 \
        -C link/elite-harmless-crt-ocean.cfg \
