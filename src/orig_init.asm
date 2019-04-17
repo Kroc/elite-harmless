@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "elite_init.asm" : contains intialisation code and graphics data
+; "orig_init.asm" -- contains intialisation code and graphics data
 
 .include        "c64/c64.asm"
 .include        "elite_consts.asm"
@@ -22,14 +22,14 @@ _75e4:                                                                  ;$75E4
         ; this code will switch the VIC-II bank to $4000..$8000;
         ; all graphics to be displayed (characters, sprites, bitmaps)
         ; must therfore exist within this memory range
-
+        ;
         ; the program file on disk uses the bitmap screen area ($4000..$6000)
         ; to store some code & data, which gets relocated during this routine.
         ; this is so that the disk file can be smaller by making use of space
         ; that would otherwise consist mostly of zeroes
-
+        ;
         ; copy $4000..$5600 to $0700..$1D00:
-
+        ;
         ; oddly, $4000..$4800 would be the character set, however only graphics
         ; for $4400..$4700 are defined, therefore the [used] character graphics
         ; get copied to $0B00..$0E00 (the rest is other data)

@@ -305,15 +305,16 @@ ZP_SUNX_HI              = $62   ; as above
 
 ZP_BETA                 = $63   ; a rotation variable used in matrix math
 
-ZP_64                   = $64   ;? x8
+ZP_PITCH_MAGNITUDE      = $64   ; unsigned pitch rotation value,
+                                ; note that $94 is the pitch rotation sign
 
 ZP_65                   = $65   ; hyperspace counter (inner)?
 ZP_66                   = $66   ; hyperspace counter (outer)?
 
 ZP_67                   = $67   ;? x9
 
-ZP_ROLL_MAGNITUDE       = $68   ; "roll magnitude"?
-ZP_ROLL_SIGN            = $69   ; "roll sign"?
+ZP_ROLL_MAGNITUDE       = $68   ; unsigned roll rotation value
+ZP_ROLL_SIGN            = $69   ; roll rotation sign
 
 ZP_6A                   = $6a   ; "move count"?
 
@@ -384,7 +385,9 @@ ZP_90                   = $90   ;? x11
 ZP_91                   = $91   ;? x9
 ZP_92                   = $92   ;? x6
 ZP_93                   = $93   ;? x4
-ZP_94                   = $94   ;? x8
+
+ZP_PITCH_SIGN           = $94   ; pitch rotation sign (see $64 for magnitude)
+
 ZP_95                   = $95   ;? x6
 
 PLAYER_SPEED            = $96

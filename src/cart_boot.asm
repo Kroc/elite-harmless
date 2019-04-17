@@ -177,8 +177,8 @@ cold_start:                                                             ;$800C
 	jsr KERNAL_IOINIT       ; initialise CIA chips
 	jsr KERNAL_RAMTAS       ; clear zero-page, RAM, and set screen address
 	jsr KERNAL_RESTOR       ; initialise the table of KERNAL vectors
-	jsr $FF5B		; CINT   - Init VIC and screen editor
-	cli			; Re-enable IRQ interrupts
+	jsr KERNAL_SCINIT       ; initialise VIC and screen editor
+	cli			; re-enable IRQ interrupts
 
         inc $d020
         jmp *-3

@@ -4821,11 +4821,11 @@ _83ed:                                                                  ;$83ED
         lda # $80
         sta VAR_048E
         sta ZP_ROLL_SIGN        ; roll sign?
-        sta ZP_94
+        sta ZP_PITCH_SIGN
 
         asl                     ;=0
         sta ZP_BETA
-        sta ZP_64
+        sta ZP_PITCH_MAGNITUDE
         sta ZP_6A               ; move count?
         sta ZP_95
         sta ZP_A3               ; move counter?
@@ -9088,12 +9088,12 @@ _a2cb:                                                                  ;$A2CB
         
         lda ZP_VAR_P3
         sta ZP_B4
-        ldx ZP_64
+        ldx ZP_PITCH_MAGNITUDE
         jsr _3a25
         sta ZP_VAR_P3
         
         lda ZP_B5
-        eor ZP_94
+        eor ZP_PITCH_SIGN
         ldx # $06
         jsr _a508
         sta ZP_POLYOBJ_ZPOS_HI
@@ -9111,7 +9111,7 @@ _a2cb:                                                                  ;$A2CB
         
         lda ZP_B5
         sta ZP_POLYOBJ_YPOS_HI
-        eor ZP_94
+        eor ZP_PITCH_SIGN
         eor ZP_POLYOBJ_ZPOS_HI
         bpl :+
         

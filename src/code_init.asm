@@ -3,8 +3,9 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "code_init.asm" : contains intialisation code for elite-harmless;
-; original Elite uses "orig_init.asm"
+; "code_init.asm" -- contains once-off intialisation code for elite-harmless;
+; original Elite uses "orig_init.asm". this code is loaded into the variable
+; space the game uses, so once executed it is erased! 
 
 .include        "c64/c64.asm"
 .include        "elite_consts.asm"
@@ -302,8 +303,8 @@ _776c:
         dex 
         bne _7745
 
-        ; set yellow colour across the bottom row of the menu-screen
-        ; write $70 from $63E4 to $63C4
+        ; set yellow colour across the bottom row of
+        ; the menu-screen. write $70 from $63E4 to $63C4
         lda # .color_nybble( YELLOW, BLACK )
         ldy # ELITE_VIEWPORT_COLS - 1
 :       sta ELITE_MENUSCR_ADDR + .scrpos(24, 4), y
@@ -312,14 +313,13 @@ _776c:
 
         ; set screen colours for the mult-colour bitmap
         ;-----------------------------------------------------------------------
-
         ; set $D800-$DC00 (colour RAM) to black
+        ;
         lda # BLACK
         sta ZP_COPY_TO+0
         tay 
         ldx #> $d800
         stx ZP_COPY_TO+1
-
         ldx # $04               ; 4 x 256 = 1'024 bytes
 :       sta [ZP_COPY_TO], y
         iny 
@@ -354,7 +354,6 @@ _77a3:  sta $d802, y
         bne _77a3
 
         ; sprite indicies
-        ; TODO: define these indicies based on the acutal sprite patterns order
         lda # ELITE_SPRITES_INDEX + 0
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE0_PTR
@@ -384,7 +383,7 @@ _77a3:  sta $d802, y
         ; clear the bitmap screen:
         ;-----------------------------------------------------------------------
         ; erase $4000-$6000
-
+        ;
         lda # $00
         sta ZP_COPY_TO+0
         tay 
@@ -416,8 +415,8 @@ _76d8:  stx ZP_COPY_TO+1
         ; NOTE: calling `init_mem` clears variable storage from $0400..$0700
         ; *THIS VERY CODE IS WITHIN THAT REGION* -- ergo, we cannot return
         ; from a subroutine here but we will still need to send execution to
-        ; `_88b3` after clearing variable storage. we do this by pushing the
-        ; address we want to jump to (`_88b3`) on to the stack and then jump
+        ; `_8863` after clearing variable storage. we do this by pushing the
+        ; address we want to jump to (`_8863`) on to the stack and then jump
         ; (*NOT* `jsr`) to the subroutine. when it hits `rts`, execution will
         ; move to the address we inserted into the stack!
         ;

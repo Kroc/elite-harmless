@@ -135,13 +135,12 @@
 .import hull_pointers
 .import hull_d042
 
-;-------------------------------------------------------------------------------
-
 .segment        "CODE_1D81"
 
+;===============================================================================
 ; I think this is when the player has docked,
 ; it checks for potential mission offers
-
+;
 _1d81:                                                                  ;$1D81
         jsr _83df
         jsr _379e
@@ -153,7 +152,8 @@ _1d81:                                                                  ;$1D81
         sta PLAYER_TEMP_LASER   ; complete laser cooldown
         sta ZP_66               ; reset hyperspace countdown
 
-        ; set shields to maximum:
+        ; set shields to maximum,
+        ; restore energy:
         lda # $ff
         sta PLAYER_SHIELD_FRONT
         sta PLAYER_SHIELD_REAR
@@ -172,7 +172,7 @@ _1d81:                                                                  ;$1D81
         ;-----------------------------------------------------------------------
         ; available on the first galaxy after 256 or more kills. your job is
         ; to hunt down the prototype Constrictor ship starting at Reesdice
-
+        ;
         ; is the mission already underway or complete?
         lda MISSION_FLAGS
         and # missions::constrictor
@@ -182,7 +182,7 @@ _1d81:                                                                  ;$1D81
         beq @skip               ; ignore mission if kills less than 256
 
         ; is the player in the first galaxy?
-
+        ;
         lda PLAYER_GALAXY       ; if bit 0 is set, shifting right will cause
         lsr                     ; it to fall off the end, leaving zero;
        .bnz @skip               ; if not first galaxy, ignore mission
@@ -204,7 +204,7 @@ _1d81:                                                                  ;$1D81
         ; completed the Constrictor mission, >=1280 kills) you're presented
         ; with a message to fly to Ceerdi. Once there, you're given some
         ; top-secret blueprints which you have to get to Birera
-        
+        ;
         ; is the player in the third galaxy?
         lda PLAYER_GALAXY
         cmp # 2
@@ -265,7 +265,7 @@ _1d81:                                                                  ;$1D81
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 @skip:  ; check for Trumbles™ mission                                   ;$1E00
-        ;-----------------------------------------------------------------------
+        ;
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
 
@@ -311,7 +311,7 @@ debug_for_brk:                                                          ;$1E14
 
 ;===============================================================================
 ; Trumble™ A.I. data?
-
+;
 trumble_steps:                                                          ;$1E21
         ; movement steps; "0, 1, -1, 0"
         .byte   $00, $01, $ff, $00
@@ -348,13 +348,13 @@ _1e35:
         jsr set_memory_layout
         
         ; should the Trumbles™ change direction?
-
+        ;
         jsr get_random_number   ; select a random number
         cmp # 235               ; is it > 234 (about 8% probability)
        .blt @move               ; no, just keep moving
 
         ; pick a direction for the Trumble™
-        
+        ;
         ; select an X direction:
         ; 50% chance stay still, 25% go left, 25% go right
         and # %00000011         ; random number modulo 4 (0-3)
@@ -374,9 +374,6 @@ _1e35:
         sta TRUMBLES_MOVE_Y, y  ; set the Trumble™'s Y direction
 
 @move:                                                                  ;$1E6A
-        ; turn *OFF* sprite MSB?
-        ; why do this?
-
         lda _1e29, y
         and VIC_SPRITES_X
         sta VIC_SPRITES_X
@@ -461,36 +458,40 @@ _1ece:                                                                  ;$1ECE
         ldx VAR_048D
         jsr _3c58
         jsr _3c58
+
         txa 
         eor # %10000000         ; flip the sign bit
         tay                     ; put aside
         and # %10000000         ; strip down to just the sign bit
-        sta ZP_ROLL_SIGN
+        sta ZP_ROLL_SIGN        ; store as our "direction of roll"
 
         stx VAR_048D            ; X-dampen?
         eor # %10000000
         sta ZP_6A               ; move count?
         
         tya 
-        bpl _1eee
+        bpl :+
 
         ; negate
         eor # %11111111
         clc 
         adc # $01
-_1eee:                                                                  ;$1EEE
-        lsr 
+
+:       lsr                                                             ;$1EEE
         lsr 
         cmp # $08
-        bcs _1ef5
+        bcs :+
         lsr 
-_1ef5:                                                                  ;$1EF5
-        sta ZP_ROLL_MAGNITUDE
+
+:       sta ZP_ROLL_MAGNITUDE                                           ;$1EF5
         ora ZP_ROLL_SIGN        ; add sign
         sta ZP_ALPHA            ; put aside for use in the matrix math
 
+        ;-----------------------------------------------------------------------
+        
         ldx VAR_048E
         jsr _3c58
+
         txa 
         eor # %10000000
         tay 
@@ -498,7 +499,7 @@ _1ef5:                                                                  ;$1EF5
         stx VAR_048E
         sta ZP_95
         eor # %10000000
-        sta ZP_94
+        sta ZP_PITCH_SIGN
         tya 
         bpl _1f15
         eor # %11111111
@@ -512,9 +513,9 @@ _1f15:                                                                  ;$1F15
         bcs _1f20
         lsr 
 _1f20:                                                                  ;$1F20
-        sta ZP_64
-        ora ZP_94
-        sta ZP_BETA
+        sta ZP_PITCH_MAGNITUDE
+        ora ZP_PITCH_SIGN
+        sta ZP_BETA             ; put aside for the matrix math
         
         ; accelerate?
         ;-----------------------------------------------------------------------
@@ -530,11 +531,11 @@ _1f20:                                                                  ;$1F20
 :       ; decelerate?                                                   ;$1F33
         ;-----------------------------------------------------------------------
         lda key_decelerate      ; is decelerate being held?
-       .bze :+
+       .bze :+                  ; if not, continue
 
-        dec PLAYER_SPEED        ; player's ship speed?
-        bne :+
-        inc PLAYER_SPEED        ; player's ship speed?
+        dec PLAYER_SPEED        ; reduce player's speed
+       .bnz :+                  ; still above zero?
+        inc PLAYER_SPEED        ; if zero, set to 1?
 
         ; disarm missile?
         ;-----------------------------------------------------------------------
@@ -1192,7 +1193,7 @@ _22c2:                                                                  ;$22C2
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
 
-        ; reduce number of Trumbles™
+        ; halve the number of Trumbles™
         lsr PLAYER_TRUMBLES_HI
         ror PLAYER_TRUMBLES_LO
 
@@ -2396,7 +2397,7 @@ _2a43:                                                                  ;$2A43
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         stx ZP_VAR_XX_LO
-        ldx ZP_64
+        ldx ZP_PITCH_MAGNITUDE
         lda ZP_VAR_YY_HI
         eor ZP_95
         jsr _393e
@@ -2520,7 +2521,7 @@ _2b30:                                                                  ;$2B30
         stx ZP_VAR_XX_LO
         lda ZP_VAR_YY_HI
         eor ZP_95
-        ldx ZP_64
+        ldx ZP_PITCH_MAGNITUDE
         jsr _393e
         sta ZP_VAR_Q
         lda ZP_VAR_XX_HI
@@ -3566,7 +3567,7 @@ _2ff3:                                                                  ;$2FF3
         jsr multiplied_now_add
         jsr _3130
         lda ZP_BETA
-        ldx ZP_64
+        ldx ZP_PITCH_MAGNITUDE
         beq _302b
         sbc # $01
 _302b:                                                                  ;$302B
@@ -5013,8 +5014,8 @@ _37fa:                                                                  ;$37FA
         stx ZP_VAR_R
         lda DUST_Y, y
         sta ZP_VAR_Y
-        eor ZP_94
-        ldx ZP_64
+        eor ZP_PITCH_SIGN
+        ldx ZP_PITCH_MAGNITUDE
         jsr _393e
         jsr multiplied_now_add
         stx ZP_VAR_XX_LO
@@ -5023,7 +5024,7 @@ _37fa:                                                                  ;$37FA
         stx ZP_VAR_R
         ldx ZP_VAR_Y
         stx ZP_VAR_S
-        ldx ZP_64
+        ldx ZP_PITCH_MAGNITUDE
         eor ZP_95
         jsr _393e
         jsr multiplied_now_add
@@ -5087,9 +5088,9 @@ _38a3:                                                                  ;$38A3
         sta ZP_ROLL_SIGN        ; roll sign?
         eor # %10000000
         sta ZP_6A               ; move count?
-        lda ZP_94
+        lda ZP_PITCH_SIGN
         eor ZP_B0
-        sta ZP_94
+        sta ZP_PITCH_SIGN
         eor # %10000000
         sta ZP_95
         rts 
@@ -5674,10 +5675,10 @@ _3c4d:                                                                  ;$3C4D
 
 ;===============================================================================
 ; BBC code says "centre ship indicators"
-; roll dampening? -- slowly reduces roll to 0
+; roll/pitch dampening? -- slowly reduces X to 1
 ;
 ;       X :  
-
+;
 _3c58:                                                                  ;$3C58
         lda DOCKCOM_STATE       ; is docking computer enabled?
        .bnz :+                  ; yes, skip over the following
@@ -5695,7 +5696,7 @@ _3c58:                                                                  ;$3C58
        .bnz @rts                ; do nothing 255/256 times
         
         dex 
-        beq :-
+       .bze :-
 
 @rts:   rts                                                             ;$3C68 
 
@@ -5994,8 +5995,9 @@ mission_trumbles:                                                       ;$3DC0
 ;===============================================================================
 
 _3dff:                                                                  ;$3DFF
-        ; and this is how you set bit 0, without using registers!
-
+        ; and this is how you set bit 0,
+        ; without using registers!
+        ;
         lsr MISSION_FLAGS       ; push bit 0 into the bit-bucket
         sec                     ; put a 1 into the carry
         rol MISSION_FLAGS       ; push the carry into bit 0

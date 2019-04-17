@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 ;
-; draw_lines.asm -- code & data for drawing lines
+; "draw_lines.asm" -- code & data for drawing lines
 ;
 ; this is a macro because it is located in the
 ; middle of other code in the original game
@@ -26,6 +26,8 @@ _ab31:                                                                  ;$AB31
         .byte   %00000010
         .byte   %00000001
 
+        ; bytes beyond this point appear not to be used
+        ;
         .byte   %10000000
         .byte   %01000000
 

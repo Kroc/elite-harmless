@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "code_boot.asm" : auto-start code for Elite : Harmless
+; "disk_boot.asm" -- auto-start code for Elite : Harmless
 ; original Elite uses the code in the "loader" folder
 
 .include        "c64/c64.asm"
@@ -16,13 +16,13 @@
 
 ; the BASIC bootstrap needs to be stored at the beginning of the program,
 ; canonically $02A7, but needs to be addressed as running from $0801.
-; the linker configuration handles this ("link/elite-harmless.cfg")
-
+; the linker configuration handles this ("link/elite-harmless-d64.cfg")
+;
 .segment        "BASIC_LOAD"
 
         ; the C64 BASIC binary format is described here:
         ; <https://www.c64-wiki.com/wiki/BASIC_token> 
-
+        ;
         .addr   @end            ; pointer to next line
         .word   1               ; BASIC line-number
         
@@ -44,11 +44,10 @@
         ; immediately following the BASIC bootstrap is a small machine-langauge
         ; routine to copy the program to its intended location
         ;-----------------------------------------------------------------------
-
         ; NOTE: the linker configuration ("link/elite-harmless.cfg")
         ;       defines the segments, their addresses, and exports those
         ;       values for use here:
-
+        ;
 .import __LOADER_START__        ; get the load address of the program
 .import __LOADER_LAST__         ; and the last address used (i.e. size)
 .import __BASIC_LOAD_RUN__      ; and, as seen by BASIC, i.e. $0801
@@ -64,7 +63,7 @@
         ; note that these are 16-bit data types and the `ldx` is limited to
         ; 8-bit values so we have to coerce the result to 8-bits using the
         ; lower-byte `<`. this means that the total program size CANNOT exceed
-        ; 255 bytes! for reasons of disk optimisation, we use a limit of 254
+        ; 256 bytes! for reasons of disk optimisation, we use a limit of 254
         ; bytes instead to fit wholly within one disk sector
         ldx #< size
 
@@ -94,7 +93,7 @@ start:
 
         ; set file parameters:
         lda # $02               ; logical file number
-        ldx # $08               ; device number == drive 8
+        ldx # DEV_DRV8          ; device number == drive 8
         ldy # $ff               ; "secondary address"
                                 ; (i.e. use the PRG load address)
         jsr KERNAL_SETLFS
