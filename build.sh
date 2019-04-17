@@ -95,22 +95,22 @@ $ca65 $options -o build/orig-link.o             src/elite_link.asm
 echo
 echo "* assemble GMA86 loader"
 echo "  --------------------------------------"
-echo "- assemble 'loader/gma/stage0.asm'"
-$ca65 -o build/loader_gma_stage0.o      src/loader/gma/stage0.asm
-echo "- assemble 'loader/gma/stage1.asm'"
-$ca65 -o build/loader_gma_stage1.o      src/loader/gma/stage1.asm
-echo "- assemble 'loader/gma/stage2.asm'"
-$ca65 -o build/loader_gma_stage2.o      src/loader/gma/stage2.asm
-echo "- assemble 'loader/gma/stage3.asm'"
-$ca65 -o build/loader_gma_stage3.o      src/loader/gma/stage3.asm
-echo "- assemble 'loader/gma/stage4.asm'"
-$ca65 -o build/loader_gma_stage4.o      src/loader/gma/stage4.asm
-echo "- assemble 'loader/gma/gma4_7C3A.asm'"
-$ca65 -o build/loader_gma_stage4_7C3A.o src/loader/gma/stage4_7C3A.asm
-echo "- assemble 'loader/gma/stage5.asm'"
-$ca65 -o build/loader_gma_stage5.o      src/loader/gma/stage5.asm
-echo "- assemble 'loader/gma/stage6.asm'"
-$ca65 -o build/loader_gma_stage6.o      src/loader/gma/stage6.asm
+echo "- assemble 'boot/gma/stage0.asm'"
+$ca65 -o build/boot_gma_stage0.o        src/boot/gma/stage0.asm
+echo "- assemble 'boot/gma/stage1.asm'"
+$ca65 -o build/boot_gma_stage1.o        src/boot/gma/stage1.asm
+echo "- assemble 'boot/gma/stage2.asm'"
+$ca65 -o build/boot_gma_stage2.o        src/boot/gma/stage2.asm
+echo "- assemble 'boot/gma/stage3.asm'"
+$ca65 -o build/boot_gma_stage3.o        src/boot/gma/stage3.asm
+echo "- assemble 'boot/gma/stage4.asm'"
+$ca65 -o build/boot_gma_stage4.o        src/boot/gma/stage4.asm
+echo "- assemble 'boot/gma/gma4_7C3A.asm'"
+$ca65 -o build/boot_gma_stage4_7C3A.o   src/boot/gma/stage4_7C3A.asm
+echo "- assemble 'boot/gma/stage5.asm'"
+$ca65 -o build/boot_gma_stage5.o        src/boot/gma/stage5.asm
+echo "- assemble 'boot/gma/stage6.asm'"
+$ca65 -o build/boot_gma_stage6.o        src/boot/gma/stage6.asm
 
 echo
 echo "* make 'elite-original-gma86.d64'"
@@ -120,14 +120,14 @@ $ld65 \
        -C link/elite-original-gma86.cfg \
        -m build/elite-original-gma86.map -vm \
     --obj build/orig-link.o \
-    --obj build/loader_gma_stage0.o \
-    --obj build/loader_gma_stage1.o \
-    --obj build/loader_gma_stage2.o \
-    --obj build/loader_gma_stage3.o \
-    --obj build/loader_gma_stage4.o \
-    --obj build/loader_gma_stage5.o \
-    --obj build/loader_gma_stage6.o \
-    --obj build/loader_gma_stage4_7C3A.o \
+    --obj build/boot_gma_stage0.o \
+    --obj build/boot_gma_stage1.o \
+    --obj build/boot_gma_stage2.o \
+    --obj build/boot_gma_stage3.o \
+    --obj build/boot_gma_stage4.o \
+    --obj build/boot_gma_stage5.o \
+    --obj build/boot_gma_stage6.o \
+    --obj build/boot_gma_stage4_7C3A.o \
     --obj build/orig-vars_0400.o \
     --obj build/orig-text_pairs.o \
     --obj build/orig-text_flight.o \
@@ -279,8 +279,8 @@ echo "- OK"
 options="-DOPTION_MATHTABLES"
 
 echo
-echo "- assemble '/loader/disk_boot_exo.asm'"
-$ca65 $options -o build/disk_boot_exo.o     src/loader/disk_boot_exo.asm
+echo "- assemble '/boot/disk_boot_exo.asm'"
+$ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
 echo "- assemble 'code_init.asm'"
 $ca65 $options -o build/code_init.o         src/code_init.asm
 echo "- assemble 'vars_0400.asm'"
@@ -427,8 +427,8 @@ echo
 
 echo "* make 'elite-harmless-ocean.crt'"
 echo "  --------------------------------------"
-echo "- assemble 'loader/cart_boot.asm'"
-$ca65 $options -o build/cart_boot.o         src/loader/cart_boot.asm
+echo "- assemble 'boot/cart_boot.asm'"
+$ca65 $options -o build/cart_boot.o         src/boot/cart_boot.asm
 echo "- linking..."
 $ld65 \
        -C link/elite-harmless-crt-ocean.cfg \
