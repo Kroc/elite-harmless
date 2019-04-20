@@ -60,8 +60,6 @@
 .import _25ff:absolute
 .import _2619:absolute
 .import _267e:absolute
-.import _26a4:absolute
-.import _27a4:absolute
 .import polyobj_addrs:absolute
 .import polyobj_addrs_lo:absolute
 .import polyobj_addrs_hi:absolute
@@ -3320,8 +3318,8 @@ _7b44:                                                                  ;$7B44
         ldx # $00
         stx ZP_7E
         dex 
-        stx _26a4
-        stx _27a4
+        stx line_points_x
+        stx line_points_y
 _7b4f:                                                                  ;$7B4F
         ldy # $c7
         lda # $00
@@ -4156,7 +4154,7 @@ _8044:                                                                  ;$8044
         jsr _814f
         bcs _8043
         lda # $00
-        sta _26a4
+        sta line_points_x
         ldx ZP_VALUE_pt1
         lda # $08
         cpx # $08
@@ -4226,16 +4224,16 @@ _80b9:                                                                  ;$80B9
         rts 
 
 _80bb:                                                                  ;$80BB
-        ldy _26a4
+        ldy line_points_x
         bne _80f5
 _80c0:                                                                  ;$80C0
         cpy ZP_7E
         bcs _80f5
-        lda _27a4, y
+        lda line_points_y, y
         cmp # $ff
         beq _80e6
         sta ZP_VAR_Y2
-        lda _26a4, y
+        lda line_points_x, y
         sta ZP_VAR_X2
         jsr draw_line
         iny 
@@ -4249,9 +4247,9 @@ _80c0:                                                                  ;$80C0
 
 _80e6:                                                                  ;$80E6
         iny 
-        lda _26a4, y
+        lda line_points_x, y
         sta ZP_VAR_X
-        lda _27a4, y
+        lda line_points_y, y
         sta ZP_VAR_Y
         iny 
         jmp _80c0
@@ -4260,7 +4258,7 @@ _80f5:                                                                  ;$80F5
         lda # $01
         sta ZP_7E
         lda # $ff
-        sta _26a4
+        sta line_points_x
 _80fe:                                                                  ;$80FE
         rts 
 
@@ -4816,8 +4814,8 @@ _83ed:                                                                  ;$83ED
 
         ; clear line-buffer?
         ldx # $ff
-        stx _26a4
-        stx _27a4
+        stx line_points_x
+        stx line_points_y
         stx ZP_7C
 
         lda # $80

@@ -276,8 +276,8 @@ rm -f bin/*.d64
 
 echo "- OK"
 
-options=""
-##options="-DOPTION_MATHTABLES"
+##options=""
+options="-DOPTION_MATHTABLES"
 
 echo
 echo "- assemble '/boot/disk_boot_exo.asm'"

@@ -428,7 +428,7 @@ set_bytes:
         ldy # $00               ; and write $00 --
         sty @addr+1             ; to the lo-byte
         
-@addr:  sta $FF00               ; this is a dummy address, gets overwritten
+@addr:  sta $ff00               ; this is a dummy address, gets overwritten
         inc @addr+1             ; move to the next byte
         bne @addr               ; keep going until $FF->$00
         inc @addr+2             ; move to the next page
@@ -481,7 +481,9 @@ set_bytes:
 
 .ifdef  OPTION_MATHTABLES
 ;///////////////////////////////////////////////////////////////////////////////
-; insert the multiplication tables (2K) in "math_3d.asm"
+; insert the multiplication tables (2 KB) in "math_3d.asm"
+; TODO: generate these at run-time instead, to decrease disk-file size
+;
 .multiply_tables
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
