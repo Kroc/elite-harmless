@@ -51,7 +51,6 @@
 .import _7d0e:absolute
 .import _805e:absolute
 .import _80ff:absolute
-.import _811e:absolute
 .import _81ee:absolute
 .import set_memory_layout:absolute
 .import _829a:absolute
@@ -1855,12 +1854,27 @@ _28e5:                                                                  ;$28E5
 
 _28f3:                                                                  ;$28F3
 ;===============================================================================
+; for `clip_horz_line`:
+;
+;      YY = middle-point of line, in viewport px (0-255)
+;       A = half-width of line
+;
+; for `draw_straight_line`: 
+;
+;       Y = Y-pos of line, in viewport px (0-144)
+;
 .export _28f3
+.import clip_horz_line
 
-        jsr _811e
+        jsr clip_horz_line
+
+        ; set parameter for drawing line
         sty ZP_VAR_Y
+        
+        ; remove this line from the line queue?
         lda # $00
         sta VAR_0580, y
+        
         jmp draw_straight_line
 
 ;===============================================================================
@@ -2032,9 +2046,9 @@ _2977:                                                                  ;$2977
         beq _2998
         inc ZP_A9
 _2988:                                                                  ;$2988
-        ldy ZP_7E
-        lda # $ff
-        cmp line_points_y-1, y          ; line-buffer Y-coords
+        ldy ZP_7E                       ; current line-buffer cursor
+        lda # $ff                       ; line terminator
+        cmp line_points_y-1, y          ; check the line-buffer Y-coords
         beq _29fa
         sta line_points_y, y            ; line-buffer Y-coords
         inc ZP_7E
@@ -2060,6 +2074,7 @@ _2998:                                                                  ;$2998
         bcs _2988
         lda VAR_06F4
         beq _29d2
+        
         lda ZP_VAR_X1
         ldy ZP_VAR_X2
         sta ZP_VAR_X2
@@ -2069,26 +2084,31 @@ _2998:                                                                  ;$2998
         sta ZP_VAR_Y2
         sty ZP_VAR_Y1
 _29d2:                                                                  ;$29D2
-        ldy ZP_7E
-        lda line_points_y-1, y
-        cmp # $ff
+        ldy ZP_7E                       ; current line-buffer cursor (1-based)
+        lda line_points_y-1, y          ; check current Y-coord
+        cmp # $ff                       ; is it the terminator?
         bne _29e6
 
-        ; add X1/Y1 to line-buffer?
+        ; add X1/Y1 to line-buffer
+        ; (Y is the current cursor position)
         lda ZP_VAR_X1
         sta line_points_x, y            ; line-buffer X-coords
         lda ZP_VAR_Y1
         sta line_points_y, y            ; line-buffer Y-coords
-        iny 
+        iny                             ; move to the next point in the buffer
+
 _29e6:                                                                  ;$2936
         ; add X2/Y2 to the line-buffer?
         lda ZP_VAR_X2
         sta line_points_x, y            ; line-buffer X-coords
         lda ZP_VAR_Y2
         sta line_points_y, y            ; line-buffer Y-coords
-        iny 
-        sty ZP_7E
+        iny                             ; move to the next point in the buffer
+        sty ZP_7E                       ; update line-buffer cursor
+        
+        ; draw the current line in X1/Y1/X2/Y2
         jsr draw_line
+
         lda ZP_A2
         bne _2988
 _29fa:                                                                  ;$29FA

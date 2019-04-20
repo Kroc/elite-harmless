@@ -3225,24 +3225,27 @@ _7a8c:                                                                  ;$7A8C
 ;===============================================================================
 
 _7a9f:                                                                  ;$7A9F
-        lda PLAYER_TRUMBLES_LO
-        beq _7ac2
+        lda PLAYER_TRUMBLES_LO  ; does the player have any Trumbles™?
+       .bze _7ac2               ; if not, skip ahead
 
         lda # $00
         sta VAR_04B0            ; cargo qty?
         sta VAR_04B6
-        jsr get_random_number
-        and # %00001111
+
+        jsr get_random_number   ; choose a random number
+        and # %00001111         ; between 0-15
         adc PLAYER_TRUMBLES_LO
         ora # %00000100
         rol 
         sta PLAYER_TRUMBLES_LO
         rol PLAYER_TRUMBLES_HI
         bpl _7ac2
-        ror PLAYER_TRUMBLES_HI
+        ror PLAYER_TRUMBLES_HI  ; undo that
+
 _7ac2:                                                                  ;$7AC2
         lsr PLAYER_LEGAL
         jsr clear_zp_polyobj
+
         lda ZP_SEED_W0_HI
         and # %00000011
         adc # $03
@@ -3317,18 +3320,22 @@ _7b41:                                                                  ;$7B41
 _7b44:                                                                  ;$7B44
         ldx # $00
         stx ZP_7E
-        dex 
-        stx line_points_x
-        stx line_points_y
+        dex                     ; change X to $FF
+        stx line_points_x       ; mark line-buffer-X as 'empty'
+        stx line_points_y       ; makr line-buffer-Y as 'empty'
+
 _7b4f:                                                                  ;$7B4F
-        ldy # $c7
+        ; clear $0580..$0647
+        ;
+        ldy # $c7               ; length of thing at $0580
         lda # $00
-_7b53:                                                                  ;$7B53
-        sta VAR_0580, y
+
+:       sta VAR_0580, y                                                 ;$7B53
         dey 
-        bne _7b53
-        dey 
-        sty VAR_0580
+       .bnz :-
+        dey                     ; change Y to $FF
+        sty VAR_0580            ; write to first entry
+
         rts 
 
 .ifdef  OPTION_ORIGINAL
@@ -3985,8 +3992,10 @@ _7f1d:                                                                  ;$7F1D
 _7f22:                                                                  ;$7F22
         lda # $01
         sta VAR_0580
+
         jsr _814f
         bcs _7f13
+        
         lda # $00
         ldx ZP_VALUE_pt1
         cpx # $60
@@ -4042,10 +4051,9 @@ _7f80:                                                                  ;$7F80
         cpy ZP_A8
         beq _7f8f
         lda VAR_0580, y
-        beq _7f8c
-        jsr _28f3
-_7f8c:                                                                  ;$7F8C
-        dey 
+        beq :+
+        jsr _28f3               ;...draw_straight_line
+:       dey                                                             ;$7F8C
         bne _7f80
 _7f8f:                                                                  ;$7F8F
         lda ZP_TEMP_ADDR3_LO
@@ -4076,7 +4084,7 @@ _7fb6:                                                                  ;$7FB6
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
         txa 
-        jsr _811e
+        jsr clip_horz_line
         lda ZP_VAR_X
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X2
@@ -4086,7 +4094,7 @@ _7fb6:                                                                  ;$7FB6
         lda ZP_POLYOBJ01_XPOS_pt2
         sta ZP_VAR_YY_HI
         lda VAR_0580, y
-        jsr _811e
+        jsr clip_horz_line
         bcs _7fed
         lda ZP_VAR_X2
         ldx ZP_VAR_XX_LO
@@ -4116,7 +4124,7 @@ _8008:                                                                  ;$8008
         stx ZP_VAR_YY_LO
         ldx ZP_POLYOBJ01_XPOS_pt2
         stx ZP_VAR_YY_HI
-        jsr _811e
+        jsr clip_horz_line
         bcc _7ff5
         lda # $00
         sta VAR_0580, y
@@ -4135,7 +4143,7 @@ _801c:                                                                  ;$801C
 _802f:                                                                  ;$02F
         lda VAR_0580, y
         beq _8037
-        jsr _28f3
+        jsr _28f3               ;...draw_straight_line
 _8037:                                                                  ;$8037
         dey 
         bne _802f
@@ -4153,8 +4161,10 @@ _8043:                                                                  ;$8043
 _8044:                                                                  ;$8044
         jsr _814f
         bcs _8043
+
         lda # $00
         sta line_points_x
+        
         ldx ZP_VALUE_pt1
         lda # $08
         cpx # $08
@@ -4174,11 +4184,14 @@ _805e:                                                                  ;$805E
 _8065:                                                                  ;$8065
         lda ZP_AA
         jsr _39e0
+
         ldx # $00
         stx ZP_VAR_T
+
         ldx ZP_AA
         cpx # $21
         bcc _8081
+        
         eor # %11111111
         adc # $00
         tax 
@@ -4229,9 +4242,11 @@ _80bb:                                                                  ;$80BB
 _80c0:                                                                  ;$80C0
         cpy ZP_7E
         bcs _80f5
+
         lda line_points_y, y
         cmp # $ff
         beq _80e6
+
         sta ZP_VAR_Y2
         lda line_points_x, y
         sta ZP_VAR_X2
@@ -4263,62 +4278,110 @@ _80fe:                                                                  ;$80FE
         rts 
 
 _80ff:                                                                  ;$80FF
+;===============================================================================
+; wipe sun
+;
 .export _80ff
+
         lda VAR_0580
         bmi _80fe
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
-        ldy # $8f
-_810e:                                                                  ;$810E
+
+        ; this is the vertical cut-off point
+        ldy # ELITE_VIEWPORT_HEIGHT-1
+@loop:                                                                  ;$810E
+        ; check if a line needs to be drawn at this Y-position
         lda VAR_0580, y
-        beq _8116
-        jsr _28f3
-_8116:                                                                  ;$8116
-        dey 
-        bne _810e
+       .bze:+                   ; if zero, skip
+
+        jsr _28f3               ;...draw_straight_line
+
+:       dey                                                             ;$8116
+       .bnz @loop
+        
         dey 
         sty VAR_0580
+        
         rts 
 
-_811e:                                                                  ;$811E
-.export _811e
-        sta ZP_VAR_T
+;===============================================================================
+; clip a centred, horizontal line so that it fits within the viewport
+;
+;      YY = middle-point of line in viewport pixels (0-255)
+;       A = half-width
+;       Y must be preserved!
+;
+clip_horz_line:                                                         ;$811E
+;-------------------------------------------------------------------------------
+.export clip_horz_line
+
+        sta ZP_VAR_T            ; put aside half-width
+
+        ; find right-hand point (X2); i.e. middle (YY) + half-width (T)
+        ; and clip if it goes beyond the viewport right edge (256)
+        ;
         clc 
-        adc ZP_VAR_YY_LO
+        adc ZP_VAR_YY_LO        ; "add centre of line X mid-point"?
+        sta ZP_VAR_X2           ; this is the right-hand X-coord
+        lda ZP_VAR_YY_HI        ; did it overflow?
+        adc # $00               ; apply the carry
+
+        bmi @clear              ; too large, don't draw!
+        beq @left               ; fits, now do left-side
+
+        ; line clips to right of viewport (256)
+        lda # ELITE_VIEWPORT_WIDTH-1
         sta ZP_VAR_X2
-        lda ZP_VAR_YY_HI
-        adc # $00
-        bmi _8148
-        beq _8131
-        lda # $ff
-        sta ZP_VAR_X2
-_8131:                                                                  ;$8131
-        lda ZP_VAR_YY_LO
+
+@left:                                                                  ;$8131
+        ;-----------------------------------------------------------------------
+        ; find left-hand point (X1); i.e. middle (YY) - half-width (T)
+        ; and clip if it goes byeond the viewport left edge (0)
+        ;
+        lda ZP_VAR_YY_LO        ; begin with middle-point
         sec 
-        sbc ZP_VAR_T
-        sta ZP_VAR_X
-        lda ZP_VAR_YY_HI
-        sbc # $00
-        bne _8140
+        sbc ZP_VAR_T            ; subtract the half-width
+        sta ZP_VAR_X1           ; this is the left-hand X-coord
+        lda ZP_VAR_YY_HI        
+        sbc # $00               ; apply the carry
+       .bnz :+                  ; did it overflow?
+        
+        ; it fits, X1 is fine
+        ; return carry clear = OK
         clc 
         rts 
 
-_8140:                                                                  ;$8140
-        bpl _8148
+        ;-----------------------------------------------------------------------
+        ; too large, don't draw?
+:       bpl @clear                                                      ;$8140
+
+        ; line clips to the left of the viewport (0)
         lda # $00
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
+        
+        ; return carry clear = OK
         clc 
         rts 
 
-_8148:                                                                  ;$8148
+@clear:                                                                  ;$8148
+        ;-----------------------------------------------------------------------
+        ; remove the line from the line-queue
+        ;
         lda # $00
         sta VAR_0580, y
+        
+        ; return carry set = error
         sec 
         rts 
 
+;===============================================================================
+; ".CHKON ; check extent of circles, P+1 set to maxY, Y protected."
+;
 _814f:                                                                  ;$814F
+
         lda ZP_POLYOBJ01_XPOS_pt1
         clc 
         adc ZP_VALUE_pt1
