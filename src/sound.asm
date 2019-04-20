@@ -1232,4 +1232,3 @@ _c164:                                                                  ;$C164
 ;$CCD7
 
 ;$CCD7..$D000 should be free
-;$CF00 is referenced somewhere

@@ -139,15 +139,17 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
         _bmprow31, _bmprow31, _bmprow31, _bmprow31
 
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
 
 .define _rowtobmp \
         _rowtobmp_rows, _rowtobmp_orig
-.else
+
+.else   ;///////////////////////////////////////////////////////////////////////
 
 .define _rowtobmp \
         _rowtobmp_rows
 
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ; write out separate tables for lo-address / hi-address:
 

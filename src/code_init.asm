@@ -22,10 +22,10 @@ init:
 ;===============================================================================
 .export init
 
-        ; change the address of STOP key routine from $F6ED, to $FFED:
+        ; change the address of STOP key routine from $F6ED, to $FFED,
         ; the SCREEN routine which returns row/col count, i.e. does
         ; nothing of use -- this effectively disables the STOP key
-        lda # $ff
+        lda # > KERNAL_SCREEN
         sta KERNAL_VECTOR_STOP + 1
 
         ; disable interrupts:
@@ -42,18 +42,16 @@ init:
         ora # %00000011         ; set bits 0/1 to R+W, all others read-only
         sta CIA2_PORTA_DDR
 
-        ; set the VIC-II to get screen / sprite
-        ; data from the zone $4000-$7FFF
-        ;
+        ; set the VIC-II bank:
         ; the lower two-bits of register $DD00 controls the VIC-II bank.
-        ; (the binary value is inverted compared to the canonical bank numbers
-        ; and you should retain the top 6 bits)
+        ; (the binary value is inverted compared to the canonical bank
+        ; numbers and you should retain the top 6 bits)
         ;
         lda CIA2_PORTA          ; read the serial bus / VIC-II bank state
         and # %11111100         ; keep current value except bits 0-1 (VIC bank)
 
-        ; set the bits according to the bank
-        ; selected in "elite_link.asm"
+        ; set the bits according to the bank defined by the linker script, e.g.
+        ; "/link/elite-harmless-d64.cfg", and imported by "elite_consts.asm"
         ora # .vic_bank_bits(ELITE_VIC_BANK)  
         sta CIA2_PORTA
 
@@ -78,6 +76,7 @@ init:
         lda # ELITE_TXTSCR_D018 | %00000001
         sta VIC_MEMORY
 
+        ; black screen:
         lda # BLACK
         sta VIC_BORDER          ; set border colour black
         lda # BLACK
@@ -101,13 +100,14 @@ init:
         lda # %11000000         ; undocumented bits? default?
         sta VIC_SCREEN_CTL2
 
+        ; sprites:
+        ;=======================================================================
         ; disable all sprites
         lda # %00000000
         sta VIC_SPRITE_ENABLE
 
-        ; set sprite 2 colour to brown
-        lda # BROWN
-        sta VIC_SPRITE2_COLOR
+.ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
         ; set sprite 3 colour to medium-grey
         lda # GREY
         sta VIC_SPRITE3_COLOR
@@ -123,7 +123,13 @@ init:
         ; set sprite 7 colour to brown
         lda # BROWN
         sta VIC_SPRITE7_COLOR
+.endif  ;///////////////////////////////////////////////////////////////////////
 
+        ; set sprite 2 colour to brown
+        ; (this is the explosion sprite)
+        lda # BROWN
+        sta VIC_SPRITE2_COLOR
+        ; extra colours for the explosion sprite:
         ; set sprite multi-colour 1 to orange
         lda # ORANGE
         sta VIC_SPRITE_EXTRA1
@@ -178,31 +184,55 @@ init:
         sta VIC_SPRITE7_X
         sty VIC_SPRITE7_Y
 
-        ; set sprite priority: only sprite 1 is behind screen
+        ; set sprite priority:
+        ; only sprite 1 (explosion) is behind screen
         lda # %0000010
         sta VIC_SPRITE_PRIORITY
 
-        ; erase $6000-$6800 (the two colour maps)
+        ; sprite indicies
+        lda # ELITE_SPRITES_INDEX + 0
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE0_PTR
+        lda # ELITE_SPRITES_INDEX + 4
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE1_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE1_PTR
+
+        ; each of the Trumbles™ alternate patterns
+.ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
+        lda # ELITE_SPRITES_INDEX + 5
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE2_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE2_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE4_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE4_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE6_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE6_PTR
+        lda # ELITE_SPRITES_INDEX + 6
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE3_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE3_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE5_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE5_PTR
+        sta ELITE_MENUSCR_ADDR + VIC_SPRITE7_PTR
+        sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
+.endif  ;///////////////////////////////////////////////////////////////////////
+
+        ; erase the two text screens
         ;-----------------------------------------------------------------------
-
-        lda # $00
-        sta ZP_COPY_TO+0
-        tay 
-        ldx #> ELITE_MENUSCR_ADDR
-
-        lda # $10               ;(white on black?)
-_76e8:  stx ZP_COPY_TO+1
-:       sta [ZP_COPY_TO], y
-        iny 
-        bne :-
-        ldx ZP_COPY_TO+1
-        inx 
-        cpx #> ELITE_MAINSCR_ADDR
-        bne _76e8
+        ; even though these two screens typically follow each other in memory,
+        ; we'll erase them individually to allow for future flexibility
+        ;
+        ldy #> ELITE_MENUSCR_ADDR
+        ldx # .page_count( 1024 )
+        lda # .color_nybble( WHITE, BLACK )
+        jsr set_bytes
+        
+        ldy #> ELITE_MAINSCR_ADDR
+        ldx # .page_count( 1024 )
+        lda # .color_nybble( WHITE, BLACK )
+        jsr set_bytes
 
         ; copy 279 bytes of data to $66D0-$67E7
         ;-----------------------------------------------------------------------
-
 .import ELITE_HUD_COLORSCR_ADDR
 .import _783a
 
@@ -219,7 +249,6 @@ _76e8:  stx ZP_COPY_TO+1
         ; set the screen-colours for the menu-screen:
         ; (high-resolution section only, no HUD)
         ;-----------------------------------------------------------------------
-
 .import ELITE_MENUSCR_ADDR
 
         lda #< ELITE_MENUSCR_ADDR
@@ -230,8 +259,6 @@ _76e8:  stx ZP_COPY_TO+1
         ldx # 25                ; 25-rows
 
         ; colour the borders yellow down the sides of the view-port:
-
-        ; yellow fore / black back colour
 _7711:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 36                ; set the colour on column 37
         sta [ZP_COPY_TO], y
@@ -266,7 +293,6 @@ _7711:  lda # .color_nybble( YELLOW, BLACK )
         ; set the screen-colours for the high-resolution
         ; bitmap portion of the main flight-screen
         ;-----------------------------------------------------------------------
-
 .import ELITE_MAINSCR_ADDR
 
         lda #< ELITE_MAINSCR_ADDR
@@ -274,7 +300,7 @@ _7711:  lda # .color_nybble( YELLOW, BLACK )
         lda #> ELITE_MAINSCR_ADDR
         sta ZP_COPY_TO+1
 
-        ldx # $12               ; 18 rows
+        ldx # ELITE_VIEWPORT_ROWS
 
 _7745:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 36
@@ -282,12 +308,13 @@ _7745:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 3
         sta [ZP_COPY_TO], y
         dey 
-        lda # $00
+        
+        lda # .color_nybble( BLACK, BLACK )
 
 _7752:  sta [ZP_COPY_TO], y
         dey 
         bpl _7752
-        ldy # $25
+        ldy # 37
         sta [ZP_COPY_TO], y
         iny 
         sta [ZP_COPY_TO], y
@@ -307,7 +334,7 @@ _776c:
         ; the menu-screen. write $70 from $63E4 to $63C4
         lda # .color_nybble( YELLOW, BLACK )
         ldy # ELITE_VIEWPORT_COLS - 1
-:       sta ELITE_MENUSCR_ADDR + .scrpos(24, 4), y
+:       sta ELITE_MENUSCR_ADDR + .scrpos( 24, 4 ), y
         dey 
         bpl :-
 
@@ -320,7 +347,7 @@ _776c:
         tay 
         ldx #> $d800
         stx ZP_COPY_TO+1
-        ldx # $04               ; 4 x 256 = 1'024 bytes
+        ldx # .page_count(1024)
 :       sta [ZP_COPY_TO], y
         iny 
         bne :-
@@ -332,7 +359,7 @@ _776c:
         ;-----------------------------------------------------------------------
         ; copy 279? bytes from $795A to $DADA
         ; multi-colour bitmap colour nybbles
-
+        ;
 .import __HUD_COLORRAM_LOAD__
 
         lda #< $dad0
@@ -348,58 +375,19 @@ _776c:
         ; write $07 to $D802-$D824
 
         ldy # $22
-        lda # $07
+        lda # YELLOW
 _77a3:  sta $d802, y
         dey 
         bne _77a3
-
-        ; sprite indicies
-        lda # ELITE_SPRITES_INDEX + 0
-        sta ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR
-        sta ELITE_MAINSCR_ADDR + VIC_SPRITE0_PTR
-        lda # ELITE_SPRITES_INDEX + 4
-        sta ELITE_MENUSCR_ADDR + VIC_SPRITE1_PTR
-        sta ELITE_MAINSCR_ADDR + VIC_SPRITE1_PTR
-
-        ; each of the Trumbles™ alternate patterns
-.ifndef OPTION_NOTRUMBLES
-        ;///////////////////////////////////////////////////////////////////////
-        lda # ELITE_SPRITES_INDEX + 5
-        sta ELITE_MENUSCR_ADDR + VIC_SPRITE2_PTR
-        sta ELITE_MAINSCR_ADDR + VIC_SPRITE2_PTR
-        sta ELITE_MENUSCR_ADDR + VIC_SPRITE4_PTR
-        sta ELITE_MAINSCR_ADDR + VIC_SPRITE4_PTR
-        sta ELITE_MENUSCR_ADDR + VIC_SPRITE6_PTR
-        sta ELITE_MAINSCR_ADDR + VIC_SPRITE6_PTR
-        lda # ELITE_SPRITES_INDEX + 6
-        sta ELITE_MENUSCR_ADDR + VIC_SPRITE3_PTR
-        sta ELITE_MAINSCR_ADDR + VIC_SPRITE3_PTR
-        sta ELITE_MENUSCR_ADDR + VIC_SPRITE5_PTR
-        sta ELITE_MAINSCR_ADDR + VIC_SPRITE5_PTR
-        sta ELITE_MENUSCR_ADDR + VIC_SPRITE7_PTR
-        sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
-.endif  ;///////////////////////////////////////////////////////////////////////
         
         ; clear the bitmap screen:
         ;-----------------------------------------------------------------------
-        ; erase $4000-$6000
-        ;
-        lda # $00
-        sta ZP_COPY_TO+0
-        tay 
-        ldx #> ELITE_BITMAP_ADDR
-
-_76d8:  stx ZP_COPY_TO+1
-:       sta [ZP_COPY_TO], y
-        iny 
-        bne :-
-        ldx ZP_COPY_TO+1
-        inx 
-        cpx # $60
-        bne _76d8
+        ldy #> ELITE_BITMAP_ADDR        ; starting address hi-byte
+        ldx # .page_count( $2000 )      ; number of pages
+        lda # $00                       ; set value
+        jsr set_bytes
 
         ;-----------------------------------------------------------------------
-
         lda CPU_CONTROL                 ; get processor port state
         and # %11111000                 ; retain everything except bits 0-2 
         ora # C64_MEM::IO_KERNAL        ; I/O & KERNAL ON, BASIC OFF
@@ -426,6 +414,28 @@ _76d8:  stx ZP_COPY_TO+1
         pha 
 
         jmp init_mem
+
+set_bytes:
+        ;=======================================================================
+        ; write a value to a block of memory (page-aligned)
+        ;
+        ;       X = number of pages to write
+        ;       Y = hi-byte of starting address
+        ;       A = value to write
+        ;
+        ; set the starting address:
+        sty @addr+2             ; hi-byte of starting address
+        ldy # $00               ; and write $00 --
+        sty @addr+1             ; to the lo-byte
+        
+@addr:  sta $FF00               ; this is a dummy address, gets overwritten
+        inc @addr+1             ; move to the next byte
+        bne @addr               ; keep going until $FF->$00
+        inc @addr+2             ; move to the next page
+        dex                     ; one less page to do
+       .bnz @addr               ; have we reached the end?
+
+        rts 
 
 .proc   copy_bytes
         ;=======================================================================
@@ -469,5 +479,9 @@ _76d8:  stx ZP_COPY_TO+1
 
 .endproc
 
+.ifdef  OPTION_MATHTABLES
+;///////////////////////////////////////////////////////////////////////////////
 ; insert the multiplication tables (2K) in "math_3d.asm"
 .multiply_tables
+;///////////////////////////////////////////////////////////////////////////////
+.endif

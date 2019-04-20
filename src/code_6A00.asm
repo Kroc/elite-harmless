@@ -205,7 +205,7 @@ set_cursor_row:                                                         ;$6A28
         sta ZP_CURSOR_ROW
         rts 
 
-cursor_down:                                                            ;$6A2b
+cursor_down:                                                            ;$6A2B
 ;===============================================================================
 ; move the cursor down a row (does not change column!)
 ;
@@ -218,7 +218,7 @@ cursor_down:                                                            ;$6A2b
 ;///////////////////////////////////////////////////////////////////////////////
 ; stubbed-out routine in the original code
 ;
-_6a2e:                                                                  ;$62AE
+_6a2e:                                                                  ;$6A2E
         rts 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif 
@@ -1379,10 +1379,11 @@ _708d:                                                                  ;$708D
         jmp _7009
 
 _7097:                                                                  ;$7097
-        lda #< (_8eff+1)        ;incorrect disassembly?
+        lda #< $8F00            ;?
         sta ZP_B7
-        lda #> (_8eff+1)        ;incorrect disassembly?
+        lda #> $8F00            ;?
         sta ZP_B8
+
         rts 
 
 ;===============================================================================
@@ -2971,7 +2972,7 @@ _7903:                                                                  ;$7903
         iny 
         lda [ZP_TEMP_ADDR2], y
         eor ZP_AA
-        sta $ffff, y
+        sta $ffff, y                    ;!?
         cpy # $06
         bne _7903
         ldy ZP_VAR_U
@@ -3165,7 +3166,7 @@ _7a38:                                                                  ;$7A38
         iny 
         lda [ZP_TEMP_ADDR2], y
         eor ZP_AA
-        sta $ffff, y
+        sta $ffff, y            ;!?
         cpy # $06
         bne _7a38
         ldy ZP_VAR_U
@@ -3320,7 +3321,7 @@ _7b44:                                                                  ;$7B44
         stx ZP_7E
         dex 
         stx _26a4
-        stx _27a4               ; write to code??
+        stx _27a4
 _7b4f:                                                                  ;$7B4F
         ldy # $c7
         lda # $00
@@ -4230,7 +4231,7 @@ _80bb:                                                                  ;$80BB
 _80c0:                                                                  ;$80C0
         cpy ZP_7E
         bcs _80f5
-        lda _27a4, y            ; write to code??
+        lda _27a4, y
         cmp # $ff
         beq _80e6
         sta ZP_VAR_Y2
@@ -4250,7 +4251,7 @@ _80e6:                                                                  ;$80E6
         iny 
         lda _26a4, y
         sta ZP_VAR_X
-        lda _27a4, y            ; write to code??
+        lda _27a4, y
         sta ZP_VAR_Y
         iny 
         jmp _80c0
@@ -4813,9 +4814,10 @@ _83ed:                                                                  ;$83ED
         lda # $0c
         sta DUST_COUNT          ; number of dust particles
 
+        ; clear line-buffer?
         ldx # $ff
         stx _26a4
-        stx _27a4               ; write to code??
+        stx _27a4
         stx ZP_7C
 
         lda # $80
@@ -4839,9 +4841,9 @@ _83ed:                                                                  ;$83ED
         lda # $10
         sta VAR_050C
         
-        lda #< (_8eff+1)        ;incorrect disassembly?
+        lda #< $8F00            ;?
         sta ZP_B7
-        lda #> (_8eff+1)        ;incorrect disassembly?
+        lda #> $8F00            ;?
         sta ZP_B8
         
         lda VAR_045F
@@ -5492,8 +5494,8 @@ _87d0:                                                                  ;$87D0
         jsr _b2a5
         lda # $00
 
-        sta ELITE_BITMAP_ADDR + 7 + .bmppos(24, 35)
-        sta ELITE_BITMAP_ADDR + 0 + .bmppos(0, 35)
+        sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )
+        sta ELITE_BITMAP_ADDR + 0 + .bmppos( 0, 35 )
         jsr _7af7
 
         lda # 12
@@ -5995,7 +5997,10 @@ _8ac7:                                                                  ;$8AC7
         dex 
         bpl :-
         rts 
-        rts                     ;?
+         
+.ifdef  OPTION_ORIGINAL
+        rts 
+.endif
 
 ;===============================================================================
 
@@ -6195,6 +6200,7 @@ _8bc0:                                                                  ;$8BC0
         cmp # $30
         bcc _8c53
         cmp # $34
+
         rts 
 
 _8c0b:                                                                  ;$8C0B
@@ -6205,8 +6211,8 @@ _8c0b:                                                                  ;$8C0B
 _8c0d:                                                                  ;$8C0D
         jsr _8bc0
         lda # $00
-        ldx # $00
-        ldy # $cf
+        ldx #< ELITE_DISK_BUFFER
+        ldy #> ELITE_DISK_BUFFER
         jsr KERNAL_LOAD         ;load after call setlfs,setnam    
         php 
         lda # $01
@@ -6232,7 +6238,7 @@ _8c0d:                                                                  ;$8C0D
         plp 
         cli 
         bcs _8c61
-        lda $cf00               ;?
+        lda ELITE_DISK_BUFFER           ;=$CF00
         bmi _8c55
 
         ; copy $CF00...$CF4C to $25B3...$25FF
@@ -6721,7 +6727,9 @@ _8e7c:                                                                  ;$8E7C
         ldy # $06
         jmp _a858
 ; $8e81
+.ifdef  OPTION_ORIGINAL
         rts 
+.endif
 
 ;===============================================================================
 
@@ -6768,6 +6776,7 @@ _8eab:                                                                  ;$8EAB
 ;===============================================================================
 
 ;$8eb3: unused / unreferenced?
+
         lda _9274, x
         eor opt_flipaxis
 
@@ -6835,16 +6844,14 @@ _8ee3:                                                                  ;$8EE3
         lda PLAYER_SPEED
         sta ZP_POLYOBJ_VERTX_LO
         jsr _34bc
-
-_8eff:                                                                  ;$8EFF
-        lda ZP_POLYOBJ_VERTX_LO
+        lda ZP_POLYOBJ_VERTX_LO                                         ;$8EFF
 _8f01:                                                                  ;$8F01
         cmp # $16
         bcc :+
 
         lda # $16
 :       sta PLAYER_SPEED                                                ;$8F07
-        
+
         lda # $ff
         ldx # $09
         ldy ZP_POLYOBJ_VERTX_HI
@@ -6964,6 +6971,7 @@ _8fde:                                                                  ;$8FDE
 _8fe5:                                                                  ;$8FE5
         cpx # $0d
         bne _8fa6
+
 _8fe9:                                                                  ;$8FE9
         rts 
 
@@ -7357,6 +7365,7 @@ _9274:                                                                  ;$9274
         .byte   $38, $39, $30, $31, $32, $33, $34, $35
         .byte   $36, $37
 
+; screen-code or PETSCII code mappings to the key-matrix?
 _927e:                                                                  ;$927E
         .byte   $00, $01, $51, $02 ,$20, $32, $03, $1b                  ;$927E
         .byte   $31, $2f, $5e, $3d ,$05, $06, $3b, $2a                  ;$9286
@@ -7623,7 +7632,7 @@ _9a2c:                                                                  ;$9A2C
 _9a30:                                                                  ;$9A30
         lda ZP_VAR_X
         sta ZP_VAR_Q
-        lda $45, x
+        lda ZP_TEMPOBJ_MATRIX, x
         jsr _39ea
         sta ZP_VAR_T
         lda ZP_VAR_Y
@@ -7807,7 +7816,7 @@ _9b51:                                                                  ;$9B51
         rol 
         jsr _99af
         ldx ZP_VAR_R
-        stx $45, y
+        stx ZP_TEMPOBJ_MATRIX, y
         dey 
         dey 
         bpl _9b51
@@ -8575,8 +8584,6 @@ _a03c:                                                                  ;$A03C
 _a04a:                                                                  ;$A04A
         sec 
         rts 
-
-;===============================================================================
 
 _a04c:                                                                  ;$A04C
         lsr ZP_A2
@@ -9470,6 +9477,7 @@ _a60e:                                                                  ;$A60E
         bcc _a60e
         cmp _1d21
         bne _a604
+
         rts 
 
 ;===============================================================================
@@ -9732,7 +9740,10 @@ _a75d:                                                                  ;$A75D
 
         dex 
         stx ZP_34
+
+.ifdef  OPTION_ORIGINAL
         rts 
+.endif
 
 ;===============================================================================
 
@@ -9891,7 +9902,7 @@ _a839:                                                                  ;$A839
         jsr _a858
 
         ; wait until the next frame:
-        ;SPEED: could just call `wait_for_frame` instead
+        ; SPEED: could just call `wait_for_frame` instead
         ldy # 1
         jsr wait_frames
 
@@ -9906,7 +9917,11 @@ _a850:                                                                  ;$A850
         stx ZP_VAR_Y
         ; this causes the `clv` below to become a `branch on overflow clear`
         ; to $A811 -- the address is defined by the opcode of `clv` ($B8)
+.ifdef  OPTION_ORIGINAL
         .byte   $50
+.else
+        .byte   $a5             ; lda ZP
+.endif
 
 _a858:                                                                  ;$A858
 .export _a858
@@ -9974,6 +9989,7 @@ _a8bd:                                                                  ;$A8BD
         tya 
         ora # %10000000
         sta _aa13, x
+        
         cli 
         sec 
         rts 
@@ -10496,26 +10512,26 @@ _b0f4:                                                                  ;$B0F4
         ldy # $09
         jsr _a858
 _b0fd:                                                                  ;$B0FD
-        lda ELITE_MAINSCR_ADDR + .scrpos(23, 11)        ;=$67A3
+        lda ELITE_MAINSCR_ADDR + .scrpos( 23, 11 )      ;=$67A3
         eor # %11100000
-        sta ELITE_MAINSCR_ADDR + .scrpos(23, 11)        ;=$67A3
+        sta ELITE_MAINSCR_ADDR + .scrpos( 23, 11 )      ;=$67A3
         
-        lda ELITE_MAINSCR_ADDR + .scrpos(24, 11)        ;=$67CB
+        lda ELITE_MAINSCR_ADDR + .scrpos( 24, 11 )      ;=$67CB
         eor # %11100000
-        sta ELITE_MAINSCR_ADDR + .scrpos(24, 11)        ;=$67CB
+        sta ELITE_MAINSCR_ADDR + .scrpos( 24, 11 )      ;=$67CB
         
         rts 
 
 ;===============================================================================
 
 _b10e:                                                                  ;$B10E
-        lda ELITE_MAINSCR_ADDR + .scrpos(23, 28)        ;=$67B4
+        lda ELITE_MAINSCR_ADDR + .scrpos( 23, 28 )      ;=$67B4
         eor # %11100000
-        sta ELITE_MAINSCR_ADDR + .scrpos(23, 28)        ;=$67B4
+        sta ELITE_MAINSCR_ADDR + .scrpos( 23, 28 )      ;=$67B4
 
-        lda ELITE_MAINSCR_ADDR + .scrpos(24, 28)        ;=$67DC
+        lda ELITE_MAINSCR_ADDR + .scrpos( 24, 28 )      ;=$67DC
         eor # %11100000
-        sta ELITE_MAINSCR_ADDR + .scrpos(24, 28)        ;=$67DC
+        sta ELITE_MAINSCR_ADDR + .scrpos( 24, 28 )      ;=$67DC
 
         rts 
 
@@ -10530,8 +10546,9 @@ _b11f:                                                                  ;$B11F
         sty ZP_TEMP_ADDR1_LO
         tay 
         lda ZP_TEMP_ADDR1_LO
-        sta ELITE_MAINSCR_ADDR + .scrpos(24, 6), y      ;=$67C6
+        sta ELITE_MAINSCR_ADDR + .scrpos( 24, 6 ), y    ;=$67C6
         ldy # $00
+
         rts 
 
 ;===============================================================================
@@ -10560,8 +10577,6 @@ _b13a:                                                                  ;$B13A
 _b146:                                                                  ;$B146
         clc 
         rts 
-
-
 
 wait_for_frame:                                                         ;$B148
         ;=======================================================================
@@ -10834,12 +10849,10 @@ _b210:  ; restore registers before returning                            ;$B210
         clc 
         rts 
 
-
-
-_b21a:                                                                  ;$B21A
 ;===============================================================================
 ; clear screen
 ;
+_b21a:                                                                  ;$B21A
         ; set starting position in top-left of the centred
         ; 32-char (256px) screen Elite uses
         lda #< (ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ))
@@ -10847,11 +10860,12 @@ _b21a:                                                                  ;$B21A
         lda #> (ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ))
         sta ZP_TEMP_ADDR1_HI
 
-        ldx # 24                ; colour 24 rows
+        ldx # 24                        ; colour 24 rows
 
 @row:   lda # .color_nybble( WHITE, BLACK )                            ;$B224
-        ldy # 31                ; 32 columns (0-31)
+        ldy # ELITE_VIEWPORT_COLS-1     ; 32 columns (0-31)
 
+        ; colour one row
 :       sta [ZP_TEMP_ADDR1], y                                          ;$B228
         dey 
         bpl :-
@@ -10868,12 +10882,11 @@ _b21a:                                                                  ;$B21A
         bne @row
 
         ;-----------------------------------------------------------------------
-        
         ; erase the bitmap area above the HUD,
         ; i.e. the viewport
-
+        ;
         ; calculate the number of bytes in the bitmap above the HUD
-        .export erase_bytes             = .bmppos(ELITE_HUD_TOP_ROW, 0)
+        .export erase_bytes             = .bmppos( ELITE_HUD_TOP_ROW, 0 )
         ; from this calculate the number of bytes in *whole* pages
         .export erase_bytes_pages       = (erase_bytes / 256) * 256
         ; and the remaining bytes that don't fill one page
@@ -10901,10 +10914,11 @@ _b21a:                                                                  ;$B21A
 
         ; are we in the cockpit-view?
         lda ZP_MENU_PAGE
-        beq :+
+       .bze :+
 
         cmp # $0d
         bne _b25d
+
 :       jmp _b301                                                       ;$B25A
 
         ;-----------------------------------------------------------------------
@@ -10915,26 +10929,30 @@ _b25d:                                                                  ;$B25D
         
         lda # $c0               ; default value
         sta _a8e1
-_b267:                                                                  ;$B267
-        jsr erase_page
+
+:       jsr erase_page                                                  ;$B267
         inx 
-        cpx # $60
-        bne _b267
+        cpx #> (ELITE_BITMAP_ADDR + $2000)
+        bne :-
+
         ldx # $00
         stx _1d01
         stx _1d04
+
         inx 
         stx ZP_CURSOR_COL
         stx ZP_CURSOR_ROW
+        
         jsr _b359
         jsr hide_all_ships
         jsr disable_sprites
-        ldy # $1f
-        lda # $70
-_b289:                                                                  ;$B289
-        sta ELITE_MENUSCR_ADDR + .scrpos(0, 4), y
+        
+        ldy # ELITE_VIEWPORT_COLS-1
+        lda # .color_nybble( YELLOW, BLACK )
+
+:       sta ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ), y                     ;$B289
         dey 
-        bpl _b289
+        bpl :-
 
         ldx ZP_MENU_PAGE
         cpx # $02
@@ -10944,17 +10962,19 @@ _b289:                                                                  ;$B289
         beq _b2a5
         cpx # $80
         beq _b2a5
-        ldy # $1f
-_b29f:                                                                  ;$B29F
-        sta ELITE_MENUSCR_ADDR + .scrpos(2, 4), y
+
+        ldy # ELITE_VIEWPORT_COLS-1
+
+:       sta ELITE_MENUSCR_ADDR + .scrpos( 2, 4 ), y                     ;$B29F
         dey 
-        bpl _b29f
+        bpl :-
+
 _b2a5:                                                                  ;$B2A5
         ldx # $c7
         jsr _b2d5
 
-        lda # $ff
-        sta ELITE_BITMAP_ADDR + 7 + .bmppos(24, 35)     ;=$5F1F
+        lda # %11111111
+        sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )                   ;=$5F1F
 
         ldx # $19
         ; this causes the next instruction to become a meaningless `bit`
@@ -10962,20 +10982,27 @@ _b2a5:                                                                  ;$B2A5
        .bit
 _b2b2:                                                                  ;$B2B2
         ldx # $12
-        stx $c0
-        ldy # $18
+
+        stx ZP_C0
+
+        ldy # 3 * 8             ; 3rd char in bitmap cells
         sty ZP_TEMP_ADDR1_LO
-        ldy # $40
-        lda # $03
+
+        ldy #> ELITE_BITMAP_ADDR
+        lda # %00000011
         jsr _b2e1
-        ldy # $20
+        
+        ldy #< (ELITE_BITMAP_ADDR + .bmppos( 0, 36 ))   ;=$4120
         sty ZP_TEMP_ADDR1_LO
-        ldy # $41
-        lda # $c0
-        ldx $c0
+        
+        ldy #> (ELITE_BITMAP_ADDR + .bmppos( 0, 36 ))   ;=$4120
+        lda # %11000000
+        ldx ZP_C0
         jsr _b2e1
+        
         lda # $01
-        sta ELITE_BITMAP_ADDR + .bmppos(0, 35)  ;=$4118
+        sta ELITE_BITMAP_ADDR + .bmppos( 0, 35 )                        ;=$4118
+        
         ldx # $00
 _b2d5:                                                                  ;$B2D5
         stx ZP_VAR_Y
@@ -10990,14 +11017,13 @@ _b2d5:                                                                  ;$B2D5
 _b2e1:                                                                  ;$B2E1
         sta ZP_BE
         sty ZP_TEMP_ADDR1_HI
-_b2e5:                                                                  ;$B2E5
+@loop:                                                                  ;$B2E5
         ldy # $07
-_b2e7:                                                                  ;$B2E7
-        lda ZP_BE
+:       lda ZP_BE                                                       ;$B2E7
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
         dey 
-        bpl _b2e7
+        bpl :-
         lda ZP_TEMP_ADDR1_LO
         clc 
         adc # $40
@@ -11005,8 +11031,10 @@ _b2e7:                                                                  ;$B2E7
         lda ZP_TEMP_ADDR1_HI
         adc # $01
         sta ZP_TEMP_ADDR1_HI
+        
         dex 
-        bne _b2e5
+        bne @loop
+
         rts 
 
 ;===============================================================================
@@ -11029,7 +11057,6 @@ _b301:                                                                  ;$B301
         ; this routine 'clears' the HUD by restoring a clean copy from RAM
         ;
 .import __HUD_DATA_RUN__
-
         
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -11173,8 +11200,8 @@ _b359:                                                                  ;$B359
         ldy # $40
         jsr _b364
 
-        ldx #< (ELITE_BITMAP_ADDR + .bmppos(0, 37))     ;=$4128
-        ldy #> (ELITE_BITMAP_ADDR + .bmppos(0, 37))     ;=$4128
+        ldx #< (ELITE_BITMAP_ADDR + .bmppos( 0, 37 ))                   ;=$4128
+        ldy #> (ELITE_BITMAP_ADDR + .bmppos( 0, 37 ))                   ;=$4128
 _b364:                                                                  ;$B364
         stx ZP_TEMP_ADDR1_LO
         sty ZP_TEMP_ADDR1_HI
@@ -11186,6 +11213,7 @@ _b36c:                                                                  ;$B36C
         sta [ZP_TEMP_ADDR1], y
         dey 
         bpl _b36c
+
         lda ZP_TEMP_ADDR1_LO
         clc 
         adc # $40
@@ -11195,11 +11223,12 @@ _b36c:                                                                  ;$B36C
         sta ZP_TEMP_ADDR1_HI
         dex 
         bne _b36a
+        
         rts 
 
 ;===============================================================================
 ; clear screen?
-
+;
 _b384:                                                                  ;$B384
         ldx # 8
         ldy # 0
@@ -11227,7 +11256,6 @@ _b389:                                                                  ;$B389
         sty ZP_CURSOR_ROW
 
         rts 
-
 
 erase_page:                                                             ;$B3A7
         ;=======================================================================
@@ -11479,4 +11507,5 @@ _b4c1:                                                                  ;$B4C1
         sta [ZP_TEMP_ADDR1], y
         inx 
         bne _b4ae
+        
         rts                                                             ;$B4CA

@@ -241,7 +241,8 @@ ZP_44                   = $44   ; often related to `ZP_POLYOBJ01_XPOS_pt2`
 ;-------------------------------------------------------------------------------
 
 ; a working copy of the zero-page poly object rotation matrix:
-
+;
+ZP_TEMPOBJ_MATRIX       = $45
 ZP_TEMPOBJ_M2x0         = $45
 ZP_TEMPOBJ_M2x0_LO      = $45
 ZP_TEMPOBJ_M2x0_HI      = $46

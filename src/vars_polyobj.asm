@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "vars_polyobj.asm" : run-time storage of 3D polygon-objects in play
+; "vars_polyobj.asm" -- run-time storage of 3D polygon-objects in play
 
 .include        "vars_zeropage.asm"
 

@@ -1581,7 +1581,6 @@ _9300:                                                                  ;$9300
         .byte   $fb, $fb, $fb, $fc, $fc, $fc, $fc, $fc                  ;$93E8
         .byte   $fd, $fd, $fd, $fd, $fd, $fd, $fe, $fe                  ;$93F0
         .byte   $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff                  ;$93F8
-;;.endif
 
 ;===============================================================================
 ; a lookup table of line height / width (signed)?

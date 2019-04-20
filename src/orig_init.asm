@@ -384,7 +384,6 @@ _776c:
 
         ; set screen colours for the mult-colour bitmap
         ;-----------------------------------------------------------------------
-
         ; set $D800..$DC00 (colour RAM) to black
         lda # BLACK
         sta ZP_COPY_TO+0
@@ -392,7 +391,7 @@ _776c:
         ldx #> $d800
         stx ZP_COPY_TO+1
 
-        ldx # $04               ; 4 x 256 = 1'024 bytes
+        ldx # .page_count(1024)
 _7784:  sta [ZP_COPY_TO], y
         iny 
         bne _7784
@@ -433,6 +432,8 @@ _77a3:  sta $d802,y
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE1_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE1_PTR
 
+.ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
         ; each of the Trumbles™ alternate patterns
         lda # ELITE_SPRITES_INDEX + 5
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE2_PTR
@@ -448,8 +449,7 @@ _77a3:  sta $d802,y
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE5_PTR
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE7_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
-
-        ;-----------------------------------------------------------------------
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda CPU_CONTROL                 ; get processor port state
         and # %11111000                 ; retain everything except bits 0-2 
@@ -457,7 +457,6 @@ _77a3:  sta $d802,y
         sta CPU_CONTROL
 
         ;-----------------------------------------------------------------------
-
         ; copy $7D7A..$867A to $EF90-$F890 (under the KERNAL ROM)
         ; -- HUD (backup?)
 

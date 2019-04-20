@@ -112,6 +112,7 @@ ELITE_VIEWPORT_WIDTH    = 256
 ELITE_VIEWPORT_HEIGHT   = 144
 
 ELITE_VIEWPORT_COLS     = ELITE_VIEWPORT_WIDTH / 8      ;=32
+ELITE_VIEWPORT_ROWS     = ELITE_VIEWPORT_HEIGHT / 8     ;=18
 
 ; the HUD occupies 7 lines at the bottom of the screen; this fact is used in
 ; a wide variety of calculations and implicit values in non-obvious ways

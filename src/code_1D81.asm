@@ -1602,18 +1602,18 @@ is_vowel:                                                               ;$24F3
         ;=======================================================================
         ora # %00100000
         cmp # $61               ; 'A'?
-        beq _250a
+        beq :+
         cmp # $65               ; 'E'?
-        beq _250a
+        beq :+
         cmp # $69               ; 'I'?
-        beq _250a
+        beq :+
         cmp # $6f               ; 'O'?
-        beq _250a
+        beq :+
         cmp # $75               ; 'U'?
-        beq _250a
+        beq :+
         
         clc 
-_250a:  rts                                                             ;$250A
+:       rts                                                             ;$250A
 
 ;===============================================================================
 
@@ -1716,8 +1716,16 @@ _267e:                                                                  ;$267E
         .byte   $aa, $aa, $aa, $aa, $aa, $aa, $aa, $aa
         .byte   $aa, $aa, $aa, $aa, $aa, $5a, $aa, $aa
         .byte   $00, $aa, $00, $00, $00, $00
+
+.segment        "LINE_DATA"
+
 _26a4:                                                                  ;$26A4
+; line-buffer X-points!
+; these current values are junk-data left over from the original loader
+;
 .export _26a4
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         .byte   $76, $85, $9c, $a5, $8b, $85, $9a, $a5
         .byte   $8d, $20, $0c, $9a, $b0, $d2, $85, $6f
         .byte   $a5, $9c, $85, $70, $a5, $6b, $85, $9b
@@ -1749,194 +1757,55 @@ _26a4:                                                                  ;$26A4
         .byte   $84, $aa, $84, $9f, $b1, $5b, $85, $6b
         .byte   $c8, $b1, $5b, $85, $6d, $c8, $b1, $5b
         .byte   $85, $6f, $c8, $b1, $5b, $85, $bb, $29
-        .byte   $1f, $c5, $ad, $90, $fb, $c8, $b1
+        .byte   $1f, $c5, $ad, $90, $fb, $c8, $b1, $5b
+.else   ;///////////////////////////////////////////////////////////////////////
+        .res    256
+.endif  ;///////////////////////////////////////////////////////////////////////
 
-;===============================================================================
-; this could be 1541 code, due to the infinite loops
-; (waiting for the drive command to finish)
 
-.segment        "CODE_27A3"
-
-_27a3:                                                                  ;$27A3
-        .byte   $5b
+; line-buffer Y-points
+;
 _27a4:                                                                  ;$27A4
 .export _27a4
-        sta ZP_VAR_P1
-        and # %00001111
-        tax 
-        lda ZP_POLYOBJ01_XPOS_pt1, x
-_27ab:  bne _27ab               ; infinite loop, why?                   ;$27AB
-        lda ZP_VAR_P1
-        lsr 
-        lsr 
-        lsr 
-        lsr 
-        tax 
-        lda ZP_POLYOBJ01_XPOS_pt1, x
-_27b6:  bne _27b6               ; infinite loop, why?                   $27B6
-        iny 
-        lda [ZP_TEMP_ADDR3], y
-        sta ZP_VAR_P1
-        and # %00001111
-        tax 
-        lda ZP_POLYOBJ01_XPOS_pt1, x
-_27c2:  bne _27c2               ; infinite loop, why?                   ;$27C2
-        lda ZP_VAR_P1
-        lsr 
-        lsr 
-        lsr 
-        lsr 
-        tax 
-        lda ZP_POLYOBJ01_XPOS_pt1, x
-_27cd:  bne _27cd               ; infinite loop, why?                   ;$27CD
-        jmp _9d8e               ; SPEED: jump to a jump (`_9f06`)
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        .byte   $85, $2e, $29, $0f, $aa, $b5, $35, $d0
+        .byte   $fe, $a5, $2e, $4a, $4a, $4a, $4a, $aa
+        .byte   $b5, $35, $d0, $fe, $c8, $b1, $5b, $85
+        .byte   $2e, $29, $0f, $aa, $b5, $35, $d0, $fe
+        .byte   $a5, $2e, $4a, $4a, $4a, $4a, $aa, $b5
+        .byte   $35, $d0, $fe, $4c, $8e, $9d, $a5, $bb
+        .byte   $85, $6c, $0a, $85, $6e, $0a, $85, $70
+        .byte   $20, $2c, $9a, $a5, $0b, $85, $6d, $45
+        .byte   $72, $30, $fe, $18, $a5, $71, $65, $09
+        .byte   $85, $6b, $a5, $0a, $69, $00, $85, $6c
+        .byte   $4c, $b3, $9d, $a5, $09, $38, $e5, $71
+        .byte   $85, $6b, $a5, $0a, $e9, $00, $85, $6c
+        .byte   $b0, $fe, $49, $ff, $85, $6c, $a9, $01
+        .byte   $e5, $6b, $85, $6b, $90, $02, $e6, $6c
+        .byte   $a5, $6d, $49, $80, $85, $6d, $a5, $0e
+        .byte   $85, $70, $45, $74, $30, $fe, $18, $a5
+        .byte   $73, $65, $0c, $85, $6e, $a5, $0d, $69
+        .byte   $00, $85, $6f, $4c, $ee, $9d, $a5, $0c
+        .byte   $38, $e5, $73, $85, $6e, $a5, $0d, $e9
+        .byte   $00, $85, $6f, $b0, $fe, $49, $ff, $85
+        .byte   $6f, $a5, $6e, $49, $ff, $69, $01, $85
+        .byte   $6e, $a5, $70, $49, $80, $85, $70, $90
+        .byte   $fe, $e6, $6f, $a5, $76, $30, $fe, $a5
+        .byte   $75, $18, $65, $0f, $85, $bb, $a5, $10
+        .byte   $69, $00, $85, $99, $4c, $27, $9e, $a6
+        .byte   $9a, $f0, $fe, $a2, $00, $4a, $e8, $c5
+        .byte   $9a, $b0, $fa, $86, $9c, $20, $af, $99
+        .byte   $a6, $9c, $a5, $9b, $0a, $26, $99, $30
+        .byte   $fe, $ca, $d0, $f8, $85, $9b, $60, $a9
+        .byte   $32, $85, $9b, $85, $99, $60, $a9, $80
+        .byte   $38, $e5, $9b, $9d, $00, $01, $e8, $a9
+        .byte   $00, $e5, $99, $9d, $00, $01, $4c, $61
+.else   ;///////////////////////////////////////////////////////////////////////
+        .res    256
+.endif
 
-;===============================================================================
-
-; unreferenced / unused?
-;$27D2:
-        lda ZP_VAR_T
-        sta ZP_VAR_Y
-        asl 
-        sta ZP_VAR_Y2
-        asl 
-        sta ZP_70
-        jsr _9a2c
-        lda ZP_POLYOBJ_XPOS_HI  ;=$0b
-        sta ZP_VAR_X2
-        eor ZP_72
-_27e5:                                                                  ;$27E5
-        bmi _27e5               ; infinite loop, why??
-        clc 
-        lda ZP_71
-        adc ZP_POLYOBJ_XPOS_LO  ;=$09
-        sta ZP_VAR_X
-        lda ZP_POLYOBJ_XPOS_MI  ;=$0A
-        adc # $00
-        sta ZP_VAR_Y
-        jmp _9db3               ; SPEED: jump to a jump (`_9dd9`)
-
-;===============================================================================
-
-; unreferenced / unused?
-;$27f7:
-        lda ZP_POLYOBJ_XPOS_LO  ;=$09
-        sec 
-        sbc ZP_71
-        sta ZP_VAR_X
-        lda ZP_POLYOBJ_XPOS_MI  ;=$0a
-        sbc # $00
-        sta ZP_VAR_Y
-_2804:  bcs _2804               ; infinite loop, why??                  ;$2804
-        eor # %11111111
-        sta ZP_VAR_Y
-        lda # $01
-        sbc ZP_VAR_X
-        sta ZP_VAR_X
-        bcc _2814
-        inc ZP_VAR_Y
-_2814:                                                                  ;$2814
-        lda ZP_VAR_X2
-        eor # %10000000
-        sta ZP_VAR_X2
-        lda ZP_POLYOBJ_YPOS_HI  ;$0E
-        sta ZP_70
-        eor ZP_74
-_2820:  bmi _2820               ; infinite loop, why??                  ;$2820
-        clc 
-        lda ZP_73
-        adc ZP_POLYOBJ_YPOS_LO  ;=$0C
-        sta ZP_VAR_Y2
-        lda ZP_POLYOBJ_YPOS_MI  ;=$0D
-        adc # $00
-        sta ZP_6F
-
-        jmp _9dee               ; SPEED: jump to a jump (`_9e16`)
-
-;===============================================================================
-
-; unreferenced / unused?
-;$2832:
-        lda ZP_POLYOBJ_YPOS_LO  ;=$0C
-        sec 
-        sbc ZP_73
-        sta ZP_VAR_Y2
-        lda ZP_POLYOBJ_YPOS_MI  ;=$0D
-        sbc # $00
-        sta ZP_6F
-_283f:  bcs _283f               ; infinite loop, why??                  ;$283F
-        eor # %11111111
-        sta ZP_6F
-        lda ZP_VAR_Y2
-        eor # %11111111
-        adc # $01
-        sta ZP_VAR_Y2
-        lda ZP_70
-        eor # %10000000
-        sta ZP_70
-_2853:  bcc _2853               ; infinite loop, why??                  ;$2853
-        inc ZP_6F
-        lda ZP_76
-_2859:  bmi _2859               ; inifinite loop, why??                 ;$2859
-        lda ZP_75
-        clc 
-        adc ZP_POLYOBJ_ZPOS_LO  ;=$0F
-        sta ZP_VAR_T
-        lda ZP_POLYOBJ_ZPOS_MI  ;=$10
-        adc # $00
-        sta ZP_VAR_U
-        jmp _9e27               ; SPEED: jump to a jump (`_9e27`)
-
-;===============================================================================
-
-; unreferenced / unused?
-;$286b:
-        ldx ZP_VAR_Q
-_286d:  beq _286d               ; infinite loop, why??                  ;$286D
-        ldx # $00
-_2871:                                                                  ;$2871
-        lsr 
-        inx 
-        cmp ZP_VAR_Q
-        bcs _2871
-        stx ZP_VAR_S
-        jsr _99af
-        ldx ZP_VAR_S
-        lda ZP_VAR_R
-_2880:                                                                  ;$2880
-        asl 
-        rol ZP_VAR_U
-_2883:  bmi _2883               ; infinite loop, why??                  ;$2883
-        dex 
-        bne _2880
-        sta ZP_VAR_R
-        rts 
-
-;===============================================================================
-
-; unreferenced / unused?
-;$288b:
-        lda # $32
-        sta ZP_VAR_R
-        sta ZP_VAR_U
-        rts 
-
-;===============================================================================
-
-; unreferenced / unused?
-;$2892:
-        lda # $80
-        sec 
-        sbc ZP_VAR_R
-        sta $0100, x
-        inx 
-        lda # $00
-        sbc ZP_VAR_U
-        sta $0100, x
-_28a2:                                                                  ;$28A2
-        .byte   $4c             ;=`jmp`
-        .byte   $61             ;=$??61
-
+.segment        "CODE_28A4"
 
 polyobj_addrs:                                                          ;$28A4
 ;===============================================================================
@@ -2061,6 +1930,8 @@ _28e5:                                                                  ;$28E5
         dex                             ; roll around to 255
         stx ZP_VAR_X2                   ; set line-end
         
+        ; TODO: could we not use the faster `draw_straight_line`,
+        ;       rather than the generic line-drawing routine?
         jmp draw_line
 
 _28f3:                                                                  ;$28F3
@@ -2095,9 +1966,8 @@ _2907:                                                                  ;$2907
         .byte   %00000011       ;=$03
         .byte   %00000001       ;=$01
 
-;===============================================================================
-
 _290f:                                                                  ;$209F
+;===============================================================================
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         txa 
@@ -2224,7 +2094,8 @@ _2976:                                                                  ;$2976
         rts 
 
 ;===============================================================================
-
+; BBC code: "BLINE"; ball-line for circle
+;
 _2977:                                                                  ;$2977
 .export _2977
         txa 
@@ -2241,9 +2112,9 @@ _2977:                                                                  ;$2977
 _2988:                                                                  ;$2988
         ldy ZP_7E
         lda # $ff
-        cmp _27a3, y
+        cmp _27a4-1, y                  ; line-buffer Y-coords
         beq _29fa
-        sta _27a4, y            ; writing to code??
+        sta _27a4, y                    ; line-buffer Y-coords
         inc ZP_7E
         bne _29fa
 _2998:                                                                  ;$2998
@@ -2277,19 +2148,22 @@ _2998:                                                                  ;$2998
         sty ZP_VAR_Y1
 _29d2:                                                                  ;$29D2
         ldy ZP_7E
-        lda _27a3, y
+        lda _27a4-1, y
         cmp # $ff
         bne _29e6
+
+        ; add X1/Y1 to line-buffer?
         lda ZP_VAR_X1
-        sta _26a4, y
+        sta _26a4, y                    ; line-buffer X-coords
         lda ZP_VAR_Y1
-        sta _27a4, y            ; writing to code??
+        sta _27a4, y                    ; line-buffer Y-coords
         iny 
 _29e6:                                                                  ;$2936
+        ; add X2/Y2 to the line-buffer?
         lda ZP_VAR_X2
-        sta _26a4, y
+        sta _26a4, y                    ; line-buffer X-coords
         lda ZP_VAR_Y2
-        sta _27a4, y            ; writing to code??
+        sta _27a4, y                    ; line-buffer Y-coords
         iny 
         sty ZP_7E
         jsr draw_line
@@ -2308,6 +2182,7 @@ _29fa:                                                                  ;$29FA
         clc 
         adc ZP_AC
         sta ZP_AA
+
         rts 
 
 dust_swap_xy:                                                           ;$2A12
