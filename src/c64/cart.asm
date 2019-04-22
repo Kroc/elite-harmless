@@ -37,11 +37,11 @@ CART_ULTIMAX    = $E000         ; a mode where the cart ROM replaces KERNAL
         ROSS                    = 23    ;
 .endenum
 
-; inserts a cartridge header. you will have to have already set the desired
-; segment as this will not force one on you
+; inserts a cartridge header. you will have to have already
+; set the desired segment as this will not force one on you
 ; 
 .macro  .cart_header    type,   EXROM,  GAME,   name
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 .if     .blank(type)
         .fatal  "Cartridge header requires a cartridge type."
@@ -69,14 +69,14 @@ CART_ULTIMAX    = $E000         ; a mode where the cart ROM replaces KERNAL
 .res    32 - .strlen(name), $00
 .endif
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 ; inserts a cartridge "CHIP" header that describes a bank of ROM or RAM
 ; on the cartridge. one of these is required before each bank in the file
 ;
 .macro  .chip_header    size,   type,   bank,   load
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 .if     .blank(size)
         .fatal  "CHIP size is required, it should be $2000 or $4000."
@@ -104,5 +104,5 @@ CART_ULTIMAX    = $E000         ; a mode where the cart ROM replaces KERNAL
 .dbyt   load                    ; intended load address
 .dbyt   size                    ; size of data (excluding header)
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro

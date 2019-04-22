@@ -17,7 +17,7 @@
 ;
 
 .macro  .move_polyobj_x
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 .move_polyobj_x_small:                                                  ;$A44A
         ;-----------------------------------------------------------------------
@@ -114,11 +114,11 @@ move_polyobj_x:                                                         ;$A44C
 
 :       rts                                                             ;$A4A0
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 .macro  .rotate_polyobj_axis
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 rotate_polyobj_axis:                                                    ;$A4A1
 ;===============================================================================
@@ -180,12 +180,13 @@ mYx2_HI = $05
 
         ldx ZP_POLYOBJ + mYx0_LO, y
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; this instruction appears entirely unecessary as `multiply_and_add`
         ; will blindly overwrite `ZP_VAR_P` anyway. if compiling elite-harmless
         ; without the multiplication lookup-tables, this instruction is skipped
-.ifdef  OPTION_ORIGINAL
         stx ZP_VAR_P
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
         lda ZP_POLYOBJ + mYx0_HI, y
         eor # %10000000                 ; flip the sign-bit
         
@@ -193,10 +194,11 @@ mYx2_HI = $05
         sta ZP_POLYOBJ + mYx1_HI, y     ; write back the hi-byte
         stx ZP_POLYOBJ + mYx1_LO, y     ; write back the lo-byte
 
-        ; as before, this instruction is unecessary
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; as before, this instruction is unecessary
         stx ZP_VAR_P
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; R.S = mYx0
         ;
@@ -210,10 +212,11 @@ mYx2_HI = $05
         sta ZP_POLYOBJ + mYx0_HI, y     ; write back the hi-byte
         stx ZP_POLYOBJ + mYx0_LO, y     ; write back the lo-byte
 
-        ; as before, this instruction is unecessary
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; as before, this instruction is unecessary
         stx ZP_VAR_P
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; compute the following:
         ;
@@ -232,10 +235,11 @@ mYx2_HI = $05
         
         ldx ZP_POLYOBJ + mYx2_LO, y
 
-        ; as before, this instruction is unecessary
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; as before, this instruction is unecessary
         stx ZP_VAR_P
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda ZP_POLYOBJ + mYx2_HI, y
         eor # %10000000                 ; flip the sign-bit
@@ -244,10 +248,11 @@ mYx2_HI = $05
         sta ZP_POLYOBJ + mYx1_HI, y     ; write back the hi-byte
         stx ZP_POLYOBJ + mYx1_LO, y     ; write back the lo-byte
 
-        ; as before, this instruction is unecessary
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; as before, this instruction is unecessary
         stx ZP_VAR_P
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
         ; R.S = mYx2
         ;
         ldx ZP_POLYOBJ + mYx2_LO, y
@@ -262,11 +267,11 @@ mYx2_HI = $05
         
         rts 
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 .macro  .multiply_and_add
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 multiply_and_add:                                                       ;$3ACE
 ;===============================================================================
@@ -329,11 +334,11 @@ multiplied_now_add:                                                     ;$3AD1
 :       eor ZP_VAR_T                                                    ;$3B0A
         rts 
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 .macro  .multiply_signed
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 ; unused / unreferenced?
 ;$3a48
@@ -356,12 +361,12 @@ multiply_signed:                                                        ;$3A54
 ; i.e. multiplies two 8-bit (signed) numbers
 ; and returns a 16-bit (signed) number: A = HI, P = LO
 ;
-
 ; this was adapted (badly) from:
 ; http://codebase64.org/doku.php?id=base:seriously_fast_multiplication
 ;
 .ifdef  OPTION_MATHTABLES
-
+        ;///////////////////////////////////////////////////////////////////////
+        
 .import square1_lo, square1_hi
 .import square2_lo, square2_hi
         ;
@@ -428,17 +433,18 @@ sm4:    sbc square2_hi, x
         ora ZP_VAR_T            ; restore the sign
         rts 
 
-.else   ;=======================================================================
+.else   ;///////////////////////////////////////////////////////////////////////
+        ;
         ; the algorithm used here is a common type, best described in context
         ; of the 6502 here: <http://nparker.llx.com/a2/mult.html> under the
         ; heading "Multplying Arbitrary Numbers"
         ;
         ; a multiply is nothing more than repeatedly adding the given value,
-        ; e.g. multiply 2 by 5 is just 2 + 2 + 2 + 2 + 2; there are shortcuts
-        ; to do this efficiently in 8-bit assembly -- looping 99 times, adding
-        ; 101 each time, would be incredibly slow! multiplying and dividing
-        ; by 2 is very fast in assembly as these can be done with left & right
-        ; shifts only
+        ; e.g. multiply 2 by 5 is just 2 + 2 + 2 + 2 + 2 but in the case of
+        ; 101 * 99, looping 99 times adding 101 each time would be incredibly
+        ; slow! there are shortcuts to do this efficiently in 8-bit assembly
+        ; -- multiplying and dividing by 2 is very fast in assembly as these
+        ; can be done with left & right shifts only
         ;
         ; therefore we want to reduce the overall multiplication to some
         ; combination of shifts, that is combining any of x1, x2, x4, x8, x16,
@@ -535,7 +541,6 @@ sm4:    sbc square2_hi, x
 
         ; this is an unrolled version of the loop in
         ; the BBC code which set X to 7 and counted down
-
         lda # $00
         tax                     ; unnecessary?
 
@@ -601,7 +606,7 @@ sm4:    sbc square2_hi, x
 @zero:  sta ZP_VAR_P            ; `A` = 0 so also return `P` = 0        ;$3AA5
         rts                     ; `A.P` will be $0000
 
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 multiply_signed_into_RS:                                                ;$3AA8
         ;-----------------------------------------------------------------------
@@ -616,11 +621,11 @@ multiply_signed_into_RS:                                                ;$3AA8
         sta ZP_VAR_R
         rts 
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 .macro  .multiply_tables
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 .pushseg
 .segment        "TABLE_SQR"
@@ -661,5 +666,5 @@ square2_hi:
 
 .popseg
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro

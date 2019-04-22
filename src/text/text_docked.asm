@@ -248,7 +248,7 @@ _COLON  = .encrypt ( $3a )              ;=$6D
 _msg_index     .set 0
 
 .macro  .define_msg     msg_id
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
         .local  _value
         _value  .set 0
@@ -269,7 +269,7 @@ _msg_index     .set 0
         ; doing this afterwards ensures that there is an index 0
         _msg_index .set _msg_index + 1
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 .define .skip_msg       _msg_index .set _msg_index + 1

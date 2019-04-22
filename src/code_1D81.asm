@@ -50,7 +50,7 @@
 .import _7d0c:absolute
 .import _7d0e:absolute
 .import _805e:absolute
-.import _80ff:absolute
+.import wipe_sun:absolute
 .import _81ee:absolute
 .import set_memory_layout:absolute
 .import _829a:absolute
@@ -1104,7 +1104,8 @@ _2230:                                                                  ;$2230
         lda # $c0
         jsr _87a6
         bcc _2277
-        jsr _80ff
+
+        jsr wipe_sun
         jsr _7c24
 _2277:                                                                  ;$2277
         jmp _231c
@@ -1150,7 +1151,7 @@ _22b5:                                                                  ;$22B5
         bne _22c2
 
         lda DOCKCOM_STATE
-        beq _231c
+       .bze _231c
         
         lda # $7b
         bne _2319
@@ -1201,6 +1202,7 @@ _22c2:                                                                  ;$22C2
 _2303:                                                                  ;$2303
         lda VAR_04C2
         beq _231c
+
         lda ZP_98
         lsr 
         adc PLAYER_FUEL
@@ -1276,9 +1278,12 @@ _2367:                                                                  ;$2367
 
         rts 
 
+;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
-.txt_docked_token1B
-.txt_docked_token1C
+;
+.txt_docked_token1B                                                     ;$2372
+.txt_docked_token1C                                                     ;$2376
+;===============================================================================
 
 _237e:                                                                  ;$237E
         ;=======================================================================
@@ -1586,16 +1591,18 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 
         jmp _2438               ; clean up and exit
 
+;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
-.txt_docked_token01_02
-.txt_docked_token08
-.txt_docked_token09
-.txt_docked_token0D
-.txt_docked_token06_05
-.txt_docked_token0E_0F
-.txt_docked_token11
-.txt_docked_token12
-.txt_docked_token_set_lowercase
+;
+.txt_docked_token01_02                                                  ;$246A
+.txt_docked_token08                                                     ;$2478
+.txt_docked_token09                                                     ;$2483
+.txt_docked_token0D                                                     ;$248B
+.txt_docked_token06_05                                                  ;$2496
+.txt_docked_token0E_0F                                                  ;$24A3
+.txt_docked_token11                                                     ;$24B0
+.txt_docked_token12                                                     ;$24CE
+.txt_docked_token_set_lowercase                                         ;$24ED
 
 is_vowel:                                                               ;$24F3
         ;=======================================================================
@@ -1614,12 +1621,13 @@ is_vowel:                                                               ;$24F3
         clc 
 :       rts                                                             ;$250A
 
-;===============================================================================
-
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
 _250b:  rts                                                             ;$250B
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 ;===============================================================================
-
 .segment        "DATA_SAVE"
 
 ; file-name?
@@ -1717,7 +1725,7 @@ _267e:                                                                  ;$267E
         .byte   $00, $aa, $00, $00, $00, $00
 
 ;===============================================================================
-;"LINE_DATA" segment goes here in the original game, see "draw_lines.asm"
+; "LINE_DATA" segment goes here in the original game, see "draw_lines.asm"
 ;
 ;line_points_x:                                                         ;$26A4
 ;line_points_y:                                                         ;$27A4
@@ -1871,7 +1879,7 @@ _28f3:                                                                  ;$28F3
         ; set parameter for drawing line
         sty ZP_VAR_Y
         
-        ; remove this line from the line queue?
+        ; remove this line from the scanline cache
         lda # $00
         sta VAR_0580, y
         
@@ -1960,13 +1968,12 @@ draw_particle:                                                          ;$2918
 
 paint_particle:                                                         ;$293A
 ;===============================================================================
-; draw dust particle?
+; paint a dust particle to the bitmap screen
 ;
 ;        A = Y-position (px)
 ;        X = X-position (px)
 ; ZP_VAR_Z = dust Z-distance
-;
-; preserves Y
+;        Y is preserved
 ;
 .export paint_particle
 
@@ -2458,17 +2465,17 @@ _2c50:                                                                  ;$2C50
 
 _2c5c:                                                                  ;$2C5C
         lda POLYOBJ_00 + PolyObject::xpos + 1, y                        ;=$F901
-        jsr _3988
+        jsr math_square
         sta ZP_VAR_R
 
         lda POLYOBJ_00 + PolyObject::ypos + 1, y                        ;=$F904
-        jsr _3988
+        jsr math_square
         adc ZP_VAR_R
         bcs _2c7a
         sta ZP_VAR_R
         
         lda POLYOBJ_00 + PolyObject::zpos + 1, y                        ;=$F907
-        jsr _3988
+        jsr math_square
         adc ZP_VAR_R
         bcc _2c7c
 _2c7a:                                                                  ;$2C7A
@@ -2690,11 +2697,12 @@ _2dc4:                                                                  ;$2DC4
 ;===============================================================================
 ;
 ;       X = offset from `ZP_POLYOBJECT` to the desired matrix row;
-;           that is, a `MATRIX_ROW_?` constant
+;           that is, a `MATRIX_ROW_*` constant
 ;
 ;       Y = offset from `ZP_POLYOBJECT` to the desired matrix row;
-;           that is, a `MATRIX_ROW_?` constant
+;           that is, a `MATRIX_ROW_*` constant
 ;
+_2dc5:                                                                  ;$2DC5
 
 COL0    = $00           ; column 0 of the matrix row
 COL0_LO = $00
@@ -2706,7 +2714,6 @@ COL2    = $04           ; column 2 of the matrix row
 COL2_LO = $04
 COL2_HI = $05
 
-_2dc5:                                                                  ;$2DC5
 .export _2dc5
         ; ROW X
         ;-----------------------------------------------------------------------
@@ -2817,8 +2824,8 @@ _max_value:                                                             ;$2E51
         ; maximum value:
         ;
         ; this is the maximum printable value: 100-billion ($17_4876_E800);
-        ; note that this lacks the first byte, $17, as that is handled directly
-        ; in the code itself
+        ; note that this lacks the first byte, $17, as that is handled
+        ; directly in the code itself
         .byte   $48, $76, $e8, $00
 
 print_tiny_value:                                                       ;$2E55
@@ -3344,7 +3351,7 @@ _2fee:                                                                  ;$2FEE
 
 ;===============================================================================
 ; BBC code says this is "update displayed dials"
-
+;
 _2ff3:                                                                  ;$2FF3
 .export _2ff3
 
@@ -4494,14 +4501,14 @@ _363f:                                                                  ;$363F
         bne _367d
         
         lda ZP_POLYOBJ_XPOS_LO
-        jsr _3988
+        jsr math_square
         sta ZP_VAR_S
         
         lda ZP_VAR_P1
         sta ZP_VAR_R
         
         lda ZP_POLYOBJ_YPOS_LO
-        jsr _3988
+        jsr math_square
         
         tax 
         lda ZP_VAR_P1
@@ -5049,28 +5056,32 @@ _3981:                                                                  ;$3981
         sta ZP_VAR_P1
         rts 
 
+math_square_7bit:                                                       ;$3986
 ;===============================================================================
-; rotation for dust particles?
+; square a 7-bit number -- removes the sign-bit and then does A * A.
+; see the following procedure for details. the caller should save
+; and restore the sign if desired
 ;
-;       A = one input
-;
-; outputs:
-;       
-;       A
-;       X
-
-_3986:                                                                  ;$3986
-.export _3986
+.export math_square_7bit
 
         and # %01111111         ; remove sign
-_3988:                                                                  ;$3988
-.export _3988
 
-        sta ZP_VAR_P            ; put aside the magnitude
-        tax 
-       .bnz _399f
+math_square:                                                            ;$3988
+;===============================================================================
+; square a number (i.e. A * A)
+;
+;       A = number to multiply with itself
+;
+; returns a 16-bit number in A.P
+;
+.export math_square
 
-        ; multiplying with zero, result is zero!
+        sta ZP_VAR_P            ; put aside initial value
+        tax                     ; and again
+       .bnz _399f               ; if not zero, begin multiplication
+
+        ; multiplying with zero?
+        ; result is zero!
         ;
 _398d:  clc                                                             ;$398D
         stx ZP_VAR_P
@@ -5093,18 +5104,21 @@ _399b:                                                                  ;$399B
         beq _398d               ; are we multiplying by zero!?
 
 _399f:                                                                  ;$399F
+        ; subtract 1 because carry will add one already
         dex 
         stx ZP_VAR_T
+
         lda # $00
         tax 
-        lsr ZP_VAR_P
-        bcc :+
-        adc ZP_VAR_T
 
-:       ror                                                             ;$39AB
-        ror ZP_VAR_P
-        bcc :+
-        adc ZP_VAR_T
+        lsr ZP_VAR_P            ; pop a bit off
+        bcc :+                  ; if zero, nothing to add
+        adc ZP_VAR_T            ; add x1 quantity to the result
+
+:       ror                     ; shift to the next power of 2          ;$39AB
+        ror ZP_VAR_P            ; move the result down and pop next bit
+        bcc :+                  ; if zero, nothing to add
+        adc ZP_VAR_T            ; add x2 quantity to result
 
 :       ror                                                             ;$39B2
         ror ZP_VAR_P

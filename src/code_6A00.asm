@@ -102,8 +102,8 @@
 .import _37b2:absolute
 .import _3895:absolute
 .import _38f8:absolute
-.import _3986:absolute
-.import _3988:absolute
+.import math_square_7bit:absolute
+.import math_square:absolute
 .import _399b:absolute
 .import _39e0:absolute
 .import _39ea:absolute
@@ -1461,7 +1461,7 @@ _70f1:                                                                  ;$70F1
         bcs :+
         eor # %11111111
         adc # $01
-:       jsr _3988                                                       ;$710C
+:       jsr math_square                                                 ;$710C
         sta ZP_VALUE_pt2
 
         lda ZP_VAR_P1
@@ -1474,7 +1474,7 @@ _70f1:                                                                  ;$70F1
         adc # $01
 _7122:                                                                  ;$7122
         lsr 
-        jsr _3988
+        jsr math_square
         pha 
         lda ZP_VAR_P1
         clc 
@@ -3328,9 +3328,9 @@ _7b4f:                                                                  ;$7B4F
         ; clear $0580..$0647
         ;
         ldy # $c7               ; length of thing at $0580
-        lda # $00
+        lda # $00               ; erase...
 
-:       sta VAR_0580, y                                                 ;$7B53
+:       sta VAR_0580, y         ; set sun scanline half-width to 0      ;$7B53
         dey 
        .bnz :-
         dey                     ; change Y to $FF
@@ -3546,10 +3546,12 @@ _7c24:                                                                  ;$7C24
         lda hull_pointer_dodo_hi
         sta hull_pointer_current_hi
 _7c61:                                                                  ;$7C61
+        ; scanlines for sun?
         lda #< VAR_0580
         sta ZP_TEMP_ADDR2_LO
         lda #> VAR_0580
         sta ZP_TEMP_ADDR2_HI
+
         lda # $02
 
 _7c6b:                                                                  ;$7C6B
@@ -3728,7 +3730,7 @@ _7d57:                                                                  ;$7D57
         jmp _80bb
 
 _7d5f:                                                                  ;$7D5F
-        jmp _80ff
+        jmp wipe_sun
 
 ;===============================================================================
 
@@ -3975,7 +3977,7 @@ _7f12:                                                                  ;$7F12
 ;===============================================================================
 
 _7f13:                                                                  ;$7F13
-        jmp _80ff
+        jmp wipe_sun
 
 _7f16:                                                                  ;$7F16
         txa 
@@ -4007,16 +4009,17 @@ _7f22:                                                                  ;$7F22
         sta ZP_AA
         lda ZP_B8
         ldx ZP_VAR_P3
-        bne _7f4b
+        bne :+
         cmp ZP_VAR_P2
-        bcc _7f4b
+        bcc :+
         lda ZP_VAR_P2
-        bne _7f4b
+        bne :+
+
         lda # $01
-_7f4b:                                                                  ;$7F4B
-        sta ZP_A8
+
+:       sta ZP_A8               ; first scanline of the sun             ;$7F4B
         
-        lda ZP_B8
+        lda ZP_B8               ; last scanline of the sun
         sec 
         sbc ZP_43
         tax 
@@ -4036,29 +4039,42 @@ _7f63:                                                                  ;$7F63
         lda # $00
 _7f67:                                                                  ;$7F67
         stx ZP_TEMP_ADDR3_LO
-        sta ZP_TEMP_ADDR3_HI
+        sta ZP_TEMP_ADDR3_HI    ; flag $00 = up, $FF = down?
+
         lda ZP_VALUE_pt1
-        jsr _3988
-        sta ZP_B3
+        jsr math_square         ; square the number
+        sta ZP_B3               ; squared 16-bit radius hi
+        
         lda ZP_VAR_P1
-        sta ZP_B2
-        ldy ZP_B8
+        sta ZP_B2               ; squared 16-bit radius lo
+
+        ;-----------------------------------------------------------------------
+        
+        ldy ZP_B8               ; begin with the lowest scanline for the sun
+
+        ; copy sun middle-point to YY-LO/HI for the
+        ; line-clipping and drawing routines used
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
 _7f80:                                                                  ;$7F80
-        cpy ZP_A8
-        beq _7f8f
+        cpy ZP_A8               ; have we reach the top of the sun?
+        beq _7f8f               ; if yes, move ahead with next step
+
         lda VAR_0580, y
-        beq :+
-        jsr _28f3               ;...draw_straight_line
-:       dey                                                             ;$7F8C
-        bne _7f80
+       .bze :+                  ; if half-width is 0, no line
+        jsr _28f3               ; calculate the line-width/pos & draw
+:       dey                     ; next scanline                         ;$7F8C
+       .bnz _7f80               ; continue scanning. reaching zero
+                                ; (top of screen) also exits 
+
 _7f8f:                                                                  ;$7F8F
+        ;-----------------------------------------------------------------------
         lda ZP_TEMP_ADDR3_LO
-        jsr _3988
+        jsr math_square
         sta ZP_VAR_T
+
         lda ZP_B2
         sec 
         sbc ZP_VAR_P1
@@ -4277,14 +4293,17 @@ _80f5:                                                                  ;$80F5
 _80fe:                                                                  ;$80FE
         rts 
 
-_80ff:                                                                  ;$80FF
+wipe_sun:                                                               ;$80FF
 ;===============================================================================
 ; wipe sun
 ;
-.export _80ff
+.export wipe_sun
 
         lda VAR_0580
         bmi _80fe
+
+        ; copy sun's horizontal position to YY-LO/HI,
+        ; as this is what the drawing operations use
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
@@ -4294,10 +4313,10 @@ _80ff:                                                                  ;$80FF
         ldy # ELITE_VIEWPORT_HEIGHT-1
 @loop:                                                                  ;$810E
         ; check if a line needs to be drawn at this Y-position
-        lda VAR_0580, y
+        lda VAR_0580, y         ; read half-width of line
        .bze:+                   ; if zero, skip
 
-        jsr _28f3               ;...draw_straight_line
+        jsr _28f3               ; work out X1/X2 from middle+width, and draw
 
 :       dey                                                             ;$8116
        .bnz @loop
@@ -4308,9 +4327,14 @@ _80ff:                                                                  ;$80FF
         rts 
 
 ;===============================================================================
-; clip a centred, horizontal line so that it fits within the viewport
+; clip a centred, horizontal line so that it fits within the viewport. this
+; routine is used when drawing the sun as that is stored as a centre-point
+; and a series of half-widths for each scanline to trace the shape
 ;
-;      YY = middle-point of line in viewport pixels (0-255)
+; note that YY is a signed 16-bit number because the sun can be so large as to
+; be way off the sides of the screen, but still be partially visible on screen
+;
+;      YY = middle-point of line (16-bit)
 ;       A = half-width
 ;       Y must be preserved!
 ;
@@ -6403,12 +6427,12 @@ _8cad:                                                                  ;$8CAD
         sta ZP_VAR_X2
 _8cc2:                                                                  ;$8CC2
         lda ZP_VAR_X
-        jsr _3986
+        jsr math_square_7bit
         sta ZP_VAR_R
         lda ZP_VAR_P1
         sta ZP_VAR_Q
         lda ZP_VAR_Y
-        jsr _3986
+        jsr math_square_7bit
         sta ZP_VAR_T
         lda ZP_VAR_P1
         adc ZP_VAR_Q
@@ -6417,7 +6441,7 @@ _8cc2:                                                                  ;$8CC2
         adc ZP_VAR_R
         sta ZP_VAR_R
         lda ZP_VAR_X2
-        jsr _3986
+        jsr math_square_7bit
         sta ZP_VAR_T
         lda ZP_VAR_P1
         adc ZP_VAR_Q

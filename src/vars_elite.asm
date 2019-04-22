@@ -247,7 +247,16 @@ VAR_06C9                = $06c9 ; within `DUST_Y`?
 
 ;-------------------------------------------------------------------------------
 
-VAR_0580                = $0580 ;? (indexed by Y)
+; the sun is converted into a list of half-widths for each scan-line, i.e.
+; for each scanline in the viewport (0-144), this array provides a radius
+; for that scanline where the centre point of the sun is already known
+;
+; length of this is given as $C7 (199) in code,
+; despite the viewport being 144 px tall
+;
+; TODO: define this structurally based on `ELITE_VIEWPORT_HEIGHT`
+; TODO: also, as this is indexed, keep it within one page
+VAR_0580                = $0580
 
 VAR_0647                = $0647 ;? (indexed by X)
 VAR_0648                = $0648 ;? (indexed by X)

@@ -21,7 +21,7 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 ; correct token number (once scrambled) into the text data
 
 .macro  .docked_pair    str
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         ; export the pair's token name
         .export .ident( .concat( "txt_docked_", str ) ) = index_docked
@@ -31,7 +31,7 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
         ; write the pair of characters to the disk
         .byte   str
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 txt_docked_pairs:                                                       ;$254C
@@ -68,9 +68,9 @@ _254e:
 ;
 ; ergo, this macro will take a pair of characters and define both a docked and
 ; flight token whilst writing only the two chars to file once
-
+;
 .macro  .shared_pair    str
-;///////////////////////////////////////////////////////////////////////////////
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         .local  idstr
 
@@ -95,12 +95,12 @@ _254e:
         ; write the pair of characters to the disk
         .byte   str
 
-;///////////////////////////////////////////////////////////////////////////////
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 ; now continue the table, where the flight pairs
 ; begin and the docked pairs overlap:
-
+;
 txt_flight_pairs:                                                       ;$2566
 ;-------------------------------------------------------------------------------
 ; flight (and docked) text compression character pairs:
