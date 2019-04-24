@@ -387,7 +387,11 @@ _77a3:  sta $d802, y
         lda # $00                       ; set value
         jsr set_bytes
 
-        ;-----------------------------------------------------------------------
+.ifdef  OPTION_MATHTABLES
+        ;///////////////////////////////////////////////////////////////////////
+        .multiply_tables_fill
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         lda CPU_CONTROL                 ; get processor port state
         and # %11111000                 ; retain everything except bits 0-2 
         ora # C64_MEM::IO_KERNAL        ; I/O & KERNAL ON, BASIC OFF
@@ -395,11 +399,7 @@ _77a3:  sta $d802, y
 
         cli 
 
-        ;-----------------------------------------------------------------------
-
-.import init_mem
-.import _8863
-        
+        ;-----------------------------------------------------------------------        
         ; NOTE: calling `init_mem` clears variable storage from $0400..$0700
         ; *THIS VERY CODE IS WITHIN THAT REGION* -- ergo, we cannot return
         ; from a subroutine here but we will still need to send execution to
@@ -408,6 +408,9 @@ _77a3:  sta $d802, y
         ; (*NOT* `jsr`) to the subroutine. when it hits `rts`, execution will
         ; move to the address we inserted into the stack!
         ;
+.import init_mem
+.import _8863
+
         lda #> (_8863 - 1)
         pha 
         lda #< (_8863 - 1)

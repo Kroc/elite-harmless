@@ -63,12 +63,11 @@
 .import _87a4:absolute
 .import _87a6:absolute
 .import _87b1:absolute
-.import debug_brk:absolute
 .import _87d0:absolute
 .import _88e7:absolute
 .import txt_docked_token1A:absolute
-.import txt_docked_token1E:absolute
-.import txt_docked_token1F:absolute
+.import txt_docked_token_mediaCurrent:absolute
+.import txt_docked_token_mediaOther:absolute
 .import _8c7b:absolute
 .import _8c8a:absolute
 .import _8cad:absolute
@@ -291,12 +290,13 @@ _1d81:                                                                  ;$1D81
 ;
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
-
 debug_for_brk:                                                          ;$1E14
         ;=======================================================================
         ; set a routine to capture use of the `brk` instruction.
         ; not actually used, but present, in original Elite
         ;
+.import debug_brk:absolute
+        
         lda #< debug_brk
         sei                     ; disable interrupts
         sta KERNAL_VECTOR_BRK+0 
@@ -1521,21 +1521,22 @@ _format_code:                                                           ;$241B
         lda ZP_TEMP_ADDR3_HI
         pha 
         
-        ; multiply token by two (lookup into table)
+        ; multiply token by two
+        ; (lookup into table)
         txa 
         asl 
         tax 
 
         ; note that the lookup table is indexed two-bytes early, making an
         ; index of zero land in some code -- this is why token $00 is invalid
-
+        ;
         ; we read an address from the table and rewrite a `jsr` instruction
         ; further down, i.e. the token is a lookup to a routine to call
-.import _250c
+.import txt_docked_functions
 
-        lda _250c - 2, x
+        lda txt_docked_functions - 2, x
         sta @jsr + 1
-        lda _250c - 1, x
+        lda txt_docked_functions - 1, x
         sta @jsr + 2
         
         ; convert the token back to its original value

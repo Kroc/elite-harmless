@@ -661,19 +661,19 @@ _0618:                                                                  ;$0618
         .byte   $ff
 
 
-;-------------------------------------------------------------------------------
-
-        ; backup $02-$FF to $CE02-$CEFF
-
+;===============================================================================
+; backup the zero-page to the zero-page shadow ($CE00 in the original game)
+;
         ; carry is a flag
-_0619:  ldx # $02
-_061b:  lda $00, x
+_0619:  ldx # $02               ; always begin from $02
+
+@loop:  lda $00, x              ; read a byte from the zero-page        ;$061B
         bcc :+
         lda ELITE_ZP_SHADOW, x
-:       sta $00, x
+:       sta $00, x              ; write to the zero-page
         sta ELITE_ZP_SHADOW, x
         inx 
-        bne _061b
+        bne @loop
         rts
 
 _062b:

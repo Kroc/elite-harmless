@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; unknown variable space
+; "vars_1D00.asm" -- mostly user preferences
 
 .export _1d01
 .export _1d02
@@ -18,7 +18,7 @@
 .export opt_flipaxis
 .export _1d0c
 .export _1d0d
-.export _1d0e
+.export opt_device
 .export _1d0f
 .export _1d10
 .export _1d11
@@ -28,7 +28,6 @@
 .export _1d21
 
 .segment        "VARS_1D00"
-
 
 _1d00:  ; nothing appears to actually reference $1D00 itself            ;$1D00
         .byte   $00
@@ -53,15 +52,19 @@ _1d08:
 _1d09:
         .byte   $00
 
-opt_flipvert:           .byte   $00     ; flip the vertical axis?       ;$1D0A
+opt_flipvert:   ; flip the vertical axis?                               ;$1D0A
+        .byte   $00
 
-opt_flipaxis:           .byte   $00     ; flip both axises              ;$1D0B
+opt_flipaxis:   ; flip both axises                                      ;$1D0B
+        .byte   $00
 
 _1d0c:
         .byte   $00
 _1d0d:
         .byte   $00
-_1d0e:
+
+opt_device:     ; selected media for data load/save:                    ;$1D0E
+                ; $FF = disk, $00 = tape
         .byte   $00
 _1d0f:
         .byte   $00

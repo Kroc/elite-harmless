@@ -366,9 +366,10 @@ multiply_signed:                                                        ;$3A54
 ;
 .ifdef  OPTION_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
-        
 .import square1_lo, square1_hi
 .import square2_lo, square2_hi
+
+        ZP_F8   = $f8
         ;
         ;       Q = multiplicand
         ;       A = multiplier
@@ -392,14 +393,14 @@ multiply_signed:                                                        ;$3A54
         ;
         lda ZP_VAR_Q            ; again, multiplicand
         and # %01111111         ; extract the magnitude
-        sta $f8
+        sta ZP_F8
 
         txa 
         and # %01111111
         
         tax 
 
-        lda $f8
+        lda ZP_F8
         sta sm1+1
         sta sm3+1
         eor # $ff
@@ -626,7 +627,6 @@ multiply_signed_into_RS:                                                ;$3AA8
 
 .macro  .multiply_tables
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 .pushseg
 .segment        "TABLE_SQR"
 .align          $0100
@@ -642,29 +642,90 @@ multiply_signed_into_RS:                                                ;$3AA8
 
 square1_lo:
 ;-------------------------------------------------------------------------------
-.repeat 512, i
-        .byte <((i * i) / 4)
-.endrepeat
+.ifdef  OPTION_MATHTABLES_ROM
+        ;///////////////////////////////////////////////////////////////////////
+        .repeat 512, i
+                .byte <((i * i) / 4)
+        .endrepeat
+.else   ;///////////////////////////////////////////////////////////////////////
+        .res    512
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 square1_hi:
 ;-------------------------------------------------------------------------------
-.repeat 512, i
-        .byte >((i * i) / 4)
-.endrepeat
+.ifdef  OPTION_MATHTABLES_ROM
+        ;///////////////////////////////////////////////////////////////////////
+        .repeat 512, i
+                .byte >((i * i) / 4)
+        .endrepeat
+.else   ;///////////////////////////////////////////////////////////////////////
+        .res    512
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 square2_lo:
 ;-------------------------------------------------------------------------------
-.repeat 512, i
-        .byte <(((i-255) * (i-255)) / 4)
-.endrepeat
+.ifdef  OPTION_MATHTABLES_ROM
+        ;///////////////////////////////////////////////////////////////////////
+        .repeat 512, i
+                .byte <(((i-255) * (i-255)) / 4)
+        .endrepeat
+.else   ;///////////////////////////////////////////////////////////////////////
+        .res    512
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 square2_hi:
 ;-------------------------------------------------------------------------------
-.repeat 512, i
-        .byte >(((i-255) * (i-255)) / 4)
-.endrepeat
+.ifdef  OPTION_MATHTABLES_ROM
+        ;///////////////////////////////////////////////////////////////////////
+        .repeat 512, i
+                .byte >(((i-255) * (i-255)) / 4)
+        .endrepeat
+.else   ;///////////////////////////////////////////////////////////////////////
+        .res    512
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 .popseg
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro
 
+.macro  .multiply_tables_fill
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+; http://codebase64.org/doku.php?id=base:table_generator_routine_for_fast_8_bit_mul_table
+
+        ldx # $00
+        txa 
+        .byte   $c9             ; skip TYA and clear carry flag
+@lb1:   tya 
+        adc # $00
+@ml1:   sta square1_hi, x
+        tay 
+        cmp # $40
+        txa 
+        ror 
+@ml9:   adc # $00
+        sta @ml9+1
+        inx 
+@ml0:   sta square1_lo, x
+        bne @lb1
+        inc @ml0+2
+        inc @ml1+2
+        clc 
+        iny 
+        bne @lb1
+
+        ;-----------------------------------------------------------------------
+        ldx # $00
+        ldy # $ff
+:       lda square1_hi+1, x
+        sta square2_hi+$100, x
+        lda square1_hi, x
+        sta square2_hi, y
+        lda square1_lo+1, x
+        sta square2_lo+$100, x
+        lda square1_lo, x
+        sta square2_lo, y
+        dey 
+        inx 
+        bne :-
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro

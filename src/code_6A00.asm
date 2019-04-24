@@ -32,7 +32,7 @@
 .import opt_flipaxis:absolute
 .import _1d0c:absolute
 .import _1d0d:absolute
-.import _1d0e:absolute
+.import opt_device:absolute
 .import _1d0f:absolute
 .import _1d10:absolute
 .import _1d11:absolute
@@ -2847,11 +2847,11 @@ swap_zp_shadow:                                                         ;$784F
 ; swap zero-page with its shadow
 ; (copies $36...$FF to $CE36...$CEFF)
 ;
-        ldx # $36
-:       lda $00, x                                                      ;$7851
-        ldy ELITE_ZP_SHADOW, x
-        sta ELITE_ZP_SHADOW, x
-        sty $00, x
+        ldx # $36               ; $36 makes no sense
+:       lda $00, x              ; read A from the zero-page               ;$7851
+        ldy ELITE_ZP_SHADOW, x  ; read Y form the shadow
+        sta ELITE_ZP_SHADOW, x  ; write A to the shadow
+        sty $00, x              ; write Y to the zero-page
         inx 
        .bnz :-
         
@@ -5532,13 +5532,16 @@ _87b1:                                                                  ;$87B1
 
         rts 
 
-;===============================================================================
-; a debugging error? `brk` causes a beep and a message to be printed
-
 _87b8:                                                                  ;$87B8
-        ; error mode? $FF = error occurred, $00 = normal
+        ; counter of some kind, possibly related to debug errors?
         .byte   $00
 
+;===============================================================================
+; the unused and incomplete debug code can be removed
+; in non-original builds
+;
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
 ; BRK routine, set up by `debug_for_brk`
 debug_brk:                                                              ;$87B9
 .export debug_brk
@@ -5562,7 +5565,8 @@ debug_brk:                                                              ;$87B9
         bne :-
         jmp _8888
 
-;===============================================================================
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 _87d0:                                                                  ;$87D0
 .export _87d0
@@ -6066,8 +6070,8 @@ _8ab4:                                                                  ;$8AB4
 ;===============================================================================
 ; insert from "text/text_docked_fns.asm"
 ;
-.txt_docked_token1E
-.txt_docked_token1F
+.txt_docked_token_mediaCurrent                                          ;$8AB5
+.txt_docked_token_mediaOther                                            ;$8ABE
 
 ;===============================================================================
 ; erase $0452...$048C
@@ -6106,42 +6110,49 @@ _8ae1:                                                                  ;$8AE1
         rts 
 
 ;===============================================================================
-
+; data menu
+;
 _8ae7:                                                                  ;$8AE7
-        lda # $01
+        ; display the data menu on screen
+.import TXT_DOCKED_DATA_MENU:direct
+
+        lda # TXT_DOCKED_DATA_MENU
         jsr print_docked_str
 
         jsr wait_for_input
-        cmp # $31
-        beq _8b1c
-        cmp # $32
-        beq _8b27
-        cmp # $33
-        beq _8b11
-        cmp # $34
-        bne _8b0f
+        cmp # '1'
+        beq @_8b1c
+        cmp # '2'
+        beq @_8b27
+        cmp # '3'
+        beq @_8b11
+        cmp # '4'
+        bne @_8b0f
         
-        lda # $e0
+.import TXT_DOCKED_ARE_YOU_SURE:direct
+        lda # TXT_DOCKED_ARE_YOU_SURE
         jsr print_docked_str
         
         jsr _81ee
-        bcc _8b0f
+        bcc @_8b0f
         jsr _8a0c
         jmp _88f0
 
-_8b0f:                                                                  ;$8B0F
+@_8b0f:                                                                 ;$8B0F
         ;-----------------------------------------------------------------------
         clc 
         rts 
 
-_8b11:                                                                  ;$8B11
+@_8b11:                                                                 ;$8B11
         ;-----------------------------------------------------------------------
-        lda _1d0e
-        eor # %11111111
-        sta _1d0e
+        ; change disk to tape and vice versa
+        ;
+        lda opt_device          ; get current device $FF = disk, $00 = tape
+        eor # %11111111         ; flip!
+        sta opt_device          ; and write back
         jmp _8ae7
 
-_8b1c:                                                                  ;$8B1C
+@_8b1c:                                                                 ;$8B1C
         ;-----------------------------------------------------------------------
         jsr _8a38
         jsr _8c0d
@@ -6149,7 +6160,7 @@ _8b1c:                                                                  ;$8B1C
         sec 
         rts 
 
-_8b27:                                                                  ;$8B27
+@_8b27:                                                                 ;$8B27
         ;-----------------------------------------------------------------------
         jsr _8a38
         jsr _8a1d
@@ -6195,7 +6206,7 @@ _8b27:                                                                  ;$8B27
         sta ZP_FE
         
         ; save to disk:
-
+        ; the linker will define the location and size of the save-data block
 .import __DATA_SAVE_RUN__
 .import __DATA_SAVE_SIZE__
 
@@ -6208,7 +6219,7 @@ _8b27:                                                                  ;$8B27
         
         sei 
         bit CIA1_INTERRUPT
-        lda # $01
+        lda # %00000001
         sta CIA1_INTERRUPT
 
         ldx # $00
@@ -6227,52 +6238,62 @@ _8b27:                                                                  ;$8B27
         jsr set_memory_layout
         
         cli 
-        jsr swap_zp_shadow
+        jsr swap_zp_shadow      ; TODO: why is this needed?
         plp 
         cli 
-        bcs _8bbb
+        bcs :+
         jsr _88f0
         jsr wait_for_input
+        
         clc 
         rts 
-
-_8bbb:                                                                  ;$8BBB
-        jmp _8c61
+             
+:       jmp _8c61                                                       ;$8BBB
 
 ;===============================================================================
 
 _8bbe:                                                                  ;$8BBE
-        .byte   $07
+        .byte   $07             ; file name length?
 _8bbf:                                                                  ;$8BBF
         .byte   $07
 
 _8bc0:                                                                  ;$8BC0
-        jsr swap_zp_shadow
+        jsr swap_zp_shadow      ; why is this needed?
         
+        ; switch on the I/O shield to talk to hardware
         lda # C64_MEM::IO_KERNAL
-        sei 
+        sei                     ; disable interrupts
         jsr set_memory_layout
         
-        lda # $00
+        lda # %00000000
         sta VIC_INTERRUPT_CONTROL
         cli 
-        lda # $81
-        sta CIA1_INTERRUPT      ;cia1: cia interrupt control register
-        lda # $c0
-        jsr KERNAL_SETMSG       ;enable/disable kernal messages   
-        ldx _1d0e
-        inx 
-        lda _8c0b, x
-        tax 
-        lda # $01
-        ldy # $00
-        jsr KERNAL_SETLFS       ;set file parameters              
-        lda _8bbe
-        ldx # $0e
-        ldy # $00
-        jmp KERNAL_SETNAM       ;set file name                    
+        lda # %10000001
+        sta CIA1_INTERRUPT
         
+        lda # $c0               ;?
+        jsr KERNAL_SETMSG   
+        
+        ; select TAPE or DISK
+        ldx opt_device          ; selected load/save device (disk/tape)
+        inx                     ; $FF = disk, $00 = tape?
+        lda _8c0b, x            ; $00 = disk, $01 = tape 
+        tax                     ; X = device ID
+        
+        lda # $01               ; logical file number
+        ldy # $00               ; secondary address
+        jsr KERNAL_SETLFS       ; note that X is device ID
+        
+        ; TODO: why should the filename be in $0E??
+        lda _8bbe               ; filename length
+        ldx # $0e               ; $000E?
+        ldy # $00               ; X.Y is filename address
+        jmp KERNAL_SETNAM
+        
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ;bug / unused code? (`jmp` instead of `jsr` above)
+        ;
         lda # $02
         jsr print_docked_str
 
@@ -6287,22 +6308,34 @@ _8bc0:                                                                  ;$8BC0
         cmp # $34
 
         rts 
+.endif  ;///////////////////////////////////////////////////////////////////////
 
-_8c0b:                                                                  ;$8C0B
-        .byte   $08, $01
+_8c0b:  ; device number table                                           ;$8C0B
+        ;-----------------------------------------------------------------------
+        ; TODO: remove tape code
+        ;
+        .byte   DEV_DRV8
+        .byte   DEV_TAPE
 
 ;===============================================================================
 
 _8c0d:                                                                  ;$8C0D
-        jsr _8bc0
-        lda # $00
+        jsr _8bc0               ; select drive & filename?
+        
+        ; load the file into the disk buffer
+        lda # $00               ; "LOAD"
         ldx #< ELITE_DISK_BUFFER
         ldy #> ELITE_DISK_BUFFER
-        jsr KERNAL_LOAD         ;load after call setlfs,setnam    
-        php 
-        lda # $01
-        sta CIA1_INTERRUPT      ;cia1: cia interrupt control register
+        jsr KERNAL_LOAD    
+        
+        ; push load result to stack
+        ; (carry is set if there was an error)
+        php                      
+        
+        lda # %00000001
+        sta CIA1_INTERRUPT
         sei 
+
         ldx # $00
         stx _a8d9
         inx 
@@ -6315,55 +6348,67 @@ _8c0d:                                                                  ;$8C0D
         lda # 40                ; raster line 40
         sta VIC_RASTER
         
+        ; turn off the I/O shield and go back to 64K RAM
         lda # C64_MEM::ALL
         jsr set_memory_layout
         
         cli 
-        jsr swap_zp_shadow
+        jsr swap_zp_shadow      ; why is this needed?
+        
+        ; check the result of the load
         plp 
         cli 
-        bcs _8c61
-        lda ELITE_DISK_BUFFER           ;=$CF00
-        bmi _8c55
+        bcs _8c61               ; carry set = error
+        lda ELITE_DISK_BUFFER
+        bmi _illegal
 
+        ; copy the save file from the disk buffer over the current data?
         ; copy $CF00...$CF4C to $25B3...$25FF
-        ldy # $4c
-_8c4a:                                                                  ;$8C4A
-        lda ELITE_DISK_BUFFER, y        ;=$CF00
+        ldy # $4c                       ; length is $FF-$4C
+        
+:       lda ELITE_DISK_BUFFER, y                                        ;$8C4A
         sta _25b3, y
         dey 
-        bpl _8c4a
+        bpl :-
 _8c53:                                                                  ;$8C53
         sec 
         rts 
 
-_8c55:                                                                  ;$8C55
-        lda # $09
+_illegal:                                                               ;$8C55
+        ;-----------------------------------------------------------------------
+        ; file is invalid
+        ;
+.import TXT_DOCKED_ILLEGAL_FILE:direct
+        lda # TXT_DOCKED_ILLEGAL_FILE   ; display "illegal Elite II file"
         jsr print_docked_str
         
-        jsr wait_for_input
+        jsr wait_for_input              ; press any key
         jmp _8ae7
 
-;===============================================================================
-
-_8c60:                                                                  ;$8C60
-        rts 
-
-;===============================================================================
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
+_8c60:  rts                                                             ;$8C60
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 _8c61:                                                                  ;$8C61
-        lda # $ff
+.import TXT_DOCKED_ERROR:direct
+        lda # TXT_DOCKED_ERROR
         jsr print_docked_str
 
         jsr wait_for_input
         jmp _8ae7
-;$8c6c:
-        rts 
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        rts                     ; not needed due to `jmp` above
+.endif  ;///////////////////////////////////////////////////////////////////////
+
+;===============================================================================
+; clear the keyboard state
+;
 clear_keyboard:                                                         ;$8C6D
-        ;=======================================================================
-        ; clears the keyboard state.
-        ;
+
         ldx # 64                ; number of keys on keyboard to scan
         lda # $00
         sta ZP_7D               ; set currently pressed key to nothing
@@ -6583,16 +6628,16 @@ get_input:                                                              ;$8D53
 ; [*] note that the read byte uses a bit value of 0 to mean pressed
 ;     and 1 to represent unpressed (i.e the key grounds a voltage level)
 ;
-;  \   BIT 7 |  BIT 6 |  BIT 5 |   BIT 4 |  BIT 3 |  BIT 2 |  BIT 1 |  BIT 0   
-;   +--------¦--------¦--------¦---------¦--------¦--------¦--------¦--------   
-; 0 | DOWN   | F5     | F3     | F1      | F7     | RIGHT  | RETURN | DELETE
-; 1 | LSHIFT | e      | s      | z       | 4      | a      | w      | 3 
-; 2 | x      | t      | f      | c       | 6      | d      | r      | 5
-; 3 | v      | u      | h      | b       | 8      | g      | y      | 7
-; 4 | n      | o      | k      | m       | 0      | j      | i      | 9
-; 5 | ,      | @      | :      | .       | -      | l      | p      | +
-; 6 | /      | ^      | =      | RSHIFT  | HOME   | ;      | *      | £ 
-; 7 | STOP   | q      | C=     | SPACE   | 2      | CTRL   | <-     | 1
+;  \   BIT 7 |  BIT 6 |  BIT 5 |  BIT 4 |  BIT 3 |  BIT 2 |  BIT 1 |  BIT 0   
+;   +--------¦--------¦--------¦--------¦--------¦--------¦--------¦--------   
+; 0 | DOWN   | F5     | F3     | F1     | F7     | RIGHT  | RETURN | DELETE
+; 1 | LSHIFT | e      | s      | z      | 4      | a      | w      | 3 
+; 2 | x      | t      | f      | c      | 6      | d      | r      | 5
+; 3 | v      | u      | h      | b      | 8      | g      | y      | 7
+; 4 | n      | o      | k      | m      | 0      | j      | i      | 9
+; 5 | ,      | @      | :      | .      | -      | l      | p      | +
+; 6 | /      | ^      | =      | RSHIFT | HOME   | ;      | *      | £ 
+; 7 | STOP   | q      | C=     | SPACE  | 2      | CTRL   | <-     | 1
 ;
 ; this chart adapted from:
 ; <http://codebase64.org/doku.php?id=base:reading_the_keyboard> 

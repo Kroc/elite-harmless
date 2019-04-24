@@ -2,7 +2,7 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-
+;
 ; "math.asm" -- common math routines. for more 3D specific stuff (such as
 ; matrix math, see "math_3d.asm")
 
@@ -28,7 +28,51 @@ math_square:                                                            ;$3988
 ; returns a 16-bit number in A.P
 ;
 .export math_square
+;
+; if the math lookup tables are being included,
+; we can use these to go faster
+; 
+.ifdef  OPTION_MATHTABLES
+        ;///////////////////////////////////////////////////////////////////////
+        tax                     ; use A as index into tables (i.e. A * A)
+        bne _399f
 
+        sta ZP_VAR_P
+        rts 
+
+_3992:  ;?
+        tax 
+        lda DUST_Y, y
+        sta ZP_VAR_Y
+_3997:  ;?
+        and # %01111111
+        sta ZP_VAR_P
+_399b:  ;?
+.export _399b
+
+        ldx ZP_VAR_Q
+
+_399f:  
+        txa 
+        sta @sm1+1
+        sta @sm3+1
+        eor # $ff
+        sta @sm2+1
+        sta @sm4+1
+
+        sec 
+@sm1:   lda square1_lo, x
+@sm2:   sbc square2_lo, x
+        sta ZP_VAR_P
+@sm3:   lda square1_hi, x
+@sm4:   sbc square2_hi, x
+
+        rts 
+
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; original elite square routine, or elite-harmless
+        ; without the math lookup tables
+        ; 
         sta ZP_VAR_P            ; put aside initial value
         tax                     ; and again
        .bnz _399f               ; if not zero, begin multiplication
@@ -108,5 +152,6 @@ _399f:                                                                  ;$399F
 
         rts 
 
+.endif  ;///////////////////////////////////////////////////////////////////////
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
