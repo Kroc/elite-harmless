@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "c64/c64.asm"
+.include        "c64/c64.inc"
 
 ; this file is the code for "firebird.prg", the first stage in loading, it's
 ; what gets loaded by the normal C64 KERNAL. the program is designed to hijack

@@ -4,6 +4,10 @@
 ;===============================================================================
 .linecont+
 
+.segment    "VARS_0400"
+
+.res    $0300
+
 .segment        "VIC_BITMAP"
 
 ; if we force the 8K alignment required by bitmap screens, the linker will

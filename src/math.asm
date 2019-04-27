@@ -3,8 +3,8 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 ;
-; "math.asm" -- common math routines. for more 3D specific stuff (such as
-; matrix math, see "math_3d.asm")
+; "math.asm" -- common math routines. for more 3D specific stuff
+; (such as matrix math, see "math_3d.asm")
 
 .macro  .math_square
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

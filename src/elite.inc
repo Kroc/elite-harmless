@@ -3,6 +3,10 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+.include        "elite_vars.inc"        ; elite's main variables
+.include        "text/text.inc"         ; text/string constants
+.include        "gfx/hull_struct.inc"   ; hull (3D object) structure
+
 ; the linker script ("link/elite-*.cfg") defines the memory layout of the game
 ; (since it will differ from the original, disk and cartridge versions) so we
 ; import some memory addresses from there and use these to configure the C64

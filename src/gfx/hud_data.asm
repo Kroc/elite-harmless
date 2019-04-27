@@ -4,8 +4,8 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64/c64.asm"
-.include        "elite_consts.asm"
+.include        "c64/c64.inc"
+.include        "elite.inc"
 
 ; this is the multi-colour bitmap data for the HUD
 ; TODO: save this to a bitmap and convert during build

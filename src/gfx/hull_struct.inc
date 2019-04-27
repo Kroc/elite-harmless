@@ -3,8 +3,8 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "hull_struct.asm" -- we cannot export structures, so we need to include this
-; file when we want to refer to the bytes [easily] within hull data
+; "hull_struct.inc" -- we cannot export structures, so we need to include
+; this file when we want to refer to the bytes [easily] within hull data
 
 .struct         Hull
         _00             .byte   ; "scoop / debris"?                     ;+$00

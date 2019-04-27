@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "c1541.asm" -- definitions for working with the Commodore 1541 disk-drive
+; "c1541.inc" -- definitions for working with the Commodore 1541 disk-drive
 ;
 ; the 1541 is a self-contained computer with its own 6502 processor, 2 KB RAM
 ; and 16 KB ROM. commands can be sent to it over the serial bus but it's also

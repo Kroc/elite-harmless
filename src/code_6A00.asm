@@ -4,12 +4,11 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64/c64.asm"
-.include        "vars_elite.asm"
+.include        "c64/c64.inc"
+.include        "elite.inc"
+
 .include        "vars_zeropage.asm"
-.include        "text/text.asm"
 .include        "text/text_docked_fns.asm"
-.include        "gfx/hull_struct.asm"
 .include        "math_3d.asm"
 .include        "draw_lines.asm"
 
@@ -9725,9 +9724,9 @@ _a6d4:                                                                  ;$A6D4
         lda PLAYER_LASERS, y    ; get type of laser for current viewpoint
         beq _a700               ; no laser? skip ahead
 
-        ; the index of the first sprite is entirely dependent on where sprites
-        ; are located in the selected VIC bank; see "elite_consts.asm" for
-        ; where this value is defined
+        ; the index of the first sprite is entirely dependent on where
+        ; sprites are located in the selected VIC bank; see "elite.inc"
+        ; for where this value is defined
         ldy # ELITE_SPRITES_INDEX
         cmp # $0f               ; a type of laser?
         beq :+

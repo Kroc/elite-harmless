@@ -8,7 +8,7 @@
 ; 'flight' strings and the 'docked' strings, even if most of the pairs are
 ; used by both
 
-.include        "text.asm"
+.include        "text.inc"
 
 .segment        "TEXT_PAIRS"
 
@@ -19,7 +19,7 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 ; write it multiple times. it writes the two charcters into the program,
 ; but also defines an external name used by "text_flight.asm" to place the
 ; correct token number (once scrambled) into the text data
-
+;
 .macro  .docked_pair    str
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

@@ -4,12 +4,14 @@
 ;===============================================================================
 .linecont+
 
-.include        "macros.asm"
-.include        "kernal.asm"
-.include        "cart.asm"
-.include        "vic.asm"
-.include        "sid.asm"
-.include        "cia.asm"
+.include        "macros.inc"
+.include        "kernal.inc"
+.include        "cart.inc"
+.include        "vic.inc"
+.include        "sid.inc"
+.include        "cia.inc"
+
+.include        "c1541.inc"
 
 ; calculate the number of *whole* pages from a given byte-size:
 ;-------------------------------------------------------------------------------

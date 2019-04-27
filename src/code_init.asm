@@ -7,8 +7,8 @@
 ; original Elite uses "orig_init.asm". this code is loaded into the variable
 ; space the game uses, so once executed it is erased! 
 
-.include        "c64/c64.asm"
-.include        "elite_consts.asm"
+.include        "c64/c64.inc"
+.include        "elite.inc"
 .include        "math_3d.asm"
 
 .zeropage
@@ -50,8 +50,8 @@ init:
         lda CIA2_PORTA          ; read the serial bus / VIC-II bank state
         and # %11111100         ; keep current value except bits 0-1 (VIC bank)
 
-        ; set the bits according to the bank defined by the linker script, e.g.
-        ; "/link/elite-harmless-d64.cfg", and imported by "elite_consts.asm"
+        ; set the bits according to the bank defined by the linker script,
+        ; e.g. "/link/elite-harmless-d64.cfg", and imported by "elite.inc"
         ora # .vic_bank_bits(ELITE_VIC_BANK)  
         sta CIA2_PORTA
 

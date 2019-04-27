@@ -4,8 +4,8 @@
 ;===============================================================================
 .linecont+
 
-; produces a value to be written to CIA2_PORTA ($DD00), for selecting the VIC
-; bank -- the bits are inverted
+; produces a value to be written to CIA2_PORTA ($DD00),
+; for selecting the VIC bank -- the bits are inverted
 ;
 .define .vic_bank_bits(bank) \
         (<(~bank & %00000011))

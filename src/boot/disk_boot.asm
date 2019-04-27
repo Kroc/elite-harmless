@@ -4,9 +4,9 @@
 ;===============================================================================
 
 ; "disk_boot.asm" -- auto-start code for Elite : Harmless
-; original Elite uses the code in the "loader" folder
+; original Elite uses the code in the "loader/gma" folder
 
-.include        "c64/c64.asm"
+.include        "c64/c64.inc"
 
 ; populate the .PRG header using the address given
 ; by the linker config (see "link/elite-original-gma86.cfg")

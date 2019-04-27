@@ -76,8 +76,8 @@ txt_docked_functions:                                                   ;$250C
 ; index         the index in the table, basis for the encrypted token
 ; function      the function to import & call for the token
 ; symbol        name slug to define the local and global symbol; the local
-;               symbol will be prefix with "FN_" and the global symbol will
-;               be prefixed with "TXTFN_" and exported
+;               symbol will be prefixed with "FN_" and the global symbol
+;               will be prefixed with "TXTFN_" and exported
 ; token         the index is encrypted (XOR $57) and this becomes
 ;               the token ID that is used within the string database
 ;
@@ -85,63 +85,63 @@ txt_docked_functions:                                                   ;$250C
 ;-------------------------------------------------------------------------------
 ; index         function:                       symbol:                 token:
 ;-------------------------------------------------------------------------------
-; $01
+; $01           ?
 .define_fn      txt_docked_token01,             "F01"                   ;=$56
-; $02
+; $02           ?
 .define_fn      txt_docked_token02,             "F02"                   ;=$55
 ; $03           print flight-token $03
 .define_fn      print_flight_token,             "PRINT_FLIGHT_TOKEN"    ;=$54
 ; $04           print flight-token $04
 .define_fn      print_flight_token,             "F04"                   ;=$53
-; $05
+; $05           ?
 .define_fn      txt_docked_token05,             "F05"                   ;=$52
-; $06
+; $06           ?
 .define_fn      txt_docked_token06,             "F06"                   ;=$51
 ; $07           print character $07 -- ?
 .define_fn      print_char,                     "F07"                   ;=$50
-; $08
+; $08           ?
 .define_fn      txt_docked_token08,             "F08"                   ;=$5F
-; $09
+; $09           ?
 .define_fn      txt_docked_token09,             "F09"                   ;=$5E
 ; $0A           print character $0A -- ?
 .define_fn      print_char,                     "F0A"                   ;=$5D
-; $0B
+; $0B           ?
 .define_fn      txt_docked_token0B,             "F0B"                   ;=$5C
 ; $0C           print a newline character -- $0C
 .define_fn      print_char,                     "F0C"                   ;=$5B
-; $0D
+; $0D           ?
 .define_fn      txt_docked_token0D,             "F0D"                   ;=$5A
-; $0E
+; $0E           ?
 .define_fn      txt_docked_token0E,             "F0E"                   ;=$59
-; $0F
+; $0F           ?
 .define_fn      txt_docked_token0F,             "F0F"                   ;=$58
-; $10
+; $10           ?
 .define_fn      txt_docked_token10,             "F10"                   ;=$47
-; $11
+; $11           ?
 .define_fn      txt_docked_token11,             "F11"                   ;=$46
-; $12
+; $12           ?
 .define_fn      txt_docked_token12,             "F12"                   ;=$45
-; $13
+; $13           ?
 .define_fn      txt_docked_token_set_lowercase, "F13"                   ;=$44
 ; $14           print character $14 -- ?
 .define_fn      print_char,                     "F14"                   ;=$43
-; $15
+; $15           ?
 .define_fn      txt_docked_token15,             "F15"                   ;=$42      
-; $16
+; $16           ?
 .define_fn      txt_docked_token16,             "F16"                   ;=$41
-; $17
+; $17           ?
 .define_fn      txt_docked_token17,             "F17"                   ;=$40
-; $18
+; $18           ?
 .define_fn      txt_docked_token18,             "F18"                   ;=$4F
 ; $19           flash "incoming message" on screen
 .define_fn      txt_docked_incoming_message,    "INCOMING_MESSAGE"      ;=$4E
-; $1A
+; $1A           ?
 .define_fn      txt_docked_token1A,             "F1A"                   ;=$4D
-; $1B
+; $1B           ?
 .define_fn      txt_docked_token1B,             "F1B"                   ;=$4C
-; $1C
+; $1C           ?
 .define_fn      txt_docked_token1C,             "F1C"                   ;=$4B
-; $1D
+; $1D           ?
 .define_fn      txt_docked_token1D,             "F1D"                   ;=$4A
 ; $1E           print currently selected load/save media -- disk / tape
 .define_fn      txt_docked_token_mediaCurrent,  "MEDIA_CURRENT"         ;=$49
@@ -1725,8 +1725,8 @@ _1a5c:                                                                  ;$1A5C
 
 .segment        "TEXT_PDESC"
 
-; I believe these are a series of expansion-tokens that act as templates
-; for planet descriptions
+; I believe these are a series of expansion-tokens
+; that act as templates for planet descriptions
 
 _3eac:                                                                  ;$3EAC
 .export _3eac
@@ -1744,17 +1744,17 @@ _3eac:                                                                  ;$3EAC
         .byte   $33             ; msg token $66
         .byte   $38             ; msg token $67
         .byte   $aa             ; msg token $68
-        .byte   FN_F15           ; msg token $69
-        .byte   FN_F10           ; msg token $6A
-        .byte   FN_F1B           ; msg token $6B
-        .byte   FN_F06           ; msg token $6C
-        .byte   FN_F01            ; msg token $6D
+        .byte   FN_F15          ; msg token $69
+        .byte   FN_F10          ; msg token $6A
+        .byte   FN_F1B          ; msg token $6B
+        .byte   FN_F06          ; msg token $6C
+        .byte   FN_F01          ; msg token $6D
         .byte   $8c             ; msg token $6E
         .byte   $60             ; msg token $6F
         .byte   $65             ; msg token $70
         .byte   _A_             ; msg token $71
         .byte   $82             ; msg token $72
-        .byte   FN_F0C           ; msg token $73
+        .byte   FN_F0C          ; msg token $73
         .byte   $6a             ; msg token $74
         .byte   $b4             ; msg token $75
         .byte   $b9             ; msg token $76

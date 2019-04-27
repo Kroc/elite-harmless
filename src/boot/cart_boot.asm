@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "c64/c64.asm"
+.include        "c64/c64.inc"
 
 .segment        "CART_HEAD"
 

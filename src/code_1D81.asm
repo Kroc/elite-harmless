@@ -3,14 +3,13 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "c64/c64.asm"
-.include        "vars_elite.asm"
+.include        "c64/c64.inc"
+.include        "elite.inc"
+
 .include        "vars_zeropage.asm"
-.include        "text/text.asm"
 .include        "math.asm"
 .include        "math_3d.asm"
 .include        "text/text_docked_fns.asm"
-.include        "gfx/hull_struct.asm"
 
 ; from "text_flight.asm"
 .import _0ac0:absolute
@@ -1704,7 +1703,7 @@ _2619:                                                                  ;$2619
         .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d  ;"JAMESON"
         .byte   $00 ,$14, $ad
         
-        ; universe seed -- see "elite_consts.asm"
+        ; universe seed -- see "elite.inc"
         .word   ELITE_SEED
         
         .byte   $00, $00, $03, $e8, $46, $00, $00, $0f

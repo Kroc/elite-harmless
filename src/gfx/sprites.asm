@@ -3,8 +3,6 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; TODO: calculate indicies here?
-
 ; NOTE: must be aligned to 64 bytes (at destination)
 
 .segment        "GFX_SPRITES"

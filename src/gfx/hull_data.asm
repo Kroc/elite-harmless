@@ -8,7 +8,7 @@
 
 ; this file was produced with the help of nc513 on the lemon64 forums
 
-.include        "hull_struct.asm"
+.include        "hull_struct.inc"
 
 .segment        "HULL_TABLE"
 

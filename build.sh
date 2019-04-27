@@ -56,8 +56,6 @@ options="-DOPTION_ORIGINAL"
 
 echo "- assemble 'orig_init.asm'"
 $ca65 $options -o build/orig-init.o             src/orig_init.asm
-echo "- assemble 'vars_0400.asm'"
-$ca65 $options -o build/orig-vars_0400.o        src/vars_0400.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/orig-text_pairs.o       src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -128,7 +126,6 @@ $ld65 \
     --obj build/boot_gma_stage5.o \
     --obj build/boot_gma_stage6.o \
     --obj build/boot_gma_stage4_7C3A.o \
-    --obj build/orig-vars_0400.o \
     --obj build/orig-text_pairs.o \
     --obj build/orig-text_flight.o \
     --obj build/orig-text_docked.o \
@@ -280,12 +277,10 @@ echo "- OK"
 options="-DOPTION_MATHTABLES"
 
 echo
-echo "- assemble '/boot/disk_boot_exo.asm'"
+echo "- assemble 'disk_boot_exo.asm'"
 $ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
 echo "- assemble 'code_init.asm'"
 $ca65 $options -o build/code_init.o         src/code_init.asm
-echo "- assemble 'vars_0400.asm'"
-$ca65 $options -o build/vars_0400.o         src/vars_0400.asm
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
@@ -326,7 +321,6 @@ $ld65 \
        -o bin/harmless.prg \
     --obj build/elite_link.o \
     --obj build/disk_boot_exo.o \
-    --obj build/vars_0400.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
@@ -400,8 +394,6 @@ echo
 ##$ca65 $options -o build/elite_link.o        src/elite_link.asm
 ##echo "- assemble 'code_init.asm'"
 ##$ca65 $options -o build/code_init.o         src/code_init.asm
-##echo "- assemble 'vars_0400.asm'"
-##$ca65 $options -o build/vars_0400.o         src/vars_0400.asm
 ##echo "- assemble 'text_pairs.asm'"
 ##$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 ##echo "- assemble 'text_flight.asm'"
@@ -441,8 +433,7 @@ echo
 ##       -m build/elite-harmless-crt-ocean.map -vm \
 ##       -o release/elite-harmless-ocean.crt \
 ##    --obj build/cart_boot.o \
-##    --obj build/elite_link.o \
-##    --obj build/vars_0400.o
+##    --obj build/elite_link.o
 
 #===============================================================================
 

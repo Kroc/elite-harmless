@@ -8,8 +8,8 @@
 ; mode, but this also includes some of the shared menu screens that can be
 ; accessed either in flight or docked, such as player status. whilst this
 ; string pool does contain much of the text on the planet status screen,
-; it doesn't include the planet description strings, that's a very complex
-; system and those are stored in the 'docked' string pool
+; it doesn't include the planet description strings, that's a very
+; complex system and those are stored in the 'docked' string pool
 
 
 ; this is the 'key' used to scramble / unscramble the text token symbols
@@ -849,8 +849,11 @@ _0ab2:  ;146.                                                           ;$0AB2
         .byte   $2b, G_, A_, M_, E_, __, O_, _VE, R_, __end
         .skip_word              ; $20^35 = $03 (same as space?)
         
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; padding
         .byte   $00, $00, $00, $00                                      ;$0ABC
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ;===============================================================================
 
