@@ -3,9 +3,9 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "code_init.asm" -- contains once-off intialisation code for elite-harmless;
-; original Elite uses "orig_init.asm". this code is loaded into the variable
-; space the game uses, so once executed it is erased! 
+; once-off intialisation code for elite-harmless; original Elite uses
+; "orig_init.asm". this code is loaded into the variable space the game uses,
+; so once executed it is erased! 
 
 .include        "c64/c64.inc"
 .include        "elite.inc"

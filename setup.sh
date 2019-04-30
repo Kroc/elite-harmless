@@ -7,6 +7,14 @@
 
 # if you've just installed Linux on Windows, you need to fetch up-to-date
 # package information or install downloads will 404
+# TODO: test if packages already exist?
+# TODO: mac support via Brew?
+
+echo
+echo "Enter your Linux root password"
+echo "to install required tools:"
+echo "(git, gcc, make, python3)"
+echo
 sudo apt update
 sudo apt-get install git gcc make python3
 
@@ -39,4 +47,4 @@ make
 cd ../..
 
 echo
-echo "Build complete."
+echo "Setup complete."
