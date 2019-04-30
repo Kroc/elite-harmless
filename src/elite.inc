@@ -67,7 +67,7 @@ ELITE_VIC_ADDR          = ELITE_VIC_BANK * $4000
 ELITE_VIC_MENUSCR       = <((ELITE_MENUSCR_ADDR - ELITE_VIC_ADDR) / $0400) ;=8
 ELITE_VIC_MAINSCR       = <((ELITE_MAINSCR_ADDR - ELITE_VIC_ADDR) / $0400) ;=9
 
-; the upper bits of register $D018 select the location of the character set,
+; the lower bits of register $D018 select the location of the character set,
 ; and the bitmap screen (if enabled). note that this is relative to the chosen
 ; VIC-II bank above
 ;

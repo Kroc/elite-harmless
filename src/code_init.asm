@@ -71,7 +71,7 @@ init:
         ;             bitmap screen @ $4000..$6000
         ; %xxxxxxx1 = N/A! (but included in the original source)
         ;
-        lda # ELITE_TXTSCR_D018 | %00000001
+        lda # ELITE_TXTSCR_D018 | vic_memory::unused
         sta VIC_MEMORY
 
         ; black screen:
@@ -86,9 +86,9 @@ init:
         ; - bit   4: screen on
         ; - bit   5: bitmap mode on
         ; - bit 6-7: extended mode off / raster interrupt off
-        lda # 3 | screen_ctl1::rows \
-                | screen_ctl1::display \
-                | screen_ctl1::bitmap
+        lda # 3 | vic_screen_ctl1::rows \
+                | vic_screen_ctl1::display \
+                | vic_screen_ctl1::bitmap
         sta VIC_SCREEN_CTL1
 
         ; further screen setup:

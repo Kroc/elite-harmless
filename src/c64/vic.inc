@@ -65,14 +65,14 @@ LTGREY          = $0f     ; %1111
 ; for example, if the VIC bank is set to 1 ($4000..$8000) and sprites are
 ; stored at $6800 then the first sprite index is $A0 (+$2800 / 64)
 
-VIC_SPRITE0_PTR                 = $03F8
-VIC_SPRITE1_PTR                 = $03F9
-VIC_SPRITE2_PTR                 = $03FA
-VIC_SPRITE3_PTR                 = $03FB
-VIC_SPRITE4_PTR                 = $03FC
-VIC_SPRITE5_PTR                 = $03FD
-VIC_SPRITE6_PTR                 = $03FE
-VIC_SPRITE7_PTR                 = $03FF
+VIC_SPRITE0_PTR                 = $03f8
+VIC_SPRITE1_PTR                 = $03f9
+VIC_SPRITE2_PTR                 = $03fa
+VIC_SPRITE3_PTR                 = $03fb
+VIC_SPRITE4_PTR                 = $03fc
+VIC_SPRITE5_PTR                 = $03fd
+VIC_SPRITE6_PTR                 = $03fe
+VIC_SPRITE7_PTR                 = $03ff
 
 VIC_SPRITE0_X                   = $d000
 VIC_SPRITE0_Y                   = $d001
@@ -95,7 +95,7 @@ VIC_SPRITES_X                   = $d010
 
 VIC_SCREEN_CTL1                 = $d011 ; screen-control register
 
-.enum   screen_ctl1
+.enum   vic_screen_ctl1
         scroll_vert     = %00000111     ; vertical scroll offset
         rows            = %00001000     ; 0 = 24 rows, 1 = 25 rows
         display         = %00010000     ; 1 = screen on, 0 = off
@@ -106,10 +106,10 @@ VIC_SCREEN_CTL1                 = $d011 ; screen-control register
 
 VIC_SCREEN_CTL2                 = $d016
 
-.enum   screen_ctl2
-        scroll_horz     = %00000111     ; horizontal scroll offset
-        cols            = %00001000     ; 1 = 38 cols, 0 = 40 cols
-        multicolor      = %00010000     ; 1 = multi-color mode on
+.enum   vic_screen_ctl2
+        scroll_horz     = %00000111     ;=$07 - horizontal scroll offset
+        cols            = %00001000     ;=$08 - 1 = 38 cols, 0 = 40 cols
+        multicolor      = %00010000     ;=$10 - 1 = multi-color mode on
 .endenum
 
 VIC_SCREEN_VERT                 = $d011 ; vertical scroll offset (bits 0-2)
@@ -126,6 +126,56 @@ VIC_SPRITE_DBLHEIGHT            = $d017
 VIC_SPRITE_DBLWIDTH             = $d01d
 
 VIC_MEMORY                      = $d018
+;
+; the location in memory of the text-screen / colour-data, character-set and
+; bitmap are determined by a single register, $D018, consisting of two fields:
+;
+.enum   vic_memory
+        ;
+        ; bits 4-7 select the location of the text-screen / colour-data, which
+        ; can be any of these values: (note that these addresses are relative
+        ; to the VIC-II bank address)
+        ; 
+        screen_mask             = %11110000
+        screen_0000             = %00000000     ;=$00 - VIC+$0000
+        screen_0400             = %00010000     ;=$10 - VIC+$0400
+        screen_0800             = %00100000     ;=$20 - VIC+$0800
+        screen_0c00             = %00110000     ;=$30 - VIC+$0C00
+        screen_1000             = %01000000     ;=$40 - VIC+$1000
+        screen_1400             = %01010000     ;=$50 - VIC+$1400
+        screen_1800             = %01100000     ;=$60 - VIC+$1800
+        screen_1c00             = %01110000     ;=$70 - VIC+$1C00
+        screen_2000             = %10000000     ;=$80 - VIC+$2000
+        screen_2400             = %10010000     ;=$90 - VIC+$2400
+        screen_2800             = %10100000     ;=$A0 - VIC+$2800
+        screen_2c00             = %10110000     ;=$B0 - VIC+$2C00
+        screen_3000             = %11000000     ;=$C0 - VIC+$3000
+        screen_3400             = %11010000     ;=$D0 - VIC+$3400
+        screen_3800             = %11100000     ;=$E0 - VIC+$3800
+        screen_3c00             = %11110000     ;=$F0 - VIC+$3C00
+
+        ; in text-mode bits 1-3 control the location of the character graphics
+        ;
+        char_mask               = %00001110
+        char_0000               = %00000000     ;=$00 - VIC+$0000
+        char_0800               = %00000010     ;=$02 - VIC+$0800
+        char_1000               = %00000100     ;=$04 - VIC+$1000
+        char_1800               = %00000110     ;=$06 - VIC+$1800
+        char_2000               = %00001000     ;=$08 - VIC+$2000
+        char_2800               = %00001010     ;=$0A - VIC+$2800
+        char_3000               = %00001100     ;=$0C - VIC+$3000
+        char_3800               = %00001110     ;=$0E - VIC+$3800
+
+        ; if bitmap mode is enabled bit 3 controls the offset of the bitmap
+        ;
+        bitmap_mask             = %00001000
+        bitmap_0000             = %00000000     ;=$00 - VIC+$0000
+        bitmap_2000             = %00001000     ;=$08 - VIC+$2000
+
+        ; bit 0 has no effect, but you may see it set by software;
+        ; some believed that it must always be set to 1
+        unused                  = %00000001
+.endenum
 
 VIC_INTERRUPT_STATUS            = $d019
 VIC_INTERRUPT_CONTROL           = $d01a

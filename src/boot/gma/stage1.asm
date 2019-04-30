@@ -692,9 +692,9 @@ _062b:
         jsr KERNAL_SCINIT
 
         ; change the RAM / ROM layout
-        lda VIC_MEMORY  ;=$D018, read the current state
-        and # %00001111 ; strip out bits 4-7 leaving the bits 0-3 intact
-        ora # %00100000 ; set bit 5 "%0010xxxx" to move the screen to $0800
+        lda VIC_MEMORY
+        and # vic_memory::char_mask | vic_memory::unused
+        ora # vic_memory::screen_0800
         sta VIC_MEMORY
 
         ; change border / background colour

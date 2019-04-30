@@ -6234,7 +6234,7 @@ _8ae7:                                                                  ;$8AE7
         stx VIC_INTERRUPT_CONTROL
 
         lda VIC_SCREEN_CTL1
-        and # screen_ctl1::raster_line ^$FF
+        and # vic_screen_ctl1::raster_line ^$FF
         sta VIC_SCREEN_CTL1
         
         lda # 40                ; raster line 40
@@ -6348,7 +6348,7 @@ _8c0d:                                                                  ;$8C0D
         stx VIC_INTERRUPT_CONTROL
 
         lda VIC_SCREEN_CTL1
-        and # screen_ctl1::raster_line ^$FF
+        and # vic_screen_ctl1::raster_line ^$FF
         sta VIC_SCREEN_CTL1
         
         lda # 40                ; raster line 40
@@ -10137,22 +10137,28 @@ _a8d9:                                                                  ;$A8D9
 
 ; these are VIC_MEMORY states
 _a8da:                                                                  ;$A8DA
-        .byte   $81
+        .byte   vic_memory::screen_2000 | vic_memory::unused
 _a8db:                                                                  ;$A8DB
-        .byte   $81
+        .byte   vic_memory::screen_2000 | vic_memory::unused
+
+; this is a toggle for `_a8d9`
 _a8dc:                                                                  ;$A8DC
         .byte   $01, $00
 
-; these are VIC_RASTER states
+; these are VIC_RASTER values
 _a8de:                                                                  ;$A8DE
-        .byte   $c2, $33
+        ; top of screen, plus height of viewport
+        .byte   51 + ELITE_VIEWPORT_HEIGHT-1
+        ; scanline 51, 2nd pixel row in screen
+        ; i.e. changes after the yellow border at the top
+        .byte   51
 
 ; these are VIC_SCREEN_CTL2 states
 _a8e0:                                                                  ;$A8E0
 .export _a8e0
-        .byte   $c0
+        .byte   %11000000
 _a8e1:                                                                  ;$A8E1
-        .byte   $c0
+        .byte   %11000000
 
 ; these are VIC_SPRITE_MULTICOLOR states
 _a8e2:                                                                  ;$A8E2
@@ -10224,8 +10230,10 @@ _a8fa:                                                                  ;$A8FA
 :       lda _a8e6, x                                                    ;$A936
         sta VIC_BACKGROUND
 
+        ; toggle frame index (0 & 1)?
         lda _a8dc, x
         sta _a8d9
+
         bne _a8ed
        .phy                     ; push Y to stack (via A)
         bit _1d03
@@ -10468,7 +10476,7 @@ _aaa2:                                                                  ;$AAA2
         stx VIC_INTERRUPT_CONTROL
         
         lda VIC_SCREEN_CTL1
-        and # screen_ctl1::raster_line ^$FF
+        and # vic_screen_ctl1::raster_line ^$FF
         sta VIC_SCREEN_CTL1
         
         ; set the interrupt to occur at line 40 (and 296?)
@@ -10724,9 +10732,8 @@ wait_for_frame:                                                         ;$B148
 
         ; wait for non-zero in the frame status?
 :       lda _a8d9                                                       ;$B149
-
-        ; and then wait for it to return to zero?
         beq :-
+        ; and then wait for it to return to zero?
 :       lda _a8d9                                                       ;$B14E
         bne :-
 

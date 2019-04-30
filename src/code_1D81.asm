@@ -1282,7 +1282,7 @@ _2367:                                                                  ;$2367
 ;
 .txt_docked_token1B                                                     ;$2372
 .txt_docked_token1C                                                     ;$2376
-;===============================================================================
+
 
 _237e:                                                                  ;$237E
         ;=======================================================================
@@ -1702,20 +1702,89 @@ _2619:                                                                  ;$2619
         .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d  ;"JAMESON"
         .byte   $00 ,$14, $ad
         
-        ; universe seed -- see "elite.inc"
+        ; galaxy seed -- see "elite.inc"
         .word   ELITE_SEED
         
-        .byte   $00, $00, $03, $e8, $46, $00, $00, $0f
-        .byte   $00, $00, $00, $00, $00, $16, $00, $00
-        .byte   $00, $00, $00, $00, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $00, $00, $00, $00
-        .byte   $00, $00, $03, $00, $10, $0f, $11, $00
-        .byte   $03, $1c, $0e, $00, $00, $0a, $00, $11
-        .byte   $3a, $07, $09, $08, $00, $00, $00, $00
-        .byte   $80, $aa, $27, $03, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00
+        .dbyt   0, 1000         ; cash?
+        .byte   $46             ; fuel?
+        .byte   $00             ; unused?
+        .byte   $00             ; number of current galaxy?
+        .byte   $0f             ; front laser type
+        .byte   $00             ; rear laser type
+        .byte   $00             ; left laser type
+        .byte   $00             ; right laser type
+        .word   $00             ; additional mission data?
+        .byte   $16
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $03             ; number of missiles?
+        .byte   $00             ; legal status?
+        .byte   $10             ; food available?
+        .byte   $0f             ; textiles available?
+        .byte   $11             ; radioactives available?
+        .byte   $00             ; slaves available?
+        .byte   $03             ; liquor available?
+        .byte   $1c             ; luxuries available?
+        .byte   $0e             ; narcotics available?
+        .byte   $00             ; computers available?
+        .byte   $00             ; machines available?
+        .byte   $0a             ; alloys available?
+        .byte   $00             ; firearms available?
+        .byte   $11             ; furs available?
+        .byte   $3a             ; minerals available?
+        .byte   $07             ; gold available?
+        .byte   $09             ; platinum available?
+        .byte   $08             ; gems available?
+        .byte   $00             ; alien goods available?
+        .byte   $00             ; price factor?
+        .word   $00             ; kills?
+        
+        .byte   $80
+        .byte   $aa
+        .byte   $27
+        .byte   $03
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
+        .byte   $00
 _267e:                                                                  ;$267E
 .export _267e
         .byte   $00, $ff, $ff, $aa, $aa, $aa, $55, $55
