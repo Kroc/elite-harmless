@@ -7,8 +7,6 @@
 .include        "elite.inc"
 
 .include        "vars_zeropage.asm"
-.include        "math.asm"
-.include        "math_3d.asm"
 .include        "text/text_docked_fns.asm"
 
 ; from "text_flight.asm"
@@ -5058,7 +5056,7 @@ _3981:                                                                  ;$3981
         rts 
 
 ;===============================================================================
-; insert some routines from "math.asm"
+; insert some routines from "math.inc"
 ;
 .math_square                                                            ;$3986
 
@@ -5149,8 +5147,7 @@ _3a3f:                                                                  ;$3A3F
         rts 
 
 ;===============================================================================
-
-; insert `multiply_signed` (and some precedents) from "math_3d.asm"
+; insert `multiply_signed` (and some precedents) from "math_3d.inc"
 .multiply_signed                                                        ;$3A48
 
 ;===============================================================================
@@ -5170,7 +5167,8 @@ _3ab2:                                                                  ;$3AB2
         stx ZP_VAR_Q
         lda ZP_VAR_X2
 
-; insert the `multiply_and_add` routine from "math_3d.asm"
+;===============================================================================
+; insert the `multiply_and_add` routine from "math_3d.inc"
 .multiply_and_add                                                       ;$3ACE 
 
 ;===============================================================================

@@ -3,31 +3,32 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 ;
-; "math.asm" -- common math routines. for more 3D specific stuff
+; common math routines. for more 3D specific stuff
 ; (such as matrix math, see "math_3d.asm")
 
 .macro  .math_square
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-math_square_7bit:                                                       ;$3986
-;===============================================================================
-; square a 7-bit number -- removes the sign-bit and then does A * A.
-; see the following procedure for details. the caller should save
-; and restore the sign if desired
-;
 .export math_square_7bit
+.export math_square
+
+; square a 7-bit number:
+;-------------------------------------------------------------------------------
+; removes the sign-bit and then does A * A. see the next procedure for details.
+; the caller should save and restore the sign if desired
+;
+math_square_7bit:                                                       ;$3986
 
         and # %01111111         ; remove sign
 
-math_square:                                                            ;$3988
-;===============================================================================
-; square a number (i.e. A * A)
-;
+; square a number:
+; (i.e. A * A)
+;-------------------------------------------------------------------------------
 ;       A = number to multiply with itself
 ;
 ; returns a 16-bit number in A.P
 ;
-.export math_square
+math_square:                                                            ;$3988
 ;
 ; if the math lookup tables are being included,
 ; we can use these to go faster

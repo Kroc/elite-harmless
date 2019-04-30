@@ -9,7 +9,6 @@
 
 .include        "vars_zeropage.asm"
 .include        "text/text_docked_fns.asm"
-.include        "math_3d.asm"
 .include        "draw_lines.asm"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
@@ -134,6 +133,15 @@
 .import sound_stop:absolute
 .import _b72d:absolute
 .import _c164:absolute
+
+; from "math_data.asm"
+.import _9300:absolute
+.import _9400:absolute
+.import _9500:absolute
+.import _9600:absolute
+.import _9700:absolute
+.import line_points_y:absolute
+.import line_points_x:absolute
 
 ; from "gfx/hull_data.asm"
 .import hull_pointers:absolute
@@ -9412,7 +9420,7 @@ _a3bf:                                                                  ;$A3BF
         rts 
 
 ;===============================================================================
-; insert these routines from "math_3d.asm"
+; insert these routines from "math_3d.inc"
 ;
 .move_polyobj_x                                                         ;$A44A
 .rotate_polyobj_axis                                                    ;$A4A1

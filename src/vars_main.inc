@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "elite_vars.inc" -- some common variables Elite stores in $0400..$0700
+; Elite's main variable space
 
 VAR_0403                = $0403
 

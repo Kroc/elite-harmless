@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 ;
-; "math_3d.asm" -- hello and welcome to disassembly hell!
+; hello and welcome to disassembly hell!
 ;
 ; I didn't know a thing about 3D math when I started disassembling this game,
 ; so the commentary below represents eveything I've learned along the way.
@@ -119,10 +119,8 @@ move_polyobj_x:                                                         ;$A44C
 
 .macro  .rotate_polyobj_axis
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-rotate_polyobj_axis:                                                    ;$A4A1
-;===============================================================================
-; rotate a poly-object around a single axis.
+;
+; rotate a poly-object around a single axis:
 ;
 ;        Y = matrix row (0, 1 or 2), i.e. axis to rotate
 ; ZP_ALPHA = roll  (signed byte) -- rotation around the Z axis (in/out)
@@ -148,6 +146,10 @@ rotate_polyobj_axis:                                                    ;$A4A1
 ; this routine gets called three times in a row,
 ; once for each of the matrix rows
 ;
+; TODO: do the full 3x3 rotation as one routine so as to be able to share
+;       intermediate calculations and reduce the amount of math needed.
+;       see: <http://realtimecollisiondetection.net/blog/?p=21>  
+;
 mYx0    = $00           ; column 0 of the matrix row given in Y (0, 1 or 2)
 mYx0_LO = $00
 mYx0_HI = $01
@@ -157,7 +159,9 @@ mYx1_HI = $03
 mYx2    = $04           ; column 2 of the matrix row given in Y (0, 1 or 2)
 mYx2_LO = $04
 mYx2_HI = $05
-        
+
+rotate_polyobj_axis:                                                    ;$A4A1
+;===============================================================================
         ; compute the following:
         ;
         ;       mYx1 = (ALPHA * -mYx0) + mYx1
@@ -253,6 +257,7 @@ mYx2_HI = $05
         ; as before, this instruction is unecessary
         stx ZP_VAR_P
 .endif  ;///////////////////////////////////////////////////////////////////////
+        ;
         ; R.S = mYx2
         ;
         ldx ZP_POLYOBJ + mYx2_LO, y
@@ -280,7 +285,7 @@ multiply_and_add:                                                       ;$3ACE
 ;
 ;       X.A = Q * A + R.S
 ;
-; this is used as part of the 3D matrix math
+; this is used as a lot as part of 3D math
 ;
 .export multiply_and_add
 
@@ -622,110 +627,5 @@ multiply_signed_into_RS:                                                ;$3AA8
         sta ZP_VAR_R
         rts 
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
-
-.macro  .multiply_tables
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-.pushseg
-.segment        "TABLE_SQR"
-.align          $0100
-
-; Table generation: I:0..511
-;       square1_lo = <((I*I)/4)
-;       square1_hi = >((I*I)/4)
-;       square2_lo = <(((I-255)*(I-255))/4)
-;       square2_hi = >(((I-255)*(I-255))/4)
-
-.export square1_lo, square1_hi
-.export square2_lo, square2_hi
-
-square1_lo:
-;-------------------------------------------------------------------------------
-.ifdef  OPTION_MATHTABLES_ROM
-        ;///////////////////////////////////////////////////////////////////////
-        .repeat 512, i
-                .byte <((i * i) / 4)
-        .endrepeat
-.else   ;///////////////////////////////////////////////////////////////////////
-        .res    512
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-square1_hi:
-;-------------------------------------------------------------------------------
-.ifdef  OPTION_MATHTABLES_ROM
-        ;///////////////////////////////////////////////////////////////////////
-        .repeat 512, i
-                .byte >((i * i) / 4)
-        .endrepeat
-.else   ;///////////////////////////////////////////////////////////////////////
-        .res    512
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-square2_lo:
-;-------------------------------------------------------------------------------
-.ifdef  OPTION_MATHTABLES_ROM
-        ;///////////////////////////////////////////////////////////////////////
-        .repeat 512, i
-                .byte <(((i-255) * (i-255)) / 4)
-        .endrepeat
-.else   ;///////////////////////////////////////////////////////////////////////
-        .res    512
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-square2_hi:
-;-------------------------------------------------------------------------------
-.ifdef  OPTION_MATHTABLES_ROM
-        ;///////////////////////////////////////////////////////////////////////
-        .repeat 512, i
-                .byte >(((i-255) * (i-255)) / 4)
-        .endrepeat
-.else   ;///////////////////////////////////////////////////////////////////////
-        .res    512
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-.popseg
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
-
-.macro  .multiply_tables_fill
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-; http://codebase64.org/doku.php?id=base:table_generator_routine_for_fast_8_bit_mul_table
-
-        ldx # $00
-        txa 
-        .byte   $c9             ; skip TYA and clear carry flag
-@lb1:   tya 
-        adc # $00
-@ml1:   sta square1_hi, x
-        tay 
-        cmp # $40
-        txa 
-        ror 
-@ml9:   adc # $00
-        sta @ml9+1
-        inx 
-@ml0:   sta square1_lo, x
-        bne @lb1
-        inc @ml0+2
-        inc @ml1+2
-        clc 
-        iny 
-        bne @lb1
-
-        ;-----------------------------------------------------------------------
-        ldx # $00
-        ldy # $ff
-:       lda square1_hi+1, x
-        sta square2_hi+$100, x
-        lda square1_hi, x
-        sta square2_hi, y
-        lda square1_lo+1, x
-        sta square2_lo+$100, x
-        lda square1_lo, x
-        sta square2_lo, y
-        dey 
-        inx 
-        bne :-
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro

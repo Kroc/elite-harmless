@@ -519,7 +519,7 @@ _7808:  lda __GFX_SPRITES_LOAD__ + $100, y
         ;     $1a = low-byte of address to copy from
         ;       A = high-byte of address to copy from (gets placed into $1b)
         ;       X = number of 265-byte blocks to copy
-
+        ;
         sta ZP_COPY_FROM+1
         ldy # $00
 

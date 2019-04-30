@@ -76,6 +76,8 @@ echo "- assemble 'gfx-font.asm'"
 $ca65 $options -o build/orig-gfx_font.o         src/gfx/font.asm
 echo "- assemble 'gfx-sprites.asm'"
 $ca65 $options -o build/orig-gfx_sprites.o      src/gfx/sprites.asm
+echo "- assemble 'math_data.asm'"
+$ca65 $options -o build/orig-math_data.o        src/math_data.asm
 echo "- assemble 'gfx-hull_data.asm'"
 $ca65 $options -o build/orig-gfx_hull_data.o    src/gfx/hull_data.asm
 echo "- assemble 'gfx-hud_data.asm'"
@@ -137,6 +139,7 @@ $ld65 \
     --obj build/orig-sound.o \
     --obj build/orig-gfx_font.o \
     --obj build/orig-gfx_sprites.o \
+    --obj build/orig-math_data.o \
     --obj build/orig-gfx_hud_data.o \
     --obj build/orig-gfx_hull_data.o \
     --obj build/orig-vars_polyobj.o
@@ -301,6 +304,8 @@ echo "- assemble 'gfx-font.asm'"
 $ca65 $options -o build/gfx-font.o          src/gfx/font.asm
 echo "- assemble 'gfx-sprites.asm'"
 $ca65 $options -o build/gfx-sprites.o       src/gfx/sprites.asm
+echo "- assemble 'math_data.asm'"
+$ca65 $options -o build/math_data.o         src/math_data.asm
 echo "- assemble 'gfx-hull_data.asm'"
 $ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
 echo "- assemble 'gfx-hud_data.asm'"
@@ -319,19 +324,20 @@ $ld65 \
        -S \$0400 \
        -m build/elite-harmless.map -vm \
        -o bin/harmless.prg \
+    --obj build/code_init.o \
     --obj build/elite_link.o \
     --obj build/disk_boot_exo.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
     --obj build/vars_1D00.o \
-    --obj build/code_init.o \
     --obj build/code_1D81.o \
     --obj build/code_6A00.o \
     --obj build/table_bitmap.o \
     --obj build/sound.o \
     --obj build/gfx-font.o \
     --obj build/gfx-sprites.o \
+    --obj build/math_data.o \
     --obj build/gfx-hull_data.o \
     --obj build/gfx-hud_data.o \
     --obj build/vars_polyobj.o 
@@ -414,6 +420,8 @@ echo
 ##$ca65 $options -o build/gfx-font.o          src/gfx/font.asm
 ##echo "- assemble 'gfx-sprites.asm'"
 ##$ca65 $options -o build/gfx-sprites.o       src/gfx/sprites.asm
+##echo "- assemble 'math_data.asm'"
+##$ca65 $options -o build/math_data.o         src/math_data.o
 ##echo "- assemble 'gfx-hull_data.asm'"
 ##$ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
 ##echo "- assemble 'gfx-hud_data.asm'"

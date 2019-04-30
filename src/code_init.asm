@@ -9,7 +9,6 @@
 
 .include        "c64/c64.inc"
 .include        "elite.inc"
-.include        "math_3d.asm"
 
 .zeropage
 
@@ -389,7 +388,18 @@ _77a3:  sta $d802, y
 
 .ifdef  OPTION_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
-        .multiply_tables_fill
+        ; if we're including the math lookup tables for faster multiplication,
+        ; then -- for the disk versions of the game -- we will populate the
+        ; table data at runtime rather than including the tables on the disk
+        ; so as to decrease the disk-file size and therefore load-times
+        ;
+        ; "math_data.asm" defines the segments for the lookup tables, but also
+        ; appends a routine to the end of our current segement which we can
+        ; call to populate the 2 KB of lookup tables
+        ; 
+.import populate_multiply_tables
+        jsr populate_multiply_tables
+
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         lda CPU_CONTROL                 ; get processor port state
@@ -481,12 +491,3 @@ set_bytes:
         rts
 
 .endproc
-
-.ifdef  OPTION_MATHTABLES
-;///////////////////////////////////////////////////////////////////////////////
-; insert the multiplication tables (2 KB) in "math_3d.asm"
-; TODO: generate these at run-time instead, to decrease disk-file size
-;
-.multiply_tables
-;///////////////////////////////////////////////////////////////////////////////
-.endif

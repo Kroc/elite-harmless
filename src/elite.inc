@@ -3,8 +3,10 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "elite_vars.inc"        ; elite's main variables
+.include        "vars_main.inc"         ; elite's main variables
 .include        "text/text.inc"         ; text/string constants
+.include        "math.inc"              ; easy math
+.include        "math_3d.inc"           ; hard math
 .include        "gfx/hull_struct.inc"   ; hull (3D object) structure
 
 ; the linker script ("link/elite-*.cfg") defines the memory layout of the game
