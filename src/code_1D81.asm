@@ -3,11 +3,12 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "c64/c64.inc"
 .include        "elite.inc"
 
 .include        "vars_zeropage.asm"
 .include        "text/text_docked_fns.asm"
+.include        "math.inc"
+.include        "math_3d.inc"
 
 ; from "text_flight.asm"
 .import _0ac0:absolute
@@ -1724,7 +1725,7 @@ _267e:                                                                  ;$267E
         .byte   $00, $aa, $00, $00, $00, $00
 
 ;===============================================================================
-; "LINE_DATA" segment goes here in the original game, see "draw_lines.asm"
+; "LINE_DATA" segment goes here in the original game, see "draw_lines.inc"
 ;
 ;line_points_x:                                                         ;$26A4
 ;line_points_y:                                                         ;$27A4

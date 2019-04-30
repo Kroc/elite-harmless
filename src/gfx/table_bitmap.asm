@@ -4,7 +4,6 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64/c64.inc"
 .include        "elite.inc"
 
 ; the BBC Micro, unusually for an 8-bit, has programmable display circuitry

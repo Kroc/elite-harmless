@@ -4,7 +4,7 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64/c64.inc"
+.include        "elite.inc"
 
 .export sound_play_addr_lo:absolute
 .export sound_play_addr_hi:absolute

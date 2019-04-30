@@ -7,7 +7,6 @@
 ; "orig_init.asm". this code is loaded into the variable space the game uses,
 ; so once executed it is erased! 
 
-.include        "c64/c64.inc"
 .include        "elite.inc"
 
 .zeropage

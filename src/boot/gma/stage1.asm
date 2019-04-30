@@ -7,7 +7,6 @@
 ; process as it displays the fastload option and orchestrates the loading /
 ; decryption of the other modules
 
-.include        "c64/c64.inc"
 .include        "elite.inc"
 
 ;===============================================================================

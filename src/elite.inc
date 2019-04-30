@@ -3,10 +3,14 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+; this is the main include file (".inc") for common definitions for Elite,
+; that is, constants, macros and the like that do not immediately output bytes.
+; each assembly file (".asm") will include this file
+
+.include        "c64/c64.inc"           ; define C64 constants
+
 .include        "vars_main.inc"         ; elite's main variables
 .include        "text/text.inc"         ; text/string constants
-.include        "math.inc"              ; easy math
-.include        "math_3d.inc"           ; hard math
 .include        "gfx/hull_struct.inc"   ; hull (3D object) structure
 
 ; the linker script ("link/elite-*.cfg") defines the memory layout of the game

@@ -5,7 +5,6 @@
 
 ; "orig_init.asm" -- contains intialisation code and graphics data
 
-.include        "c64/c64.inc"
 .include        "elite.inc"
 
 .zeropage

@@ -4,12 +4,12 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64/c64.inc"
 .include        "elite.inc"
 
 .include        "vars_zeropage.asm"
 .include        "text/text_docked_fns.asm"
-.include        "draw_lines.asm"
+.include        "draw_lines.inc"
+.include        "math_3d.inc"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -139,7 +139,6 @@
 .import _9400:absolute
 .import _9500:absolute
 .import _9600:absolute
-.import _9700:absolute
 .import line_points_y:absolute
 .import line_points_x:absolute
 
@@ -7524,7 +7523,7 @@ _927e:                                                                  ;$927E
 
 ;===============================================================================
 
-; $9300..$9700 is in "draw_lines.asm"
+; $9300..$9700 is in "draw_lines.inc"
 ; $9700..$9900 is in "gfx/table_bitmap.asm"
 
 ;===============================================================================
@@ -10533,7 +10532,7 @@ _aaa2:                                                                  ;$AAA2
         rts 
 
 ;===============================================================================
-; from "draw_lines.asm" insert the line-drawing code
+; from "draw_lines.inc" insert the line-drawing code
 ;
 .draw_lines                                                             ;$AB31
 ;===============================================================================

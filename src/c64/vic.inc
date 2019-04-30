@@ -60,7 +60,7 @@ LTGREY          = $0f     ; %1111
 ; bytes available there. these constants are offsets you should add to your
 ; screen location. sprites in memory must be aligned to 64 bytes, so the value
 ; used in the sprite pointers is the offset of the sprite from the beginning
-; of the selected VIC bank (see "vic.asm"), divided by 64
+; of the selected VIC bank (see "vic.inc"), divided by 64
 ;
 ; for example, if the VIC bank is set to 1 ($4000..$8000) and sprites are
 ; stored at $6800 then the first sprite index is $A0 (+$2800 / 64)

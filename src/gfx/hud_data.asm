@@ -4,7 +4,6 @@
 ;===============================================================================
 .linecont+
 
-.include        "c64/c64.inc"
 .include        "elite.inc"
 
 ; this is the multi-colour bitmap data for the HUD

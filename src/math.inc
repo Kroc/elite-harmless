@@ -4,7 +4,7 @@
 ;===============================================================================
 ;
 ; common math routines. for more 3D specific stuff
-; (such as matrix math, see "math_3d.asm")
+; (such as matrix math, see "math_3d.inc")
 
 .macro  .math_square
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
