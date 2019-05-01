@@ -10179,28 +10179,38 @@ _a8e8:                                                                  ;$A8E8
         bpl _a958
         pla 
         tay 
-_a8ed:                                                                  ;$A8ED
-        pla 
-        tax 
 
+interrupt_end_XA:                                                       ;$A8ED
+        ;=======================================================================
+        ; interrupt finished! restores X & A.
+        ;
+       .plx                     ; restore X
+
+        ; turn off the I/O shield at the end of the interrupt
+        ; and return to the previous I/O state
         lda CPU_CONTROL
         and # %11111000
         ora current_memory_layout
         sta CPU_CONTROL
         
-        pla 
-        rti 
+        pla                     ; restore A
+        rti                     ; "ReTurn from Interrupt"
 
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; this is Elite's main interrupt routine
+;
+interrupt:                                                              ;$A8FA
 
-_a8fa:                                                                  ;$A8FA
-        pha 
+        pha                     ; preserve A
         
+        ; turn on the I/O shield
+        ;
         lda CPU_CONTROL
         and # %11111000
         ora # C64_MEM::IO_ONLY
         sta CPU_CONTROL
 
+        ; acknowledge the interrupt?
         lda VIC_INTERRUPT_STATUS
         ora # %10000000
         sta VIC_INTERRUPT_STATUS
@@ -10209,6 +10219,9 @@ _a8fa:                                                                  ;$A8FA
         
         ldx _a8d9
 
+        ; flicker the VIC memory map!?
+        ; the two values are the same, so this does nothing in practice
+        ;
         lda _a8da, x
         sta VIC_MEMORY
 
@@ -10224,6 +10237,7 @@ _a8fa:                                                                  ;$A8FA
         lda _a8e4, x
         sta VIC_SPRITE1_COLOR
         
+        ; flash screen with e-bomb explosion?
         bit PLAYER_EBOMB
         bpl :+
         inc _a8e6
@@ -10234,16 +10248,24 @@ _a8fa:                                                                  ;$A8FA
         lda _a8dc, x
         sta _a8d9
 
-        bne _a8ed
-       .phy                     ; push Y to stack (via A)
-        bit _1d03
-        bpl _a956
-        jsr _b4d2
-        bit _1d12
-        bmi _a956
-        jmp _aa04
+        ; just exit every other frame
+        ; (this is the short routine above this one)
+       .bnz interrupt_end_XA
 
-        ;-----------------------------------------------------------------------
+        ; push Y to stack (via A).
+        ; from this point we must restore Y before ending the interrupt,
+        ; so a different exit point is used than the one above
+       .phy
+
+        bit _1d03               ; if this option,
+        bpl _a956               ; is off, skip ahead
+
+        jsr _b4d2               ; handle music?
+
+        bit _1d12               ; sound effects enabled?
+        bmi _a956               ; yes, do SFX
+        
+        jmp interrupt_end_YXA
 
 _a956:                                                                  ;$A956
         ldy # $02
@@ -10251,6 +10273,7 @@ _a958:                                                                  ;$A958
         lda _aa13, y
         beq _a8e8
         bmi _a969
+
         ldx _aa2f, y
         lda _aa1d, y
         beq _a9ae
@@ -10261,7 +10284,7 @@ _a969:                                                                  ;$A969
         lda # $00
         ldx # $06
 _a973:                                                                  ;$A973
-        sta SID_VOICE1_FREQ_LO, x
+        sta SID_VOICE1, x
         dex 
         bpl _a973
         ldx _aa2f, y
@@ -10334,19 +10357,19 @@ _a9fc:                                                                  ;$A9FC
         lda _aa1c
         eor # %00000100
         sta _aa1c
-_aa04:                                                                  ;$AA04
-        pla 
-        tay 
-        pla 
-        tax 
+
+interrupt_end_YXA:                                                      ;$AA04
+        ;-----------------------------------------------------------------------
+       .ply                     ; restore Y
+       .plx                     ; restore X
 
         lda CPU_CONTROL
         and # %11111000
         ora current_memory_layout
         sta CPU_CONTROL
 
-        pla 
-        rti 
+        pla                     ; restore A
+        rti                     ; "ReTurn from Interrupt"
 
 ;===============================================================================
 
@@ -10409,10 +10432,10 @@ _aaa2:                                                                  ;$AAA2
 .export init_mem
 .proc   init_mem                                                        ;$AAB2
         ;=======================================================================
-        ; erase $0400..$0700
-
-.import __VARS_0400_RUN__
-.import __VARS_0400_SIZE__
+        ; clear the main variable space
+        ;
+.import __VARS_0400_RUN__       ; runtime location
+.import __VARS_0400_SIZE__      ; and length
 
         lda #> __VARS_0400_RUN__
         sta ZP_TEMP_ADDR1_HI
@@ -10433,9 +10456,12 @@ _aaa2:                                                                  ;$AAA2
         bne :-
 
         ;-----------------------------------------------------------------------
-
-        ; set non-maskable interrupt location
-
+        ; set non-maskable interrupt location when the KERNAL is on.
+        ; pressing the RESTORE key will fire this routine
+        ;
+        ; note that when the KERNAL is switched off, the RAM underneath will
+        ; define the NMI interrupt address -- this gets rectified further down
+        ;
         lda #< nmi_null
         sta KERNAL_VECTOR_NMI+0
         lda #> nmi_null
@@ -10443,30 +10469,33 @@ _aaa2:                                                                  ;$AAA2
         
         ; set new KERNAL_CHROUT (print character) routine
         ; -- re-route printing to the bitmap screen
-
+        ;
         lda #< chrout
         sta KERNAL_VECTOR_CHROUT+0
         lda #> chrout
         sta KERNAL_VECTOR_CHROUT+1
 
-        ;-----------------------------------------------------------------------
-
         ; change the C64's memory layout, turn off the BASIC & KERNAL ROMs
         ; leaving just the I/O registers ($D000...)
+        ;
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
 
-        sei 
+        sei                     ; disable interrupts
 
-        ; enable interrupts (regular and non-interruptable) for system
-        ; timers A & B. do not use the TimeOfDay timer
+        ; configure interrupts (regular and non-interruptable)
+        ; for system timers A & B -- do not use the TimeOfDay timer
+        ;
         lda # CIA::TIMER_A | CIA::TIMER_B
         sta CIA1_INTERRUPT
         sta CIA2_INTERRUPT
         
-        lda # 15
+        ; configure SID chip
+        ;
+        lda # 15                ; max volume, filters off 
         sta SID_VOLUME_CTRL
         
+        ; frame indicator?
         ldx # $00
         stx _a8d9
 
@@ -10475,14 +10504,19 @@ _aaa2:                                                                  ;$AAA2
         inx 
         stx VIC_INTERRUPT_CONTROL
         
+        ; the 9th bit (for scanlines 256-312) of the raster line register 
+        ; is held in the MSB of $D011. in Elite's case our raster-splits
+        ; all occur before 256 so this bit just needs to be zero
         lda VIC_SCREEN_CTL1
         and # vic_screen_ctl1::raster_line ^$FF
         sta VIC_SCREEN_CTL1
         
-        ; set the interrupt to occur at line 40 (and 296?)
+        ; set the interrupt to occur at line 40.
+        ; this is above the top screen border (~50)
         lda # 40
         sta VIC_RASTER
         
+        ; switch off the ROMs, leaving 64K of RAM
         lda CPU_CONTROL
         and # %11111000
         ora # C64_MEM::ALL
@@ -10506,12 +10540,12 @@ _aaa2:                                                                  ;$AAA2
         sta HW_VECTOR_NMI+1
 
         ; regular interrupt:
-        lda #>_a8fa
+        lda #> interrupt
         sta HW_VECTOR_IRQ+1
-        lda #<_a8fa
+        lda #< interrupt
         sta HW_VECTOR_IRQ+0
         
-        cli 
+        cli                     ; enable interrupts
         rts 
 .endproc
 
@@ -10519,7 +10553,7 @@ _aaa2:                                                                  ;$AAA2
         ;=======================================================================
         ; a Non-Maskable-Interrupt that does nothing; used to disable the
         ; RESTORE key and to prevent crashes when the KERNAL ROM is off
-
+        ;
         cli                     ; re-enable interrupts
         rti                     ; "ReTurn from Interrupt"
 .endproc
@@ -10543,7 +10577,6 @@ _aaa2:                                                                  ;$AAA2
 ; from "draw_lines.inc" insert the line-drawing code
 ;
 .draw_lines                                                             ;$AB31
-;===============================================================================
 
 
 _b09d:                                                                  ;$B09D
@@ -11446,9 +11479,7 @@ _b3c0:                                                                  ;$B3C0
 
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
-
-block_copy:                                                             ;$B3C3
-;===============================================================================
+;
 ; does a large block-copy of bytes. used to wipe the HUD
 ; by copying over a clean copy of the HUD in RAM.
 ;
@@ -11459,12 +11490,13 @@ block_copy:                                                             ;$B3C3
 ; the copy method is replaced with a faster alternative
 ; in elite-harmless, so this code is no longer used there
 ; 
-;-------------------------------------------------------------------------------
+block_copy:                                                             ;$B3C3
+        ;-----------------------------------------------------------------------
         ; start copying from the beginning of the page
         ldy # $00
 
 block_copy_from:                                                        ;$B3C5
-        ;=======================================================================
+        ;-----------------------------------------------------------------------
         lda [ZP_TEMP_ADDR3], y  ; read from
         sta [ZP_TEMP_ADDR1], y  ; write to
         dey                     ; roll the byte-counter
@@ -11507,13 +11539,14 @@ txt_docked_token15:                                                     ;$B3D4
         lda #< txt_bmp_addr     ;=$5A60
         sta ZP_TEMP_ADDR1_LO
         ldx # $03
-_b3f7:                                                                  ;$B3F7
+
+@_b3f7:                                                                 ;$B3F7
         lda # $00
         tay 
-_b3fa:                                                                  ;$B3FA
-        sta [ZP_TEMP_ADDR1], y
+
+:       sta [ZP_TEMP_ADDR1], y                                          ;$B3FA
         dey 
-        bne _b3fa
+        bne :-
         clc 
         lda ZP_TEMP_ADDR1_LO
         adc # $40
@@ -11522,7 +11555,7 @@ _b3fa:                                                                  ;$B3FA
         adc # $01
         sta ZP_TEMP_ADDR1_HI
         dex 
-        bne _b3f7
+        bne @_b3f7
 _b40f:                                                                  ;$B40F
         rts 
 

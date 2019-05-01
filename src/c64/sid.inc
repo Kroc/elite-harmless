@@ -18,6 +18,7 @@
 
 SID_REGISTERS                   = $d400 ; beginning of the SID registers
 
+SID_VOICE1                      = $d400
 SID_VOICE1_FREQ                 = $d400
 SID_VOICE1_FREQ_LO              = $d400
 SID_VOICE1_FREQ_HI              = $d401
@@ -33,6 +34,7 @@ SID_VOICE1_SUSREL               = $d406 ; sustain & release
 
 ;-------------------------------------------------------------------------------
 
+SID_VOICE2                      = $d407
 SID_VOICE2_FREQ                 = $d407
 SID_VOICE2_FREQ_LO              = $d407
 SID_VOICE2_FREQ_HI              = $d408
@@ -48,6 +50,7 @@ SID_VOICE2_SUSREL               = $d40d ; sustain & release
 
 ;-------------------------------------------------------------------------------
 
+SID_VOICE3                      = $d40e
 SID_VOICE3_FREQ                 = $d40e
 SID_VOICE3_FREQ_LO              = $d40e
 SID_VOICE3_FREQ_HI              = $d40f

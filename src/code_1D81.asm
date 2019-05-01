@@ -692,7 +692,7 @@ _201b:                                                                  ;$201B
         ldy # $0b
 _201d:                                                                  ;$201D
         jsr _a858
-        jsr _3cdb                       ; draw laser-beam
+        jsr shoot_lasers
         pla 
         bpl _2028
         lda # $00
@@ -5601,43 +5601,63 @@ _3cda:                                                                  ;$3CDA
         rts 
 
 ;===============================================================================
-; draw lasers?
+; pew! pew!
 ;
-_3cdb:                                                                  ;$3CDB
-        ; jitter the laser beam's position a bit
+shoot_lasers:                                                           ;$3CDB
+
+        ; jitter the laser beam's position a bit:
+        ; pick the starting Y-position (Y1)
         ;
         jsr get_random_number
         and # %00000111                 ; clip to 0-7
         adc # $44                       ; offset by 68px
         sta VAR_06F1
 
+        ; pick the starting X-position (X1)
+        ;
         jsr get_random_number
         and # %00000111                 ; clip to 0-7
         adc # $7C                       ; offset by 124 (256-8 / 2?)
         sta VAR_06F0
         
+        ; increase laser temperature!
+        ;
         lda PLAYER_TEMP_LASER
         adc # $08
         sta PLAYER_TEMP_LASER
-        jsr _7b64
+        jsr _7b64                       ; handle laser temperature limits?
+
 _3cfa:                                                                  ;$3CFA
+        ;=======================================================================
         ; are we in the cockpit-view?
         lda ZP_MENU_PAGE
-        bne _3cda
+        bne _3cda                       ; no, exit (`rts` above us)
 
-        lda # $20
-        ldy # $e0
-        jsr _3d09
-        lda # $30
-        ldy # $d0
-_3d09:                                                                  ;$3D09
+        lda # 32                        ; X2
+        ldy # 224
+        jsr @_3d09
+
+        lda # 48                        ; X2
+        ldy # 208
+
+@_3d09:                                                                 ;$3D09
+        ;-----------------------------------------------------------------------
+        ; the horizontal end of the line, which will
+        ; be somewhere along the bottom of the viewport
         sta ZP_VAR_X2
+
+        ; set the start point of the line, in the middle
+        ; of the screen (slightly randomised, by above)
         lda VAR_06F0
         sta ZP_VAR_X1
         lda VAR_06F1
         sta ZP_VAR_Y1
+        
+        ; the bottom of the line is always at
+        ; the bottom of the viewport
         lda # ELITE_VIEWPORT_HEIGHT - 1
         sta ZP_VAR_Y2
+
         jsr draw_line
 
         lda VAR_06F0
@@ -5647,6 +5667,7 @@ _3d09:                                                                  ;$3D09
         sty ZP_VAR_X2
         lda # ELITE_VIEWPORT_HEIGHT - 1
         sta ZP_VAR_Y2
+
         jmp draw_line
 
 ;===============================================================================
@@ -5857,10 +5878,12 @@ _3e31:                                                                  ;$3E31
         lda # $0a
         bne _3dbe               ; always branches
 
+;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
-.txt_docked_incoming_message
-.txt_docked_token16_17_1D
-.txt_docked_token18
+;
+.txt_docked_incoming_message                                            ;$3E37
+.txt_docked_token16_17_1D                                               ;$3E41
+.txt_docked_token18                                                     ;$3E7C
 
 get_polyobj:                                                            ;$3E87
 ;===============================================================================
