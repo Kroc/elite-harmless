@@ -350,7 +350,7 @@ ZP_VALUE_pt3            = $79
 ZP_VALUE_pt4            = $7a
 
 ZP_7B                   = $7b   ;? x8
-ZP_7C                   = $7c   ;? x7
+ZP_MISSILE_TARGET       = $7c   ; missile target?
 ZP_7D                   = $7d   ;? x6
 ZP_7E                   = $7e   ;? x10
 

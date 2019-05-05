@@ -43,9 +43,10 @@ _1d05:
         .byte   $00
 
         ; series of flags?
-_1d06:
+
+_1d06:          ; dampening toggle?
         .byte   $00
-_1d07:
+_1d07:          ; keyboard auto-recentrering?
         .byte   $00
 _1d08:
         .byte   $00

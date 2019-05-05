@@ -9,6 +9,7 @@ VAR_0403                = $0403
 
 VAR_0441                = $0441 ;?
 
+;-------------------------------------------------------------------------------
 ; up to 11 3D-objects ("poly objcets") can be in the game at a time.
 ; these are the 11 available slots; a value of $00 represents an unused slot,
 ; otherwise the value is a hull index (see "hull_data.asm") 
@@ -41,8 +42,6 @@ VAR_047C                = $047c ;?
 
 VAR_047F                = $047f ;?
 
-;-------------------------------------------------------------------------------
-
 DOCKCOM_STATE           = $0480 ; docking computer state: $00 = OFF, $FF = ON
 
 VAR_0481                = $0481 ;?
@@ -56,6 +55,9 @@ VAR_0487                = $0487 ;?
 VAR_048A                = $048a ;?
 VAR_048B                = $048b ;?
 VAR_048C                = $048c ;?
+
+;-------------------------------------------------------------------------------
+
 VAR_048D                = $048d ;? x8   X-dampen?
 VAR_048E                = $048e ;?      Y-dampen?
 VAR_048F                = $048f ;?
@@ -185,8 +187,8 @@ VAR_04EB                = $04eb ;?
 PLAYER_TEMP_LASER       = $0488 ; laser temperature
 PLAYER_TEMP_CABIN       = $0483 ; cabin temperature
 
-VAR_04F2                = $04f2 ;?
-VAR_04F3                = $04f3 ;?
+SHIP_LINES_LO           = $04f2 ; ship lines pointer lo-byte
+SHIP_LINES_HI           = $04f3 ; ship lines pointer hi-byte
 VAR_04F4                = $04f4 ;? (indexed by X)
 VAR_04FA                = $04fa ;? (indexed by X)
 
@@ -266,4 +268,4 @@ VAR_06F1                = $06f1 ;?
 VAR_06F3                = $06f3 ;?
 VAR_06F4                = $06f4 ;?
 
-VAR_06FB                = $06fb ;?
+VAR_06FB                = $06fb ; title screen poly-object z-distance?

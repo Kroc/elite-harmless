@@ -2167,7 +2167,7 @@ _7549:                                                                  ;$7549
 
         stx PLAYER_MISSILES
         
-        jsr _845c
+        jsr _845c               ; update missile blocks on HUD
         lda # $01
 _755f:                                                                  ;$755F
         ldy # $6b
@@ -3218,7 +3218,8 @@ _7a86:                                                                  ;$7A86
 ;===============================================================================
 
 _7a8c:                                                                  ;$7A8C
-        jsr _845c
+        jsr _845c               ; update missile blocks on HUD
+
         lda # $7f
         sta ZP_POLYOBJ_ROLL
         sta ZP_POLYOBJ_PITCH
@@ -3597,27 +3598,32 @@ _7c7b:                                                                  ;$7C7B
         ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
-        lda VAR_04F2
+
+        lda SHIP_LINES_LO
         sec 
         sbc ZP_TEMP_VAR
         sta ZP_TEMP_ADDR2_LO
-        lda VAR_04F3
+        
+        lda SHIP_LINES_HI
         sbc # $00
         sta ZP_TEMP_ADDR2_HI
+        
         lda ZP_TEMP_ADDR2_LO
         sbc ZP_POLYOBJ_ADDR_LO
         tay 
+        
         lda ZP_TEMP_ADDR2_HI
         sbc ZP_POLYOBJ_ADDR_HI
         bcc _7c7a
         bne _7cba
+        
         cpy # $25
         bcc _7c7a
 _7cba:                                                                  ;$7CBA
         lda ZP_TEMP_ADDR2_LO
-        sta VAR_04F2
+        sta SHIP_LINES_LO
         lda ZP_TEMP_ADDR2_HI
-        sta VAR_04F3
+        sta SHIP_LINES_HI
 _7cc4:                                                                  ;$7CC4
         ldy # Hull::energy      ;=$0E: energy
         lda [ZP_HULL_ADDR], y
@@ -3678,7 +3684,7 @@ _7d0c:                                                                  ;$7D0C
         ldx # $ff
 _7d0e:                                                                  ;$7D0E
 .export _7d0e
-        stx ZP_7C
+        stx ZP_MISSILE_TARGET
         ldx PLAYER_MISSILES
         jsr _b11f
         
@@ -4646,12 +4652,13 @@ current_memory_layout:                                                  ;$828E
         .byte   C64_MEM::ALL
 
 ;===============================================================================
-
+; transfer the address in P1/P2 to the ship lines pointer
+;
 _828f:                                                                  ;$828F
         lda ZP_VAR_P1
-        sta VAR_04F2            ; "ship lines pointer lo"?
+        sta SHIP_LINES_LO
         lda ZP_VAR_P2
-        sta VAR_04F3            ; "ship lines pointer hi"?
+        sta SHIP_LINES_HI
 
         rts 
 
@@ -4728,7 +4735,7 @@ _82ed:                                                                  ;$82ED
 
 _82f3:                                                                  ;$82F3
         stx ZP_AD
-        lda ZP_7C
+        lda ZP_MISSILE_TARGET
         cmp ZP_AD
         bne _8305
 
@@ -4873,27 +4880,30 @@ _83c9:                                                                  ;$83C9
 ;===============================================================================
 
 _83ca:                                                                  ;$83CA
+        ; clear ships slots and some other data?
         jsr _8ac7               ; erase $0452...$048C (58 bytes)
 
         ; erase $63...$69
-
+        ; (pitch, roll, hyperspace countdown?)
         ldx # $06
 :       sta ZP_BETA, x                                                  ;$83CF
         dex 
         bpl :-
 
         txa                     ; set A = 0 (saves a byte over `lda # $00`)
-        sta ZP_A7
+        sta ZP_A7               ; docked flag?
 
         ; erase $04E7...$04E9
-
+        ; player sheild and energy
         ldx # $02
 :       sta PLAYER_SHIELD_FRONT, x                                      ;$83D9
         dex 
         bpl :-
 
 _83df:                                                                  ;$83DF
+;-------------------------------------------------------------------------------
 .export _83df
+        ; clears SID registers?
         jsr _923b
 
         lda PLAYER_EBOMB
@@ -4909,11 +4919,12 @@ _83ed:                                                                  ;$83ED
         ldx # $ff
         stx line_points_x
         stx line_points_y
-        stx ZP_7C
+
+        stx ZP_MISSILE_TARGET   ; no missile target
 
         lda # $80
-        sta VAR_048E
-        sta ZP_ROLL_SIGN        ; roll sign?
+        sta VAR_048E            ; joystick Y?
+        sta ZP_ROLL_SIGN
         sta ZP_PITCH_SIGN
 
         asl                     ;=0
@@ -4922,7 +4933,10 @@ _83ed:                                                                  ;$83ED
         sta ZP_6A               ; move count?
         sta ZP_95
         sta ZP_A3               ; move counter?
+.ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
         sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda # $03
         sta PLAYER_SPEED
@@ -4932,9 +4946,9 @@ _83ed:                                                                  ;$83ED
         lda # $10
         sta VAR_050C
         
-        lda #< $8F00            ;?
+        lda # $00               ;?
         sta ZP_B7
-        lda #> $8F00            ;?
+        lda # $8F               ;?
         sta ZP_B8
         
         lda VAR_045F
@@ -4946,12 +4960,12 @@ _8430:                                                                  ;$8430
         jsr _a786
 _8437:                                                                  ;$8437
         jsr _7b1a
-        jsr _8ac7
+        jsr _8ac7               ; clear ship slots and other vars
         
-        lda #< KERNAL_OPEN
-        sta VAR_04F2
-        lda #> KERNAL_OPEN
-        sta VAR_04F3
+        lda #< $ffc0            ;?
+        sta SHIP_LINES_LO
+        lda #> $ffc0            ;?
+        sta SHIP_LINES_HI
 
 clear_zp_polyobj:                                                       ;$8447
         ;-----------------------------------------------------------------------
@@ -4975,24 +4989,27 @@ clear_zp_polyobj:                                                       ;$8447
         rts 
 
 ;===============================================================================
-
+; update missile blocks on HUD?
+;
 _845c:                                                                  ;$845C
-        ldx # $04
-_845e:                                                                  ;$845E
-        cpx PLAYER_MISSILES
-        beq _846c
+        ldx # $04               ; number of missile blocks
+
+:       cpx PLAYER_MISSILES     ; player missile count                  ;$845E
+        beq @_846c              ; colour remaining missiles
 
         ldy # $b7
         jsr _b11f
         dex 
-        bne _845e
+        bne :-
+
         rts 
 
-_846c:                                                                  ;$846C
+@_846c:                                                                 ;$846C
         ldy # $57
         jsr _b11f
         dex 
-        bne _846c
+        bne @_846c
+
         rts 
 
 ;===============================================================================
@@ -5569,7 +5586,10 @@ debug_brk:                                                              ;$87B9
         iny 
         lda [ZP_FD], y          ;???
         bne :-
-        jmp _8888
+
+        ; this would typically be overwritten
+        ; with the address to jump to
+        jmp $8888
 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
@@ -5677,16 +5697,19 @@ _8863:                                                                  ;$8863
         ; (user settings?)
         ldx # $11
         lda # $00
+
 :       sta _1d01, x                                                    ;$8867
         dex 
         bpl :-
 
+        ; backup the original hull address (which 3D object to display)
+        ; as we will change this on the title screen
         lda hull_pointer_current_lo
         sta _8861
         lda hull_pointer_current_hi
         sta _8862
         
-        jsr _8a0c
+        jsr _8a0c               ; reset the save data to default
 
         ; set the stack pointer to the top ($01FF),
         ; (i.e. disregard all stack-use prior to this point)
@@ -5694,6 +5717,7 @@ _8863:                                                                  ;$8863
         txs 
 
         jsr _83ca
+
 _8882:                                                                  ;$8882
         ; set the stack pointer to the top ($01FF),
         ; (i.e. disregard all stack-use prior to this point)
@@ -5701,35 +5725,43 @@ _8882:                                                                  ;$8882
         txs 
 
         jsr _83df
-_8888:                                                                  ;$8888
         jsr clear_keyboard
         
         lda # 3
         jsr set_cursor_col
         
         jsr _91fe
+
         ldx # $0b
-        lda # $06
+.import TXT_DOCKED_06:direct
+        lda # TXT_DOCKED_06
         ldy # $d2
         jsr _8920
+        
         cmp # $27
         bne _88ac
+        
         jsr _9245
         jsr _88f0
         jsr _8ae7
         jsr _91fe
 _88ac:                                                                  ;$88AC
         jsr _88f0
-        jsr _845c
-        lda # $07
+        jsr _845c               ; update missile blocks on HUD
+
+        ; "press space or fire commander"
+.import TXT_DOCKED_07:direct
+        lda # TXT_DOCKED_07
         ldx # $14
         ldy # $30
         jsr _8920
+
         jsr _9245
         jsr set_psystem_to_tsystem
         jsr _70ab
         jsr _7217
 
+        ; restore default galaxy seed?
         ldx # $05
 :       lda ZP_SEED, x                                                  ;$88C9
         sta VAR_04F4, x
@@ -5755,7 +5787,8 @@ _88e7:                                                                  ;$88E7
         jmp _86a4
 
 ;===============================================================================
-
+; new game file?
+;
 _88f0:                                                                  ;$88F0
         ldx # 84                ; size of new-game data?
 :       lda _25aa, x                                                    ;$88F2
@@ -5783,15 +5816,21 @@ _8912:                                                                  ;$8912
         rts 
 
 ;===============================================================================
-; part of the title screen?
-
+; draw the title screen?
+;
+;       A = a docked-string token to print
+;       X = ? e.g. $0B
+;       Y = ? e.g. $D2
+;
 _8920:                                                                  ;$8920
-        sty VAR_06FB
-        pha 
+        sty VAR_06FB            ; z-distance?
+
+        pha                     ; keep A parameter
         stx ZP_A5
+
         lda # $ff
         sta _1d13
-        jsr _83ca
+        jsr _83ca               ; this has nothing to do with `_1d13`??
         lda # $00
         sta _1d13
 
@@ -5841,13 +5880,13 @@ _8920:                                                                  ;$8920
         jsr set_cursor_col
         
         lda _1d08
-        beq _8978
+        beq :+
 
         lda # $0d
         jsr print_docked_str
-_8978:                                                                  ;$8978
-        lda _87b8
-        beq _8994
+
+:       lda _87b8                                                       ;$8978
+        beq @_8994
         inc _87b8
 
         lda # 7
@@ -5856,12 +5895,12 @@ _8978:                                                                  ;$8978
         jsr set_cursor_row
         
         ldy # $00
-_898c:                                                                  ;$898C
-        jsr paint_char
+:       jsr paint_char                                                  ;$898C
         iny 
         lda [ZP_FD], y
-        bne _898c
-_8994:                                                                  ;$8994
+        bne :-
+
+@_8994:                                                                 ;$8994
         ldy # $00
         sty PLAYER_SPEED
         sty _1d0c
@@ -5871,12 +5910,12 @@ _8994:                                                                  ;$8994
         lda # 1
         sta ZP_CURSOR_COL
         
-        pla 
-        jsr print_docked_str
+        pla                     ; retrieve the original A parameter
+        jsr print_docked_str    ; use this as a docked string token
+                                ; (see "text/text_docked.asm")
 
         lda # 3
         jsr set_cursor_col
-        
         lda # TXT_NEWLINE
         jsr print_docked_str
         
@@ -5888,15 +5927,14 @@ _8994:                                                                  ;$8994
         
         lda # $ff
         sta _1d0c
-_89be:                                                                  ;$89BE
+@_89be:                                                                 ;$89BE
         lda ZP_POLYOBJ_ZPOS_MI
         cmp # $01
-        beq _89c6
+        beq :+
         dec ZP_POLYOBJ_ZPOS_MI
-_89c6:                                                                  ;$89C6
-        jsr _a2a0
+:       jsr _a2a0                                                       ;$89C6
         
-        ldx VAR_06FB
+        ldx VAR_06FB            ; title screen poly-object z-distance?
         stx ZP_POLYOBJ_ZPOS_LO
         
         lda ZP_A3               ; move counter?
@@ -5909,11 +5947,11 @@ _89c6:                                                                  ;$89C6
 
         dec ZP_A3               ; move counter?
         bit joy_fire
-        bmi _89ea
-        bcc _89be
+        bmi :+
+        bcc @_89be
         inc _1d0c
-_89ea:                                                                  ;$89EA
-        rts 
+
+:       rts                                                             ;$89EA
 
 ;===============================================================================
 
@@ -6019,10 +6057,10 @@ txt_docked_token1A:                                                     ;$8A5B
         jsr _28d5               ; loads A & X with $0F
         ldy # $00
 _8a6a:                                                                  ;$8A6A
-        jsr _8fea
-        cmp # $0d
+        jsr _8fea               ; get input?
+        cmp # $0d               ; return key?
         beq @_8a94
-        cmp # $1b
+        cmp # $1b               ; K?
         beq @_8aa1
         cmp # $7f
         beq @_8aa8
@@ -6041,7 +6079,8 @@ _8a6a:                                                                  ;$8A6A
         lda # $07               ; BEEP?                                 ;$8A8D
 @_8a8f:
         jsr paint_char                                                  ;$8A8F
-        bcc _8a6a
+        bcc _8a6a               ; always branches?
+
 @_8a94:                                                                 ;$8A94
         sta ZP_POLYOBJ_YPOS_HI, y       ;?
 
@@ -6083,7 +6122,7 @@ _8ab4:                                                                  ;$8AB4
 ; erase $0452...$048C
 ;
 _8ac7:                                                                  ;$8AC7
-        ldx # $3a
+        ldx # $3a               ;=58
         lda # $00
 
         ; $0452 is SHIP_SLOTS, but in this context
@@ -6091,29 +6130,30 @@ _8ac7:                                                                  ;$8AC7
 :       sta SHIP_SLOTS, x                                               ;$8ACB
         dex 
         bpl :-
+
         rts 
          
 .ifdef  OPTION_ORIGINAL
-        rts 
-.endif
-
-;===============================================================================
+        ;///////////////////////////////////////////////////////////////////////
+        rts                     ; extraneous `rts`
 
 ;$8AD3  unused code?
 
         ldx # $0c
         jsr _8ad9
         dex 
+
 _8ad9:                                                                  ;$8AD9
         ldy # $00
         sty ZP_TEMP_ADDR1_LO
         lda # $00
         stx ZP_TEMP_ADDR1_HI
-_8ae1:                                                                  ;$8AE1
-        sta [ZP_TEMP_ADDR1], y
+
+:       sta [ZP_TEMP_ADDR1], y                                          ;$8AE1
         iny 
-        bne _8ae1
+        bne :-
         rts 
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ;===============================================================================
 ; data menu
@@ -6141,7 +6181,7 @@ _8ae7:                                                                  ;$8AE7
         
         jsr _81ee
         bcc @_8b0f
-        jsr _8a0c
+        jsr _8a0c               ; reset save data to default
         jmp _88f0
 
 @_8b0f:                                                                 ;$8B0F
@@ -6541,76 +6581,81 @@ _8cc2:                                                                  ;$8CC2
 .export key_jump                = key_j
 .export key_hyperspace          = key_h
 
+; an array of key states to indicate which keys are pressed; the byte values
+; written out here are meaningless, this array is cleared with $00 when in use
+; and an entry is changed to $FF when that key is pressed
+;
 ; the order of keys represented here is determined by the method used to read
 ; off the keyboard matrix, which is starting at the 64th index in this table
 ; and working backwards -- for each row 0 to 7, columns are read from 0 to 7.
 ; this gives a key order of:
 ;
-key_states:     .byte   $31     ; (unsued)                              ;$8D0C
-key_stop:       .byte   $32     ; STOP                                  ;$8D0D
-key_q:          .byte   $33     ; Q                                     ;$80DE
-key_c64:        .byte   $34     ; C=    (energy bomb)                   ;$8D0F
-key_spc:        .byte   $35     ; SPACE (accelerate)                    ;$8D10
-key_2:          .byte   $36     ; 2                                     ;$8D11
-key_ctrl:       .byte   $37     ; CTRL                                  ;$8D12
-key_back:       .byte   $38     ; <-    (escape pod)                    ;$8D13
-key_1:          .byte   $39     ; 1                                     ;$8D14
-key_slash:      .byte   $41     ; /     (decelerate)                    ;$8D15
-key_pow:        .byte   $42     ; ^                                     ;$8D16
-key_equ:        .byte   $43     ; =                                     ;$8D17
-key_rshft:      .byte   $44     ; RSHIFT                                ;$8D18
-key_home:       .byte   $45     ; HOME                                  ;$8D19
-key_semi:       .byte   $46     ; ;                                     ;$8D1A
-key_star:       .byte   $30     ; *                                     ;$8D1B
-key_gbp:        .byte   $31     ; £                                     ;$8D1C
-key_comma:      .byte   $32     ; ,     (roll anti-clockwise)           ;$8D1D
-key_at:         .byte   $33     ; @                                     ;$8D1E
-key_colon:      .byte   $34     ; :                                     ;$8D1E
-key_dot:        .byte   $35     ; .     (roll clockwise)                ;$8D20
-key_dash:       .byte   $36     ; -                                     ;$8D21
-key_l:          .byte   $37     ; L                                     ;$8D22
-key_p:          .byte   $38     ; P     (docking computer off)          ;$8D23
-key_plus:       .byte   $39     ; +                                     ;$8D24
-key_n:          .byte   $41     ; N                                     ;$8D25
-key_o:          .byte   $42     ; O                                     ;$8D26
-key_k:          .byte   $43     ; K                                     ;$8D27
-key_m:          .byte   $44     ; M     (fire missile)                  ;$8D28
-key_0:          .byte   $45     ; 0                                     ;$8D29
-key_j:          .byte   $46     ; J     (quick-jump)                    ;$8D2A
-key_i:          .byte   $30     ; I                                     ;$8D2B
-key_9:          .byte   $31     ; 9                                     ;$8D2C
-key_v:          .byte   $32     ; V                                     ;$8D2D
-key_u:          .byte   $33     ; U     (untarget missile)              ;$8D2E
-key_h:          .byte   $34     ; H     (hyperspace)                    ;$8D2F
-key_b:          .byte   $35     ; B                                     ;$8D30
-key_8:          .byte   $36     ; 8                                     ;$8D31
-key_g:          .byte   $37     ; G                                     ;$8D32
-key_y:          .byte   $38     ; Y                                     ;$8D33
-key_7:          .byte   $39     ; 7                                     ;$8D34
-key_x:          .byte   $41     ; X     (climb)                         ;$8D35
-key_t:          .byte   $42     ; T     (target missile)                ;$8D36
-key_f:          .byte   $43     ; F                                     ;$8D37
-key_c:          .byte   $44     ; C     (docking computer on)           ;$8D38
-key_6:          .byte   $45     ; 6                                     ;$8D39
-key_d:          .byte   $46     ; D                                     ;$8D3A
-key_r:          .byte   $30     ; R                                     ;$8D3B
-key_5:          .byte   $31     ; 5                                     ;$8D3C
-key_lshft:      .byte   $32     ; LSHIFT                                ;$8D3D
-key_e:          .byte   $33     ; E     (ECM)                           ;$8D3E
-key_s:          .byte   $34     ; S     (dive)                          ;$8D3F
-key_z:          .byte   $35     ; Z                                     ;$8D40
-key_4:          .byte   $36     ; 4                                     ;$8D41
-key_a:          .byte   $37     ; A     (fire)                          ;$8D42
-key_w:          .byte   $38     ; W                                     ;$8D43
-key_3:          .byte   $39     ; 3                                     ;$8D44
-key_down:       .byte   $41     ; DOWN                                  ;$8D45
-key_f5:         .byte   $42     ; F5    (starboard view)                ;$8D46
-key_f3:         .byte   $43     ; F3    (aft view)                      ;$8D47
-key_f1:         .byte   $44     ; F1    (front view)                    ;$8D48
-key_f7:         .byte   $45     ; F7    (portside view)                 ;$8D49
-key_right:      .byte   $46     ; RIGHT                                 ;$8D4A
-key_return:     .byte   $30     ; RETURN                                ;$8D4B
-key_del:        .byte   $31     ; DELETE                                ;$8D4C
+; addr                  N/A     index
+key_states:     .byte   $31     ;=$00 - (unsued)                        ;$8D0C
+key_stop:       .byte   $32     ;=$01 - STOP                            ;$8D0D
+key_q:          .byte   $33     ;=$02 - Q                               ;$80DE
+key_c64:        .byte   $34     ;=$03 - C=    (energy bomb)             ;$8D0F
+key_spc:        .byte   $35     ;=$04 - SPACE (accelerate)              ;$8D10
+key_2:          .byte   $36     ;=$05 - 2                               ;$8D11
+key_ctrl:       .byte   $37     ;=$06 - CTRL                            ;$8D12
+key_back:       .byte   $38     ;=$07 - <-    (escape pod)              ;$8D13
+key_1:          .byte   $39     ;=$08 - 1                               ;$8D14
+key_slash:      .byte   $41     ;=$09 - /     (decelerate)              ;$8D15
+key_pow:        .byte   $42     ;=$0A - ^                               ;$8D16
+key_equ:        .byte   $43     ;=$0B - =                               ;$8D17
+key_rshft:      .byte   $44     ;=$0C - RSHIFT                          ;$8D18
+key_home:       .byte   $45     ;=$0D - HOME                            ;$8D19
+key_semi:       .byte   $46     ;=$0E - ;                               ;$8D1A
+key_star:       .byte   $30     ;=$0F - *                               ;$8D1B
+key_gbp:        .byte   $31     ;=$10 - £                               ;$8D1C
+key_comma:      .byte   $32     ;=$11 - ,     (roll anti-clockwise)     ;$8D1D
+key_at:         .byte   $33     ;=$12 - @                               ;$8D1E
+key_colon:      .byte   $34     ;=$13 - :                               ;$8D1E
+key_dot:        .byte   $35     ;=$14 - .     (roll clockwise)          ;$8D20
+key_dash:       .byte   $36     ;=$15 - -                               ;$8D21
+key_l:          .byte   $37     ;=$16 - L                               ;$8D22
+key_p:          .byte   $38     ;=$17 - P     (docking computer off)    ;$8D23
+key_plus:       .byte   $39     ;=$18 - +                               ;$8D24
+key_n:          .byte   $41     ;=$19 - N                               ;$8D25
+key_o:          .byte   $42     ;=$1A - O                               ;$8D26
+key_k:          .byte   $43     ;=$1B - K                               ;$8D27
+key_m:          .byte   $44     ;=$1C - M     (fire missile)            ;$8D28
+key_0:          .byte   $45     ;=$1D - 0                               ;$8D29
+key_j:          .byte   $46     ;=$1E - J     (quick-jump)              ;$8D2A
+key_i:          .byte   $30     ;=$1F - I                               ;$8D2B
+key_9:          .byte   $31     ;=$20 - 9                               ;$8D2C
+key_v:          .byte   $32     ;=$21 - V                               ;$8D2D
+key_u:          .byte   $33     ;=$22 - U     (untarget missile)        ;$8D2E
+key_h:          .byte   $34     ;=$23 - H     (hyperspace)              ;$8D2F
+key_b:          .byte   $35     ;=$24 - B                               ;$8D30
+key_8:          .byte   $36     ;=$25 - 8                               ;$8D31
+key_g:          .byte   $37     ;=$26 - G                               ;$8D32
+key_y:          .byte   $38     ;=$27 - Y                               ;$8D33
+key_7:          .byte   $39     ;=$28 - 7                               ;$8D34
+key_x:          .byte   $41     ;=$29 - X     (climb)                   ;$8D35
+key_t:          .byte   $42     ;=$2A - T     (target missile)          ;$8D36
+key_f:          .byte   $43     ;=$2B - F                               ;$8D37
+key_c:          .byte   $44     ;=$2C - C     (docking computer on)     ;$8D38
+key_6:          .byte   $45     ;=$2D - 6                               ;$8D39
+key_d:          .byte   $46     ;=$2E - D                               ;$8D3A
+key_r:          .byte   $30     ;=$2F - R                               ;$8D3B
+key_5:          .byte   $31     ;=$30 - 5                               ;$8D3C
+key_lshft:      .byte   $32     ;=$31 - LSHIFT                          ;$8D3D
+key_e:          .byte   $33     ;=$32 - E     (ECM)                     ;$8D3E
+key_s:          .byte   $34     ;=$33 - S     (dive)                    ;$8D3F
+key_z:          .byte   $35     ;=$34 - Z                               ;$8D40
+key_4:          .byte   $36     ;=$35 - 4                               ;$8D41
+key_a:          .byte   $37     ;=$36 - A     (fire)                    ;$8D42
+key_w:          .byte   $38     ;=$37 - W                               ;$8D43
+key_3:          .byte   $39     ;=$38 - 3                               ;$8D44
+key_down:       .byte   $41     ;=$39 - DOWN                            ;$8D45
+key_f5:         .byte   $42     ;=$3A - F5    (starboard view)          ;$8D46
+key_f3:         .byte   $43     ;=$3B - F3    (aft view)                ;$8D47
+key_f1:         .byte   $44     ;=$3C - F1    (front view)              ;$8D48
+key_f7:         .byte   $45     ;=$3D - F7    (portside view)           ;$8D49
+key_right:      .byte   $46     ;=$3E - RIGHT                           ;$8D4A
+key_return:     .byte   $30     ;=$3F - RETURN                          ;$8D4B
+key_del:        .byte   $31     ;=$40 - DELETE                          ;$8D4C
 
                 ; unused?
                 .byte   $32
@@ -6815,57 +6860,70 @@ get_input:                                                              ;$8D53
 
         rts 
 
-_8e29:                                                                  ;$8E29
+do_quickjump:                                                           ;$8E29
 ;===============================================================================
-.export _8e29
+.export do_quickjump
 
-        ldx VAR_047F
+        ; reasons not to quickjump:
+        ldx VAR_047F            ; there are asteroids?
         lda SHIP_SLOT2, x
-        ora VAR_045F
-        ora IS_WITCHSPACE
-        bne _8e7c
+        ora VAR_045F            ;?
+        ora IS_WITCHSPACE       ; we are in witchspace
+       .bnz @nojump             ; -- cannot quick-jump
+
+        ; check player's Z-position 
+        ;
         ldy POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
-        bmi _8e44
+        bmi :+
+        
+        ; note that A is zero due to the
+        ; tests above mandating a zero result
         tay 
         jsr _2c50
-        cmp # $02
-        bcc _8e7c
-_8e44:                                                                  ;$8E44
-        ldy POLYOBJ_01 + PolyObject::zpos + 2
-        bmi _8e52
-        ldy # $25
+        cmp # $02               ; minimum distance? ($020000?)
+        bcc @nojump
+
+:       ldy POLYOBJ_01 + PolyObject::zpos + 2                           ;$8E44
+        bmi :+
+        ; check the sun's position?
+        ldy # .sizeof(PolyObject)
         jsr _2c4e
-        cmp # $02
-        bcc _8e7c
-_8e52:                                                                  ;$8E52
-        lda # $81
+        cmp # $02               ; minimum distance?
+        bcc @nojump
+            
+:       lda # $81               ; jump distance?                        ;$8E52
         sta ZP_VAR_S
         sta ZP_VAR_R
-        sta ZP_VAR_P1
+        sta ZP_VAR_P
         
-        lda POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
+        ; push the player forward
+        ;
+        lda POLYOBJ_00 + PolyObject::zpos + 2
         jsr multiplied_now_add
-        sta POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
+        sta POLYOBJ_00 + PolyObject::zpos + 2
 
-        lda POLYOBJ_01 + PolyObject::zpos + 2                           ;=$F92D
+        lda POLYOBJ_01 + PolyObject::zpos + 2
         jsr multiplied_now_add
-        sta POLYOBJ_01 + PolyObject::zpos + 2                           ;=$F92D
+        sta POLYOBJ_01 + PolyObject::zpos + 2
 
         lda # $01
         sta ZP_MENU_PAGE
         sta ZP_A3               ; move counter?
         lsr 
         sta VAR_048A
-        ldx VAR_0486
-        jmp _a6ba
 
-_8e7c:                                                                  ;$8E7C
+        ldx VAR_0486
+        jmp _a6ba               ; redraw viewport?
+
+@nojump:                                                                ;$8E7C
+        ;-----------------------------------------------------------------------
         ldy # $06
-        jmp _a858
-; $8e81
+        jmp _a858               ; "sound low beep"?
+
 .ifdef  OPTION_ORIGINAL
-        rts 
-.endif
+        ;///////////////////////////////////////////////////////////////////////
+        rts                     ; extraneous `rts`                      ;$8E81
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ;===============================================================================
 
@@ -7429,7 +7487,9 @@ _91fe:                                                                  ;$91FE
         lda #< (_c164 - 1)
         ldx #> (_c164 - 1)
         bne _920d
+
 _9204:                                                                  ;$9204
+;-------------------------------------------------------------------------------
 .export _9204
         bit _1d11
         bmi _91fe
@@ -7459,15 +7519,18 @@ _9231:                                                                  ;$9231
         eor # %11111111
         and DOCKCOM_STATE
         bmi _9222
+
 _923b:                                                                  ;$923B
+        ;-----------------------------------------------------------------------
 .export _923b
-        bit _1d13
-        bmi _91fd               ; negative value?
-        bit _1d10
-        bmi _9204               ; negative value?
+        bit _1d13               ; user option?
+        bmi _91fd               ; `rts`
+        bit _1d10               ; user option?
+        bmi _9204
+
 _9245:                                                                  ;$9245
-        bit _1d03
-        bpl _91fd               ; positive value? (bit 7 is off)
+        bit _1d03               ; user option?
+        bpl _91fd
 
         jsr _a817
 
@@ -7476,13 +7539,17 @@ _9245:                                                                  ;$9245
         
         lda # $00
         sta _1d03
+
+        ; clear the SID registers
+        ; ($D400..$D418)
         ldx # $18
         sei 
-_925a:                                                                  ;$925A
-        sta SID_VOICE1_FREQ_LO, x
-        dex 
-        bpl _925a
 
+:       sta SID_REGISTERS, x                                            ;$925A
+        dex 
+        bpl :-
+
+        ; set volume to maximum
         lda # 15
         sta SID_VOLUME_CTRL
         
@@ -10001,10 +10068,10 @@ _a817:                                                                  ;$A817
 ;===============================================================================
         ldy # $03
         lda # $01
-_a81b:                                                                  ;$A81B
-        sta _aa15, y
+
+:       sta _aa15, y                                                    ;$A81B
         dey 
-        bne _a81b
+        bne :-
 _a821:                                                                  ;$A821
         rts 
 
@@ -10028,7 +10095,10 @@ _a827:                                                                  ;$A827
 
 _a839:                                                                  ;$A839
 ;===============================================================================
+; called only by `_3795`
+;
 .export _a839
+
         ldy # $07
         lda # $f5
         ldx # $f0
@@ -10049,8 +10119,8 @@ _a850:                                                                  ;$A850
         ;-----------------------------------------------------------------------
         bit _a821
 
-        sta ZP_VAR_X
-        stx ZP_VAR_Y
+        sta ZP_VAR_X1
+        stx ZP_VAR_Y1
         ; this causes the `clv` below to become a `branch on overflow clear`
         ; to $A811 -- the address is defined by the opcode of `clv` ($B8)
 .ifdef  OPTION_ORIGINAL
@@ -10065,6 +10135,7 @@ _a858:                                                                  ;$A858
         
         lda _1d05
         bne _a821
+
         ldx # $02
         iny 
         sty ZP_VAR_X2
@@ -10713,7 +10784,8 @@ _b10e:                                                                  ;$B10E
         rts 
 
 ;===============================================================================
-
+; "draw missile block"
+;
 _b11f:                                                                  ;$B11F
 .export _b11f
         dex 

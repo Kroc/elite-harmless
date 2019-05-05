@@ -83,7 +83,7 @@
 .import key_ecm:absolute
 .import joy_fire:absolute
 .import get_input:absolute
-.import _8e29:absolute
+.import do_quickjump:absolute
 .import _900d:absolute
 .import _9204:absolute
 .import _923b:absolute
@@ -549,7 +549,7 @@ _1f20:                                                                  ;$1F20
         lda # $00               ; set loaded missile as disarmed ($00)
         sta PLAYER_MISSILE_ARMED
 
-:       lda ZP_7C                                                       ;$1F55
+:       lda ZP_MISSILE_TARGET                                           ;$1F55
         bpl :+
 
         ; target missile?
@@ -572,7 +572,7 @@ _1f20:                                                                  ;$1F20
 :       lda key_missile_fire    ; fire missile key held?                ;$1F6B
        .bze :+                  ; no, skip ahead
 
-        lda ZP_7C
+        lda ZP_MISSILE_TARGET
         bmi _1fc2
         jsr _36a6
 
@@ -614,9 +614,9 @@ _1f20:                                                                  ;$1F20
         ; quick-jump?
         ;-----------------------------------------------------------------------
 :       lda key_jump            ; quick-jump key pressed?               ;$1FA8
-        beq :+                  ; no? skip ahead
+       .bze :+                  ; no? skip ahead
         
-        jsr _8e29               ; handle quick-jump?
+        jsr do_quickjump        ; handle the quick-jump
 
         ; activate E.C.M.?
         ;-----------------------------------------------------------------------
@@ -1164,9 +1164,9 @@ _22c2:                                                                  ;$22C2
         lda VAR_045F
         bne _231c
         
-        ldy # $25
+        ldy # .sizeof(PolyObject)
         jsr _2c50
-        bne _231c
+       .bnz _231c
         
         jsr _2c5c
         
@@ -2515,18 +2515,22 @@ _2c43:                                                                  ;$2C43
         rts 
 
 ;===============================================================================
-
+; examine a poly-object's X/Y/Z position?
+;
+;       A = a starting value to merge with
+;       Y = a multiple of 37 bytes for each poly-object
+;
 _2c4e:                                                                  ;$2C4E
 .export _2c4e
         lda # $00
 _2c50:                                                                  ;$2C50
 .export _2c50
-.import POLYOBJ_00, PolyObject
+.import POLYOBJECTS, PolyObject
 
-        ora POLYOBJ_00 + PolyObject::xpos + 2, y
-        ora POLYOBJ_00 + PolyObject::ypos + 2, y
-        ora POLYOBJ_00 + PolyObject::zpos + 2, y
-        and # %01111111
+        ora POLYOBJECTS + PolyObject::xpos + 2, y
+        ora POLYOBJECTS + PolyObject::ypos + 2, y
+        ora POLYOBJECTS + PolyObject::zpos + 2, y
+        and # %01111111         ; strip sign
 
         rts 
 
@@ -3686,26 +3690,31 @@ _next_row:                                                              ;$3122
         rts 
 
 ;===============================================================================
-
+; ".DIL2 -> roll/pitch indicator takes X.A"
+;
 _3130:                                                                  ;$3130
-        ldy # $01
+        ldy # $01               ; counter Y = 1
         sta ZP_VAR_Q
-_3134:                                                                  ;$3134
+@_3134:                                                                 ;$3134
         sec 
         lda ZP_VAR_Q
         sbc # $04
-        bcs _3149
+        bcs @_3149               ; >= 4?
+
         lda # $ff
         ldx ZP_VAR_Q
         sta ZP_VAR_Q
         lda _28d0, x
-        and # %10101010
-        jmp _314d
+        and # %10101010         ; colour mask
+        
+        jmp @_314d
 
-_3149:                                                                  ;$3149
+@_3149:                                                                 ;$3149
+        ; clear the bar
         sta ZP_VAR_Q
         lda # $00
-_314d:                                                                  ;$314D
+@_314d:                                                                 ;$314D
+        ; fill four pixel rows?
         sta [ZP_TEMP_ADDR1], y
         iny 
         sta [ZP_TEMP_ADDR1], y
@@ -3714,17 +3723,21 @@ _314d:                                                                  ;$314D
         iny 
         sta [ZP_TEMP_ADDR1], y
         tya 
+
+        ; move to the next cell?
         clc 
         adc # $05
         tay 
         cpy # $1e
-        bcc _3134
+        bcc @_3134
+
         lda ZP_TEMP_ADDR1_LO
         adc # $3f
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
         adc # $01
         sta ZP_TEMP_ADDR1_HI
+
         rts 
 
 ;===============================================================================
@@ -4614,7 +4627,7 @@ _3680:                                                                  ;$3680
         lda # $80
         sta ZP_POLYOBJ_YPOS_HI
         
-        lda ZP_7C
+        lda ZP_MISSILE_TARGET
         asl 
         ora # attack::active
         sta ZP_POLYOBJ_ATTACK
@@ -4641,7 +4654,7 @@ _36a6:                                                                  ;$36A6
         jsr _3680
         bcc _3701
         
-        ldx ZP_7C               ; missile target?
+        ldx ZP_MISSILE_TARGET
         jsr get_polyobj
 
         lda SHIP_SLOTS, x
@@ -4812,6 +4825,7 @@ _3795:                                                                  ;$3795
         jsr _a839
         lda # $04
         jsr _37a5
+        
         rts 
 
 ;===============================================================================
