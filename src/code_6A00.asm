@@ -136,7 +136,7 @@
 
 ; from "math_data.asm"
 .import table_log:absolute
-.import table_antilog:absolute
+.import table_logdiv:absolute
 .import _9500:absolute
 .import _9600:absolute
 .import line_points_y:absolute
@@ -7740,10 +7740,10 @@ _99af:                                                                  ;$99AF
         sta ZP_B6
         tax 
         beq _99d3
-        lda table_antilog, x
+        lda table_logdiv, x
         ldx ZP_VAR_Q
         sec 
-        sbc table_antilog, x
+        sbc table_logdiv, x
         bmi _99d6
         ldx ZP_B6
         lda table_log, x

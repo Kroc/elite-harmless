@@ -248,11 +248,17 @@ draw_line_horz:                                                         ;$ABBB
 :       ldx ZP_BD                       ; get line height (dy)          ;$ABD3
        .bze @flat                       ; if zero, line is straight!
 
-        lda table_antilog, x            ;?
+        ; divide width by height?
+        ; (determine type of slope?)
+        ;
+        ; the log table used here is:
+        ; TRUNC(256*(LOG_2(X)*32-TRUNC(LOG_2(X)*32)))
+        ;
+        lda table_logdiv, x             ;?
 
         ldx ZP_BC                       ; get line width (dx)
         sec 
-        sbc table_antilog, x            ;
+        sbc table_logdiv, x             ;
         bmi @_abfd
 
         ldx ZP_BD                       ; get line height (dy)
@@ -1213,10 +1219,10 @@ draw_line_vert:                                                         ;$AF08
         ldx ZP_BC                       ; get line-width
        .bze @_af77                      ; if zero, skip ahead
         
-        lda table_antilog, x
+        lda table_logdiv, x
         ldx ZP_BD
         sec 
-        sbc table_antilog, x
+        sbc table_logdiv, x
         bmi @_af65
         
         ldx ZP_BC

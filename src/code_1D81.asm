@@ -89,7 +89,7 @@
 .import _923b:absolute
 
 .import table_log:absolute
-.import table_antilog:absolute
+.import table_logdiv:absolute
 .import _9500:absolute
 .import _9600:absolute
 .import row_to_bitmap_lo:absolute
@@ -5160,11 +5160,11 @@ _39ea:                                                                  ;$39EA
         sta ZP_B6
         tax 
         beq _3a1d
-        lda table_antilog, x
+        lda table_logdiv, x
         ldx ZP_VAR_Q
         beq _3a20
         clc 
-        adc table_antilog, x
+        adc table_logdiv, x
         bmi _3a0f
         lda table_log, x
         ldx ZP_B6
@@ -5350,10 +5350,10 @@ _3b82:                                                                  ;$3B82
         sta ZP_B6
         tax 
         beq _3ba6
-        lda table_antilog, x
+        lda table_logdiv, x
         ldx ZP_VAR_Q
         sec 
-        sbc table_antilog, x
+        sbc table_logdiv, x
         bmi _3bae
         ldx ZP_B6
         lda table_log, x

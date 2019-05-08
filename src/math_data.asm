@@ -208,14 +208,14 @@ table_log:                                                              ;$9300
         .byte   $fd, $fd, $fd, $fd, $fd, $fd, $fe, $fe                  ;$93F0
         .byte   $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff                  ;$93F8
 
-table_antilog:                                                          ;$9400
+table_logdiv:                                                           ;$9400
 ;===============================================================================
 ; nc513 says:
 ; - $9400..94FF is a lookup table for the function
 ;   TRUNC(256*(LOG(X;2)*32-TRUNC(LOG(X;2)*32))),
 ;   except for X=0, X=8, X=64
 ;
-.export table_antilog
+.export table_logdiv
         .byte   $ae, $00, $00, $b8, $00, $4d, $b8, $d5                  ;$9400
         .byte   $ff, $70, $4d, $b3, $b8, $6a, $d5, $05                  ;$9408
         .byte   $00, $cc, $70, $ef, $4d, $8d, $b3, $c1                  ;$9410
