@@ -166,15 +166,15 @@ populate_multiply_tables:
 ;
 ; 2. it's not possible to use these log-tables for typical multiplication.
 ;    Elite has its own multiplication routine (see "math.inc") required to
-;    produce even accurate results
+;    produce correct results
 
-_9300:                                                                  ;$9300
+table_log:                                                              ;$9300
 ;===============================================================================
 ; nc513 says:
 ; - $9300..$93FF is a lookup table for the function
 ;   TRUNC(LOG(X;2)*32), except for X=0, X=8, X=64
 ;
-.export _9300
+.export table_log
         .byte   $06, $00, $20, $32, $40, $4a, $52, $59                  ;$9300
         .byte   $5f, $65, $6a, $6e, $72, $76, $79, $7d                  ;$9308
         .byte   $80, $82, $85, $87, $8a, $8c, $8e, $90                  ;$9310
@@ -208,14 +208,14 @@ _9300:                                                                  ;$9300
         .byte   $fd, $fd, $fd, $fd, $fd, $fd, $fe, $fe                  ;$93F0
         .byte   $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff                  ;$93F8
 
-_9400:                                                                  ;$9400
+table_antilog:                                                          ;$9400
 ;===============================================================================
 ; nc513 says:
 ; - $9400..94FF is a lookup table for the function
 ;   TRUNC(256*(LOG(X;2)*32-TRUNC(LOG(X;2)*32))),
 ;   except for X=0, X=8, X=64
 ;
-.export _9400
+.export table_antilog
         .byte   $ae, $00, $00, $b8, $00, $4d, $b8, $d5                  ;$9400
         .byte   $ff, $70, $4d, $b3, $b8, $6a, $d5, $05                  ;$9408
         .byte   $00, $cc, $70, $ef, $4d, $8d, $b3, $c1                  ;$9410

@@ -88,8 +88,8 @@
 .import _9204:absolute
 .import _923b:absolute
 
-.import _9300:absolute
-.import _9400:absolute
+.import table_log:absolute
+.import table_antilog:absolute
 .import _9500:absolute
 .import _9600:absolute
 .import row_to_bitmap_lo:absolute
@@ -5160,15 +5160,15 @@ _39ea:                                                                  ;$39EA
         sta ZP_B6
         tax 
         beq _3a1d
-        lda _9400, x
+        lda table_antilog, x
         ldx ZP_VAR_Q
         beq _3a20
         clc 
-        adc _9400, x
+        adc table_antilog, x
         bmi _3a0f
-        lda _9300, x
+        lda table_log, x
         ldx ZP_B6
-        adc _9300, x
+        adc table_log, x
         bcc _3a20
         tax 
         lda _9500, x
@@ -5178,9 +5178,9 @@ _39ea:                                                                  ;$39EA
         ;-----------------------------------------------------------------------
 
 _3a0f:                                                                  ;$3A0F
-        lda _9300, x
+        lda table_log, x
         ldx ZP_B6
-        adc _9300, x
+        adc table_log, x
         bcc _3a20
         tax 
         lda _9600, x
@@ -5350,15 +5350,15 @@ _3b82:                                                                  ;$3B82
         sta ZP_B6
         tax 
         beq _3ba6
-        lda _9400, x
+        lda table_antilog, x
         ldx ZP_VAR_Q
         sec 
-        sbc _9400, x
+        sbc table_antilog, x
         bmi _3bae
         ldx ZP_B6
-        lda _9300, x
+        lda table_log, x
         ldx ZP_VAR_Q
-        sbc _9300, x
+        sbc table_log, x
         bcs _3ba9
         tax 
         lda _9500, x
@@ -5377,9 +5377,9 @@ _3ba9:                                                                  ;$3BA9
 
 _3bae:                                                                  ;$3ABE
         ldx ZP_B6
-        lda _9300, x
+        lda table_log, x
         ldx ZP_VAR_Q
-        sbc _9300, x
+        sbc table_log, x
         bcs _3ba9
         tax 
         lda _9600, x

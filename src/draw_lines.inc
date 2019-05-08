@@ -248,17 +248,17 @@ draw_line_horz:                                                         ;$ABBB
 :       ldx ZP_BD                       ; get line height (dy)          ;$ABD3
        .bze @flat                       ; if zero, line is straight!
 
-        lda _9400, x                    ;?
+        lda table_antilog, x            ;?
 
         ldx ZP_BC                       ; get line width (dx)
         sec 
-        sbc _9400, x                    ;
+        sbc table_antilog, x            ;
         bmi @_abfd
 
         ldx ZP_BD                       ; get line height (dy)
-        lda _9300, x                    ;?
+        lda table_log, x                ;?
         ldx ZP_BC                       ; get line width (dx)
-        sbc _9300, x                    ;?
+        sbc table_log, x                ;?
         bcs @deg45                      ; is the line 45-degrees?
         
         tax 
@@ -278,9 +278,9 @@ draw_line_horz:                                                         ;$ABBB
 @_abfd:                                                                 ;$ABFD
         ;-----------------------------------------------------------------------
         ldx ZP_BD                       ; get line-height
-        lda _9300, x                    ;?
+        lda table_log, x                ;?
         ldx ZP_BC                       ; get line-width
-        sbc _9300, x                    ;?
+        sbc table_log, x                ;?
         bcs @deg45                      ; is the line 45-degrees?
 
         tax 
@@ -1213,16 +1213,16 @@ draw_line_vert:                                                         ;$AF08
         ldx ZP_BC                       ; get line-width
        .bze @_af77                      ; if zero, skip ahead
         
-        lda _9400, x
+        lda table_antilog, x
         ldx ZP_BD
         sec 
-        sbc _9400, x
+        sbc table_antilog, x
         bmi @_af65
         
         ldx ZP_BC
-        lda _9300, x
+        lda table_log, x
         ldx ZP_BD
-        sbc _9300, x
+        sbc table_log, x
         bcs @deg45
         
         tax 
@@ -1237,9 +1237,9 @@ draw_line_vert:                                                         ;$AF08
 @_af65:                                                                 ;$AF65
         ;-----------------------------------------------------------------------
         ldx ZP_BC                       ; get line-width
-        lda _9300, x                    ;?
+        lda table_log, x                ;?
         ldx ZP_BD                       ; get line-height
-        sbc _9300, x                    ;?
+        sbc table_log, x                ;?
         bcs @deg45                      ; is the line 45-degrees?
         
         tax 
