@@ -113,14 +113,67 @@ populate_multiply_tables:
 .endif
 ;///////////////////////////////////////////////////////////////////////////////
 
-; a series of lookup tables. something to do with line drawing.
-; much kudos to anybody who can reverse-engineer these tables, I'm stumped
-;
-.segment        "DATA_9300"
+.segment        "MATH_LOGS"
 .align  256
+;
+; hello and welcome to "I don't understand logarithims 101"
+;
+; in disassembling Elite, and having no background in math, I have discovered
+; how awful math tutorials are. it is only by the grace of lemon64 forum
+; member nc513 that I can tell you anything about these lookup tables
+;
+; what is a log? it's the opposite of exponention -- "to the power of" -- which
+; I hope you are familiar with as even if you've never come across logs before,
+; exponention is extremely common in any low-level computing such as assembly.
+; you'll already be very familiar with the sequence of powers of 2:
+; 1, 2, 4, 8, 16, 32, 64, 128 & 256
+;
+; since we're using an 8-bit computer and powers of 2 are easy for us to use,
+; we'll also be using base 2 logs. note that logs can be in any base, but from
+; this point onwards any reference to log is going to assume a base of 2
+;
+; (NOTE: the caret "^" symbol will be used here as the symbol for exponention
+;  as it is more commonly known this way, even though the caret is XOR in CA65)
+;
+; if 2^8 (=256) can be seen as:
+;
+;       2^8 = 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 = 256
+;
+; then log answers the question "given a number, what power do we need to raise
+; our base [2] to get that number?". i.e.
+;
+;       log2(256) = 2^? = 8
+;
+; logs are useful because they can simulate a multiplication using lookup
+; tables and addition. a multiplication of X & Y can be reduced to adding
+; two logs together and then using exponention to restore the number base
+;
+; however, given that the input number is not always going to be a square
+; number the answer is, more often than not, going to be a fraction, e.g.
+;
+;       log2(240) = 2^? = 7.906890595608519
+;
+; if this were a spreadsheet then we'd be using full 4 or 5-byte floating-point
+; numbers, but that would be too slow for a game! in DOOM a "16.16" fixed-point
+; floating number is used but even this is too much for our lowly 8-bit micro!
+; Elite does away with all precision and uses 8-bit integers without fractions
+; for its log numbers -- given that the viewport is only 256px wide, this is
+; sufficient but it menas that the log tables here have two major drawbacks:
+;
+; 1. compound use increases the error drastically; that is, the more times
+;    a value goes through the log tables the more severe the loss of
+;    precision becomes
+;
+; 2. it's not possible to use these log-tables for typical multiplication.
+;    Elite has its own multiplication routine (see "math.inc") required to
+;    produce even accurate results
 
 _9300:                                                                  ;$9300
 ;===============================================================================
+; nc513 says:
+; - $9300..$93FF is a lookup table for the function
+;   TRUNC(LOG(X;2)*32), except for X=0, X=8, X=64
+;
 .export _9300
         .byte   $06, $00, $20, $32, $40, $4a, $52, $59                  ;$9300
         .byte   $5f, $65, $6a, $6e, $72, $76, $79, $7d                  ;$9308
@@ -157,7 +210,10 @@ _9300:                                                                  ;$9300
 
 _9400:                                                                  ;$9400
 ;===============================================================================
-; a lookup table of line height / width?
+; nc513 says:
+; - $9400..94FF is a lookup table for the function
+;   TRUNC(256*(LOG(X;2)*32-TRUNC(LOG(X;2)*32))),
+;   except for X=0, X=8, X=64
 ;
 .export _9400
         .byte   $ae, $00, $00, $b8, $00, $4d, $b8, $d5                  ;$9400
@@ -195,17 +251,11 @@ _9400:                                                                  ;$9400
 
 _9500:                                                                  ;$9500
 ;===============================================================================
+; nc513 says:
+; - $9500..$95FF is a lookup table for the function TRUNC(2^(X/32))
+;
 .export _9500
 
-        ; this looks like slopes, where the line length increases,
-        ; at the same time the angle increases 0 to 45-degrees
-        ; (sans 45-degrees itself),
-        ;
-        ; e.g. $FA = 250/256 = 0.9765625 (almost 1:1)
-        ;
-        ; imagine a line from (0,0) to (y,255) where y is 1-255
-        ; (could be degrees rather than pixels)
-        ;
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9500
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9508
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9510
@@ -241,6 +291,10 @@ _9500:                                                                  ;$9500
 
 _9600:                                                                  ;$9600
 ;===============================================================================
+; nc513 says:
+; - $9600..96FF seems to follow the pattern of
+;   TRUNC(2^((X/32)+(1/64))) just perfectly
+;
 .export _9600
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9600
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9608
@@ -292,6 +346,9 @@ line_points_x:                                                          ;$26A4
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
+        ; this is junk code/data left in memory
+        ; in this unitialised table
+        ;
         .byte   $76, $85, $9c, $a5, $8b, $85, $9a, $a5
         .byte   $8d, $20, $0c, $9a, $b0, $d2, $85, $6f
         .byte   $a5, $9c, $85, $70, $a5, $6b, $85, $9b
@@ -337,6 +394,9 @@ line_points_y:                                                          ;$27A4
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
+        ; this is junk code/data left in memory
+        ; in this unitialised table
+        ;
         .byte   $85, $2e, $29, $0f, $aa, $b5, $35, $d0
         .byte   $fe, $a5, $2e, $4a, $4a, $4a, $4a, $aa
         .byte   $b5, $35, $d0, $fe, $c8, $b1, $5b, $85

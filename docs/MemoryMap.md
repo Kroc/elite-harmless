@@ -174,7 +174,7 @@
           |               |
           |               |
           |---------------|
-    $9300 | DATA_9300     |   lookup tables for line-drawing
+    $9300 | MATH_LOGS     |   lookup tables for math / line-drawing
     $9400 |               |
     $9500 |               |
     $9600 |               |
