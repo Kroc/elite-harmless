@@ -341,9 +341,16 @@ _1e35:
 :       asl                                                             ;$1E41
         tay 
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; turn the I/O area on to manage the sprites
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         ; should the Trumbles™ change direction?
         ;
@@ -419,11 +426,18 @@ _1eb3:                                                                  ;$1EB3
         lda ZP_VAR_T
         sta VIC_SPRITE2_X, y
         cli                     ; re-enable interrupts
-
+        
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; turn I/O off, go back to 64K RAM
         lda # C64_MEM::ALL
         jsr set_memory_layout
-        
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         jmp _1ece
 
 _1ec1:                                                                  ;$1EC1
@@ -511,6 +525,9 @@ _1f15:                                                                  ;$1F15
         bcs _1f20
         lsr 
 _1f20:                                                                  ;$1F20
+        ; get the player ship's pitch;
+        ; stored as separate sign & magnitude
+        ;
         sta ZP_PITCH_MAGNITUDE
         ora ZP_PITCH_SIGN
         sta ZP_BETA             ; put aside for the matrix math
@@ -609,7 +626,7 @@ _1f20:                                                                  ;$1F20
         lda IS_WITCHSPACE       ; is the player stuck in witchspace?
        .bnz :+                  ; yes...
 
-        jmp _316e               ; no: eject escpae pod
+        jmp eject_escapepod     ; no: eject escpae pod
 
         ; quick-jump?
         ;-----------------------------------------------------------------------
@@ -815,12 +832,13 @@ _20c0:                                                                  ;$20C0
         jsr get_random_number
         and # %00000111
 _20c5:                                                                  ;$20C5
-        jsr _6a00
+        jsr _6a00               ; count cargo?
         ldy # $4e
         bcs _2110
+
         ldy VAR_04EF            ; item index?
-        adc VAR_04B0, y         ; cargo qty?
-        sta VAR_04B0, y         ; cargo qty?
+        adc VAR_CARGO, y
+        sta VAR_CARGO, y
         tya 
         adc # $d0
         jsr _900d
@@ -1179,23 +1197,37 @@ _22c2:                                                                  ;$22C2
         cmp # $f0
         bcc _2303
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn the I/O area on to manage the sprites
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         lda VIC_SPRITE_ENABLE
         and # %00000011
         sta VIC_SPRITE_ENABLE
         
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
         
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
-
         ; halve the number of Trumbles™
         lsr PLAYER_TRUMBLES_HI
         ror PLAYER_TRUMBLES_LO
-
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _2303:                                                                  ;$2303
@@ -3741,9 +3773,10 @@ _3130:                                                                  ;$3130
         rts 
 
 ;===============================================================================
-; eject escape pod?
+; eject escape pod
 ;
-_316e:                                                                  ;$316E
+eject_escapepod:                                                        ;$316E
+
         jsr _83df
 
         ldx # $0b
@@ -3772,13 +3805,14 @@ _318a:                                                                  ;$318A
         jsr _b410
         
         lda # $00
-        ldx # $10
-_319b:                                                                  ;$319B
-        sta VAR_04B0, x         ; cargo qty?
+        ldx # .sizeof(Cargo)-1
+
+:       sta VAR_CARGO, x        ; empty cargo slot                      ;$319B
         dex 
-        bpl _319b
-        sta PLAYER_LEGAL
-        sta PLAYER_ESCAPEPOD
+        bpl :-
+
+        sta PLAYER_LEGAL        ; clear legal status
+        sta PLAYER_ESCAPEPOD    ; you no longer own an escape pod
         
         ; some Trumbles™ will slip away
         ; with you, the sneaky things!

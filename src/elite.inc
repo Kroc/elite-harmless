@@ -5,7 +5,8 @@
 
 ; this is the main include file (".inc") for common definitions for Elite,
 ; that is, constants, macros and the like that do not immediately output bytes.
-; each assembly file (".asm") will include this file
+; each assembly file (".asm") will include this file so therefore this is the
+; "starting point" of the source code
 
 .include        "c64/c64.inc"           ; define C64 constants
 

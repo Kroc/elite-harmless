@@ -141,13 +141,52 @@ PLAYER_LASER_2          = $04aa ;TODO: is this left, right, or rear?
 PLAYER_LASER_3          = $04ab ;TODO: is this left, right, or rear?
 PLAYER_LASER_4          = $04ac ;TODO: is this left, right, or rear?
 
-VAR_04AF                = $04af ;?
-VAR_04B0                = $04b0 ;? (indexed by Y)
+;-------------------------------------------------------------------------------
 
-VAR_04B3                = $04b3 ;?
-VAR_04B6                = $04b6 ;?
+SHIP_HOLD               = $04af ; cargo capacity of the player's ship
 
-VAR_04BA                = $04ba ;?
+.struct Cargo
+        food            .byte   ;+$00
+        textiles        .byte   ;+$01
+        radioactives    .byte   ;+$02
+        slaves          .byte   ;+$03
+        alcohol         .byte   ;+$04
+        luxuries        .byte   ;+$05
+        narcotics       .byte   ;+$06
+        computers       .byte   ;+$07
+        machinery       .byte   ;+$08
+        alloys          .byte   ;+$09
+        firearms        .byte   ;+$0A
+        furs            .byte   ;+$0B
+        minerals        .byte   ;+$0C
+        gold            .byte   ;+$0D
+        platinum        .byte   ;+$0E
+        gems            .byte   ;+$0F
+        aliens          .byte   ;+$10
+.endstruct
+
+; cargo storage:
+; NOTE: the order here has to mimic that of the strings in "text_flight.asm",
+;       (or vice-versa depending on how you see it)
+;
+VAR_CARGO               = $04b0
+VAR_CARGO_FOOD          = $04b0 ; food
+VAR_CARGO_TEXTILES      = $04b1 ; textiles
+VAR_CARGO_RADIOACTIVES  = $04b2 ; radioactives
+VAR_CARGO_SLAVES        = $04b3 ; slaves
+VAR_CARGO_ALCOHOL       = $04b4 ; liquor & wines
+VAR_CARGO_LUXURIES      = $04b5 ; luxuries
+VAR_CARGO_NARCOTICS     = $04b6 ; narcotics
+VAR_CARGO_COMPUTERS     = $04b7 ; computers
+VAR_CARGO_MACHINERY     = $04b8 ; machinery
+VAR_CARGO_ALLOYS        = $04b9 ; alloys
+VAR_CARGO_FIREARMS      = $04ba ; firearms
+VAR_CARGO_FURS          = $04bb ; furs
+VAR_CARGO_MINERALS      = $04bc ; minerals
+VAR_CARGO_GOLD          = $04bd ; gold
+VAR_CARGO_PLATINUM      = $04be ; platinum
+VAR_CARGO_GEMS          = $04bf ; gem-stones
+VAR_CARGO_ALIENS        = $04c0 ; alien items
 
 PLAYER_ECM              = $04c1 ; player has an E.C.M.?
 
@@ -165,9 +204,28 @@ PLAYER_MISSILE_ARMED    = $0485 ; armed state of missile
 
 PLAYER_LEGAL            = $04cd ; player's legal status
 
-VAR_04CE                = $04ce ;? (indexed by Y)
+; market availability:
+; (quantity of goods on sale)
+;
+VAR_MARKET              = $04ce
+VAR_MARKET_FOOD         = $04ce ; quantity of food on sale
+VAR_MARKET_TEXTILES     = $04cf ; quantity of textiles on sale
+VAR_MARKET_RADIOACTIVES = $04d0 ; quantity of radioactives on sale
+VAR_MARKET_SLAVES       = $04d1 ; quantity of slaves on sale
+VAR_MARKET_ALCOHOL      = $04d2 ; quantity of liquor & wines on sale
+VAR_MARKET_LUXURIES     = $04d3 ; quantity of luxuries on sale
+VAR_MARKET_NARCOTICS    = $04d4 ; quantity of narcotics on sale
+VAR_MARKET_COMPUTERS    = $04d5 ; quantity of computers on sale
+VAR_MARKET_MACHINERY    = $04d6 ; quantity of machinery on sale
+VAR_MARKET_ALLOYS       = $04d7 ; quantity of alloys on sale
+VAR_MARKET_FIREARMS     = $04d8 ; quantity of firearms on sale
+VAR_MARKET_FURS         = $04d9 ; quantity of furs on sale
+VAR_MARKET_MINERALS     = $04da ; quantity of minerals on sale
+VAR_MARKET_GOLD         = $04db ; quantity of gold on sale
+VAR_MARKET_PLATINUM     = $04dc ; quantity of platinum on sale
+VAR_MARKET_GEMS         = $04dd ; quantity of gem-stones on sale
+VAR_MARKET_ALIENS       = $04de ; quantity of alien items on sale
 
-VAR_04DE                = $04de ;?
 VAR_04DF                = $04df ;?
 
 VAR_04E0                = $04e0 ; number of kills (lo byte?)

@@ -156,35 +156,76 @@
 
 _6a00:                                                                  ;$6A00
 ;===============================================================================
-; some kind of cargo quantity check?
+; count your current cargo in-use capacity
+;
+;       A = index of cargo item;
+;           see `Cargo` struct for order
+;
+; returns:
+;
+;       carry unset = OK
+;       carry set   = cargo overflow
 ;
 .export _6a00
 
         sta VAR_04EF            ; item index?
-
         lda # $01
-_6a05:  pha                                                             ;$6A05
+
+_6a05:                                                                  ;$6A05
+;-------------------------------------------------------------------------------
+;       A = initial quantity count
+;
+        pha                     ; preserve A
         
-        ldx # $0c
+        ; the precious materials (gold / platinum / gems / alien items)
+        ; are measured in Kg
+        ;
+        ldx # Cargo::minerals   ; minerals or below?
         cpx VAR_04EF            ; item index?
-        bcc _6a1b
+        bcc @kg                 ; skip ahead if precious materials
 
-_6a0d:  adc VAR_04B0, x         ; cargo qty?                            ;$6A0D
+        ; count the number of tons of cargo:
+        ; for each cargo type, add its quantity to the Accumulator
+:       adc VAR_CARGO, x                                                ;$6A0D
         dex 
-        bpl _6a0d
+        bpl :-
 
+.ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
+        ; have you ever wondered what a Trumble™ weighs? we count 1 tonne
+        ; (1000 Kg) for every 256 Tumbles™, disregarding any remainder, so
+        ; anywhere between 256 to 511 Trumbles™ weigh 1 tonne. one Trumble™
+        ; will therfore weigh between 1.95 Kg (4.2 lb) & 3.9 Kg (8.5 lb);
+        ; a bit under the weight of an average cat (4-5 Kg), except
+        ; imagine several thousand of them. and now you know
+        ;
         adc PLAYER_TRUMBLES_HI
-        cmp VAR_04AF            ; inside `DUST_X` array
+.endif  ;///////////////////////////////////////////////////////////////////////
+
+        ; will the selected cargo fit in your hold?
+        ;
+        ; carry unset = OK
+        ; carry set   = overflow
+        ;
+        cmp SHIP_HOLD           ; compare cargo capacity of the player's ship
         
-        pla 
-        rts
+        pla                     ; restore A
+        rts 
 
-_6a1b:                                                                  ;$6A1B
-        ldy VAR_04EF            ; item index?
-        adc VAR_04B0, y         ; cargo qty?
-        cmp # $c8
+@kg:                                                                    ;$6A1B
+        ;-----------------------------------------------------------------------
+        ; will the selected cargo fit? for precious materials, the limit
+        ; is 200 Kg, not taken from your ships hold capacity. maybe you
+        ; stuff it behind your seat?
+        ;
+        ; carry unset = OK
+        ; carry set   = overflow
+        ;
+        ldy VAR_04EF
+        adc VAR_CARGO, y        ; number of Kg of selected item
+        cmp # 200               ; maximum of 200 Kg
 
-        pla 
+        pla                     ; restore A
         rts 
 
 set_cursor_col:                                                         ;$6A25
@@ -872,7 +913,7 @@ _6d3e:                                                                  ;$6D3E
         jsr _6dc9
         bcs _6d32
         sta ZP_VAR_P1
-        jsr _6a05
+        jsr _6a05               ; count cargo
         ldy # $ce
         lda ZP_VAR_R
         beq _6d79
@@ -888,12 +929,12 @@ _6d79:                                                                  ;$6D79
         lda ZP_VAR_R
         pha 
         clc 
-        adc VAR_04B0, y         ; cargo qty?
-        sta VAR_04B0, y         ; cargo qty?
-        lda VAR_04CE, y
+        adc VAR_CARGO, y
+        sta VAR_CARGO, y
+        lda VAR_MARKET_FOOD, y  ; update quantity available for sale?
         sec 
         sbc ZP_VAR_R
-        sta VAR_04CE, y
+        sta VAR_MARKET_FOOD, y  ; quantity available for sale?
         pla 
         beq _6da4
         jsr _761f
@@ -1005,8 +1046,9 @@ _6e58:                                                                  ;$6E58
 _6e5a:                                                                  ;$6E5a
         sty VAR_04EF            ; item index?
 _6e5d:                                                                  ;$6E5d
-        ldx VAR_04B0, y         ; cargo qty?
-        beq _6eca
+        ldx VAR_CARGO, y        ; cargo qty?
+       .bze _6eca               ; none of that cargo
+
         tya 
         asl 
         asl 
@@ -1057,10 +1099,10 @@ _6e5d:                                                                  ;$6E5d
         stx ZP_34
         jsr _7246
         ldy VAR_04EF            ; item index?
-        lda VAR_04B0, y         ; cargo qty?
+        lda VAR_CARGO, y
         sec 
         sbc ZP_VAR_R
-        sta VAR_04B0, y         ; cargo qty?
+        sta VAR_CARGO, y
         lda ZP_VAR_R
         sta ZP_VAR_P1
         lda VAR_04EC
@@ -1141,7 +1183,7 @@ _6f16:                                                                  ;$6F16
 
         jsr txt_docked_token0B
         jsr print_fuel_and_cash
-        lda VAR_04AF            ; inside `DUST_X` array
+        lda SHIP_HOLD            ; cargo capacity of the player's ship
         cmp # $1a
         bcc _6f37
 
@@ -1735,7 +1777,7 @@ _728e:                                                                  ;$728E
 
         ldy ZP_92
         lda # $05
-        ldx VAR_04CE, y
+        ldx VAR_MARKET_FOOD, y
         stx VAR_04ED
         clc 
         beq _72af
@@ -1820,7 +1862,7 @@ _731a:                                                                  ;$731A
         sta ZP_90
         clc 
         lda # $00
-        sta VAR_04DE
+        sta VAR_MARKET_ALIENS
 _7329:                                                                  ;$7329
         dey 
         bmi _7331
@@ -1883,7 +1925,7 @@ _7384:                                                                  ;$7384
 _7388:                                                                  ;$7388
         ldy ZP_AD
         and # %00111111
-        sta VAR_04CE, y
+        sta VAR_MARKET_FOOD, y
         iny 
         tya 
         sta ZP_AD
@@ -2174,9 +2216,9 @@ _755f:                                                                  ;$755F
         cmp # $02
         bne _756f
         ldx # $25
-        cpx VAR_04AF
+        cpx SHIP_HOLD           ; cargo capacity of the player's ship
         beq _75a1
-        stx VAR_04AF
+        stx SHIP_HOLD           ; cargo capacity of the player's ship
 _756f:                                                                  ;$756F
         cmp # $03
         bne _757c
@@ -3086,11 +3128,18 @@ _7998:                                                                  ;$7998
 _79a7:                                                                  ;$79A7
         .byte   $00, $02
 
-;===============================================================================
-
 _79a9:                                                                  ;$79A9
+;===============================================================================
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn the I/O area on to manage the sprites
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda ZP_POLYOBJ_ZPOS_MI
         cmp # $07
@@ -3204,8 +3253,16 @@ _7a78:                                                                  ;$7A78
         pla 
         sta ZP_GOATSOUP_pt2     ;?
         
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
         sta ZP_GOATSOUP_pt4
@@ -3235,9 +3292,10 @@ _7a9f:                                                                  ;$7A9F
         lda PLAYER_TRUMBLES_LO  ; does the player have any Trumbles™?
        .bze _7ac2               ; if not, skip ahead
 
+        ; they've eaten your goods!
         lda # $00
-        sta VAR_04B0            ; cargo qty?
-        sta VAR_04B6
+        sta VAR_CARGO_FOOD
+        sta VAR_CARGO_NARCOTICS
 
         jsr get_random_number   ; choose a random number
         and # %00001111         ; between 0-15
@@ -4618,16 +4676,28 @@ disable_sprites:                                                        ;$8273
 ;===============================================================================
 ; disable all sprites: (for example, when switching to menu screen)
 ;
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; ensure the I/O is enabled so we can talk to the VIC-II:
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; disable all sprites
         lda # %00000000
         sta VIC_SPRITE_ENABLE
 
+.ifndef OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        dec CPU_CONTROL
+        rts 
+.else   ;///////////////////////////////////////////////////////////////////////
         ; switch back to 64K RAM layout
         lda # C64_MEM::ALL
+
+        ; fall-through to the routine below
 
 set_memory_layout:                                                      ;$827F
 ;===============================================================================
@@ -4650,6 +4720,8 @@ set_memory_layout:                                                      ;$827F
 
 current_memory_layout:                                                  ;$828E
         .byte   C64_MEM::ALL
+
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ;===============================================================================
 ; transfer the address in P1/P2 to the ship lines pointer
@@ -5524,11 +5596,11 @@ _877e:                                                                  ;$877E
 ;===============================================================================
 
 _8798:                                                                  ;$8798
-        lda VAR_04B3
+        lda VAR_CARGO_SLAVES
         clc 
-        adc VAR_04B6
+        adc VAR_CARGO_NARCOTICS
         asl 
-        adc VAR_04BA
+        adc VAR_CARGO_FIREARMS
         rts 
 
 ;===============================================================================
@@ -6244,7 +6316,7 @@ _8ae7:                                                                  ;$8AE7
         pla 
         eor # %10101001
         sta _25fd
-        jsr _8bc0
+        jsr _8bc0               ; NOTE: enables KERNAL
 
         lda #< _25b3
         sta ZP_FD
@@ -6280,8 +6352,17 @@ _8ae7:                                                                  ;$8AE7
         lda # 40                ; raster line 40
         sta VIC_RASTER
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn KERNAL & I/O area off
         lda # C64_MEM::ALL
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        dec CPU_CONTROL         ; turn off KERNAL
+        dec CPU_CONTROL         ; turn off I/O
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         cli 
         jsr swap_zp_shadow      ; TODO: why is this needed?
@@ -6306,11 +6387,17 @@ _8bbf:                                                                  ;$8BBF
 _8bc0:                                                                  ;$8BC0
         jsr swap_zp_shadow      ; why is this needed?
         
-        ; switch on the I/O shield to talk to hardware
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # C64_MEM::IO_KERNAL
         sei                     ; disable interrupts
         jsr set_memory_layout
-        
+.else   ;///////////////////////////////////////////////////////////////////////
+        sei                     ; disable interrupts
+        inc CPU_CONTROL
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         lda # %00000000
         sta VIC_INTERRUPT_CONTROL
         cli 
@@ -6367,6 +6454,7 @@ _8c0b:  ; device number table                                           ;$8C0B
 
 _8c0d:                                                                  ;$8C0D
         jsr _8bc0               ; select drive & filename?
+                                ; NOTE: enables KERNAL
         
         ; load the file into the disk buffer
         lda # $00               ; "LOAD"
@@ -6394,9 +6482,17 @@ _8c0d:                                                                  ;$8C0D
         lda # 40                ; raster line 40
         sta VIC_RASTER
         
-        ; turn off the I/O shield and go back to 64K RAM
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn off KERNAL & I/O, go back to 64K RAM
         lda # C64_MEM::ALL
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        dec CPU_CONTROL         ; turn off KERNAL
+        dec CPU_CONTROL         ; turn off I/O
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         cli 
         jsr swap_zp_shadow      ; why is this needed?
@@ -6697,8 +6793,16 @@ get_input:                                                              ;$8D53
 
        .phy                     ; preserve Y
         
+        ; NOTE: it appears that the memory-map state when entering this
+        ; routine might vary and we cannot yet rely upon `inc`/`dec`
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; hide sprite 1: why?
         lda VIC_SPRITE_ENABLE
@@ -6730,12 +6834,12 @@ get_input:                                                              ;$8D53
         
         ; if no keys were pressed, X will be $FF (bits are 1 for unpressed!)
         ; and incrementing X will roll it over to 0
-        inx
+        inx 
        .bze @done               ; no keys pressed at all? skip ahead
 
         ; begin looping through the keyboard
         ; matrix, row by row
-
+        ;
         ldx # 64                ; number of keys to scan
         lda # %11111110         ; select keyboard row 0 for reading
 
@@ -6848,10 +6952,17 @@ get_input:                                                              ;$8D53
         sta key_docking_on
         sta key_docking_off
 
+:                                                                       ;$8E1E
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; turn the I/O shield off and
         ; return to 'game' memory layout
-:       lda # C64_MEM::ALL                                              ;$8E1E
+        lda # C64_MEM::ALL
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
 
        .ply                     ; restore Y
         
@@ -6947,8 +7058,17 @@ get_ctrl:                                                               ;$8E92
 
 ; ununsed / unreferenced?
 ; $8e99:
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn the I/O area on to manage the CIA ports
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         sei 
         stx CIA1_PORTA
@@ -6957,9 +7077,18 @@ get_ctrl:                                                               ;$8E92
         inx 
         beq _8eab
         ldx # $ff
+
 _8eab:                                                                  ;$8EAB
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         txa 
         rts 
@@ -7263,13 +7392,14 @@ _906a:                                                                  ;$906A
         bmi _9001
         cpx # $16
         bcs _9001
-        lda VAR_04B0, x         ; cargo qty?
+
+        lda VAR_CARGO, x
         beq _9001
         lda VAR_048B
         bne _9001
         ldy # $03
         sty VAR_048C
-        sta VAR_04B0, x         ; cargo qty?
+        sta VAR_CARGO, x
         cpx # $11
         bcs _908f
         txa 
@@ -7505,12 +7635,28 @@ _920d:                                                                  ;$920D
         bit _1d10
         bmi _9222
         bit _1d0d
-        bmi _91fd
+        bmi _91fd               ; rts
+      
 _9222:                                                                  ;$9222
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        ;
+        inc CPU_CONTROL         ; enable I/O
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         jsr sound_stop
+        
+.ifndef OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        dec CPU_CONTROL         ; disable I/O
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         lda # $ff
         sta _1d03
         bne _9266
@@ -7534,8 +7680,16 @@ _9245:                                                                  ;$9245
 
         jsr _a817
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn on I/O to access the SID
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         lda # $00
         sta _1d03
@@ -7553,12 +7707,26 @@ _9245:                                                                  ;$9245
         lda # 15
         sta SID_VOLUME_CTRL
         
+.ifndef OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        dec CPU_CONTROL         ; disable I/O
+.endif  ;///////////////////////////////////////////////////////////////////////
         cli 
+
 _9266:                                                                  ;$9266
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL
         jmp set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; we must *not* decrement the memory map twice so the decrements have
+        ; been moved above to avoid a fall-through condition that would crash
+        ; the machine if we decrement here at the end of the routine
+        rts 
+.endif  ;///////////////////////////////////////////////////////////////////////
 
-;===============================================================================
 
 ; unused / unreferenced?
 ;$926b:
@@ -7590,7 +7758,7 @@ _927e:                                                                  ;$927E
 
 ;===============================================================================
 
-; $9300..$9700 is in "draw_lines.inc"
+; $9300..$9700 is in "math_tables.asm"
 ; $9700..$9900 is in "gfx/table_bitmap.asm"
 
 ;===============================================================================
@@ -9791,8 +9959,17 @@ _a6ba:                                                                  ;$A6BA
         jsr dust_swap_xy
         jsr _7b1a
 _a6d4:                                                                  ;$A6D4
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn the I/O area on to manage the sprites
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        inc CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ldy VAR_0486            ; current viewpoint? (front, rear, left, right)
         lda PLAYER_LASERS, y    ; get type of laser for current viewpoint
@@ -9848,9 +10025,17 @@ _a700:                                                                  ;$A700
         sta VIC_SPRITE_ENABLE
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ; turn off the I/O and go back to 64K RAM
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL
         jmp set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        dec CPU_CONTROL
+        rts 
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 .ifndef OPTION_NOTRUMBLES
 ;///////////////////////////////////////////////////////////////////////////////
@@ -10257,11 +10442,16 @@ interrupt_end_XA:                                                       ;$A8ED
         ;
        .plx                     ; restore X
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; turn off the I/O shield at the end of the interrupt
         ; and return to the previous I/O state
         lda CPU_CONTROL
         and # %11111000
         ora current_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        pla 
+.endif  ;/////////////////////////////////////////////////////////////////////// 
         sta CPU_CONTROL
         
         pla                     ; restore A
@@ -10274,12 +10464,45 @@ interrupt:                                                              ;$A8FA
 
         pha                     ; preserve A
         
-        ; turn on the I/O shield
+        ; the current memory map (BASIC, KERNAL, and/or I/O) could be anything
+        ; when this interrupt occurs; for the purposes of the interrupt routine
+        ; we want to have the ROMs off and I/O on
         ;
-        lda CPU_CONTROL
-        and # %11111000
-        ora # C64_MEM::IO_ONLY
-        sta CPU_CONTROL
+        ; in the original Elite code, changing the memory map is handled by
+        ; a central routine `set_memory_layout` which keeps a record of the
+        ; "current" state. assuming that this routine is *always* used when
+        ; changing the memory map, the interrupt routine can restore the
+        ; previous state
+        ;
+        lda CPU_CONTROL         ; read current memory map
+
+.ifndef OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; in elite-harmless, we use an optimisation technique described by
+        ; Gregory Naçu in his article "The 6510 Processor Port":
+        ; <http://www.c64os.com/post?p=83>
+        ;
+        ; this method removes the need to store extra state, doesn't require
+        ; an expensive subroutine and doesn't even use any registers(!) but
+        ; it does mean we have to be very, very careful that before we change
+        ; it, the memory map is guaranteed to be an expected value every time
+        ; (otherwise the machine usually crashes hard)
+        ;
+        ; the interrupt routine complicates this as we cannot guarantee that
+        ; the memory map will be a certain value any time the interrupt occurs.
+        ; nested interrupts (when an interrupt interrupts an interrupt) need to
+        ; be handled too, so whilst the original code 'knows' what memory map
+        ; to return to, elite-harmless pushes the current value to the stack
+        ; during the interrupt. whilst this adds 3 cycles to the initialisation
+        ; it does greatly reduce the cleanup at the end -- a simple pull and
+        ; set (7 cycles) does everything, without needing to `lda, and, ora`
+        ; first and then set (12 cycles)
+        ; 
+        pha                     ; push current memory-map value on stack
+.endif  ;///////////////////////////////////////////////////////////////////////
+        and # %11111000         ; mask out current value in the memory map bits
+        ora # C64_MEM::IO_ONLY  ; set I/O on, ROMs off
+        sta CPU_CONTROL         ; make it so!
 
         ; acknowledge the interrupt?
         lda VIC_INTERRUPT_STATUS
@@ -10434,9 +10657,18 @@ interrupt_end_YXA:                                                      ;$AA04
        .ply                     ; restore Y
        .plx                     ; restore X
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; the original source code uses the last-set memory layout state
+        ; recorded by the central routine for changing the memory layout
         lda CPU_CONTROL
         and # %11111000
         ora current_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; in elite-harmless the previous memory layout state
+        ; has been pushed to the stack
+        pla 
+.endif  ;/////////////////////////////////////////////////////////////////////// 
         sta CPU_CONTROL
 
         pla                     ; restore A
@@ -10546,12 +10778,22 @@ _aaa2:                                                                  ;$AAA2
         lda #> chrout
         sta KERNAL_VECTOR_CHROUT+1
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; change the C64's memory layout, turn off the BASIC & KERNAL ROMs
         ; leaving just the I/O registers ($D000...)
-        ;
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
-
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        ;
+        ; the KERNAL is currently on, so stepping down
+        ; once will switch from KERNAL+I/O to I/O only
+        ;
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
+        
         sei                     ; disable interrupts
 
         ; configure interrupts (regular and non-interruptable)
@@ -10587,16 +10829,22 @@ _aaa2:                                                                  ;$AAA2
         lda # 40
         sta VIC_RASTER
         
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; switch off the ROMs, leaving 64K of RAM
         lda CPU_CONTROL
         and # %11111000
         ora # C64_MEM::ALL
         sta CPU_CONTROL
-        
+
         ; record this as the game's
         ; current memory-layout state
         lda # C64_MEM::ALL
         sta current_memory_layout
+        
+.else   ;///////////////////////////////////////////////////////////////////////
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         ; set up the routines for the interrupts:
         ;

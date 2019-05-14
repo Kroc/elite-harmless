@@ -57,6 +57,10 @@ This work was made possible by various resources available on the web, for which
 
 [crazy]:  https://xania.org/201406/elites-crazy-string-format
 
+* Gregory Naçu's blog post [The 6510 Processor Port][6510] for the neat memory map optimisation and general C64 internals knowledge
+
+[6510]: http://www.c64os.com/post?p=83
+
 ## Legal ##
 
 "Elite" is copyright David Braben & Ian Bell, Acornsoft (BBC / Electron versions), Firebird / British Telecom (C64 version), 1984-1985, all rights reserved. The name "Elite" is used in this project for historical, educational and archival purposes only.

@@ -28,13 +28,16 @@ init:
 
         ; disable interrupts:
         ; (we'll be configuring screen & sprites)
-        sei
+        sei 
         
-        ; switch the I/O area on:
-        lda CPU_CONTROL         ; get the current processor port value
-        and # %11111000         ; reset bottom 3 bits, top 5 unchanged 
-        ora # C64_MEM::IO_ONLY  ; switch I/O on, BASIC & KERNAL ROM off
-        sta CPU_CONTROL
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        ;
+        ; BASIC & KERNAL are currently on, so stepping down
+        ; twice will switch from BASIC+KERNAL+I/O to KERNAL+I/O,
+        ; and then to I/O only
+        dec CPU_CONTROL         ; turn off BASIC ROM
+        dec CPU_CONTROL         ; turn off KERNAL ROM, leaving I/O
 
         lda CIA2_PORTA_DDR      ; read Port A ($DD00) data-direction register
         ora # %00000011         ; set bits 0/1 to R+W, all others read-only
@@ -158,7 +161,7 @@ init:
         stx VIC_SPRITE0_X
         sty VIC_SPRITE0_Y
         
-        ; setup (but don't display) the trumbles
+        ; setup (but don't display) the Trumbles™
         lda # 18
         ldy # 12
         sta VIC_SPRITE1_X
@@ -401,12 +404,12 @@ _77a3:  sta $d802, y
 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda CPU_CONTROL                 ; get processor port state
-        and # %11111000                 ; retain everything except bits 0-2 
-        ora # C64_MEM::IO_KERNAL        ; I/O & KERNAL ON, BASIC OFF
-        sta CPU_CONTROL
-
-        cli 
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        ;
+        ; the KERNAL is currently off, so stepping up
+        ; once will switch from I/O only to KERNAL+I/O
+        inc CPU_CONTROL
 
         ;-----------------------------------------------------------------------        
         ; NOTE: calling `init_mem` clears variable storage from $0400..$0700
@@ -425,6 +428,7 @@ _77a3:  sta $d802, y
         lda #< (_8863 - 1)
         pha 
 
+        cli                     ; enable interrupts
         jmp init_mem
 
 set_bytes:
