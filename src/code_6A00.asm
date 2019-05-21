@@ -10,6 +10,7 @@
 .include        "text/text_docked_fns.asm"
 .include        "draw_lines.inc"
 .include        "math_3d.inc"
+.include        "code_keyboard.inc"
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -5356,77 +5357,101 @@ _8612:                                                                  ;$8612
         jsr _7c6b
         dec ZP_A2
         bpl _8612
+
 _8627:                                                                  ;$8627
+        ;=======================================================================
+        ; reset the stack pointer!
         ldx # $ff
         txs 
-        ldx PLAYER_TEMP_LASER
-        beq _8632
-        dec PLAYER_TEMP_LASER
-_8632:                                                                  ;$8632
-        ldx VAR_0487
-        beq _863e
+
+        ; cool down lasers:
+        ;
+        ldx PLAYER_TEMP_LASER   ; get current laser temperature
+        beq :+                  ; skip if > 0
+        dec PLAYER_TEMP_LASER   ; reduce laser temperature
+
+:       ldx VAR_0487                                                    ;$8632
+        beq @_863e
         dex 
-        beq _863b
-        dex 
-_863b:                                                                  ;$863B
-        stx VAR_0487
-_863e:                                                                  ;$863E
+        beq :+
+        dex                
+:       stx VAR_0487                                                    ;$863B
+
+@_863e:                                                                 ;$863E
         lda ZP_MENU_PAGE
-        bne _8645
+       .bnz :+                  ; not flight screen? skip
 
         jsr _2ff3
-_8645:                                                                  ;$8645
-        lda ZP_MENU_PAGE
-        beq _8654
+
+:       lda ZP_MENU_PAGE                                                ;$8645
+       .bze @_8654              ; on flight screen? skip
 
         and _1d08
         lsr 
-        bcs _8654
+        bcs @_8654
         
         ldy # 2
         jsr wait_frames
-_8654:                                                                  ;$8654
+
+@_8654:                                                                 ;$8654
+        ; handle breeding for < 256 Trumbles™
+        ;-----------------------------------------------------------------------
         ; does the player have more than 256 Trumbles™?
         lda PLAYER_TRUMBLES_HI
-       .bze _8670
+       .bze :+                  ; no? skip ahead
 
-        jsr get_random_number
-        cmp # $dc
+        ; check for breeding:
+        ;
+        jsr get_random_number   ; pick a random number between 0-255
+        cmp # 220               ; is it >= 220? (about 10% chance)
+                                ; note that this will set carry
 
+        ; add the carry, if present
         lda PLAYER_TRUMBLES_LO
         adc # $00
         sta PLAYER_TRUMBLES_LO
-       .bbw _8670
+        bcc :+                  ; if that didn't exceed 256, skip over
         
-        inc PLAYER_TRUMBLES_HI
-        bpl _8670
-        dec PLAYER_TRUMBLES_HI
-_8670:                                                                  ;$8670
-        lda PLAYER_TRUMBLES_HI
-        beq _86a1
-        sta ZP_VAR_T
-        lda PLAYER_TEMP_CABIN
-        cmp # $e0
-        bcs _8680
-        asl ZP_VAR_T
-_8680:                                                                  ;$8680
-        jsr get_random_number
-        cmp ZP_VAR_T
-        bcs _86a1
+        inc PLAYER_TRUMBLES_HI  ; increase the Trumble™ count hi-byte
+        bpl :+                  ; OK if the hi-byte remains < 128
+        dec PLAYER_TRUMBLES_HI  ; when above 32'768 Trumbles™, step back one
+
+        ; handle breeding for > 255 Trumbles™
+        ;-----------------------------------------------------------------------
+        ; skip over if less than 256 Trumbles™
+:       lda PLAYER_TRUMBLES_HI                                          ;$8670
+       .bze _86a1
+        
+        sta ZP_VAR_T            ; put aside the Trumble™ hi-byte
+                                ; this will be the 'odds' (n/256)
+        lda PLAYER_TEMP_CABIN   ; get current cabin temperature
+        cmp # 224               ; is it >= 224?
+        bcs :+                  ; yes, skip the next instruction
+                                ; (reduces Trumble™ growth in hot conditions)
+
+        asl ZP_VAR_T            ; double the odds
+
+:       jsr get_random_number   ; pick a random number 0-255            ;$8680
+        cmp ZP_VAR_T            ; compare against our odds
+        bcs _86a1               ; if random number >= odds, skip
+
         jsr get_random_number
         ora # %01000000
         tax 
+
         lda # $80
-        ldy PLAYER_TEMP_CABIN
-        cpy # $e0
-        bcc _869c
+        ldy PLAYER_TEMP_CABIN   ; get current cabin temperature
+        cpy # 224               ; is it >= 224?
+        bcc :+                  ; if not, skip over
+
         txa 
         and # %00001111
         tax 
         lda # $f1
-_869c:                                                                  ;$869C
-        ldy # $0e
+        
+:       ldy # $0e                                                       ;$869C
         jsr _a850
+
 _86a1:                                                                  ;$86A1
         jsr _81fb
 _86a4:                                                                  ;$86A4
@@ -5523,6 +5548,7 @@ _871f:  ldx # $01                                                       ;$871F
 _8724:                                                                  ;$872F
         bit key_hyperspace      ; hyperspace key pressed?
         bpl _872c
+        
         jmp _715c
 
 _872c:                                                                  ;$872C
@@ -6547,23 +6573,14 @@ _8c61:                                                                  ;$8C61
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 ;===============================================================================
-; clear the keyboard state
+; include code from "code_keyboard.inc"
 ;
-clear_keyboard:                                                         ;$8C6D
+.clear_keyboard                                                         ;$8C6D
 
-        ldx # 64                ; number of keys on keyboard to scan
-        lda # $00
-        sta ZP_7D               ; set currently pressed key to nothing
-
-:       sta key_states, x       ; reset the current key-state           ;$8C73
-        dex                     ; move to next key 
-        bpl :-                  ; keep going until all 64 are done
-
-        rts 
-
-        rts                                                             ;$8C7A
-
-;===============================================================================
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        rts                     ; superfluous rts                       ;$8C7A
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _8c7b:                                                                  ;$8C7B
 .export _8c7b
@@ -6649,327 +6666,10 @@ _8cc2:                                                                  ;$8CC2
         rts 
 
 ;===============================================================================
-; keyboard keys:
+; insert code from "code_keyboard.inc"
 ;
-; map semantic names to the desired key-state memory locations.
-; this lets you very easily remap controls for compile time
-;
-.export joy_up                  = key_s
-.export joy_down                = key_x
-.export joy_left                = key_comma
-.export joy_right               = key_dot
-.export joy_fire                = key_a
-
-.export key_accelerate          = key_spc 
-.export key_decelerate          = key_slash
-
-.export key_missile_target      = key_t
-.export key_missile_disarm      = key_u
-.export key_missile_fire        = key_m
-
-.export key_bomb                = key_c64
-.export key_ecm                 = key_e
-.export key_escape_pod          = key_back
-
-.export key_docking_on          = key_c
-.export key_docking_off         = key_p
-
-.export key_jump                = key_j
-.export key_hyperspace          = key_h
-
-; an array of key states to indicate which keys are pressed; the byte values
-; written out here are meaningless, this array is cleared with $00 when in use
-; and an entry is changed to $FF when that key is pressed
-;
-; the order of keys represented here is determined by the method used to read
-; off the keyboard matrix, which is starting at the 64th index in this table
-; and working backwards -- for each row 0 to 7, columns are read from 0 to 7.
-; this gives a key order of:
-;
-; addr                  N/A     index
-key_states:     .byte   $31     ;=$00 - (unsued)                        ;$8D0C
-key_stop:       .byte   $32     ;=$01 - STOP                            ;$8D0D
-key_q:          .byte   $33     ;=$02 - Q                               ;$80DE
-key_c64:        .byte   $34     ;=$03 - C=    (energy bomb)             ;$8D0F
-key_spc:        .byte   $35     ;=$04 - SPACE (accelerate)              ;$8D10
-key_2:          .byte   $36     ;=$05 - 2                               ;$8D11
-key_ctrl:       .byte   $37     ;=$06 - CTRL                            ;$8D12
-key_back:       .byte   $38     ;=$07 - <-    (escape pod)              ;$8D13
-key_1:          .byte   $39     ;=$08 - 1                               ;$8D14
-key_slash:      .byte   $41     ;=$09 - /     (decelerate)              ;$8D15
-key_pow:        .byte   $42     ;=$0A - ^                               ;$8D16
-key_equ:        .byte   $43     ;=$0B - =                               ;$8D17
-key_rshft:      .byte   $44     ;=$0C - RSHIFT                          ;$8D18
-key_home:       .byte   $45     ;=$0D - HOME                            ;$8D19
-key_semi:       .byte   $46     ;=$0E - ;                               ;$8D1A
-key_star:       .byte   $30     ;=$0F - *                               ;$8D1B
-key_gbp:        .byte   $31     ;=$10 - £                               ;$8D1C
-key_comma:      .byte   $32     ;=$11 - ,     (roll anti-clockwise)     ;$8D1D
-key_at:         .byte   $33     ;=$12 - @                               ;$8D1E
-key_colon:      .byte   $34     ;=$13 - :                               ;$8D1E
-key_dot:        .byte   $35     ;=$14 - .     (roll clockwise)          ;$8D20
-key_dash:       .byte   $36     ;=$15 - -                               ;$8D21
-key_l:          .byte   $37     ;=$16 - L                               ;$8D22
-key_p:          .byte   $38     ;=$17 - P     (docking computer off)    ;$8D23
-key_plus:       .byte   $39     ;=$18 - +                               ;$8D24
-key_n:          .byte   $41     ;=$19 - N                               ;$8D25
-key_o:          .byte   $42     ;=$1A - O                               ;$8D26
-key_k:          .byte   $43     ;=$1B - K                               ;$8D27
-key_m:          .byte   $44     ;=$1C - M     (fire missile)            ;$8D28
-key_0:          .byte   $45     ;=$1D - 0                               ;$8D29
-key_j:          .byte   $46     ;=$1E - J     (quick-jump)              ;$8D2A
-key_i:          .byte   $30     ;=$1F - I                               ;$8D2B
-key_9:          .byte   $31     ;=$20 - 9                               ;$8D2C
-key_v:          .byte   $32     ;=$21 - V                               ;$8D2D
-key_u:          .byte   $33     ;=$22 - U     (untarget missile)        ;$8D2E
-key_h:          .byte   $34     ;=$23 - H     (hyperspace)              ;$8D2F
-key_b:          .byte   $35     ;=$24 - B                               ;$8D30
-key_8:          .byte   $36     ;=$25 - 8                               ;$8D31
-key_g:          .byte   $37     ;=$26 - G                               ;$8D32
-key_y:          .byte   $38     ;=$27 - Y                               ;$8D33
-key_7:          .byte   $39     ;=$28 - 7                               ;$8D34
-key_x:          .byte   $41     ;=$29 - X     (climb)                   ;$8D35
-key_t:          .byte   $42     ;=$2A - T     (target missile)          ;$8D36
-key_f:          .byte   $43     ;=$2B - F                               ;$8D37
-key_c:          .byte   $44     ;=$2C - C     (docking computer on)     ;$8D38
-key_6:          .byte   $45     ;=$2D - 6                               ;$8D39
-key_d:          .byte   $46     ;=$2E - D                               ;$8D3A
-key_r:          .byte   $30     ;=$2F - R                               ;$8D3B
-key_5:          .byte   $31     ;=$30 - 5                               ;$8D3C
-key_lshft:      .byte   $32     ;=$31 - LSHIFT                          ;$8D3D
-key_e:          .byte   $33     ;=$32 - E     (ECM)                     ;$8D3E
-key_s:          .byte   $34     ;=$33 - S     (dive)                    ;$8D3F
-key_z:          .byte   $35     ;=$34 - Z                               ;$8D40
-key_4:          .byte   $36     ;=$35 - 4                               ;$8D41
-key_a:          .byte   $37     ;=$36 - A     (fire)                    ;$8D42
-key_w:          .byte   $38     ;=$37 - W                               ;$8D43
-key_3:          .byte   $39     ;=$38 - 3                               ;$8D44
-key_down:       .byte   $41     ;=$39 - DOWN                            ;$8D45
-key_f5:         .byte   $42     ;=$3A - F5    (starboard view)          ;$8D46
-key_f3:         .byte   $43     ;=$3B - F3    (aft view)                ;$8D47
-key_f1:         .byte   $44     ;=$3C - F1    (front view)              ;$8D48
-key_f7:         .byte   $45     ;=$3D - F7    (portside view)           ;$8D49
-key_right:      .byte   $46     ;=$3E - RIGHT                           ;$8D4A
-key_return:     .byte   $30     ;=$3F - RETURN                          ;$8D4B
-key_del:        .byte   $31     ;=$40 - DELETE                          ;$8D4C
-
-                ; unused?
-                .byte   $32
-                .byte   $33
-                .byte   $34
-                .byte   $35
-                .byte   $36
-                .byte   $37
-
-get_input:                                                              ;$8D53
-;===============================================================================
-; read joystick & keyboard input:
-;
-; the keyboard is laid out as a matrix of rows & columns. writing to CIA1
-; port A ($DC00) sets which row(s) to select where bits 0-7 represent rows 0-7
-; and a bit-value of 0 means selected and 1 is ignored. reading from the port
-; returns the key-states[*] for the selected row(s).
-;
-; reads and writes to port B ($DC01) select columns in the same fashion.
-;
-; [*] note that the read byte uses a bit value of 0 to mean pressed
-;     and 1 to represent unpressed (i.e the key grounds a voltage level)
-;
-;  \   BIT 7 |  BIT 6 |  BIT 5 |  BIT 4 |  BIT 3 |  BIT 2 |  BIT 1 |  BIT 0   
-;   +--------¦--------¦--------¦--------¦--------¦--------¦--------¦--------   
-; 0 | DOWN   | F5     | F3     | F1     | F7     | RIGHT  | RETURN | DELETE
-; 1 | LSHIFT | e      | s      | z      | 4      | a      | w      | 3 
-; 2 | x      | t      | f      | c      | 6      | d      | r      | 5
-; 3 | v      | u      | h      | b      | 8      | g      | y      | 7
-; 4 | n      | o      | k      | m      | 0      | j      | i      | 9
-; 5 | ,      | @      | :      | .      | -      | l      | p      | +
-; 6 | /      | ^      | =      | RSHIFT | HOME   | ;      | *      | £ 
-; 7 | STOP   | q      | C=     | SPACE  | 2      | CTRL   | <-     | 1
-;
-; this chart adapted from:
-; <http://codebase64.org/doku.php?id=base:reading_the_keyboard> 
-;
-.export get_input
-
-       .phy                     ; preserve Y
-        
-        ; NOTE: it appears that the memory-map state when entering this
-        ; routine might vary and we cannot yet rely upon `inc`/`dec`
-
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        lda # C64_MEM::IO_ONLY
-        jsr set_memory_layout
-.else   ;///////////////////////////////////////////////////////////////////////
-        inc CPU_CONTROL
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-        ; hide sprite 1: why?
-        lda VIC_SPRITE_ENABLE
-        and # %11111101
-        sta VIC_SPRITE_ENABLE
-
-        ; clear the current keyboard state
-        ; (sets all key-states to 0)
-        jsr clear_keyboard
-
-        ; read joystick?
-        ;-----------------------------------------------------------------------
-        ldx _1d0c               ; joystick control enabled?
-       .bze :+
-
-        lda CIA1_PORTA
-        and # %00011111         ; check only first 5 bits (joystick port 2)
-        eor # %00011111         ; flip so ON = 1 instead
-       .bnz @joy                ; anything pressed?
-
-        ; read keyboard:
-        ;-----------------------------------------------------------------------
-:       clc                                                             ;$8D73
-        ldx # $00
-        sei                     ; disable interrupts before writing to CIA1
-        stx CIA1_PORTA          ; select all keyboard rows for reading ($00)
-        ldx CIA1_PORTB          ; read the keyboard matrix
-        cli                     ; enable interrupts
-        
-        ; if no keys were pressed, X will be $FF (bits are 1 for unpressed!)
-        ; and incrementing X will roll it over to 0
-        inx 
-       .bze @done               ; no keys pressed at all? skip ahead
-
-        ; begin looping through the keyboard
-        ; matrix, row by row
-        ;
-        ldx # 64                ; number of keys to scan
-        lda # %11111110         ; select keyboard row 0 for reading
-
-@row:   sei                     ; disable interrupts                    ;$8D85
-        sta CIA1_PORTA          ; select keyboard row to read
-        pha                     ; store this for later
-
-        ldy # 8                 ; initialise column counter
-
-        ; wait for the keyboard scan to happen
-:       lda CIA1_PORTB          ; read the keyboard column state        ;$8D8C
-        cmp CIA1_PORTB          ; has the state changed?
-       .bnz :-                  ; no, wait until the state has changed
-
-        cli                     ; enable interrupts again
-
-        
-@col:   ; read keys from each column in the current row:                ;$8D95
-        ;
-        lsr                     ; check the next key from the column
-        bcs :+                  ; no key pressed? skip ahead
-                                ; (note that 1 = unpressed, so carry will set)
-        
-        dec key_states, x       ; %0000000 -> %1111111
-        stx ZP_7D               ; remember currently pressed key
-        sec 
-
-:       dex                     ; move along to the next key-state      ;$8D9E
-        bmi :+                  ; if all keys are done, skip ahead
-                                ; (X will roll-under to 255, bit 7 is "minus")
-        
-        dey                     ; next column 
-       .bnz @col
-        
-        pla                     ; retrieve the CIA keyboard row value 
-        rol                     ; move to the next row pattern
-       .bnz @row                ; if all rows done, fall through
-
-:       pla                     ; level the stack off                   ;$8DA8
-        sec                     ;?
-
-@done:  lda # %01111111         ; select keyboard row 7                 ;$8DAA
-        sta CIA1_PORTA
-        bne @exit               ; always triggers
-
-        ; handle joystick:
-        ;-----------------------------------------------------------------------
-@joy:   ; joystick up:                                                  ;$8DB1
-        lsr                     ; push bit 0 off
-        bcc :+                  ; unpressed? skip ahead
-        stx joy_up              ; set up-direction pressed flag
-
-:       ; joystick down:                                                ;$8DB7
-        lsr                     ; push bit 1 off
-        bcc :+                  ; unpressed? skip ahead
-        stx joy_down            ; set down-direction pressed flag
-
-:       ; joystick left:                                                ;$8DBD
-        lsr                     ; push bit 2 off
-        bcc :+                  ; unpressed? skip ahead
-        stx joy_left            ; set left-direction pressed flag
-
-:       ; joystick right:                                               ;$8DC3
-        lsr                     ; push bit 3 off 
-        bcc :+                  ; unpressed? skip ahead
-        stx joy_right           ; set right-direction pressed flag
-
-:       ; fire button                                                   ;$8DC9
-        lsr                     ; push bit 4 off 
-        bcc :+                  ; unpressed? skip ahead
-        stx joy_fire            ; set fire-button pressed flag
-
-:       ; flip vertical axis?                                           ;$8DCF
-        lda opt_flipvert
-       .bze :+
-
-        lda joy_down
-        ldx joy_up
-        sta joy_up
-        stx joy_down
-
-:       ; flip both axises?                                             ;$8DE0
-        lda opt_flipaxis
-       .bze @exit
-
-        lda joy_down
-        ldx joy_up
-        sta joy_up
-        stx joy_down
-        lda joy_left
-        ldx joy_right
-        sta joy_right
-        stx joy_left
-
-        ;-----------------------------------------------------------------------
-
-@exit:  lda ZP_MENU_PAGE        ; which screen page are we looking at?  ;$8DFD
-        beq :+                  ; if cockpit-view, skip 
-        
-        ; for non cockpit-view pages, do not
-        ; allow these key-states to persist?
-        lda # $00
-        sta key_bomb
-        sta key_escape_pod
-        sta key_missile_target
-        sta key_missile_disarm
-        sta key_missile_fire
-        sta key_ecm
-        sta key_jump
-        sta key_docking_on
-        sta key_docking_off
-
-:                                                                       ;$8E1E
-
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        ; turn the I/O shield off and
-        ; return to 'game' memory layout
-        lda # C64_MEM::ALL
-        jsr set_memory_layout
-.else   ;///////////////////////////////////////////////////////////////////////
-        dec CPU_CONTROL
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-       .ply                     ; restore Y
-        
-        lda ZP_7D               ; return currently-pressed key in A...
-        tax                     ; ...and X
-
-        rts 
+.key_states                                                             ;$8D0C
+.get_input                                                              ;$8D53
 
 do_quickjump:                                                           ;$8E29
 ;===============================================================================
@@ -7259,7 +6959,8 @@ _8f9d:                                                                  ;$8F9D
 _8fa6:                                                                  ;$8FA6
         jsr wait_for_frame
         jsr get_input
-        cpx # $02
+
+        cpx # $02               ; "Q"?
         bne _8fb3
         stx _1d05
 _8fb3:                                                                  ;$8FB3
@@ -10300,9 +10001,13 @@ _a839:                                                                  ;$A839
         ldy # $87
         bne _a858               ; awlays branches
 
+;===============================================================================
+;       A = X1
+;       X = Y1
+;       Y = ?
+;
 _a850:                                                                  ;$A850
-        ;-----------------------------------------------------------------------
-        bit _a821
+        bit _a821               ; an unused skip?
 
         sta ZP_VAR_X1
         stx ZP_VAR_Y1
@@ -10315,45 +10020,50 @@ _a850:                                                                  ;$A850
 .endif
 
 _a858:                                                                  ;$A858
+;       Y = $00-$0F?
 .export _a858
         clv 
         
+        ; do nothing if an option is set?
         lda _1d05
-        bne _a821
+        bne _a821               ; `rts`
 
         ldx # $02
-        iny 
+        iny                     ; use Y 1-based
         sty ZP_VAR_X2
-        dey 
+        dey                     ; return to 0-based for the lookup
         lda _aa32, y
-        lsr 
-        bcs _a876
-_a86a:                                                                  ;$A86A
-        lda _aa13, x
+        lsr                     ; check bit 1 by pushing it off
+        bcs @_a876              ; did the bit fall into the carry?
+
+:       lda _aa13, x                                                    ;$A86A
         and # %00111111
         cmp ZP_VAR_X2
-        beq _a88b
+        beq @_a88b
         dex 
-        bpl _a86a
-_a876:                                                                  ;$A876
+        bpl :-
+
+@_a876:                                                                 ;$A876
         ldx # $00
         lda _aa19
         cmp _aa1a
-        bcc _a884
+        bcc :+
         inx 
         lda _aa1a
-_a884:                                                                  ;$A884
-        cmp _aa1b
-        bcc _a88b
+
+:       cmp _aa1b                                                       ;$A884
+        bcc @_a88b
         ldx # $02
-_a88b:                                                                  ;$A88B
+
+@_a88b:                                                                  ;$A88B
         tya 
         and # %01111111
         tay 
         lda _aa32, y
         cmp _aa19, x
         bcc _a821
-        sei 
+
+        sei                     ; disable interrupts
         sta _aa19, x
         bvs _a8a0+1
         lda _aa82, y
@@ -10382,8 +10092,8 @@ _a8bd:                                                                  ;$A8BD
         ora # %10000000
         sta _aa13, x
         
-        cli 
-        sec 
+        cli                     ; enable interrupts
+        sec                     ; exit with carry set
         rts 
 
 ;===============================================================================
@@ -10444,14 +10154,16 @@ interrupt_end_XA:                                                       ;$A8ED
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        ; turn off the I/O shield at the end of the interrupt
-        ; and return to the previous I/O state
+        ; the original source code uses the last-set memory layout state
+        ; recorded by the central routine for restoring the memory layout
         lda CPU_CONTROL
         and # %11111000
         ora current_memory_layout
 .else   ;///////////////////////////////////////////////////////////////////////
+        ; in elite-harmless the previous memory layout state
+        ; has been pushed to the stack
         pla 
-.endif  ;/////////////////////////////////////////////////////////////////////// 
+.endif  ;///////////////////////////////////////////////////////////////////////
         sta CPU_CONTROL
         
         pla                     ; restore A
@@ -10660,7 +10372,7 @@ interrupt_end_YXA:                                                      ;$AA04
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; the original source code uses the last-set memory layout state
-        ; recorded by the central routine for changing the memory layout
+        ; recorded by the central routine for restoring the memory layout
         lda CPU_CONTROL
         and # %11111000
         ora current_memory_layout
@@ -10668,7 +10380,7 @@ interrupt_end_YXA:                                                      ;$AA04
         ; in elite-harmless the previous memory layout state
         ; has been pushed to the stack
         pla 
-.endif  ;/////////////////////////////////////////////////////////////////////// 
+.endif  ;///////////////////////////////////////////////////////////////////////
         sta CPU_CONTROL
 
         pla                     ; restore A
@@ -10843,6 +10555,12 @@ _aaa2:                                                                  ;$AAA2
         sta current_memory_layout
         
 .else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        ;
+        ; the I/O shield is currently on so stepping down
+        ; once will turn I/O off leaving 64K of RAM
+        ;
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
         
