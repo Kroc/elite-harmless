@@ -16,8 +16,6 @@
 .ifdef  OPTION_DYME_FASTLINE
         ;///////////////////////////////////////////////////////////////////////
         .include        "draw_fastlines.inc"
-        .include        "draw_fastlines_h.inc"
-        .include        "draw_fastlines_v.inc"
 .else   ;///////////////////////////////////////////////////////////////////////
         ; original Elite line-drawing routine. pretty fast actually,
         ; but it doesn't batch pixels together before writing 

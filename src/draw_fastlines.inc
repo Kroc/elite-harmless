@@ -3,6 +3,9 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+.include        "draw_fastlines_h.inc"
+.include        "draw_fastlines_v.inc"
+
 ; line drawing optimization results:
 ; drawloop measured with VICE tickcount between $B820 and $B83C
 ;
