@@ -1,6 +1,10 @@
-; ###############################################
-; Line drawing optimization results:
-; drawloop measured with VICE tickcount between b820 and b83c
+; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2019,
+; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
+; All Rights Reserved. <github.com/Kroc/elite-harmless>
+;===============================================================================
+
+; line drawing optimization results:
+; drawloop measured with VICE tickcount between $B820 and $B83C
 ;
 ; SIMPLE SHIP (no engines visible)
 ;
@@ -44,20 +48,19 @@
 ; 104694440 - 104655991 = 38449
 ; 104744599 - 104705517 = 39082
 ;
-; ###############################################
-
 
 .macro  .draw_lines
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 ZP_LINE_HEIGHT = ZP_BD
 ZP_LINE_WIDTH = ZP_BC
 ZP_LINE_RESTORE_Y = ZP_9E
-ZP_LINE_BLOCKS = ZP_BC ; repurpose line width
+ZP_LINE_BLOCKS = ZP_BC          ; repurpose line width
 
 ;=== HLINE
 ZP_HLINE_SLOPE = ZP_BD
 ZP_HLINE_COUNTER = ZP_BF
-ZP_HLINE_ENDMASK = ZP_BE ; used for vert_line, i guess it's safe
+ZP_HLINE_ENDMASK = ZP_BE        ; used for vert_line, I guess it's safe
 
 ;=== SLINE
 ZP_SLINE_XOFF1 = ZP_BE
@@ -68,10 +71,10 @@ ZP_VLINE_BIT = ZP_BE
 ZP_VLINE_YEND = ZP_BD
 ZP_VLINE_YSTART = ZP_BF
 
-_ab47:                                                                  ;$AB47
+_ab47:
         .byte   %11000000
         .byte   %11000000
-_ab49:                                                                  ;$AB49
+_ab49:
         .byte   %00110000
         .byte   %00110000
         .byte   %00001100
@@ -82,7 +85,7 @@ _ab49:                                                                  ;$AB49
         .byte   %11000000
 
 
-draw_line:                                                              ;$AB91
+draw_line:
 ;===============================================================================
 ; draw a line:
 ;
@@ -118,40 +121,40 @@ draw_line:                                                              ;$AB91
         ;       when building the list of lines to draw, rather than every
         ;       time a line is drawn
         ;
-        sty ZP_LINE_RESTORE_Y                ; preserve Y
-                                        
-        sec
+        sty ZP_LINE_RESTORE_Y   ; preserve Y
+
+        sec 
         ; get abs height of line:
-        lda ZP_VAR_Y2                   ; take line-ending Y pos
-        sbc ZP_VAR_Y1                   ; subtract the line-starting Y pos
+        lda ZP_VAR_Y2           ; take line-ending Y pos
+        sbc ZP_VAR_Y1           ; subtract the line-starting Y pos
         beq @flat
-        bcs :+                          ; if line is top-to-bottom, skip ahead
-        eor #%11111111                 ; flip all bits,
-        adc #$01                       ; and add 1 (two's compliment)
+        bcs :+                  ; if line is top-to-bottom, skip ahead
+        eor #%11111111          ; flip all bits,
+        adc #$01                ; and add 1 (two's compliment)
         sec
-:       sta ZP_LINE_HEIGHT                       ; store line-height             ;$ABB2        
+:       sta ZP_LINE_HEIGHT      ; store line-height
                 
         ; get abs width of the line:
-        lda ZP_VAR_X2                   ; take line-starting X pos
-        sbc ZP_VAR_X1                   ; and subtract line-ending X pos
-        bcs :+                          ; if line is left-to-right, skip ahead
-        eor #%11111111                 ; flip all bits,
-        adc #$01                       ; and add 1 (two's compliment)
-:       sta ZP_LINE_WIDTH                       ; store line-width              ;$ABA5
+        ;
+        lda ZP_VAR_X2           ; take line-starting X pos
+        sbc ZP_VAR_X1           ; and subtract line-ending X pos
+        bcs :+                  ; if line is left-to-right, skip ahead
+        eor #%11111111          ; flip all bits,
+        adc #$01                ; and add 1 (two's compliment)
+:       sta ZP_LINE_WIDTH       ; store line-width
 
-        
         ; is the line "horizontal" or "vertical"?
         ; note: A = line-width
         ;
-        cmp ZP_LINE_HEIGHT                       ; compare line-height with width                       
+        cmp ZP_LINE_HEIGHT      ; compare line-height with width
         bcc @vert
-        bne draw_line_horz              ; a "horiztonal" line?
+        bne draw_line_horz      ; a "horiztonal" line?
 
-@vert:   ; handle "vertical" line
+@vert:  ; handle "vertical" line
         jmp draw_line_vert
 
 @flat:
         jmp draw_straight_line
-        
-        
+
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro

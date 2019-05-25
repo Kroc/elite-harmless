@@ -298,7 +298,10 @@ draw_line_horz:                                                         ;$ABBB
         ; overflows a step vertically will be taken
         sta ZP_BD
 
-        clc                              ;; unneccessary, the carry is reset on cpy
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        clc                     ; unneccessary, the carry is reset on cpy
+.endif  ;///////////////////////////////////////////////////////////////////////
         ldy ZP_VAR_Y1
         cpy ZP_VAR_Y2
        .bge draw_line_horzup

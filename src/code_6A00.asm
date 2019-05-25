@@ -11,15 +11,18 @@
 .include        "math_3d.inc"
 .include        "code_keyboard.inc"
 
-.ifdef OPTION_DYME_FASTLINE
- .include        "draw_fastlines.inc"
- .include        "draw_fastlines_h.inc"
- .include        "draw_fastlines_v.inc"
-.else
- .include        "draw_lines.inc"
-.endif
-
-
+; use replacement line-drawing routines if specified
+;
+.ifdef  OPTION_DYME_FASTLINE
+        ;///////////////////////////////////////////////////////////////////////
+        .include        "draw_fastlines.inc"
+        .include        "draw_fastlines_h.inc"
+        .include        "draw_fastlines_v.inc"
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; original Elite line-drawing routine. pretty fast actually,
+        ; but it doesn't batch pixels together before writing 
+        .include        "draw_lines.inc"
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -10623,9 +10626,12 @@ _aaa2:                                                                  ;$AAA2
 ; from "draw_lines.inc" insert the line-drawing code
 ;
 .draw_lines                                                             ;$AB31
-.ifdef OPTION_DYME_FASTLINE
- .HLINE_DRAW
- .VLINE_DRAW
+
+.ifdef  OPTION_DYME_FASTLINE
+;///////////////////////////////////////////////////////////////////////////////
+.hline_draw
+.vline_draw
+;///////////////////////////////////////////////////////////////////////////////
 .endif
 
 

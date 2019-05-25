@@ -278,6 +278,7 @@ echo "- OK"
 
 ##options=""
 ##options="-DOPTION_MATHTABLES"
+# enable undocumented opcodes and the replacement line-drawing routines
 options="--cpu 6502X -DOPTION_DYME_FASTLINE"
 
 echo
