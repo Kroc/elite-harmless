@@ -130,20 +130,20 @@ draw_line:
         ; get abs height of line:
         lda ZP_VAR_Y2           ; take line-ending Y pos
         sbc ZP_VAR_Y1           ; subtract the line-starting Y pos
-        beq @flat
+;;        beq @flat
         bcs :+                  ; if line is top-to-bottom, skip ahead
-        eor #%11111111          ; flip all bits,
-        adc #$01                ; and add 1 (two's compliment)
-        sec
+        eor # %11111111         ; flip all bits,
+        adc # $01               ; and add 1 (two's compliment)
+        sec 
 :       sta ZP_LINE_HEIGHT      ; store line-height
-                
+
         ; get abs width of the line:
         ;
         lda ZP_VAR_X2           ; take line-starting X pos
         sbc ZP_VAR_X1           ; and subtract line-ending X pos
         bcs :+                  ; if line is left-to-right, skip ahead
-        eor #%11111111          ; flip all bits,
-        adc #$01                ; and add 1 (two's compliment)
+        eor # %11111111         ; flip all bits,
+        adc # $01               ; and add 1 (two's compliment)
 :       sta ZP_LINE_WIDTH       ; store line-width
 
         ; is the line "horizontal" or "vertical"?
@@ -151,13 +151,16 @@ draw_line:
         ;
         cmp ZP_LINE_HEIGHT      ; compare line-height with width
         bcc @vert
-        bne draw_line_horz      ; a "horiztonal" line?
+
+        jmp draw_line_horz
+
+;;        bne draw_line_horz      ; a "horiztonal" line?
+
+;;@flat:  ; a perfectly flat line
+;;        jmp draw_straight_line
 
 @vert:  ; handle "vertical" line
         jmp draw_line_vert
-
-@flat:
-        jmp draw_straight_line
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
