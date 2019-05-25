@@ -910,7 +910,7 @@ _2131:                                                                  ;$2131
         jsr _b410
 _2138:                                                                  ;$2138
         ; are we in the cockpit-view?
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _21ab
 
         jsr _a626
@@ -1270,7 +1270,7 @@ _2342:                                                                  ;$2342
         jsr _a786
 _2345:                                                                  ;$2345
         ; are we in the cockpit-view?
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _2366
 
         jmp _2a32
@@ -2614,8 +2614,11 @@ _2c88:                                                                  ;$2C88
 
         dex                     ; "Competent" status or below
         bne _2cee
-_2c9b:                                                                  ;$2C9B
-.export _2c9b
+
+; display status page
+;===============================================================================
+status_screen:                                                          ;$2C9B
+.export status_screen
 
         ; switch to page "8"(?)
         lda # $08
@@ -4873,7 +4876,7 @@ _379e:                                                                  ;$397E
 _37a5:                                                                  ;$37A5
         sta ZP_AC
 
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         pha 
         
         ; switch to cockpit-view?
@@ -4881,7 +4884,7 @@ _37a5:                                                                  ;$37A5
         jsr set_page
         
         pla 
-        sta ZP_MENU_PAGE
+        sta ZP_SCREEN
 
 _37b2:                                                                  ;$37B2
 .export _37b2
@@ -5678,7 +5681,7 @@ shoot_lasers:                                                           ;$3CDB
 _3cfa:                                                                  ;$3CFA
         ;=======================================================================
         ; are we in the cockpit-view?
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _3cda                       ; no, exit (`rts` above us)
 
         lda # 32                        ; X2
