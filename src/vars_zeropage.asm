@@ -405,21 +405,21 @@ ZP_9D                   = $9d   ;? x11
 ZP_9E                   = $9e   ;? x12
 ZP_9F                   = $9f   ;? x10
 
-; which 'page' the main screen is on,
-; e.g. cockpit-view, galactic chart &c.
+; which screen the game is on, e.g. cockpit-view, galactic chart &c.
+; not to be confused with the bitmap screen and colour screens
 ;
 ;       $00 = cockpit-view (fore/left/right/aft-view is a separate variable)
 ;       $01 = ?
 ;       $03 = ?
 ;       $04 = ?
-;       $08 = status?
+;       $08 = status screen
 ;       $0D = ?
 ;       $10 = ?
 ;       $20 = ?
 ;       $40 = galactic chart
 ;       $80 = short-range (local) chart
 ;
-ZP_MENU_PAGE            = $a0
+ZP_SCREEN               = $a0
 
 ZP_VAR_Z                = $a1   ; a common "Z" variable
 

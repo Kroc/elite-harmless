@@ -76,7 +76,7 @@
 .import dust_swap_xy:absolute
 .import _2c4e:absolute
 .import _2c50:absolute
-.import _2c9b:absolute
+.import status_screen:absolute
 .import _2d69:absolute
 .import _2dc5:absolute
 .import print_tiny_value:absolute
@@ -386,9 +386,12 @@ _6a9b:                                                                  ;$6A9B
         jsr print_flight_token
         jmp print_space
 
-_6aa1:                                                                  ;$6AA1
 ;===============================================================================
-        ; switch to page "1"(?)
+; planetary information screen
+;
+planet_screen:                                                          ;$6AA1
+
+        ; switch to planetary information page
         lda # $01
         jsr _6a2f
 
@@ -681,7 +684,8 @@ _6ba9:                                                                  ;$6BA9
 ;===============================================================================
 ; galactic chart
 ;
-_6c1c:                                                                  ;$6C1C
+galactic_chart:                                                         ;$6C1C
+
         lda # $40               ; page-ID for galactic chart
         jsr set_page            ; switch pages, clearing the screen
         
@@ -744,7 +748,7 @@ _6c40:                                                                  ;$6C40
         sta ZP_90
 _6c6d:                                                                  ;$6C6D
         lda # $18
-        ldx ZP_MENU_PAGE
+        ldx ZP_SCREEN
         bpl _6c75
         lda # $00
 _6c75:                                                                  ;$6C75
@@ -784,7 +788,7 @@ _6ca2:                                                                  ;$6CA2
         adc ZP_93
         cmp # $98
         bcc _6cb8
-        ldx ZP_MENU_PAGE
+        ldx ZP_SCREEN
         bmi _6cb8
         lda # $97
 _6cb8:                                                                  ;$6CB8
@@ -811,7 +815,7 @@ _6cc3:                                                                  ;$6CC3
         jmp _6cfe
 
 _6cda:                                                                  ;$6CDA
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bmi _6cc3
 
         lda PLAYER_FUEL
@@ -855,8 +859,10 @@ _6cfe:                                                                  ;$6CFE
         jmp _805e
 
 ;===============================================================================
+; buy cargo screen
+;
+buy_screen:                                                             ;$6D16
 
-_6d16:                                                                  ;$6D16
         ; switch to page "2"(?)
         lda # $02
         jsr _6a2f
@@ -1025,7 +1031,11 @@ _6e30:                                                                  ;$6E30
         jsr _7627
         ldy VAR_04EF            ; item index?
         jmp _6e5d
-_6e41:                                                                  ;$6E41
+
+;===============================================================================
+; sell cargo screen
+;
+sell_cargo:                                                             ;$6E41
         ; switch to page "4"(?)
         lda # $04
         jsr _6a2f
@@ -1080,7 +1090,7 @@ _6e5d:                                                                  ;$6E5d
         jsr print_tiny_value
         jsr _72b8
 
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         cmp # $04
         bne _6eca
 
@@ -1119,7 +1129,7 @@ _6eca:                                                                  ;$6ECA
         cpy # $11
         bcc _6e5a
 
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         cmp # $04
         bne _6ede
         
@@ -1170,8 +1180,10 @@ _6eea:                                                                  ;$6EEA
         jmp print_char
 
 ;===============================================================================
+; inventory screen
+;
+inventory_screen:                                                       ;$6F16
 
-_6f16:                                                                  ;$6F16
         lda # $08
         jsr _6a2f
 
@@ -1247,7 +1259,7 @@ _6f55:                                                                  ;$6F55
         sta ZP_8E
 _6f82:                                                                  ;$6F82
 .export _6f82
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bmi _6fa9
 
         lda TSYSTEM_POS_X
@@ -1307,12 +1319,13 @@ _6fce:                                                                  ;$6FCE
 ;===============================================================================
 ; short-range (local) chart
 ;
-_6fdb:                                                                  ;$6FDB
+local_chart:                                                            ;$6FDB
+
         lda # $c7
         sta ZP_B8
         sta ZP_B7
 
-        lda # $80               ; page-ID for short-range (local) chart
+        lda # $80               ; screen-ID for short-range (local) chart
         jsr set_page            ; switch pages, clearing the screen
         
 .ifdef  OPTION_ORIGINAL
@@ -1573,7 +1586,7 @@ _7165:                                                                  ;$7165
         bmi _71ca
 
         ; are we in the cockpit-view?
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         beq _71c4
 
         and # %11000000
@@ -1601,7 +1614,7 @@ _7181:                                                                  ;$7181
         jsr set_cursor_col
         
         lda # $17
-        ldy ZP_MENU_PAGE
+        ldy ZP_SCREEN
         bne _7196
 
         lda # $11
@@ -1822,7 +1835,9 @@ _72db:                                                                  ;$72DB
 
         lda # $ff
         bne _72c7
-_72e4:                                                                  ;$72E4
+
+market_screen:                                                          ;$72E4
+
         lda # $10
         jsr _6a2f
 
@@ -1970,8 +1985,10 @@ _73c1:                                                                  ;$73C1
         bcs _73c1
         sta DUST_COUNT          ; number of dust particles
 
-        ldx # $00
-        jsr _a6ba
+        ; change to cockpit front view
+        ldx # $00               ; =front view
+        jsr _a6ba               ; switch to cockpit
+
         lda PSYSTEM_POS_Y
         eor # %00011111
         sta PSYSTEM_POS_Y
@@ -1992,7 +2009,7 @@ _73dd:                                                                  ;$73DD
 _73e8:                                                                  ;$73E8
         sta PLAYER_FUEL
         
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _73f5
 
         jsr set_page
@@ -2008,16 +2025,17 @@ _73f5:                                                                  ;$73F5
         jsr _83df
         jsr _7a9f
 
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         and # %00111111
         bne _73dc
         
         jsr _a731
 
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _7452
-        inc ZP_MENU_PAGE
-_741c:                                                                  ;$741C
+        inc ZP_SCREEN
+
+_741c:  ; launch ship from docking?                                     ;$741C
         ldx ZP_A7
         beq _744b
         jsr _379e
@@ -2036,7 +2054,7 @@ _741c:                                                                  ;$741C
         sta PLAYER_LEGAL
 
         lda # $ff
-        sta ZP_MENU_PAGE
+        sta ZP_SCREEN
         
         jsr _37b2
 _744b:                                                                  ;$744B
@@ -2046,9 +2064,9 @@ _744b:                                                                  ;$744B
 
 _7452:                                                                  ;$7452
         bmi _7457
-        jmp _6c1c
+        jmp galactic_chart
 _7457:                                                                  ;$7457
-        jmp _6fdb
+        jmp local_chart
 
 
 ; increase / decrease cash
@@ -2117,7 +2135,11 @@ _74a5:                                                                  ;$74A5
 
 _74b8:   jmp _88e7                                                      ;$74B8
 
-_74bb:                                                                  ;$74BB
+;===============================================================================
+; buy equipment screen
+;
+equipment_screen:                                                       ;$74BB
+
         lda # $20
         jsr _6a2f
 
@@ -2318,7 +2340,7 @@ _760c:                                                                  ;$760C
         jsr _76a1
 _7619:                                                                  ;$7619
         jsr _761f
-        jmp _74bb
+        jmp equipment_screen
 
 _761f:                                                                  ;$761F
         jsr print_space
@@ -3336,7 +3358,7 @@ _7ac2:                                                                  ;$7AC2
         lda # $81
         jsr _7c6b
 _7af3:                                                                  ;$7AF3
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _7b1a
 _7af7:                                                                  ;$7AF7
         ldy DUST_COUNT          ; number of dust particles
@@ -4598,7 +4620,7 @@ _81ee:                                                                  ;$81EE
 ;===============================================================================
 
 _81fb:                                                                  ;$81FB
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _8204
 
         jsr _8ee3
@@ -5088,7 +5110,7 @@ _845c:                                                                  ;$845C
 ;===============================================================================
 
 _8475:                                                                  ;$8475
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _8487
 
         lda VAR_04E6
@@ -5358,6 +5380,8 @@ _8612:                                                                  ;$8612
         dec ZP_A2
         bpl _8612
 
+; main loop?
+;
 _8627:                                                                  ;$8627
         ;=======================================================================
         ; reset the stack pointer!
@@ -5378,12 +5402,12 @@ _8627:                                                                  ;$8627
 :       stx VAR_0487                                                    ;$863B
 
 @_863e:                                                                 ;$863E
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
        .bnz :+                  ; not flight screen? skip
 
         jsr _2ff3
 
-:       lda ZP_MENU_PAGE                                                ;$8645
+:       lda ZP_SCREEN                                                ;$8645
        .bze @_8654              ; on flight screen? skip
 
         and _1d08
@@ -5420,7 +5444,7 @@ _8627:                                                                  ;$8627
         ;-----------------------------------------------------------------------
         ; skip over if less than 256 Trumbles™
 :       lda PLAYER_TRUMBLES_HI                                          ;$8670
-       .bze _86a1
+       .bze @_86a1
         
         sta ZP_VAR_T            ; put aside the Trumble™ hi-byte
                                 ; this will be the 'odds' (n/256)
@@ -5433,10 +5457,10 @@ _8627:                                                                  ;$8627
 
 :       jsr get_random_number   ; pick a random number 0-255            ;$8680
         cmp ZP_VAR_T            ; compare against our odds
-        bcs _86a1               ; if random number >= odds, skip
+        bcs @_86a1              ; if random number >= odds, skip
 
         jsr get_random_number
-        ora # %01000000
+        ora # %01000000         ;?
         tax 
 
         lda # $80
@@ -5447,142 +5471,166 @@ _8627:                                                                  ;$8627
         txa 
         and # %00001111
         tax 
+
         lda # $f1
         
 :       ldy # $0e                                                       ;$869C
-        jsr _a850
+        jsr _a850               ;???
 
-_86a1:                                                                  ;$86A1
+@_86a1:                                                                 ;$86A1
         jsr _81fb
 _86a4:                                                                  ;$86A4
-        jsr _86b1
+        jsr @_86b1
         lda ZP_A7
-        beq _86ae
+        beq :+
         jmp _8627
+:       jmp _84ed                                                       ;$86AE
 
-_86ae:                                                                  ;$86AE
-        jmp _84ed
+        ; key commands:
+        ;-----------------------------------------------------------------------
+@_86b1:                                                                 ;$86B1
+        ; key for status page pressed?
+        ; (default '8' in original Elite)
+        cmp # .key_index(key_status)
+        bne :+                  ; no? skip over
+        jmp status_screen       ; switch to the status screen
 
-_86b1:                                                                  ;$86B1
-        cmp # $25
-        bne _86b8
-        jmp _2c9b
+        ; key for galactic chart pressed?
+        ; (default '4' in original Elite)
+:       cmp # .key_index(key_chart_galactic)                            ;$86B8
+        bne :+                  ; no? skip over
+        jmp galactic_chart      ; switch to galactic chart screen
 
-_86b8:                                                                  ;$86B8
-        cmp # $35
-        bne _86bf
-        jmp _6c1c
+        ; key for local (short-range) chart pressed?
+        ; (default '5' in original Elite)
+:       cmp # .key_index(key_chart_local)                               ;$86BF
+        bne :+                  ; no? skip over
+        jmp local_chart         ; switch to local chart screen
 
-_86bf:                                                                  ;$86BF
-        cmp # $30
-        bne _86c6
-        jmp _6fdb
+        ; key for planetary information pressed?
+        ; (default '6' in original Elite)
+:       cmp # .key_index(key_planet)                                    ;$86C6
+        bne :+                  ; no? skip over
+        jsr _70ab               ; prepare planet seed?
+        jmp planet_screen       ; switch to planetary information screen
 
-_86c6:                                                                  ;$86C6
-        cmp # $2d
-        bne _86d0
-        jsr _70ab
-        jmp _6aa1
+        ; key for inventory screen pressed?
+        ; (default '9' in original Elite)
+:       cmp # .key_index(key_inventory)                                 ;$68D0
+        bne :+                  ; no? skip over
+        jmp inventory_screen    ; switch to inventory screen
 
-_86d0:                                                                  ;$68D0
-        cmp # $20
-        bne _86d7
-        jmp _6f16
+        ; key for market prices screen pressed?
+        ; (default '7' in original Elite)
+:       cmp # .key_index(key_market)                                    ;$86D7
+        bne :+                  ; no? skip over
+        jmp market_screen       ; switch to market prices screen
 
-_86d7:                                                                  ;$86D7
-        cmp # $28
-        bne _86de
-        jmp _72e4
+:       cmp # $3c               ; 'F1'?                                 ;$86DE
+        bne :+                  ; no? skip over
+        jmp _741c               ; launch?!
 
-_86de:                                                                  ;$86DE
-        cmp # $3c
-        bne _86e5
-        jmp _741c
+:       bit ZP_A7                                                       ;$86E5
+        bpl @_870d
 
-_86e5:                                                                  ;$86E5
-        bit ZP_A7
-        bpl _870d
-        cmp # $38
-        bne _86f0
-        jmp _74bb
+        ; key for buy equipment screen pressed?
+        ; (default '3' in original Elite)
+        cmp # .key_index(key_buy_equipment)
+        bne :+                  ; no? skip over
+        jmp equipment_screen    ; switch to buy equipment screen
 
-_86f0:                                                                  ;$86F0
-        cmp # $08
-        bne _86f7
-        jmp _6d16
+        ; key for buy cargo screen pressed?
+        ; (default '1' in original Elite)
+:       cmp # .key_index(key_buy_cargo)                                 ;$86F0
+        bne :+                  ; no? skip over
+        jmp buy_screen          ; switch to buy cargo screen
 
-_86f7:                                                                  ;$86F7
-        cmp # $12
-        bne _8706
+:       cmp # $12               ; '@'?                                  ;$86F7
+        bne @_8706
         jsr _8ae7
-        bcc _8703
-        jmp _88ac
+        bcc :+
+        jmp _88ac               ;? (do something on disk-error?)
+:       jmp _88e7                                                       ;$8703
 
-_8703:                                                                  ;$8703
-        jmp _88e7
+        ; key for sell cargo screen pressed?
+        ; (default '2' in original Elite)
+@_8706:                                                                 ;$8706
+        cmp # .key_index(key_sell_cargo)
+        bne @_8724
+        jmp sell_cargo          ; switch to sell cargo screen
 
-_8706:                                                                  ;$8706
-        cmp # $05
-        bne _8724
-        jmp _6e41
+@_870d: ; cockpit view keys:                                            ;$870D
+        ;-----------------------------------------------------------------------
+        ; rear view -- 'F3' by default
+        cmp # .key_index(key_view_rear)
+        beq @rear
+        ; left view -- 'F5' by default
+        cmp # .key_index(key_view_left)
+        beq @left
+        ; right view -- 'F7' by default
+        cmp # .key_index(key_view_right)
+        bne @_8724
 
-_870d:                                                                  ;$870D
-        cmp # $3b
-        beq _871f
-        cmp # $3a
-        beq _871c
-        cmp # $3d
-        bne _8724
-        ldx # $03
+        ; select right view:
+@right: ldx # $03
+
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
-_871c:  ldx # $02                                                       ;$871C
+
+        ; select left view:
+@left:  ldx # $02                                                       ;$871C
+
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
-_871f:  ldx # $01                                                       ;$871F
+        
+        ; select rear view:
+@rear:  ldx # $01                                                       ;$871F
 
+        ; set cockpit camera view?
         jmp _a6ba
 
-_8724:                                                                  ;$872F
+@_8724:                                                                 ;$872F
+        ;-----------------------------------------------------------------------
+        ; TODO: why not `cmp #xx`? (2 cycles faster)
         bit key_hyperspace      ; hyperspace key pressed?
-        bpl _872c
+        bpl :+
         
         jmp _715c
 
-_872c:                                                                  ;$872C
-        cmp # $2e
+:       cmp # $2e               ; 'f'?                                  ;$872C
         beq _877e
-        cmp # $2b
-        bne _8741
+        cmp # $2b               ; 'c'?
+        bne :+
         lda ZP_A7
         beq _877d
 
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         and # %11000000
         beq _877d
         
         jmp _31c6
 
-_8741:                                                                  ;$8741
-        sta ZP_TEMP_VAR
+:       sta ZP_TEMP_VAR                                                 ;$8741
 
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         and # %11000000
 
         beq _875f
         lda ZP_66               ; hyperspace countdown (outer)?
         bne _875f
+        
         lda ZP_TEMP_VAR
         cmp # $1a
-        bne _875c
+        bne :+
+
         jsr _6f82
         jsr set_psystem_to_tsystem
         jmp _6f82
 
-_875c:                                                                  ;$875C
-        jsr _6f55
+:       jsr _6f55                                                       ;$875C
+
 _875f:                                                                  ;$875F
         lda ZP_66               ; hyperspace countdown (outer)?
         beq _877d
@@ -5604,7 +5652,8 @@ _877d:                                                                  ;$877D
 
 _877e:                                                                  ;$877E
 .export _877e
-        lda ZP_MENU_PAGE
+
+        lda ZP_SCREEN
         and # %11000000
         beq _877d
 
@@ -5664,6 +5713,7 @@ _87b8:                                                                  ;$87B8
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 ; BRK routine, set up by `debug_for_brk`
+;
 debug_brk:                                                              ;$87B9
 .export debug_brk
 
@@ -5724,7 +5774,7 @@ _87fd:                                                                  ;$87FD
         sta ZP_POLYOBJ_XPOS_LO
 
         ldy # $00
-        sty ZP_MENU_PAGE
+        sty ZP_SCREEN
         sty ZP_POLYOBJ_XPOS_MI
         sty ZP_POLYOBJ_YPOS_MI
         sty ZP_POLYOBJ_ZPOS_MI
@@ -5894,7 +5944,7 @@ _88f0:                                                                  ;$88F0
         dex 
         bne :-
 
-        stx ZP_MENU_PAGE
+        stx ZP_SCREEN
 _88fd:                                                                  ;$88FD
         jsr _89eb
         cmp _25ff
@@ -5944,7 +5994,7 @@ _8920:                                                                  ;$8920
         jsr set_page
         
         lda # $00
-        sta ZP_MENU_PAGE
+        sta ZP_SCREEN
 
         lda # $60
         sta ZP_POLYOBJ_M0x2_HI
@@ -6718,7 +6768,7 @@ do_quickjump:                                                           ;$8E29
         sta POLYOBJ_01 + PolyObject::zpos + 2
 
         lda # $01
-        sta ZP_MENU_PAGE
+        sta ZP_SCREEN
         sta ZP_A3               ; move counter?
         lsr 
         sta VAR_048A
@@ -6961,10 +7011,10 @@ _8fa6:                                                                  ;$8FA6
         jsr get_input
 
         cpx # $02               ; "Q"?
-        bne _8fb3
+        bne :+
         stx _1d05
-_8fb3:                                                                  ;$8FB3
-        ldy # $00
+:       ldy # $00                                                       ;$8FB3
+
 _8fb5:                                                                  ;$8FB5
         jsr _8eba               ; flip a flag?
         iny 
@@ -6983,17 +7033,17 @@ _8fca:                                                                  ;$8FCA
         beq _8fd5
         jsr _9231
 _8fd5:                                                                  ;$8FD5
-        cpx # $33
+        cpx # $33               ; "S"?
         bne _8fde
         lda # $00
         sta _1d05
 _8fde:                                                                  ;$8FDE
-        cpx # $07
+        cpx # $07               ; "<-"?
         bne _8fe5
         jmp _8882
 
 _8fe5:                                                                  ;$8FE5
-        cpx # $0d
+        cpx # $0d               ; "HOME"?
         bne _8fa6
 
 _8fe9:                                                                  ;$8FE9
@@ -7035,7 +7085,7 @@ _900d:                                                                  ;$900D
         pha 
         
         lda # $10
-        ldx ZP_MENU_PAGE
+        ldx ZP_SCREEN
         beq _9019+1
 
         jsr txt_docked_token15
@@ -9640,7 +9690,13 @@ _a6ae:                                                                  ;$A6AE
         jmp _7af3
 
 ;===============================================================================
-
+; set cockpit view (front / rear / left / right)
+;
+;       X = $00 = front
+;           $01 = rear
+;           $02 = left
+;           $03 = right
+;
 _a6ba:                                                                  ;$A6BA
         lda # $00
 
@@ -9649,7 +9705,7 @@ _a6ba:                                                                  ;$A6BA
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ldy ZP_MENU_PAGE
+        ldy ZP_SCREEN
         bne _a6ae
         
         cpx VAR_0486
@@ -9772,7 +9828,7 @@ set_page:                                                               ;$A72F
 
 .export set_page
 
-        sta ZP_MENU_PAGE
+        sta ZP_SCREEN
 _a731:                                                                  ;$A731
         jsr txt_docked_token02
 
@@ -9807,7 +9863,7 @@ _a75d:                                                                  ;$A75D
         jsr set_cursor_row
         
         ; are we in the cockpit-view?
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne :+
         
         lda # 11
@@ -11127,7 +11183,7 @@ _b21a:                                                                  ;$B21A
         ;-----------------------------------------------------------------------
 
         ; are we in the cockpit-view?
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
        .bze :+
 
         cmp # $0d
@@ -11168,7 +11224,7 @@ _b25d:                                                                  ;$B25D
         dey 
         bpl :-
 
-        ldx ZP_MENU_PAGE
+        ldx ZP_SCREEN
         cpx # $02
         beq _b2a5
         
@@ -11602,7 +11658,7 @@ _b40f:                                                                  ;$B40F
 _b410:                                                                  ;$B410
 .export _b410
 
-        lda ZP_MENU_PAGE
+        lda ZP_SCREEN
         bne _b40f
 
         lda ZP_POLYOBJ_VISIBILITY
