@@ -276,8 +276,9 @@ rm -f bin/*.d64
 
 echo "- OK"
 
-options=""
+##options=""
 ##options="-DOPTION_MATHTABLES"
+options="--cpu 6502X -DOPTION_DYME_FASTLINE"
 
 echo
 echo "- assemble 'disk_boot_exo.asm'"

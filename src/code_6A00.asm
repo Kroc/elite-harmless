@@ -8,9 +8,18 @@
 
 .include        "vars_zeropage.asm"
 .include        "text/text_docked_fns.asm"
-.include        "draw_lines.inc"
 .include        "math_3d.inc"
 .include        "code_keyboard.inc"
+
+.ifdef OPTION_DYME_FASTLINE
+ .include        "draw_fastlines.inc"
+ .include        "draw_fastlines_h.inc"
+ .include        "draw_fastlines_v.inc"
+.else
+ .include        "draw_lines.inc"
+.endif
+
+
 
 ; yes, I am aware that cc65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -171,7 +180,7 @@ _6a00:                                                                  ;$6A00
 
         sta VAR_04EF            ; item index?
         lda # $01
-
+        
 _6a05:                                                                  ;$6A05
 ;-------------------------------------------------------------------------------
 ;       A = initial quantity count
@@ -202,7 +211,7 @@ _6a05:                                                                  ;$6A05
         ;
         adc PLAYER_TRUMBLES_HI
 .endif  ;///////////////////////////////////////////////////////////////////////
-
+        
         ; will the selected cargo fit in your hold?
         ;
         ; carry unset = OK
@@ -211,7 +220,7 @@ _6a05:                                                                  ;$6A05
         cmp SHIP_HOLD           ; compare cargo capacity of the player's ship
         
         pla                     ; restore A
-        rts 
+        rts
 
 @kg:                                                                    ;$6A1B
         ;-----------------------------------------------------------------------
@@ -5374,7 +5383,7 @@ _8627:                                                                  ;$8627
         beq @_863e
         dex 
         beq :+
-        dex                
+        dex 
 :       stx VAR_0487                                                    ;$863B
 
 @_863e:                                                                 ;$863E
@@ -6423,7 +6432,7 @@ _8bc0:                                                                  ;$8BC0
         inc CPU_CONTROL
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
-
+        
         lda # %00000000
         sta VIC_INTERRUPT_CONTROL
         cli 
@@ -10505,7 +10514,7 @@ _aaa2:                                                                  ;$AAA2
         ;
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
-        
+
         sei                     ; disable interrupts
 
         ; configure interrupts (regular and non-interruptable)
@@ -10548,7 +10557,7 @@ _aaa2:                                                                  ;$AAA2
         and # %11111000
         ora # C64_MEM::ALL
         sta CPU_CONTROL
-
+        
         ; record this as the game's
         ; current memory-layout state
         lda # C64_MEM::ALL
@@ -10614,9 +10623,13 @@ _aaa2:                                                                  ;$AAA2
 ; from "draw_lines.inc" insert the line-drawing code
 ;
 .draw_lines                                                             ;$AB31
+.ifdef OPTION_DYME_FASTLINE
+ .HLINE_DRAW
+ .VLINE_DRAW
+.endif
 
 
-_b09d:                                                                  ;$B09D
+_b09d:                                                                  ;$B09DB
 ;===============================================================================
 ; plot a multi-color pixel
 ;
