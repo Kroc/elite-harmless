@@ -208,21 +208,23 @@ _hline_startmask = _2907
         ; lines: top-down, i.e. "\", and bottom-up, i.e. "/"
         ;
 draw_line_horz:
+.export draw_line_horz
+
         lax ZP_VAR_X1
         cpx ZP_VAR_X2
         bcc :+
         
         ; line is the wrong way around,
         ; flip the line's direction
-;        dec VAR_06F4                    ;?
+;        dec VAR_06F4           ;?
 
-        lda ZP_VAR_X2                   ; flip beginning and end points;
-        sta ZP_VAR_X1                   ; line-drawing will proceed
-        stx ZP_VAR_X2                   ; left-to-right
-        ldx ZP_VAR_Y2                   ; also flip vertically, so that the
-        ldy ZP_VAR_Y1                   ; line proceeds from the higher to
-        stx ZP_VAR_Y1                   ; the lower Y-coordinate
-        sty ZP_VAR_Y2                   ; Y = vertical start point (pixels)
+        lda ZP_VAR_X2           ; flip beginning and end points;
+        sta ZP_VAR_X1           ; line-drawing will proceed
+        stx ZP_VAR_X2           ; left-to-right
+        ldx ZP_VAR_Y2           ; also flip vertically, so that the
+        ldy ZP_VAR_Y1           ; line proceeds from the higher to
+        stx ZP_VAR_Y1           ; the lower Y-coordinate
+        sty ZP_VAR_Y2           ; Y = vertical start point (pixels)
         sec 
 
         ;-----------------------------------------------------------------------
@@ -510,6 +512,7 @@ draw_straight_line:
         ; end pixel (or start pixel if reversed)
         ; seems to be excluded in all lines
         beq _hline_exit4_norestore
+        
         sty ZP_LINE_RESTORE_Y   ; preserve Y
         bcc _sline_enter
 

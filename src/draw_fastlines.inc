@@ -55,24 +55,24 @@
 .macro  .draw_lines
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-ZP_LINE_HEIGHT = ZP_BD
-ZP_LINE_WIDTH = ZP_BC
-ZP_LINE_RESTORE_Y = ZP_9E
-ZP_LINE_BLOCKS = ZP_BC          ; repurpose line width
+ZP_LINE_HEIGHT          = ZP_REG_H
+ZP_LINE_WIDTH           = ZP_REG_W
+ZP_LINE_RESTORE_Y       = ZP_9E
+ZP_LINE_BLOCKS          = ZP_REG_W      ; repurpose line width
 
 ;=== HLINE
-ZP_HLINE_SLOPE = ZP_BD
-ZP_HLINE_COUNTER = ZP_BF
-ZP_HLINE_ENDMASK = ZP_BE        ; used for vert_line, I guess it's safe
+ZP_HLINE_SLOPE          = ZP_REG_H
+ZP_HLINE_COUNTER        = ZP_BF
+ZP_HLINE_ENDMASK        = ZP_BE         ; used for vert_line, I guess it's safe
 
 ;=== SLINE
-ZP_SLINE_XOFF1 = ZP_BE
-ZP_SLINE_XOFF2 = ZP_BF
+ZP_SLINE_XOFF1          = ZP_BE
+ZP_SLINE_XOFF2          = ZP_BF
 
 ;=== VLINE
-ZP_VLINE_BIT = ZP_BE
-ZP_VLINE_YEND = ZP_BD
-ZP_VLINE_YSTART = ZP_BF
+ZP_VLINE_BIT            = ZP_BE
+ZP_VLINE_YEND           = ZP_REG_H
+ZP_VLINE_YSTART         = ZP_BF
 
 _ab47:
         .byte   %11000000
@@ -151,10 +151,9 @@ draw_line:
         ;
         cmp ZP_LINE_HEIGHT      ; compare line-height with width
         bcc @vert
+;;        bne draw_line_horz      ; a "horiztonal" line?
 
         jmp draw_line_horz
-
-;;        bne draw_line_horz      ; a "horiztonal" line?
 
 ;;@flat:  ; a perfectly flat line
 ;;        jmp draw_straight_line

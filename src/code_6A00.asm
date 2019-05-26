@@ -782,6 +782,8 @@ _6c8b:                                                                  ;$6C8B
         adc ZP_93
         sta ZP_VAR_Y1
         sta ZP_VAR_Y2
+        ; TODO: do validation of line direction here so as to allow
+        ;       removal of validation in the line routine
         jsr draw_line
         lda ZP_8F
         sec 
@@ -806,6 +808,8 @@ _6cb8:                                                                  ;$6CB8
         lda ZP_8E
         sta ZP_VAR_X1
         sta ZP_VAR_X2
+        ; TODO: do validation of line direction here so as to allow
+        ;       removal of validation in the line routine
         jmp draw_line
 
 ;===============================================================================
@@ -4369,6 +4373,8 @@ _80c0:                                                                  ;$80C0
         sta ZP_VAR_Y2
         lda line_points_x, y
         sta ZP_VAR_X2
+        ; TODO: do validation of line direction here so as to allow
+        ;       removal of validation in the line routine
         jsr draw_line
         iny 
         lda VAR_06F4
@@ -8922,6 +8928,8 @@ _a183:                                                                  ;$A183
         iny 
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_Y2
+        ; TODO: do validation of line direction here so as to allow
+        ;       removal of validation in the line routine
         jsr draw_line
         iny 
         cpy ZP_AE

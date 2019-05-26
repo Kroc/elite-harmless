@@ -459,8 +459,8 @@ ZP_VAR_T                = $bb   ; a common variable named "T"
 
 ; used in line-drawing:
 ;
-ZP_BC                   = $bc   ;? x15
-ZP_BD                   = $bd   ;? x25
+ZP_REG_W                = $bc   ; "width" ZP register, used in line-drawing
+ZP_REG_H                = $bd   ; "height" ZP register, used in line-drawing
 ZP_BE                   = $be   ;? x11
 ZP_BF                   = $bf   ;? x37 "S"?
 ZP_C0                   = $c0   ; stores a mask for < 8px-length lines

@@ -188,7 +188,7 @@ draw_line:                                                              ;$AB91
         eor # %11111111                 ; flip all bits,
         adc # $01                       ; and add 1 (two's compliment)
 
-:       sta ZP_BC                       ; store line-width              ;$ABA5
+:       sta ZP_REG_W                    ; store line-width              ;$ABA5
 
         ; get height of line:
         sec 
@@ -202,12 +202,12 @@ draw_line:                                                              ;$AB91
         eor # %11111111                 ; flip all bits,
         adc # $01                       ; and add 1 (two's compliment)
 
-:       sta ZP_BD                       ; store line-height             ;$ABB2
+:       sta ZP_REG_H                    ; store line-height             ;$ABB2
         
         ; is the line "horizontal" or "vertical"?
         ; note: A = line-height
         ;
-        cmp ZP_BC                       ; compare line-height with width                       
+        cmp ZP_REG_W                    ; compare line-height with width
        .blt draw_line_horz              ; a "horiztonal" line?
 
         ; handle "vertical" line
@@ -222,6 +222,20 @@ draw_line_horz:                                                         ;$ABBB
         ; for drawing and speed purposes, there are two kinds of horizontal
         ; lines: top-down, i.e. "\", and bottom-up, i.e. "/"
         ;
+        ; if calling into this point externally,
+        ; the parameters would look like this:
+        ;
+        ;       ZP_VAR_X1 = x-pos start of line in viewport pixels
+        ;       ZP_VAR_X2 = x-pos end of line in viewport pixels
+        ;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
+        ;       ZP_VAR_Y2 = y-pos end of line in viewport pixels
+        ;       ZP_REG_W  = width of line, i.e. ABS(X2-X1)
+        ;       ZP_REG_H  = height of line, i.e. ABS(Y2-Y1)
+        ;
+        ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+        ;
+.export draw_line_horz
+        
         ldx ZP_VAR_X1
         cpx ZP_VAR_X2
        .blt :+                          ; line is left-to-right, skip ahead.
@@ -245,7 +259,7 @@ draw_line_horz:                                                         ;$ABBB
         ; at a time, we must get the 'step' value that tells us how often
         ; the horizontal line takes a step vertically
         ;
-:       ldx ZP_BD                       ; get line height (dy)          ;$ABD3
+:       ldx ZP_REG_H                    ; get line height (dy)          ;$ABD3
        .bze @flat                       ; if zero, line is straight!
 
         ; divide width by height?
@@ -256,14 +270,14 @@ draw_line_horz:                                                         ;$ABBB
         ;
         lda table_logdiv, x             ;?
 
-        ldx ZP_BC                       ; get line width (dx)
+        ldx ZP_REG_W                    ; get line width (dx)
         sec 
         sbc table_logdiv, x             ;
         bmi @_abfd
 
-        ldx ZP_BD                       ; get line height (dy)
+        ldx ZP_REG_H                    ; get line height (dy)
         lda table_log, x                ;?
-        ldx ZP_BC                       ; get line width (dx)
+        ldx ZP_REG_W                    ; get line width (dx)
         sbc table_log, x                ;?
         bcs @deg45                      ; is the line 45-degrees?
         
@@ -283,9 +297,9 @@ draw_line_horz:                                                         ;$ABBB
 
 @_abfd:                                                                 ;$ABFD
         ;-----------------------------------------------------------------------
-        ldx ZP_BD                       ; get line-height
+        ldx ZP_REG_H                    ; get line-height
         lda table_log, x                ;?
-        ldx ZP_BC                       ; get line-width
+        ldx ZP_REG_W                    ; get line-width
         sbc table_log, x                ;?
         bcs @deg45                      ; is the line 45-degrees?
 
@@ -296,7 +310,7 @@ draw_line_horz:                                                         ;$ABBB
         ; set the step-fraction. for every pixel horizontal, this fractional
         ; amount will be added to the incremental counter. every time it
         ; overflows a step vertically will be taken
-        sta ZP_BD
+        sta ZP_REG_H
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -310,7 +324,20 @@ draw_line_horz:                                                         ;$ABBB
 
 draw_line_horzup:                                                       ;$AC19
         ;=======================================================================
-        ; draws a horizontally sloped line from the bottom up (Y2 > Y1)
+        ; draws a horizontally sloped line from the bottom up
+        ;
+        ; if calling into this point externally,
+        ; the parameters would look like this:
+        ;
+        ;       ZP_VAR_X1 = x-pos start of line in viewport pixels
+        ;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
+        ;               Y = copy of above
+        ;        ZP_REG_W = width of line
+        ;        ZP_REG_H = height of line
+        ;
+        ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+        ;
+.export draw_line_horzup
         
         ; get the address within the bitmap where we will be drawing,
         ; stored into `ZP_TEMP_ADDR1`
@@ -341,7 +368,7 @@ draw_line_horzup:                                                       ;$AC19
         sta @_ac46+1
         lda _ab59, x
         sta @_ac46+2
-        ldx ZP_BC
+        ldx ZP_REG_W
 @_ac46:                                                                 ;$AC46
         jmp $8888
 
@@ -350,7 +377,7 @@ draw_line_horzup:                                                       ;$AC19
         sta @_ac5a+1
         lda _ab69, x
         sta @_ac5a+2
-        ldx ZP_BC
+        ldx ZP_REG_W
         inx 
         beq line_done1
 @_ac5a:                                                                 ;$AC5A
@@ -382,7 +409,7 @@ _horzup_col0_next:                                                      ;$AC66
        .bze line_done1                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzup_col1                ; draw next pixel if step continues
 
@@ -425,7 +452,7 @@ _horzup_col1_next:                                                      ;$AC89
         beq line_done1                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzup_col2                ; draw next pixel if step continues
 
@@ -468,7 +495,7 @@ _horzup_col2_next:                                                      ;$ACAC
         beq line_done1                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzup_col3                ; draw next pixel if step continues
 
@@ -511,7 +538,7 @@ _horzup_col3_next:                                                      ;$ACCF
         beq line_done1                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzup_col4                ; draw next pixel if step continues
 
@@ -556,7 +583,7 @@ _horzup_col4_next:                                                      ;$ACF2
                                         ; so trampolines downward
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzup_col5                ; draw next pixel if step continues
 
@@ -599,7 +626,7 @@ _horzup_col5_next:                                                      ;$AD15
         beq line_done2                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzup_col6                ; draw next pixel if step continues
 
@@ -642,7 +669,7 @@ _horzup_col6_done:                                                      ;$AD39
         beq line_done2                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzup_col7                ; draw next pixel if step continues
 
@@ -685,7 +712,7 @@ _horzup_col7_next:                                                      ;$AD5B
         beq line_done2                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzup_next_char           ; draw next pixel if step continues
         
@@ -732,6 +759,21 @@ line_done2:                                                             ;$AD88
 
 draw_line_horzdn:                                                       ;$AD8B
         ;=======================================================================
+        ; draws a horizontally sloped line from the top down
+        ;
+        ; if calling into this point externally,
+        ; the parameters would look like this:
+        ;
+        ;       ZP_VAR_X1 = x-pos start of line in viewport pixels
+        ;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
+        ;               Y = copy of above
+        ;        ZP_REG_W = width of line
+        ;        ZP_REG_H = height of line
+        ;
+        ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+        ;
+.export draw_line_horzdn
+
         ; get the char-cell bitmap address
         ; for the given X & Y pixel coords:
         ;
@@ -767,7 +809,7 @@ draw_line_horzdn:                                                       ;$AD8B
         sta _adc6+1
         lda _ab79, x
         sta _adc6+2
-        ldx ZP_BC
+        ldx ZP_REG_W
         beq line_done2
 _adc6:                                                                  ;$ADC6
         jmp $8888
@@ -779,7 +821,7 @@ _adc9:                                                                  ;$ADC9
         sta _adda+1
         lda _ab89, x
         sta _adda+2
-        ldx ZP_BC
+        ldx ZP_REG_W
         inx 
         beq line_done2
 _adda:                                                                  ;$ADDA
@@ -811,7 +853,7 @@ _horzdn_col0_next:                                                      ;$ADE6
         beq line_done3                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzdn_col1                ; draw next pixel if step continues
         
@@ -855,7 +897,7 @@ _horzdn_col1_next:                                                      ;$AE09
         beq line_done3                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzdn_col2                ; draw next pixel if step continues
         
@@ -899,7 +941,7 @@ _horzdn_col2_next:                                                      ;$AE2C
         beq line_done3                  ; no more pixels to draw?
         
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzdn_col3                ; draw next pixel if step continues
         
@@ -943,7 +985,7 @@ _horzdn_col3_next:                                                      ;$AE4F
         beq _horzdn_col6_done           ; no more pixels to draw?
         
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzdn_col4                ; draw next pixel if step continues
         
@@ -987,7 +1029,7 @@ _horzdn_col4_next:                                                      ;$AE72
         beq _horzdn_col6_done           ; no more pixels to draw?
         
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzdn_col5                ; draw next pixel if step continues
         
@@ -1031,7 +1073,7 @@ _horzdn_col5_next:                                                      ;$AE95
         beq line_done4                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzdn_col6                ; draw next pixel if step continues
         
@@ -1075,7 +1117,7 @@ _horzdn_col6_done:                                                      ;$AEB9
         beq line_done4                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzdn_col7                ; draw next pixel if step continues
         
@@ -1119,7 +1161,7 @@ _horzdn_col7_next:                                                      ;$AEDB
         beq line_done4                  ; no more pixels to draw?
 
         lda ZP_BF                       ; current step counter
-        adc ZP_BD                       ; add the step fraction
+        adc ZP_REG_H                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc _horzdn_next_char           ; draw next pixel if step continues
         
@@ -1173,6 +1215,8 @@ draw_line_vert:                                                         ;$AF08
         ; the first thing we have to do is determine which way the line goes
         ; and flip top-down lines so we always work bottom-up
         ;
+.export draw_line_vert
+
         ldy ZP_VAR_Y1                   ; get "starting" Y-position
         tya 
         ldx ZP_VAR_X1                   ; (get starting X-position, for later)
@@ -1219,18 +1263,18 @@ draw_line_vert:                                                         ;$AF08
         sta ZP_BE
 
         ; is the line straight? (completely vertical)
-        ldx ZP_BC                       ; get line-width
+        ldx ZP_REG_W                    ; get line-width
        .bze @_af77                      ; if zero, skip ahead
         
         lda table_logdiv, x
-        ldx ZP_BD
+        ldx ZP_REG_H
         sec 
         sbc table_logdiv, x
         bmi @_af65
         
-        ldx ZP_BC
+        ldx ZP_REG_W
         lda table_log, x
-        ldx ZP_BD
+        ldx ZP_REG_H
         sbc table_log, x
         bcs @deg45
         
@@ -1245,9 +1289,9 @@ draw_line_vert:                                                         ;$AF08
 
 @_af65:                                                                 ;$AF65
         ;-----------------------------------------------------------------------
-        ldx ZP_BC                       ; get line-width
+        ldx ZP_REG_W                    ; get line-width
         lda table_log, x                ;?
-        ldx ZP_BD                       ; get line-height
+        ldx ZP_REG_H                    ; get line-height
         sbc table_log, x                ;?
         bcs @deg45                      ; is the line 45-degrees?
         
@@ -1258,10 +1302,10 @@ draw_line_vert:                                                         ;$AF08
         ; set the step-fraction. for every pixel vertical, this fractional
         ; amount will be added to the incremental counter. every time it
         ; overflows a step horizontally will be taken
-        sta ZP_BC
+        sta ZP_REG_W
 @_af77:                                                                 ;$AF77
         sec 
-        ldx ZP_BD
+        ldx ZP_REG_H
         inx 
         
         lda ZP_VAR_X2
@@ -1298,7 +1342,7 @@ _vertrt_pixel_next:                                                     ;$AF8E
         ldy # $07
 
 :       lda ZP_BF                       ; current step counter          ;$AF9F
-        adc ZP_BC                       ; add the step fraction
+        adc ZP_REG_W                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc :+                          ; draw next pixel if step continues
 
@@ -1355,7 +1399,7 @@ _vertlt_pixel_next:                                                     ;$AFCA
         ldy # $07
 
 :       lda ZP_BF                       ; current step counter          ;$AFDB
-        adc ZP_BC                       ; add the step fraction
+        adc ZP_REG_W                    ; add the step fraction
         sta ZP_BF                       ; update step counter
         bcc @next                       ; draw next pixel if step continues
 

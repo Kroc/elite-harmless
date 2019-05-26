@@ -2215,6 +2215,8 @@ _29e6:                                                                  ;$2936
         sty ZP_7E                       ; update line-buffer cursor
         
         ; draw the current line in X1/Y1/X2/Y2
+        ; TODO: do validation of line direction here so as to allow
+        ;       removal of validation in the line routine
         jsr draw_line
 
         lda ZP_A2
@@ -5289,7 +5291,8 @@ _3ab2:                                                                  ;$3AB2
         lda ZP_VAR_X2
 
 ;===============================================================================
-; insert the `multiply_and_add` routine from "math_3d.inc"
+; insert the `multiply_and_add` routine from "math.inc"
+;
 .multiply_and_add                                                       ;$3ACE 
 
 ;===============================================================================
@@ -5709,6 +5712,8 @@ _3cfa:                                                                  ;$3CFA
         lda # ELITE_VIEWPORT_HEIGHT - 1
         sta ZP_VAR_Y2
 
+        ; TODO: skip validation and jump straight to
+        ;       the vertical up/down line routine?
         jsr draw_line
 
         lda VAR_06F0
@@ -5719,6 +5724,8 @@ _3cfa:                                                                  ;$3CFA
         lda # ELITE_VIEWPORT_HEIGHT - 1
         sta ZP_VAR_Y2
 
+        ; TODO: skip validation and jump straight to
+        ;       the vertical up/down line routine?
         jmp draw_line
 
 ;===============================================================================
