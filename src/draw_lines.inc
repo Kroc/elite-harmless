@@ -149,7 +149,7 @@ draw_line:                                                              ;$AB91
 ;
 ; Bresenham's algorithm works on the principal that a solid line will only
 ; ever step 1 pixel at a time in one of the directions but potentially multiple
-; pixles in the other. therefore, there are two distinct types of lines --
+; pixels in the other. therefore, there are two distinct types of lines --
 ; "horizontal" lines are wider than they are tall, thus step multiple pixels
 ; across X, but only one at a time in Y. "vertical" lines are taller than they
 ; are wide and step multiple pixels across Y, but only one at a time in X
@@ -172,7 +172,7 @@ draw_line:                                                              ;$AB91
         ; we begin with a step fraction of 1/2,
         ; i.e. the centre of a pixel
         ;
-        lda # $80                       ; = 128/256 (1/2, or "0.5")                        
+        lda # $80                       ; = 128/256 (1/2, or "0.5")
         sta ZP_BF                       ; this will be the incremental counter
         asl                             ; this just sets A to 0
         sta VAR_06F4                    ;?
@@ -1530,7 +1530,7 @@ draw_straight_line:                                                     ;$AFFA
         inc ZP_TEMP_ADDR1_HI
         clc 
 
-:       dex                                                             ;$B061 
+:       dex                                                             ;$B061
        .bnz @fill
 
 @_b064:                                                                 ;$B064

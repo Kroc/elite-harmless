@@ -8,6 +8,24 @@
 # stop further processing on any error
 set -e
 
+clean() {
+    echo "* cleaning up:"
+
+    rm -rf build/*.o
+    rm -rf build/*.s
+    rm -rf build/*.bin
+    rm -rf build/*.prg
+    rm -rf build/*.d64
+    rm -rf build/*.crt
+
+    rm -f bin/*.prg
+    rm -f bin/*.d64
+    rm -f bin/*.crt
+
+    echo "- OK"
+}
+
+#===============================================================================
 
 ca65="./bin/cc65/bin/ca65 \
     --target c64 \
@@ -27,18 +45,7 @@ clear
 echo "building Elite : Harmless"
 echo
 
-echo "* cleaning up:"
-
-rm -rf build/*.o
-rm -rf build/*.s
-rm -rf build/*.bin
-rm -rf build/*.prg
-rm -rf build/*.d64
-
-rm -f bin/*.prg
-rm -f bin/*.d64
-
-echo "- OK"
+clean
 
 # build an original version of the game, including the original fast-loader
 
@@ -263,23 +270,11 @@ cd ..
 echo
 echo "* build Elite : Harmless (disk images)"
 echo "  ======================================"
-echo "* cleaning up:"
+echo "* elite-harmless.d64"
+echo "  --------------------------------------"
+clean
 
-rm -rf build/*.o
-rm -rf build/*.s
-rm -rf build/*.bin
-rm -rf build/*.prg
-rm -rf build/*.d64
-
-rm -f bin/*.prg
-rm -f bin/*.d64
-
-echo "- OK"
-
-##options=""
-##options="-DOPTION_MATHTABLES"
-# enable undocumented opcodes and the replacement line-drawing routines
-options="--cpu 6502X -DOPTION_DYME_FASTLINE"
+options="-DOPTION_MATHTABLES"
 
 echo
 echo "- assemble 'disk_boot_exo.asm'"
@@ -317,9 +312,6 @@ $ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
 echo "- assemble 'elite_link.asm'"
 $ca65 $options -o build/elite_link.o        src/elite_link.asm
 
-echo
-echo "* make 'elite-harmless.d64'"
-echo "  --------------------------------------"
 echo "- linking..."
 $ld65 \
        -C link/elite-harmless-d64.cfg \
@@ -374,9 +366,104 @@ $mkd64 \
 echo "- OK"
 echo
 
-##
-##exit 0
-##
+#-------------------------------------------------------------------------------
+
+echo "* elite-harmless-fastlines.d64"
+echo "  --------------------------------------"
+clean
+
+# enable undocumented opcodes and the replacement line-drawing routines
+options="--cpu 6502X -DOPTION_DYME_FASTLINE"
+
+echo
+echo "- assemble 'disk_boot_exo.asm'"
+$ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
+echo "- assemble 'code_init.asm'"
+$ca65 $options -o build/code_init.o         src/code_init.asm
+echo "- assemble 'text_pairs.asm'"
+$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
+echo "- assemble 'text_flight.asm'"
+$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
+echo "- assemble 'text_docked.asm'"
+$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
+echo "- assemble 'vars_1D00.asm'"
+$ca65 $options -o build/vars_1D00.o         src/vars_1D00.asm
+echo "- assemble 'code_1D81.asm'"
+$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
+echo "- assemble 'code_6A00.asm'"
+$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
+echo "- assemble 'table_bitmap.asm'"
+$ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
+echo "- assemble 'sound.asm'"
+$ca65 $options -o build/sound.o             src/sound.asm
+echo "- assemble 'gfx-font.asm'"
+$ca65 $options -o build/gfx-font.o          src/gfx/font.asm
+echo "- assemble 'gfx-sprites.asm'"
+$ca65 $options -o build/gfx-sprites.o       src/gfx/sprites.asm
+echo "- assemble 'math_data.asm'"
+$ca65 $options -o build/math_data.o         src/math_data.asm
+echo "- assemble 'gfx-hull_data.asm'"
+$ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
+echo "- assemble 'gfx-hud_data.asm'"
+$ca65 $options -o build/gfx-hud_data.o      src/gfx/hud_data.asm
+echo "- assemble 'vars_polyobj.asm'"
+$ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
+echo "- assemble 'elite_link.asm'"
+$ca65 $options -o build/elite_link.o        src/elite_link.asm
+
+echo "- linking..."
+$ld65 \
+       -C link/elite-harmless-d64.cfg \
+       -S \$0400 \
+       -m build/elite-harmless-fastlines.map -vm \
+       -o bin/harmless.prg \
+    --obj build/code_init.o \
+    --obj build/elite_link.o \
+    --obj build/disk_boot_exo.o \
+    --obj build/text_pairs.o \
+    --obj build/text_flight.o \
+    --obj build/text_docked.o \
+    --obj build/vars_1D00.o \
+    --obj build/code_1D81.o \
+    --obj build/code_6A00.o \
+    --obj build/table_bitmap.o \
+    --obj build/sound.o \
+    --obj build/gfx-font.o \
+    --obj build/gfx-sprites.o \
+    --obj build/math_data.o \
+    --obj build/gfx-hull_data.o \
+    --obj build/gfx-hud_data.o \
+    --obj build/vars_polyobj.o 
+
+#-------------------------------------------------------------------------------
+
+# compress and fast-load the program
+echo "- exomizing..."
+echo
+
+# NB: `lda #$00 sta $d011` turns the screen "off" so no background is
+# displayed. it also speeds up the processor (no VIC wait-states).
+# we don't need to turn the screen back on afterwards as Elite
+# does this itself during initialisation
+
+$exomizer \$0400 -B \
+    -x3 -s "lda #\$00 sta \$d011" \
+    -o "bin/harmless-exo.prg" \
+    -- \
+        "bin/init.prg" \
+        "bin/prg1.prg" \
+        "bin/prg2.prg" \
+        "bin/prg3.prg"
+
+echo
+echo "* write floppy disk image"
+$mkd64 \
+    -o release/elite-harmless-fastlines.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
+    1>/dev/null
+echo "- OK"
+echo
 
 #===============================================================================
 
@@ -445,7 +532,7 @@ echo
 ##    --obj build/cart_boot.o \
 ##    --obj build/elite_link.o
 
-#===============================================================================
+#-------------------------------------------------------------------------------
 
 echo
 echo "* complete."

@@ -3,54 +3,10 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+; a new line-drawing routine by Dyme! formatted and lightly modified by Kroc
+
 .include        "draw_fastlines_h.inc"
 .include        "draw_fastlines_v.inc"
-
-; line drawing optimization results:
-; drawloop measured with VICE tickcount between $B820 and $B83C
-;
-; SIMPLE SHIP (no engines visible)
-;
-; OLD:
-; 100577375 - 100552083 = 25292
-; 100611261 - 100586775 = 24486
-; 100680798 - 100656741 = 24057
-; 100702224 - 100687369 = 14855
-;
-; NEW:
-; 100656644 - 100633465 = 23179
-; 100689606 - 100666088 = 23518
-; 100759112 - 100735968 = 23144
-; 100779769 - 100765642 = 14127
-;
-;
-; COMPLEX SHIP (Pointing up, engines visible:)
-;
-; OLD:
-; 102412378 - 102376109 = 36269
-; 102459956 - 102423424 = 36532
-; 102565798 - 102529230 = 36568
-; 102615180 - 102576718 = 38462
-; 102722982 - 102684075 = 38907
-;
-; 104485635 - 104442873 = 42762
-; 104538453 - 104496124 = 42329
-; 104649668 - 104607563 = 42105
-; 104703684 - 104660629 = 43055
-;
-;
-; NEW:
-; 102416238 - 102384206 = 32032
-; 102461048 - 102426943 = 34105
-; 102563756 - 102530002 = 33754
-; 102609132 - 102574503 = 34629
-; 102713648 - 102679239 = 34409
-;
-; 104530801 - 104492551 = 38250
-; 104580127 - 104541675 = 38452
-; 104694440 - 104655991 = 38449
-; 104744599 - 104705517 = 39082
-;
 
 .macro  .draw_lines
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -110,7 +66,7 @@ draw_line:
 ;
 ; Bresenham's algorithm works on the principal that a solid line will only
 ; ever step 1 pixel at a time in one of the directions but potentially multiple
-; pixles in the other. therefore, there are two distinct types of lines --
+; pixels in the other. therefore, there are two distinct types of lines --
 ; "horizontal" lines are wider than they are tall, thus step multiple pixels
 ; across X, but only one at a time in Y. "vertical" lines are taller than they
 ; are wide and step multiple pixels across Y, but only one at a time in X
