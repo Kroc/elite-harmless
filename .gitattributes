@@ -1,0 +1,20 @@
+*               text=auto
+
+*.txt           text eol=crlf
+*.md            text eol=crlf
+*.asm           text eol=crlf
+*.s             text eol=crlf
+
+*.sh            text eol=lf
+*.bat           text eol=crlf
+*.cfg           text eol=crlf
+*.md5           text eol=lf
+
+*.o             binary
+*.bin           binary
+*.prg           binary
+*.d64           binary
+*.crt           binary
+
+.gitattributes  export-ignore
+.gitignore      export-ignore

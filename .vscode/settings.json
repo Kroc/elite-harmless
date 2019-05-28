@@ -19,7 +19,8 @@
         "**/*.prg": true,
         "**/*.d64": true,
         "**/*.g64": true,
-        "**/*.bin": true
+        "**/*.bin": true,
+        "**/*.crt": true,
     },
     "search.exclude": {
         // don't search the auto-generated symbol files
@@ -34,4 +35,5 @@
         "editor.wordWrap": "off"
     },
     "terminal.integrated.shell.windows": "C:\\Windows\\sysnative\\bash.exe",
+    "python.linting.enabled": false,
 }
