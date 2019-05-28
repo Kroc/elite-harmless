@@ -519,6 +519,7 @@ draw_straight_line:
         lda ZP_VAR_X2
         sta ZP_VAR_X1
         stx ZP_VAR_X2
+        clc
 
 _sline_enter:
         ldx # %00000111
