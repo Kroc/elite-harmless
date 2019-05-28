@@ -34,7 +34,7 @@
         ; another bloody decryption routine
 .import ELITE_ZP_SHADOW
 
-_1d22:
+_1d22:                                                                  ;$1D22
         cld                     ; clear decimal mode (why?)
 
         ; backup zero-page to $ce02-$ceff
@@ -50,11 +50,11 @@ _1d22:
 
         ; initialise interrupts,
         ; clears $0400..$0700
-        jsr init_mem            ;<-- GMA6.PRG; $6A00..$CCE0             ;$1d30
+        jsr init_mem            ;<-- GMA6.PRG; $6A00..$CCE0             ;$1D30
 
         jmp _8863               ;<-- GMA6.PRG; $6A00..$CCE0
 
-_1d36:                                                                  ;$13d6
+_1d36:                                                                  ;$13D6
         ;-----------------------------------------------------------------------
         ; walks backward through code/data un-scrambling it
 
@@ -82,7 +82,7 @@ _1d36:                                                                  ;$13d6
         ldy #< $ccd6
         ldx # $49
 
-.proc   _1d59
+.proc   _1d59                                                           ;$1D59
         ;=======================================================================
         ; A = high-byte of address
         ; Y = index into address
@@ -92,7 +92,7 @@ _1d36:                                                                  ;$13d6
         sta $08
         lda # $00
         sta $07
-_1d61:
+_1d61:                                                                  ;$1D61
         lda [$07], y
         sec 
         sbc $bb
@@ -101,7 +101,7 @@ _1d61:
         tya 
         bne _1d6f
         dec $08
-_1d6f:  dey 
+_1d6f:  dey                                                             ;$1D6F
         cpy $0452
         bne _1d61
         lda $08
@@ -111,10 +111,10 @@ _1d6f:  dey
         rts
 .endproc
 
-_1d7d:
+_1d7d:                                                                  ;$1D7D
         .byte   $b7, $aa, $45, $23
 
-_1d81:
+_1d81:                                                                  ;$1D81
 .export _1d81
 
 ;$3ED5

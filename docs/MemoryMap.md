@@ -5,7 +5,7 @@
           +---------------+
     $0300 | ?             |   Some heap space?
           |---------------|
-    $0400 | VARS_0400     |   variable space
+    $0400 | VARS_MAIN     |   variable space
           |               |   (extact details incomplete)
           |               |
           |---------------|
