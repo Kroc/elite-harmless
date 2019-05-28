@@ -69,14 +69,14 @@ echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/orig-text_flight.o      src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/orig-text_docked.o      src/text/text_docked.asm
-echo "- assemble 'vars_1D00.asm'"
-$ca65 $options -o build/orig-vars_1D00.o        src/vars_1D00.asm
+echo "- assemble 'vars_user.asm'"
+$ca65 $options -o build/orig-vars_user.o        src/vars_user.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/orig-code_1D81.o        src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 $options -o build/orig-code_6A00.o        src/code_6A00.asm
-echo "- assemble 'table_bitmap.asm'"
-$ca65 $options -o build/orig-table_bitmap.o     src/gfx/table_bitmap.asm
+echo "- assemble 'bitmap.asm'"
+$ca65 $options -o build/orig-bitmap.o           src/gfx/bitmap.asm
 echo "- assemble 'sound.asm'"
 $ca65 $options -o build/orig-sound.o            src/sound.asm
 echo "- assemble 'gfx-font.asm'"
@@ -138,11 +138,11 @@ $ld65 \
     --obj build/orig-text_pairs.o \
     --obj build/orig-text_flight.o \
     --obj build/orig-text_docked.o \
-    --obj build/orig-vars_1D00.o \
+    --obj build/orig-vars_user.o \
     --obj build/orig-init.o \
     --obj build/orig-code_1D81.o \
     --obj build/orig-code_6A00.o \
-    --obj build/orig-table_bitmap.o \
+    --obj build/orig-bitmap.o \
     --obj build/orig-sound.o \
     --obj build/orig-gfx_font.o \
     --obj build/orig-gfx_sprites.o \
@@ -287,14 +287,14 @@ echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-echo "- assemble 'vars_1D00.asm'"
-$ca65 $options -o build/vars_1D00.o         src/vars_1D00.asm
+echo "- assemble 'vars_user.asm'"
+$ca65 $options -o build/vars_user.o         src/vars_user.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/code_1D81.o         src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-echo "- assemble 'table_bitmap.asm'"
-$ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
+echo "- assemble 'bitmap.asm'"
+$ca65 $options -o build/bitmap.o            src/gfx/bitmap.asm
 echo "- assemble 'sound.asm'"
 $ca65 $options -o build/sound.o             src/sound.asm
 echo "- assemble 'gfx-font.asm'"
@@ -324,10 +324,10 @@ $ld65 \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
-    --obj build/vars_1D00.o \
+    --obj build/vars_user.o \
     --obj build/code_1D81.o \
     --obj build/code_6A00.o \
-    --obj build/table_bitmap.o \
+    --obj build/bitmap.o \
     --obj build/sound.o \
     --obj build/gfx-font.o \
     --obj build/gfx-sprites.o \
@@ -386,14 +386,14 @@ echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-echo "- assemble 'vars_1D00.asm'"
-$ca65 $options -o build/vars_1D00.o         src/vars_1D00.asm
+echo "- assemble 'vars_user.asm'"
+$ca65 $options -o build/vars_user.o         src/vars_user.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/code_1D81.o         src/code_1D81.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-echo "- assemble 'table_bitmap.asm'"
-$ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
+echo "- assemble 'bitmap.asm'"
+$ca65 $options -o build/bitmap.o            src/gfx/bitmap.asm
 echo "- assemble 'sound.asm'"
 $ca65 $options -o build/sound.o             src/sound.asm
 echo "- assemble 'gfx-font.asm'"
@@ -423,10 +423,10 @@ $ld65 \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
     --obj build/text_docked.o \
-    --obj build/vars_1D00.o \
+    --obj build/vars_user.o \
     --obj build/code_1D81.o \
     --obj build/code_6A00.o \
-    --obj build/table_bitmap.o \
+    --obj build/bitmap.o \
     --obj build/sound.o \
     --obj build/gfx-font.o \
     --obj build/gfx-sprites.o \
@@ -495,14 +495,14 @@ echo
 ##$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 ##echo "- assemble 'text_docked.asm'"
 ##$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-##echo "- assemble 'vars_1D00.asm'"
-##$ca65 $options -o build/vars_1D00.o         src/vars_1D00.asm
+##echo "- assemble 'vars_user.asm'"
+##$ca65 $options -o build/vars_user.o         src/vars_user.asm
 ##echo "- assemble 'code_1D81.asm'"
 ##$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
 ##echo "- assemble 'code_6A00.asm'"
 ##$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-##echo "- assemble 'table_bitmap.asm'"
-##$ca65 $options -o build/table_bitmap.o      src/gfx/table_bitmap.asm
+##echo "- assemble 'bitmap.asm'"
+##$ca65 $options -o build/bitmap.o            src/gfx/bitmap.asm
 ##echo "- assemble 'sound.asm'"
 ##$ca65 $options -o build/sound.o             src/sound.asm
 ##echo "- assemble 'gfx-font.asm'"
