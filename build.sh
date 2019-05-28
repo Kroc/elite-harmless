@@ -274,7 +274,8 @@ echo "* elite-harmless.d64"
 echo "  --------------------------------------"
 clean
 
-options="-DOPTION_MATHTABLES"
+# enable undocumented opcodes and mathtables
+options="--cpu 6502X -DOPTION_MATHTABLES"
 
 echo
 echo "- assemble 'disk_boot_exo.asm'"

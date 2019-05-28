@@ -261,7 +261,8 @@ multiply_signed:                                                        ;$3A54
         ;       Q = multiplicand
         ;       A = multiplier
         ;
-        tax 
+        ldx #%01111111
+        axs #0          ;; x = $7F & a (-0)
         
         ; compare signs for working out what the final sign will be. XOR'ing
         ; the two operands will work out the +ve/-ve combination for us!
@@ -280,15 +281,7 @@ multiply_signed:                                                        ;$3A54
         ;
         lda ZP_VAR_Q            ; again, multiplicand
         and # %01111111         ; extract the magnitude
-        sta ZP_F8
-
-        txa 
-        and # %01111111
-        
-        tax 
-
-        lda ZP_F8
-        sta sm1+1
+        sta sm1+1               ; these effectively add a and x : lda table+a,x
         sta sm3+1
         eor # $ff
         sta sm2+1
