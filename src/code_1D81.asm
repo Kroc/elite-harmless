@@ -19,7 +19,7 @@
 .import _1a27:absolute
 .import _1a41:absolute
 
-; from "vars_1D00.asm"
+; from "vars_user.asm"
 .import _1d06:absolute
 .import _1d07:absolute
 .import _1d09:absolute

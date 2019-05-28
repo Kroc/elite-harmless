@@ -29,7 +29,7 @@
 .import _0700:absolute
 .import _0ac0:absolute
 
-; from "vars_1D00.asm"
+; from "vars_user.asm"
 .import _1d01:absolute
 .import _1d02:absolute
 .import _1d03:absolute

@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "vars_1D00.asm" -- mostly user preferences
+; user preferences
 
 .export _1d01
 .export _1d02
@@ -27,7 +27,7 @@
 .export _1d14
 .export _1d21
 
-.segment        "VARS_1D00"
+.segment        "VARS_USER"
 
 _1d00:  ; nothing appears to actually reference $1D00 itself            ;$1D00
         .byte   $00
