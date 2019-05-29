@@ -3019,14 +3019,14 @@ print_large_value:                                                      ;$2E65
         inc ZP_PADDING          ; fix use of carry
 
         ; clear the overflow byte used during calculations with the value.
-        ; note that this is also setting Y to zero
+        ; note that this is also setting Y (the current digit counter) to zero
         ldy # $00
         sty ZP_VALUE_OVFLW
         
-        jmp _2ec1               ; jump into the main loop
+        jmp @_check_curr_digit  ; jump into the main loop
                                 ; (below is not a direct follow-on from here)
         
-_x10:   ; multiply by 10:                                               ;$2E82
+@_x10:  ; multiply by 10:                                               ;$2E82
         ;-----------------------------------------------------------------------
         ; since you can't 'just' multiply by 10 in binary, we first multiply
         ; by 2 and put that aside, do a multiply by 8 and then add the two
@@ -3079,10 +3079,17 @@ _x10:   ; multiply by 10:                                               ;$2E82
         adc ZP_VALUE_OVFLW
         sta ZP_VALUE_OVFLW
 
-        ldy # 0
+        ldy # 0                 ; set the current digit counter to 0
 
-_2ec1:  ;                                                               ;$2EC1
+@_check_curr_digit:                                                     ;$2EC1
         ;-----------------------------------------------------------------------
+        ; subtract the check digit (100-billion) from value as long as
+        ; possible, increasing Y each time. when less than 100-billion,
+        ; multiply by 10 to check for the next digit
+        ;
+        ; why 100 billion and the overflow byte is used is beyound me...
+        ; 1 billion should be enough, since max<uint32> is < 5 billion
+        ;
         ldx # 3                 ; numerical value is 4-bytes long (0..3)
 
        .clb                     ; clear the borrow before subtracting
@@ -3098,10 +3105,11 @@ _2ec1:  ;                                                               ;$2EC1
                                 ; i.e. 100-billion decimal
         sta ZP_VCOPY_OVFLW
 
-        ; no matter what I do I can't grasp what is happening with the bits
-        ; to spit out decimal digits here 
-       .bbw _print_digit
+        ; underflow, 100-billion did not fit another time. 
+        ; print current digit 'y' and advance to next digit
+       .bbw @_print_digit
 
+        ; 100-billion did fit, so 'commit' the subtraction to VALUE
         ldx # 3                 ; numerical value is 4-bytes long (0..3)
 :       lda ZP_VCOPY, x                                                 ;$2ED8
         sta ZP_VALUE, x
@@ -3111,10 +3119,10 @@ _2ec1:  ;                                                               ;$2EC1
         lda ZP_VCOPY_OVFLW
         sta ZP_VALUE_OVFLW
 
-        iny 
-        jmp _2ec1
+        iny                     ; increase the current digit
+        jmp @_check_curr_digit  ; try to subtract another 100-billion
 
-_print_digit:                                                           ;$2EE7 
+@_print_digit:                                                          ;$2EE7
         ;-----------------------------------------------------------------------
         ; is there a digit waiting to be printed?
         ; (when we first enter this routine, Y will be zero)
@@ -3125,7 +3133,7 @@ _print_digit:                                                           ;$2EE7
        .bze @ascii
 
         dec ZP_PADDING
-        bpl _2f00               
+        bpl @_2f00
 
         lda # ' '               ; print leading white-space
         bne @print              ; skip over the next bit (always branches)
@@ -3138,14 +3146,13 @@ _print_digit:                                                           ;$2EE7
         clc 
         adc # '0'               ; re-base as an ASCII/PETSCII numeral
 
-@print: jsr print_char                                                  ;$2EFD        
+@print: jsr print_char                                                  ;$2EFD
 
-_2f00:
+@_2f00:                                                                 ;$2F00
         dec ZP_MAXLEN
-        bpl _2f06
+        bpl :+
         inc ZP_MAXLEN
-_2f06:
-        dec ZP_9F
+:       dec ZP_9F                                                       ;$2F06
         bmi @rts
         bne :+
 
@@ -3158,9 +3165,9 @@ _2f06:
         jsr print_char
 
         ; handle the next decimal digit...
-:       jmp _x10                                                        ;$2F14
+:       jmp @_x10                                                       ;$2F14
 
-@rts:   rts                                                             ;$2F17 
+@rts:   rts                                                             ;$2F17
 
 ;===============================================================================
 ; a block of text-printing related flags and variables

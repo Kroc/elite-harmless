@@ -261,35 +261,28 @@ multiply_signed:                                                        ;$3A54
         ;       Q = multiplicand
         ;       A = multiplier
         ;
-        tax 
+        ldx # %01111111
+        axs # 0                 ; X = $7F & A (-0)
         
         ; compare signs for working out what the final sign will be. XOR'ing
         ; the two operands will work out the +ve/-ve combination for us!
         ;
-        ; +ve * +ve = +ve
-        ; +ve * -ve = -ve
-        ; -ve * +ve = -ve
-        ; -ve * -ve = +ve
+        ;       +ve * +ve = +ve
+        ;       +ve * -ve = -ve
+        ;       -ve * +ve = -ve
+        ;       -ve * -ve = +ve
         ;
         eor ZP_VAR_Q            ; load multiplicand, combining the signs
         and # %10000000         ; extract resulting sign
         sta ZP_VAR_T            ; keep resulting sign for the end
 
         ; now the sign is separate, extract the "magnitude"
-        ; -- the value, without sign which will be 0 to 127
+        ; -- the value, without sign, which will be 0 to 127
         ;
         lda ZP_VAR_Q            ; again, multiplicand
         and # %01111111         ; extract the magnitude
-        sta ZP_F8
-
-        txa 
-        and # %01111111
-        
-        tax 
-
-        lda ZP_F8
-        sta sm1+1
-        sta sm3+1
+        sta sm1+1               ; these effectively add A and X
+        sta sm3+1               ; ->  `lda table+A, X`
         eor # $ff
         sta sm2+1
         sta sm4+1
@@ -360,7 +353,7 @@ sm4:    sbc square2_hi, x
         ;                      |+-----   8
         ;                      +------ +16
         ;                              ---
-        ;                               25, i.e. x + 8x + 16x = 25x. 
+        ;                               25, i.e. x + 8x + 16x = 25x
         ;
         ; therefore we can reduce the multiplication of any two 8-bit numbers
         ; to just 8 steps (or 7 in our case for signed numbers) by adding
@@ -398,10 +391,10 @@ sm4:    sbc square2_hi, x
         ; compare signs for working out what the final sign will be. XOR'ing
         ; the two operands will work out the +ve/-ve combination for us!
         ;
-        ; +ve * +ve = +ve
-        ; +ve * -ve = -ve
-        ; -ve * +ve = -ve
-        ; -ve * -ve = +ve
+        ;       +ve * +ve = +ve
+        ;       +ve * -ve = -ve
+        ;       -ve * +ve = -ve
+        ;       -ve * -ve = +ve
         ;
         txa                     ; load multiplier
         eor ZP_VAR_Q            ; load multiplicand, combining the signs
@@ -409,7 +402,7 @@ sm4:    sbc square2_hi, x
         sta ZP_VAR_T            ; keep resulting sign for the end
 
         ; now the sign is separate, extract the "magnitude" -- the value,
-        ; without sign which will be 0 to 127. we'll check here to see if
+        ; without sign, which will be 0 to 127. we'll check here to see if
         ; we're multiplying with zero, which will always yield a result of zero
         ;
         lda ZP_VAR_Q            ; again, multiplicand
