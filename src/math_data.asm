@@ -148,6 +148,9 @@ populate_multiply_tables:
 ; tables and addition. a multiplication of X & Y can be reduced to adding
 ; two logs together and then using exponention to restore the number base
 ;
+; likewise, a division can be done by subtracting the logarithms of two numbers
+; end exponentiating the result.
+;
 ; however, given that the input number is not always going to be a square
 ; number the answer is, more often than not, going to be a fraction, e.g.
 ;
@@ -167,6 +170,40 @@ populate_multiply_tables:
 ; 2. it's not possible to use these log-tables for typical multiplication.
 ;    Elite has its own multiplication routine (see "math.inc") required to
 ;    produce correct results
+;
+; =============================================
+; ==  USE OF THE LOGARITHM TABLES IN ELITE:  ==
+; =============================================
+; _9500 and _9600 together build an exp table for 2^((x*2)/32),
+; where _9500 contains all the even entries (thus being a 2^(x/32) table)
+; and _9600 contains all the odd entries (thus being a 2^((x+0.5)/32) table)
+; table_logdiv is used to determine which of the two exp-tables to use
+; to get the most accurate result for a log-table multiplication or division.
+; This gives an extra bit of accuracy in log-space, which is direly needed.
+;
+; whenever a log-addition (A*X) or a log-subtraction (A/X) is done, the same
+; operation with the table_logdiv yields a negative value if the _9600-table
+; should be used.
+;
+; ==  OVERFLOW AND UNDERFLOW:  ==
+;
+; Elite uses log and exp-tables that scale the value internally by a factor
+; of 32. this just gives a little extra precision, and  since both the
+; log and exp-tables use this factor, they normally cancel each other out:
+; exp((log(A)*32 + log(B)*32)/32) = exp((log(A)+log(B)) = A*B
+; exp((log(A)*32 - log(B)*32)/32) = exp((log(A)-log(B)) = A/B
+; 
+; but when an overflow occurs, the 256 overflow difference conviniently turns
+; into an 8 bit shift:
+; exp((log(A)*32 + log(B)*32 - 256)/32) = exp(log(A)+log(B)-8) = (A*B)/256
+; exp((log(A)*32 - log(B)*32 + 256)/32) = exp(log(A)-log(B)+8) = (A/B)*256
+;
+; so when multiplying two big values (overflow occurs when adding the logs),
+; the result of the exp() is the hi-byte of the multiplication.
+; and when dividing the lesser of two values by the greater, the subtraction
+; of the two logs underflows, and the result is the fraction in 8-bit fixed
+; point.
+;
 
 table_log:                                                              ;$9300
 ;===============================================================================
@@ -253,7 +290,6 @@ _9500:                                                                  ;$9500
 ;===============================================================================
 ; nc513 says:
 ; - $9500..$95FF is a lookup table for the function TRUNC(2^(X/32))
-;
 .export _9500
 
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9500
