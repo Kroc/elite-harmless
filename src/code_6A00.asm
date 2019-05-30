@@ -29,7 +29,7 @@
 .import _0700:absolute
 .import table_sin:absolute
 
-; from "vars_1D00.asm"
+; from "vars_user.asm"
 .import _1d01:absolute
 .import _1d02:absolute
 .import _1d03:absolute
@@ -133,7 +133,7 @@
 .import set_psystem_to_tsystem:absolute
 .import wait_frames:absolute
 
-; from "gfx/table_bitmap.asm"
+; from "gfx/bitmap.asm"
 .import row_to_bitmap_lo:absolute
 .import row_to_bitmap_hi:absolute
 
@@ -7526,7 +7526,7 @@ _927e:                                                                  ;$927E
 ;===============================================================================
 
 ; $9300..$9700 is in "math_tables.asm"
-; $9700..$9900 is in "gfx/table_bitmap.asm"
+; $9700..$9900 is in "gfx/bitmap.asm"
 
 ;===============================================================================
 

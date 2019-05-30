@@ -5,7 +5,7 @@
           +---------------+
     $0300 | ?             |   Some heap space?
           |---------------|
-    $0400 | VARS_0400     |   variable space
+    $0400 | VARS_MAIN     |   variable space
           |               |   (extact details incomplete)
           |               |
           |---------------|
@@ -34,7 +34,7 @@
           |               |
           |               |
           |---------------|
-    $1D00 | CODE_1D00     |   variable space
+    $1D00 | VARS_USER     |   user-preferences variable space
           |---------------|
     $1D21 | CODE_GMA5     |   loader stage 5 decryption routine (left behind)
           |---------------|

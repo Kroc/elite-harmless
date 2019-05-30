@@ -6,6 +6,21 @@
 
 .include        "elite.inc"
 
+;===============================================================================
+; reserve the bitmap screen in the C64 memory map
+;
+.segment        "VIC_BITMAP"
+
+; if we force the 8K alignment required by bitmap screens, the linker will
+; issue a warning that this is "suspiciously large"!
+;.align          $2000
+
+.res    $2000
+
+;===============================================================================
+
+.code
+
 ; the BBC Micro, unusually for an 8-bit, has programmable display circuitry
 ; allowing the developer to create custom display modes. On the BBC, Elite uses
 ; a 256-px wide display for easy math (x-coordinates do not have to be 2 bytes)

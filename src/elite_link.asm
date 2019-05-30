@@ -2,19 +2,10 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-.linecont+
 
 .segment    "VARS_0400"
 
 .res    $0300
-
-.segment        "VIC_BITMAP"
-
-; if we force the 8K alignment required by bitmap screens, the linker will
-; issue a warning that this is "suspiciously large"!
-;.align          $2000
-
-.res    $2000
 
 .segment        "VIC_SCR_MENU"
 
