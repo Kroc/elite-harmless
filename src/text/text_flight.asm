@@ -857,10 +857,10 @@ _0ab2:  ;146.                                                           ;$0AB2
 
 ;===============================================================================
 
-; is this related to text at all?
+; is this related to text at all? /no, this is a sine table
 
-_0ac0:
-.export _0ac0
+table_sin: ;; table: sin(x/32*pi)*256
+.export table_sin
         .byte   $00, $19, $32, $4a, $62, $79, $8e, $a2                  ;$0AC0
         .byte   $b5, $c6, $d5, $e2, $ed, $f5, $fb, $ff
         .byte   $ff, $ff, $fb, $f5, $ed, $e2, $d5, $c6                  ;$0AD0

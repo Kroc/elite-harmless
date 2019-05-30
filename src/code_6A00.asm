@@ -27,7 +27,7 @@
 
 ; from "text_flight.asm"
 .import _0700:absolute
-.import _0ac0:absolute
+.import table_sin:absolute
 
 ; from "vars_1D00.asm"
 .import _1d01:absolute
@@ -122,7 +122,7 @@
 .import multiply_and_add:absolute
 .import multiplied_now_add:absolute
 .import _3b0d:absolute
-.import _3b37:absolute
+.import divide_unsigned:absolute
 .import _3bc1:absolute
 .import _3c6f:absolute
 .import _3c7f:absolute
@@ -2981,7 +2981,7 @@ _7885:                                                                  ;$7885
         adc # $04
         bcs _785f
         sta [ZP_TEMP_ADDR2], y
-        jsr _3b37
+        jsr divide_unsigned
         lda ZP_VAR_P1
         cmp # $1c
         bcc _78a1
@@ -3491,7 +3491,7 @@ _7b7d:                                                                  ;$7B7D
         lda # $14
         sta ZP_VAR_Q
         txa 
-        jsr _3b37
+        jsr divide_unsigned
         ldx ZP_VAR_P1
         tya 
         bmi _7b93
@@ -3986,7 +3986,7 @@ _7e5f:                                                                  ;$7E5F
         lda ZP_AB
         and # %00011111
         tax 
-        lda _0ac0, x
+        lda table_sin, x
         sta ZP_VAR_Q
         lda ZP_B4
         jsr _39ea
@@ -4004,7 +4004,7 @@ _7e5f:                                                                  ;$7E5F
         adc # $10
         and # %00011111
         tax 
-        lda _0ac0, x
+        lda table_sin, x
         sta ZP_VAR_Q
         lda ZP_B3
         jsr _39ea
