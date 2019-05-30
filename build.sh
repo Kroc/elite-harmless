@@ -28,6 +28,7 @@ clean() {
 #===============================================================================
 
 ca65="./bin/cc65/bin/ca65 \
+    --auto-import \
     --target c64 \
     --debug-info \
     --include-dir src \
@@ -62,37 +63,41 @@ $ca65 -o build/prgheader.o      src/c64/prgheader.asm
 options="-DOPTION_ORIGINAL"
 
 echo "- assemble 'orig_init.asm'"
-$ca65 $options -o build/orig-init.o             src/orig_init.asm
+$ca65 $options -o build/orig_init.o         src/orig_init.asm
 echo "- assemble 'text_pairs.asm'"
-$ca65 $options -o build/orig-text_pairs.o       src/text/text_pairs.asm
+$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
-$ca65 $options -o build/orig-text_flight.o      src/text/text_flight.asm
+$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
-$ca65 $options -o build/orig-text_docked.o      src/text/text_docked.asm
+$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
 echo "- assemble 'vars_user.asm'"
-$ca65 $options -o build/orig-vars_user.o        src/vars_user.asm
+$ca65 $options -o build/vars_user.o         src/vars_user.asm
 echo "- assemble 'code_1D81.asm'"
-$ca65 $options -o build/orig-code_1D81.o        src/code_1D81.asm
+$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
+echo "- assemble 'data_save.asm'"
+$ca65 $options -o build/data_save.o         src/data_save.asm
+echo "- assemble 'code_2A84.asm'"
+$ca65 $options -o build/code_2A84.o         src/code_2A84.asm
 echo "- assemble 'code_6A00.asm'"
-$ca65 $options -o build/orig-code_6A00.o        src/code_6A00.asm
+$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
 echo "- assemble 'bitmap.asm'"
-$ca65 $options -o build/orig-bitmap.o           src/gfx/bitmap.asm
+$ca65 $options -o build/bitmap.o            src/gfx/bitmap.asm
 echo "- assemble 'sound.asm'"
-$ca65 $options -o build/orig-sound.o            src/sound.asm
+$ca65 $options -o build/sound.o             src/sound.asm
 echo "- assemble 'gfx-font.asm'"
-$ca65 $options -o build/orig-gfx_font.o         src/gfx/font.asm
+$ca65 $options -o build/gfx_font.o          src/gfx/font.asm
 echo "- assemble 'gfx-sprites.asm'"
-$ca65 $options -o build/orig-gfx_sprites.o      src/gfx/sprites.asm
+$ca65 $options -o build/gfx_sprites.o       src/gfx/sprites.asm
 echo "- assemble 'math_data.asm'"
-$ca65 $options -o build/orig-math_data.o        src/math_data.asm
+$ca65 $options -o build/math_data.o         src/math_data.asm
 echo "- assemble 'gfx-hull_data.asm'"
-$ca65 $options -o build/orig-gfx_hull_data.o    src/gfx/hull_data.asm
+$ca65 $options -o build/gfx_hull_data.o     src/gfx/hull_data.asm
 echo "- assemble 'gfx-hud_data.asm'"
-$ca65 $options -o build/orig-gfx_hud_data.o     src/gfx/hud_data.asm
+$ca65 $options -o build/gfx_hud_data.o      src/gfx/hud_data.asm
 echo "- assemble 'vars_polyobj.asm'"
-$ca65 $options -o build/orig-vars_polyobj.o     src/vars_polyobj.asm
+$ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
 echo "- assemble 'elite_link.asm'"
-$ca65 $options -o build/orig-link.o             src/elite_link.asm
+$ca65 $options -o build/elite_link.o        src/elite_link.asm
 
 #-------------------------------------------------------------------------------
 
@@ -126,7 +131,7 @@ echo "-     link 'elite-original-gma86.cfg'"
 $ld65 \
        -C link/elite-original-gma86.cfg \
        -m build/elite-original-gma86.map -vm \
-    --obj build/orig-link.o \
+    --obj build/elite_link.o \
     --obj build/boot_gma_stage0.o \
     --obj build/boot_gma_stage1.o \
     --obj build/boot_gma_stage2.o \
@@ -135,21 +140,23 @@ $ld65 \
     --obj build/boot_gma_stage5.o \
     --obj build/boot_gma_stage6.o \
     --obj build/boot_gma_stage4_7C3A.o \
-    --obj build/orig-text_pairs.o \
-    --obj build/orig-text_flight.o \
-    --obj build/orig-text_docked.o \
-    --obj build/orig-vars_user.o \
-    --obj build/orig-init.o \
-    --obj build/orig-code_1D81.o \
-    --obj build/orig-code_6A00.o \
-    --obj build/orig-bitmap.o \
-    --obj build/orig-sound.o \
-    --obj build/orig-gfx_font.o \
-    --obj build/orig-gfx_sprites.o \
-    --obj build/orig-math_data.o \
-    --obj build/orig-gfx_hud_data.o \
-    --obj build/orig-gfx_hull_data.o \
-    --obj build/orig-vars_polyobj.o
+    --obj build/text_pairs.o \
+    --obj build/text_flight.o \
+    --obj build/text_docked.o \
+    --obj build/vars_user.o \
+    --obj build/orig_init.o \
+    --obj build/code_1D81.o \
+    --obj build/data_save.o \
+    --obj build/code_2A84.o \
+    --obj build/code_6A00.o \
+    --obj build/bitmap.o \
+    --obj build/sound.o \
+    --obj build/gfx_font.o \
+    --obj build/gfx_sprites.o \
+    --obj build/math_data.o \
+    --obj build/gfx_hud_data.o \
+    --obj build/gfx_hull_data.o \
+    --obj build/vars_polyobj.o
 
 # encrypt GMA4.PRG:
 #-------------------------------------------------------------------------------
@@ -291,6 +298,10 @@ echo "- assemble 'vars_user.asm'"
 $ca65 $options -o build/vars_user.o         src/vars_user.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/code_1D81.o         src/code_1D81.asm
+echo "- assemble 'data_save.asm'"
+$ca65 $options -o build/data_save.o         src/data_save.asm
+echo "- assemble 'code_2A84.asm'"
+$ca65 $options -o build/code_2A84.o         src/code_2A84.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 $options -o build/code_6A00.o         src/code_6A00.asm
 echo "- assemble 'bitmap.asm'"
@@ -326,6 +337,8 @@ $ld65 \
     --obj build/text_docked.o \
     --obj build/vars_user.o \
     --obj build/code_1D81.o \
+    --obj build/data_save.o \
+    --obj build/code_2A84.o \
     --obj build/code_6A00.o \
     --obj build/bitmap.o \
     --obj build/sound.o \
@@ -390,6 +403,10 @@ echo "- assemble 'vars_user.asm'"
 $ca65 $options -o build/vars_user.o         src/vars_user.asm
 echo "- assemble 'code_1D81.asm'"
 $ca65 $options -o build/code_1D81.o         src/code_1D81.asm
+echo "- assemble 'data_save.asm'"
+$ca65 $options -o build/data_save.o         src/data_save.asm
+echo "- assemble 'code_2A84.asm'"
+$ca65 $options -o build/code_2A84.o         src/code_2A84.asm
 echo "- assemble 'code_6A00.asm'"
 $ca65 $options -o build/code_6A00.o         src/code_6A00.asm
 echo "- assemble 'bitmap.asm'"
@@ -425,6 +442,8 @@ $ld65 \
     --obj build/text_docked.o \
     --obj build/vars_user.o \
     --obj build/code_1D81.o \
+    --obj build/data_save.o \
+    --obj build/code_2A84.o \
     --obj build/code_6A00.o \
     --obj build/bitmap.o \
     --obj build/sound.o \
