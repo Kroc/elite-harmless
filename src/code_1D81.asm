@@ -5359,56 +5359,15 @@ divide_unsigned:                                                                
 
         asl
         sta ZP_VAR_P1
-
         lda # $00
+        
+.REPEAT 8
         rol
         cmp ZP_VAR_Q
-        bcc _3b43
+        bcc :+
         sbc ZP_VAR_Q
-_3b43:                                                                  ;$3B43
-        rol ZP_VAR_P1 ; 1
-        rol
-        cmp ZP_VAR_Q
-        bcc _3b4c
-        sbc ZP_VAR_Q
-_3b4c:                                                                  ;$3B4C
-        rol ZP_VAR_P1 ; 2
-        rol
-        cmp ZP_VAR_Q
-        bcc _3b55
-        sbc ZP_VAR_Q
-_3b55:                                                                  ;$3B55
-        rol ZP_VAR_P1 ; 4
-        rol
-        cmp ZP_VAR_Q
-        bcc _3b5e
-        sbc ZP_VAR_Q
-_3b5e:                                                                  ;$3B5E
-        rol ZP_VAR_P1 ; 8
-        rol
-        cmp ZP_VAR_Q
-        bcc _3b67
-        sbc ZP_VAR_Q
-_3b67:                                                                  ;$3B67
-        rol ZP_VAR_P1 ; 16
-        rol
-        cmp ZP_VAR_Q
-        bcc _3b70
-        sbc ZP_VAR_Q
-_3b70:                                                                  ;$3B70
-        rol ZP_VAR_P1 ; 32
-        rol
-        cmp ZP_VAR_Q
-        bcc _3b79
-        sbc ZP_VAR_Q
-_3b79:                                                                  ;$3B79
-        rol ZP_VAR_P1 ; 64
-        rol
-        cmp ZP_VAR_Q
-        bcc _3b82
-        sbc ZP_VAR_Q
-_3b82:                                                                  ;$3B82
-        rol ZP_VAR_P1 ; 128
+:       rol ZP_VAR_P1
+.ENDREP
         ;; End of P1 = A/Q
 
         ldx # $00       ;; unneccessary, is cancelled out by the tax below
