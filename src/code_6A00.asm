@@ -6789,7 +6789,7 @@ do_quickjump:                                                           ;$8E29
         lsr 
         sta VAR_048A
 
-        ldx VAR_0486
+        ldx COCKPIT_VIEW
         jmp _a6ba               ; redraw viewport?
 
 @nojump:                                                                ;$8E7C
@@ -9624,7 +9624,7 @@ _a60e:                                                                  ;$A60E
 
 _a626:                                                                  ;$A626
 .export _a626
-        ldx VAR_0486
+        ldx COCKPIT_VIEW
         beq _a65e
         dex 
         bne _a65f
@@ -9702,7 +9702,7 @@ _a6ad:                                                                  ;$A6AD
 ;===============================================================================
 
 _a6ae:                                                                  ;$A6AE
-        stx VAR_0486
+        stx COCKPIT_VIEW
         jsr set_page
         jsr _a6d4
         jmp _7af3
@@ -9726,9 +9726,9 @@ _a6ba:                                                                  ;$A6BA
         ldy ZP_SCREEN
         bne _a6ae
         
-        cpx VAR_0486
-        beq _a6ad
-        stx VAR_0486
+        cpx COCKPIT_VIEW
+        beq _a6ad               ; view did not change, rts
+        stx COCKPIT_VIEW
         
         jsr set_page
         jsr dust_swap_xy
@@ -9746,7 +9746,7 @@ _a6d4:                                                                  ;$A6D4
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ldy VAR_0486            ; current viewpoint? (front, rear, left, right)
+        ldy COCKPIT_VIEW        ; current viewpoint? (front, rear, left, right)
         lda PLAYER_LASERS, y    ; get type of laser for current viewpoint
         beq _a700               ; no laser? skip ahead
 
@@ -9887,7 +9887,7 @@ _a75d:                                                                  ;$A75D
         lda # 11
         jsr set_cursor_col
 
-        lda VAR_0486
+        lda COCKPIT_VIEW
         ora # %01100000
         jsr print_flight_token
         jsr print_space

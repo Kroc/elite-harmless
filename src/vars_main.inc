@@ -49,7 +49,7 @@ VAR_0481                = $0481 ;?
 IS_WITCHSPACE           = $0482 ; has misjump occurred?
 
 VAR_0484                = $0484 ;?
-VAR_0486                = $0486 ;?
+COCKPIT_VIEW            = $0486 ; active cockpit view : (front, rear, left, right)
 VAR_0487                = $0487 ;?
 
 VAR_048A                = $048a ;?
@@ -291,17 +291,17 @@ VAR_049C                = $049c ;? (indexed by X)
 
 ;-------------------------------------------------------------------------------
 
-; NOTE: there are up-to 25 dust-particles at a time
+; NOTE: there are up-to 13 dust-particles at a time
+; DUST_COUNT is only ever set to $0c (in _83ed) or $03 (in _73c1)
 ; TODO: define the arrays below based on this
-DUST_MAX                = 25
+DUST_MAX                = 13
 
 DUST_COUNT              = $050b ; number of dust particles
-DUST_X                  = $06a2 ;..$06BB: X-positions of dust-particles
-DUST_Y                  = $06bc ;..$06D5: Y-positions of dust-particles
-DUST_Z                  = $06d6 ;..$06EF: Z-positions of dust-particles
-
-VAR_06AF                = $06af ; within `DUST_X`?
-VAR_06C9                = $06c9 ; within `DUST_Y`?
+DUST_X                  = $06a2 ;..$06AE: X-positions of dust-particles
+DUST_X_LO               = $06af ;..$06BB: fractional X-position
+DUST_Y                  = $06bc ;..$06C8: Y-positions of dust-particles
+DUST_Y_LO               = $06c9 ;..$06D5: fractional Y-position
+DUST_Z                  = $06d6 ;..$06E1: Z-positions of dust-particles
 
 ;-------------------------------------------------------------------------------
 

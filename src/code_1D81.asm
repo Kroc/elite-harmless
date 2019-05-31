@@ -667,7 +667,7 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
         ror ZP_97
         lsr
         ror ZP_97
-        sta ZP_98
+        sta ZP_98               ; ZP_98.ZP_97 = PLAYER_SPEED*64
 
         lda VAR_0487
         bne _202d
@@ -679,7 +679,7 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
         cmp # $f2
         bcs _202d
 
-        ldx VAR_0486
+        ldx COCKPIT_VIEW
         lda PLAYER_LASERS, x
         beq _202d
 
@@ -1273,7 +1273,7 @@ _2345:                                                                  ;$2345
         lda ZP_SCREEN
         bne _2366
 
-        jmp _2a32
+        jmp .animate_dust
 
 ;===============================================================================
 
@@ -2013,7 +2013,7 @@ _290f:                                                                  ;$209F
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         txa
-        sta VAR_06C9, y         ; within "dust y-lo" ???
+        sta DUST_Y_LO, y         ; within "dust y-lo" ???
 
 draw_particle:                                                          ;$2918
 ;===============================================================================
@@ -2268,34 +2268,30 @@ dust_swap_xy:                                                           ;$2A12
         rts
 
 ;===============================================================================
-
-_2a32:                                                                  ;$2A32
-        ldx VAR_0486
-        beq _2a40
+; animate dust particles based on COCKPIT_VIEW
+.animate_dust:                                                                  ;$2A32
+        ldx COCKPIT_VIEW
+        beq .animate_dust_front      ; COCKPIT_VIEW == front
         dex
-        bne _2a3d
-        jmp _2b2d
-
-;===============================================================================
-
-_2a3d:                                                                  ;$2A3D
-        jmp _37e9
+        bne :+          
+        jmp .animate_dust_rear       ; COCKPIT_VIEW == rear
+:       jmp .animate_dust_sideways   ; else (left, right)
 
         ;-----------------------------------------------------------------------
 
-_2a40:                                                                  ;$2A40
+.animate_dust_front:                                                                  ;$2A40
         ldy DUST_COUNT          ; number of dust particles
 _2a43:                                                                  ;$2A43
-        jsr _3b30
-        lda ZP_VAR_R
+        jsr _3b30               ; calculate PLAYER_SPEED / DUST_Z,y -> {P1.R}
+        lda ZP_VAR_R            ; unneccessary, A is R after _3b30
         lsr ZP_VAR_P1
         ror
         lsr ZP_VAR_P1
-        ror
-        ora # %00000001
-        sta ZP_VAR_Q
+        ror                     ; {P1.A} = (PLAYER_SPEED / DUST_Z) / 4
+        ora # %00000001         ; cheap way of asserting != 0 ?
+        sta ZP_VAR_Q            ; so Q is SPEED/DZ/4 if P1 is 0..sure?
         lda VAR_06E3, y
-        sbc ZP_97
+        sbc ZP_97               ; ZP_97 is probably still (PLAYER_SPEED&3)<<6
         sta VAR_06E3, y
         lda DUST_Z, y
         sta ZP_VAR_Z
@@ -2304,7 +2300,7 @@ _2a43:                                                                  ;$2A43
         jsr _3992
         sta ZP_VAR_YY_HI
         lda ZP_VAR_P1
-        adc VAR_06C9, y         ; inside `DUST_Y` array
+        adc DUST_Y_LO, y         ; inside `DUST_Y` array
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_Y
@@ -2316,7 +2312,7 @@ _2a43:                                                                  ;$2A43
         jsr _3997
         sta ZP_VAR_XX_HI
         lda ZP_VAR_P1
-        adc VAR_06AF, y         ; inside `DUST_X` array
+        adc DUST_X_LO, y         ; inside `DUST_X` array
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X
         adc ZP_VAR_XX_HI
@@ -2334,7 +2330,7 @@ _2a43:                                                                  ;$2A43
         ldx ZP_PITCH_MAGNITUDE
         lda ZP_VAR_YY_HI
         eor ZP_95
-        jsr _393e
+        jsr _393e               ; multiply_small_number:A.P = A*X (X<32)
         sta ZP_VAR_Q
         jsr _3a4c
         asl ZP_VAR_P1
@@ -2343,10 +2339,10 @@ _2a43:                                                                  ;$2A43
         lda # $00
         ror
         ora ZP_VAR_T
-        jsr multiplied_now_add
+        jsr multiplied_now_add  ; A.P + R.S -> X.A
         sta ZP_VAR_XX_HI
         txa
-        sta VAR_06AF, y         ; inside `DUST_X` array
+        sta DUST_X_LO, y         ; inside `DUST_X` array
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -2404,22 +2400,22 @@ _2b0a:                                                                  ;$2B0A
 
 ;===============================================================================
 
-_2b2d:                                                                  ;$2B2D
+.animate_dust_rear:                                                                  ;$2B2D
         ldy DUST_COUNT          ; number of dust particles
 _2b30:                                                                  ;$2B30
-        jsr _3b30
-        lda ZP_VAR_R
+        jsr _3b30               ; calculate PLAYER_SPEED / DUST_Z,y -> (P1.R)
+        lda ZP_VAR_R            ; unneccessary, A is R after _3b30
         lsr ZP_VAR_P1
         ror
         lsr ZP_VAR_P1
-        ror
-        ora # %00000001
-        sta ZP_VAR_Q
+        ror                     ; {P1.A} = (PLAYER_SPEED / DUST_Z) / 4
+        ora # %00000001         ; cheap way of asserting != 0 ?
+        sta ZP_VAR_Q            ; so Q is SPEED/DZ/4 if P1 is 0..sure?
         lda DUST_X, y
         sta ZP_VAR_X
         jsr _3997
         sta ZP_VAR_XX_HI
-        lda VAR_06AF, y         ; inside `DUST_X` array
+        lda DUST_X_LO, y         ; inside `DUST_X` array
         sbc ZP_VAR_P1
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X
@@ -2427,7 +2423,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_XX_HI
         jsr _3992
         sta ZP_VAR_YY_HI
-        lda VAR_06C9, y         ; inside `DUST_Y` array
+        lda DUST_Y_LO, y         ; inside `DUST_Y` array
         sbc ZP_VAR_P1
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
@@ -2436,7 +2432,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
         lda VAR_06E3, y
-        adc ZP_97
+        adc ZP_97               ; ZP_97 is probably still (PLAYER_SPEED&3)<<6
         sta VAR_06E3, y
         lda DUST_Z, y
         sta ZP_VAR_Z
@@ -2456,7 +2452,7 @@ _2b30:                                                                  ;$2B30
         lda ZP_VAR_YY_HI
         eor ZP_95
         ldx ZP_PITCH_MAGNITUDE
-        jsr _393e
+        jsr _393e               ; multiply_small_number:A.P = A*X (X<32)
         sta ZP_VAR_Q
         lda ZP_VAR_XX_HI
         sta ZP_VAR_S
@@ -2471,7 +2467,7 @@ _2b30:                                                                  ;$2B30
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         txa
-        sta VAR_06AF, y         ; inside `DUST_X` array
+        sta DUST_X_LO, y         ; inside `DUST_X` array
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -4945,64 +4941,69 @@ _37e8:                                                                  ;$37E8
 
 ;===============================================================================
 
-_37e9:                                                                  ;$37E9
+.animate_dust_sideways:                                                 ;$37E9
         lda # $00
-        cpx # $02
-        ror
-        sta ZP_B0
+        cpx # $02               ; X is COCKPIT_VIEW-1, so this checks for RIGHT
+        ror                     ; A = 0:left or -128:right
+        sta ZP_B0               ; B0 = 0:left or -128:right
         eor # %10000000
-        sta ZP_B1
-        jsr _38a3
+        sta ZP_B1               ; B1 = -128:left or 0:right
+        jsr _38a3               ; inverts roll/pitch etc. when looking RIGHT
         ldy DUST_COUNT          ; number of dust particles
 _37fa:                                                                  ;$37FA
+        ; first calculate X-movement according to player speed
         lda DUST_Z, y
         sta ZP_VAR_Z
         lsr
         lsr
         lsr
-        jsr _3b33
+        jsr _3b33               ; P.R = PLAYER_SPEED / A
         lda ZP_VAR_P1
-        sta ZP_BA
-        eor ZP_B1
+        sta ZP_BA               ; BA = PLAYER_SPEED / (DUST_Z/8), no fraction
+        eor ZP_B1               ; -128 for LEFT
         sta ZP_VAR_S
-        lda VAR_06AF, y         ; inside `DUST_X` array
+        lda DUST_X_LO, y
         sta ZP_VAR_P1
         lda DUST_X, y
         sta ZP_VAR_X
-        jsr multiplied_now_add
+        jsr multiplied_now_add  ; A.X = S.R + A.P = (Spd/Z) + DUST_X(16bit)
         sta ZP_VAR_S
-        stx ZP_VAR_R
+        stx ZP_VAR_R            ; S.R = (Spd/DustZ) + DUST_X (LEFT: ~sign)
+        
+        ; now rotate the dust according to pitch
         lda DUST_Y, y
         sta ZP_VAR_Y
         eor ZP_PITCH_SIGN
         ldx ZP_PITCH_MAGNITUDE
-        jsr _393e
+        jsr _393e               ;  A.P = DUST_Y * ZP_PITCH_MAGNITUDE
         jsr multiplied_now_add
         stx ZP_VAR_XX_LO
-        sta ZP_VAR_XX_HI
-        ldx VAR_06C9, y         ; inside `DUST_Y` array
+        sta ZP_VAR_XX_HI        ; ZP_VAR_XX = DUST_Y * PITCH + (Spd/DustZ) + DUST_X
+        ldx DUST_Y_LO, y
         stx ZP_VAR_R
         ldx ZP_VAR_Y
-        stx ZP_VAR_S
+        stx ZP_VAR_S            ; S.R = DUST_Y
         ldx ZP_PITCH_MAGNITUDE
         eor ZP_95
-        jsr _393e
+        jsr _393e               ; A.P = XX_HI * PITCH
         jsr multiplied_now_add
         stx ZP_VAR_YY_LO
-        sta ZP_VAR_YY_HI
+        sta ZP_VAR_YY_HI        ; ZP_VAR_YY = XX_HI * PITCH + DUST_Y
+        
+        ; now rotate the dust according to roll
         ldx ZP_ROLL_MAGNITUDE
         eor ZP_ROLL_SIGN
-        jsr _393e
-        sta ZP_VAR_Q
+        jsr _393e               ; A.P = YY_HI * ROLL
+        sta ZP_VAR_Q            ; Q = (YY_HI * ROLL)HI
         lda ZP_VAR_XX_LO
         sta ZP_VAR_R
         lda ZP_VAR_XX_HI
-        sta ZP_VAR_S
+        sta ZP_VAR_S            ; S.R = XX
         eor # %10000000
-        jsr multiply_and_add
+        jsr multiply_and_add    ; A.X = (YY_HI * ROLL)HI * XX_HI + XX
         sta ZP_VAR_XX_HI
         txa
-        sta VAR_06AF, y         ; inside `DUST_X` array
+        sta DUST_X_LO, y
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -5015,7 +5016,7 @@ _37fa:                                                                  ;$37FA
         lda ZP_ALPHA
         jsr _290f
         lda ZP_VAR_XX_HI
-        sta DUST_X, y
+        sta DUST_X, y           ; DUST_X = (YY_HI * ROLL)HI * XX_HI + XX
         sta ZP_VAR_X
         and # %01111111
         eor # %01111111
@@ -5038,7 +5039,7 @@ _389a:                                                                  ;$389A
         jmp _37fa
 
         ;-----------------------------------------------------------------------
-
+        ; applies B0 to all kind of roll/pitch variables (-= 128)
 _38a3:                                                                  ;$38A3
         lda ZP_ALPHA
         eor ZP_B0
@@ -5138,6 +5139,11 @@ _3934:                                                                  ;$3934
         stx ZP_VAR_S
 _393c:                                                                  ;$393C
         ldx ZP_ROLL_MAGNITUDE
+        
+;; multiply_small_number : returns A * (X & $1F) in A.P
+;; TODO: whats with the topmost bit? this does not seem to indicate a
+;; real negative number but more of a direction-flag...
+;; the result always has at least 3 clear bits before the sign-bit is applied
 _393e:                                                                  ;$393E
         stx ZP_VAR_P1
         tax
@@ -5145,50 +5151,31 @@ _393e:                                                                  ;$393E
         sta ZP_VAR_T
         txa
         and # %01111111
-        beq _3981
+        beq _3981           ; A=0 -> result = 0
         tax
-        dex
+        dex                 ; decrement because carry is always set on adc
         stx ZP_TEMP_VAR
         lda # $00
         lsr ZP_VAR_P1
-        bcc _3956
-        adc ZP_TEMP_VAR
-_3956:                                                                  ;$3956
-        ror
+        
+        ; do the multiplication by shift+add for 5 bits (max factor of 31)
+.REPEAT 5
+        bcc :+
+        adc ZP_TEMP_VAR     ; A,ZP_TEMP_VAR both < 128, so no overflow
+:       ror                 ; could as well be lsr, carry is always clear
         ror ZP_VAR_P1
-        bcc _395d
-        adc ZP_TEMP_VAR
-_395d:                                                                  ;$395D
-        ror
-        ror ZP_VAR_P1
-        bcc _3964
-        adc ZP_TEMP_VAR
-_3964:                                                                  ;$3964
-        ror
-        ror ZP_VAR_P1
-        bcc _396b
-        adc ZP_TEMP_VAR
-_396b:                                                                  ;$396B
-        ror
-        ror ZP_VAR_P1
-        bcc _3972
-        adc ZP_TEMP_VAR
-_3972:                                                                  ;$3972
-        ror
-        ror ZP_VAR_P1
+.ENDREP
+        ; ignore the last 3 bits (they are considered to be 0 anyway)
+.REPEAT 3
         lsr
         ror ZP_VAR_P1
-        lsr
-        ror ZP_VAR_P1
-        lsr
-        ror ZP_VAR_P1
-        ora ZP_VAR_T
+.ENDREP
+        ora ZP_VAR_T        ; keep the sign-bit (is this just a flag?)
         rts
-
         ;-----------------------------------------------------------------------
 
 _3981:                                                                  ;$3981
-        sta ZP_VAR_P2
+        sta ZP_VAR_P2       ; why clear P2?
         sta ZP_VAR_P1
         rts
 
@@ -5338,9 +5325,9 @@ _3b27:                                                                  ;$3B27
 
 ;===============================================================================
 
-_3b30:                                                                  ;$3B30
+_3b30:                   ; calculate P.R = PLAYER_SPEED / DUST_Z,y      ;$3B30
         lda DUST_Z, y
-_3b33:                                                                  ;$3B33
+_3b33:                   ; calculate P.R = PLAYER_SPEED / A             ;$3B33
         sta ZP_VAR_Q
 
         lda PLAYER_SPEED
@@ -5368,6 +5355,7 @@ divide_unsigned:                                                                
         sbc ZP_VAR_Q
 :       rol ZP_VAR_P1
 .ENDREP
+
         ;; End of P1 = A/Q
 
         ldx # $00       ;; unneccessary, is cancelled out by the tax below
