@@ -38,7 +38,7 @@ Help is needed in these areas:
 
 ## Getting _Elite : Harmless_ ##
 
-Due to legal concerns, _Elite : Harmless_ binaries (i.e. disk images) are not made available, you will have to build the source code yourself using the instructions provided in [INSTALL.md](install.md).
+Due to legal concerns, _Elite : Harmless_ binaries (i.e. disk images) are not made available, you will have to build the source code yourself using the instructions provided in [INSTALL.md](INSTALL.md).
 
 ## Acknowledgements ##
 
