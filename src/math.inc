@@ -165,7 +165,7 @@ multiply_and_add:                                                       ;$3ACE
 ; returns a 16-bit number (in X & A), by multiplying "Q" (`ZP_VAR_Q`) with `A`
 ; and adding the 16-bit number in `R` (`ZP_VAR_R`) & `S` (`ZP_VAR_S`):
 ;
-;       X.A = Q * A + R.S
+;       A.X = Q * A + S.R
 ;
 ; this is used as a lot as part of 3D math
 ;
@@ -176,7 +176,7 @@ multiply_and_add:                                                       ;$3ACE
 
 multiplied_now_add:                                                     ;$3AD1
         ;-----------------------------------------------------------------------
-        ; skips the `Q * A` multiplication and adds `A.P`
+        ; skips the `Q * A` multiplication: A.X = S.R + A.P
         ;
 .export multiplied_now_add
 
