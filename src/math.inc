@@ -165,7 +165,7 @@ multiply_and_add:                                                       ;$3ACE
 ; returns a 16-bit number (in X & A), by multiplying "Q" (`ZP_VAR_Q`) with `A`
 ; and adding the 16-bit number in `R` (`ZP_VAR_R`) & `S` (`ZP_VAR_S`):
 ;
-;       X.A = Q * A + R.S
+;       A.X = Q * A + S.R
 ;
 ; this is used as a lot as part of 3D math
 ;
@@ -176,7 +176,7 @@ multiply_and_add:                                                       ;$3ACE
 
 multiplied_now_add:                                                     ;$3AD1
         ;-----------------------------------------------------------------------
-        ; skips the `Q * A` multiplication and adds `A.P`
+        ; skips the `Q * A` multiplication: A.X = S.R + A.P
         ;
 .export multiplied_now_add
 
@@ -267,10 +267,10 @@ multiply_signed:                                                        ;$3A54
         ; compare signs for working out what the final sign will be. XOR'ing
         ; the two operands will work out the +ve/-ve combination for us!
         ;
-        ;       +ve * +ve = +ve
-        ;       +ve * -ve = -ve
-        ;       -ve * +ve = -ve
-        ;       -ve * -ve = +ve
+        ; +ve * +ve = +ve
+        ; +ve * -ve = -ve
+        ; -ve * +ve = -ve
+        ; -ve * -ve = +ve
         ;
         eor ZP_VAR_Q            ; load multiplicand, combining the signs
         and # %10000000         ; extract resulting sign
@@ -391,10 +391,10 @@ sm4:    sbc square2_hi, x
         ; compare signs for working out what the final sign will be. XOR'ing
         ; the two operands will work out the +ve/-ve combination for us!
         ;
-        ;       +ve * +ve = +ve
-        ;       +ve * -ve = -ve
-        ;       -ve * +ve = -ve
-        ;       -ve * -ve = +ve
+        ; +ve * +ve = +ve
+        ; +ve * -ve = -ve
+        ; -ve * +ve = -ve
+        ; -ve * -ve = +ve
         ;
         txa                     ; load multiplier
         eor ZP_VAR_Q            ; load multiplicand, combining the signs

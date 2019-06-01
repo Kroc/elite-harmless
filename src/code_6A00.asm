@@ -27,7 +27,7 @@
 
 ; from "text_flight.asm"
 .import _0700:absolute
-.import _0ac0:absolute
+.import table_sin:absolute
 
 ; from "vars_user.asm"
 .import _1d01:absolute
@@ -122,7 +122,7 @@
 .import multiply_and_add:absolute
 .import multiplied_now_add:absolute
 .import _3b0d:absolute
-.import _3b37:absolute
+.import divide_unsigned:absolute
 .import _3bc1:absolute
 .import _3c6f:absolute
 .import _3c7f:absolute
@@ -2981,7 +2981,7 @@ _7885:                                                                  ;$7885
         adc # $04
         bcs _785f
         sta [ZP_TEMP_ADDR2], y
-        jsr _3b37
+        jsr divide_unsigned
         lda ZP_VAR_P1
         cmp # $1c
         bcc _78a1
@@ -3491,7 +3491,7 @@ _7b7d:                                                                  ;$7B7D
         lda # $14
         sta ZP_VAR_Q
         txa 
-        jsr _3b37
+        jsr divide_unsigned
         ldx ZP_VAR_P1
         tya 
         bmi _7b93
@@ -3986,7 +3986,7 @@ _7e5f:                                                                  ;$7E5F
         lda ZP_AB
         and # %00011111
         tax 
-        lda _0ac0, x
+        lda table_sin, x
         sta ZP_VAR_Q
         lda ZP_B4
         jsr _39ea
@@ -4004,7 +4004,7 @@ _7e5f:                                                                  ;$7E5F
         adc # $10
         and # %00011111
         tax 
-        lda _0ac0, x
+        lda table_sin, x
         sta ZP_VAR_Q
         lda ZP_B3
         jsr _39ea
@@ -6789,7 +6789,7 @@ do_quickjump:                                                           ;$8E29
         lsr 
         sta VAR_048A
 
-        ldx VAR_0486
+        ldx COCKPIT_VIEW
         jmp _a6ba               ; redraw viewport?
 
 @nojump:                                                                ;$8E7C
@@ -9624,7 +9624,7 @@ _a60e:                                                                  ;$A60E
 
 _a626:                                                                  ;$A626
 .export _a626
-        ldx VAR_0486
+        ldx COCKPIT_VIEW
         beq _a65e
         dex 
         bne _a65f
@@ -9702,7 +9702,7 @@ _a6ad:                                                                  ;$A6AD
 ;===============================================================================
 
 _a6ae:                                                                  ;$A6AE
-        stx VAR_0486
+        stx COCKPIT_VIEW
         jsr set_page
         jsr _a6d4
         jmp _7af3
@@ -9726,9 +9726,9 @@ _a6ba:                                                                  ;$A6BA
         ldy ZP_SCREEN
         bne _a6ae
         
-        cpx VAR_0486
-        beq _a6ad
-        stx VAR_0486
+        cpx COCKPIT_VIEW
+        beq _a6ad               ; view did not change, rts
+        stx COCKPIT_VIEW
         
         jsr set_page
         jsr dust_swap_xy
@@ -9746,7 +9746,7 @@ _a6d4:                                                                  ;$A6D4
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ldy VAR_0486            ; current viewpoint? (front, rear, left, right)
+        ldy COCKPIT_VIEW        ; current viewpoint? (front, rear, left, right)
         lda PLAYER_LASERS, y    ; get type of laser for current viewpoint
         beq _a700               ; no laser? skip ahead
 
@@ -9887,7 +9887,7 @@ _a75d:                                                                  ;$A75D
         lda # 11
         jsr set_cursor_col
 
-        lda VAR_0486
+        lda COCKPIT_VIEW
         ora # %01100000
         jsr print_flight_token
         jsr print_space
