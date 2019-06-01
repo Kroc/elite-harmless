@@ -49,7 +49,9 @@ VAR_0481                = $0481 ;?
 IS_WITCHSPACE           = $0482 ; has misjump occurred?
 
 VAR_0484                = $0484 ;?
-COCKPIT_VIEW            = $0486 ; active cockpit view : (front, rear, left, right)
+
+COCKPIT_VIEW            = $0486 ; (front, rear, left, right)
+
 VAR_0487                = $0487 ;?
 
 VAR_048A                = $048a ;?
@@ -292,8 +294,9 @@ VAR_049C                = $049c ;? (indexed by X)
 ;-------------------------------------------------------------------------------
 
 ; NOTE: there are up-to 13 dust-particles at a time
-; DUST_COUNT is only ever set to $0c (in _83ed) or $03 (in _73c1)
+; DUST_COUNT is only ever set to $0C (in `_83ed`) or $03 (in `_73c1`)
 ; TODO: define the arrays below based on this
+;
 DUST_MAX                = 13
 
 DUST_COUNT              = $050b ; number of dust particles
@@ -314,6 +317,7 @@ DUST_Z                  = $06d6 ;..$06E1: Z-positions of dust-particles
 ;
 ; TODO: define this structurally based on `ELITE_VIEWPORT_HEIGHT`
 ; TODO: also, as this is indexed, keep it within one page
+;
 VAR_0580                = $0580
 
 VAR_0647                = $0647 ;? (indexed by X)
