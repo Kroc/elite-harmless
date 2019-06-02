@@ -16,7 +16,7 @@ echo "to install required tools:"
 echo "(git, gcc, make, python3)"
 echo
 sudo apt update
-sudo apt-get install git gcc make python3
+sudo apt-get install git gcc make python3 bison
 
 # todo: make this script `git pull` if code is already present?
 

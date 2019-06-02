@@ -1,6 +1,9 @@
 # ignore anything beginning with "__"
 # (used to hide stuff from the repository)
 __*
-**\__*
+**/__*
 
 ca65_plugin_build.sh
+
+# cache from the VSCode C extension?
+.vscode/ipch
