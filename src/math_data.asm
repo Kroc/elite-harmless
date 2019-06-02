@@ -7,6 +7,25 @@
 ; and cannot be included multiple times by other files, which is why the math
 ; routines are in separate files
 
+;===============================================================================
+.segment        "TABLE_SIN"
+
+; table: sin(x/32*pi)*256
+;
+table_sin:                                                              ;$0AC0
+.export table_sin
+        .byte   $00, $19, $32, $4a, $62, $79, $8e, $a2                  ;$0AC0
+        .byte   $b5, $c6, $d5, $e2, $ed, $f5, $fb, $ff
+        .byte   $ff, $ff, $fb, $f5, $ed, $e2, $d5, $c6                  ;$0AD0
+        .byte   $b5, $a2, $8e, $79, $62, $4a, $32, $19
+_0ae0:
+.export _0ae0
+        .byte   $00, $01, $03, $04, $05, $06, $08, $09                  ;$0AE0
+        .byte   $0a, $0b, $0c, $0d, $0f, $10, $11, $12
+        .byte   $13, $14, $15, $16, $17, $18, $19, $19                  ;$0AF0
+        .byte   $1a, $1b, $1c, $1d, $1d, $1e, $1f, $1f
+
+
 .ifdef  OPTION_MATHTABLES
 ;///////////////////////////////////////////////////////////////////////////////
 .segment        "TABLE_SQR"

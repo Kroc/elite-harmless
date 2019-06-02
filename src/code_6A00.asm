@@ -9746,7 +9746,9 @@ _a6d4:                                                                  ;$A6D4
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ldy COCKPIT_VIEW        ; current viewpoint? (front, rear, left, right)
+        ; TODO: is this instruction unecessary?
+        ldy COCKPIT_VIEW        ; current viewpoint (front, rear, left, right)
+
         lda PLAYER_LASERS, y    ; get type of laser for current viewpoint
         beq _a700               ; no laser? skip ahead
 
@@ -9782,6 +9784,7 @@ _a6d4:                                                                  ;$A6D4
         lda # %00000001
 
 _a700:                                                                  ;$A700
+
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         sta ZP_VAR_T

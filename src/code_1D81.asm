@@ -1273,7 +1273,7 @@ _2345:                                                                  ;$2345
         lda ZP_SCREEN
         bne _2366
 
-        jmp .animate_dust
+        jmp _animate_dust
 
 ;===============================================================================
 
@@ -2013,7 +2013,7 @@ _290f:                                                                  ;$209F
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         txa
-        sta DUST_Y_LO, y         ; within "dust y-lo" ???
+        sta DUST_Y_LO, y
 
 draw_particle:                                                          ;$2918
 ;===============================================================================
@@ -2106,10 +2106,11 @@ paint_particle:                                                         ;$293A
         and # %00000111         ; modulo 8 (0-7)
         tax
 
-        ;; The Z-check makes effectively the same paint operation for Z>=144
-        ;; and Z>=80, this seems to be a remnant from a different implementation
-        ;; we could instead use this to grow dust in more detail
-        ;; using a single-pixel bitmask for far far away dust particles
+        ; The Z-check makes effectively the same paint operation for Z>=144
+        ; and Z>=80, this seems to be a remnant from a different implementation
+        ; we could instead use this to grow dust in more detail ; using a
+        ; single-pixel bitmask for far far away dust particles
+        ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda ZP_VAR_Z            ; "pixel distance"
@@ -2269,17 +2270,18 @@ dust_swap_xy:                                                           ;$2A12
 
 ;===============================================================================
 ; animate dust particles based on COCKPIT_VIEW
-.animate_dust:                                                                  ;$2A32
+;
+_animate_dust:                                                          ;$2A32
+
         ldx COCKPIT_VIEW
-        beq .animate_dust_front      ; COCKPIT_VIEW == front
+        beq _animate_dust_front         ; COCKPIT_VIEW == front
         dex
-        bne :+          
-        jmp .animate_dust_rear       ; COCKPIT_VIEW == rear
-:       jmp .animate_dust_sideways   ; else (left, right)
+        bne :+
+        jmp _animate_dust_rear          ; COCKPIT_VIEW == rear
+:       jmp _animate_dust_sideways      ; else (left, right)
 
+_animate_dust_front:                                                    ;$2A40
         ;-----------------------------------------------------------------------
-
-.animate_dust_front:                                                                  ;$2A40
         ldy DUST_COUNT          ; number of dust particles
 _2a43:                                                                  ;$2A43
         jsr _3b30               ; calculate PLAYER_SPEED / DUST_Z,y -> {P1.R}
@@ -2342,7 +2344,7 @@ _2a43:                                                                  ;$2A43
         jsr multiplied_now_add  ; A.P + R.S -> X.A
         sta ZP_VAR_XX_HI
         txa
-        sta DUST_X_LO, y         ; inside `DUST_X` array
+        sta DUST_X_LO, y        ; inside `DUST_X` array
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -2398,9 +2400,8 @@ _2b0a:                                                                  ;$2B0A
         lda ZP_VAR_Y
         jmp _2b00
 
-;===============================================================================
-
-.animate_dust_rear:                                                                  ;$2B2D
+_animate_dust_rear:                                                     ;$2B2D
+        ;-----------------------------------------------------------------------
         ldy DUST_COUNT          ; number of dust particles
 _2b30:                                                                  ;$2B30
         jsr _3b30               ; calculate PLAYER_SPEED / DUST_Z,y -> (P1.R)
@@ -4939,9 +4940,8 @@ _37d7:                                                                  ;$37D7
 _37e8:                                                                  ;$37E8
         rts
 
+_animate_dust_sideways:                                                 ;$37E9
 ;===============================================================================
-
-.animate_dust_sideways:                                                 ;$37E9
         lda # $00
         cpx # $02               ; X is COCKPIT_VIEW-1, so this checks for RIGHT
         ror                     ; A = 0:left or -128:right
@@ -5159,17 +5159,17 @@ _393e:                                                                  ;$393E
         lsr ZP_VAR_P1
         
         ; do the multiplication by shift+add for 5 bits (max factor of 31)
-.REPEAT 5
+.repeat 5
         bcc :+
         adc ZP_TEMP_VAR     ; A,ZP_TEMP_VAR both < 128, so no overflow
 :       ror                 ; could as well be lsr, carry is always clear
         ror ZP_VAR_P1
-.ENDREP
+.endrep
         ; ignore the last 3 bits (they are considered to be 0 anyway)
-.REPEAT 3
+.repeat 3
         lsr
         ror ZP_VAR_P1
-.ENDREP
+.endrep
         ora ZP_VAR_T        ; keep the sign-bit (is this just a flag?)
         rts
         ;-----------------------------------------------------------------------
