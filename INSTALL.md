@@ -27,7 +27,7 @@ The assembler used is [CC65](https://cc65.github.io/cc65/), this provides us cro
 3. You may be prompted that the project contains recommended extensions and asked if you want to install them. This you should accept, or otherwise open the Extensions panel (`CTRL+SHIFT+X`), search for "CC65" and install the CC65 extension
 
 4. From the VSCode menu, select "Tasks" > "Run Task..." and click on "Install build tools".
-   The setup Bash script will download and compile CC65, mkd64 and other required tools. The script will ask for your Linux password so as to install the GCC compiler suite and required tools (`sudo apt-get install git gcc make python3`)
+   The setup Bash script will download and compile CC65, mkd64 and other required tools. The script will ask for your Linux password so as to install the GCC compiler suite and required tools (`sudo apt-get install git gcc make python3 bison`)
 
 ### Compiling the Source ###
 
