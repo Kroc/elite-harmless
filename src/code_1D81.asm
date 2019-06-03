@@ -95,7 +95,7 @@
 .import row_to_bitmap_lo:absolute
 .import row_to_bitmap_hi:absolute
 
-.import _9978:absolute
+.import square_root:absolute
 .import _99af:absolute
 .import _9a2c:absolute
 .import _9a86:absolute
@@ -479,7 +479,7 @@ _1ece:                                                                  ;$1ECE
 
         stx VAR_048D            ; X-dampen?
         eor # %10000000
-        sta ZP_6A               ; move count?
+        sta ZP_6A               ; inverse roll direction
 
         tya
         bpl :+
@@ -1154,7 +1154,7 @@ _2292:                                                                  ;$2292
         sbc # $24
         bcc _22b2
         sta ZP_VAR_R
-        jsr _9978
+        jsr square_root
         lda ZP_VAR_Q
         sta VAR_06F3
         bne _231c
@@ -2010,6 +2010,8 @@ _2907:                                                                  ;$2907
 
 _290f:                                                                  ;$209F
 ;===============================================================================
+; called during all _animate_dust-routines to erase the old dust pixels
+; TODO: name? multiply_to_temp_y_and_erase_old_dust?
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         txa
@@ -2254,10 +2256,10 @@ dust_swap_xy:                                                           ;$2A12
 :       ldx DUST_Y, y           ; get dust-particle Y-position          ;$2A15
         lda DUST_X, y           ; get dust-particle X-position
         sta ZP_VAR_Y            ; (put aside X-position)
-        sta DUST_Y, y           ; save the Y-value to the X-position
+        sta DUST_Y, y           ; save the X-value to the Y-position
         txa                     ; move the Y-position into A
         sta ZP_VAR_X            ; (put aside Y-value)
-        sta DUST_X, y           ; write the X-value to the Y-position
+        sta DUST_X, y           ; write the Y-value to the X-position
         lda DUST_Z, y           ; get dust z-position
         sta ZP_VAR_Z            ; (put aside Z-position)
 
@@ -2319,7 +2321,7 @@ _2a43:                                                                  ;$2A43
         lda ZP_VAR_X
         adc ZP_VAR_XX_HI
         sta ZP_VAR_XX_HI
-        eor ZP_6A               ; move count?
+        eor ZP_6A                ; inverse roll direction
         jsr _393c
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
@@ -2353,47 +2355,47 @@ _2a43:                                                                  ;$2A43
         sta ZP_VAR_P1
         lda ZP_BETA
         eor # %10000000
-        jsr _290f
+        jsr _290f               ; also deletes current dust (at previous pos)
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X
         sta DUST_X, y
         and # %01111111
         cmp # $78
-        bcs _2b0a
+        bcs _create_particle_front
         lda ZP_VAR_YY_HI
         sta DUST_Y, y
         sta ZP_VAR_Y
         and # %01111111
         cmp # $78
-        bcs _2b0a
+        bcs _create_particle_front
         lda DUST_Z, y
         cmp # $10
-        bcc _2b0a
+        bcc _create_particle_front
         sta ZP_VAR_Z
 _2b00:                                                                  ;$2B00
         jsr draw_particle
         dey
-        beq _2b09
+        beq :+
         jmp _2a43
-
-_2b09:                                                                  ;$2B09
-        rts
+:       rts
 
         ;-----------------------------------------------------------------------
-
-_2b0a:                                                                  ;$2B0A
+_create_particle_front:                                                 ;$2B0A
+        ; resets DUST X,Y,Z to new values suitable for a newly visible
+        ; front view dust particle. the LO-values of X and Y stay the same,
+        ; as their values only matter for smooth movement
         jsr get_random_number
-        ora # %00000100
+        ora # %00000100         ; Y shall be >= 8
         sta ZP_VAR_Y
         sta DUST_Y, y
 
         jsr get_random_number
-        ora # %00001000
+        ora # %00001000         ; X shall be >= 16
         sta ZP_VAR_X
         sta DUST_X, y
 
         jsr get_random_number
-        ora # %10010000
+        ora # %10010000         ; Z shall be >= 144
         sta DUST_Z, y
         sta ZP_VAR_Z
 
@@ -2445,7 +2447,7 @@ _2b30:                                                                  ;$2B30
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         stx ZP_VAR_YY_LO
-        eor ZP_6A               ; move count?
+        eor ZP_6A               ; inverse roll direction
         jsr _3934
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
@@ -2476,7 +2478,7 @@ _2b30:                                                                  ;$2B30
         lda # $00
         sta ZP_VAR_P1
         lda ZP_BETA
-        jsr _290f
+        jsr _290f               ; also deletes current dust (at previous pos)
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X
         sta DUST_X, y
@@ -2485,52 +2487,54 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_Y
         and # %01111111
         cmp # $6e
-        bcs _2bf7
+        bcs _create_particle_rear
         lda DUST_Z, y
         cmp # $a0
-        bcs _2bf7
+        bcs _create_particle_rear
         sta ZP_VAR_Z
 _2bed:                                                                  ;$2BED
         jsr draw_particle
         dey
-        beq _2bf6
+        beq :+
         jmp _2b30
-
-_2bf6:                                                                  ;$2BF6
-        rts
+:       rts
 
         ;-----------------------------------------------------------------------
-
-_2bf7:                                                                  ;$2BF7
+_create_particle_rear:                                                  ;$2BF7
+        ; resets DUST X,Y,Z to new values suitable for a newly visible
+        ; rear view dust particle. the LO-values of X and Y stay the same,
+        ; as their values only matter for smooth movement
+        ; this function uses less randomization than the front view version
+        ; and calls get_random_number only for either X or Y.
         jsr get_random_number
         and # %01111111
         adc # $0a
-        sta DUST_Z, y
+        sta DUST_Z, y           ; Z shall be >=10 and <138 
         sta ZP_VAR_Z
         lsr
-        bcs _2c1a
-        lsr
+        bcs @randomizeX         ; Z is odd -> use different randomization
+        lsr                     
         lda # $fc
         ror
-        sta ZP_VAR_X
+        sta ZP_VAR_X            ; X is $7E or $FE (random upper bit from Z)
         sta DUST_X, y
         jsr get_random_number
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y            ; Y completely random
         sta DUST_Y, y
         jmp _2bed
-
-        ;-----------------------------------------------------------------------
-
-_2c1a:                                                                  ;$2C1A
+@randomizeX:                                                                  ;$2C1A
         jsr get_random_number
-        sta ZP_VAR_X
+        sta ZP_VAR_X            ; X completely random
         sta DUST_X, y
         lsr
-        lda # $e6
+        lda # $e6               
         ror
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y            ; Y is $63 or $E3 (random upper bit from X)
         sta DUST_Y, y
-        bne _2bed
+        bne _2bed               ; always taken
+        
+        ;-----------------------------------------------------------------------
+        
 _2c2d:                                                                  ;$2C2D
         lda ZP_POLYOBJ_XPOS_LO, y
         asl
@@ -5014,32 +5018,33 @@ _37fa:                                                                  ;$37FA
         lda # $00
         sta ZP_VAR_P1
         lda ZP_ALPHA
-        jsr _290f
+        jsr _290f               ; also deletes current dust (at previous pos)
         lda ZP_VAR_XX_HI
         sta DUST_X, y           ; DUST_X = (YY_HI * ROLL)HI * XX_HI + XX
         sta ZP_VAR_X
         and # %01111111
         eor # %01111111
         cmp ZP_BA
-        bcc _38be
-        beq _38be
+        bcc _create_particle_sideways_x
+        beq _create_particle_sideways_x
         lda ZP_VAR_YY_HI
         sta DUST_Y, y
         sta ZP_VAR_Y
         and # %01111111
-_3895:                                                                  ;$3895
-.export _3895
-
         cmp # $74
-        bcs _38d1
+        bcs _create_particle_sideways_y
 _389a:                                                                  ;$389A
         jsr draw_particle
         dey
-        beq _38a3
+        beq _38a3               ; restores initial state of the roll/pitch vars
         jmp _37fa
 
         ;-----------------------------------------------------------------------
         ; applies B0 to all kind of roll/pitch variables (-= 128)
+        ; this is called exclusively at the beginning and end of
+        ; _animate_dust_sideways to invert the variables for the
+        ; right view and only during _animate_dust_sideways
+        ; name proposal? _invert_pitch_roll_for_right_view?
 _38a3:                                                                  ;$38A3
         lda ZP_ALPHA
         eor ZP_B0
@@ -5048,7 +5053,7 @@ _38a3:                                                                  ;$38A3
         eor ZP_B0
         sta ZP_ROLL_SIGN        ; roll sign?
         eor # %10000000
-        sta ZP_6A               ; move count?
+        sta ZP_6A               ; inv. roll now indicates dust dy at sideview
         lda ZP_PITCH_SIGN
         eor ZP_B0
         sta ZP_PITCH_SIGN
@@ -5057,31 +5062,39 @@ _38a3:                                                                  ;$38A3
         rts
 
         ;-----------------------------------------------------------------------
-
-_38be:                                                                  ;$38BE
+_create_particle_sideways_x:                                              ;$38BE
+        ; resets DUST X,Y,Z to new values suitable for a newly visible
+        ; left or right view dust particle. This is called whenever a
+        ; particle travels outside the view in x-direction (due to speed)
         jsr get_random_number
         sta ZP_VAR_Y
-        sta DUST_Y, y
+        sta DUST_Y, y           ; Y always fully random
         lda # $73
-        ora ZP_B0
-        sta ZP_VAR_X
+        ora ZP_B0               ; B0 is 0:left or -128:right
+        sta ZP_VAR_X            ; X starts at $73 or $F3
         sta DUST_X, y
-        bne _38e2
-_38d1:                                                                  ;$38D1
+        bne :+                  ; always branches
+_create_particle_sideways_y:                                                                  ;$38D1
+        ; resets DUST X,Y,Z to new values suitable for a newly visible
+        ; left or right view dust particle. This is called whenever a
+        ; particle travels outside the view in y-direction (due to roll)
         jsr get_random_number
         sta ZP_VAR_X
-        sta DUST_X, y
+        sta DUST_X, y           ; X always fully random
         lda # $6e
-        ora ZP_6A               ; move count?
-        sta ZP_VAR_Y
-        sta DUST_Y, y
-_38e2:                                                                  ;$38E2
+        ora ZP_6A               ; side-adjusted inverse roll (dust move-y)
+        sta ZP_VAR_Y            
+        sta DUST_Y, y           ; Y starts at $6E or $EE
+:                                                               ;$38E2
         jsr get_random_number
-        ora # %00001000
+        ora # %00001000         ; set min. Z to 16
         sta ZP_VAR_Z
         sta DUST_Z, y
-        bne _389a
+        bne _389a               ; always branches, continues animate loop
+
+        ;-----------------------------------------------------------------------
 _38ee:                                                                  ;$38EE
+        ; this belongs to _38f8
         sta ZP_VALUE_pt1
         sta ZP_VALUE_pt2
         sta ZP_VALUE_pt3
@@ -5099,7 +5112,7 @@ _38f8:                                                                  ;$38F8
         sta ZP_VALUE_pt3
         lda ZP_VAR_Q
         and # %01111111
-        beq _38ee
+        beq _38ee           ; when Q=0: set all to 0, clc and rts
         sec
         sbc # $01
         sta ZP_VAR_T
