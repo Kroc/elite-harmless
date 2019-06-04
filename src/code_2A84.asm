@@ -162,7 +162,7 @@ _290f:                                                                  ;$209F
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         txa 
-        sta VAR_06C9, y         ; within "dust y-lo" ???
+        sta DUST_Y_LO, y
 
 draw_particle:                                                          ;$2918
 ;===============================================================================
@@ -251,10 +251,18 @@ paint_particle:                                                         ;$293A
         and # %00000111         ; modulo 8 (0-7)
         tax 
         
+        ; the Z-check makes effectively the same paint operation for Z>=144
+        ; and Z>=80, this seems to be a remnant from a different implementation
+        ; we could instead use this to grow dust in more detail  using a
+        ; single-pixel bitmask for far far away dust particles
+        ;
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda ZP_VAR_Z            ; "pixel distance"
         cmp # 144               ; is the dust-particle >= 144 Z-distance?
        .bge :+                  ; yes, is very far away
-        
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         lda _28c8, x            ; get mask for desired pixel-position
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
@@ -399,34 +407,36 @@ dust_swap_xy:                                                           ;$2A12
 
         rts 
 
-_2a32:                                                                  ;$2A32
 ;===============================================================================
-        ldx VAR_0486
-        beq _2a40
+; animate dust particles based on COCKPIT_VIEW
+;
+_animate_dust:                                                          ;$2A32
+
+        ldx COCKPIT_VIEW
+        beq _animate_dust_front ; COCKPIT_VIEW == front
         dex 
         bne _2a3d
-        jmp _2b2d
+        jmp _animate_dust_rear
 
 ;===============================================================================
 
 _2a3d:                                                                  ;$2A3D
         jmp _37e9
 
-        ;-----------------------------------------------------------------------
+_animate_dust_front:                                                    ;$2A40
 
-_2a40:                                                                  ;$2A40
         ldy DUST_COUNT          ; number of dust particles
 _2a43:                                                                  ;$2A43
-        jsr _3b30
-        lda ZP_VAR_R
-        lsr ZP_VAR_P1
+        jsr _3b30               ; calculate PLAYER_SPEED / DUST_Z, y -> {P.R}
+        lda ZP_VAR_R            ; unneccessary, A is R after _3b30
+        lsr ZP_VAR_P
         ror 
-        lsr ZP_VAR_P1
-        ror 
-        ora # %00000001
-        sta ZP_VAR_Q
+        lsr ZP_VAR_P
+        ror                     ; {P.A} = (PLAYER_SPEED / DUST_Z) / 4
+        ora # %00000001         ; cheap way of asserting != 0 ?
+        sta ZP_VAR_Q            ; so Q is SPEED/DZ/4 if P is 0..sure?
         lda VAR_06E3, y
-        sbc ZP_97
+        sbc ZP_97               ; ZP_97 is probably still (PLAYER_SPEED&3)<<6
         sta VAR_06E3, y
         lda DUST_Z, y
         sta ZP_VAR_Z
@@ -435,7 +445,7 @@ _2a43:                                                                  ;$2A43
         jsr _3992
         sta ZP_VAR_YY_HI
         lda ZP_VAR_P1
-        adc VAR_06C9, y         ; inside `DUST_Y` array
+        adc DUST_Y_LO, y
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_Y
@@ -447,7 +457,7 @@ _2a43:                                                                  ;$2A43
         jsr _3997
         sta ZP_VAR_XX_HI
         lda ZP_VAR_P1
-        adc VAR_06AF, y         ; inside `DUST_X` array
+        adc DUST_X_LO, y
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X
         adc ZP_VAR_XX_HI
@@ -465,7 +475,7 @@ _2a43:                                                                  ;$2A43
         ldx ZP_PITCH_MAGNITUDE
         lda ZP_VAR_YY_HI
         eor ZP_95
-        jsr _393e
+        jsr _393e               ; multiply_small_number:A.P = A*X (X<32)
         sta ZP_VAR_Q
         jsr _3a4c
         asl ZP_VAR_P1
@@ -474,10 +484,10 @@ _2a43:                                                                  ;$2A43
         lda # $00
         ror 
         ora ZP_VAR_T
-        jsr multiplied_now_add
+        jsr multiplied_now_add  ; A.P + R.S -> X.A
         sta ZP_VAR_XX_HI
         txa 
-        sta VAR_06AF, y         ; inside `DUST_X` array
+        sta DUST_X_LO, y
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -535,7 +545,8 @@ _2b0a:                                                                  ;$2B0A
 
 ;===============================================================================
 
-_2b2d:                                                                  ;$2B2D
+_animate_dust_rear:                                                     ;$2B2D
+
         ldy DUST_COUNT          ; number of dust particles
 _2b30:                                                                  ;$2B30
         jsr _3b30
@@ -550,7 +561,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_X
         jsr _3997
         sta ZP_VAR_XX_HI
-        lda VAR_06AF, y         ; inside `DUST_X` array
+        lda DUST_X_LO, y
         sbc ZP_VAR_P1
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X
@@ -558,7 +569,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_XX_HI
         jsr _3992
         sta ZP_VAR_YY_HI
-        lda VAR_06C9, y         ; inside `DUST_Y` array
+        lda DUST_Y_LO, y
         sbc ZP_VAR_P1
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
@@ -602,7 +613,7 @@ _2b30:                                                                  ;$2B30
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         txa 
-        sta VAR_06AF, y         ; inside `DUST_X` array
+        sta DUST_X_LO, y
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -3037,7 +3048,7 @@ _37fa:                                                                  ;$37FA
         sta ZP_BA
         eor ZP_B1
         sta ZP_VAR_S
-        lda VAR_06AF, y         ; inside `DUST_X` array
+        lda DUST_X_LO, y
         sta ZP_VAR_P1
         lda DUST_X, y
         sta ZP_VAR_X
@@ -3052,7 +3063,7 @@ _37fa:                                                                  ;$37FA
         jsr multiplied_now_add
         stx ZP_VAR_XX_LO
         sta ZP_VAR_XX_HI
-        ldx VAR_06C9, y         ; inside `DUST_Y` array
+        ldx DUST_Y_LO, y
         stx ZP_VAR_R
         ldx ZP_VAR_Y
         stx ZP_VAR_S
@@ -3074,7 +3085,7 @@ _37fa:                                                                  ;$37FA
         jsr multiply_and_add
         sta ZP_VAR_XX_HI
         txa 
-        sta VAR_06AF, y         ; inside `DUST_X` array
+        sta DUST_X_LO, y
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
         lda ZP_VAR_YY_HI
@@ -3266,15 +3277,19 @@ _3981:                                                                  ;$3981
 .math_square                                                            ;$3986
 
 ;===============================================================================
+; calculate ZP_VALUE_pt1 * abs(sin(A))
+;
 _39e0:                                                                  ;$39E0
         and # %00011111
-        tax 
-.import _0ac0
-        lda _0ac0, x
-        sta ZP_VAR_Q
+        tax                     ; X = A%31, with 0..31 equiv. 0..pi
+        lda table_sin, x
+        sta ZP_VAR_Q            ; Q = abs(sin(A))*256
         lda ZP_VALUE_pt1
+
 _39ea:                                                                  ;$39EA
-        stx ZP_VAR_P1
+        ; calculate A=(A*Q)/256 via log-tables
+        ;
+        stx ZP_VAR_P            ; preserve X
         sta ZP_B6
         tax 
         beq _3a1d
@@ -3287,10 +3302,10 @@ _39ea:                                                                  ;$39EA
         lda table_log, x
         ldx ZP_B6
         adc table_log, x
-        bcc _3a20
+        bcc _3a20               ; no overflow: A*Q < 256
         tax 
         lda _9500, x
-        ldx ZP_VAR_P1
+        ldx ZP_VAR_P            ; restore X
         rts 
 
         ;-----------------------------------------------------------------------
@@ -3299,18 +3314,18 @@ _3a0f:                                                                  ;$3A0F
         lda table_log, x
         ldx ZP_B6
         adc table_log, x
-        bcc _3a20
+        bcc _3a20               ; no overflow: A*Q < 256
         tax 
-        lda _9600, x
+        lda _9600, x            ; A = X*ZP_B6
 _3a1d:                                                                  ;$3A1D
-        ldx ZP_VAR_P1
+        ldx ZP_VAR_P            ; restore X
         rts 
 
         ;-----------------------------------------------------------------------
 
 _3a20:                                                                  ;$3A20
-        lda # $00
-        ldx ZP_VAR_P1
+        lda # $00               ; A=0 when either A or Q was 0 or A*Q < 256
+        ldx ZP_VAR_P            ; restore X
         rts 
 
 ;===============================================================================
@@ -3403,9 +3418,24 @@ _3b33:                                                                  ;$3B33
         sta ZP_VAR_Q
 
         lda PLAYER_SPEED
+
+;===============================================================================
+; unsigned integer division
+;
+; params:
+;       A =
+;       Q =
+;
+; returns:
+;       A/Q*256 as 16-bit value in P.R  (A is the same as R on exit)
+;
+divide_unsigned:                                                        ;$3B37
+
+        ; This calculates A / Q by repeatedly shifting A (16bit) left
+        ; and subtracting from the hi-byte whenever possible.
 _3b37:                                                                  ;$3B37
         asl 
-        sta ZP_VAR_P1
+        sta ZP_VAR_P
         
         lda # $00
         rol 
@@ -3414,53 +3444,58 @@ _3b37:                                                                  ;$3B37
         
         sbc ZP_VAR_Q
 _3b43:                                                                  ;$3B43
-        rol ZP_VAR_P1
+        rol ZP_VAR_P            ; 1
         rol 
         cmp ZP_VAR_Q
         bcc _3b4c
         sbc ZP_VAR_Q
 _3b4c:                                                                  ;$3B4C
-        rol ZP_VAR_P1
+        rol ZP_VAR_P            ; 2
         rol 
         cmp ZP_VAR_Q
         bcc _3b55
         sbc ZP_VAR_Q
 _3b55:                                                                  ;$3B55
-        rol ZP_VAR_P1
+        rol ZP_VAR_P            ; 4
         rol 
         cmp ZP_VAR_Q
         bcc _3b5e
         sbc ZP_VAR_Q
 _3b5e:                                                                  ;$3B5E
-        rol ZP_VAR_P1
+        rol ZP_VAR_P            ; 8
         rol 
         cmp ZP_VAR_Q
         bcc _3b67
         sbc ZP_VAR_Q
 _3b67:                                                                  ;$3B67
-        rol ZP_VAR_P1
+        rol ZP_VAR_P            ; 16
         rol 
         cmp ZP_VAR_Q
         bcc _3b70
         sbc ZP_VAR_Q
 _3b70:                                                                  ;$3B70
-        rol ZP_VAR_P1
+        rol ZP_VAR_P            ; 32
         rol 
         cmp ZP_VAR_Q
         bcc _3b79
         sbc ZP_VAR_Q
 _3b79:                                                                  ;$3B79
-        rol ZP_VAR_P1
+        rol ZP_VAR_P            ; 64
         rol 
         cmp ZP_VAR_Q
         bcc _3b82
         sbc ZP_VAR_Q
 _3b82:                                                                  ;$3B82
-        rol ZP_VAR_P1
-        ldx # $00
-        sta ZP_B6
+        rol ZP_VAR_P            ; 128
+        
+        ; end of P = A/Q
+
+        ldx # $00               ; unneccessary, cancelled out by the tax below
+        sta ZP_B6               ; A and ZP_B6 are now both the remainder of A/Q
         tax 
-        beq _3ba6
+        beq _3ba6               ; no remainder: finish
+
+        ; calculate (remainder/Q)*256 via the log-tables
         lda table_logdiv, x
         ldx ZP_VAR_Q
         sec 
@@ -3470,7 +3505,7 @@ _3b82:                                                                  ;$3B82
         lda table_log, x
         ldx ZP_VAR_Q
         sbc table_log, x
-        bcs _3ba9
+        bcs _3ba9               ; carry is set: log(remainder) < log(Q)
         tax 
         lda _9500, x
 _3ba6:                                                                  ;$3BA6
@@ -3713,7 +3748,7 @@ _3cce:                                                                  ;$3CCE
         lsr 
         lsr 
         tax 
-.import _0ae0
+
         lda _0ae0, x
 _3cda:                                                                  ;$3CDA
         rts 

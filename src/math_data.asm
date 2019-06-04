@@ -7,6 +7,25 @@
 ; and cannot be included multiple times by other files, which is why the math
 ; routines are in separate files
 
+;===============================================================================
+.segment        "TABLE_SIN"
+
+; table: sin(x/32*pi)*256
+;
+table_sin:                                                              ;$0AC0
+
+        .byte   $00, $19, $32, $4a, $62, $79, $8e, $a2                  ;$0AC0
+        .byte   $b5, $c6, $d5, $e2, $ed, $f5, $fb, $ff
+        .byte   $ff, $ff, $fb, $f5, $ed, $e2, $d5, $c6                  ;$0AD0
+        .byte   $b5, $a2, $8e, $79, $62, $4a, $32, $19
+_0ae0:                                                                  ;$0AE0
+
+        .byte   $00, $01, $03, $04, $05, $06, $08, $09                  ;$0AE0
+        .byte   $0a, $0b, $0c, $0d, $0f, $10, $11, $12
+        .byte   $13, $14, $15, $16, $17, $18, $19, $19                  ;$0AF0
+        .byte   $1a, $1b, $1c, $1d, $1d, $1e, $1f, $1f
+
+
 .ifdef  OPTION_MATHTABLES
 ;///////////////////////////////////////////////////////////////////////////////
 .segment        "TABLE_SQR"
@@ -144,6 +163,9 @@ populate_multiply_tables:
 ; tables and addition. a multiplication of X & Y can be reduced to adding
 ; two logs together and then using exponention to restore the number base
 ;
+; likewise, a division can be done by subtracting the logarithms of two numbers
+; end exponentiating the result.
+;
 ; however, given that the input number is not always going to be a square
 ; number the answer is, more often than not, going to be a fraction, e.g.
 ;
@@ -163,6 +185,40 @@ populate_multiply_tables:
 ; 2. it's not possible to use these log-tables for typical multiplication.
 ;    Elite has its own multiplication routine (see "math.inc") required to
 ;    produce correct results
+;
+; =============================================
+; ==  USE OF THE LOGARITHM TABLES IN ELITE:  ==
+; =============================================
+; _9500 and _9600 together build an exp table for 2^((x*2)/32),
+; where _9500 contains all the even entries (thus being a 2^(x/32) table)
+; and _9600 contains all the odd entries (thus being a 2^((x+0.5)/32) table)
+; table_logdiv is used to determine which of the two exp-tables to use
+; to get the most accurate result for a log-table multiplication or division.
+; This gives an extra bit of accuracy in log-space, which is direly needed.
+;
+; whenever a log-addition (A*X) or a log-subtraction (A/X) is done, the same
+; operation with the table_logdiv yields a negative value if the _9600-table
+; should be used.
+;
+; ==  OVERFLOW AND UNDERFLOW:  ==
+;
+; Elite uses log and exp-tables that scale the value internally by a factor
+; of 32. this just gives a little extra precision, and  since both the
+; log and exp-tables use this factor, they normally cancel each other out:
+; exp((log(A)*32 + log(B)*32)/32) = exp((log(A)+log(B)) = A*B
+; exp((log(A)*32 - log(B)*32)/32) = exp((log(A)-log(B)) = A/B
+; 
+; but when an overflow occurs, the 256 overflow difference conviniently turns
+; into an 8 bit shift:
+; exp((log(A)*32 + log(B)*32 - 256)/32) = exp(log(A)+log(B)-8) = (A*B)/256
+; exp((log(A)*32 - log(B)*32 + 256)/32) = exp(log(A)-log(B)+8) = (A/B)*256
+;
+; so when multiplying two big values (overflow occurs when adding the logs),
+; the result of the exp() is the hi-byte of the multiplication.
+; and when dividing the lesser of two values by the greater, the subtraction
+; of the two logs underflows, and the result is the fraction in 8-bit fixed
+; point.
+;
 
 table_log:                                                              ;$9300
 ;===============================================================================

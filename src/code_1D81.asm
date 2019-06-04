@@ -26,7 +26,7 @@ _1d81:                                                                  ;$1D81
         sta PLAYER_SHIELD_FRONT
         sta PLAYER_SHIELD_REAR
         sta PLAYER_ENERGY
-        
+
         ldy # 44                ; wait 44 frames
         jsr wait_frames         ; -- why would this be necessary?
 
@@ -35,7 +35,7 @@ _1d81:                                                                  ;$1D81
         ;
 .ifndef OPTION_CUSTOMSEED
         ;///////////////////////////////////////////////////////////////////////
-        
+
         ; check eligibility for the Constrictor mission:
         ;-----------------------------------------------------------------------
         ; available on the first galaxy after 256 or more kills. your job is
@@ -45,7 +45,7 @@ _1d81:                                                                  ;$1D81
         lda MISSION_FLAGS
         and # missions::constrictor
        .bnz :+                  ; mission is underway/complete, ignore it
-        
+
         lda PLAYER_KILLS
         beq @skip               ; ignore mission if kills less than 256
 
@@ -54,7 +54,7 @@ _1d81:                                                                  ;$1D81
         lda PLAYER_GALAXY       ; if bit 0 is set, shifting right will cause
         lsr                     ; it to fall off the end, leaving zero;
        .bnz @skip               ; if not first galaxy, ignore mission
-        
+
         ; start the Constrictor mission
         jmp _3dff
 
@@ -84,7 +84,7 @@ _1d81:                                                                  ;$1D81
         and # missions::constrictor | missions::blueprints
         cmp # missions::constrictor_complete
         bne :+
-        
+
         ; has the player at least 1280 kills? (halfway to Deadly)
         lda PLAYER_KILLS
         cmp #> 1280
@@ -106,13 +106,13 @@ _1d81:                                                                  ;$1D81
         lda PSYSTEM_POS_X
         cmp # 215
         bne @skip
-        
+
         lda PSYSTEM_POS_Y
         cmp # 84
         bne @skip
-        
+
         jmp mission_blueprints_ceerdi
-  
+
 :       cmp # %00001010                                                 ;$1DEB
         bne @skip
 
@@ -123,11 +123,11 @@ _1d81:                                                                  ;$1D81
         lda PSYSTEM_POS_X
         cmp # 63
         bne @skip
-        
+
         lda PSYSTEM_POS_Y
         cmp # 72
         bne @skip
-        
+
         jmp mission_blueprints_birera
 
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -166,12 +166,12 @@ debug_for_brk:                                                          ;$1E14
         ;
         lda #< debug_brk
         sei                     ; disable interrupts
-        sta KERNAL_VECTOR_BRK+0 
+        sta KERNAL_VECTOR_BRK+0
         lda #> debug_brk
         sta KERNAL_VECTOR_BRK+1
         cli                     ; enable interrupts
 
-        rts 
+        rts
 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
@@ -208,7 +208,7 @@ _1e35:
         ; take the counter 0-7 and multiply by 2
         ; for use in a table of 16-bit values later
 :       asl                                                             ;$1E41
-        tay 
+        tay
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -220,7 +220,7 @@ _1e35:
         ; with thanks to: <http://www.c64os.com/post?p=83>
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
-        
+
         ; should the Trumbles™ change direction?
         ;
         jsr get_random_number   ; select a random number
@@ -251,26 +251,26 @@ _1e35:
         lda _1e29, y
         and VIC_SPRITES_X
         sta VIC_SPRITES_X
-        
+
         ; move the Trumble™ sprite vertically
         lda VIC_SPRITE2_Y, y
-        clc 
+        clc
         adc TRUMBLES_MOVE_Y, y
         sta VIC_SPRITE2_Y, y
-        
+
         ; move the Trumble™ sprite horizontally
-        clc 
+        clc
         lda VIC_SPRITE2_X, y
         adc TRUMBLES_MOVE_X, y
         sta ZP_VAR_T
-        
+
         lda VAR_0531, y
         adc VAR_0521, y
         bpl :+
-        
+
         lda # $48               ;=72 / %01001000
         sta ZP_VAR_T
-        
+
         lda # $01
 :       and # %00000001                                                 ;$1E94
         beq _1ea4
@@ -279,7 +279,7 @@ _1e35:
         cmp # $50               ;=80 / %10000000
         lda # $01
         bcc _1ea4
-        
+
         lda # $00
         sta ZP_VAR_T
 _1ea4:                                                                  ;$1EA4
@@ -295,7 +295,7 @@ _1eb3:                                                                  ;$1EB3
         lda ZP_VAR_T
         sta VIC_SPRITE2_X, y
         cli                     ; re-enable interrupts
-        
+
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn I/O off, go back to 64K RAM
@@ -312,7 +312,7 @@ _1eb3:                                                                  ;$1EB3
 _1ec1:                                                                  ;$1EC1
 ;===============================================================================
 ; main cockpit-view game-play loop perhaps?
-; (handles many key presses) 
+; (handles many key presses)
 ;
         lda POLYOBJ_00          ;=$F900?
         sta ZP_GOATSOUP_pt1     ;? randomize?
@@ -323,7 +323,7 @@ _1ec1:                                                                  ;$1EC1
         ; are there any Trumbles™ on-screen?
         lda TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
        .bze _1ece               ; =0; don't process Trumbles™
-        
+
         ; process Trumbles™
         ; (move them about, breed them)
         jmp _1e35
@@ -336,7 +336,7 @@ _1ece:                                                                  ;$1ECE
         jsr _3c58
         jsr _3c58
 
-        txa 
+        txa
         eor # %10000000         ; flip the sign bit
         tay                     ; put aside
         and # %10000000         ; strip down to just the sign bit
@@ -344,51 +344,51 @@ _1ece:                                                                  ;$1ECE
 
         stx VAR_048D            ; X-dampen?
         eor # %10000000
-        sta ZP_6A               ; move count?
-        
-        tya 
+        sta ZP_6A               ; inverse roll direction
+
+        tya
         bpl :+
 
         ; negate
         eor # %11111111
-        clc 
+        clc
         adc # $01
 
 :       lsr                                                             ;$1EEE
-        lsr 
+        lsr
         cmp # $08
         bcs :+
-        lsr 
+        lsr
 
 :       sta ZP_ROLL_MAGNITUDE                                           ;$1EF5
         ora ZP_ROLL_SIGN        ; add sign
         sta ZP_ALPHA            ; put aside for use in the matrix math
 
         ;-----------------------------------------------------------------------
-        
+
         ldx VAR_048E
         jsr _3c58
 
-        txa 
+        txa
         eor # %10000000
-        tay 
+        tay
         and # %10000000
         stx VAR_048E
         sta ZP_95
         eor # %10000000
         sta ZP_PITCH_SIGN
-        tya 
+        tya
         bpl _1f15
         eor # %11111111
 _1f15:                                                                  ;$1F15
         adc # $04
-        lsr 
-        lsr 
-        lsr 
-        lsr 
+        lsr
+        lsr
+        lsr
+        lsr
         cmp # $03
         bcs _1f20
-        lsr 
+        lsr
 _1f20:                                                                  ;$1F20
         ; get the player ship's pitch;
         ; stored as separate sign & magnitude
@@ -396,16 +396,16 @@ _1f20:                                                                  ;$1F20
         sta ZP_PITCH_MAGNITUDE
         ora ZP_PITCH_SIGN
         sta ZP_BETA             ; put aside for the matrix math
-        
+
         ; accelerate?
         ;-----------------------------------------------------------------------
         lda key_accelerate      ; is accelerate being held?
        .bze :+                  ; if not, continue
-        
+
         lda PLAYER_SPEED        ; current speed
         cmp # $28               ; are we at maximum speed?
         bcs :+
-        
+
         inc PLAYER_SPEED        ; increase player's speed
 
 :       ; decelerate?                                                   ;$1F33
@@ -468,7 +468,7 @@ _1f20:                                                                  ;$1F20
 
         ldy # $d0
         sty _a8e0
-        
+
         ldy # $0d
         jsr _a858               ; handle e-bomb?
 
@@ -479,7 +479,7 @@ _1f20:                                                                  ;$1F20
 
         lda # $00               ; $00 = OFF
         sta DOCKCOM_STATE       ; turn docking computer off
-        
+
         jsr _923b
 
         ; activate escape pod?
@@ -497,7 +497,7 @@ _1f20:                                                                  ;$1F20
         ;-----------------------------------------------------------------------
 :       lda key_jump            ; quick-jump key pressed?               ;$1FA8
        .bze :+                  ; no? skip ahead
-        
+
         jsr do_quickjump        ; handle the quick-jump
 
         ; activate E.C.M.?
@@ -528,34 +528,34 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
         sta ZP_97
 
         lda PLAYER_SPEED
-        lsr 
+        lsr
         ror ZP_97
-        lsr 
+        lsr
         ror ZP_97
-        sta ZP_98
-        
+        sta ZP_98               ; ZP_98.ZP_97 = PLAYER_SPEED*64
+
         lda VAR_0487
         bne _202d
-        
+
         lda joy_fire
         beq _202d
-        
+
         lda PLAYER_TEMP_LASER
         cmp # $f2
         bcs _202d
-        
-        ldx VAR_0486
+
+        ldx COCKPIT_VIEW
         lda PLAYER_LASERS, x
         beq _202d
-        
-        pha 
+
+        pha
         and # %01111111
         sta ZP_7B
         sta VAR_0484
-        
+
         ldy # $00
-        pla 
-        pha 
+        pla
+        pha
         bmi _2014
         cmp # $32
         bne _2012
@@ -575,7 +575,7 @@ _201b:                                                                  ;$201B
 _201d:                                                                  ;$201D
         jsr _a858
         jsr shoot_lasers
-        pla 
+        pla
         bpl _2028
         lda # $00
 _2028:                                                                  ;$2028
@@ -585,7 +585,7 @@ _202d:                                                                  ;$202D
         ldx # $00
 _202f:                                                                  ;$202F
         stx ZP_9D
-        
+
         lda SHIP_SLOTS, x
         bne _2039
 
@@ -596,26 +596,26 @@ _202f:                                                                  ;$202F
 _2039:                                                                  ;$2039
         sta ZP_A5               ; put ship type aside
         jsr get_polyobj
-        
+
         ; copy the given PolyObject to the zero page:
         ; ($09..$2D)
         ;
         ldy # .sizeof(PolyObject) - 1
 :       lda [ZP_POLYOBJ_ADDR], y                                        ;$2040
         sta ZP_POLYOBJ, y
-        dey 
+        dey
         bpl :-
 
         lda ZP_A5               ; get ship type back
         bmi @skip               ; if sun / planet, skip over
-        
-        asl 
-        tay 
+
+        asl
+        tay
         lda hull_pointers - 2, y
         sta ZP_HULL_ADDR_LO
         lda hull_pointers - 1, y
         sta ZP_HULL_ADDR_HI
-        
+
         lda PLAYER_EBOMB        ; player has energy bomb?
         bpl @skip
 
@@ -636,12 +636,12 @@ _2039:                                                                  ;$2039
         bne @skip
 
         asl ZP_POLYOBJ_VISIBILITY
-        sec 
+        sec
         ror ZP_POLYOBJ_VISIBILITY
 
         ldx ZP_A5
         jsr _a7a6
-        
+
 @skip:  jsr _a2a0                                                       ;$2079
 
         ; copy the zero-page PolyObject back to its storage
@@ -649,7 +649,7 @@ _2039:                                                                  ;$2039
         ldy # .sizeof(PolyObject) - 1
 :       lda ZP_POLYOBJ, y                                               ;$207E
         sta [ZP_POLYOBJ_ADDR], y
-        dey 
+        dey
         bpl :-
 
         lda ZP_POLYOBJ_VISIBILITY
@@ -664,13 +664,13 @@ _2039:                                                                  ;$2039
 
         ldx ZP_A5
         bmi _20e0
-        
+
         cpx # $02
         beq _20e3
-        
+
         and # %11000000
         bne _20e0
-        
+
         cpx # $01
         beq _20e0
         lda VAR_04C2
@@ -681,10 +681,10 @@ _2039:                                                                  ;$2039
 
         ldy # Hull::_00         ;=$00: "scoop / debris"?
         lda [ZP_HULL_ADDR], y
-        lsr 
-        lsr 
-        lsr 
-        lsr 
+        lsr
+        lsr
+        lsr
+        lsr
         beq _2122
         adc # $01
         bne _20c5
@@ -699,12 +699,12 @@ _20c5:                                                                  ;$20C5
         ldy VAR_04EF            ; item index?
         adc VAR_CARGO, y
         sta VAR_CARGO, y
-        tya 
+        tya
         adc # $d0
         jsr _900d
-        
+
         asl ZP_POLYOBJ_BEHAVIOUR
-        sec 
+        sec
         ror ZP_POLYOBJ_BEHAVIOUR
 _20e0:                                                                  ;$20E0
         jmp _2131
@@ -744,9 +744,9 @@ _2107:                                                                  ;$2107
 _2110:                                                                  ;$2110
         jsr _a813
 
-        ; set top-bit of visibility state? 
+        ; set top-bit of visibility state?
         asl ZP_POLYOBJ_VISIBILITY
-        sec 
+        sec
         ror ZP_POLYOBJ_VISIBILITY
         bne _2131
 _211a:                                                                  ;$211A
@@ -756,11 +756,11 @@ _211a:                                                                  ;$211A
         bne _212b
 _2122:                                                                  ;$2122
         asl ZP_POLYOBJ_VISIBILITY
-        sec 
+        sec
         ror ZP_POLYOBJ_VISIBILITY
         lda ZP_POLYOBJ_ENERGY
-        sec 
-        ror 
+        sec
+        ror
 _212b:                                                                  ;$212B
         jsr _7bd2
         jsr _a813
@@ -779,7 +779,7 @@ _2138:                                                                  ;$2138
 
         lda PLAYER_MISSILE_ARMED
         beq _2153
-        
+
         jsr _a80f
         ldx ZP_9D
         ldy # $27
@@ -801,14 +801,14 @@ _2153:                                                                  ;$2153
         lsr ZP_7B
 _2170:                                                                  ;$2170
         lda ZP_POLYOBJ_ENERGY
-        sec 
+        sec
         sbc ZP_7B
         bcs _21a1
 
         asl ZP_POLYOBJ_VISIBILITY
-        sec 
+        sec
         ror ZP_POLYOBJ_VISIBILITY
-        
+
         lda ZP_A5
         cmp # $07
         bne _2192
@@ -844,7 +844,7 @@ _21ab:                                                                  ;$21AB
 
         lda ZP_POLYOBJ_VISIBILITY
         bpl _21e5               ; bit 7 set?
-        
+
         and # visibility::display
         beq _21e5
 
@@ -859,11 +859,11 @@ _21ab:                                                                  ;$21AB
         ldy # Hull::bounty      ;=$0A: (bounty lo-byte)
         lda [ZP_HULL_ADDR], y
         beq _21e2
-        
-        tax 
+
+        tax
         iny                     ;=$0B: (bounty hi-byte)
         lda [ZP_HULL_ADDR], y
-        tay 
+        tay
         jsr _7481
         lda # $00
         jsr _900d
@@ -883,7 +883,7 @@ _21ee:                                                                  ;$21EE
         sta [ZP_POLYOBJ_ADDR], y
 
         ldx ZP_9D
-        inx 
+        inx
         jmp _202f
 
         ;-----------------------------------------------------------------------
@@ -901,7 +901,7 @@ _2207:                                                                  ;$2207
 
         ldx PLAYER_ENERGY
         bpl _2224
-        
+
         ldx PLAYER_SHIELD_REAR
         jsr _7b61
         stx PLAYER_SHIELD_REAR
@@ -910,7 +910,7 @@ _2207:                                                                  ;$2207
         jsr _7b61
         stx PLAYER_SHIELD_FRONT
 _2224:                                                                  ;$2224
-        sec 
+        sec
         lda VAR_04C4            ; energy charge rate?
         adc PLAYER_ENERGY
         bcs _2230
@@ -918,15 +918,15 @@ _2224:                                                                  ;$2224
 _2230:                                                                  ;$2230
         lda IS_WITCHSPACE
         bne _2277
-        
+
         lda ZP_A3               ; move counter?
         and # %00011111
         bne _2283
-        
+
         lda VAR_045F
         bne _2277
-        
-        tay 
+
+        tay
         jsr _2c50
         bne _2277
 
@@ -938,7 +938,7 @@ _2230:                                                                  ;$2230
         ; $09-$0B:      xpos            .faraddr
         ; $0C-$0E:      ypos            .faraddr
         ; $0F-$11:      zpos            .faraddr
-        ;      
+        ;
         ; a 3x3 rotation matrix?
         ;
         ; $12-$13:      m0x0            .word
@@ -954,7 +954,7 @@ _2230:                                                                  ;$2230
         ; a pointer to already processed vertex data
         ;
         ; $24-$25:      vertexData      .addr
-        
+
         ; number of bytes to copy:
         ; (up to, and including, the `vertexData` property)
         ldx # PolyObject::vertexData + .sizeof(PolyObject::vertexData) - 1
@@ -962,10 +962,10 @@ _2230:                                                                  ;$2230
         ;?
 :       lda POLYOBJ_00, x       ;=$F900                                 ;$2248
         sta ZP_POLYOBJ, x       ;=$09
-        dex 
+        dex
         bpl :-
 
-        inx 
+        inx
         ldy # $09
         jsr _2c2d
         bne _2277
@@ -992,7 +992,7 @@ _2277:                                                                  ;$2277
 _227a:                                                                  ;$227A
         lda IS_WITCHSPACE
         bne _2277
-        
+
         lda ZP_A3               ; move counter?
         and # %00011111
 _2283:                                                                  ;$2283
@@ -1001,12 +1001,12 @@ _2283:                                                                  ;$2283
         lda # $32
         cmp PLAYER_ENERGY
         bcc _2292
-        asl 
+        asl
         jsr _900d
 _2292:                                                                  ;$2292
         ldy # $ff
         sty VAR_06F3
-        iny 
+        iny
         jsr _2c4e
         bne _231c
         jsr _2c5c
@@ -1014,7 +1014,7 @@ _2292:                                                                  ;$2292
         sbc # $24
         bcc _22b2
         sta ZP_VAR_R
-        jsr _9978
+        jsr square_root
         lda ZP_VAR_Q
         sta VAR_06F3
         bne _231c
@@ -1029,7 +1029,7 @@ _22b5:                                                                  ;$22B5
 
         lda DOCKCOM_STATE
        .bze _231c
-        
+
         lda # $7b
         bne _2319
 _22c2:                                                                  ;$22C2
@@ -1038,16 +1038,16 @@ _22c2:                                                                  ;$22C2
 
         lda # $1e
         sta PLAYER_TEMP_CABIN
-        
+
         lda VAR_045F
         bne _231c
-        
+
         ldy # .sizeof(PolyObject)
         jsr _2c50
        .bnz _231c
-        
+
         jsr _2c5c
-        
+
         eor # %11111111
         adc # $1e
         sta PLAYER_TEMP_CABIN
@@ -1067,11 +1067,11 @@ _22c2:                                                                  ;$22C2
         ; with thanks to: <http://www.c64os.com/post?p=83>
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
-        
+
         lda VIC_SPRITE_ENABLE
         and # %00000011
         sta VIC_SPRITE_ENABLE
-        
+
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn off I/O, go back to 64K RAM
@@ -1082,7 +1082,7 @@ _22c2:                                                                  ;$22C2
         ; with thanks to: <http://www.c64os.com/post?p=83>
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
-        
+
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; halve the number of Trumbles™
@@ -1095,7 +1095,7 @@ _2303:                                                                  ;$2303
         beq _231c
 
         lda ZP_98
-        lsr 
+        lsr
         adc PLAYER_FUEL
         cmp # $46
         bcc _2314
@@ -1118,7 +1118,7 @@ _231c:                                                                  ;$231C
 _2330:                                                                  ;$2330
         lda VAR_0481
         beq _233a
-        
+
         jsr _7b64
         beq _2342
 _233a:                                                                  ;$233A
@@ -1133,7 +1133,7 @@ _2345:                                                                  ;$2345
         lda ZP_SCREEN
         bne _2366
 
-        jmp _2a32
+        jmp _animate_dust
 
 ;===============================================================================
 
@@ -1141,8 +1141,8 @@ _234c:                                                                  ;$234C
         jsr get_random_number
         bpl _2366
 
-        tya 
-        tax 
+        tya
+        tax
         ldy # Hull::_00         ;=$00: "scoop / debris"?
         and [ZP_HULL_ADDR], y
         and # %00001111
@@ -1155,7 +1155,7 @@ _235d:                                                                  ;$235D
         dec ZP_AA
         bne _235d
 _2366:                                                                  ;$2366
-        rts 
+        rts
 
 _2367:                                                                  ;$2367
 ;===============================================================================
@@ -1165,7 +1165,7 @@ _2367:                                                                  ;$2367
         lda # $00
         sta _a8e6
 
-        rts 
+        rts
 
 ;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
@@ -1179,13 +1179,13 @@ _2367:                                                                  ;$2367
 ; 
 _237e:                                                                  ;$237E
         ; push the current state:
-        pha 
-        tax 
+        pha
+        tax
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha 
+        pha
         lda ZP_TEMP_ADDR3_HI
-        pha 
+        pha
 
         ; switch base-address of the message pool and jump into the print
         ; routine using this new address. note that in this case, X is the
@@ -1211,14 +1211,14 @@ print_docked_str:                                                       ;$2390
 
         pha                     ; preserve A (message index)
         tax                     ; move message index to X
-        
+
         ; when recursing, $5B/$5C+Y represent the
         ; current position in the message data
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha 
+        pha
         lda ZP_TEMP_ADDR3_HI
-        pha 
+        pha
 
         ; load the message table
         lda #< _0e00
@@ -1271,15 +1271,15 @@ _23a0:                                                                  ;$23A0
 
 @rts:   ; finished printing, clean up and exit                          ;$23C5
         ;-----------------------------------------------------------------------
-        pla 
+        pla
         sta ZP_TEMP_ADDR3_HI
-        pla 
+        pla
         sta ZP_TEMP_ADDR3_LO
-        pla 
-        tay 
-        pla 
+        pla
+        tay
+        pla
 
-        rts 
+        rts
 
 print_docked_token:                                                     ;$23CF
         ;=======================================================================
@@ -1288,19 +1288,19 @@ print_docked_token:                                                     ;$23CF
 
         bit txt_flight_flag     ; if flight string mode is off,
         bpl :+                  ; skip the next bit
-       
+
        ; save state before we recurse
-        tax 
-       .phy                     ; push Y to stack (via A) 
+        tax
+       .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha 
+        pha
         lda ZP_TEMP_ADDR3_HI
-        pha 
-        txa 
+        pha
+        txa
 
         ; print from the commonly shared 'flight' strings
         jsr print_flight_token
-        
+
         jmp _2438
 
 :                                                                       ;$23E8
@@ -1310,10 +1310,10 @@ print_docked_token:                                                     ;$23CF
 
         cmp # $81               ; tokens $5B...$80?
        .blt _2441               ; handle planet description tokens
-        
+
         cmp # $d7               ; tokens $81...$D6 are expansions,
        .blt print_docked_str    ; use the token as a message index
-        
+
         ; tokens $D7 and above:
         ; (character pairs)
 
@@ -1327,28 +1327,28 @@ print_docked_token:                                                     ;$23CF
         lda txt_docked_pair1, x ; read 1st character and print it
 
         jsr _2404
-        
-        pla                     ; get the offset again 
-        tax 
+
+        pla                     ; get the offset again
+        tax
         lda txt_docked_pair2, x ; read 2nd character and print it
 
 _2404:  ; print a character                                             ;$2404
         ;-----------------------------------------------------------------------
-        
+
         ; print the punctuation characters ($20...$40), as is
 
         cmp # '@'+1
        .blt @print
-        
+
         ; shall we change the letter case?
-        
+
         ; check for the upper-case flag: -- note that this will have no effect
         ; if the upper-case mask is not set or if the lower-case mask is set
         ; which takes precedence
 
         bit txt_ucase_flag      ; check if bit 7 is set
         bmi @ucase              ; if so, skip ahead
-        
+
         ; check for the lower-case flag: -- this will only have an effect if
         ; the lower-case mask is set to remove bit 5
 
@@ -1356,7 +1356,7 @@ _2404:  ; print a character                                             ;$2404
         bmi @lcase              ; if so, skip ahead
 
 @ucase: ora txt_ucase_mask      ; upper case (if enabled)               ;$2412
-        
+
 @lcase: and txt_lcase_mask      ; lower-case (if enabled)               ;$2415
 
 @print: jmp print_char                                                  ;$2418
@@ -1401,18 +1401,18 @@ _format_code:                                                           ;$241B
 
         ; snapshot current state:
         ; -- these format codes can get recursive
-        tax 
+        tax
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha 
+        pha
         lda ZP_TEMP_ADDR3_HI
-        pha 
-        
+        pha
+
         ; multiply token by two
         ; (lookup into table)
-        txa 
-        asl 
-        tax 
+        txa
+        asl
+        tax
 
         ; note that the lookup table is indexed two-bytes early, making an
         ; index of zero land in some code -- this is why token $00 is invalid
@@ -1425,10 +1425,10 @@ _format_code:                                                           ;$241B
         sta @jsr + 1
         lda txt_docked_functions - 1, x
         sta @jsr + 2
-        
+
         ; convert the token back to its original value
         ; (to be used as a parameter for whatever we jump to)
-        txa 
+        txa
         lsr
 
         ; NOTE: this address gets overwritten by the code above!!
@@ -1436,29 +1436,29 @@ _format_code:                                                           ;$241B
 
 _2438:  ; restore state and exit                                        ;$2438
         ;-----------------------------------------------------------------------
-        pla 
+        pla
         sta ZP_TEMP_ADDR3_HI
-        pla 
+        pla
         sta ZP_TEMP_ADDR3_LO
-        pla 
-        tay 
-        rts 
+        pla
+        tay
+        rts
 
 _2441:  ; process msg tokens $5B..$80                                   ;$2441
         ;-----------------------------------------------------------------------
         sta ZP_TEMP_ADDR1_LO    ; put token aside
-        
+
         ; put aside our current location in the text data
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha 
+        pha
         lda ZP_TEMP_ADDR3_HI
-        pha 
+        pha
 
         ; choose planet description template 0-4:
 
         jsr get_random_number
-        tax 
+        tax
         lda # $00               ; select description template 0
         cpx # $33               ; is random number over $33?
         adc # $00               ; select description template 1
@@ -1506,8 +1506,8 @@ is_vowel:                                                               ;$24F3
         beq :+
         cmp # $75               ; 'U'?
         beq :+
-        
-        clc 
+
+        clc
 :       rts                                                             ;$250A
 
 .ifdef  OPTION_ORIGINAL

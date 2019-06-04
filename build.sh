@@ -234,7 +234,8 @@ echo "* elite-harmless.d64"
 echo "  --------------------------------------"
 clean
 
-options="-DOPTION_MATHTABLES"
+# enable undocumented opcodes and mathtables
+options="--cpu 6502X -DOPTION_MATHTABLES"
 
 # assemble the mega-object containing
 # the majority of the elite code
