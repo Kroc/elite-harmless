@@ -13,6 +13,24 @@
 
 .include        "c1541.inc"
 
+; are illegal opcodes available?
+;-------------------------------------------------------------------------------
+; if the assembler is called with `--cpu 6502X` then 6502/10 illegal opcodes
+; are enabled. these will provide speedups in some places but are incompatible
+; with later 6502-based CPUs such as the 65816 in the SuperCPU
+;
+; we detect if they are enabled and set a flag that can be used where needed
+; to provide support or fall-back
+;
+; import CA65's bundled macros for detecting CPU type:
+.macpack cpu
+
+; check for illegal opcode support:
+.if (.cpu .bitand CPU_ISET_6502X)
+        ; set the flag to indicate illegal opcodes available
+        USE_ILLEGAL_OPS = 1
+.endif
+
 ; calculate the number of *whole* pages from a given byte-size:
 ;-------------------------------------------------------------------------------
 ; note that the lack of a rounding-up divide is fixed by adding just shy of
@@ -49,8 +67,3 @@ CPU_CONTROL             = $01   ; processor port (memory layout and Datasette)
         IO_KERNAL       = %110  ; 6:  OFF   |     I/O     |  KERNAL
         DEFAULT         = %111  ; 7 : BASIC |     I/O     |  KERNAL
 .endenum
-
-.macpack cpu
-.if (.cpu .bitand CPU_ISET_6502X)
-   USE_ILLEGAL_OPS = 1
-.endif

@@ -2,11 +2,16 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
+.linecont+
 
-; a new line-drawing routine by Dyme! formatted and lightly modified by Kroc
-
+; a new line-drawing routine by Dyme! formatted and lightly modified by Kroc.
+; requires illegal opcodes:
+;
 .ifndef  USE_ILLEGAL_OPS
-    .fatal "please enable the extended 6502 instruction set for the fastlines option (option: --cpu 6502X)"
+        .fatal .concat( \
+                "please enable the extended 6502 instruction set for the ", \
+                "fastlines option (option: --cpu 6502X)" \
+        )
 .endif
 
 .include        "draw_fastlines_h.inc"

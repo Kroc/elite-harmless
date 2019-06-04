@@ -252,11 +252,12 @@ multiply_signed:                                                        ;$3A54
         ;       A = multiplier
         ;
 .ifdef  USE_ILLEGAL_OPS
+        ;///////////////////////////////////////////////////////////////////////
         ldx # %01111111
         axs # 0                 ; X = $7F & A (-0)
-.else
+.else   ;///////////////////////////////////////////////////////////////////////
         tax
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; compare signs for working out what the final sign will be. XOR'ing
         ; the two operands will work out the +ve/-ve combination for us!
@@ -280,13 +281,13 @@ multiply_signed:                                                        ;$3A54
         eor # $ff
         sta sm2+1
         sta sm4+1
-;;:     
 
 .ifndef USE_ILLEGAL_OPS
+        ;///////////////////////////////////////////////////////////////////////
         txa
         and # %01111111
         tax
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         sec 
 sm1:    lda square1_lo, x
@@ -294,23 +295,6 @@ sm2:    sbc square2_lo, x
         sta ZP_VAR_P
 sm3:    lda square1_hi, x
 sm4:    sbc square2_hi, x
-
-;;        ; Apply sign (See C=Hacking16 for details).
-;;        lda ZP_VAR_Q
-;;        bpl :+
-;;        sec 
-;;        lda ZP_VAR_P2
-;;        sbc $f8
-;;        sta ZP_VAR_P2
-;;
-;;:       lda $f8
-;;        bpl :+
-;;        sec 
-;;        lda ZP_VAR_P2
-;;        sbc ZP_VAR_Q
-;;        sta ZP_VAR_P2
-;;:
-;;        lda ZP_VAR_P2
 
         ora ZP_VAR_T            ; restore the sign
         rts 
