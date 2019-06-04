@@ -208,7 +208,6 @@ _hline_startmask = _2907
         ; lines: top-down, i.e. "\", and bottom-up, i.e. "/"
         ;
 draw_line_horz:
-.export draw_line_horz
 
         lax ZP_VAR_X1
         cpx ZP_VAR_X2
@@ -494,18 +493,16 @@ _hline_exit4:
 _hline_exit4_norestore:     
         rts                     ; line has been drawn!
 
-
-draw_straight_line:
 ;===============================================================================
-; draws a straight, horizontal line:
+; draw a straight, horizontal line:
 ;
 ;       ZP_VAR_Y  = Y-position
 ;       ZP_VAR_X1 = starting X-position, in viewport pixels (0-255)
 ;       ZP_VAR_X2 = ending X-position, in viewport pixels (0-255)
 ;       preserves Y
 ;
-.export draw_straight_line
-
+draw_straight_line:
+        
         ; swap X1, X2 if neccessary
         lax ZP_VAR_X1
         cpx ZP_VAR_X2

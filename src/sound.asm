@@ -4,15 +4,6 @@
 ;===============================================================================
 .linecont+
 
-.include        "elite.inc"
-
-.export sound_play_addr_lo:absolute
-.export sound_play_addr_hi:absolute
-.export _b4d2:absolute
-.export sound_stop:absolute
-.export _b72d:absolute
-.export _c164:absolute
-
 ZP_SOUND_ADDR           = $c2
 ZP_SOUND_ADDR_LO        = $c2
 ZP_SOUND_ADDR_HI        = $c3

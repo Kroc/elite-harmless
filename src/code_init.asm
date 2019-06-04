@@ -7,8 +7,6 @@
 ; "orig_init.asm". this code is loaded into the variable space the game uses,
 ; so once executed it is erased! 
 
-.include        "elite.inc"
-
 .zeropage
 
 ZP_COPY_TO      := $18
@@ -17,9 +15,6 @@ ZP_COPY_FROM    := $1a
 .segment        "CODE_INIT"
 
 init:
-;===============================================================================
-.export init
-
         ; change the address of STOP key routine from $F6ED, to $FFED,
         ; the SCREEN routine which returns row/col count, i.e. does
         ; nothing of use -- this effectively disables the STOP key
@@ -223,35 +218,30 @@ init:
         ; we'll erase them individually to allow for future flexibility
         ;
         ldy #> ELITE_MENUSCR_ADDR
-        ldx # .page_count( 1024 )
+        ldx # .page_count( 1000 )
         lda # .color_nybble( WHITE, BLACK )
         jsr set_bytes
         
         ldy #> ELITE_MAINSCR_ADDR
-        ldx # .page_count( 1024 )
+        ldx # .page_count( 1000 )
         lda # .color_nybble( WHITE, BLACK )
         jsr set_bytes
 
         ; copy 279 bytes of data to $66D0-$67E7
         ;-----------------------------------------------------------------------
-.import ELITE_HUD_COLORSCR_ADDR
-.import _783a
-
         lda #< ELITE_HUD_COLORSCR_ADDR
         sta ZP_COPY_TO+0
         lda #> ELITE_HUD_COLORSCR_ADDR
         sta ZP_COPY_TO+1
 
-        lda #< _783a
+        lda #< hud_screenram_copy
         sta ZP_COPY_FROM+0
-        lda #> _783a
+        lda #> hud_screenram_copy
         jsr _7827
 
         ; set the screen-colours for the menu-screen:
         ; (high-resolution section only, no HUD)
         ;-----------------------------------------------------------------------
-.import ELITE_MENUSCR_ADDR
-
         lda #< ELITE_MENUSCR_ADDR
         sta ZP_COPY_TO+0
         lda #> ELITE_MENUSCR_ADDR
@@ -294,8 +284,6 @@ _7711:  lda # .color_nybble( YELLOW, BLACK )
         ; set the screen-colours for the high-resolution
         ; bitmap portion of the main flight-screen
         ;-----------------------------------------------------------------------
-.import ELITE_MAINSCR_ADDR
-
         lda #< ELITE_MAINSCR_ADDR
         sta ZP_COPY_TO+0
         lda #> ELITE_MAINSCR_ADDR
@@ -348,7 +336,7 @@ _776c:
         tay 
         ldx #> $d800
         stx ZP_COPY_TO+1
-        ldx # .page_count(1024)
+        ldx # .page_count( 1000 )
 :       sta [ZP_COPY_TO], y
         iny 
         bne :-
@@ -399,7 +387,6 @@ _77a3:  sta $d802, y
         ; appends a routine to the end of our current segement which we can
         ; call to populate the 2 KB of lookup tables
         ; 
-.import populate_multiply_tables
         jsr populate_multiply_tables
 
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -420,9 +407,6 @@ _77a3:  sta $d802, y
         ; (*NOT* `jsr`) to the subroutine. when it hits `rts`, execution will
         ; move to the address we inserted into the stack!
         ;
-.import init_mem
-.import _8863
-
         lda #> (_8863 - 1)
         pha 
         lda #< (_8863 - 1)

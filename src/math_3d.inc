@@ -35,8 +35,6 @@ move_polyobj_x:                                                         ;$A44C
         ;       R = lo-byte of X-amount to move object
         ;       A = hi-byte of X-amount to move object
         ;
-.export move_polyobj_x
-
         asl                     ; shift the sign into carry
         sta ZP_VAR_S            ; set aside the magnitude (shifted left once,
                                 ; must be shifted right to restore again)

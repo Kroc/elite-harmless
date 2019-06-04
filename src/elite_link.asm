@@ -3,10 +3,6 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.segment    "VARS_0400"
-
-.res    $0300
-
 .segment        "VIC_SCR_MENU"
 
 .res    $0400

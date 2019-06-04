@@ -127,7 +127,6 @@ _ab79:  .hibytes _ab71_addrs                                            ;$AB79
 _ab81:  .lobytes _ab81_addrs                                            ;$AB81
 _ab89:  .hibytes _ab81_addrs                                            ;$AB89
 
-draw_line:                                                              ;$AB91
 ;===============================================================================
 ; draw a line:
 ;
@@ -157,7 +156,7 @@ draw_line:                                                              ;$AB91
 ; this routine determines what type of line the coordinates describe
 ; and uses either a horizontal or vertical algorithm accordingly
 ;
-.export draw_line
+draw_line:                                                              ;$AB91
         ; TODO: since every line is drawn twice (drawn once, then erased next
         ;       frame), the line-flipping checks here should really be done
         ;       when building the list of lines to draw, rather than every
@@ -213,29 +212,28 @@ draw_line:                                                              ;$AB91
         ; handle "vertical" line
         jmp draw_line_vert
 
+;===============================================================================
+; a "horizontal" line is one which is wider than it is tall, having the
+; property that the line only ever steps one pixel vertically at a time
+; (for any given number of steps horizontally, depending on width)
+;
+; for drawing and speed purposes, there are two kinds of horizontal
+; lines: top-down, i.e. "\", and bottom-up, i.e. "/"
+;
+; if calling into this point externally,
+; the parameters would look like this:
+;
+;       ZP_VAR_X1 = x-pos start of line in viewport pixels
+;       ZP_VAR_X2 = x-pos end of line in viewport pixels
+;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
+;       ZP_VAR_Y2 = y-pos end of line in viewport pixels
+;       ZP_REG_W  = width of line, i.e. ABS(X2-X1)
+;       ZP_REG_H  = height of line, i.e. ABS(Y2-Y1)
+;
+;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+;
 draw_line_horz:                                                         ;$ABBB
-        ;=======================================================================
-        ; a "horizontal" line is one which is wider than it is tall, having the
-        ; property that the line only ever steps one pixel vertically at a time
-        ; (for any given number of steps horizontally, depending on width)
-        ;
-        ; for drawing and speed purposes, there are two kinds of horizontal
-        ; lines: top-down, i.e. "\", and bottom-up, i.e. "/"
-        ;
-        ; if calling into this point externally,
-        ; the parameters would look like this:
-        ;
-        ;       ZP_VAR_X1 = x-pos start of line in viewport pixels
-        ;       ZP_VAR_X2 = x-pos end of line in viewport pixels
-        ;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
-        ;       ZP_VAR_Y2 = y-pos end of line in viewport pixels
-        ;       ZP_REG_W  = width of line, i.e. ABS(X2-X1)
-        ;       ZP_REG_H  = height of line, i.e. ABS(Y2-Y1)
-        ;
-        ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
-        ;
-.export draw_line_horz
-        
+
         ldx ZP_VAR_X1
         cpx ZP_VAR_X2
        .blt :+                          ; line is left-to-right, skip ahead.
@@ -322,23 +320,22 @@ draw_line_horz:                                                         ;$ABBB
 
         jmp draw_line_horzdn
 
+;=======================================================================
+; draws a horizontally sloped line from the bottom up
+;
+; if calling into this point externally,
+; the parameters would look like this:
+;
+;       ZP_VAR_X1 = x-pos start of line in viewport pixels
+;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
+;               Y = copy of above
+;        ZP_REG_W = width of line
+;        ZP_REG_H = height of line
+;
+;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+;
 draw_line_horzup:                                                       ;$AC19
-        ;=======================================================================
-        ; draws a horizontally sloped line from the bottom up
-        ;
-        ; if calling into this point externally,
-        ; the parameters would look like this:
-        ;
-        ;       ZP_VAR_X1 = x-pos start of line in viewport pixels
-        ;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
-        ;               Y = copy of above
-        ;        ZP_REG_W = width of line
-        ;        ZP_REG_H = height of line
-        ;
-        ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
-        ;
-.export draw_line_horzup
-        
+       
         ; get the address within the bitmap where we will be drawing,
         ; stored into `ZP_TEMP_ADDR1`
         ;
@@ -757,22 +754,21 @@ line_done2:                                                             ;$AD88
         rts                             ; line has been drawn!
 
 
+;=======================================================================
+; draws a horizontally sloped line from the top down
+;
+; if calling into this point externally,
+; the parameters would look like this:
+;
+;       ZP_VAR_X1 = x-pos start of line in viewport pixels
+;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
+;               Y = copy of above
+;        ZP_REG_W = width of line
+;        ZP_REG_H = height of line
+;
+;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+;
 draw_line_horzdn:                                                       ;$AD8B
-        ;=======================================================================
-        ; draws a horizontally sloped line from the top down
-        ;
-        ; if calling into this point externally,
-        ; the parameters would look like this:
-        ;
-        ;       ZP_VAR_X1 = x-pos start of line in viewport pixels
-        ;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
-        ;               Y = copy of above
-        ;        ZP_REG_W = width of line
-        ;        ZP_REG_H = height of line
-        ;
-        ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
-        ;
-.export draw_line_horzdn
 
         ; get the char-cell bitmap address
         ; for the given X & Y pixel coords:
@@ -1202,20 +1198,18 @@ line_done4:                                                             ;$AF05
         ldy ZP_9E                       ; restore Y
         rts                             ; line has been drawn!
 
-
+;===============================================================================
+; a "vertical" line is one which is taller than it is wide, having the
+; property that the line only ever steps one pixel horizontally at a
+; time (for any given number of steps vertically, depending on height)
+;
+; for speed, all vertical lines are drawn top-to-bottom and a different
+; routine is used for left-to-right ("/") vs. right-to-left ("\") lines
+;
+; the first thing we have to do is determine which way the line goes
+; and flip top-down lines so we always work bottom-up
+;
 draw_line_vert:                                                         ;$AF08
-        ;=======================================================================
-        ; a "vertical" line is one which is taller than it is wide, having the
-        ; property that the line only ever steps one pixel horizontally at a
-        ; time (for any given number of steps vertically, depending on height)
-        ;
-        ; for speed, all vertical lines are drawn top-to-bottom and a different
-        ; routine is used for left-to-right ("/") vs. right-to-left ("\") lines
-        ;
-        ; the first thing we have to do is determine which way the line goes
-        ; and flip top-down lines so we always work bottom-up
-        ;
-.export draw_line_vert
 
         ldy ZP_VAR_Y1                   ; get "starting" Y-position
         tya 
@@ -1428,9 +1422,8 @@ _vertlt_pixel_next:                                                     ;$AFCA
         ldy ZP_9E               ; restore Y
 :       rts                     ; line has been drawn!                  ;$AFF9
 
-draw_straight_line:                                                     ;$AFFA
 ;===============================================================================
-; draws a straight, horizontal line:
+; draw a straight, horizontal line:
 ;
 ;       ZP_VAR_Y  = Y-position
 ;       ZP_VAR_X1 = starting X-position, in viewport pixels (0-255)
@@ -1440,7 +1433,7 @@ draw_straight_line:                                                     ;$AFFA
 ; this is reasonably fast as it marches 8-pixels
 ; at a time in the middle of the line
 ;
-.export draw_straight_line
+draw_straight_line:                                                     ;$AFFA
 
         sty ZP_9E               ; preserve Y
 

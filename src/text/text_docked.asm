@@ -55,11 +55,11 @@ _fn_index       .set 1
         .ident( .concat( "FN_", fn_id )) = _value
         ; define an export for the index-number of the function;
         ; this is how the outside world will specify the message to print
-        .export .ident( .concat( "TXTFN_", fn_id )) = _fn_index
+.export .ident( .concat( "TXTFN_", fn_id )) = _fn_index
 
         ; import the function from "txt_docked_fns.asm",
         ; and write its address to the table
-        .import fn_import
+.import fn_import
         .addr   fn_import
 
         ; move to the next index number

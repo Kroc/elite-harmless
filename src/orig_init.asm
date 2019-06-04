@@ -5,8 +5,6 @@
 
 ; "orig_init.asm" -- contains intialisation code and graphics data
 
-.include        "elite.inc"
-
 .zeropage
 
 ZP_COPY_TO      := $18

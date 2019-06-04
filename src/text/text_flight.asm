@@ -139,7 +139,7 @@ _word_index     .set 0
         ;;.out .sprintf(": $%0.2x: TXT%s", _value, word_id)
         .ident(word_id) = _value
 
-        .export .ident(.concat("TXT", word_id)) = .encrypt( _value )
+.export .ident(.concat("TXT", word_id)) = .encrypt( _value )
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro

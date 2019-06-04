@@ -24,7 +24,7 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         ; export the pair's token name
-        .export .ident( .concat( "txt_docked_", str ) ) = index_docked
+.export .ident( .concat( "txt_docked_", str ) ) = index_docked
         ; move to the next token number
         index_docked    .set    index_docked + 1
 
@@ -82,7 +82,7 @@ _254e:
                 .define idstr   str
         .endif
 
-        .export .ident(.concat( "txt_flight_", idstr )) = index_flight
+.export .ident(.concat( "txt_flight_", idstr )) = index_flight
         index_flight    .set    index_flight + 1
 
         ; the madness continues because the docked tokens run out

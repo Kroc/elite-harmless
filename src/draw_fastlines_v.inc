@@ -77,7 +77,6 @@ _vline_bitmask:
         .byte   %00000001
 
 draw_line_vert:
-.export draw_line_vert
 
         ldx ZP_VAR_Y1
         cpx ZP_VAR_Y2

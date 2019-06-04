@@ -3,12 +3,6 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "elite.inc"
-
-.include        "vars_zeropage.asm"
-.include        "math.inc"
-.include        "text/text_docked_fns.asm"
-
 .segment        "CODE_28A4"
 
 polyobj_addrs:                                                          ;$28A4
@@ -18,31 +12,19 @@ polyobj_addrs:                                                          ;$28A4
 ; state including rotation, speed, shield etc. this is a lookup-table of
 ; addresses for each poly-object slot
 ;
-.export polyobj_addrs
-.export polyobj_addrs_lo = polyobj_addrs
-.export polyobj_addrs_hi = polyobj_addrs + 1
+polyobj_addrs_lo := polyobj_addrs
+polyobj_addrs_hi := polyobj_addrs + 1
 
-.import POLYOBJ_00
         .word   POLYOBJ_00
-.import POLYOBJ_01
         .word   POLYOBJ_01
-.import POLYOBJ_02
         .word   POLYOBJ_02
-.import POLYOBJ_03
         .word   POLYOBJ_03
-.import POLYOBJ_04
         .word   POLYOBJ_04
-.import POLYOBJ_05
         .word   POLYOBJ_05
-.import POLYOBJ_06
         .word   POLYOBJ_06
-.import POLYOBJ_07
         .word   POLYOBJ_07
-.import POLYOBJ_08
         .word   POLYOBJ_08
-.import POLYOBJ_09
         .word   POLYOBJ_09
-.import POLYOBJ_10
         .word   POLYOBJ_10
         
 ;===============================================================================
@@ -90,8 +72,6 @@ _28d0:  ; this looks like masks for multi-colour pixels?                ;$28D0
 
 _28d5:                                                                  ;$28D5
         ; loads A & F with $0F!
-
-.export _28d5
         lda # $0f
         tax 
         rts 
@@ -101,8 +81,6 @@ _28d9:                                                                  ;$28D9
 ; print a flight token and then draw a line across the screen
 ; i.e. screen titles
 ;
-.export _28d9
-
         jsr print_flight_token
 
 txt_docked_token0B:                                                     ;$28DC
@@ -114,8 +92,6 @@ txt_docked_token0B:                                                     ;$28DC
 
 _28e0:                                                                  ;$28E0
 ;===============================================================================
-.export _28e0
-
         lda # 23
         jsr cursor_down
 
@@ -126,8 +102,6 @@ _28e5:                                                                  ;$28E5
 ;
 ;       A = Y-position of line
 ;
-.export _28e5
-
         sta ZP_VAR_Y1                   ; set Y-position of line,
         sta ZP_VAR_Y2                   ; both start and end (straight)
 
@@ -152,9 +126,6 @@ _28f3:                                                                  ;$28F3
 ;
 ;       Y = Y-pos of line, in viewport px (0-144)
 ;
-.export _28f3
-.import clip_horz_line
-
         jsr clip_horz_line
 
         ; set parameter for drawing line
@@ -169,7 +140,6 @@ _28f3:                                                                  ;$28F3
 ;===============================================================================
 
 _2900:                                                                  ;$2900
-.export _2900
         .byte   %10000000       ;=$80
         .byte   %11000000       ;=$C0
         .byte   %11100000       ;=$E0
@@ -178,7 +148,6 @@ _2900:                                                                  ;$2900
         .byte   %11111100       ;=$FC
         .byte   %11111110       ;=$FE
 _2907:                                                                  ;$2907
-.export _2907
         .byte   %11111111       ;=$FF
         .byte   %01111111       ;=$7F
         .byte   %00111111       ;=$3F
@@ -203,8 +172,6 @@ draw_particle:                                                          ;$2918
 ;   ZP_VAR_Y = Y-distance from middle of screen
 ;   ZP_VAR_Z = dust Z-distance;
 ;
-.export draw_particle
-
         lda ZP_VAR_X
         bpl :+                  ; handle dust to the right
         
@@ -256,8 +223,6 @@ paint_particle:                                                         ;$293A
 ; ZP_VAR_Z = dust Z-distance
 ;        Y is preserved
 ;
-.export paint_particle
-
         sty ZP_TEMP_VAR         ; preserve Y through this ordeal
         tay                     ; get a copy of our Y-coordinate
         
@@ -318,10 +283,6 @@ _2976:                                                                  ;$2976
 ; BBC code: "BLINE"; ball-line for circle
 ;
 _2977:                                                                  ;$2977
-.export _2977
-.import line_points_x
-.import line_points_y
-
         txa 
         adc ZP_43
         sta ZP_8B
@@ -419,8 +380,6 @@ _29fa:                                                                  ;$29FA
 
 dust_swap_xy:                                                           ;$2A12
 ;===============================================================================
-.export dust_swap_xy
-
         ldy DUST_COUNT          ; get number of dust particles
 
 :       ldx DUST_Y, y           ; get dust-particle Y-position          ;$2A15
@@ -442,8 +401,6 @@ dust_swap_xy:                                                           ;$2A12
 
 _2a32:                                                                  ;$2A32
 ;===============================================================================
-.export _2a32
-
         ldx VAR_0486
         beq _2a40
         dex 
@@ -709,8 +666,6 @@ _2c1a:                                                                  ;$2C1A
         sta DUST_Y, y
         bne _2bed
 _2c2d:                                                                  ;$2C2D
-.export _2c2d
-
         lda ZP_POLYOBJ_XPOS_LO, y
         asl 
         sta ZP_VALUE_pt2
@@ -723,7 +678,6 @@ _2c2d:                                                                  ;$2C2D
         jsr _2d69
         sta ZP_POLYOBJ_XPOS_HI, x
 _2c43:                                                                  ;$2C43
-.export _2c43
         ldy ZP_VALUE_pt2
         sty ZP_POLYOBJ_XPOS_LO, x
         ldy ZP_VALUE_pt3
@@ -738,12 +692,8 @@ _2c43:                                                                  ;$2C43
 ;       Y = a multiple of 37 bytes for each poly-object
 ;
 _2c4e:                                                                  ;$2C4E
-.export _2c4e
         lda # $00
 _2c50:                                                                  ;$2C50
-.export _2c50
-.import POLYOBJECTS, PolyObject
-
         ora POLYOBJECTS + PolyObject::xpos + 2, y
         ora POLYOBJECTS + PolyObject::ypos + 2, y
         ora POLYOBJECTS + PolyObject::zpos + 2, y
@@ -753,8 +703,6 @@ _2c50:                                                                  ;$2C50
 
 _2c5c:                                                                  ;$2C5C
 ;===============================================================================
-.export _2c5c
-
         lda POLYOBJ_00 + PolyObject::xpos + 1, y                        ;=$F901
         jsr math_square
         sta ZP_VAR_R
@@ -801,11 +749,10 @@ _2c88:                                                                  ;$2C88
         dex                     ; "Competent" status or below
         bne _2cee
 
-; display status page
-;===============================================================================
 status_screen:                                                          ;$2C9B
-.export status_screen
-
+;===============================================================================
+; display status page
+;
         ; switch to page "8"(?)
         lda # $08
         jsr _6a2f
@@ -932,8 +879,6 @@ _2d61:                                                                  ;$2D61
 ;===============================================================================
 
 _2d69:                                                                  ;$2D69
-.export _2d69
-
         lda ZP_VALUE_pt4
         sta ZP_VAR_S
         and # %10000000
@@ -1008,7 +953,6 @@ COL2    = $04           ; column 2 of the matrix row
 COL2_LO = $04
 COL2_HI = $05
 
-.export _2dc5
         ; ROW X
         ;-----------------------------------------------------------------------
 
@@ -1101,18 +1045,17 @@ COL2_HI = $05
 
 ; the number to be converted:
 ; (a 4-byte big-endian buffer is defined for $77..$7A)
-.exportzp       ZP_VALUE_OVFLW  := $9c  ; because, why not!?
+ZP_VALUE_OVFLW  := $9c  ; because, why not!?
 
 ; working copy of the number:
-.exportzp       ZP_VCOPY        := $6b
-.exportzp       ZP_VCOPY_pt1    := $6b
-.exportzp       ZP_VCOPY_pt2    := $6c
-.exportzp       ZP_VCOPY_pt3    := $6d
-.exportzp       ZP_VCOPY_pt4    := $6e
-.exportzp       ZP_VCOPY_OVFLW  := $6f
-
-.exportzp       ZP_PADDING      := $99
-.exportzp       ZP_MAXLEN       := $bb  ; maximum length of string
+ZP_VCOPY        := $6b
+ZP_VCOPY_pt1    := $6b
+ZP_VCOPY_pt2    := $6c
+ZP_VCOPY_pt3    := $6d
+ZP_VCOPY_pt4    := $6e
+ZP_VCOPY_OVFLW  := $6f
+ZP_PADDING      := $99
+ZP_MAXLEN       := $bb  ; maximum length of string
 
 _max_value:                                                             ;$2E51
         ; maximum value:
@@ -1128,8 +1071,6 @@ print_tiny_value:                                                       ;$2E55
         ;
         ;    X = value to print
         ;
-.export print_tiny_value
-
         ; set the padding to a max. number of digits to 3, i.e. "  0"-"255"
         lda # $03
 
@@ -1141,8 +1082,6 @@ print_small_value:                                                      ;$2E57
         ;    X = value to print
         ;    A = width in chars to pad to
         ;
-.export print_small_value
-
         ; strip the hi-byte for what follows; only use X
         ldy # $00
 
@@ -1154,8 +1093,6 @@ print_medium_value:                                                     ;$2E59
         ;    X = lo-byte of value
         ;    Y = hi-byte of value
         ;
-.export print_medium_value
-
         sta ZP_PADDING
 
         ; zero out the upper-bytes of the 32-bit value to print
@@ -1175,8 +1112,6 @@ print_large_value:                                                      ;$2E65
         ;     $99 = max. number of expected digits, i.e. left-pad the number
         ;       c = carry set: use decimal point
         ;
-.export print_large_value
-
         ; set max. text width
         ; i.e. for "100000000000" (100-billion)
         ldx # 11                ; 12 chars
@@ -1350,36 +1285,26 @@ _2f06:
 ; a block of text-printing related flags and variables
 
 txt_ucase_mask:                                                         ;$2F18
-.export txt_ucase_mask
         ; a mask for converting a character A-Z to upper-case.
         ; this byte gets changed to 0 to neuter the effect
         .byte   %00100000
 
 txt_lcase_flag:                                                         ;$2F19
-.export txt_lcase_flag
-        
         .byte   %11111111
 
 txt_flight_flag:                                                        ;$2F1A
-.export txt_flight_flag
         .byte   %00000000
 
 txt_buffer_flag:                                                        ;$2F1B
-.export txt_buffer_flag
-
         .byte   %00000000
 
 txt_buffer_index:                                                       ;$2F1C
-.export txt_buffer_index
-        
         .byte   $00
 
 txt_ucase_flag:                                                         ;$2F1D
-.export txt_ucase_flag
         .byte   %00000000
 
 txt_lcase_mask:                                                         ;$2F1E
-.export txt_lcase_mask
         ; this byte is used to lower-case charcters, it's ANDed with the
         ; character value -- therefore its default value $FF does nothing.
         ; this byte is changed to %11011111 to enable lower-casing, which
@@ -1391,8 +1316,6 @@ print_crlf:                                                             ;$2F1F
 ;===============================================================================
 ; 'print' a new-line character. i.e. move to the next row, starting column
 ;
-.export print_crlf
-
         lda # TXT_NEWLINE
 
         ; this causes the next instruction to become a meaningless `bit`
@@ -1642,8 +1565,7 @@ _exit:  stx txt_buffer_index    ; save remaining buffer length          ;$2FE4
 _2fee:                                                                  ;$2FEE
         ;=======================================================================
         ; the BBC code says that char 7 is a beep
-.export _2fee
-        
+        ;
         lda # $07               ; BEEP?
         jmp paint_char
 
@@ -1651,8 +1573,6 @@ _2fee:                                                                  ;$2FEE
 ; BBC code says this is "update displayed dials"
 ;
 _2ff3:                                                                  ;$2FF3
-.export _2ff3
-
         ; location of the speed bar on the HUD
         ; TODO: this should be defined in the file with the HUD graphics
         dial_speed_addr = ELITE_BITMAP_ADDR + .bmppos(18, 30)
@@ -1969,7 +1889,6 @@ _3130:                                                                  ;$3130
 ; eject escape pod
 ;
 eject_escapepod:                                                        ;$316E
-.export eject_escapepod
 
         jsr _83df
 
@@ -2036,8 +1955,6 @@ _31be:                                                                  ;$31BE
 ;===============================================================================
 
 _31c6:                                                                  ;$31C6
-.export _31c6
-
         lda # $0e
         jsr print_docked_str
 
@@ -2191,8 +2108,6 @@ _32aa:                                                                  ;$32AA
 ;===============================================================================
 
 _32ad:                                                                  ;$32AD
-.export _32ad
-
         lda #< VAR_0403
         sta ZP_B0
         lda #> VAR_0403
@@ -2343,8 +2258,6 @@ _3381:                                                                  ;$3381
         cmp # $0e
         bne _339a
 _3385:                                                                  ;$3385
-.export _3385
-
         jsr get_random_number
         cmp # $c8
         bcc _339a
@@ -2552,8 +2465,6 @@ _34b9:                                                                  ;$24B9
 ;===============================================================================
 
 _34bc:                                                                  ;$34BC
-.export _34bc
-
         lda # $06
         sta ZP_B1
         lsr 
@@ -2796,8 +2707,6 @@ _3617:                                                                  ;$3617
 
 _363f:                                                                  ;$363F
 ;===============================================================================
-.export _363f
-
         clc 
         lda ZP_POLYOBJ_ZPOS_HI
         bne _367d
@@ -2862,8 +2771,6 @@ _3680:                                                                  ;$3680
         sta ZP_POLYOBJ_ATTACK
 
 _3695:                                                                  ;$3695
-.export _3695
-
         lda # $60
         sta ZP_POLYOBJ_M0x2_HI
         ora # %10000000
@@ -2878,8 +2785,6 @@ _3695:                                                                  ;$3695
 
 _36a6:                                                                  ;$36A6
 ;===============================================================================
-.export _36a6
-
         ldx # $01
         jsr _3680
         bcc _3701
@@ -2900,12 +2805,8 @@ _36a6:                                                                  ;$36A6
 
 ;===============================================================================
 ; target / fire missile?
-
-.import hull_coreolis_index:direct
-
+;
 _36c5:                                                                  ;$36C5
-.export _36c5
-
         ; firing misisle at space station?
         ; (not a good idea)
         cmp # hull_coreolis_index       ;$02
@@ -2962,12 +2863,8 @@ _3701:                                                                  ;$3701
 _3706:                                                                  ;$3706
         ldx # $03
 _3708:                                                                  ;$3708
-.export _3708
-
         lda # $fe
 _370a:                                                                  ;$370A
-.export _370a
-
         sta ZP_TEMP_VAR
        .phx                     ; push X to stack (via A)
         lda ZP_HULL_ADDR_LO
@@ -3054,8 +2951,6 @@ _378c:                                                                  ;$378C
         jmp move_polyobj_x
 
 _3795:                                                                  ;$3795
-.export _3795
-
         jsr _a839
         lda # $04
         jsr _37a5
@@ -3065,8 +2960,6 @@ _3795:                                                                  ;$3795
 ;===============================================================================
 
 _379e:                                                                  ;$397E
-.export _379e
-
         ldy # $04
         jsr _a858
         lda # $08
@@ -3084,8 +2977,6 @@ _37a5:                                                                  ;$37A5
         sta ZP_SCREEN
 
 _37b2:                                                                  ;$37B2
-.export _37b2
-
         ldx # $80
         stx ZP_POLYOBJ01_XPOS_pt1
 
@@ -3208,8 +3099,6 @@ _37fa:                                                                  ;$37FA
         sta ZP_VAR_Y
         and # %01111111
 _3895:                                                                  ;$3895
-.export _3895
-
         cmp # $74
         bcs _38d1
 _389a:                                                                  ;$389A
@@ -3272,8 +3161,6 @@ _38ee:                                                                  ;$38EE
         ;-----------------------------------------------------------------------
 
 _38f8:                                                                  ;$38F8
-.export _38f8
-
         sta ZP_VAR_R
         and # %01111111
         sta ZP_VALUE_pt3
@@ -3380,16 +3267,13 @@ _3981:                                                                  ;$3981
 
 ;===============================================================================
 _39e0:                                                                  ;$39E0
-.export _39e0
-
         and # %00011111
         tax 
+.import _0ac0
         lda _0ac0, x
         sta ZP_VAR_Q
         lda ZP_VALUE_pt1
 _39ea:                                                                  ;$39EA
-.export _39ea
-
         stx ZP_VAR_P1
         sta ZP_B6
         tax 
@@ -3432,12 +3316,8 @@ _3a20:                                                                  ;$3A20
 ;===============================================================================
 
 _3a25:                                                                  ;$3A25
-.export _3a25
-
         stx ZP_VAR_Q
 _3a27:                                                                  ;$3A27
-.export _3a27
-
         eor # %11111111
         lsr 
         sta ZP_VAR_P2
@@ -3493,8 +3373,6 @@ _3ab2:                                                                  ;$3AB2
 ;===============================================================================
 
 _3b0d:                                                                  ;$3B0D
-.export _3b0d
-
         stx ZP_VAR_Q
         eor # %10000000
         jsr multiply_and_add
@@ -3526,8 +3404,6 @@ _3b33:                                                                  ;$3B33
 
         lda PLAYER_SPEED
 _3b37:                                                                  ;$3B37
-.export _3b37
-
         asl 
         sta ZP_VAR_P1
         
@@ -3624,8 +3500,6 @@ _3bae:                                                                  ;$3ABE
 ;===============================================================================
 
 _3bc1:                                                                  ;$3BC1
-.export _3bc1
-
         sta ZP_VAR_P3
         lda ZP_POLYOBJ_ZPOS_LO
         ora # %00000001
@@ -3734,8 +3608,6 @@ _3c4d:                                                                  ;$3C4D
 ;       X :  
 ;
 _3c58:                                                                  ;$3C58
-.export _3c58
-
         lda DOCKCOM_STATE       ; is docking computer enabled?
        .bnz :+                  ; yes, skip over the following
 
@@ -3759,8 +3631,6 @@ _3c58:                                                                  ;$3C58
 ;===============================================================================
 
 _3c6f:                                                                  ;$3C6F
-.export _3c6f
-
         sta ZP_VAR_T
         txa 
         clc 
@@ -3777,8 +3647,6 @@ _3c7c:                                                                  ;$3C7C
         ;-----------------------------------------------------------------------
 
 _3c7f:                                                                  ;$3C7F
-.export _3c7f
-
         sta ZP_VAR_T
         txa 
         sec 
@@ -3794,8 +3662,6 @@ _3c8c:                                                                  ;$3C8C
         ldx # $80
         bmi _3c7c
 _3c95:                                                                  ;$3C95
-.export _3c95
-
         lda ZP_VAR_P1
         eor ZP_VAR_Q
         sta ZP_TEMP_VAR
@@ -3847,6 +3713,7 @@ _3cce:                                                                  ;$3CCE
         lsr 
         lsr 
         tax 
+.import _0ae0
         lda _0ae0, x
 _3cda:                                                                  ;$3CDA
         rts 
@@ -3855,8 +3722,6 @@ shoot_lasers:                                                           ;$3CDB
 ;===============================================================================
 ; pew! pew!
 ;
-.export shoot_lasers
-
         ; jitter the laser beam's position a bit:
         ; pick the starting Y-position (Y1)
         ;
@@ -3881,8 +3746,6 @@ shoot_lasers:                                                           ;$3CDB
 
 _3cfa:                                                                  ;$3CFA
         ;=======================================================================
-.export _3cfa
-
         ; are we in the cockpit-view?
         lda ZP_SCREEN
         bne _3cda                       ; no, exit (`rts` above us)
@@ -3931,7 +3794,10 @@ _3cfa:                                                                  ;$3CFA
 ;===============================================================================
 
 _3d2f:                                                                  ;$3D2F
-.export _3d2f
+
+; from "text/text_docked.asm"
+.import _1a27
+.import _1a41
 
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
@@ -3988,8 +3854,6 @@ _3d7a:  jmp print_docked_str                                            ;$3D7A
 
 mission_blueprints_begin:                                               ;$3D7D
         ;=======================================================================
-.export mission_blueprints_begin
-
         ; begin the Thargoid Blueprints mission:
         ;
         lda MISSION_FLAGS
@@ -4008,8 +3872,6 @@ _3d8a:                                                                  ;$3D8A
 
 mission_blueprints_ceerdi:                                              ;$3D8D
         ;=======================================================================
-.export mission_blueprints_ceerdi
-        
         lda MISSION_FLAGS
         and # %11110000
         ora # %00001010
@@ -4020,8 +3882,6 @@ mission_blueprints_ceerdi:                                              ;$3D8D
 
 mission_blueprints_birera:                                              ;$3D9B
         ;=======================================================================
-.export mission_blueprints_birera
-
         lda MISSION_FLAGS
         ora # %00000100
         sta MISSION_FLAGS
@@ -4037,8 +3897,6 @@ mission_blueprints_birera:                                              ;$3D9B
 
 _3daf:                                                                  ;$3DAF
         ;=======================================================================
-.export _3daf
-
         lsr MISSION_FLAGS
         asl MISSION_FLAGS
         
@@ -4057,8 +3915,6 @@ mission_trumbles:                                                       ;$3DC0
         ;=======================================================================
         ; begin Trumbles™ mission
         ;
-.export mission_trumbles
-
         ;set the mission bit:
         lda MISSION_FLAGS
         ora # missions::trumbles
@@ -4087,8 +3943,6 @@ mission_trumbles:                                                       ;$3DC0
 
 _3dff:                                                                  ;$3DFF
 ;===============================================================================
-.export _3dff
-
         ; and this is how you set bit 0,
         ; without using registers!
         ;
@@ -4166,8 +4020,6 @@ get_polyobj:                                                            ;$3E87
 ;
 ; returns address in $59/$5A
 ;
-.export get_polyobj
-
         txa 
         asl                     ; multiply by 2 (for 2-byte table-lookup)
         tay 
@@ -4183,8 +4035,6 @@ set_psystem_to_tsystem:                                                 ;$3E95
 ; copy present system co-ordinates to target system co-ordinates,
 ; i.e. you have arrived at your destination
 ;
-.export set_psystem_to_tsystem
-
         ldx # 1
 :       lda PSYSTEM_POS, x                                              ;$3E97
         sta TSYSTEM_POS, x
@@ -4199,8 +4049,6 @@ wait_frames:                                                            ;$3EA1
 ;
 ;       Y = number of frames to wait
 ;
-.export wait_frames
-
         jsr wait_for_frame
         dey 
         bne wait_frames
@@ -4208,10 +4056,9 @@ wait_frames:                                                            ;$3EA1
 
 ;===============================================================================
 ; colour of different type of laser cross-hairs?
-
+;
 _3ea8:                                                                  ;$3EA8
-.export _3ea8
-        .byte   YELLOW, YELLOW, LTGREEN, PURPLE                         ;$3EA8
+        .byte   YELLOW, YELLOW, LTGREEN, PURPLE
 
 
 ;$3EAC

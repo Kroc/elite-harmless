@@ -3,135 +3,6 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "elite.inc"
-
-.include        "vars_zeropage.asm"
-.include        "text/text_docked_fns.asm"
-.include        "math.inc"
-.include        "math_3d.inc"
-
-; from "text_flight.asm"
-.import _0ac0:absolute
-.import _0ae0:absolute
-
-; from "text_docked.asm"
-.import _0e00:absolute
-.import _1a27:absolute
-.import _1a41:absolute
-
-; from "vars_user.asm"
-.import _1d06:absolute
-.import _1d07:absolute
-.import _1d09:absolute
-
-; from "code_6A00.asm"
-.import _6a00:absolute
-.import set_cursor_col:absolute
-.import set_cursor_row:absolute
-.import cursor_down:absolute
-.import _6a2f:absolute
-.import randomize:absolute
-.import _6a9b:absolute
-.import _6f82:absolute
-.import _70a0:absolute
-.import _70ab:absolute
-.import _745a:absolute
-.import _7481:absolute
-.import _76e9:absolute
-.import print_flight_token_and_newline:absolute
-.import print_flight_token:absolute
-.import _7b61:absolute
-.import _7b64:absolute
-.import _7b6f:absolute
-.import _7bd2:absolute
-.import _7c24:absolute
-.import _7c6b:absolute
-.import _7d0c:absolute
-.import _7d0e:absolute
-.import _805e:absolute
-.import wipe_sun:absolute
-.import _81ee:absolute
-.import set_memory_layout:absolute
-.import _829a:absolute
-.import _83df:absolute
-.import clear_zp_polyobj:absolute
-.import get_random_number:absolute
-.import _872f:absolute
-.import _877e:absolute
-.import _87a4:absolute
-.import _87a6:absolute
-.import _87b1:absolute
-.import _87d0:absolute
-.import _88e7:absolute
-.import txt_docked_token1A:absolute
-.import txt_docked_token_mediaCurrent:absolute
-.import txt_docked_token_mediaOther:absolute
-.import _8c7b:absolute
-.import _8c8a:absolute
-.import _8cad:absolute
-.import key_bomb:absolute
-.import key_accelerate:absolute
-.import key_escape_pod:absolute
-.import key_decelerate:absolute
-.import key_docking_off:absolute
-.import key_missile_fire:absolute
-.import key_jump:absolute
-.import key_missile_disarm:absolute
-.import joy_down:absolute
-.import key_missile_target:absolute
-.import key_docking_on:absolute
-.import key_ecm:absolute
-.import joy_fire:absolute
-.import get_input:absolute
-.import do_quickjump:absolute
-.import _900d:absolute
-.import _9204:absolute
-.import _923b:absolute
-
-.import table_log:absolute
-.import table_logdiv:absolute
-.import _9500:absolute
-.import _9600:absolute
-.import row_to_bitmap_lo:absolute
-.import row_to_bitmap_hi:absolute
-
-.import _9978:absolute
-.import _99af:absolute
-.import _9a2c:absolute
-.import _9a86:absolute
-.import _9d8e:absolute
-.import _9db3:absolute
-.import _9dee:absolute
-.import _9e27:absolute
-.import _a013:absolute
-.import _a2a0:absolute
-.import move_polyobj_x:absolute
-.import _a626:absolute
-.import set_page:absolute
-.import _a7a6:absolute
-.import _a786:absolute
-.import _a795:absolute
-.import _a7e9:absolute
-.import _a80f:absolute
-.import _a813:absolute
-.import _a839:absolute
-.import _a858:absolute
-.import _a8e0:absolute
-.import _a8e6:absolute
-.import draw_line:absolute
-.import draw_straight_line:absolute
-.import _b0f4:absolute
-.import _b11f:absolute
-.import wait_for_frame:absolute
-.import paint_newline:absolute
-.import paint_char:absolute
-.import txt_docked_token15:absolute
-.import _b410:absolute
-
-; from "hull_data.asm"
-.import hull_pointers
-.import hull_d042
-
 .segment        "CODE_1D81"
 
 ;===============================================================================
@@ -293,8 +164,6 @@ debug_for_brk:                                                          ;$1E14
         ; set a routine to capture use of the `brk` instruction.
         ; not actually used, but present, in original Elite
         ;
-.import debug_brk:absolute
-        
         lda #< debug_brk
         sei                     ; disable interrupts
         sta KERNAL_VECTOR_BRK+0 
@@ -445,10 +314,6 @@ _1ec1:                                                                  ;$1EC1
 ; main cockpit-view game-play loop perhaps?
 ; (handles many key presses) 
 ;
-.export _1ec1
-
-.import POLYOBJ_00
-
         lda POLYOBJ_00          ;=$F900?
         sta ZP_GOATSOUP_pt1     ;? randomize?
 
@@ -719,7 +584,6 @@ _2028:                                                                  ;$2028
 _202d:                                                                  ;$202D
         ldx # $00
 _202f:                                                                  ;$202F
-.export _202f
         stx ZP_9D
         
         lda SHIP_SLOTS, x
@@ -754,13 +618,9 @@ _2039:                                                                  ;$2039
         
         lda PLAYER_EBOMB        ; player has energy bomb?
         bpl @skip
-        
-.import hull_coreolis_index:direct
-.import hull_thargoid_index:direct
-.import hull_constrictor_index:direct
 
         ; space station?
-        cpy # hull_coreolis_index *2 
+        cpy # hull_coreolis_index *2
         beq @skip
 
         ; thargoid?
@@ -868,7 +728,6 @@ _20e3:                                                                  ;$20E3
         cmp # $50
         bcc _2107
 _2101:                                                                  ;$2101
-.export _2101
         jsr _923b
         jmp _1d81
 
@@ -1300,8 +1159,6 @@ _2366:                                                                  ;$2366
 
 _2367:                                                                  ;$2367
 ;===============================================================================
-.export _2367
-
         lda # $c0
         sta _a8e0
 
@@ -1316,14 +1173,11 @@ _2367:                                                                  ;$2367
 .txt_docked_token1B                                                     ;$2372
 .txt_docked_token1C                                                     ;$2376
 
-
+;=======================================================================
+; print a message from the message table at `_1a5c` rather than the
+; standard one (`_0e00`)
+; 
 _237e:                                                                  ;$237E
-        ;=======================================================================
-        ; print a message from the message table at `_1a5c` rather than the
-        ; standard one (`_0e00`)
-        ; 
-.export _237e
-
         ; push the current state:
         pha 
         tax 
@@ -1337,7 +1191,7 @@ _237e:                                                                  ;$237E
         ; routine using this new address. note that in this case, X is the
         ; message-index to print
 .import _1a5c
-
+        
         lda # < _1a5c
         sta ZP_TEMP_ADDR3_LO
         lda # > _1a5c
@@ -1353,7 +1207,7 @@ print_docked_str:                                                       ;$2390
 ; preserves A, Y & $5B/$5C
 ; (due to recursion)
 ;
-.export print_docked_str
+.import _0e00
 
         pha                     ; preserve A (message index)
         tax                     ; move message index to X
@@ -1429,8 +1283,6 @@ _23a0:                                                                  ;$23A0
 
 print_docked_token:                                                     ;$23CF
         ;=======================================================================
-.export print_docked_token
-        
         cmp # ' '               ; tokens less than $20 (space)
        .blt _format_code        ; are format codes
 
@@ -1661,7 +1513,6 @@ is_vowel:                                                               ;$24F3
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 _250b:  rts                                                             ;$250B
-.export _250b
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 

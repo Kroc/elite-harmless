@@ -5,28 +5,6 @@
 
 ; user preferences
 
-.export _1d01
-.export _1d02
-.export _1d03
-.export _1d04
-.export _1d05
-.export _1d06
-.export _1d07
-.export _1d08
-.export _1d09
-.export opt_flipvert
-.export opt_flipaxis
-.export _1d0c
-.export _1d0d
-.export opt_device
-.export _1d0f
-.export _1d10
-.export _1d11
-.export _1d12
-.export _1d13
-.export _1d14
-.export _1d21
-
 .segment        "VARS_USER"
 
 _1d00:  ; nothing appears to actually reference $1D00 itself            ;$1D00

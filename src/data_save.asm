@@ -3,29 +3,23 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "elite.inc"
-
 .segment        "DATA_SAVE"
 
 ; file-name?
 
 _25a6:                                                                  ;$25A6
-.export _25a6
         .byte   $3a, $30, $2e,$45                       ;":0.E"?
 
 ; 85 bytes here get copied by `_88f0` to $0490..$04E4
 
 _25aa:                                                                  ;$25AA
-.export _25aa
         .byte   $2e                                     ;"."?
 
 ; save data; length might be 97 bytes
 ;
 _25ab:                                                                  ;$25AB
-.export _25ab
         .byte   $6a, $61, $6d, $65, $73, $6f, $6e       ;"jameson"?
 _25b2:                                                                  ;$25B2
-.export _25b2
         .byte   $0d
 
 .proc   _25b3                                                           ;$25B3
@@ -52,10 +46,9 @@ _25ff:                                                                  ;$25FF
         .byte   $00
 .endproc
 
-.export _25b3
-.export _25fd   := _25b3::_25fd
-.export _25fe   := _25b3::_25fe
-.export _25ff   := _25b3::_25ff
+_25fd   := _25b3::_25fd
+_25fe   := _25b3::_25fe
+_25ff   := _25b3::_25ff
 
 ;-------------------------------------------------------------------------------
 
@@ -74,7 +67,6 @@ _25ff:                                                                  ;$25FF
 ; save data during game initialisation. length: 97 bytes
 ;
 _2619:                                                                  ;$2619
-.export _2619
         ; commander name
         .byte   $4a ,$41, $4d, $45, $53, $4f, $4e, $0d  ;"JAMESON"
         .byte   $00 ,$14, $ad
@@ -163,7 +155,6 @@ _2619:                                                                  ;$2619
         .byte   $00
         .byte   $00
 _267e:                                                                  ;$267E
-.export _267e
         .byte   $00, $ff, $ff, $aa, $aa, $aa, $55, $55
         .byte   $55, $aa, $aa, $aa, $aa, $aa, $aa, $55
         .byte   $aa, $aa, $aa, $aa, $aa, $aa, $aa, $aa

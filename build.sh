@@ -8,27 +8,9 @@
 # stop further processing on any error
 set -e
 
-clean() {
-    echo "* cleaning up:"
-
-    rm -rf build/*.o
-    rm -rf build/*.s
-    rm -rf build/*.bin
-    rm -rf build/*.prg
-    rm -rf build/*.d64
-    rm -rf build/*.crt
-
-    rm -f bin/*.prg
-    rm -f bin/*.d64
-    rm -f bin/*.crt
-
-    echo "- OK"
-}
-
 #===============================================================================
 
 ca65="./bin/cc65/bin/ca65 \
-    --auto-import \
     --target c64 \
     --debug-info \
     --include-dir src \
@@ -46,6 +28,22 @@ clear
 echo "building Elite : Harmless"
 echo
 
+clean() {
+    echo "* cleaning up:"
+
+    rm -rf build/*.o
+    rm -rf build/*.s
+    rm -rf build/*.bin
+    rm -rf build/*.prg
+    rm -rf build/*.d64
+    rm -rf build/*.crt
+
+    rm -f bin/*.prg
+    rm -f bin/*.d64
+    rm -f bin/*.crt
+
+    echo "- OK"
+}
 clean
 
 # build an original version of the game, including the original fast-loader
@@ -54,52 +52,25 @@ echo
 echo "* build original Elite"
 echo "  ======================================"
 
-echo "- assemble 'prgheader.asm'"
-$ca65 -o build/prgheader.o      src/c64/prgheader.asm
-
 # assemble 'original' version of the code; the `OPTION_ORIGINAL` symbol
 # is used within the files to exlcude changed code from the original
 
 options="-DOPTION_ORIGINAL"
 
-echo "- assemble 'orig_init.asm'"
-$ca65 $options -o build/orig_init.o         src/orig_init.asm
+# assemble the mega-object containing
+# the majority of the elite code
+echo "- assemble 'elite-original.asm'"
+$ca65 $options -o build/elite-original.o    src/elite-original.asm
+
+# the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into 
+# the global scope along with the main source code
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-echo "- assemble 'vars_user.asm'"
-$ca65 $options -o build/vars_user.o         src/vars_user.asm
-echo "- assemble 'code_1D81.asm'"
-$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
-echo "- assemble 'data_save.asm'"
-$ca65 $options -o build/data_save.o         src/data_save.asm
-echo "- assemble 'code_2A84.asm'"
-$ca65 $options -o build/code_2A84.o         src/code_2A84.asm
-echo "- assemble 'code_6A00.asm'"
-$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-echo "- assemble 'bitmap.asm'"
-$ca65 $options -o build/bitmap.o            src/gfx/bitmap.asm
-echo "- assemble 'sound.asm'"
-$ca65 $options -o build/sound.o             src/sound.asm
-echo "- assemble 'gfx-font.asm'"
-$ca65 $options -o build/gfx_font.o          src/gfx/font.asm
-echo "- assemble 'gfx-sprites.asm'"
-$ca65 $options -o build/gfx_sprites.o       src/gfx/sprites.asm
-echo "- assemble 'math_data.asm'"
-$ca65 $options -o build/math_data.o         src/math_data.asm
-echo "- assemble 'gfx-hull_data.asm'"
-$ca65 $options -o build/gfx_hull_data.o     src/gfx/hull_data.asm
-echo "- assemble 'gfx-hud_data.asm'"
-$ca65 $options -o build/gfx_hud_data.o      src/gfx/hud_data.asm
-echo "- assemble 'vars_polyobj.asm'"
-$ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
-echo "- assemble 'elite_link.asm'"
-$ca65 $options -o build/elite_link.o        src/elite_link.asm
-
-#-------------------------------------------------------------------------------
 
 # let's build an original floppy disk to verify that we haven't broken
 # the code or failed to preserve the original somewhere along the lines
@@ -131,7 +102,7 @@ echo "-     link 'elite-original-gma86.cfg'"
 $ld65 \
        -C link/elite-original-gma86.cfg \
        -m build/elite-original-gma86.map -vm \
-    --obj build/elite_link.o \
+    --obj build/elite-original.o \
     --obj build/boot_gma_stage0.o \
     --obj build/boot_gma_stage1.o \
     --obj build/boot_gma_stage2.o \
@@ -142,21 +113,7 @@ $ld65 \
     --obj build/boot_gma_stage4_7C3A.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
-    --obj build/text_docked.o \
-    --obj build/vars_user.o \
-    --obj build/orig_init.o \
-    --obj build/code_1D81.o \
-    --obj build/data_save.o \
-    --obj build/code_2A84.o \
-    --obj build/code_6A00.o \
-    --obj build/bitmap.o \
-    --obj build/sound.o \
-    --obj build/gfx_font.o \
-    --obj build/gfx_sprites.o \
-    --obj build/math_data.o \
-    --obj build/gfx_hud_data.o \
-    --obj build/gfx_hull_data.o \
-    --obj build/vars_polyobj.o
+    --obj build/text_docked.o
 
 # encrypt GMA4.PRG:
 #-------------------------------------------------------------------------------
@@ -268,10 +225,6 @@ md5sum --ignore-missing --quiet --check checksums.md5
 if [ $? -eq 0 ]; then echo "- OK"; fi
 cd ..
 
-##
-##exit 0
-##
-
 #===============================================================================
 
 echo
@@ -283,45 +236,20 @@ clean
 
 options="-DOPTION_MATHTABLES"
 
-echo
-echo "- assemble 'disk_boot_exo.asm'"
-$ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
-echo "- assemble 'code_init.asm'"
-$ca65 $options -o build/code_init.o         src/code_init.asm
+# assemble the mega-object containing
+# the majority of the elite code
+echo "- assemble 'elite-harmless.asm'"
+$ca65 $options -o build/elite-harmless.o    src/elite-harmless.asm
+
+# the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into 
+# the global scope along with the main source code
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-echo "- assemble 'vars_user.asm'"
-$ca65 $options -o build/vars_user.o         src/vars_user.asm
-echo "- assemble 'code_1D81.asm'"
-$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
-echo "- assemble 'data_save.asm'"
-$ca65 $options -o build/data_save.o         src/data_save.asm
-echo "- assemble 'code_2A84.asm'"
-$ca65 $options -o build/code_2A84.o         src/code_2A84.asm
-echo "- assemble 'code_6A00.asm'"
-$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-echo "- assemble 'bitmap.asm'"
-$ca65 $options -o build/bitmap.o            src/gfx/bitmap.asm
-echo "- assemble 'sound.asm'"
-$ca65 $options -o build/sound.o             src/sound.asm
-echo "- assemble 'gfx-font.asm'"
-$ca65 $options -o build/gfx-font.o          src/gfx/font.asm
-echo "- assemble 'gfx-sprites.asm'"
-$ca65 $options -o build/gfx-sprites.o       src/gfx/sprites.asm
-echo "- assemble 'math_data.asm'"
-$ca65 $options -o build/math_data.o         src/math_data.asm
-echo "- assemble 'gfx-hull_data.asm'"
-$ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
-echo "- assemble 'gfx-hud_data.asm'"
-$ca65 $options -o build/gfx-hud_data.o      src/gfx/hud_data.asm
-echo "- assemble 'vars_polyobj.asm'"
-$ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
-echo "- assemble 'elite_link.asm'"
-$ca65 $options -o build/elite_link.o        src/elite_link.asm
 
 echo "- linking..."
 $ld65 \
@@ -329,27 +257,10 @@ $ld65 \
        -S \$0400 \
        -m build/elite-harmless.map -vm \
        -o bin/harmless.prg \
-    --obj build/code_init.o \
-    --obj build/elite_link.o \
-    --obj build/disk_boot_exo.o \
+    --obj build/elite-harmless.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
-    --obj build/text_docked.o \
-    --obj build/vars_user.o \
-    --obj build/code_1D81.o \
-    --obj build/data_save.o \
-    --obj build/code_2A84.o \
-    --obj build/code_6A00.o \
-    --obj build/bitmap.o \
-    --obj build/sound.o \
-    --obj build/gfx-font.o \
-    --obj build/gfx-sprites.o \
-    --obj build/math_data.o \
-    --obj build/gfx-hull_data.o \
-    --obj build/gfx-hud_data.o \
-    --obj build/vars_polyobj.o 
-
-#-------------------------------------------------------------------------------
+    --obj build/text_docked.o
 
 # compress and fast-load the program
 echo "- exomizing..."
@@ -361,7 +272,8 @@ echo
 # does this itself during initialisation
 
 $exomizer \$0400 -B \
-    -x3 -s "lda #\$00 sta \$d011" \
+    -s "lda #\$00 sta \$d011 sta \$d020" \
+    -X "inc \$d020 dec \$d020" \
     -o "bin/harmless-exo.prg" \
     -- \
         "bin/init.prg" \
@@ -388,45 +300,20 @@ clean
 # enable undocumented opcodes and the replacement line-drawing routines
 options="--cpu 6502X -DOPTION_DYME_FASTLINE"
 
-echo
-echo "- assemble 'disk_boot_exo.asm'"
-$ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
-echo "- assemble 'code_init.asm'"
-$ca65 $options -o build/code_init.o         src/code_init.asm
+# assemble the mega-object containing
+# the majority of the elite code
+echo "- assemble 'elite-harmless.asm'"
+$ca65 $options -o build/elite-harmless.o    src/elite-harmless.asm
+
+# the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into 
+# the global scope along with the main source code
 echo "- assemble 'text_pairs.asm'"
 $ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
 echo "- assemble 'text_flight.asm'"
 $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-echo "- assemble 'vars_user.asm'"
-$ca65 $options -o build/vars_user.o         src/vars_user.asm
-echo "- assemble 'code_1D81.asm'"
-$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
-echo "- assemble 'data_save.asm'"
-$ca65 $options -o build/data_save.o         src/data_save.asm
-echo "- assemble 'code_2A84.asm'"
-$ca65 $options -o build/code_2A84.o         src/code_2A84.asm
-echo "- assemble 'code_6A00.asm'"
-$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-echo "- assemble 'bitmap.asm'"
-$ca65 $options -o build/bitmap.o            src/gfx/bitmap.asm
-echo "- assemble 'sound.asm'"
-$ca65 $options -o build/sound.o             src/sound.asm
-echo "- assemble 'gfx-font.asm'"
-$ca65 $options -o build/gfx-font.o          src/gfx/font.asm
-echo "- assemble 'gfx-sprites.asm'"
-$ca65 $options -o build/gfx-sprites.o       src/gfx/sprites.asm
-echo "- assemble 'math_data.asm'"
-$ca65 $options -o build/math_data.o         src/math_data.asm
-echo "- assemble 'gfx-hull_data.asm'"
-$ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
-echo "- assemble 'gfx-hud_data.asm'"
-$ca65 $options -o build/gfx-hud_data.o      src/gfx/hud_data.asm
-echo "- assemble 'vars_polyobj.asm'"
-$ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
-echo "- assemble 'elite_link.asm'"
-$ca65 $options -o build/elite_link.o        src/elite_link.asm
 
 echo "- linking..."
 $ld65 \
@@ -434,27 +321,10 @@ $ld65 \
        -S \$0400 \
        -m build/elite-harmless-fastlines.map -vm \
        -o bin/harmless.prg \
-    --obj build/code_init.o \
-    --obj build/elite_link.o \
-    --obj build/disk_boot_exo.o \
+    --obj build/elite-harmless.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
-    --obj build/text_docked.o \
-    --obj build/vars_user.o \
-    --obj build/code_1D81.o \
-    --obj build/data_save.o \
-    --obj build/code_2A84.o \
-    --obj build/code_6A00.o \
-    --obj build/bitmap.o \
-    --obj build/sound.o \
-    --obj build/gfx-font.o \
-    --obj build/gfx-sprites.o \
-    --obj build/math_data.o \
-    --obj build/gfx-hull_data.o \
-    --obj build/gfx-hud_data.o \
-    --obj build/vars_polyobj.o 
-
-#-------------------------------------------------------------------------------
+    --obj build/text_docked.o
 
 # compress and fast-load the program
 echo "- exomizing..."
@@ -553,6 +423,5 @@ echo
 
 #-------------------------------------------------------------------------------
 
-echo
 echo "* complete."
 exit 0

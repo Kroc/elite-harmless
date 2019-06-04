@@ -122,7 +122,6 @@ start:
 init_end:
 .export init_end
 
-.import init_mem, _8863
         jsr init_mem
         jmp _8863
 

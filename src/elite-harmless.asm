@@ -7,7 +7,6 @@
 
 .include        "math.inc"
 .include        "math_3d.inc"
-.include        "math_data.asm"
 
 .include        "gfx/hull_struct.inc"
 
@@ -16,6 +15,11 @@
 .include        "code_keyboard.inc"
 
 .include        "elite_link.asm"        ; to be phased out
+
+.include        "boot/disk_boot_exo.asm"
+.include        "code_init.asm"                                         ;$0400
+
+.include        "math_data.asm"
 
 .include        "vars_polyobj.asm"                                      ;$F900
 
@@ -30,7 +34,7 @@
 .include        "code_2A84.asm"                                         ;$2A84
 .include        "gfx/sprites.asm"                                       ;$6800
 .include        "code_6A00.asm"                                         ;$6A00
-.include        "orig_init.asm"                                         ;$75E4
+
 
 .include        "gfx/bitmap.asm"                                        ;$9700
 

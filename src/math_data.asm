@@ -18,9 +18,6 @@
 ;       square2_lo = <(((I-255)*(I-255))/4)
 ;       square2_hi = >(((I-255)*(I-255))/4)
 
-.export square1_lo, square1_hi
-.export square2_lo, square2_hi
-
 square1_lo:
 ;-------------------------------------------------------------------------------
 .ifdef  OPTION_MATHTABLES_ROM
@@ -68,7 +65,6 @@ square2_hi:
 ; http://codebase64.org/doku.php?id=base:table_generator_routine_for_fast_8_bit_mul_table
 ;
 .segment        "CODE_INIT"
-.export populate_multiply_tables
 
 populate_multiply_tables:
         ;-----------------------------------------------------------------------
@@ -174,7 +170,6 @@ table_log:                                                              ;$9300
 ; - $9300..$93FF is a lookup table for the function
 ;   TRUNC(LOG(X;2)*32), except for X=0, X=8, X=64
 ;
-.export table_log
         .byte   $06, $00, $20, $32, $40, $4a, $52, $59                  ;$9300
         .byte   $5f, $65, $6a, $6e, $72, $76, $79, $7d                  ;$9308
         .byte   $80, $82, $85, $87, $8a, $8c, $8e, $90                  ;$9310
@@ -215,7 +210,6 @@ table_logdiv:                                                           ;$9400
 ;   TRUNC(256*(LOG(X;2)*32-TRUNC(LOG(X;2)*32))),
 ;   except for X=0, X=8, X=64
 ;
-.export table_logdiv
         .byte   $ae, $00, $00, $b8, $00, $4d, $b8, $d5                  ;$9400
         .byte   $ff, $70, $4d, $b3, $b8, $6a, $d5, $05                  ;$9408
         .byte   $00, $cc, $70, $ef, $4d, $8d, $b3, $c1                  ;$9410
@@ -254,8 +248,6 @@ _9500:                                                                  ;$9500
 ; nc513 says:
 ; - $9500..$95FF is a lookup table for the function TRUNC(2^(X/32))
 ;
-.export _9500
-
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9500
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9508
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9510
@@ -295,7 +287,6 @@ _9600:                                                                  ;$9600
 ; - $9600..96FF seems to follow the pattern of
 ;   TRUNC(2^((X/32)+(1/64))) just perfectly
 ;
-.export _9600
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9600
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9608
         .byte   $01, $01, $01, $01, $01, $01, $01, $01                  ;$9610
@@ -342,8 +333,6 @@ line_points_x:                                                          ;$26A4
 ;-------------------------------------------------------------------------------
 ; RAM used for X-coords for line-drawing
 ;
-.export line_points_x
-
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this is junk code/data left in memory
@@ -390,8 +379,6 @@ line_points_y:                                                          ;$27A4
 ;-------------------------------------------------------------------------------
 ; RAM used for X-coords for line-drawing
 ;
-.export line_points_y
-
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this is junk code/data left in memory

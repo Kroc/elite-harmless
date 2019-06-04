@@ -3,8 +3,6 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.include        "vars_zeropage.asm"
-
 ; this is a segement as we need to assign a place in RAM for it
 ; (based on everything else in RAM), but it's not written to disk;
 ; this variable space is only used at run-time
@@ -34,16 +32,3 @@ POLYOBJ_07:      .tag    PolyObject                                     ;$FA03
 POLYOBJ_08:      .tag    PolyObject                                     ;$FA28
 POLYOBJ_09:      .tag    PolyObject                                     ;$FA4D
 POLYOBJ_10:      .tag    PolyObject                                     ;$FA72
-
-.export POLYOBJECTS
-.export POLYOBJ_00 
-.export POLYOBJ_01
-.export POLYOBJ_02
-.export POLYOBJ_03
-.export POLYOBJ_04
-.export POLYOBJ_05
-.export POLYOBJ_06
-.export POLYOBJ_07
-.export POLYOBJ_08
-.export POLYOBJ_09
-.export POLYOBJ_10

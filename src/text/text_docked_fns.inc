@@ -291,7 +291,6 @@ txt_docked_token1D:                                                     ;$3E5A
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-.import _250b
         jsr _250b               ; dead code, just an RTS
 .endif  ;///////////////////////////////////////////////////////////////////////
         
@@ -365,8 +364,8 @@ txt_docked_incoming_message:                                            ;$3E37
 txt_docked_token_mediaCurrent:                                          ;$8AB5
 ;-------------------------------------------------------------------------------
 .export txt_docked_token_mediaCurrent
-.import TXT_DOCKED_TAPE:direct
 
+.import TXT_DOCKED_TAPE:direct
         lda # TXT_DOCKED_TAPE   ; $02 = "DISK", $03 = "TAPE"
         clc                     ; add the following:
         adc opt_device          ; $FF = disk,   $00 = tape

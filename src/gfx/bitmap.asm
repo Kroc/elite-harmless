@@ -4,9 +4,6 @@
 ;===============================================================================
 .linecont+
 
-.include        "elite.inc"
-
-;===============================================================================
 ; reserve the bitmap screen in the C64 memory map
 ;
 .segment        "VIC_BITMAP"
@@ -15,11 +12,10 @@
 ; issue a warning that this is "suspiciously large"!
 ;.align          $2000
 
-.res    $2000
+; reserve 8 KB
+.res            $2000
 
 ;===============================================================================
-
-.code
 
 ; the BBC Micro, unusually for an 8-bit, has programmable display circuitry
 ; allowing the developer to create custom display modes. On the BBC, Elite uses
@@ -176,6 +172,3 @@ row_to_bitmap_lo:                                                       ;$9700
 
 row_to_bitmap_hi:                                                       ;$9800
         .hibytes _rowtobmp
-
-.export row_to_bitmap_lo
-.export row_to_bitmap_hi

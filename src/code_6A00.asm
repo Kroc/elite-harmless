@@ -4,13 +4,6 @@
 ;===============================================================================
 .linecont+
 
-.include        "elite.inc"
-
-.include        "vars_zeropage.asm"
-.include        "text/text_docked_fns.asm"
-.include        "math_3d.inc"
-.include        "code_keyboard.inc"
-
 ; use replacement line-drawing routines if specified
 ;
 .ifdef  OPTION_DYME_FASTLINE
@@ -27,141 +20,10 @@
 
 ; from "text_flight.asm"
 .import _0700:absolute
-.import _0ac0:absolute
-
-; from "vars_user.asm"
-.import _1d01:absolute
-.import _1d02:absolute
-.import _1d03:absolute
-.import _1d04:absolute
-.import _1d05:absolute
-.import _1d06:absolute
-.import _1d08:absolute
-.import opt_flipvert:absolute
-.import opt_flipaxis:absolute
-.import _1d0c:absolute
-.import _1d0d:absolute
-.import opt_device:absolute
-.import _1d0f:absolute
-.import _1d10:absolute
-.import _1d11:absolute
-.import _1d12:absolute
-.import _1d13:absolute
-.import _1d14:absolute
-.import _1d21:absolute
-
-; from "code_1D81.asm"
-.import _1ec1:absolute
-.import _202f:absolute
-.import _2367:absolute
-.import print_docked_str:absolute
-.import txt_docked_token02:absolute
-.import txt_docked_token0F:absolute
+; from "text_pairs.asm"
 .import txt_flight_pair1:absolute
 .import txt_flight_pair2:absolute
-.import _25a6:absolute
-.import _25aa:absolute
-.import _25ab:absolute
-.import _25b2:absolute
-.import _25b3:absolute
-.import _25fd:absolute
-.import _25fe:absolute
-.import _25ff:absolute
-.import _2619:absolute
-.import _267e:absolute
-.import polyobj_addrs:absolute
-.import polyobj_addrs_lo:absolute
-.import polyobj_addrs_hi:absolute
-.import _28d5:absolute
-.import _28d9:absolute
-.import txt_docked_token0B:absolute
-.import _28e0:absolute
-.import _28e5:absolute
-.import _28f3:absolute
-.import _2900:absolute
-.import _2907:absolute
-.import draw_particle:absolute
-.import paint_particle:absolute
-.import _2977:absolute
-.import dust_swap_xy:absolute
-.import _2c4e:absolute
-.import _2c50:absolute
-.import status_screen:absolute
-.import _2d69:absolute
-.import _2dc5:absolute
-.import print_tiny_value:absolute
-.import print_small_value:absolute
-.import print_medium_value:absolute
-.import print_large_value:absolute
-.import txt_lcase_flag:absolute
-.import txt_buffer_flag:absolute
-.import txt_buffer_index:absolute
-.import print_crlf:absolute
-.import print_char:absolute
-.import _2fee:absolute
-.import _2ff3:absolute
-.import _31c6:absolute
-.import _32ad:absolute
-.import _3385:absolute
-.import _34bc:absolute
-.import _3695:absolute
-.import _3708:absolute
-.import _3795:absolute
-.import _379e:absolute
-.import _37b2:absolute
-.import _3895:absolute
-.import _38f8:absolute
-.import math_square_7bit:absolute
-.import math_square:absolute
-.import _399b:absolute
-.import _39e0:absolute
-.import _39ea:absolute
-.import _3a25:absolute
-.import _3a27:absolute
-.import multiply_signed_into_RS:absolute
-.import multiply_and_add:absolute
-.import multiplied_now_add:absolute
-.import _3b0d:absolute
-.import _3b37:absolute
-.import _3bc1:absolute
-.import _3c6f:absolute
-.import _3c7f:absolute
-.import _3c95:absolute
-.import _3d2f:absolute
-.import _3ea8:absolute
-.import get_polyobj:absolute
-.import set_psystem_to_tsystem:absolute
-.import wait_frames:absolute
 
-; from "gfx/bitmap.asm"
-.import row_to_bitmap_lo:absolute
-.import row_to_bitmap_hi:absolute
-
-; from "sound.asm"
-.import sound_play_addr_lo:absolute
-.import sound_play_addr_hi:absolute
-.import _b4d2:absolute
-.import sound_stop:absolute
-.import _b72d:absolute
-.import _c164:absolute
-
-; from "math_data.asm"
-.import table_log:absolute
-.import table_logdiv:absolute
-.import _9500:absolute
-.import _9600:absolute
-.import line_points_y:absolute
-.import line_points_x:absolute
-
-; from "gfx/hull_data.asm"
-.import hull_pointers:absolute
-.import hull_pointer_current_lo:absolute
-.import hull_pointer_current_hi:absolute
-.import hull_pointer_dodo_lo:absolute
-.import hull_pointer_dodo_hi:absolute
-.import hull_d042:absolute
-.import hull_d062:absolute
-.import hull_d083:absolute
 
 .segment        "CODE_6A00"
 
@@ -177,8 +39,6 @@ _6a00:                                                                  ;$6A00
 ;       carry unset = OK
 ;       carry set   = cargo overflow
 ;
-.export _6a00
-
         sta VAR_04EF            ; item index?
         lda # $01
         
@@ -245,8 +105,6 @@ set_cursor_col:                                                         ;$6A25
 ;
 ;     A = column number
 ;
-.export set_cursor_col
-
         sta ZP_CURSOR_COL
         rts 
 
@@ -256,8 +114,6 @@ set_cursor_row:                                                         ;$6A28
 ;
 ;     A = row number
 ;
-.export set_cursor_row
-
         sta ZP_CURSOR_ROW
         rts 
 
@@ -265,8 +121,6 @@ cursor_down:                                                            ;$6A2B
 ;===============================================================================
 ; move the cursor down a row (does not change column!)
 ;
-.export cursor_down
-
         inc ZP_CURSOR_ROW
         rts 
 
@@ -285,8 +139,6 @@ _6a2f:                                                                  ;$6A2F
 ;
 ;       A = page ID to change to
 ;
-.export _6a2f
-
         jsr set_page
 
         jsr _28d5               ; loads A & X with $0F
@@ -304,8 +156,6 @@ randomize:                                                              ;$6A3B
 ; moves the random number generator along 4 steps to produce
 ; fresh random numbers, but does not return a random number
 ;
-.export randomize
-
         ; this routine calls itself 4 times to ensure
         ; enough scrambling of the random number
 
@@ -392,7 +242,6 @@ _6a93:                                                                  ;$6A93
 
 _6a9b:                                                                  ;$6A9B
 ;===============================================================================
-.export _6a9b
         jsr print_flight_token
         jmp print_space
 
@@ -1272,7 +1121,6 @@ _6f55:                                                                  ;$6F55
         sta TSYSTEM_POS_X
         sta ZP_8E
 _6f82:                                                                  ;$6F82
-.export _6f82
         lda ZP_SCREEN
         bmi _6fa9
 
@@ -1461,11 +1309,9 @@ _7097:                                                                  ;$7097
         rts 
 
 ;===============================================================================
-
 ; to do with the seed
-
+;
 _70a0:                                                                  ;$70A0
-.export _70a0
         ldx # 5                 ; seed is 6 bytes
 _70a2:                                                                  ;$70A2
         lda VAR_049C, x
@@ -1477,7 +1323,6 @@ _70a2:                                                                  ;$70A2
 ;===============================================================================
 
 _70ab:                                                                  ;$70AB
-.export _70ab
         jsr _70a0
         ldy # $7f
         sty ZP_VAR_T
@@ -2087,7 +1932,6 @@ _7457:                                                                  ;$7457
 
 _745a:                                                                  ;$745A
 ;===============================================================================
-.export _745a
         stx ZP_TEMP_VAR
         lda PLAYER_CASH_pt4
         sec 
@@ -2107,7 +1951,6 @@ _745a:                                                                  ;$745A
         
 _7481:                                                                  ;$7481
 ;===============================================================================
-.export _7481
         txa 
         clc 
         adc PLAYER_CASH_pt4
@@ -2488,7 +2331,6 @@ _76cd:                                                                  ;$76CD
 ;===============================================================================
 
 _76e9:                                                                  ;$76E9
-.export _76e9
         ldx # $05
 
 :       lda ZP_SEED, x                                                  ;$76EB
@@ -2616,8 +2458,6 @@ _775f:                                                                  ;$775F
 
 print_flight_token_and_newline:                                         ;$7773
         ;=======================================================================
-.export print_flight_token_and_newline
-
         jsr print_flight_token
         jmp print_newline
 
@@ -3097,8 +2937,6 @@ _7948:                                                                  ;$7948
         pla 
         sta ZP_GOATSOUP_pt2
 
-.import POLYOBJ_00
-
         lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
@@ -3454,11 +3292,9 @@ _7b5f:                                                                  ;$7B5F
         rts 
 
 _7b61:                                                                  ;$7B61
-.export _7b61
         inx 
         beq _7b5f
 _7b64:                                                                  ;$7B64
-.export _7b64
         dec PLAYER_ENERGY
         php 
         bne _7b6d
@@ -3470,7 +3306,6 @@ _7b6d:                                                                  ;$7B6D
 ;===============================================================================
 
 _7b6f:                                                                  ;$7B6F
-.export _7b6f
         jsr _b09d                       ; draw multi-color pixel?
 
         lda VAR_045F
@@ -3514,7 +3349,6 @@ _7b9b:                                                                  ;$7B9B
         ldx # (.sizeof(PolyObject::xpos) + .sizeof(PolyObject::ypos) \
             + .sizeof(PolyObject::zpos) - 1)
 
-.import POLYOBJ_01
 :       lda POLYOBJ_01, x       ;=$F925..                               ;$7B9D
         sta ZP_POLYOBJ01, x     ;=$35..
         dex 
@@ -3558,7 +3392,6 @@ _7bcc:                                                                  ;$7BCC
 ;===============================================================================
 
 _7bd2:                                                                  ;$7BD2
-.export _7bd2
         sta ZP_VAR_T
         ldx # $00
         ldy # $08
@@ -3616,7 +3449,6 @@ _7c11:                                                                  ;$7C11
 ;===============================================================================
 
 _7c24:                                                                  ;$7C24
-.export _7c24
         jsr _b10e
         ldx # attack::active | attack::ecm      ;=%10000001
         stx ZP_POLYOBJ_ATTACK
@@ -3657,8 +3489,6 @@ _7c61:                                                                  ;$7C61
         lda # $02
 
 _7c6b:                                                                  ;$7C6B
-.export _7c6b
-
         sta ZP_VAR_T            ; put aside ship-type
         ldx # $00
 
@@ -3775,10 +3605,8 @@ _7d03:                                                                  ;$7D03
 ;===============================================================================
 
 _7d0c:                                                                  ;$7D0C
-.export _7d0c
         ldx # $ff
 _7d0e:                                                                  ;$7D0E
-.export _7d0e
         stx ZP_MISSILE_TARGET
         ldx PLAYER_MISSILES
         jsr _b11f
@@ -4299,7 +4127,6 @@ _8044:                                                                  ;$8044
 _805c:                                                                  ;$805C
         sta ZP_AC
 _805e:                                                                  ;$805E
-.export _805e
         ldx # $ff
         stx ZP_A9
         inx 
@@ -4406,8 +4233,6 @@ wipe_sun:                                                               ;$80FF
 ;===============================================================================
 ; wipe sun
 ;
-.export wipe_sun
-
         lda VAR_0580
         bmi _80fe
 
@@ -4448,8 +4273,6 @@ wipe_sun:                                                               ;$80FF
 ;       Y must be preserved!
 ;
 clip_horz_line:                                                         ;$811E
-;-------------------------------------------------------------------------------
-.export clip_horz_line
 
         sta ZP_VAR_T            ; put aside half-width
 
@@ -4624,7 +4447,6 @@ _81ed:                                                                  ;$81ED
 ;===============================================================================
 
 _81ee:                                                                  ;$81EE
-.export _81ee
         jsr wait_for_input
         cmp # $59
         beq _81ed
@@ -4739,9 +4561,7 @@ disable_sprites:                                                        ;$8273
         ; fall-through to the routine below
 
 set_memory_layout:                                                      ;$827F
-;===============================================================================
-.export set_memory_layout
-
+        ;=======================================================================
         sei                     ; disable interrupts
         
         ; remember the requested memory layout state
@@ -4776,7 +4596,6 @@ _828f:                                                                  ;$828F
 ;===============================================================================
 
 _829a:                                                                  ;$829A
-.export _829a
         ldx ZP_9D
         jsr _82f3
         ldx ZP_9D
@@ -4796,10 +4615,6 @@ _82a4:                                                                  ;$82A4
         jmp _7c6b
 
 ;===============================================================================
-
-.import hull_missile_index:direct
-.import hull_coreolis_index:direct
-.import hull_constrictor_index:direct
 
 _82bc:                                                                  ;$82BC
         ldx # $ff
@@ -5013,7 +4828,6 @@ _83ca:                                                                  ;$83CA
 
 _83df:                                                                  ;$83DF
 ;-------------------------------------------------------------------------------
-.export _83df
         ; clears SID registers?
         jsr _923b
 
@@ -5082,8 +4896,6 @@ clear_zp_polyobj:                                                       ;$8447
         ;-----------------------------------------------------------------------
         ; clear the zero-page PolyObject storage
         ;
-.export clear_zp_polyobj
-
         ldy # .sizeof(PolyObject) - 1
         lda # $00
 :       sta ZP_POLYOBJ_XPOS_LO, y                                       ;$844B
@@ -5166,7 +4978,6 @@ get_random_number:                                                      ;$84AF
         ;=======================================================================
         ; generate an 8-bit 'random' number
         ;
-.export get_random_number
         lda ZP_GOATSOUP_pt1
         rol 
         tax 
@@ -5667,8 +5478,6 @@ _877d:                                                                  ;$877D
         rts 
 
 _877e:                                                                  ;$877E
-.export _877e
-
         lda ZP_SCREEN
         and # %11000000
         beq _877d
@@ -5697,10 +5506,8 @@ _8798:                                                                  ;$8798
 ;===============================================================================
 
 _87a4:                                                                  ;$87A4
-.export _87a4
         lda # $e0
 _87a6:                                                                  ;$87A6
-.export _87a6
         cmp ZP_POLYOBJ_XPOS_MI
         bcc _87b0
         cmp ZP_POLYOBJ_YPOS_MI
@@ -5711,7 +5518,6 @@ _87b0:                                                                  ;$87B0
 
 _87b1:                                                                  ;$87B1
 ;===============================================================================
-.export _87b1
         ora ZP_POLYOBJ_XPOS_MI
         ora ZP_POLYOBJ_YPOS_MI
         ora ZP_POLYOBJ_ZPOS_MI
@@ -5731,7 +5537,6 @@ _87b8:                                                                  ;$87B8
 ; BRK routine, set up by `debug_for_brk`
 ;
 debug_brk:                                                              ;$87B9
-.export debug_brk
 
         dec _87b8
 
@@ -5759,7 +5564,6 @@ debug_brk:                                                              ;$87B9
 .endif
 
 _87d0:                                                                  ;$87D0
-.export _87d0
         jsr _a813
         jsr _83df
         asl PLAYER_SPEED        ;?
@@ -5943,7 +5747,6 @@ _88ac:                                                                  ;$88AC
         lda TSYSTEM_GOVERNMENT
         sta PSYSTEM_GOVERNMENT
 _88e7:                                                                  ;$88E7
-.export _88e7
         lda # $ff
         sta ZP_A7
 
@@ -6649,7 +6452,6 @@ _8c61:                                                                  ;$8C61
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _8c7b:                                                                  ;$8C7B
-.export _8c7b
         ldx # $00
         jsr _7c11
 
@@ -6659,7 +6461,6 @@ _8c7b:                                                                  ;$8C7B
         ldx # $06
         jsr _7c11
 _8c8a:                                                                  ;$8C8A
-.export _8c8a
         lda ZP_POLYOBJ01_XPOS_pt1
         ora ZP_POLYOBJ01_YPOS_pt1
         ora ZP_POLYOBJ01_ZPOS_pt1
@@ -6682,7 +6483,6 @@ _8c9a:                                                                  ;$8C9A
         rol ZP_POLYOBJ01_ZPOS_pt2
         bcc _8c9a
 _8cad:                                                                  ;$8CAD
-.export _8cad
         lda ZP_POLYOBJ01_XPOS_pt2
         lsr 
         ora ZP_POLYOBJ01_XPOS_pt3
@@ -6739,8 +6539,6 @@ _8cc2:                                                                  ;$8CC2
 
 do_quickjump:                                                           ;$8E29
 ;===============================================================================
-.export do_quickjump
-
         ; reasons not to quickjump:
         ldx VAR_047F            ; there are asteroids?
         lda SHIP_SLOT2, x
@@ -7097,7 +6895,6 @@ _9002:                                                                  ;$9002
         jsr _905d
         pla 
 _900d:                                                                  ;$900D
-.export _900d
         pha 
         
         lda # $10
@@ -7387,7 +7184,6 @@ _91fe:                                                                  ;$91FE
 
 _9204:                                                                  ;$9204
 ;-------------------------------------------------------------------------------
-.export _9204
         bit _1d11
         bmi _91fe
         
@@ -7435,7 +7231,6 @@ _9231:                                                                  ;$9231
 
 _923b:                                                                  ;$923B
         ;-----------------------------------------------------------------------
-.export _923b
         bit _1d13               ; user option?
         bmi _91fd               ; `rts`
         bit _1d10               ; user option?
@@ -7625,7 +7420,6 @@ _9964:                                                                  ;$9964
 ;===============================================================================
 
 _9978:                                                                  ;$9978
-.export _9978
         ldy ZP_VAR_R
         lda ZP_VAR_Q
         sta ZP_VAR_S
@@ -7669,7 +7463,6 @@ _9998:                                                                  ;$9998
 ;===============================================================================
 
 _99af:                                                                  ;$99AF
-.export _99af
         cmp ZP_VAR_Q
         bcs _9a07
         sta ZP_B6
@@ -7764,7 +7557,6 @@ _9a1f:                                                                  ;$9A1F
 ;===============================================================================
 
 _9a2c:                                                                  ;$9A2C
-.export _9a2c
         ldx # $00
         ldy # $00
 _9a30:                                                                  ;$9A30
@@ -7816,7 +7608,6 @@ _9a83:                                                                  ;$9A83
         jmp _7d62
 
 _9a86:                                                                  ;$9A86
-.export _9a86
         lda ZP_A5
         bmi _9a83
         lda # $1f
@@ -8288,7 +8079,6 @@ _9d45:                                                                  ;$9D45
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
 _9d8e:                                                                  ;$9D8E
-.export _9d8e
         jmp _9f06
 
         ;-----------------------------------------------------------------------
@@ -8313,7 +8103,6 @@ _9d91:                                                                  ;$9D91
         adc # $00
         sta ZP_VAR_Y
 _9db3:                                                                  ;$9DB3
-.export _9db3
         jmp _9dd9
 
 _9db6:                                                                  ;$9DB6
@@ -8349,7 +8138,6 @@ _9dd9:                                                                  ;$9DD9
         adc # $00
         sta ZP_6F
 _9dee:                                                                  ;$9DEE
-.export _9dee
         jmp _9e16
 
         ;-----------------------------------------------------------------------
@@ -8385,7 +8173,6 @@ _9e16:                                                                  ;$9E16
         adc # $00
         sta ZP_VAR_U
 _9e27:                                                                  ;$9E27
-.export _9e27
         jmp _9e83
 
 ;===============================================================================
@@ -8684,7 +8471,6 @@ _9fd9:                                                                  ;$9FD9
 ;===============================================================================
 
 _a013:                                                                  ;$A013
-.export _a013
         lda # $00
         sta VAR_06F4
         lda ZP_70
@@ -9123,8 +8909,6 @@ _a29d:                                                                  ;$A29D
 ;       X = ship type (i.e. a `hull_pointers` index)
 ;
 _a2a0:                                                                  ;$A2A0
-.export _a2a0
-
         ; is the ship exploding? must be 'near'
         ; (i.e. not a distant dot), and in exploding state
         lda ZP_POLYOBJ_VISIBILITY
@@ -9623,7 +9407,6 @@ _a60e:                                                                  ;$A60E
 ;===============================================================================
 
 _a626:                                                                  ;$A626
-.export _a626
         ldx VAR_0486
         beq _a65e
         dex 
@@ -9843,9 +9626,6 @@ trumbles_sprite_mask:                                                   ;$A727
 ;       A = page to switch to; e.g. cockpit-view, galactic chart &c.
 ;
 set_page:                                                               ;$A72F
-
-.export set_page
-
         sta ZP_SCREEN
 _a731:                                                                  ;$A731
         jsr txt_docked_token02
@@ -9914,7 +9694,6 @@ _a785:                                                                  ;$A785
         rts 
 
 _a786:                                                                  ;$A786
-.export _a786
         lda # $00
         sta ZP_67
         sta VAR_0481
@@ -9926,7 +9705,6 @@ _a786:                                                                  ;$A786
 ;===============================================================================
 
 _a795:                                                                  ;$A795
-.export _a795
         ldx # $01
         jsr _3708
         bcc _a785
@@ -9939,7 +9717,6 @@ _a7a6:                                                                  ;$A7A6
 ;===============================================================================
 ; kill a PolyObject?
 ;
-.export _a7a6
         lda VAR_04CB
         clc 
         adc hull_d062, x
@@ -9985,7 +9762,6 @@ _a7db:                                                                  ;$A7DB
 ;===============================================================================
 
 _a7e9:                                                                  ;$A7E9
-.export _a7e9
         lda ZP_POLYOBJ_ZPOS_MI
         ldx # $0b
         cmp # $08
@@ -10014,13 +9790,11 @@ _a801:                                                                  ;$A801
 
 _a80f:                                                                  ;$A80F
 ;===============================================================================
-.export _a80f
         ldy # $05
         bne _a858               ; always branches
 
 _a813:                                                                  ;$A813
 ;===============================================================================
-.export _a813
         ldy # $03
         bne _a858               ; always branches
 
@@ -10057,8 +9831,6 @@ _a839:                                                                  ;$A839
 ;===============================================================================
 ; called only by `_3795`
 ;
-.export _a839
-
         ldy # $07
         lda # $f5
         ldx # $f0
@@ -10095,7 +9867,7 @@ _a850:                                                                  ;$A850
 
 _a858:                                                                  ;$A858
 ;       Y = $00-$0F?
-.export _a858
+
         clv 
         
         ; do nothing if an option is set?
@@ -10195,7 +9967,6 @@ _a8de:                                                                  ;$A8DE
 
 ; these are VIC_SCREEN_CTL2 states
 _a8e0:                                                                  ;$A8E0
-.export _a8e0
         .byte   %11000000
 _a8e1:                                                                  ;$A8E1
         .byte   %11000000
@@ -10208,7 +9979,6 @@ _a8e2:                                                                  ;$A8E2
 _a8e4:                                                                  ;$A8E4
         .byte   RED, BLACK
 _a8e6:                                                                  ;$A8E6
-.export _a8e6
         .byte   $00, $00
 
 ; e-bomb explosion?
@@ -10801,7 +10571,6 @@ _b0b5:                                                                  ;$B0B5
 ;===============================================================================
 
 _b0f4:                                                                  ;$B0F4
-.export _b0f4
         lda # $20
         sta ZP_67
         ldy # $09
@@ -10834,7 +10603,6 @@ _b10e:                                                                  ;$B10E
 ; "draw missile block"
 ;
 _b11f:                                                                  ;$B11F
-.export _b11f
         dex 
         txa 
         inx 
@@ -10878,8 +10646,6 @@ wait_for_frame:                                                         ;$B148
         ;=======================================================================
         ; I think this function waits for a frame to complete
         ;
-.export wait_for_frame
-
         pha                     ; preserve A
 
         ; wait for non-zero in the frame status?
@@ -10921,10 +10687,10 @@ chrout:                                                                 ;$B155
         rts 
 
 ;define the use of some zero-page variables for this routine
-.exportzp       ZP_CHROUT_CHARADDR      := $2f  ; $2F/$30
-.exportzp       ZP_CHROUT_DRAWADDR      := $07  ; $07/$08
-.exportzp       ZP_CHROUT_DRAWADDR_LO   := $07
-.exportzp       ZP_CHROUT_DRAWADDR_HI   := $08
+ZP_CHROUT_CHARADDR      := $2f  ; $2F/$30
+ZP_CHROUT_DRAWADDR      := $07  ; $07/$08
+ZP_CHROUT_DRAWADDR_LO   := $07
+ZP_CHROUT_DRAWADDR_HI   := $08
 
 _b168:                                                                  ;$B168
         jsr _a80f               ; BEEP?
@@ -10948,8 +10714,6 @@ paint_newline:                                                          ;$B179
         ;-----------------------------------------------------------------------
         ; NOTE: called only ever by `_2c7d`!
         ;
-.export paint_newline
-
         lda # TXT_NEWLINE
 
 paint_char:                                                             ;$B17B
@@ -10957,8 +10721,6 @@ paint_char:                                                             ;$B17B
 ; draws a character on the bitmap screen as if it were the text screen
 ; (automatically advances the cursor)
 ;
-.export paint_char
-
         ; store current registers
         ; (compatibility with KERNAL_CHROUT?)
         sta ZP_POLYOBJ01_XPOS_pt1
@@ -11181,11 +10943,11 @@ _b21a:                                                                  ;$B21A
         ; i.e. the viewport
         ;
         ; calculate the number of bytes in the bitmap above the HUD
-        .export erase_bytes             = .bmppos( ELITE_HUD_TOP_ROW, 0 )
+        erase_bytes             = .bmppos( ELITE_HUD_TOP_ROW, 0 )
         ; from this calculate the number of bytes in *whole* pages
-        .export erase_bytes_pages       = (erase_bytes / 256) * 256
+        erase_bytes_pages       = (erase_bytes / 256) * 256
         ; and the remaining bytes that don't fill one page
-        .export erase_bytes_remain      = erase_bytes - erase_bytes_pages
+        erase_bytes_remain      = erase_bytes - erase_bytes_pages
 
         ldx #> ELITE_BITMAP_ADDR
 :       jsr erase_page                                                  ;$B23D
@@ -11681,8 +11443,6 @@ _b40f:                                                                  ;$B40F
 ;===============================================================================
 
 _b410:                                                                  ;$B410
-.export _b410
-
         lda ZP_SCREEN
         bne _b40f
 

@@ -10,9 +10,7 @@
 
 .include        "c64/c64.inc"           ; define C64 constants
 
-.include        "vars_main.inc"         ; elite's main variables
 .include        "text/text.inc"         ; text/string constants
-.include        "gfx/hull_struct.inc"   ; hull (3D object) structure
 
 ; the linker script ("link/elite-*.cfg") defines the memory layout of the game
 ; (since it will differ from the original, disk and cartridge versions) so we

@@ -9,9 +9,6 @@
 .macro  .math_square
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-.export math_square_7bit
-.export math_square
-
 ; square a 7-bit number:
 ;-------------------------------------------------------------------------------
 ; removes the sign-bit and then does A * A. see the next procedure for details.
@@ -49,8 +46,6 @@ _3997:  ;?
         and # %01111111
         sta ZP_VAR_P
 _399b:  ;?
-.export _399b
-
         ldx ZP_VAR_Q
 
 _399f:  
@@ -96,8 +91,6 @@ _3997:                                                                  ;$3997
         and # %01111111         ; strip the sign
         sta ZP_VAR_P            ; store this as the working multiplier
 _399b:                                                                  ;$399B
-.export _399b
-
         ldx ZP_VAR_Q            ; load our multiplicand
         beq _398d               ; are we multiplying by zero!?
 
@@ -159,27 +152,24 @@ _399f:                                                                  ;$399F
 
 .macro  .multiply_and_add
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-multiply_and_add:                                                       ;$3ACE
-;===============================================================================
-; returns a 16-bit number (in X & A), by multiplying "Q" (`ZP_VAR_Q`) with `A`
+;
+; return a 16-bit number (in X & A), by multiplying "Q" (`ZP_VAR_Q`) with `A`
 ; and adding the 16-bit number in `R` (`ZP_VAR_R`) & `S` (`ZP_VAR_S`):
 ;
 ;       X.A = Q * A + R.S
 ;
 ; this is used as a lot as part of 3D math
 ;
-.export multiply_and_add
-
+multiply_and_add:                                                       ;$3ACE
+        ;=======================================================================
         ; calculate `Q * A`, returning `A.P`
+        ;
         jsr multiply_signed
 
 multiplied_now_add:                                                     ;$3AD1
-        ;-----------------------------------------------------------------------
+        ;=======================================================================
         ; skips the `Q * A` multiplication and adds `A.P`
         ;
-.export multiplied_now_add
-
         sta ZP_TEMP_VAR
         and # %10000000
         sta ZP_VAR_T
@@ -253,9 +243,6 @@ multiply_signed:                                                        ;$3A54
 ;
 .ifdef  OPTION_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
-.import square1_lo, square1_hi
-.import square2_lo, square2_hi
-
         ZP_F8   = $f8
         ;
         ;       Q = multiplicand
@@ -501,8 +488,6 @@ multiply_signed_into_RS:                                                ;$3AA8
         ; does a multiply as above (`multiply_signed`) and stores the result
         ; in "`R.S`" (`ZP_VAR_R` & `ZP_VAR_S`)
         ;
-.export multiply_signed_into_RS
-
         jsr multiply_signed
         sta ZP_VAR_S
         lda ZP_VAR_P

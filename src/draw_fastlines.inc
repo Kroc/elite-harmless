@@ -43,8 +43,6 @@ _ab49:
         .byte   %11000000
         .byte   %11000000
 
-
-draw_line:
 ;===============================================================================
 ; draw a line:
 ;
@@ -74,7 +72,7 @@ draw_line:
 ; this routine determines what type of line the coordinates describe
 ; and uses either a horizontal or vertical algorithm accordingly
 ;
-.export draw_line
+draw_line:
         ; TODO: since every line is drawn twice (drawn once, then erased next
         ;       frame), the line-flipping checks here should really be done
         ;       when building the list of lines to draw, rather than every
