@@ -49,3 +49,8 @@ CPU_CONTROL             = $01   ; processor port (memory layout and Datasette)
         IO_KERNAL       = %110  ; 6:  OFF   |     I/O     |  KERNAL
         DEFAULT         = %111  ; 7 : BASIC |     I/O     |  KERNAL
 .endenum
+
+.macpack cpu
+.if (.cpu .bitand CPU_ISET_6502X)
+   USE_ILLEGAL_OPS = 1
+.endif

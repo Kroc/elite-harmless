@@ -251,9 +251,13 @@ multiply_signed:                                                        ;$3A54
         ;       Q = multiplicand
         ;       A = multiplier
         ;
+.ifdef  USE_ILLEGAL_OPS
         ldx # %01111111
         axs # 0                 ; X = $7F & A (-0)
-        
+.else
+        tax
+.endif
+
         ; compare signs for working out what the final sign will be. XOR'ing
         ; the two operands will work out the +ve/-ve combination for us!
         ;
@@ -277,6 +281,13 @@ multiply_signed:                                                        ;$3A54
         sta sm2+1
         sta sm4+1
 ;;:     
+
+.ifndef USE_ILLEGAL_OPS
+        txa
+        and # %01111111
+        tax
+.endif
+
         sec 
 sm1:    lda square1_lo, x
 sm2:    sbc square2_lo, x

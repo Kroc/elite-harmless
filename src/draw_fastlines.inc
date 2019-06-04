@@ -5,6 +5,10 @@
 
 ; a new line-drawing routine by Dyme! formatted and lightly modified by Kroc
 
+.ifndef  USE_ILLEGAL_OPS
+    .fatal "please enable the extended 6502 instruction set for the fastlines option (option: --cpu 6502X)"
+.endif
+
 .include        "draw_fastlines_h.inc"
 .include        "draw_fastlines_v.inc"
 
