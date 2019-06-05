@@ -2,10 +2,9 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
+; NOTE: the segment that this code belongs to will be set by the including
+;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
 
-.segment        "CODE_1D81"
-
-;===============================================================================
 ; I think this is when the player has docked,
 ; it checks for potential mission offers
 ;

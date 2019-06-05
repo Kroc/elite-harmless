@@ -24,8 +24,8 @@
 .import txt_flight_pair1:absolute
 .import txt_flight_pair2:absolute
 
-
-.segment        "CODE_6A00"
+; NOTE: the segment that this code belongs to will be set by the including
+;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
 
 _6a00:                                                                  ;$6A00
 ;===============================================================================

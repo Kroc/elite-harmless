@@ -2,8 +2,8 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-
-.segment        "CODE_28A4"
+; NOTE: the segment that this code belongs to will be set by the including
+;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
 
 polyobj_addrs:                                                          ;$28A4
 ;===============================================================================
