@@ -5,9 +5,8 @@
 
 ; Elite's main variable space
 
-.segment    "VARS_0400"
-
-.res    $0300
+.segment        "VARS_MAIN"
+.res            $0300
 
 VAR_0403                = $0403
 

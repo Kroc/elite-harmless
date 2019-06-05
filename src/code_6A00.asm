@@ -10317,16 +10317,16 @@ _aaa2:                                                                  ;$AAA2
         ;=======================================================================
         ; clear the main variable space
         ;
-.import __VARS_0400_RUN__       ; runtime location
-.import __VARS_0400_SIZE__      ; and length
+.import __VARS_MAIN_RUN__       ; runtime location
+.import __VARS_MAIN_SIZE__      ; and length
 
-        lda #> __VARS_0400_RUN__
+        lda #> __VARS_MAIN_RUN__
         sta ZP_TEMP_ADDR1_HI
 
         ; number of whole pages to copy
-        ldx #< .page_count(__VARS_0400_SIZE__)
+        ldx #< .page_count( __VARS_MAIN_SIZE__ )
 
-        lda #< __VARS_0400_RUN__
+        lda #< __VARS_MAIN_RUN__
         sta ZP_TEMP_ADDR1_LO
         tay                     ; =0
 
