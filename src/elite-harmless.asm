@@ -16,7 +16,6 @@
 
 .include        "elite_link.asm"        ; to be phased out
 
-.include        "boot/disk_boot_exo.asm"
 .include        "code_init.asm"                                         ;$0400
 
 .include        "math_data.asm"

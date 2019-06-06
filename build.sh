@@ -11,6 +11,7 @@ set -e
 #===============================================================================
 
 ca65="./bin/cc65/bin/ca65 \
+    --debug-info \
     --target c64 \
     --debug-info \
     --include-dir src \
@@ -252,6 +253,10 @@ $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
 
+# assemble the once-off initialisation program
+echo "- assemble 'disk_boot_exo.asm'"
+$ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
+
 echo "- linking..."
 $ld65 \
        -C link/elite-harmless-d64.cfg \
@@ -261,7 +266,8 @@ $ld65 \
     --obj build/elite-harmless.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
-    --obj build/text_docked.o
+    --obj build/text_docked.o \
+    --obj build/disk_boot_exo.o
 
 # compress and fast-load the program
 echo "- exomizing..."
@@ -294,6 +300,7 @@ echo
 
 #-------------------------------------------------------------------------------
 
+echo "  --------------------------------------"
 echo "* elite-harmless-fastlines.d64"
 echo "  --------------------------------------"
 clean
@@ -316,6 +323,10 @@ $ca65 $options -o build/text_flight.o       src/text/text_flight.asm
 echo "- assemble 'text_docked.asm'"
 $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
 
+# assemble the once-off initialisation program
+echo "- assemble 'disk_boot_exo.asm'"
+$ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
+
 echo "- linking..."
 $ld65 \
        -C link/elite-harmless-d64.cfg \
@@ -325,7 +336,8 @@ $ld65 \
     --obj build/elite-harmless.o \
     --obj build/text_pairs.o \
     --obj build/text_flight.o \
-    --obj build/text_docked.o
+    --obj build/text_docked.o \
+    --obj build/disk_boot_exo.o
 
 # compress and fast-load the program
 echo "- exomizing..."
@@ -337,7 +349,8 @@ echo
 # does this itself during initialisation
 
 $exomizer \$0400 -B \
-    -x3 -s "lda #\$00 sta \$d011" \
+    -s "lda #\$00 sta \$d011 sta \$d020" \
+    -X "inc \$d020 dec \$d020" \
     -o "bin/harmless-exo.prg" \
     -- \
         "bin/init.prg" \
@@ -349,6 +362,67 @@ echo
 echo "* write floppy disk image"
 $mkd64 \
     -o release/elite-harmless-fastlines.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
+    1>/dev/null
+echo "- OK"
+echo
+
+#-------------------------------------------------------------------------------
+
+echo "  --------------------------------------"
+echo "* elite-harmless-hiram.d64"
+echo "  --------------------------------------"
+clean
+
+options=""
+
+# assemble the mega-object containing
+# the majority of the elite code
+echo "- assemble 'elite-harmless.asm'"
+$ca65 $options -o build/elite-harmless.o    src/elite-harmless.asm
+
+# the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into 
+# the global scope along with the main source code
+echo "- assemble 'text_pairs.asm'"
+$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
+echo "- assemble 'text_flight.asm'"
+$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
+echo "- assemble 'text_docked.asm'"
+$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
+
+# include a program header
+echo "- assemble 'prgheader.asm'"
+$ca65 $options -o build/prgheader.o         src/c64/prgheader.asm
+
+echo "- linking..."
+$ld65 \
+       -C link/elite-harmless-hiram.cfg \
+       -S \$0400 \
+       -m build/elite-harmless-hiram.map -vm \
+      -Ln build/elite-harmless-hiram.ll \
+       -o bin/harmless.prg \
+    --obj build/elite-harmless.o \
+    --obj build/text_pairs.o \
+    --obj build/text_flight.o \
+    --obj build/text_docked.o \
+    --obj build/prgheader.o
+
+# compress and fast-load the program
+echo "- exomizing..."
+echo
+$exomizer \$0400 -B \
+    -s "lda #\$00 sta \$d011 sta \$d020" \
+    -X "inc \$d020 dec \$d020" \
+    -o "bin/harmless-exo.prg" \
+    -- \
+        "bin/harmless.prg"
+
+echo
+echo "* write floppy disk image"
+$mkd64 \
+    -o release/elite-harmless-hiram.d64 \
     -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
     -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
     1>/dev/null

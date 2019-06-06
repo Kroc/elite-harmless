@@ -28,7 +28,7 @@
 ;
 ; we can caluclate this value from the bitmap address given by the linker
 ; 
-ELITE_VIC_BANK          = .vic_bank_from_bitmap(ELITE_BITMAP_ADDR)
+ELITE_VIC_BANK          = .vic_bank_from_bitmap( ELITE_BITMAP_ADDR )
 ELITE_VIC_ADDR          = ELITE_VIC_BANK * $4000
 
 ; the VIC-II uses a 1 KB block of RAM for the text-screen (40x25 = 1'000 bytes)
@@ -81,7 +81,14 @@ ELITE_VIC_MAINSCR       = <((ELITE_MAINSCR_ADDR - ELITE_VIC_ADDR) / $0400) ;=9
 ;
 ; Elite always runs in bitmap mode so never uses a character set
 ; 
-ELITE_VIC_CHARBMP       = 0
+; TODO: FIX THIS SILLYNESS
+;
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ELITE_VIC_CHARBMP       = 0
+.else   ;///////////////////////////////////////////////////////////////////////
+        ELITE_VIC_CHARBMP       = 4
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ELITE_BITMAP_D018       = \
         ((ELITE_VIC_MENUSCR & 15) << 4) \

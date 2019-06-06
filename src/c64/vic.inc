@@ -7,17 +7,23 @@
 ; produces a value to be written to CIA2_PORTA ($DD00),
 ; for selecting the VIC bank -- the bits are inverted
 ;
-.define .vic_bank_bits(bank) \
+.define .vic_bank_bits( bank ) \
         (<(~bank & %00000011))
 
 ; returns the address of the given VIC bank number
-.define .vic_bank_addr(bank) \
+.define .vic_bank_addr( bank ) \
         (bank * $4000)
 
 ; gives you the VIC bank number based on the bitmap address.
 ; the bitmap is 8K so can appear at the lower or upper half of any bank
-.define .vic_bank_from_bitmap(addr) \
-        .min ( addr / $4000, (addr + $2000) / $4000 )
+.define .vic_bank_from_bitmap( addr ) \
+        .min (addr / $4000, (addr + $2000) / $4000)
+
+; given a bitmap address returns %0000 if it appears in the lower-half of the
+; VIC bank (+$0000), or %1000 if it appears in the upper half (+$2000) --
+; this is for use as bit 4 of $D018; see `VIC_MEMORY` below
+.define .vic_bitmap_bit( addr ) \
+        ((addr .mod $4000 ) >> 10)
 
 ; colours
 ;===============================================================================
