@@ -2967,7 +2967,7 @@ _795d:                                                                  ;$795D
 ;===============================================================================
 
 _7974:                                                                  ;$7974
-        sta ZP_VAR_S
+        sta ZP_VAR_S            ; retain A
         clc
         lda ZP_GOATSOUP_pt1
         rol
@@ -2980,23 +2980,23 @@ _7974:                                                                  ;$7974
         adc ZP_GOATSOUP_pt4
         sta ZP_GOATSOUP_pt2
         stx ZP_GOATSOUP_pt4
-        rol
-        bcs _7998
-        jsr _39ea
-        adc ZP_VAR_R
-        tax
-        lda ZP_VAR_S
-        adc # $00
+        rol                     ; -> A is still random, carry is random
+        bcs _7998               
+        jsr _39ea               ; A=(A*Q)/256  isn't that still simply random?
+        adc ZP_VAR_R            ; A+=R
+        tax                     ; why do we need x?
+        lda ZP_VAR_S            ; restore A
+        adc # $00               ; add 1 on overflow?
         rts
 
 _7998:                                                                  ;$7998
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256  isn't that still simply random?
         sta ZP_VAR_T
         lda ZP_VAR_R
-        sbc ZP_VAR_T
-        tax
-        lda ZP_VAR_S
-        sbc # $00
+        sbc ZP_VAR_T            ; A = R-A
+        tax                     ; why do we need x?
+        lda ZP_VAR_S            ; restore A
+        sbc # $00               ; sub 1 on underflow?
         rts
 
 ;===============================================================================
@@ -3817,32 +3817,32 @@ _7e5f:                                                                  ;$7E5F
         lda ZP_AB
         and # %00011111
         tax
-        lda table_sin, x
-        sta ZP_VAR_Q
+        lda table_sin, x        
+        sta ZP_VAR_Q            ; Q = abs(sin(AB))*256
         lda ZP_B4
-        jsr _39ea
-        sta ZP_VAR_R
+        jsr _39ea               ; A=(A*Q)/256
+        sta ZP_VAR_R            ; R = B4 * abs(sin(AB))
         lda ZP_B5
-        jsr _39ea
-        sta ZP_VALUE_pt1
+        jsr _39ea               ; A=(A*Q)/256
+        sta ZP_VALUE_pt1        ; VALUE_pt1 = B5 * abs(sin(AB))
         ldx ZP_AB
-        cpx # $21
-        lda # $00
+        cpx # $21               ; AB > pi : invert matrix sign
+        lda # $00               ;   (because sin turns negative at $21)
         ror
-        sta ZP_TEMPOBJ_M2x2_HI
+        sta ZP_TEMPOBJ_M2x2_HI  ; store the sign
         lda ZP_AB
         clc
-        adc # $10
+        adc # $10               ; offset in sine-table: sin(x+pi/2) = cos(x)
         and # %00011111
         tax
         lda table_sin, x
-        sta ZP_VAR_Q
+        sta ZP_VAR_Q            ; Q = abs(cos(AB))*256
         lda ZP_B3
-        jsr _39ea
-        sta ZP_VALUE_pt3
+        jsr _39ea               ; A=(A*Q)/256
+        sta ZP_VALUE_pt3        ; VALUE_pt3 = B3 * abs(cos(AB))
         lda ZP_B2
-        jsr _39ea
-        sta ZP_VAR_P1
+        jsr _39ea               ; A=(A*Q)/256
+        sta ZP_VAR_P1           ; P1 = B2 * abs(cos(AB))
         lda ZP_AB
         adc # $0f
         and # %00111111
@@ -7577,7 +7577,7 @@ _9a30:                                                                  ;$9A30
         lda ZP_VAR_X
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_MATRIX, x
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_T
         lda ZP_VAR_Y
         eor ZP_TEMPOBJ_M2x0_HI, x
@@ -7585,7 +7585,7 @@ _9a30:                                                                  ;$9A30
         lda ZP_VAR_X2
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_M2x1_LO, x
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
@@ -7596,7 +7596,7 @@ _9a30:                                                                  ;$9A30
         lda ZP_6F
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_M2x2_LO, x
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
@@ -7962,7 +7962,7 @@ _9ca9:                                                                  ;$9CA9
         lda ZP_71
         sta ZP_VAR_Q
         lda ZP_VAR_X
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_T
         lda ZP_72
         eor ZP_VAR_Y
@@ -7970,7 +7970,7 @@ _9ca9:                                                                  ;$9CA9
         lda ZP_73
         sta ZP_VAR_Q
         lda ZP_VAR_X2
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
@@ -7981,7 +7981,7 @@ _9ca9:                                                                  ;$9CA9
         lda ZP_75
         sta ZP_VAR_Q
         lda ZP_6F
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
@@ -8974,7 +8974,7 @@ _a2cb:                                                                  ;$A2CB
 
         lda ZP_POLYOBJ_M0x0_HI
         and # %01111111         ; remove sign
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_R
 
         lda ZP_POLYOBJ_M0x0_HI
@@ -8982,7 +8982,7 @@ _a2cb:                                                                  ;$A2CB
         jsr .move_polyobj_x_small
         lda ZP_POLYOBJ_M0x1_HI
         and # %01111111
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_R
 
         lda ZP_POLYOBJ_M0x1_HI
@@ -8990,7 +8990,7 @@ _a2cb:                                                                  ;$A2CB
         jsr .move_polyobj_x_small
         lda ZP_POLYOBJ_M0x2_HI
         and # %01111111
-        jsr _39ea
+        jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_R
 
         lda ZP_POLYOBJ_M0x2_HI
@@ -10116,13 +10116,13 @@ interrupt:                                                              ;$A8FA
 :       lda _a8e6, x                                                    ;$A936
         sta VIC_BACKGROUND
 
-        ; toggle frame index (0 & 1)?
+        ; fetch the next interrupt index (currently 0->1->0...)
         ; this toggles the interrupt index in the same frame.
         lda _a8dc, x
         sta _a8d9
 
         ; exit when this is not the last interrupt of this frame
-        ; (the interrupt directly before the HUD)
+        ; (the interrupt directly before the HUD, so the next index is zero)
         ; everything that follows shall only be don 1x per frame
        .bnz interrupt_end_XA
 
