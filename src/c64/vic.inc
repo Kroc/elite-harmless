@@ -25,15 +25,15 @@ LTGREEN         = $0d     ; %1101
 LTBLUE          = $0e     ; %1110
 LTGREY          = $0f     ; %1111
 
-.define .color_nybble(fore, back) \
+.define .color_nybble( fore, back ) \
         (fore & 15) << 4 | (back & 15)
 
-.define .scrpos(row, col) \
+.define .scrpos( row, col ) \
         ((row * 40) + col)
 
 ; given a screen row + column, return a bitmap offset in bytes
 ; where 1 char = 8 bytes, therefore one row is 320 bytes
-.define .bmppos(row, col) \
+.define .bmppos( row, col ) \
         (row * 320) + (col * 8)
 
 ;===============================================================================

@@ -10,7 +10,11 @@
 .zeropage
 
 ZP_COPY_TO      := $18
+ZP_COPY_TO_LO   := $18
+ZP_COPY_TO_HI   := $19
 ZP_COPY_FROM    := $1a
+ZP_COPY_FROM_LO := $1a
+ZP_COPY_FROM_HI := $1b
 
 .segment        "CODE_INIT"
 
@@ -18,7 +22,7 @@ init:
         ; change the address of STOP key routine from $F6ED, to $FFED,
         ; the SCREEN routine which returns row/col count, i.e. does
         ; nothing of use -- this effectively disables the STOP key
-        lda # > KERNAL_SCREEN
+        lda #> KERNAL_SCREEN
         sta KERNAL_VECTOR_STOP + 1
 
         ; disable interrupts:
@@ -45,9 +49,32 @@ init:
         sta CIA2_PORTA_DDR
 
         ; set the VIC-II bank:
-        ; the lower two-bits of register $DD00 controls the VIC-II bank.
+        ;
+        ; the VIC-II video chip itself can only reference 16 KB of RAM and not
+        ; the full 64 KB of the C64 at once. you must select the 16 KB slice
+        ; (known as a "bank") for the VIC-II to use
+        ;
+        ;       $FFFF +--------+--------+ <-- hardware vectors: $FFFA-$FFFF
+        ;             |        | KERNAL |
+        ;             | BANK 3 ¦--------+
+        ;             |        |   I/O  |
+        ;       $C000 +--------+--------+
+        ;             |        |
+        ;             | BANK 2 |
+        ;             |        |
+        ;       $8000 +--------+
+        ;             |        |
+        ;             | BANK 1 |
+        ;             |        |
+        ;       $4000 +--------+
+        ;             |        |
+        ;             | BANK 0 |
+        ;             |        | <-- stack: $100-$1FF
+        ;       $0000 +--------+ <-- zero page: $00-$FF
+        ;
+        ; the lower two-bits of register $DD00 selects the VIC-II bank.
         ; (the binary value is inverted compared to the canonical bank
-        ; numbers and you should retain the top 6 bits)
+        ;  numbers and you should retain the top 6 bits)
         ;
         lda CIA2_PORTA          ; read the serial bus / VIC-II bank state
         and # %11111100         ; keep current value except bits 0-1 (VIC bank)
@@ -66,6 +93,12 @@ init:
         sta CIA2_INTERRUPT      ; non-maskable interrupt register
 
         ; set up VIC-II memory:
+        ;
+        ; the VIC-II register $D018 (here, `VIC_MEMORY`) controls the relative
+        ; locations of the screen, character map and bitmap screen within the
+        ; selected VIC-II bank. "elite.inc" takes the memory addresses defined
+        ; by the linker script ("link/elite-*.cfg") and puts together a $D018
+        ; value that selects the chosen screen & bitmap locations
         ;
         lda # ELITE_VIC_MEMORY_MENUSCR
         sta VIC_MEMORY
@@ -91,31 +124,19 @@ init:
         ldx # .page_count( 1000 )
         lda # .color_nybble( WHITE, BLACK )
         jsr set_bytes
-
-        ; copy 279 bytes of data to $66D0-$67E7
-        ;-----------------------------------------------------------------------
-        lda #< ELITE_HUD_COLORSCR_ADDR
-        sta ZP_COPY_TO+0
-        lda #> ELITE_HUD_COLORSCR_ADDR
-        sta ZP_COPY_TO+1
-
-        lda #< hud_screenram_copy
-        sta ZP_COPY_FROM+0
-        lda #> hud_screenram_copy
-        jsr _7827
-
+        
         ; set the screen-colours for the menu-screen:
         ; (high-resolution section only, no HUD)
         ;-----------------------------------------------------------------------
         lda #< ELITE_MENUSCR_ADDR
-        sta ZP_COPY_TO+0
+        sta ZP_COPY_TO_LO
         lda #> ELITE_MENUSCR_ADDR
-        sta ZP_COPY_TO+1
+        sta ZP_COPY_TO_HI
 
         ldx # 25                ; 25-rows
 
         ; colour the borders yellow down the sides of the view-port:
-_7711:  lda # .color_nybble( YELLOW, BLACK )
+@menu:   lda # .color_nybble( YELLOW, BLACK )
         ldy # 36                ; set the colour on column 37
         sta [ZP_COPY_TO], y
         ldy # 3                 ; set the colour on column 4
@@ -137,26 +158,26 @@ _7711:  lda # .color_nybble( YELLOW, BLACK )
 
         ; move to the next row
         ; (add 40 columns)
-        lda ZP_COPY_TO+0
+        lda ZP_COPY_TO_LO
         clc 
         adc # 40
-        sta ZP_COPY_TO+0
+        sta ZP_COPY_TO_LO
         bcc :+
-        inc ZP_COPY_TO+1
+        inc ZP_COPY_TO_HI
 :       dex                     ; repeat for 25 rows
-        bne _7711
+        bne @menu
 
         ; set the screen-colours for the high-resolution
         ; bitmap portion of the main flight-screen
         ;-----------------------------------------------------------------------
         lda #< ELITE_MAINSCR_ADDR
-        sta ZP_COPY_TO+0
+        sta ZP_COPY_TO_LO
         lda #> ELITE_MAINSCR_ADDR
-        sta ZP_COPY_TO+1
+        sta ZP_COPY_TO_HI
 
         ldx # ELITE_VIEWPORT_ROWS
 
-_7745:  lda # .color_nybble( YELLOW, BLACK )
+@main:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 36
         sta [ZP_COPY_TO], y
         ldy # 3
@@ -165,24 +186,23 @@ _7745:  lda # .color_nybble( YELLOW, BLACK )
         
         lda # .color_nybble( BLACK, BLACK )
 
-_7752:  sta [ZP_COPY_TO], y
+:       sta [ZP_COPY_TO], y
         dey 
-        bpl _7752
+        bpl :-
         ldy # 37
         sta [ZP_COPY_TO], y
         iny 
         sta [ZP_COPY_TO], y
         iny 
         sta [ZP_COPY_TO], y
-        lda ZP_COPY_TO+0
+        lda ZP_COPY_TO_LO
         clc 
         adc # 40
-        sta ZP_COPY_TO+0
-        bcc _776c
-        inc ZP_COPY_TO+1
-_776c:
-        dex 
-        bne _7745
+        sta ZP_COPY_TO_LO
+        bcc :+
+        inc ZP_COPY_TO_HI
+:       dex 
+        bne @main
 
         ; set yellow colour across the bottom row of the menu-screen
         lda # .color_nybble( YELLOW, BLACK )
@@ -191,15 +211,16 @@ _776c:
         dey 
         bpl :-
 
-        ; clear the bitmap screen:
         ;-----------------------------------------------------------------------
-        ; TODO: handle VIC bank #3, where the interrupt vectors are in the
-        ;       last few bytes of the bitmap zone!
-        ;
-        ldy #> ELITE_BITMAP_ADDR        ; starting address hi-byte
-        ldx # .page_count( $2000 )-1      ; number of pages
-        lda # $00                       ; set value
-        jsr set_bytes
+        lda #< ELITE_HUD_COLORSCR_ADDR
+        sta ZP_COPY_TO_LO
+        lda #> ELITE_HUD_COLORSCR_ADDR
+        sta ZP_COPY_TO_HI
+
+        lda #< hud_screenram_copy
+        sta ZP_COPY_FROM_LO
+        lda #> hud_screenram_copy
+        jsr copy_hud_color
 
         ; sprites:
         ;=======================================================================
@@ -331,42 +352,48 @@ _776c:
         ; set $D800-$DC00 (colour RAM) to black.
         ;
         lda # BLACK
-        sta ZP_COPY_TO+0
-        tay 
-        ldx #> $d800
-        stx ZP_COPY_TO+1
         ldx # .page_count( 1000 )
-:       sta [ZP_COPY_TO], y
-        iny 
-        bne :-
-        inc ZP_COPY_TO+1
-        dex 
-        bne :-
+        ldy #> $d800
+        jsr set_bytes
 
         ; colour the HUD:
         ;-----------------------------------------------------------------------
         ; copy 279? bytes from $795A to $DADA
         ; multi-colour bitmap colour nybbles
         ;
-.import __HUD_COLORRAM_LOAD__
-
         lda #< $dad0
-        sta ZP_COPY_TO+0
+        sta ZP_COPY_TO_LO
         lda #> $dad0
-        sta ZP_COPY_TO+1
+        sta ZP_COPY_TO_HI
         
-        lda #< __HUD_COLORRAM_LOAD__
-        sta ZP_COPY_FROM+0
-        lda #> __HUD_COLORRAM_LOAD__
-        jsr _7827
+        lda #< hud_colorram_copy
+        sta ZP_COPY_FROM_LO
+        lda #> hud_colorram_copy
+        jsr copy_hud_color
 
         ; write $07 to $D802-$D824
-
         ldy # $22
         lda # YELLOW
 _77a3:  sta $d802, y
         dey 
         bne _77a3
+
+        ; clear the bitmap screen:
+        ;-----------------------------------------------------------------------
+        ; NOTE: the HUD colour data is usually stored in the bitmap area as
+        ;       once it has been copied into place, it's not needed again
+        ;       and can be erased, rather than permentantly occupying RAM --
+        ;       therefore we must erase the bitamp *after* we've copied the
+        ;       HUD colour data to screen & color RAM, or we might end up
+        ;       erasing the HUD colour before we've used it!
+        ;
+        ; TODO: handle VIC bank #3, where the interrupt vectors are in the
+        ;       last few bytes of the bitmap zone!
+        ;
+        ldy #> ELITE_BITMAP_ADDR        ; starting address high-byte
+        ldx # .page_count( 8000 )       ; number of pages (8'000 bytes)
+        lda # %00000000                 ; set value (clear bits)
+        jsr set_bytes
 
 .ifdef  OPTION_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
@@ -395,10 +422,10 @@ _77a3:  sta $d802, y
         ; set up the bitmap screen:
         ;
         ; - bit 0-2: vertical scroll offset (set to 3, why?)
-        ; - bit   3: 25 rows
-        ; - bit   4: screen on
-        ; - bit   5: bitmap mode on
-        ; - bit 6-7: extended mode off / raster interrupt off
+        ; - bit   3: 1 = 25 rows
+        ; - bit   4: 1 = screen on
+        ; - bit   5: 1 = bitmap mode on
+        ; - bit 6-7: 0 = extended mode off / raster interrupt off
         ;
         lda # 3 | vic_screen_ctl1::rows \
                 | vic_screen_ctl1::display \
@@ -427,7 +454,6 @@ _77a3:  sta $d802, y
         lda #< (_8863 - 1)
         pha 
 
-;;        jmp *
         cli                     ; enable interrupts
         jmp init_mem
 
@@ -453,14 +479,15 @@ set_bytes:
 
         rts 
 
-.proc   copy_bytes
-        ;=======================================================================
-        ; copies bytes from one address to another in 256 byte blocks
-        ;
-        ; $18/$19 = pointer to address to copy to
-        ;     $1a = low-byte of address to copy from
-        ;       A = high-byte of address to copy from (gets placed into $1b)
-        ;       X = number of 265-byte blocks to copy
+;===============================================================================
+; copy bytes from one address to another in 256 byte blocks
+;
+; $18/$19 = pointer to address to copy to
+;     $1a = low-byte of address to copy from
+;       A = high-byte of address to copy from (gets placed into $1b)
+;       X = number of 265-byte blocks to copy
+;
+copy_bytes:
 
         sta ZP_COPY_FROM+1
         ldy # $00
@@ -475,10 +502,9 @@ set_bytes:
         bne :-
         rts
 
-.endproc
+;===============================================================================
+copy_hud_color:
 
-.proc   _7827
-        ;=======================================================================
         ; copy 256-bytes using current parameters
         ldx # $01
         jsr copy_bytes
@@ -492,5 +518,3 @@ set_bytes:
         bpl :-
         ldx # $00
         rts
-
-.endproc

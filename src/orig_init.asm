@@ -282,7 +282,7 @@ _76e8:  stx ZP_COPY_TO+1
         lda #< __HUD_COLORSCR_LOAD__
         sta ZP_COPY_FROM+0
         lda #> __HUD_COLORSCR_LOAD__
-        jsr _7827
+        jsr copy_hud_color
 
         ; set the screen-colours for the menu-screen:
         ; (high-resolution section only, no HUD)
@@ -410,7 +410,7 @@ _7784:  sta [ZP_COPY_TO], y
         lda #< __HUD_COLORRAM_LOAD__
         sta ZP_COPY_FROM+0
         lda #> __HUD_COLORRAM_LOAD__
-        jsr _7827
+        jsr copy_hud_color
 
         ; write $07 to $d802-$d824
 
@@ -532,7 +532,7 @@ _7808:  lda __GFX_SPRITES_LOAD__ + $100, y
 
 .endproc
 
-.proc   _7827                                                           ;$7827
+.proc   copy_hud_color                                                  ;$7827
         ;=======================================================================
         ; copy 256-bytes using current parameters
         ldx # $01
