@@ -2,6 +2,7 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
+.linecont+
 
 ; this is the main include file (".inc") for common definitions for Elite,
 ; that is, constants, macros and the like that do not immediately output bytes.
@@ -44,60 +45,18 @@ ELITE_VIC_ADDR          = ELITE_VIC_BANK * $4000
 .import ELITE_MENUSCR_ADDR
 .import ELITE_MAINSCR_ADDR
 
-; the location in memory of the text-screen / colour-data, character-set and
-; bitmap are determined by a single register, $D018, consisting of two fields:
-;
-; bits 4-7 select the location of the text-screen / colour-data, which can be
-; any of these values: (note that these addresses are relative to the VIC-II
-; bank address above)
-; 
-;  0 = +$0000   /    8 = +$2000
-;  1 = +$0400   /    9 = +$2400
-;  2 = +$0800   /   10 = +$2800
-;  3 = +$0C00   /   11 = +$2C00
-;  4 = +$1000   /   12 = +$3000
-;  5 = +$1400   /   13 = +$3400
-;  6 = +$1800   /   14 = +$3800
-;  7 = +$1C00   /   15 = +$3C00
-;
-; since the linker has already given the address of the screens,
-; we need to work backwards to get their indicies
-;
-ELITE_VIC_MENUSCR       = <((ELITE_MENUSCR_ADDR - ELITE_VIC_ADDR) / $0400) ;=8
-ELITE_VIC_MAINSCR       = <((ELITE_MAINSCR_ADDR - ELITE_VIC_ADDR) / $0400) ;=9
 
-; the lower bits of register $D018 select the location of the character set,
-; and the bitmap screen (if enabled). note that this is relative to the chosen
-; VIC-II bank above
-;
-; 0 = charset: +$0000, bitmap: +$0000
-; 1 = charset: +$0800, bitmap: +$0000
-; 2 = charset: +$1000, bitmap: +$0000 (nb: character ROM in VIC-II banks 0/2)
-; 3 = charset: +$1800, bitmap: +$0000 (nb: character ROM in VIC-II banks 0/2)
-; 4 = charset: +$2000, bitmap: +$2000
-; 5 = charset: +$2800, bitmap: +$2000
-; 6 = charset: +$3000, bitmap: +$2000
-; 7 = charset: +$3800, bitmap: +$2000
-;
-; Elite always runs in bitmap mode so never uses a character set
-; 
-; TODO: FIX THIS SILLYNESS
-;
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        ELITE_VIC_CHARBMP       = 0
-.else   ;///////////////////////////////////////////////////////////////////////
-        ELITE_VIC_CHARBMP       = 4
-.endif  ;///////////////////////////////////////////////////////////////////////
+ELITE_VIC_MEMORY_MAINSCR := \
+     <( (((ELITE_MAINSCR_ADDR .mod $4000) / $0400) << 4) \
+      |  ((ELITE_BITMAP_ADDR .mod $4000) >> 10) \
+      | vic_memory::unused \
+      )
 
-ELITE_BITMAP_D018       = \
-        ((ELITE_VIC_MENUSCR & 15) << 4) \
-      | (((ELITE_VIC_CHARBMP & 7) << 1) & %00001110)
-
-ELITE_TXTSCR_D018       = \
-        ((ELITE_VIC_MENUSCR & 15) << 4) \
-      | (((ELITE_VIC_CHARBMP & 7) << 1) & %00001110)
-
+ELITE_VIC_MEMORY_MENUSCR := \
+     <( (((ELITE_MENUSCR_ADDR .mod $4000) / $0400) << 4) \
+      |  ((ELITE_BITMAP_ADDR .mod $4000) >> 10) \
+      | vic_memory::unused \
+      )
 
 .import ELITE_SPRITES_ADDR
 

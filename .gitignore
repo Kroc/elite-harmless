@@ -5,5 +5,7 @@ __*
 
 ca65_plugin_build.sh
 
+**.o
+
 # cache from the VSCode C extension?
 .vscode/ipch

@@ -4,27 +4,6 @@
 ;===============================================================================
 .linecont+
 
-; produces a value to be written to CIA2_PORTA ($DD00),
-; for selecting the VIC bank -- the bits are inverted
-;
-.define .vic_bank_bits( bank ) \
-        (<(~bank & %00000011))
-
-; returns the address of the given VIC bank number
-.define .vic_bank_addr( bank ) \
-        (bank * $4000)
-
-; gives you the VIC bank number based on the bitmap address.
-; the bitmap is 8K so can appear at the lower or upper half of any bank
-.define .vic_bank_from_bitmap( addr ) \
-        .min (addr / $4000, (addr + $2000) / $4000)
-
-; given a bitmap address returns %0000 if it appears in the lower-half of the
-; VIC bank (+$0000), or %1000 if it appears in the upper half (+$2000) --
-; this is for use as bit 4 of $D018; see `VIC_MEMORY` below
-.define .vic_bitmap_bit( addr ) \
-        ((addr .mod $4000 ) >> 10)
-
 ; colours
 ;===============================================================================
 
@@ -60,6 +39,36 @@ LTGREY          = $0f     ; %1111
 ;===============================================================================
 ; VIC-II registers:
 ;===============================================================================
+
+; produces a value to be written to CIA2_PORTA ($DD00),
+; for selecting the VIC bank -- the bits are inverted
+;
+.define .vic_bank_bits( bank ) \
+        (<(~bank & %00000011))
+
+; returns the address of the given VIC bank number
+.define .vic_bank_addr( bank ) \
+        (bank * $4000)
+
+; gives you the VIC bank number based on the bitmap address.
+; the bitmap is 8K so can appear at the lower or upper half of any bank
+;
+.define .vic_bank_from_bitmap( addr ) \
+        .min (addr / $4000, (addr + $2000) / $4000)
+
+; given a bitmap address returns %0000 if it appears in the lower-half
+; of the VIC bank (+$0000), or %1000 if it appears in the upper half (+$2000)
+; -- this is for use as bit 3 of $D018; see `VIC_MEMORY` below
+;
+.define .vic_memory_bitmap( addr ) \
+        ((addr .mod $4000) >> 10)
+
+; for a given screen memory address (any multiple of $0400), returns the
+; bit-pattern for use with the VIC-II memory register $D018 that sets the
+; location of the text-screen (and bitmap and charset)
+;
+.define .vic_memory_screen( addr ) \
+        ((( addr .mod $4000) / $0400) << 4)
 
 ; the sprite pointers are stored in the unused space directly after the screen
 ; RAM (default $0400) since the screen is 1'000 chars long and there are 24
@@ -160,7 +169,8 @@ VIC_MEMORY                      = $d018
         screen_3800             = %11100000     ;=$E0 - VIC+$3800
         screen_3c00             = %11110000     ;=$F0 - VIC+$3C00
 
-        ; in text-mode bits 1-3 control the location of the character graphics
+        ; in text-mode bits 1-3 control the
+        ; location of the character graphics
         ;
         char_mask               = %00001110
         char_0000               = %00000000     ;=$00 - VIC+$0000
@@ -172,7 +182,8 @@ VIC_MEMORY                      = $d018
         char_3000               = %00001100     ;=$0C - VIC+$3000
         char_3800               = %00001110     ;=$0E - VIC+$3800
 
-        ; if bitmap mode is enabled bit 3 controls the offset of the bitmap
+        ; if bitmap mode is enabled, bit 3
+        ; controls the offset of the bitmap
         ;
         bitmap_mask             = %00001000
         bitmap_0000             = %00000000     ;=$00 - VIC+$0000

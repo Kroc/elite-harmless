@@ -10,6 +10,14 @@ set -e
 
 #===============================================================================
 
+cl65="./bin/cc65/bin/cl65 \
+    --debug-info \
+    --include-dir src \
+    --include-dir build \
+    --bin-include-dir build \
+    --feature leading_dot_in_identifiers \
+    --feature bracket_as_indirect \
+    --asm-args --large-alignment"
 ca65="./bin/cc65/bin/ca65 \
     --debug-info \
     --target c64 \
@@ -18,7 +26,8 @@ ca65="./bin/cc65/bin/ca65 \
     --include-dir build \
     --bin-include-dir build \
     --feature leading_dot_in_identifiers \
-    --feature bracket_as_indirect"
+    --feature bracket_as_indirect \
+    --large-alignment"
 ld65="ld65"
 mkd64="mkd64"
 encrypt="python3 link/encrypt.py"
@@ -30,7 +39,7 @@ echo "building Elite : Harmless"
 echo
 
 clean() {
-    echo "* cleaning up:"
+    echo -n "* cleaning up: "
 
     rm -rf build/*.o
     rm -rf build/*.s
@@ -43,7 +52,15 @@ clean() {
     rm -f bin/*.d64
     rm -f bin/*.crt
 
-    echo "- OK"
+    # annoyingly `cl65` will always place object files in the same directory
+    # as the source file, so we need to clean these out of "src" ourselves
+    rm -f src/*.o
+    rm -f src/boot/*.o
+    rm -f src/c64/*.o
+    rm -f src/gfx/*.o
+    rm -f src/text/*.o
+
+    echo "OK"
 }
 clean
 
@@ -101,20 +118,21 @@ echo "* make 'elite-original-gma86.d64'"
 echo "  --------------------------------------"
 echo "-     link 'elite-original-gma86.cfg'"
 $ld65 \
-       -C link/elite-original-gma86.cfg \
-       -m build/elite-original-gma86.map -vm \
-    --obj build/elite-original.o \
-    --obj build/boot_gma_stage0.o \
-    --obj build/boot_gma_stage1.o \
-    --obj build/boot_gma_stage2.o \
-    --obj build/boot_gma_stage3.o \
-    --obj build/boot_gma_stage4.o \
-    --obj build/boot_gma_stage5.o \
-    --obj build/boot_gma_stage6.o \
-    --obj build/boot_gma_stage4_7C3A.o \
-    --obj build/text_pairs.o \
-    --obj build/text_flight.o \
-    --obj build/text_docked.o
+       -C "link/elite-original-gma86.cfg" \
+       -m "build/elite-original-gma86.map" -vm \
+      -Ln "build/elite-original-gma86.ll" \
+    --obj "build/elite-original.o" \
+    --obj "build/boot_gma_stage0.o" \
+    --obj "build/boot_gma_stage1.o" \
+    --obj "build/boot_gma_stage2.o" \
+    --obj "build/boot_gma_stage3.o" \
+    --obj "build/boot_gma_stage4.o" \
+    --obj "build/boot_gma_stage5.o" \
+    --obj "build/boot_gma_stage6.o" \
+    --obj "build/boot_gma_stage4_7C3A.o" \
+    --obj "build/text_pairs.o" \
+    --obj "build/text_flight.o" \
+    --obj "build/text_docked.o"
 
 # encrypt GMA4.PRG:
 #-------------------------------------------------------------------------------
@@ -238,36 +256,23 @@ clean
 # enable undocumented opcodes and mathtables
 options="--cpu 6502X -DOPTION_MATHTABLES"
 
-# assemble the mega-object containing
-# the majority of the elite code
-echo "- assemble 'elite-harmless.asm'"
-$ca65 $options -o build/elite-harmless.o    src/elite-harmless.asm
+echo "- assembling"
 
-# the text database has to be assembled separately from the main code
-# due to the rather insane complexity which is best not leaked into 
-# the global scope along with the main source code
-echo "- assemble 'text_pairs.asm'"
-$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
-echo "- assemble 'text_flight.asm'"
-$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
-echo "- assemble 'text_docked.asm'"
-$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
+# note that the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into  the global
+# scope along with the main source code
 
-# assemble the once-off initialisation program
-echo "- assemble 'disk_boot_exo.asm'"
-$ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
-
-echo "- linking..."
-$ld65 \
-       -C link/elite-harmless-d64.cfg \
-       -S \$0400 \
-       -m build/elite-harmless.map -vm \
-       -o bin/harmless.prg \
-    --obj build/elite-harmless.o \
-    --obj build/text_pairs.o \
-    --obj build/text_flight.o \
-    --obj build/text_docked.o \
-    --obj build/disk_boot_exo.o
+$cl65 $options \
+    --config "link/elite-harmless-d64.cfg" \
+    --start-addr \$0400 \
+     -m "build/elite-harmless.map" -vm \
+    -Ln "build/elite-harmless.ll" \
+     -o "bin/harmless.prg" \
+        "src/elite-harmless.asm" \
+        "src/text/text_pairs.asm" \
+        "src/text/text_flight.asm" \
+        "src/text/text_docked.asm" \
+        "src/boot/disk_boot_exo.asm"
 
 # compress and fast-load the program
 echo "- exomizing..."
@@ -308,36 +313,23 @@ clean
 # enable undocumented opcodes and the replacement line-drawing routines
 options="--cpu 6502X -DOPTION_DYME_FASTLINE"
 
-# assemble the mega-object containing
-# the majority of the elite code
-echo "- assemble 'elite-harmless.asm'"
-$ca65 $options -o build/elite-harmless.o    src/elite-harmless.asm
+echo "- assembling"
 
-# the text database has to be assembled separately from the main code
-# due to the rather insane complexity which is best not leaked into 
-# the global scope along with the main source code
-echo "- assemble 'text_pairs.asm'"
-$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
-echo "- assemble 'text_flight.asm'"
-$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
-echo "- assemble 'text_docked.asm'"
-$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
+# note that the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into  the global
+# scope along with the main source code
 
-# assemble the once-off initialisation program
-echo "- assemble 'disk_boot_exo.asm'"
-$ca65 $options -o build/disk_boot_exo.o     src/boot/disk_boot_exo.asm
-
-echo "- linking..."
-$ld65 \
-       -C link/elite-harmless-d64.cfg \
-       -S \$0400 \
-       -m build/elite-harmless-fastlines.map -vm \
-       -o bin/harmless.prg \
-    --obj build/elite-harmless.o \
-    --obj build/text_pairs.o \
-    --obj build/text_flight.o \
-    --obj build/text_docked.o \
-    --obj build/disk_boot_exo.o
+$cl65 $options \
+    --config "link/elite-harmless-d64.cfg" \
+    --start-addr \$0400 \
+     -m "build/elite-harmless-fastlines.map" -vm \
+    -Ln "build/elite-harmless-fastlines.ll" \
+     -o "bin/harmless.prg" \
+        "src/elite-harmless.asm" \
+        "src/text/text_pairs.asm" \
+        "src/text/text_flight.asm" \
+        "src/text/text_docked.asm" \
+        "src/boot/disk_boot_exo.asm"
 
 # compress and fast-load the program
 echo "- exomizing..."
@@ -377,37 +369,23 @@ clean
 
 options=""
 
-# assemble the mega-object containing
-# the majority of the elite code
-echo "- assemble 'elite-harmless.asm'"
-$ca65 $options -o build/elite-harmless.o    src/elite-harmless.asm
+echo "- assembling"
 
-# the text database has to be assembled separately from the main code
-# due to the rather insane complexity which is best not leaked into 
-# the global scope along with the main source code
-echo "- assemble 'text_pairs.asm'"
-$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
-echo "- assemble 'text_flight.asm'"
-$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
-echo "- assemble 'text_docked.asm'"
-$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
+# note that the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into  the global
+# scope along with the main source code
 
-# include a program header
-echo "- assemble 'prgheader.asm'"
-$ca65 $options -o build/prgheader.o         src/c64/prgheader.asm
-
-echo "- linking..."
-$ld65 \
-       -C link/elite-harmless-hiram.cfg \
-       -S \$0400 \
-       -m build/elite-harmless-hiram.map -vm \
-      -Ln build/elite-harmless-hiram.ll \
-       -o bin/harmless.prg \
-    --obj build/elite-harmless.o \
-    --obj build/text_pairs.o \
-    --obj build/text_flight.o \
-    --obj build/text_docked.o \
-    --obj build/prgheader.o
+$cl65 $options \
+    --config "link/elite-harmless-hiram.cfg" \
+    --start-addr \$0400 \
+     -m "build/elite-harmless-hiram.map" -vm \
+    -Ln "build/elite-harmless-hiram.ll" \
+     -o "bin/harmless.prg" \
+        "src/elite-harmless.asm" \
+        "src/text/text_pairs.asm" \
+        "src/text/text_flight.asm" \
+        "src/text/text_docked.asm" \
+        "src/c64/prgheader.asm"
 
 # compress and fast-load the program
 echo "- exomizing..."
@@ -431,72 +409,13 @@ echo
 
 #===============================================================================
 
-##echo "* build Elite : Harmless (cartridges)"
-##echo "  ======================================"
-##echo "* cleaning up:"
-##
-##rm -rf build/*.o
-##rm -rf build/*.s
-##rm -rf build/*.bin
-##rm -rf build/*.prg
-##rm -rf build/*.d64
-##
-##rm -f bin/*.prg
-##rm -f bin/*.d64
-##
-##echo "- OK"
-##
-##options="-DOPTION_MATHTABLES"
-##
-##echo
-##echo "- assemble 'elite_link.asm'"
-##$ca65 $options -o build/elite_link.o        src/elite_link.asm
-##echo "- assemble 'code_init.asm'"
-##$ca65 $options -o build/code_init.o         src/code_init.asm
-##echo "- assemble 'text_pairs.asm'"
-##$ca65 $options -o build/text_pairs.o        src/text/text_pairs.asm
-##echo "- assemble 'text_flight.asm'"
-##$ca65 $options -o build/text_flight.o       src/text/text_flight.asm
-##echo "- assemble 'text_docked.asm'"
-##$ca65 $options -o build/text_docked.o       src/text/text_docked.asm
-##echo "- assemble 'vars_user.asm'"
-##$ca65 $options -o build/vars_user.o         src/vars_user.asm
-##echo "- assemble 'code_1D81.asm'"
-##$ca65 $options -o build/code_1D81.o         src/code_1D81.asm
-##echo "- assemble 'code_6A00.asm'"
-##$ca65 $options -o build/code_6A00.o         src/code_6A00.asm
-##echo "- assemble 'bitmap.asm'"
-##$ca65 $options -o build/bitmap.o            src/gfx/bitmap.asm
-##echo "- assemble 'sound.asm'"
-##$ca65 $options -o build/sound.o             src/sound.asm
-##echo "- assemble 'gfx-font.asm'"
-##$ca65 $options -o build/gfx-font.o          src/gfx/font.asm
-##echo "- assemble 'gfx-sprites.asm'"
-##$ca65 $options -o build/gfx-sprites.o       src/gfx/sprites.asm
-##echo "- assemble 'math_data.asm'"
-##$ca65 $options -o build/math_data.o         src/math_data.o
-##echo "- assemble 'gfx-hull_data.asm'"
-##$ca65 $options -o build/gfx-hull_data.o     src/gfx/hull_data.asm
-##echo "- assemble 'gfx-hud_data.asm'"
-##$ca65 $options -o build/gfx-hud_data.o      src/gfx/hud_data.asm
-##echo "- assemble 'vars_polyobj.asm'"
-##$ca65 $options -o build/vars_polyobj.o      src/vars_polyobj.asm
-##echo
-##
-##echo "* make 'elite-harmless-ocean.crt'"
-##echo "  --------------------------------------"
-##echo "- assemble 'boot/cart_boot.asm'"
-##$ca65 $options -o build/cart_boot.o         src/boot/cart_boot.asm
-##echo "- linking..."
-##$ld65 \
-##       -C link/elite-harmless-crt-ocean.cfg \
-##       -S \$0400 \
-##       -m build/elite-harmless-crt-ocean.map -vm \
-##       -o release/elite-harmless-ocean.crt \
-##    --obj build/cart_boot.o \
-##    --obj build/elite_link.o
-
-#-------------------------------------------------------------------------------
+# annoyingly `cl65` will always place object files in the same directory
+# as the source file, so we need to clean these out of "src" ourselves
+rm -f src/*.o
+rm -f src/boot/*.o
+rm -f src/c64/*.o
+rm -f src/gfx/*.o
+rm -f src/text/*.o
 
 echo "* complete."
 exit 0

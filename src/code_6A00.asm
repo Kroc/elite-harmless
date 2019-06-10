@@ -9971,10 +9971,9 @@ _a8d9:                                                                  ;$A8D9
 
 ; these are VIC_MEMORY states
 _a8da:                                                                  ;$A8DA
-        .byte   ELITE_BITMAP_D018 | vic_memory::unused
+        .byte   ELITE_VIC_MEMORY_MENUSCR
 _a8db:                                                                  ;$A8DB
-        .byte   ELITE_BITMAP_D018 | vic_memory::unused
-
+        .byte   ELITE_VIC_MEMORY_MENUSCR
 
 ; this is a toggle for `_a8d9`
 _a8dc:                                                                  ;$A8DC

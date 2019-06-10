@@ -28,7 +28,6 @@ init:
         ; black screen:
         lda # BLACK
         sta VIC_BORDER          ; set border colour black
-        lda # BLACK
         sta VIC_BACKGROUND      ; set background colour black
 
         ; optimisation for changing the memory map,
@@ -68,13 +67,7 @@ init:
 
         ; set up VIC-II memory:
         ;
-        ; %1000xxxx = set text/colour screen to VIC+$2000,
-        ;             colour map    @ $6000..$6400
-        ; %xxxx000x = set character set to VIC+$0000
-        ;             bitmap screen @ $4000..$6000
-        ; %xxxxxxx1 = N/A! (but included in the original source)
-        ;
-        lda # ELITE_BITMAP_D018 | vic_memory::unused
+        lda # ELITE_VIC_MEMORY_MENUSCR
         sta VIC_MEMORY
 
         ; clear the screen
