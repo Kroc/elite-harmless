@@ -33,7 +33,7 @@
 .segment        "CODE_1D81"
 .include        "code_1D81.asm"                                         ;$1D81
 
-.include        "data_save.asm"                                         ;$25A6
+.include        "save_data.asm"                                         ;$25A6
 
 .segment        "CODE_28A4"
 .include        "code_2A84.asm"                                         ;$2A84

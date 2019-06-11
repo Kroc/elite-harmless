@@ -129,7 +129,7 @@ populate_multiply_tables:
 ;///////////////////////////////////////////////////////////////////////////////
 
 .segment        "MATH_LOGS"
-.align  256
+.align          $0100
 ;
 ; hello and welcome to "I don't understand logarithims 101"
 ;

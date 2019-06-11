@@ -1516,10 +1516,10 @@ _250b:  rts                                                             ;$250B
 .endif
 
 ;===============================================================================
-; segments from "data_save.asm" goes here
+; segments from "save_data.asm" goes here
 ;
-; DATA_SAVE                                                             ;$25A6
-; DATA_2600                                                             ;$2600
+; SAVE_DATA                                                             ;$25A6
+; SAVE_DEFAULT                                                          ;$2600
 
 ;===============================================================================
 ; "LINE_DATA" segment goes here in the original game, see "draw_lines.inc"

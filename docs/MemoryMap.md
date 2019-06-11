@@ -5,8 +5,8 @@
           +---------------+
     $0300 | ?             |   Some heap space?
           |---------------|
-    $0400 | VARS_MAIN     |   variable space
-          |               |   (extact details incomplete)
+    $0400 | VARS_MAIN     |   main variable space
+          |               |
           |               |
           |---------------|
     $0700 | TEXT_FLIGHT   |   compressed text
@@ -49,8 +49,8 @@
     $250C | TEXT_TOKENS   |
     $254C | TEXT_PAIRS    |
           |---------------|
-    $25A6 | DATA_SAVE     |
-    $2600 | DATA_2600     |
+    $25A6 | SAVE_DATA     |
+    $2600 | SAVE_DEFAULT  |
           |---------------|
     $26A4 | LINE_DATA     |   line-buffer X & Y co-ords
           |               |

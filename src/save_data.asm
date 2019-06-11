@@ -3,7 +3,13 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-.segment        "DATA_SAVE"
+; a page is reserved for load/save operations
+; TODO: can this be done away with (the disk drive already has a buffer)
+;
+.segment        "DISK_BUFFER"
+.res            $0100
+
+.segment        "SAVE_DATA"
 
 ; file-name?
 
@@ -52,7 +58,7 @@ _25ff   := _25b3::_25ff
 
 ;-------------------------------------------------------------------------------
 
-.segment        "DATA_2600"
+.segment        "SAVE_DEFAULT"
 
 ;$2600: unreferenced / unused data?
 

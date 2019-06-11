@@ -15,6 +15,3 @@
 
 .res    $0100
 
-.segment        "DISK_BUFFER"
-
-.res    $0100

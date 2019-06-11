@@ -4,19 +4,17 @@
 ;===============================================================================
 .linecont+
 
-; this is the main include file (".inc") for common definitions for Elite,
-; that is, constants, macros and the like that do not immediately output bytes.
-; each assembly file (".asm") will include this file so therefore this is the
-; "starting point" of the source code
+; this is the main include file for common definitions for Elite, that is,
+; constants, macros and the like that do not immediately output bytes
 
 .include        "c64/c64.inc"           ; define C64 constants
-
 .include        "text/text.inc"         ; text/string constants
 
 ; the linker script ("link/elite-*.cfg") defines the memory layout of the game
 ; (since it will differ from the original, disk and cartridge versions) so we
 ; import some memory addresses from there and use these to configure the C64
-;
+
+; the bitmap is the largest portion of memory at 8K
 .import ELITE_BITMAP_ADDR
 
 ; the VIC-II bank, where Elite places graphics (bitmap, sprites)

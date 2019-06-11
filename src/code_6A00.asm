@@ -6223,13 +6223,13 @@ _8ae7:                                                                  ;$8AE7
 
         ; save to disk:
         ; the linker will define the location and size of the save-data block
-.import __DATA_SAVE_RUN__
-.import __DATA_SAVE_SIZE__
+.import __SAVE_DATA_RUN__
+.import __SAVE_DATA_SIZE__
 
         ; data is located at the pointer in $FD/$FE
         lda # ZP_FD
-        ldx #< (__DATA_SAVE_RUN__ + __DATA_SAVE_SIZE__)
-        ldy #> (__DATA_SAVE_RUN__ + __DATA_SAVE_SIZE__)
+        ldx #< (__SAVE_DATA_RUN__ + __SAVE_DATA_SIZE__)
+        ldy #> (__SAVE_DATA_RUN__ + __SAVE_DATA_SIZE__)
         jsr KERNAL_SAVE
         php
 
