@@ -3866,7 +3866,7 @@ _b301:                                                                  ;$B301
         bmp = ELITE_BITMAP_ADDR
 
         ; TODO: we could `.repeat` this for the number of rows defined by
-        ; ELITE_HUD_HEIGHT_ROWS`
+        ;       `ELITE_HUD_HEIGHT_ROWS`
         ;
 :       lda __HUD_DATA_RUN__, x         ; read from row 1 of backup HUD
         sta bmp + .bmppos(18, 4), x     ; write to row 18 of bitmap screen

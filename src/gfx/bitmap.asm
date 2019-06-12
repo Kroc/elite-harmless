@@ -12,8 +12,12 @@
 ; issue a warning that this is "suspiciously large"!
 ;.align          $2000
 
-; reserve 8 KB
-.res            $2000
+; whilst the bitmap screen is aligned to 8'192 bytes, it doesn't occupy all
+; of them. 8 bytes per char, times 40 columns, times 25 rows equals 8'000
+; bytes. typically code just writes/erases the whole 8'192 bytes, but when
+; VIC bank #3 is being used with the bitamp at $E000-$FFFF, the last few bytes
+; hold the hardware registers and erasing these will crash the machine!
+.res            8000
 
 ;===============================================================================
 
