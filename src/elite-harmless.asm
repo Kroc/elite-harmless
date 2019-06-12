@@ -33,7 +33,7 @@
 
 .include        "vars_user.asm"                                         ;$1D00
 
-; lump all the code together into a single segment in elite-harmless!
+; in elite-harmless we conjoin these code segments together
 ;
 .segment        "CODE_LORAM"
 .include        "code_1D81.asm"                                         ;$1D81
@@ -43,9 +43,11 @@
 
 .include        "gfx/sprites.asm"                                       ;$6800
 
-.segment        "CODE_6A00"
+; in elite-harmless we conjoin these code segments together
+;
+.segment        "CODE_HIRAM"
 .include        "code_6A00.asm"                                         ;$6A00
-
+.include        "code_9900.asm"                                         ;$9900
 
 .include        "gfx/bitmap.asm"                                        ;$9700
 
