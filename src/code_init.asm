@@ -59,8 +59,8 @@ init:
         ;             | BANK 3 ¦--------+
         ;             |        |   I/O  |
         ;       $C000 +--------+--------+
-        ;             |        |
-        ;             | BANK 2 |
+        ;             |        |  BASIC |
+        ;             | BANK 2 ¦--------+
         ;             |        |
         ;       $8000 +--------+
         ;             |        |
@@ -69,7 +69,7 @@ init:
         ;       $4000 +--------+
         ;             |        |
         ;             | BANK 0 |
-        ;             |        | <-- stack: $100-$1FF
+        ;             |        | <-- stack: $0100-$01FF
         ;       $0000 +--------+ <-- zero page: $00-$FF
         ;
         ; the lower two-bits of register $DD00 selects the VIC-II bank.

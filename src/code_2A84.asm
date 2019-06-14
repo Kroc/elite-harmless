@@ -1586,7 +1586,7 @@ _2fee:                                                                  ;$2FEE
 _2ff3:                                                                  ;$2FF3
         ; location of the speed bar on the HUD
         ; TODO: this should be defined in the file with the HUD graphics
-        dial_speed_addr = ELITE_BITMAP_ADDR + .bmppos(18, 30)
+        dial_speed_addr = ELITE_BITMAP_ADDR + .bmppos( 18, 30 )
 
         lda #< dial_speed_addr
         sta ZP_TEMP_ADDR1_LO
@@ -1673,7 +1673,7 @@ _3068:                                                                  ;$3068
         bne _3068
 
         ; location of the fore-shield bar on the HUD
-        dial_fore_addr = ELITE_BITMAP_ADDR + .bmppos(18, 6)
+        dial_fore_addr = ELITE_BITMAP_ADDR + .bmppos( 18, 6 )
         
         lda #< dial_fore_addr
         sta ZP_TEMP_ADDR1_LO
@@ -1929,7 +1929,7 @@ _318a:                                                                  ;$318A
         jsr _b410
         
         lda # $00
-        ldx # .sizeof(Cargo)-1
+        ldx # .sizeof( Cargo )-1
 
 :       sta VAR_CARGO, x        ; empty cargo slot                      ;$319B
         dex 

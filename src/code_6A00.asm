@@ -663,7 +663,7 @@ _6cb8:                                                                  ;$6CB8
 
 ;===============================================================================
 
-dial_addr = ELITE_BITMAP_ADDR + .bmppos(21, 5)
+dial_addr = ELITE_BITMAP_ADDR + .bmppos( 21, 5 )
 
 _6cc3:                                                                  ;$6CC3
         lda #< dial_addr
@@ -5581,7 +5581,7 @@ _87d0:                                                                  ;$87D0
         lda # $00
 
         sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )
-        sta ELITE_BITMAP_ADDR + 0 + .bmppos( 0, 35 )
+        sta ELITE_BITMAP_ADDR + 0 + .bmppos(  0, 35 )
         jsr _7af7
 
         lda # 12
