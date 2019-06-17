@@ -45,6 +45,23 @@
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
+.macro  .koala_color    row, col, chars
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+; read from the colour RAM data in the Koala file:
+;
+; - PRG header: 2 bytes
+; - skip bitmap data (8'000 bytes)
+; - screen data is a 1'000 bytes
+; - the colour RAM data is a 1'000 byte array of 40x25 chars
+;
+.local  offset
+        offset .set (2 + 8000 + 1000 + (row * 40) + col)
+
+.incbin "build/hud_koala.koa", offset, chars
+
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro
+
 ; in what is probably one of the most egregious cases of wasted CPU time and
 ; space in Elite C64, the backup HUD bitmap actually contains all the blank
 ; space on the left and right from where the C64's screen is 320px wide,
@@ -130,16 +147,15 @@
 ;$F870:
 
 ;===============================================================================
+; screen RAM colour
+;
 ; TODO: like the HUD, there's wasted bytes here too
 ;
 .segment        "HUD_COLORSCR"
 
-ELITE_HUD_COLORSCR_ADDR = ELITE_MAINSCR_ADDR + .scrpos(18, 0)
-
-; screen RAM colour
+ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 
 ; `proc` is used so that `.sizeof(hud_screenram_copy)` is available
-;
 .proc   hud_screenram_copy                                              ;$783A
 
         ; include the screen RAM data from the Koala file
@@ -154,52 +170,18 @@ ELITE_HUD_COLORSCR_ADDR = ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 .endproc
 
 ;===============================================================================
-.segment        "HUD_COLORRAM"
-
 ; colour RAM ($D800..) nybbles
+;
+.segment        "HUD_COLORRAM"
 
 ; TODO: we could save space in the .PRG by storing these by combining
 ;       the nybbles into bytes and unpacking during initialization
 
 ; `proc` is used so that `.sizeof(hud_colorram_copy)` is available
-;
 .proc   hud_colorram_copy                                               ;$795A
 
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $05, $05, $05, $05, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $05, $05, $05, $05, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $05, $05, $05, $05, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $05, $05, $05, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $05, $05, $05, $05
-        .byte   $05, $05, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $05, $05
-        .byte   $05, $05, $05, $05, $00, $00, $00, $00
-        .byte   $00, $00, $00, $00, $0f, $0f, $07, $07
-        .byte   $07, $07, $0d, $0d, $0d, $0d, $0d, $0d
-        .byte   $0d, $03, $03, $03, $03, $03, $0d, $0d
-        .byte   $0d, $0d, $0d, $0d, $0d, $0d, $07, $07
-        .byte   $07, $07, $05, $05, $00, $00, $00, $00
+        ; include the screen RAM data from the Koala file
+        .koala_color    18, 0, (7 * 40)
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
