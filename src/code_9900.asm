@@ -2809,7 +2809,10 @@ interrupt:                                                              ;$A8FA
         bit _1d03               ; if this option,
         bpl _a956               ; is off, skip ahead
 
+.ifndef OPTION_NOSOUND
+        ;///////////////////////////////////////////////////////////////////////
         jsr _b4d2               ; handle music?
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         bit _1d12               ; sound effects enabled?
         bmi _a956               ; yes, do SFX

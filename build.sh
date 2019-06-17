@@ -275,7 +275,7 @@ echo "  --------------------------------------"
 clean
 
 # enable undocumented opcodes and mathtables
-options="--cpu 6502X -DOPTION_MATHTABLES"
+options="--cpu 6502X -Wa -DOPTION_MATHTABLES"
 
 echo -n "- assembling                        "
 
@@ -333,7 +333,7 @@ echo "  --------------------------------------"
 clean
 
 # enable undocumented opcodes and the replacement line-drawing routines
-options="--cpu 6502X -DOPTION_DYME_FASTLINE"
+options="--cpu 6502X -Wa -DOPTION_DYME_FASTLINE,-DOPTION_NOSOUND"
 
 echo -n "- assembling                        "
 

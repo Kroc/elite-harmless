@@ -520,7 +520,10 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
        .bze :+
         sta DOCKCOM_STATE       ; turn docking computer on (A = $FF)
 
-        jsr _9204               ; handle docking computer behaviour?
+.ifndef OPTION_NOSOUND
+        ;///////////////////////////////////////////////////////////////////////
+        jsr _9204               ; handle docking computer music?
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 :       lda # $00                                                       ;$1FD5
         sta ZP_7B

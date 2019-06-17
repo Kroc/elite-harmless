@@ -3,10 +3,6 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; this is the multi-colour bitmap data for the HUD
-
-.segment        "HUD_DATA"
-
 ; the game's default viewport/HUD data is stored in "hud_koala.asm",
 ; and during the build process, this is assembled into a Koala Painter
 ; image file "build/hud_koala.koa" -- the bytes that will go into the
@@ -61,6 +57,10 @@
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
+
+; this is the multi-colour bitmap data for the HUD
+;
+.segment        "HUD_DATA"
 
 ; in what is probably one of the most egregious cases of wasted CPU time and
 ; space in Elite C64, the backup HUD bitmap actually contains all the blank

@@ -49,7 +49,11 @@
 
 .include        "gfx/bitmap.asm"                                        ;$9700
 
+.ifndef         OPTION_NOSOUND
+;///////////////////////////////////////////////////////////////////////////////
 .include        "sound.asm"                                             ;$B4CB
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 .include        "gfx/hull_data.asm"                                     ;$D000
 .include        "gfx/hud_data.asm"                                      ;$EF90
