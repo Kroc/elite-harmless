@@ -29,6 +29,22 @@
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
+.macro  .koala_screen   row, col, chars
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+; read from the screen data in the Koala file:
+;
+; - PRG header: 2 bytes
+; - skip bitmap data (8'000 bytes)
+; - the screen data is a 1'000 byte array of 40x25 chars
+;
+.local  offset
+        offset .set (2 + 8000 + (row * 40) + col)
+
+.incbin "build/hud_koala.koa", offset, chars
+
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro
+
 ; in what is probably one of the most egregious cases of wasted CPU time and
 ; space in Elite C64, the backup HUD bitmap actually contains all the blank
 ; space on the left and right from where the C64's screen is 320px wide,
@@ -126,45 +142,18 @@ ELITE_HUD_COLORSCR_ADDR = ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ;
 .proc   hud_screenram_copy                                              ;$783A
 
-        .byte   $00, $00, $00, $07, $17, $17, $74, $74
-        .byte   $74, $74, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $67, $27, $27, $27
-        .byte   $27, $27, $37, $37, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $17, $17, $24, $24
-        .byte   $24, $24, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $67, $67, $67, $67, $23, $23
-        .byte   $23, $23, $37, $37, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $37, $37, $29, $29
-        .byte   $29, $29, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $67, $27, $23, $23
-        .byte   $23, $23, $37, $37, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $37, $37, $28, $28
-        .byte   $28, $28, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $24, $24
-        .byte   $24, $24, $17, $17, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $37, $37, $2a, $2a
-        .byte   $2a, $2a, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $24, $24
-        .byte   $24, $24, $17, $17, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $37, $37, $2d, $2d
-        .byte   $2d, $2d, $27, $07, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $07, $27, $24, $24
-        .byte   $24, $24, $17, $17, $07, $00, $00, $00
-        .byte   $00, $00, $00, $07, $c7, $c7, $07, $07
-        .byte   $07, $07, $27, $07, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $27, $27, $27, $27
-        .byte   $27, $27, $27, $27, $07, $27, $24, $24
-        .byte   $24, $24, $17, $17, $07, $00, $00, $00
+        ; include the screen RAM data from the Koala file
+        .koala_screen   18, 0, (7 * 40)
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; trailing junk bytes that appear in the original game data
         .byte   $60, $d3, $66, $1d, $a0, $40, $b3, $d3
+.endif  ;///////////////////////////////////////////////////////////////////////
+
 .endproc
 
+;===============================================================================
 .segment        "HUD_COLORRAM"
 
 ; colour RAM ($D800..) nybbles
@@ -212,5 +201,10 @@ ELITE_HUD_COLORSCR_ADDR = ELITE_MAINSCR_ADDR + .scrpos(18, 0)
         .byte   $0d, $0d, $0d, $0d, $0d, $0d, $07, $07
         .byte   $07, $07, $05, $05, $00, $00, $00, $00
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; trailing junk bytes that appear in the original game data
         .byte   $8d, $18, $8f, $50, $46, $7e, $a4, $f4
+.endif  ;///////////////////////////////////////////////////////////////////////
+
 .endproc
