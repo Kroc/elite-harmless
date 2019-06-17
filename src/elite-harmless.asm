@@ -14,8 +14,6 @@
 .include        "text/text_docked_fns.inc"
 .include        "code_keyboard.inc"
 
-.include        "elite_link.asm"        ; to be phased out
-
 .include        "code_init.asm"                                         ;$0400
 
 .include        "math_data.asm"

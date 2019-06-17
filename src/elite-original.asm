@@ -15,8 +15,6 @@
 .include        "text/text_docked_fns.inc"
 .include        "code_keyboard.inc"
 
-.include        "elite_link.asm"        ; to be phased out
-
 ; due to a limitation, CA65 cannot 'look-ahead' for scopes (including procs &
 ; structs) and therefore our `PolyObject` struct must be loaded in before it
 ; is referenced anywhere, even though the code segment might be addressed

@@ -147,7 +147,7 @@
 ;$F870:
 
 ;===============================================================================
-; screen RAM colour
+; screen RAM colour:
 ;
 ; TODO: like the HUD, there's wasted bytes here too
 ;
@@ -170,17 +170,34 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 .endproc
 
 ;===============================================================================
-; colour RAM ($D800..) nybbles
+; Elite uses two screens for bitmap colour data (excluding colour RAM at $D800)
+; one for the main "flight screen" which needs to include the colour data for
+; the HUD and a second screen for the "menu", which doesn't have the HUD
+; 
+; the linker script ("link/elite-*.cfg") defines where these screens are
+; in RAM, we only have to reserve their bytes here
+;
+.segment        "VIC_SCR_MENU"
+.res            $0400
+
+.segment        "VIC_SCR_MAIN"
+.res            $0400
+
+;===============================================================================
+; colour RAM ($D800..) nybbles:
+;
+; this data is used only once to initialise colour RAM and is not referred to
+; again. ergo, the segment address is not colour RAM itself ($D800) but the
+; address in the game binary where the data is to copy to colour RAM
 ;
 .segment        "HUD_COLORRAM"
-
-; TODO: we could save space in the .PRG by storing these by combining
-;       the nybbles into bytes and unpacking during initialization
 
 ; `proc` is used so that `.sizeof(hud_colorram_copy)` is available
 .proc   hud_colorram_copy                                               ;$795A
 
         ; include the screen RAM data from the Koala file
+        ; TODO: we could save space in the .PRG by combining the nybbles
+        ;       into bytes and unpacking during initialization
         .koala_color    18, 0, (7 * 40)
 
 .ifdef  OPTION_ORIGINAL

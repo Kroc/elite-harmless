@@ -8,6 +8,9 @@
 ;
 ; note that $00 & $01 are hard-wired to the CPU, so cannot be used
 
+.segment        "ZP_SHADOW"
+.res            $0100
+
 ;-------------------------------------------------------------------------------
 
 ; "goat soup" is the algorithm for generating planet descriptions.
