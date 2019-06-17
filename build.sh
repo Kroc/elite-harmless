@@ -39,7 +39,7 @@ echo "building Elite : Harmless"
 echo
 
 clean() {
-    echo -n "* cleaning up:                      "
+    echo -n "- cleaning up:                      "
 
     rm -rf build/*.o
     rm -rf build/*.s
@@ -47,7 +47,6 @@ clean() {
     rm -rf build/*.prg
     rm -rf build/*.d64
     rm -rf build/*.crt
-    rm -rf build/*.koa
 
     rm -f bin/*.prg
     rm -f bin/*.d64
@@ -242,7 +241,7 @@ echo "[OK]"
 #-------------------------------------------------------------------------------
 
 echo "  --------------------------------------"
-echo -n "* write floppy disk image           "
+echo -n "- write floppy disk image           "
 $mkd64 \
     -o release/elite-original-gma86.d64 \
     -m xtracks -XDS \
@@ -260,7 +259,7 @@ echo "[OK]"
 
 #-------------------------------------------------------------------------------
 
-echo -n "* verifying checksums               "
+echo -n "- verifying checksums               "
 cd bin
 md5sum --ignore-missing --quiet --check checksums.md5
 if [ $? -eq 0 ]; then echo "[OK]"; fi
@@ -317,7 +316,7 @@ $exomizer \
         "bin/prg3.prg"
 
 echo "[OK]"
-echo -n "* write floppy disk image           "
+echo -n "- write floppy disk image           "
 $mkd64 \
     -o release/elite-harmless.d64 \
     -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
@@ -375,7 +374,7 @@ $exomizer \
         "bin/prg3.prg"
 
 echo "[OK]"
-echo -n "* write floppy disk image           "
+echo -n "- write floppy disk image           "
 $mkd64 \
     -o release/elite-harmless-fastlines.d64 \
     -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
@@ -423,7 +422,7 @@ $exomizer \
     -- "bin/harmless.prg"
 
 echo "[OK]"
-echo -n "* write floppy disk image           "
+echo -n "- write floppy disk image           "
 $mkd64 \
     -o release/elite-harmless-hiram.d64 \
     -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
@@ -436,12 +435,15 @@ echo "[OK]"
 
 # annoyingly `cl65` will always place object files in the same directory
 # as the source file, so we need to clean these out of "src" ourselves
-echo -n "* cleaning up:                      "
+echo -n "- cleaning up:                      "
+
 rm -f src/*.o
 rm -f src/boot/*.o
 rm -f src/c64/*.o
 rm -f src/gfx/*.o
 rm -f src/text/*.o
+
+rm -rf build/*.koa
 echo "[OK]"
 
 echo "  ======================================"
