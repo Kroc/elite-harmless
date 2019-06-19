@@ -8,6 +8,111 @@
 ;
 clear_screen:                                                           ;$B21A
 ;===============================================================================
+.ifndef OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; improved screen-clearing code for elite-harmless
+        ; (doesn't erase the bytes outside of the 256px-wide viewport)
+        ;
+        ; erase the bitmap area above the HUD,
+        ; i.e. the viewport
+        ;
+
+        ; set text-cursor to row/col 2
+        ldx # $01
+        stx ZP_CURSOR_COL
+        stx ZP_CURSOR_ROW
+        
+        ; we need to loop a full 256 times and we want to keep the exit check
+        ; fast (so testing for zero/non-zero). starting at $FF won't do, as a
+        ; zero-check at the bottom will exit out before the 0'th loop has been
+        ; done. ergo, we start at 0, the `dex` at the bottom will underflow
+        ; back to $FF and we loop around until back to $00 where the loop
+        ; will exit without repeating the 0'th iteration
+        ;
+        dex 
+        ; erasing bitmap bits...
+        txa 
+
+:       ; begin loop, erasing one byte
+        ; of all viewport rows at once
+        ;
+        sta ELITE_BITMAP_ADDR + .bmppos(  0, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  1, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  2, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  3, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  4, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  5, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  6, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  7, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  8, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos(  9, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( 10, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( 11, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( 12, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( 13, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( 14, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( 15, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( 16, 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( 17, 4 ), x
+        dex 
+       .bnz :-
+        
+        ; are we in the cockpit-view?
+        ldy ZP_SCREEN           ; (Y is used here to keep A & X = $00)
+       .bze :+                  ; yes -- HUD will be redrawn
+
+        cpy # $0d               ;?
+        bne @hud
+
+        ; redraw the HUD
+:       jmp _b301
+
+        ; erase the HUD to make way for the menu screen:
+@hud:   ; begin loop, erasing one byte of all HUD rows at once
+        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 0) * 320) + (4 * 8), x
+        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 1) * 320) + (4 * 8), x
+        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 2) * 320) + (4 * 8), x
+        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 3) * 320) + (4 * 8), x
+        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 4) * 320) + (4 * 8), x
+        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 5) * 320) + (4 * 8), x
+        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 6) * 320) + (4 * 8), x
+        dex 
+       .bnz @hud
+
+        ; (note that X will be $00 due to loop condition above)
+        stx _1d01               ;?
+        stx _1d04               ;?
+        
+        ; will switch to menu screen during the interrupt
+        lda # ELITE_VIC_MEMORY_MENUSCR
+        sta _a8db
+
+        lda # %11000000         ; default value
+        sta _a8e1
+
+        jsr hide_all_ships
+        jsr disable_sprites
+
+        ;-----------------------------------------------------------------------
+        ; apply the yellow colour to the second header-border on some screens
+        ; TODO: can we get away with this on every menu screen, and just bake
+        ;       it into the menu-screen data?
+        ;
+        ldx ZP_SCREEN
+        cpx # $02
+        beq _b2a5
+
+        cpx # $40
+        beq _b2a5
+        cpx # $80
+        beq _b2a5
+
+        ldy # ELITE_VIEWPORT_COLS-1
+:       sta ELITE_MENUSCR_ADDR + .scrpos( 2, 4 ), y
+        dey
+        bpl :-
+
+.else   ;///////////////////////////////////////////////////////////////////////
         ; reset the colour-map (the colour-nybbles held in the text screen)
         ;-----------------------------------------------------------------------
         ; set starting position in top-left of the centred
@@ -79,7 +184,7 @@ clear_screen:                                                           ;$B21A
         lda # ELITE_VIC_MEMORY_MENUSCR
         sta _a8db
 
-        lda # $c0               ; default value
+        lda # %11000000         ; default value
         sta _a8e1
 
         ; erase bitmap to end?
@@ -98,10 +203,7 @@ clear_screen:                                                           ;$B21A
         stx ZP_CURSOR_COL
         stx ZP_CURSOR_ROW
 
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
         jsr fill_sides          ; fills outside the viewport!?
-.endif  ;///////////////////////////////////////////////////////////////////////
         jsr hide_all_ships
         jsr disable_sprites
 
@@ -120,28 +222,28 @@ clear_screen:                                                           ;$B21A
         beq _b2a5
         cpx # $80
         beq _b2a5
-
+        
+        ; apply the yellow colour to the second header-border on some screens
         ldy # ELITE_VIEWPORT_COLS-1
-
 :       sta ELITE_MENUSCR_ADDR + .scrpos( 2, 4 ), y                     ;$B29F
         dey
         bpl :-
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _b2a5:                                                                  ;$B2A5
         ldx # 199               ; last pixel row
         jsr _b2d5               ; draw the bottom screen border
 
-        ;???
         lda # %11111111
         sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )                   ;=$5F1F
 
-        ldx # $19
+        ldx # 25
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
 
 _b2b2:                                                                  ;$B2B2
-        ldx # $12
+        ldx # ELITE_VIEWPORT_ROWS
         stx ZP_C0
 
         ldy # 3 * 8             ; 3rd char in bitmap cells
@@ -183,16 +285,18 @@ _b2e1:                                                                  ;$B2E1
 @loop:                                                                  ;$B2E5
         ldy # $07
 :       lda ZP_BE                                                       ;$B2E7
+.ifdef  OPTION_ORIGINAL
         eor [ZP_TEMP_ADDR1], y
+.endif
         sta [ZP_TEMP_ADDR1], y
         dey
         bpl :-
         lda ZP_TEMP_ADDR1_LO
         clc
-        adc # $40
+        adc #< 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        adc # $01
+        adc #> 320
         sta ZP_TEMP_ADDR1_HI
 
         dex
@@ -200,181 +304,14 @@ _b2e1:                                                                  ;$B2E1
 
         rts
 
-;;.else   ;///////////////////////////////////////////////////////////////////////
-;;        ; improved screen-clearing code for elite-harmless
-;;        ; (doesn't erase the bytes outside of the 256px-wide viewport)
-;;        ;-----------------------------------------------------------------------
-;;        ; erase the bitmap area above the HUD,
-;;        ; i.e. the viewport
-;;        ;
-;;.ifndef USE_ILLEGAL_OPCODES
-;;
-;;        ; erasing bitmap bits...
-;;        lda # %00000000
-;;
-;;        ; we need to loop a full 256 times and we want to keep the exit check
-;;        ; fast (so testing for zero/non-zero). starting at $FF won't do, as a
-;;        ; zero-check at the bottom will exit out before the 0'th loop has been
-;;        ; done. ergo, we start at 0, the `dex` at the bottom will underflow
-;;        ; back to $FF and we loop around until back to $00 where the loop
-;;        ; will exit without repeating the 0'th iteration
-;;        ;
-;;        tax 
-;;.else
-;;        ; as above, but using a single (illegal) opcode
-;;        lax # %00000000
-;;.endif
-;;:       ; begin loop, erasing one byte
-;;        ; of all viewport rows at once
-;;        ;
-;;        sta (ELITE_BITMAP_ADDR + ( 0 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 1 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 2 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 3 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 4 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 5 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 6 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 7 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 8 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( 9 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + (10 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + (11 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + (12 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + (13 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + (14 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + (15 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + (16 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + (17 * 320) + (4 * 8)), x
-;;        dex 
-;;       .bnz :-
-;;
-;;        ; are we in the cockpit-view?
-;;        ldy ZP_SCREEN           ; (Y is used here to keep A & X = $00)
-;;       .bze :+                  ; yes -- HUD will be redrawn
-;;
-;;        cpy # $0d               ;?
-;;        bne @hud
-;;
-;;        ; redraw the HUD
-;;:       jmp _b301
-;;
-;;        ; erase the HUD to make way for the menu screen:
-;;@hud:   ; begin loop, erasing one byte of all HUD rows at once
-;;        sta (ELITE_BITMAP_ADDR + ( ELITE_HUD_TOP_ROW + 0 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( ELITE_HUD_TOP_ROW + 1 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( ELITE_HUD_TOP_ROW + 2 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( ELITE_HUD_TOP_ROW + 3 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( ELITE_HUD_TOP_ROW + 4 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( ELITE_HUD_TOP_ROW + 5 * 320) + (4 * 8)), x
-;;        sta (ELITE_BITMAP_ADDR + ( ELITE_HUD_TOP_ROW + 6 * 320) + (4 * 8)), x
-;;        dex 
-;;       .bnz @hud
-;;
-;;        ; (note that X will be $00 due to loop condition above)
-;;        stx _1d01               ;?
-;;        stx _1d04               ;?
-;;
-;;        ; set text-cursor to row/col 2
-;;        ; (note that X will be $00 due to loop condition above)
-;;        inx                     ; X = $01
-;;        stx ZP_CURSOR_COL
-;;        stx ZP_CURSOR_ROW
-;;        
-;;        ; will switch to menu screen during the interrupt
-;;        lda # ELITE_VIC_MEMORY_MENUSCR
-;;        sta _a8db
-;;
-;;        lda # $c0               ; default value
-;;        sta _a8e1
-;;
-;;        jsr hide_all_ships
-;;        jsr disable_sprites
-;;
-;;        ; in progress
-;;        ;...
-;;
-;;_b2a5:                                                                 ;$B2A5
-;;        ldx # 199               ; last pixel row
-;;        jsr _b2d5               ; draw the bottom screen border
-;;
-;;        ;???
-;;        lda # %11111111
-;;        sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )                   ;=$5F1F
-;;
-;;        ldx # $19
-;;        ; this causes the next instruction to become a meaningless `bit`
-;;        ; instruction, a very handy way of skipping without branching
-;;       .bit
-;;
-;;_b2b2:                                                                  ;$B2B2
-;;        ldx # $12
-;;        stx ZP_C0
-;;
-;;        ldy # 3 * 8             ; 3rd char in bitmap cells
-;;        sty ZP_TEMP_ADDR1_LO
-;;        ldy #> ELITE_BITMAP_ADDR
-;;        lda # %00000011
-;;        jsr _b2e1
-;;
-;;        ldy #< (ELITE_BITMAP_ADDR + .bmppos( 0, 36 ))   ;=$4120
-;;        sty ZP_TEMP_ADDR1_LO
-;;
-;;        ldy #> (ELITE_BITMAP_ADDR + .bmppos( 0, 36 ))   ;=$4120
-;;        lda # %11000000
-;;        ldx ZP_C0
-;;        jsr _b2e1
-;;
-;;        lda # $01
-;;        sta ELITE_BITMAP_ADDR + .bmppos( 0, 35 )                        ;=$4118
-;;
-;;        ldx # $00
-;;
-;;_b2d5:                                                                  ;$B2D5
-;;        ;-----------------------------------------------------------------------
-;;        ; draw the horizontal border
-;;        ; X = pixel row (i.e. 0 or 199)
-;;        ;
-;;        stx ZP_VAR_Y            ; first pixel row
-;;        ldx # $00
-;;        stx ZP_VAR_X1           ; X1 = 0
-;;        dex                     ; $00 -> $FF
-;;        stx ZP_VAR_X2           ; X2 = 255
-;;        jmp draw_straight_line
-;;
-;;_b2e1:                                                                  ;$B2E1
-;;        ;-----------------------------------------------------------------------
-;;        ; draw the vertical border
-;;        sta ZP_BE
-;;        sty ZP_TEMP_ADDR1_HI
-;;@loop:                                                                  ;$B2E5
-;;        ldy # $07
-;;:       lda ZP_BE                                                       ;$B2E7
-;;        eor [ZP_TEMP_ADDR1], y
-;;        sta [ZP_TEMP_ADDR1], y
-;;        dey
-;;        bpl :-
-;;        lda ZP_TEMP_ADDR1_LO
-;;        clc
-;;        adc # $40
-;;        sta ZP_TEMP_ADDR1_LO
-;;        lda ZP_TEMP_ADDR1_HI
-;;        adc # $01
-;;        sta ZP_TEMP_ADDR1_HI
-;;
-;;        dex
-;;        bne @loop
-;;
-;;
-;;.endif  ;///////////////////////////////////////////////////////////////////////
-
 _b301:                                                                  ;$B301
         jsr _b2b2
 
-        lda # $91
-        sta _a8db               ; default value is $81
+        lda # ELITE_VIC_MEMORY_MAINSCR
+        sta _a8db
 
-        lda # $d0
-        sta _a8e1               ; default value is $C0
+        lda # %11000000 | vic_screen_ctl2::multicolor
+        sta _a8e1
 
         lda _1d04               ; is HUD visible? (main or menu screen?)
         bne _b335
@@ -455,8 +392,13 @@ _b301:                                                                  ;$B301
         dex
        .bnz :-
 
-        ; borders to the left and right of the HUD lay outside the 256px
-        ; centred HUD.
+        ; borders to the left and right of the HUD
+        ; lay outside the 256px centred HUD
+        ;
+        ; NOTE: these only have to be redrawn because in the hires bitmap
+        ;       area (viewport) the border pixels are %11, but in the
+        ;       multi-color bitmap area (HUD), the yellow colour is %10.
+        ;       if we remap the colours, maybe we can do away with this?
         ;
         ; TODO: this should be drawn only once during initialisation,
         ;       as with the new HUD-copying method it never gets erased
@@ -485,7 +427,7 @@ _b301:                                                                  ;$B301
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         jsr hide_all_ships
-        jsr _2ff3
+        jsr _2ff3               ; update dials?
 
 _b335:                                                                  ;$B335
 .ifdef  OPTION_ORIGINAL
@@ -526,7 +468,7 @@ hide_all_ships:                                                         ;$B341
 
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
-; fills the borders down the sides of the viewport!
+; fill the borders down the sides of the viewport!
 ;
 ; (probably used to clip the explosion sprite -- it appears below graphics --
 ;  but that doesn't cover the borders to the sides of the viewport)

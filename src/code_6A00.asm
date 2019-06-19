@@ -5235,7 +5235,7 @@ _8627:                                                                  ;$8627
         lda ZP_SCREEN
        .bnz :+                  ; not flight screen? skip
 
-        jsr _2ff3
+        jsr _2ff3               ; update dials?
 
 :       lda ZP_SCREEN                                                ;$8645
        .bze @_8654              ; on flight screen? skip

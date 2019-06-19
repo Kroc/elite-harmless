@@ -465,7 +465,7 @@ _1f20:                                                                  ;$1F20
         asl PLAYER_EBOMB        ; does player have an energy bomb?
         beq :+                  ; no? keep going
 
-        ldy # $d0
+        ldy # %11000000 | vic_screen_ctl2::multicolor
         sty _a8e0
 
         ldy # $0d
@@ -1161,7 +1161,7 @@ _2366:                                                                  ;$2366
 
 _2367:                                                                  ;$2367
 ;===============================================================================
-        lda # $c0
+        lda # %11000000
         sta _a8e0
 
         lda # $00
