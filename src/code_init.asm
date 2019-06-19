@@ -511,6 +511,23 @@ set_bytes:
         rts 
 
 ;===============================================================================
+copy_hud_color:
+
+        ; copy 256-bytes using current parameters
+        ldx # $01
+        jsr copy_bytes
+
+        ; copy a further 22 bytes
+        ldy # $17
+        ldx # $01
+:       lda [ZP_COPY_FROM], y
+        sta [ZP_COPY_TO], y
+        dey 
+        bpl :-
+        ldx # $00
+        rts
+
+;===============================================================================
 ; copy bytes from one address to another in 256 byte blocks
 ;
 ; $18/$19 = pointer to address to copy to
@@ -531,21 +548,4 @@ copy_bytes:
         inc ZP_COPY_TO+1
         dex 
         bne :-
-        rts
-
-;===============================================================================
-copy_hud_color:
-
-        ; copy 256-bytes using current parameters
-        ldx # $01
-        jsr copy_bytes
-
-        ; copy a further 22 bytes
-        ldy # $17
-        ldx # $01
-:       lda [ZP_COPY_FROM], y
-        sta [ZP_COPY_TO], y
-        dey 
-        bpl :-
-        ldx # $00
         rts

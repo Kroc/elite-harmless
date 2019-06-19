@@ -58,9 +58,11 @@
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-; this is the multi-colour bitmap data for the HUD
+; this is the multi-colour bitmap data for the HUD. note that this is the
+; copy of the HUD kept in RAM for restoring a fresh copy of the HUD when
+; refreshing the screen, not the HUD as it exists on the bitmap screen
 ;
-.segment        "HUD_DATA"
+.segment        "HUD_COPY"
 
 ; in what is probably one of the most egregious cases of wasted CPU time and
 ; space in Elite C64, the backup HUD bitmap actually contains all the blank
@@ -140,11 +142,11 @@
         ; you doing in my house!?
         .byte   $f5
 
+        ;$F870
+        
 .else   ;///////////////////////////////////////////////////////////////////////
         .koala_bitmap   24, 4, 32
 .endif  ;///////////////////////////////////////////////////////////////////////
-
-;$F870:
 
 ;===============================================================================
 ; screen RAM colour:
@@ -188,7 +190,8 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ;
 ; this data is used only once to initialise colour RAM and is not referred to
 ; again. ergo, the segment address is not colour RAM itself ($D800) but the
-; address in the game binary where the data is to copy to colour RAM
+; address in the game binary where the data is to copy to colour RAM during
+; initialisation
 ;
 .segment        "HUD_COLORRAM"
 

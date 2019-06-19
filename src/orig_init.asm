@@ -460,23 +460,23 @@ _77a3:  sta $d802,y
         cli 
 
         ; get the location of the HUD data from the linker configuration
-.import __HUD_DATA_LOAD__, __HUD_DATA_SIZE__
+.import __HUD_COPY_LOAD__, __HUD_COPY_SIZE__
 
         ; number of whole pages to copy
-        ldx #< .page_count(__HUD_DATA_SIZE__)
+        ldx #< .page_count(__HUD_COPY_SIZE__)
 
         ; get the location where the HUD data is to be copied to
-.import __HUD_DATA_LOAD__
-.import __HUD_DATA_RUN__
+.import __HUD_COPY_LOAD__
+.import __HUD_COPY_RUN__
 
-        lda #< __HUD_DATA_RUN__
+        lda #< __HUD_COPY_RUN__
         sta ZP_COPY_TO+0
-        lda #> __HUD_DATA_RUN__
+        lda #> __HUD_COPY_RUN__
         sta ZP_COPY_TO+1
         
-        lda #< __HUD_DATA_LOAD__
+        lda #< __HUD_COPY_LOAD__
         sta ZP_COPY_FROM+0
-        lda #> __HUD_DATA_LOAD__
+        lda #> __HUD_COPY_LOAD__
         jsr copy_bytes
 
         ;-----------------------------------------------------------------------
