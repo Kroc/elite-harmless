@@ -24,7 +24,7 @@
 
 .include        "vars_main.inc"                                         ;$0400
 
-.include        "gfx/font.asm"                                          ;$0B00
+.include        "gfx/gfx_font.asm"                                      ;$0B00
 
 .include        "vars_user.asm"                                         ;$1D00
 
@@ -36,7 +36,7 @@
 .segment        "CODE_28A4"
 .include        "code_2A84.asm"                                         ;$2A84
 
-.include        "gfx/sprites.asm"                                       ;$6800
+.include        "gfx/gfx_sprites.asm"                                   ;$6800
 
 .segment        "CODE_6A00"
 .include        "code_6A00.asm"                                         ;$6A00

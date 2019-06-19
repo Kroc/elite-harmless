@@ -27,7 +27,7 @@
 
 .include        "vars_main.inc"                                         ;$0400
 
-.include        "gfx/font.asm"                                          ;$0B00
+.include        "gfx/gfx_font.asm"                                      ;$0B00
 
 .include        "vars_user.asm"                                         ;$1D00
 
@@ -39,7 +39,7 @@
 
 .include        "save_data.asm"                                         ;$25A6
 
-.include        "gfx/sprites.asm"                                       ;$6800
+.include        "gfx/gfx_sprites.asm"                                   ;$6800
 
 ; in elite-harmless we conjoin these code segments together
 ;

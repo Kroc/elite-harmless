@@ -9,11 +9,16 @@
 ; a Koala format is essentially a memory-dump of the separate graphics/colour
 ; components the VIC-II uses:
 ;
+;          2 bytes - PRG header (deafult "$6000")
 ;       8000 bytes - bitmap data
 ;       1000 bytes - screen RAM
 ;       1000 bytes - colour RAM
 ;          1 byte  - background colour
-
+;
+; even though elite doesn't store its bitmap at $6000, Koala files
+; are often recognised by this header, so for compatibility with
+; image editors, we stick to $6000
+;
         .word   $6000
 
 ; bitmap data
