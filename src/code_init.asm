@@ -109,22 +109,7 @@ init:
         ; shield! make sure to turn off I/O before trying to write to $D000+
         ;
         dec CPU_CONTROL         ; disable I/O
-
-        ; erase the two text screens
-        ;-----------------------------------------------------------------------
-        ; even though these two screens typically follow each other in memory,
-        ; we'll erase them individually to allow for future flexibility
-        ;
-        ldy #> ELITE_MENUSCR_ADDR
-        ldx # .page_count( 1000 )
-        lda # .color_nybble( WHITE, BLACK )
-        jsr set_bytes
-        
- ;;       ldy #> ELITE_MAINSCR_ADDR
- ;;       ldx # .page_count( 1000 )
- ;;       lda # .color_nybble( WHITE, BLACK )
- ;;       jsr set_bytes
-        
+       
         ; set the screen-colours for the menu-screen:
         ; (high-resolution section only, no HUD)
         ;-----------------------------------------------------------------------
@@ -136,7 +121,7 @@ init:
         ldx # 25                ; 25-rows
 
         ; colour the borders yellow down the sides of the view-port:
-@menu:   lda # .color_nybble( YELLOW, BLACK )
+@menu:  lda # .color_nybble( YELLOW, BLACK )
         ldy # 36                ; set the colour on column 37
         sta [ZP_COPY_TO], y
         ldy # 3                 ; set the colour on column 4
@@ -167,43 +152,6 @@ init:
 :       dex                     ; repeat for 25 rows
         bne @menu
 
-        ; set the screen-colours for the high-resolution
-        ; bitmap portion of the main flight-screen
-        ;-----------------------------------------------------------------------
-        lda #< ELITE_MAINSCR_ADDR
-        sta ZP_COPY_TO_LO
-        lda #> ELITE_MAINSCR_ADDR
-        sta ZP_COPY_TO_HI
-
-        ldx # ELITE_VIEWPORT_ROWS
-
-@main:  lda # .color_nybble( YELLOW, BLACK )
-        ldy # 36
-        sta [ZP_COPY_TO], y
-        ldy # 3
-        sta [ZP_COPY_TO], y
-        dey 
-        
-        lda # .color_nybble( BLACK, BLACK )
-
-:       sta [ZP_COPY_TO], y
-        dey 
-        bpl :-
-        ldy # 37
-        sta [ZP_COPY_TO], y
-        iny 
-        sta [ZP_COPY_TO], y
-        iny 
-        sta [ZP_COPY_TO], y
-        lda ZP_COPY_TO_LO
-        clc 
-        adc # 40
-        sta ZP_COPY_TO_LO
-        bcc :+
-        inc ZP_COPY_TO_HI
-:       dex 
-        bne @main
-
         ; set yellow colour across the bottom row of the menu-screen
         lda # .color_nybble( YELLOW, BLACK )
         ldy # ELITE_VIEWPORT_COLS - 1
@@ -211,15 +159,35 @@ init:
         dey 
         bpl :-
 
-        ; sprites:
-        ;=======================================================================
-        ; re-enable the I/O shield to manage sprites
+        ; re-enable the I/O shield
+        ; to manage colour-RAM & sprites
         inc CPU_CONTROL
         
+        ; upload the colour RAM from the initialisation data:
+        ;-----------------------------------------------------------------------
+        ; number of pages to copy; even though colour RAM is 1'000 bytes,
+        ; we'll copy 1'024 to make this loop easier to write (whole pages)
+        ldx # .page_count( 1024 )
+        ldy # $00
+        ; copy one-byte of colour RAM over
+@from:  lda gfx_colorram_copy, y
+@to:    sta $D800, y
+        dey 
+        bne @from               ; keep copying page?
+
+        ; page has been copied, move to the next page
+        inc @from+2
+        inc @to  +2
+        ; all pages copied?
+        dex 
+        bne @from
+
         ; disable all sprites
         lda # %00000000
         sta VIC_SPRITE_ENABLE
 
+        ; sprites:
+        ;=======================================================================
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; set sprite 3 colour to medium-grey
@@ -336,85 +304,6 @@ init:
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ; set screen colours for the mult-colour bitmap
-        ;-----------------------------------------------------------------------
-        ; set $D800-$DC00 (colour RAM) to black.
-        ;
-        lda # BLACK
-        ldx # .page_count( 1000 )
-        ldy #> $d800
-        jsr set_bytes
-
-        ; colour the HUD:
-        ;-----------------------------------------------------------------------
-        ; copy 279? bytes from $795A to $DADA
-        ; multi-colour bitmap colour nybbles
-        ;
-        lda #< $dad0
-        sta ZP_COPY_TO_LO
-        lda #> $dad0
-        sta ZP_COPY_TO_HI
-        
-        lda #< hud_colorram_copy
-        sta ZP_COPY_FROM_LO
-        lda #> hud_colorram_copy
-        jsr copy_hud_color
-
-        ; write $07 to $D802-$D824
-        ldy # $22
-        lda # YELLOW
-:       sta $d802, y
-        dey 
-        bne :-
-
-;;        ; clear the bitmap screen:
-;;        ;-----------------------------------------------------------------------
-;;        ; NOTE: the HUD colour data is usually stored in the bitmap area as
-;;        ;       once it has been copied into place, it's not needed again
-;;        ;       and can be erased, rather than permentantly occupying RAM --
-;;        ;       therefore we must erase the bitamp *after* we've copied the
-;;        ;       HUD colour data to screen & color RAM, or we might end up
-;;        ;       erasing the HUD colour before we've used it!
-;;        ;
-;;        ; whilst the bitmap screen is aligned to 8'192 bytes, it doesn't occupy
-;;        ; all of them. 8 bytes per char, times 40 columns, times 25 rows equals
-;;        ; 8'000 bytes ($1F40). in most circumstances erasing the full 8'192
-;;        ; bytes is simpler, except when VIC bank #3 is being used -- here the
-;;        ; hardware vectors $FFFA-$FFFF sit in the last few bytes of the 8 KB
-;;        ; bitmap region and erasing these will crash the machine! therefore
-;;        ; this little routine erases exactly 8'000 bytes
-;;
-;;        ; erasing bitmap bits...
-;;        lda # %00000000
-;;        ; preload the starting address hi-byte. this will allow us
-;;        ; to check the exit-condition using fast, simple instructions.
-;;        ; (note the `-1` to account for the pre-decrement below,
-;;        ;  should you want to erase the whole 8 KB)
-;;        ldx #> (ELITE_BITMAP_ADDR + 8000 - 1)
-;;
-;;        ; set the bitmap address high-byte. when looping, this allows us to
-;;        ; both use X as a quick check for the address hi-byte, as well as
-;;        ; using the hi-byte directly as part of an instruction (`sta $????`)
-;;@hi:    stx @addr+2
-;;        ; pre-decrement the address lo-byte,
-;;        ; zero flag will be set if the lo-byte becomes $00
-;;@lo:    dec @addr+1
-;;        ; erase the bitmap bits. note that this doesn't change
-;;        ; flags, so the zero-flag from above will be retained
-;;@addr:  sta (ELITE_BITMAP_ADDR + 8000)
-;;        ; if we've not reached the bottom of
-;;        ; the current page yet, keep going
-;;        bne @lo
-;;        ; bottom of page reached, move to the top of the 'next' page
-;;        ; (remember that we're walking down through memory, not up!)
-;;        dex 
-;;        ; have we finished? i.e. the page decrement
-;;        ; goes below the bitmap base address
-;;        cpx #> ELITE_BITMAP_ADDR
-;;        ; no, continue looping -- jumping here will
-;;        ; roll over the lo-byte from $00 to $FF
-;;        bcs @hi
-
 .ifdef  OPTION_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
         ; if we're including the math lookup tables for faster multiplication,
@@ -476,65 +365,3 @@ init:
 
         cli                     ; enable interrupts
         jmp init_mem
-
-set_bytes:
-        ;=======================================================================
-        ; write a value to a block of memory (page-aligned)
-        ;
-        ;       X = number of pages to write
-        ;       Y = hi-byte of starting address
-        ;       A = value to write
-        ;
-        ; set the starting address:
-        sty @addr+2             ; hi-byte of starting address
-        ldy # $00               ; and write $00 --
-        sty @addr+1             ; to the lo-byte
-        
-@addr:  sta $ff00               ; this is a dummy address, gets overwritten
-        inc @addr+1             ; move to the next byte
-        bne @addr               ; keep going until $FF->$00
-        inc @addr+2             ; move to the next page
-        dex                     ; one less page to do
-       .bnz @addr               ; have we reached the end?
-
-        rts 
-
-;===============================================================================
-copy_hud_color:
-
-        ; copy 256-bytes using current parameters
-        ldx # $01
-        jsr copy_bytes
-
-        ; copy a further 22 bytes
-        ldy # $17
-        ldx # $01
-:       lda [ZP_COPY_FROM], y
-        sta [ZP_COPY_TO], y
-        dey 
-        bpl :-
-        ldx # $00
-        rts
-
-;===============================================================================
-; copy bytes from one address to another in 256 byte blocks
-;
-; $18/$19 = pointer to address to copy to
-;     $1a = low-byte of address to copy from
-;       A = high-byte of address to copy from (gets placed into $1b)
-;       X = number of 265-byte blocks to copy
-;
-copy_bytes:
-
-        sta ZP_COPY_FROM+1
-        ldy # $00
-
-:       lda [ZP_COPY_FROM], y
-        sta [ZP_COPY_TO], y
-        dey 
-        bne :-
-        inc ZP_COPY_FROM+1
-        inc ZP_COPY_TO+1
-        dex 
-        bne :-
-        rts

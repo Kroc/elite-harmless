@@ -401,15 +401,15 @@ _7784:  sta [ZP_COPY_TO], y
         ; copy 279? bytes from $795a to $dada
         ; multi-colour bitmap colour nybbles
 
-.import __HUD_COLORRAM_LOAD__   ;=$795A
+.import __GFX_COLORRAM_LOAD__   ;=$795A
 
         lda #< $dad0
         sta ZP_COPY_TO+0
         lda #> $dad0
         sta ZP_COPY_TO+1
-        lda #< __HUD_COLORRAM_LOAD__
+        lda #< __GFX_COLORRAM_LOAD__
         sta ZP_COPY_FROM+0
-        lda #> __HUD_COLORRAM_LOAD__
+        lda #> __GFX_COLORRAM_LOAD__
         jsr copy_hud_color
 
         ; write $07 to $d802-$d824

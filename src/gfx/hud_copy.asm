@@ -207,20 +207,26 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ; address in the game binary where the data is to copy to colour RAM during
 ; initialisation
 ;
-.segment        "HUD_COLORRAM"
+; in the original game, this is only the colour data for the HUD (7 rows)
+; since the rest of the colour data is constructed programatically.
+; in elite-harmless the whole colour RAM is stored
+;
+.segment        "GFX_COLORRAM"
 
-; `proc` is used so that `.sizeof(hud_colorram_copy)` is available
-.proc   hud_colorram_copy                                               ;$795A
-
-        ; include the screen RAM data from the Koala file
-        ; TODO: we could save space in the .PRG by combining the nybbles
-        ;       into bytes and unpacking during initialization
-        .koala_color    18, 0, (7 * 40)
+; `proc` is used so that `.sizeof(gfx_colorram_copy)` is available
+.proc   gfx_colorram_copy                                               ;$795A
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
+        ; include the HUD's colour RAM data from the Koala image
+        .koala_color    18, 0, (7 * 40)
         ; trailing junk bytes that appear in the original game data
         .byte   $8d, $18, $8f, $50, $46, $7e, $a4, $f4
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; include the whole colour RAM data from the Koala image 
+        ; TODO: we could save space in the .PRG by combining the nybbles
+        ;       into bytes and unpacking during initialization
+        .koala_color    0, 0, 1000
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 .endproc
