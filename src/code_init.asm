@@ -167,7 +167,7 @@ init:
         ;-----------------------------------------------------------------------
         ; number of pages to copy; even though colour RAM is 1'000 bytes,
         ; we'll copy 1'024 to make this loop easier to write (whole pages)
-        ldx # .page_count( 1024 )
+        ldx # .page_count( 1000 )
         ldy # $00
         ; copy one-byte of colour RAM over
 @from:  lda gfx_colorram_copy, y
@@ -182,12 +182,12 @@ init:
         dex 
         bne @from
 
+        ; sprites:
+        ;=======================================================================
         ; disable all sprites
         lda # %00000000
         sta VIC_SPRITE_ENABLE
 
-        ; sprites:
-        ;=======================================================================
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; set sprite 3 colour to medium-grey

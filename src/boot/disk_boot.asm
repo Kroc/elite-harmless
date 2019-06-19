@@ -4,7 +4,7 @@
 ;===============================================================================
 
 ; "disk_boot.asm" -- auto-start code for Elite : Harmless
-; original Elite uses the code in the "loader/gma" folder
+; original Elite uses the code in the "boot/gma" folder
 
 .include        "c64/c64.inc"
 

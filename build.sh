@@ -81,7 +81,7 @@ options="-DOPTION_ORIGINAL"
 echo -n "- assemble 'hud_koala.koa'          "
 $cl65 $options \
     --target none \
-    --start-addr \$04000 \
+    --start-addr \$4000 \
      -o "build/hud_koala.koa" \
         "src/gfx/hud_koala.asm"
 
