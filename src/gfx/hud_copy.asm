@@ -154,23 +154,28 @@
 ;
 ; TODO: like the HUD, there's wasted bytes here too
 ;
-.segment        "HUD_COLORSCR"
-
+; in the original game this is a block of data that is copied to the screen RAM
+; during initialisation and then erased by the bitmap. in elite-harmless we are
+; including the screens pre-filled in the binary, so this temporary copy is not
+; needed
+;
 ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
+
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
+.segment        "HUD_COLORSCR"
 
 ; `proc` is used so that `.sizeof(hud_screenram_copy)` is available
 .proc   hud_screenram_copy                                              ;$783A
 
-        ; include the screen RAM data from the Koala file
+        ; include the screen RAM data (for the HUD) from the Koala file
         .koala_screen   18, 0, (7 * 40)
-
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
         ; trailing junk bytes that appear in the original game data
         .byte   $60, $d3, $66, $1d, $a0, $40, $b3, $d3
-.endif  ;///////////////////////////////////////////////////////////////////////
 
 .endproc
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 ;===============================================================================
 ; Elite uses two screens for bitmap colour data (excluding colour RAM at $D800)
@@ -181,10 +186,18 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ; in RAM, we only have to reserve their bytes here
 ;
 .segment        "VIC_SCR_MENU"
+;-------------------------------------------------------------------------------
 .res            $0400
 
 .segment        "VIC_SCR_MAIN"
-.res            $0400
+;-------------------------------------------------------------------------------
+.ifndef OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; include the entire default screen RAM
+        .koala_screen   0, 0, 1000
+.else   ;///////////////////////////////////////////////////////////////////////
+        .res            $0400
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ;===============================================================================
 ; colour RAM ($D800..) nybbles:

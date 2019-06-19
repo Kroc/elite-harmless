@@ -120,10 +120,10 @@ init:
         lda # .color_nybble( WHITE, BLACK )
         jsr set_bytes
         
-        ldy #> ELITE_MAINSCR_ADDR
-        ldx # .page_count( 1000 )
-        lda # .color_nybble( WHITE, BLACK )
-        jsr set_bytes
+ ;;       ldy #> ELITE_MAINSCR_ADDR
+ ;;       ldx # .page_count( 1000 )
+ ;;       lda # .color_nybble( WHITE, BLACK )
+ ;;       jsr set_bytes
         
         ; set the screen-colours for the menu-screen:
         ; (high-resolution section only, no HUD)
@@ -210,17 +210,6 @@ init:
 :       sta ELITE_MENUSCR_ADDR + .scrpos( 24, 4 ), y
         dey 
         bpl :-
-
-        ;-----------------------------------------------------------------------
-        lda #< ELITE_HUD_COLORSCR_ADDR
-        sta ZP_COPY_TO_LO
-        lda #> ELITE_HUD_COLORSCR_ADDR
-        sta ZP_COPY_TO_HI
-
-        lda #< hud_screenram_copy
-        sta ZP_COPY_FROM_LO
-        lda #> hud_screenram_copy
-        jsr copy_hud_color
 
         ; sprites:
         ;=======================================================================
@@ -378,53 +367,53 @@ init:
         dey 
         bne :-
 
-        ; clear the bitmap screen:
-        ;-----------------------------------------------------------------------
-        ; NOTE: the HUD colour data is usually stored in the bitmap area as
-        ;       once it has been copied into place, it's not needed again
-        ;       and can be erased, rather than permentantly occupying RAM --
-        ;       therefore we must erase the bitamp *after* we've copied the
-        ;       HUD colour data to screen & color RAM, or we might end up
-        ;       erasing the HUD colour before we've used it!
-        ;
-        ; whilst the bitmap screen is aligned to 8'192 bytes, it doesn't occupy
-        ; all of them. 8 bytes per char, times 40 columns, times 25 rows equals
-        ; 8'000 bytes ($1F40). in most circumstances erasing the full 8'192
-        ; bytes is simpler, except when VIC bank #3 is being used -- here the
-        ; hardware vectors $FFFA-$FFFF sit in the last few bytes of the 8 KB
-        ; bitmap region and erasing these will crash the machine! therefore
-        ; this little routine erases exactly 8'000 bytes
-
-        ; erasing bitmap bits...
-        lda # %00000000
-        ; preload the starting address hi-byte. this will allow us
-        ; to check the exit-condition using fast, simple instructions.
-        ; (note the `-1` to account for the pre-decrement below,
-        ;  should you want to erase the whole 8 KB)
-        ldx #> (ELITE_BITMAP_ADDR + 8000 - 1)
-
-        ; set the bitmap address high-byte. when looping, this allows us to
-        ; both use X as a quick check for the address hi-byte, as well as
-        ; using the hi-byte directly as part of an instruction (`sta $????`)
-@hi:    stx @addr+2
-        ; pre-decrement the address lo-byte,
-        ; zero flag will be set if the lo-byte becomes $00
-@lo:    dec @addr+1
-        ; erase the bitmap bits. note that this doesn't change
-        ; flags, so the zero-flag from above will be retained
-@addr:  sta (ELITE_BITMAP_ADDR + 8000)
-        ; if we've not reached the bottom of
-        ; the current page yet, keep going
-        bne @lo
-        ; bottom of page reached, move to the top of the 'next' page
-        ; (remember that we're walking down through memory, not up!)
-        dex 
-        ; have we finished? i.e. the page decrement
-        ; goes below the bitmap base address
-        cpx #> ELITE_BITMAP_ADDR
-        ; no, continue looping -- jumping here will
-        ; roll over the lo-byte from $00 to $FF
-        bcs @hi
+;;        ; clear the bitmap screen:
+;;        ;-----------------------------------------------------------------------
+;;        ; NOTE: the HUD colour data is usually stored in the bitmap area as
+;;        ;       once it has been copied into place, it's not needed again
+;;        ;       and can be erased, rather than permentantly occupying RAM --
+;;        ;       therefore we must erase the bitamp *after* we've copied the
+;;        ;       HUD colour data to screen & color RAM, or we might end up
+;;        ;       erasing the HUD colour before we've used it!
+;;        ;
+;;        ; whilst the bitmap screen is aligned to 8'192 bytes, it doesn't occupy
+;;        ; all of them. 8 bytes per char, times 40 columns, times 25 rows equals
+;;        ; 8'000 bytes ($1F40). in most circumstances erasing the full 8'192
+;;        ; bytes is simpler, except when VIC bank #3 is being used -- here the
+;;        ; hardware vectors $FFFA-$FFFF sit in the last few bytes of the 8 KB
+;;        ; bitmap region and erasing these will crash the machine! therefore
+;;        ; this little routine erases exactly 8'000 bytes
+;;
+;;        ; erasing bitmap bits...
+;;        lda # %00000000
+;;        ; preload the starting address hi-byte. this will allow us
+;;        ; to check the exit-condition using fast, simple instructions.
+;;        ; (note the `-1` to account for the pre-decrement below,
+;;        ;  should you want to erase the whole 8 KB)
+;;        ldx #> (ELITE_BITMAP_ADDR + 8000 - 1)
+;;
+;;        ; set the bitmap address high-byte. when looping, this allows us to
+;;        ; both use X as a quick check for the address hi-byte, as well as
+;;        ; using the hi-byte directly as part of an instruction (`sta $????`)
+;;@hi:    stx @addr+2
+;;        ; pre-decrement the address lo-byte,
+;;        ; zero flag will be set if the lo-byte becomes $00
+;;@lo:    dec @addr+1
+;;        ; erase the bitmap bits. note that this doesn't change
+;;        ; flags, so the zero-flag from above will be retained
+;;@addr:  sta (ELITE_BITMAP_ADDR + 8000)
+;;        ; if we've not reached the bottom of
+;;        ; the current page yet, keep going
+;;        bne @lo
+;;        ; bottom of page reached, move to the top of the 'next' page
+;;        ; (remember that we're walking down through memory, not up!)
+;;        dex 
+;;        ; have we finished? i.e. the page decrement
+;;        ; goes below the bitmap base address
+;;        cpx #> ELITE_BITMAP_ADDR
+;;        ; no, continue looping -- jumping here will
+;;        ; roll over the lo-byte from $00 to $FF
+;;        bcs @hi
 
 .ifdef  OPTION_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
