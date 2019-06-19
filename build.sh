@@ -293,7 +293,7 @@ $cl65 $options \
         "src/text/text_pairs.asm" \
         "src/text/text_flight.asm" \
         "src/text/text_docked.asm" \
-        "src/boot/disk_boot_exo.asm"
+        "src/c64/prgheader.asm"
 
 echo "[OK]"
 
@@ -309,11 +309,7 @@ $exomizer \
     -s "lda #\$00 sta \$d011 sta \$d020" \
     -X "inc \$d020 dec \$d020" \
     -o "bin/harmless-exo.prg" \
-    -- \
-        "bin/init.prg" \
-        "bin/prg1.prg" \
-        "bin/prg2.prg" \
-        "bin/prg3.prg"
+    -- "bin/harmless.prg"
 
 echo "[OK]"
 echo -n "- write floppy disk image           "
@@ -351,7 +347,7 @@ $cl65 $options \
         "src/text/text_pairs.asm" \
         "src/text/text_flight.asm" \
         "src/text/text_docked.asm" \
-        "src/boot/disk_boot_exo.asm"
+        "src/c64/prgheader.asm"
 
 echo "[OK]"
 
@@ -367,11 +363,7 @@ $exomizer \
     -s "lda #\$00 sta \$d011 sta \$d020" \
     -X "inc \$d020 dec \$d020" \
     -o "bin/harmless-exo.prg" \
-    -- \
-        "bin/init.prg" \
-        "bin/prg1.prg" \
-        "bin/prg2.prg" \
-        "bin/prg3.prg"
+    -- "bin/harmless.prg"
 
 echo "[OK]"
 echo -n "- write floppy disk image           "

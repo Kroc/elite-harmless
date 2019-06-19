@@ -16,8 +16,9 @@
 ; - bitmap data comes first so we just need to multiply up row & column
 ;
 .local  offset
-        offset .set (2 + (row * 320) + (col * 8))
 .local  length
+
+        offset .set (2 + (row * 320) + (col * 8))
         length .set (chars * 8)
 
 .incbin "build/hud_koala.koa", offset, length

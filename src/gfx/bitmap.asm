@@ -12,13 +12,31 @@
 ; issue a warning that this is "suspiciously large"!
 ;.align          $2000
 
-; whilst the bitmap screen is aligned to 8'192 bytes, it doesn't occupy all
-; of them. 8 bytes per char, times 40 columns, times 25 rows equals 8'000
-; bytes. typically code just writes/erases the whole 8'192 bytes, but when
-; VIC bank #3 is being used with the bitamp at $E000-$FFFF, the last few bytes
-; hold the hardware registers and erasing these will crash the machine!
-.res            8000
+; in the original game, the bitmap screen is constructed by code and the bitmap
+; area is instead used as packing space for initialisation. in elite-harmless
+; we store a pre-constructed bitmap screen in the binary, doing away with
+; a lot of code spread throughout the game to erase and rebuild the screen
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; simply reserve the 8K of space for the original game
+        .res    $2000
 
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; import the pre-constructed default bitmap screen:
+        ;
+        ; note that whilst the bitmap screen is aligned to 8'192 bytes,
+        ; it doesn't occupy all of them. 8 bytes per char, times 40 columns,
+        ; times 25 rows equals 8'000 bytes. typically code just writes/erases
+        ; the whole 8'192 bytes, but when VIC bank #3 is being used with the
+        ; bitamp at $E000-$FFFF, the last few bytes hold the hardware registers
+        ; and erasing these will crash the machine!
+        ;
+        ; this macro is defined in "hud_copy.asm" and it extracts bitmap
+        ; data from the Koala image file of the viewport/HUD image
+        ;
+        .koala_bitmap   0, 0, 1000
+
+.endif  ;///////////////////////////////////////////////////////////////////////
 ;===============================================================================
 
 ; the BBC Micro, unusually for an 8-bit, has programmable display circuitry

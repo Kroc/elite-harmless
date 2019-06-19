@@ -47,8 +47,6 @@
 .include        "code_6A00.asm"                                         ;$6A00
 .include        "code_9900.asm"                                         ;$9900
 
-.include        "gfx/bitmap.asm"                                        ;$9700
-
 .ifndef         OPTION_NOSOUND
 ;///////////////////////////////////////////////////////////////////////////////
 .include        "sound.asm"                                             ;$B4CB
@@ -57,3 +55,5 @@
 
 .include        "gfx/hull_data.asm"                                     ;$D000
 .include        "gfx/hud_copy.asm"                                      ;$EF90
+
+.include        "gfx/bitmap.asm"                                        ;$9700
