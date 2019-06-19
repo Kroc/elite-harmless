@@ -54,6 +54,5 @@
 .endif
 
 .include        "gfx/hull_data.asm"                                     ;$D000
-.include        "gfx/hud_copy.asm"                                      ;$EF90
 
-.include        "gfx/bitmap.asm"                                        ;$9700
+.include        "gfx/gfx_bitmap.asm"

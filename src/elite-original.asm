@@ -43,7 +43,7 @@
 
 .include        "orig_init.asm"                                         ;$75E4
 
-.include        "gfx/bitmap.asm"                                        ;$9700
+.include        "gfx/gfx_bitmap.asm"
 
 .segment        "CODE_9900"
 .include        "code_9900.asm"                                         ;$9900
@@ -51,4 +51,3 @@
 .include        "sound.asm"                                             ;$B4CB
 
 .include        "gfx/hull_data.asm"                                     ;$D000
-.include        "gfx/hud_copy.asm"                                      ;$EF90

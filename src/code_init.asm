@@ -7,15 +7,6 @@
 ; "orig_init.asm". this code is loaded into the variable space the game
 ; uses, so once executed it is erased!
 
-.zeropage
-
-ZP_COPY_TO      := $18
-ZP_COPY_TO_LO   := $18
-ZP_COPY_TO_HI   := $19
-ZP_COPY_FROM    := $1a
-ZP_COPY_FROM_LO := $1a
-ZP_COPY_FROM_HI := $1b
-
 .segment        "CODE_INIT"
 
 init:
@@ -102,66 +93,6 @@ init:
         ;
         lda # ELITE_VIC_MEMORY_MENUSCR
         sta VIC_MEMORY
-
-        ; clear the screen
-        ;=======================================================================
-        ; NOTE: if VIC bank #3 is being used, the screens will be under the I/O
-        ; shield! make sure to turn off I/O before trying to write to $D000+
-        ;
-        dec CPU_CONTROL         ; disable I/O
-       
-        ; set the screen-colours for the menu-screen:
-        ; (high-resolution section only, no HUD)
-        ;-----------------------------------------------------------------------
-        lda #< ELITE_MENUSCR_ADDR
-        sta ZP_COPY_TO_LO
-        lda #> ELITE_MENUSCR_ADDR
-        sta ZP_COPY_TO_HI
-
-        ldx # 25                ; 25-rows
-
-        ; colour the borders yellow down the sides of the view-port:
-@menu:  lda # .color_nybble( YELLOW, BLACK )
-        ldy # 36                ; set the colour on column 37
-        sta [ZP_COPY_TO], y
-        ldy # 3                 ; set the colour on column 4
-        sta [ZP_COPY_TO], y
-        dey
-
-        ; colour the area outside the viewport black
-        lda # .color_nybble( BLACK, BLACK )
-:       sta [ZP_COPY_TO], y     ; set columns 2, 1 & 0 to black
-        dey 
-        bpl :-
-
-        ldy # 37                ; begin at column 38
-        sta [ZP_COPY_TO], y     ; set column 38 black
-        iny 
-        sta [ZP_COPY_TO], y     ; and column 39
-        iny 
-        sta [ZP_COPY_TO], y     ; and column 40
-
-        ; move to the next row
-        ; (add 40 columns)
-        lda ZP_COPY_TO_LO
-        clc 
-        adc # 40
-        sta ZP_COPY_TO_LO
-        bcc :+
-        inc ZP_COPY_TO_HI
-:       dex                     ; repeat for 25 rows
-        bne @menu
-
-        ; set yellow colour across the bottom row of the menu-screen
-        lda # .color_nybble( YELLOW, BLACK )
-        ldy # ELITE_VIEWPORT_COLS - 1
-:       sta ELITE_MENUSCR_ADDR + .scrpos( 24, 4 ), y
-        dey 
-        bpl :-
-
-        ; re-enable the I/O shield
-        ; to manage colour-RAM & sprites
-        inc CPU_CONTROL
         
         ; upload the colour RAM from the initialisation data:
         ;-----------------------------------------------------------------------
