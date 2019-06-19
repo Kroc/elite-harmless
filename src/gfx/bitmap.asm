@@ -8,10 +8,6 @@
 ;
 .segment        "VIC_BITMAP"
 
-; if we force the 8K alignment required by bitmap screens, the linker will
-; issue a warning that this is "suspiciously large"!
-;.align          $2000
-
 ; in the original game, the bitmap screen is constructed by code and the bitmap
 ; area is instead used as packing space for initialisation. in elite-harmless
 ; we store a pre-constructed bitmap screen in the binary, doing away with

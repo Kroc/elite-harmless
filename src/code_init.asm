@@ -170,7 +170,7 @@ init:
         ldx # .page_count( 1000 )
         ldy # $00
         ; copy one-byte of colour RAM over
-@from:  lda gfx_colorram_copy, y
+@from:  lda gfx_colorram_init, y
 @to:    sta $D800, y
         dey 
         bne @from               ; keep copying page?

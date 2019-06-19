@@ -3,9 +3,9 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; the game's default viewport/HUD data is stored in "hud_koala.asm",
+; the game's default viewport/HUD data is stored in "gfx_koala_main.asm",
 ; and during the build process, this is assembled into a Koala Painter
-; image file "build/hud_koala.koa" -- the bytes that will go into the
+; image file "build/bitmap_main.koa" -- the bytes that will go into the
 ; game are extracted from that image file here
 
 .macro  .koala_bitmap   row, col, chars
@@ -21,7 +21,7 @@
         offset .set (2 + (row * 320) + (col * 8))
         length .set (chars * 8)
 
-.incbin "build/hud_koala.koa", offset, length
+.incbin "build/screen_main.koa", offset, length
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -37,7 +37,7 @@
 .local  offset
         offset .set (2 + 8000 + (row * 40) + col)
 
-.incbin "build/hud_koala.koa", offset, chars
+.incbin "build/screen_main.koa", offset, chars
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -54,7 +54,7 @@
 .local  offset
         offset .set (2 + 8000 + 1000 + (row * 40) + col)
 
-.incbin "build/hud_koala.koa", offset, chars
+.incbin "build/screen_main.koa", offset, chars
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -213,8 +213,8 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ;
 .segment        "GFX_COLORRAM"
 
-; `proc` is used so that `.sizeof(gfx_colorram_copy)` is available
-.proc   gfx_colorram_copy                                               ;$795A
+; `proc` is used so that `.sizeof(gfx_colorram_init)` is available
+.proc   gfx_colorram_init                                               ;$795A
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////

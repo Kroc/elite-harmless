@@ -78,12 +78,20 @@ options="-DOPTION_ORIGINAL"
 # assemble the HUD bitmap into a Koala file we can pick bytes from.
 # we won't use a linker script for this as we don't need to include
 # any external symbols or definitions
-echo -n "- assemble 'hud_koala.koa'          "
+echo -n "- assemble 'screen_main.koa'        "
 $cl65 $options \
     --target none \
     --start-addr \$4000 \
-     -o "build/hud_koala.koa" \
-        "src/gfx/hud_koala.asm"
+     -o "build/screen_main.koa" \
+        "src/gfx/gfx_koala_main.asm"
+
+echo "[OK]"
+echo -n "- assemble 'screen_menu.koa'        "
+$cl65 $options \
+    --target none \
+    --start-addr \$4000 \
+     -o "build/screen_menu.koa" \
+        "src/gfx/gfx_koala_menu.asm"
 
 echo "[OK]"
 
@@ -435,7 +443,6 @@ rm -f src/c64/*.o
 rm -f src/gfx/*.o
 rm -f src/text/*.o
 
-rm -rf build/*.koa
 echo "[OK]"
 
 echo "  ======================================"

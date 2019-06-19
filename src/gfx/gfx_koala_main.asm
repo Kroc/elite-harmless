@@ -15,13 +15,13 @@
 ;       1000 bytes - colour RAM
 ;          1 byte  - background colour
 ;
-; even though elite doesn't store its bitmap at $6000, Koala files
+; even though Elite doesn't store its bitmap at $6000, Koala files
 ; are often recognised by this header, so for compatibility with
 ; image editors, we stick to $6000
 ;
         .word   $6000
 
-; bitmap data
+; bitmap data                                                     original-addr
 ;===============================================================================
 ; ROW 0                                                                 ;$4000
 ;-------------------------------------------------------------------------------
@@ -412,7 +412,7 @@
         .byte   $00, $00, $00, $00, $00, $00, $00, $00  ; COL 38
         .byte   $00, $00, $00, $00, $00, $00, $00, $00  ; COL 39
 ;===============================================================================
-; screen RAM                                                            ;$6000
+; screen RAM                                                            ;$6400
 ;===============================================================================
 ; ROWS 0-17
 ;-------------------------------------------------------------------------------
