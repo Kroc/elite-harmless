@@ -256,7 +256,7 @@ init:
         ; - bit   3: 38 columns (borders inset)
         ; - bit   4: multi-color mode off
         ;
-        lda # %11000000         ; undocumented bits? default?
+        lda # vic_screen_ctl2::unused
         sta VIC_SCREEN_CTL2
         
         ; set up the bitmap screen:

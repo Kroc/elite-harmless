@@ -85,10 +85,10 @@ clear_screen:                                                           ;$B21A
         
         ; will switch to menu screen during the interrupt
         lda # ELITE_VIC_LAYOUT_MENUSCR
-        sta _a8db
+        sta interrupt_layout2
 
         lda # %11000000         ; default value
-        sta _a8e1
+        sta interrupt_screenmode2
 
         jsr hide_all_ships
         jsr disable_sprites
@@ -182,10 +182,10 @@ clear_screen:                                                           ;$B21A
         ;-----------------------------------------------------------------------
         ; will switch to menu screen during the interrupt
         lda # ELITE_VIC_LAYOUT_MENUSCR
-        sta _a8db
+        sta interrupt_layout2
 
         lda # %11000000         ; default value
-        sta _a8e1
+        sta interrupt_screenmode2
 
         ; erase bitmap to end?
         ; TODO: fix for VIC bank 3
@@ -308,10 +308,10 @@ _b301:                                                                  ;$B301
         jsr _b2b2
 
         lda # ELITE_VIC_LAYOUT_MAINSCR
-        sta _a8db
+        sta interrupt_layout2
 
-        lda # %11000000 | vic_screen_ctl2::multicolor
-        sta _a8e1
+        lda # vic_screen_ctl2::unused | vic_screen_ctl2::multicolor
+        sta interrupt_screenmode2
 
         lda _1d04               ; is HUD visible? (main or menu screen?)
         bne _b335

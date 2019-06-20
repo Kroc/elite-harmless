@@ -465,8 +465,8 @@ _1f20:                                                                  ;$1F20
         asl PLAYER_EBOMB        ; does player have an energy bomb?
         beq :+                  ; no? keep going
 
-        ldy # %11000000 | vic_screen_ctl2::multicolor
-        sty _a8e0
+        ldy # vic_screen_ctl2::unused | vic_screen_ctl2::multicolor
+        sty interrupt_screenmode1
 
         ldy # $0d
         jsr _a858               ; handle e-bomb?
@@ -1162,7 +1162,7 @@ _2366:                                                                  ;$2366
 _2367:                                                                  ;$2367
 ;===============================================================================
         lda # %11000000
-        sta _a8e0
+        sta interrupt_screenmode1
 
         lda # $00
         sta _a8e6

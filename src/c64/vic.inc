@@ -122,9 +122,12 @@ VIC_SCREEN_CTL1                 = $d011 ; screen-control register
 VIC_SCREEN_CTL2                 = $d016
 
 .enum   vic_screen_ctl2
+        unused          = %11000000     ;=$C0 - unused, but always present
         scroll_horz     = %00000111     ;=$07 - horizontal scroll offset
         cols            = %00001000     ;=$08 - 1 = 38 cols, 0 = 40 cols
         multicolor      = %00010000     ;=$10 - 1 = multi-color mode on
+
+        default         = %11001000     ;=$C8 - default value at system-on
 .endenum
 
 VIC_SCREEN_VERT                 = $d011 ; vertical scroll offset (bits 0-2)

@@ -4,19 +4,20 @@
 ;===============================================================================
 
 ; this table contains the state-switches for the raster-splits, that is, what
-; properties of the VIC to change at the first split (bitmap line 1), then the
-; second split (bitmap line 145), the HUD. for example, the top-border on the
-; screen is multi-colour and switches to hires afterwards, then multi-colour
-; is reenabled for the HUD
+; properties of the VIC-II to change at the first split (bitmap line 1), then
+; the second split (bitmap line 145), the HUD. for example, the top-border on
+; the screen is multi-colour and switches to hires afterwards,
+; then multi-colour is reenabled for the HUD
 ;
 _a8d9:                                                                  ;$A8D9
         .byte   $00
 
-; these are `VIC_LAYOUT` states
+; VIC-II memory layout state for each raster-split:
 ;-------------------------------------------------------------------------------
-_a8da:                                                                  ;$A8DA
+interrupt_layout:
+interrupt_layout1:                                                      ;$A8DA
         .byte   ELITE_VIC_LAYOUT_MENUSCR
-_a8db:                                                                  ;$A8DB
+interrupt_layout2:                                                      ;$A8DB
         .byte   ELITE_VIC_LAYOUT_MENUSCR
 
 ; this is a toggle for `_a8d9`
@@ -25,28 +26,37 @@ _a8dc:                                                                  ;$A8DC
 
 ; the location of raster-splits:
 ;-------------------------------------------------------------------------------
-_a8de:                                                                  ;$A8DE
+interrupt_scanline:                                                     ;$A8DE
+interrupt_scanline1:
         ; top of screen, plus height of viewport
         .byte   51 + ELITE_VIEWPORT_HEIGHT-1
+interrupt_scanline2:
         ; scanline 51, 2nd pixel row in screen
         ; i.e. changes after the yellow border at the top
         .byte   51
 
-; these are `VIC_SCREEN_CTL2` states
-_a8e0:                                                                  ;$A8E0
-        .byte   %11000000
-_a8e1:                                                                  ;$A8E1
-        .byte   %11000000
+; hires/multi-colour bitmap state to use at each raster split:
+;-------------------------------------------------------------------------------
+; (note that these are `VIC_SCREEN_CTL2` states, see "c64/vic.inc" for details)
+interrupt_screenmode:
+interrupt_screenmode1:                                                  ;$A8E0
+        .byte   vic_screen_ctl2::unused
+interrupt_screenmode2:                                                  ;$A8E1
+        .byte   vic_screen_ctl2::unused
 
 ; these are `VIC_SPRITE_MULTICOLOR` states
 _a8e2:                                                                  ;$A8E2
-        .byte   %11111110, %11111100
+        .byte   %11111110
+        .byte   %11111100
 
 ; these are `VIC_SPRITE1_COLOR` states
 _a8e4:                                                                  ;$A8E4
-        .byte   RED, BLACK
+        .byte   RED
+        .byte   BLACK
+
 _a8e6:                                                                  ;$A8E6
-        .byte   $00, $00
+        .byte   $00
+        .byte   $00
 
 ; e-bomb explosion?
 ;
@@ -75,13 +85,16 @@ interrupt_end_XA:                                                       ;$A8ED
         ; has been pushed to the stack
         pla
 .endif  ;///////////////////////////////////////////////////////////////////////
-        sta CPU_CONTROL
+        sta CPU_CONTROL         ; restore the memory map
 
         pla                     ; restore A
         rti                     ; "ReTurn from Interrupt"
 
 ;===============================================================================
 ; this is Elite's main interrupt routine
+;
+; note that this routine gets called by both raster splits,
+; so functionality for both is combined in the one routine
 ;
 interrupt:                                                              ;$A8FA
 
@@ -134,23 +147,31 @@ interrupt:                                                              ;$A8FA
 
        .phx                     ; push X to stack (via A)
 
+        ; load the toggle-state; this value flips between 0 & 1 for the two
+        ; raster splits and is used as an index for what VIC states to set
+        ; at each split
         ldx _a8d9
 
-        ; flicker the VIC memory map!?
-        ; the two values are the same, so this does nothing in practice
-        ;
-        lda _a8da, x
+        ; change the VIC memory layout for the current split. this is used to
+        ; switch between the two text-screens that hold colour data used for
+        ; the main flight screen (includes HUD) and menu screens (no HUD)
+        lda interrupt_layout, x
         sta VIC_LAYOUT
 
-        lda _a8e0, x
+        ; set screen properties for the split,
+        ; i.e. dis/enabling multi-colour bitmap mode
+        lda interrupt_screenmode1, x
         sta VIC_SCREEN_CTL2
 
-        lda _a8de, x
+        ; set the next raster-split line
+        lda interrupt_scanline, x
         sta VIC_RASTER
 
+        ; dis/enable sprite multi-colour mode
         lda _a8e2, x
         sta VIC_SPRITE_MULTICOLOR
 
+        ; change the sprite colour
         lda _a8e4, x
         sta VIC_SPRITE1_COLOR
 
@@ -168,12 +189,13 @@ interrupt:                                                              ;$A8FA
 
         ; exit when this is not the last interrupt of this frame
         ; (the interrupt directly before the HUD, so the next index is zero)
-        ; everything that follows shall only be don 1x per frame
+        ;  everything that follows shall only be done 1x per frame
        .bnz interrupt_end_XA
 
-        ; push Y to stack (via A).
-        ; from this point we must restore Y before ending the interrupt,
-        ; so a different exit point is used than the one above
+        ;-----------------------------------------------------------------------
+        ; push Y to stack (via A). from this point we must restore Y before
+        ; ending the interrupt, so a different exit point is used than the
+        ; one above
        .phy
 
         bit _1d03               ; if this option,
@@ -297,7 +319,7 @@ interrupt_end_YXA:                                                      ;$AA04
         ; has been pushed to the stack
         pla
 .endif  ;///////////////////////////////////////////////////////////////////////
-        sta CPU_CONTROL
+        sta CPU_CONTROL         ; restore the memory map
 
         pla                     ; restore A
         rti                     ; "ReTurn from Interrupt"
@@ -357,13 +379,13 @@ _aaa2:                                                                  ;$AAA2
         .byte   $03, $03, $03, $0f, $0f, $ff, $ff, $1f
         .byte   $ff, $ff, $03, $03, $0f, $ff, $ff, $03
 
+;===============================================================================
+; clear the main variable space and initialise the interrupts:
 ; CALL FROM LOADER; this is the first thing called after initialisation
+;
+init_mem:                                                               ;$AAB2
 
 .export init_mem
-.proc   init_mem                                                        ;$AAB2
-        ;=======================================================================
-        ; clear the main variable space
-        ;
 .import __VARS_MAIN_RUN__       ; runtime location
 .import __VARS_MAIN_SIZE__      ; and length
 
@@ -499,13 +521,12 @@ _aaa2:                                                                  ;$AAA2
 
         cli                     ; enable interrupts
         rts
-.endproc
 
-.proc   nmi_null                                                        ;$AB27
-        ;=======================================================================
-        ; a Non-Maskable-Interrupt that does nothing; used to disable the
-        ; RESTORE key and to prevent crashes when the KERNAL ROM is off
-        ;
+;===============================================================================
+; a Non-Maskable-Interrupt that does nothing; used to disable the
+; RESTORE key and to prevent crashes when the KERNAL ROM is off
+;
+nmi_null:                                                               ;$AB27
+
         cli                     ; re-enable interrupts
         rti                     ; "ReTurn from Interrupt"
-.endproc

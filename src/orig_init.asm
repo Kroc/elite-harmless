@@ -153,7 +153,7 @@ _75e4:                                                                  ;$75E4
         ; - bit 0-2: horizontal scroll (0)
         ; - bit   3: 38 columns (borders inset)
         ; - bit   4: multi-color mode off
-        lda # %11000000         ; undocumented bits? default?
+        lda # vic_screen_ctl2::unused
         sta VIC_SCREEN_CTL2
 
         ; disable all sprites
