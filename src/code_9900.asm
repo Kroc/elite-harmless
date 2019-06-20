@@ -2644,11 +2644,11 @@ _a8bd:                                                                  ;$A8BD
 _a8d9:                                                                  ;$A8D9
         .byte   $00
 
-; these are VIC_MEMORY states
+; these are VIC_LAYOUT states
 _a8da:                                                                  ;$A8DA
-        .byte   ELITE_VIC_MEMORY_MENUSCR
+        .byte   ELITE_VIC_LAYOUT_MENUSCR
 _a8db:                                                                  ;$A8DB
-        .byte   ELITE_VIC_MEMORY_MENUSCR
+        .byte   ELITE_VIC_LAYOUT_MENUSCR
 
 ; this is a toggle for `_a8d9`
 _a8dc:                                                                  ;$A8DC
@@ -2770,7 +2770,7 @@ interrupt:                                                              ;$A8FA
         ; the two values are the same, so this does nothing in practice
         ;
         lda _a8da, x
-        sta VIC_MEMORY
+        sta VIC_LAYOUT
 
         lda _a8e0, x
         sta VIC_SCREEN_CTL2

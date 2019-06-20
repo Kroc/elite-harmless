@@ -84,7 +84,7 @@ clear_screen:                                                           ;$B21A
         stx _1d04               ;?
         
         ; will switch to menu screen during the interrupt
-        lda # ELITE_VIC_MEMORY_MENUSCR
+        lda # ELITE_VIC_LAYOUT_MENUSCR
         sta _a8db
 
         lda # %11000000         ; default value
@@ -181,7 +181,7 @@ clear_screen:                                                           ;$B21A
 @_b25d:                                                                 ;$B25D
         ;-----------------------------------------------------------------------
         ; will switch to menu screen during the interrupt
-        lda # ELITE_VIC_MEMORY_MENUSCR
+        lda # ELITE_VIC_LAYOUT_MENUSCR
         sta _a8db
 
         lda # %11000000         ; default value
@@ -307,7 +307,7 @@ _b2e1:                                                                  ;$B2E1
 _b301:                                                                  ;$B301
         jsr _b2b2
 
-        lda # ELITE_VIC_MEMORY_MAINSCR
+        lda # ELITE_VIC_LAYOUT_MAINSCR
         sta _a8db
 
         lda # %11000000 | vic_screen_ctl2::multicolor
@@ -582,30 +582,28 @@ erase_page_to_end:                                                      ;$B3B5
 
         rts
 
-; unreferenced / unused?
-;$b3bd:
-        sta ZP_CURSOR_COL
-        rts
-
-_b3c0:                                                                  ;$B3C0
-        sta ZP_CURSOR_ROW
-        rts
-
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
-;
-; does a large block-copy of bytes. used to wipe the HUD
-; by copying over a clean copy of the HUD in RAM.
-;
-; [ZP_TEMP_ADDR3] = from address
-; [ZP_TEMP_ADDR1] = to address
-;               X = number of pages to copy
-;
-; the copy method is replaced with a faster alternative
-; in elite-harmless, so this routine is no longer used
-;
+; unreferenced / unused?
+
+        sta ZP_CURSOR_COL                                               ;$B3BD
+        rts
+
+        sta ZP_CURSOR_ROW                                               ;$B3C0
+        rts
+
 block_copy:                                                             ;$B3C3
-        ;-----------------------------------------------------------------------
+        ;=======================================================================
+        ; does a large block-copy of bytes. used to wipe the HUD
+        ; by copying over a clean copy of the HUD in RAM.
+        ;
+        ; [ZP_TEMP_ADDR3] = from address
+        ; [ZP_TEMP_ADDR1] = to address
+        ;               X = number of pages to copy
+        ;
+        ; the copy method is replaced with a faster alternative
+        ; in elite-harmless, so this routine is no longer used
+        ;
         ; start copying from the beginning of the page
         ldy # $00
 

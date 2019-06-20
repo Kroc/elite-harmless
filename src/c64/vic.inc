@@ -58,16 +58,16 @@ LTGREY          = $0f     ; %1111
 
 ; given a bitmap address returns %0000 if it appears in the lower-half
 ; of the VIC bank (+$0000), or %1000 if it appears in the upper half (+$2000)
-; -- this is for use as bit 3 of $D018; see `VIC_MEMORY` below
+; -- this is for use as bit 3 of $D018; see `VIC_LAYOUT` below
 ;
-.define .vic_memory_bitmap( addr ) \
+.define .vic_layout_bitmap( addr ) \
         ((addr .mod $4000) >> 10)
 
 ; for a given screen memory address (any multiple of $0400), returns the
 ; bit-pattern for use with the VIC-II memory register $D018 that sets the
 ; location of the text-screen (and bitmap and charset)
 ;
-.define .vic_memory_screen( addr ) \
+.define .vic_layout_screen( addr ) \
         ((( addr .mod $4000) / $0400) << 4)
 
 ; the sprite pointers are stored in the unused space directly after the screen
@@ -140,12 +140,12 @@ VIC_SPRITE_ENABLE               = $d015
 VIC_SPRITE_DBLHEIGHT            = $d017
 VIC_SPRITE_DBLWIDTH             = $d01d
 
-VIC_MEMORY                      = $d018
+VIC_LAYOUT                      = $d018
 ;
 ; the location in memory of the text-screen / colour-data, character-set and
 ; bitmap are determined by a single register, $D018, consisting of two fields:
 ;
-.enum   vic_memory
+.enum   vic_layout
         ;
         ; bits 4-7 select the location of the text-screen / colour-data, which
         ; can be any of these values: (note that these addresses are relative

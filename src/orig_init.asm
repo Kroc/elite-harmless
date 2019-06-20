@@ -130,8 +130,8 @@ _75e4:                                                                  ;$75E4
         ;             bitmap screen @ $4000..$6000
         ; %xxxxxxx1 = N/A! (but included in the original source)
         ;
-        lda # ELITE_VIC_MEMORY_MENUSCR
-        sta VIC_MEMORY
+        lda # ELITE_VIC_LAYOUT_MENUSCR
+        sta VIC_LAYOUT
 
         lda # BLACK
         sta VIC_BORDER          ; set border colour black

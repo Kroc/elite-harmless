@@ -85,14 +85,14 @@ init:
 
         ; set up VIC-II memory:
         ;
-        ; the VIC-II register $D018 (here, `VIC_MEMORY`) controls the relative
+        ; the VIC-II register $D018 (here, `VIC_LAYOUT`) controls the relative
         ; locations of the screen, character map and bitmap screen within the
         ; selected VIC-II bank. "elite.inc" takes the memory addresses defined
         ; by the linker script ("link/elite-*.cfg") and puts together a $D018
         ; value that selects the chosen screen & bitmap locations
         ;
-        lda # ELITE_VIC_MEMORY_MENUSCR
-        sta VIC_MEMORY
+        lda # ELITE_VIC_LAYOUT_MENUSCR
+        sta VIC_LAYOUT
         
         ; upload the colour RAM from the initialisation data:
         ;-----------------------------------------------------------------------

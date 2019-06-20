@@ -692,10 +692,10 @@ _062b:
         jsr KERNAL_SCINIT
 
         ; change the RAM / ROM layout
-        lda VIC_MEMORY
-        and # vic_memory::char_mask | vic_memory::unused
-        ora # vic_memory::screen_0800
-        sta VIC_MEMORY
+        lda VIC_LAYOUT
+        and # vic_layout::char_mask | vic_layout::unused
+        ora # vic_layout::screen_0800
+        sta VIC_LAYOUT
 
         ; change border / background colour
         lda # RED

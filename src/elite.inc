@@ -44,16 +44,16 @@ ELITE_VIC_ADDR          = ELITE_VIC_BANK * $4000
 .import ELITE_MAINSCR_ADDR
 
 
-ELITE_VIC_MEMORY_MAINSCR := \
+ELITE_VIC_LAYOUT_MAINSCR := \
      <( (((ELITE_MAINSCR_ADDR .mod $4000) / $0400) << 4) \
       |  ((ELITE_BITMAP_ADDR .mod $4000) >> 10) \
-      | vic_memory::unused \
+      | vic_layout::unused \
       )
 
-ELITE_VIC_MEMORY_MENUSCR := \
+ELITE_VIC_LAYOUT_MENUSCR := \
      <( (((ELITE_MENUSCR_ADDR .mod $4000) / $0400) << 4) \
       |  ((ELITE_BITMAP_ADDR .mod $4000) >> 10) \
-      | vic_memory::unused \
+      | vic_layout::unused \
       )
 
 .import ELITE_SPRITES_ADDR
