@@ -301,3 +301,211 @@ interrupt_end_YXA:                                                      ;$AA04
 
         pla                     ; restore A
         rti                     ; "ReTurn from Interrupt"
+
+;===============================================================================
+
+_aa13:                                                                  ;$AA13
+        .byte   $00, $00
+_aa15:                                                                  ;$AA15
+        .byte   $00
+_aa16:                                                                  ;$AA16
+        .byte   $00, $00, $00
+_aa19:                                                                  ;$AA19
+        .byte   $00
+_aa1a:                                                                  ;$AA1A
+        .byte   $00
+_aa1b:                                                                  ;$AA1B
+        .byte   $00
+_aa1c:                                                                  ;$AA1C
+        .byte   $02
+_aa1d:                                                                  ;$AA1D
+        .byte   $00, $00, $00
+_aa20:                                                                  ;$AA20
+        .byte   $00, $00, $00
+_aa23:                                                                  ;$AA23
+        .byte   $00, $00, $00
+_aa26:                                                                  ;$AA26
+        .byte   $00, $00, $00
+_aa29:                                                                  ;$AA29
+        .byte   $00, $00, $00
+_aa2c:                                                                  ;$AA2C
+        .byte   $00, $00, $00
+_aa2f:                                                                  ;$AA2F
+        .byte   $00, $07, $0e
+_aa32:                                                                  ;$AA32
+        .byte   $72, $70, $74, $77, $73, $68, $60, $f0
+        .byte   $30, $fe, $72, $72, $92, $e1, $51, $02
+_aa42:                                                                  ;$AA42
+        .byte   $14, $0e, $0c, $50, $3f, $05, $18, $80
+        .byte   $30, $ff, $10, $10, $70, $40, $0f, $0e
+_aa52:                                                                  ;$AA52
+        .byte   $45, $48, $d0, $51, $40, $f0, $40, $80
+        .byte   $10, $50, $34, $33, $60, $55, $80, $40
+_aa62:                                                                  ;$AA62
+        .byte   $41, $11, $81, $81, $81, $11, $11, $41
+        .byte   $21, $41, $21, $21, $11, $81, $11, $21
+_aa72:                                                                  ;$AA72
+        .byte   $01, $09, $20, $08, $0c, $00, $63, $18
+        .byte   $44, $11, $00, $00, $44, $11, $18, $09
+_aa82:                                                                  ;$AA82
+        .byte   $d1, $f1, $e5, $fb, $dc, $f0, $f3, $d8
+        .byte   $00, $e1, $e1, $f1, $f4, $e3, $b0, $a1
+_aa92:                                                                  ;$AA92
+        .byte   $fe, $fe, $f3, $ff, $00, $00, $00, $44
+        .byte   $00, $55, $fe, $ff, $ef, $77, $7b, $fe
+_aaa2:                                                                  ;$AAA2
+        .byte   $03, $03, $03, $0f, $0f, $ff, $ff, $1f
+        .byte   $ff, $ff, $03, $03, $0f, $ff, $ff, $03
+
+; CALL FROM LOADER; this is the first thing called after initialisation
+
+.export init_mem
+.proc   init_mem                                                        ;$AAB2
+        ;=======================================================================
+        ; clear the main variable space
+        ;
+.import __VARS_MAIN_RUN__       ; runtime location
+.import __VARS_MAIN_SIZE__      ; and length
+
+        lda #> __VARS_MAIN_RUN__
+        sta ZP_TEMP_ADDR1_HI
+
+        ; number of whole pages to copy
+        ldx #< .page_count( __VARS_MAIN_SIZE__ )
+
+        lda #< __VARS_MAIN_RUN__
+        sta ZP_TEMP_ADDR1_LO
+        tay                     ; =0
+
+:       sta [ZP_TEMP_ADDR1], y                                          ;$AABD
+        iny
+        bne :-
+
+        inc ZP_TEMP_ADDR1_HI     ; move to the next page
+        dex
+        bne :-
+
+        ;-----------------------------------------------------------------------
+        ; set non-maskable interrupt location when the KERNAL is on.
+        ; pressing the RESTORE key will fire this routine
+        ;
+        ; note that when the KERNAL is switched off, the RAM underneath will
+        ; define the NMI interrupt address -- this gets rectified further down
+        ;
+        lda #< nmi_null
+        sta KERNAL_VECTOR_NMI+0
+        lda #> nmi_null
+        sta KERNAL_VECTOR_NMI+1
+
+        ; set new KERNAL_CHROUT (print character) routine
+        ; -- re-route printing to the bitmap screen
+        ;
+        lda #< chrout
+        sta KERNAL_VECTOR_CHROUT+0
+        lda #> chrout
+        sta KERNAL_VECTOR_CHROUT+1
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; change the C64's memory layout, turn off the BASIC & KERNAL ROMs
+        ; leaving just the I/O registers ($D000...)
+        lda # C64_MEM::IO_ONLY
+        jsr set_memory_layout
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        ;
+        ; the KERNAL is currently on, so stepping down
+        ; once will switch from KERNAL+I/O to I/O only
+        ;
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
+
+        sei                     ; disable interrupts
+
+        ; configure interrupts (regular and non-interruptable)
+        ; for system timers A & B -- do not use the TimeOfDay timer
+        ;
+        lda # CIA::TIMER_A | CIA::TIMER_B
+        sta CIA1_INTERRUPT
+        sta CIA2_INTERRUPT
+
+        ; configure SID chip
+        ;
+        lda # 15                ; max volume, filters off
+        sta SID_VOLUME_CTRL
+
+        ; frame indicator?
+        ldx # $00
+        stx _a8d9
+
+        ; set the flag for raster interrupts, but note that with CIA1 & 2
+        ; interrupts currently enabled, the raster interrupt won't fire
+        inx
+        stx VIC_INTERRUPT_CONTROL
+
+        ; the 9th bit (for scanlines 256-312) of the raster line register
+        ; is held in the MSB of $D011. in Elite's case our raster-splits
+        ; all occur before 256 so this bit just needs to be zero
+        lda VIC_SCREEN_CTL1
+        and # vic_screen_ctl1::raster_line ^$FF
+        sta VIC_SCREEN_CTL1
+
+        ; set the interrupt to occur at line 40.
+        ; this is above the top screen border (~50)
+        lda # 40
+        sta VIC_RASTER
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; switch off the ROMs, leaving 64K of RAM
+        lda CPU_CONTROL
+        and # %11111000
+        ora # C64_MEM::ALL
+        sta CPU_CONTROL
+
+        ; record this as the game's
+        ; current memory-layout state
+        lda # C64_MEM::ALL
+        sta current_memory_layout
+
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; optimisation for changing the memory map,
+        ; with thanks to: <http://www.c64os.com/post?p=83>
+        ;
+        ; the I/O shield is currently on so stepping down
+        ; once will turn I/O off leaving 64K of RAM
+        ;
+        dec CPU_CONTROL
+.endif  ;///////////////////////////////////////////////////////////////////////
+
+        ; set up the routines for the interrupts:
+        ;
+        ; NOTE: with the KERNAL ROM off, the hardware vectors at $FFFA...$FFFF
+        ;       are now being defined by empty RAM -- we need to set something
+        ;       there to prevent crashes when KERNAL ROM is off
+
+        ; non-maskable interrupt:
+        lda #< nmi_null
+        sta HW_VECTOR_NMI+0
+        lda #> nmi_null
+        sta HW_VECTOR_NMI+1
+
+        ; regular interrupt:
+        lda #> interrupt
+        sta HW_VECTOR_IRQ+1
+        lda #< interrupt
+        sta HW_VECTOR_IRQ+0
+
+        cli                     ; enable interrupts
+        rts
+.endproc
+
+.proc   nmi_null                                                        ;$AB27
+        ;=======================================================================
+        ; a Non-Maskable-Interrupt that does nothing; used to disable the
+        ; RESTORE key and to prevent crashes when the KERNAL ROM is off
+        ;
+        cli                     ; re-enable interrupts
+        rti                     ; "ReTurn from Interrupt"
+.endproc
