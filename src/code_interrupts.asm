@@ -6,10 +6,11 @@
 ; this table contains the state-switches for the raster-splits, that is, what
 ; properties of the VIC-II to change at the first split (bitmap line 1), then
 ; the second split (bitmap line 145), the HUD. for example, the top-border on
-; the screen is multi-colour and switches to hires afterwards,
-; then multi-colour is reenabled for the HUD
+; the screen is multi-colour and switches to hires, then multi-colour is
+; re-enabled for the HUD
 ;
-_a8d9:                                                                  ;$A8D9
+interrupt_split:                                                        ;$A8D9
+;-------------------------------------------------------------------------------
         .byte   $00
 
 ; VIC-II memory layout state for each raster-split:
@@ -20,12 +21,15 @@ interrupt_layout1:                                                      ;$A8DA
 interrupt_layout2:                                                      ;$A8DB
         .byte   ELITE_VIC_LAYOUT_MENUSCR
 
-; this is a toggle for `_a8d9`
+; this is a toggle for `interrupt_split`
 _a8dc:                                                                  ;$A8DC
         .byte   $01, $00
 
 ; the location of raster-splits:
 ;-------------------------------------------------------------------------------
+; note that because these are used to set up the *next* raster-split,
+; they are effectively in reverse order, starting with the HUD split first
+;
 interrupt_scanline:                                                     ;$A8DE
 interrupt_scanline1:
         ; top of screen, plus height of viewport
@@ -35,7 +39,7 @@ interrupt_scanline2:
         ; i.e. changes after the yellow border at the top
         .byte   51
 
-; hires/multi-colour bitmap state to use at each raster split:
+; hires/multi-colour bitmap state for each raster-split:
 ;-------------------------------------------------------------------------------
 ; (note that these are `VIC_SCREEN_CTL2` states, see "c64/vic.inc" for details)
 interrupt_screenmode:
@@ -44,7 +48,13 @@ interrupt_screenmode1:                                                  ;$A8E0
 interrupt_screenmode2:                                                  ;$A8E1
         .byte   vic_screen_ctl2::unused
 
-; these are `VIC_SPRITE_MULTICOLOR` states
+; sprite multi-colour state for each raster-split:
+;-------------------------------------------------------------------------------
+; these are used to turn on/off sprite multi-colour at the raster-splits;
+; note how the Trumbles™ (bits 7-2) remain multi-colour but the explosion
+; sprite, for unknown reasons, is switched from multi-colour to single-colour
+;
+; (these are `VIC_SPRITE_MULTICOLOR` states, 1 bit for each sprite)
 _a8e2:                                                                  ;$A8E2
         .byte   %11111110
         .byte   %11111100
@@ -150,7 +160,7 @@ interrupt:                                                              ;$A8FA
         ; load the toggle-state; this value flips between 0 & 1 for the two
         ; raster splits and is used as an index for what VIC states to set
         ; at each split
-        ldx _a8d9
+        ldx interrupt_split
 
         ; change the VIC memory layout for the current split. this is used to
         ; switch between the two text-screens that hold colour data used for
@@ -185,7 +195,7 @@ interrupt:                                                              ;$A8FA
         ; fetch the next interrupt index (currently 0->1->0...)
         ; this toggles the interrupt index in the same frame.
         lda _a8dc, x
-        sta _a8d9
+        sta interrupt_split
 
         ; exit when this is not the last interrupt of this frame
         ; (the interrupt directly before the HUD, so the next index is zero)
@@ -198,20 +208,23 @@ interrupt:                                                              ;$A8FA
         ; one above
        .phy
 
-        bit _1d03               ; if this option,
-        bpl _a956               ; is off, skip ahead
-
 .ifndef OPTION_NOSOUND
         ;///////////////////////////////////////////////////////////////////////
+        bit opt_music           ; is music enabled?
+        bpl do_sfx              ; no, skip ahead (do SFX)
+
         jsr _b4d2               ; handle music?
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        bit _1d12               ; sound effects enabled?
-        bmi _a956               ; yes, do SFX
+        bit opt_sfx             ; sound effects enabled?
+        bmi do_sfx              ; yes, do SFX
 
+        ; end the interrupt, but X has been
+        ; used so must be restored first
         jmp interrupt_end_YXA
 
-_a956:                                                                  ;$A956
+do_sfx:                                                                 ;$A956
+        ;=======================================================================
         ldy # $02
 _a958:                                                                  ;$A958
         lda _aa13, y
@@ -459,7 +472,7 @@ init_mem:                                                               ;$AAB2
 
         ; frame indicator?
         ldx # $00
-        stx _a8d9
+        stx interrupt_split
 
         ; set the flag for raster interrupts, but note that with CIA1 & 2
         ; interrupts currently enabled, the raster interrupt won't fire

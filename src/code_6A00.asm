@@ -6247,7 +6247,7 @@ _8ae7:                                                                  ;$8AE7
         sta CIA1_INTERRUPT
 
         ldx # $00
-        stx _a8d9
+        stx interrupt_split
         inx
         stx VIC_INTERRUPT_CONTROL
 
@@ -6377,7 +6377,7 @@ _8c0d:                                                                  ;$8C0D
         sei
 
         ldx # $00
-        stx _a8d9
+        stx interrupt_split
         inx
         stx VIC_INTERRUPT_CONTROL
 
@@ -7212,8 +7212,8 @@ _920d:                                                                  ;$920D
         sta sound_play_addr_lo
         stx sound_play_addr_hi
 
-        bit _1d03
-        bmi _91fd
+        bit opt_music           ; is music enabled?
+        bmi _91fd               ; no, exit
         bit _1d10
         bmi _9222
         bit _1d0d
@@ -7239,9 +7239,10 @@ _9222:                                                                  ;$9222
         dec CPU_CONTROL         ; disable I/O
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda # $ff
-        sta _1d03
-        bne _9266
+        lda # $ff               ; enable music
+        sta opt_music
+        bne _9266               ; (always branches)
+
 _9231:                                                                  ;$9231
         sta _1d02
         eor # %11111111
@@ -7262,7 +7263,7 @@ _923b:                                                                  ;$923B
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _9245:                                                                  ;$9245
-        bit _1d03               ; user option?
+        bit opt_music           ; is music enabled?
         bpl _91fd
 
         jsr _a817
@@ -7279,7 +7280,7 @@ _9245:                                                                  ;$9245
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         lda # $00
-        sta _1d03
+        sta opt_music
 
         ; clear the SID registers
         ; ($D400..$D418)

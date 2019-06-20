@@ -2852,10 +2852,10 @@ wait_for_frame:                                                         ;$B148
         pha                     ; preserve A
 
         ; wait for non-zero in the frame status?
-:       lda _a8d9                                                       ;$B149
+:       lda interrupt_split                                             ;$B149
         beq :-
         ; and then wait for it to return to zero?
-:       lda _a8d9                                                       ;$B14E
+:       lda interrupt_split                                             ;$B14E
         bne :-
 
         pla                     ; restore A

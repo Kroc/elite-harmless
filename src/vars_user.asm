@@ -13,8 +13,11 @@ _1d01:
         .byte   $00
 _1d02:
         .byte   $00
-_1d03:
+
+opt_music:      ; music enabled?                                        ;$1D03
+                ; $00 = off, $FF = on
         .byte   $00
+
 _1d04:
         .byte   $00
 _1d05:
@@ -51,12 +54,18 @@ _1d10:
         .byte   $00
 _1d11:
         .byte   $00
-_1d12:
+
+opt_sfx:        ; SFX enabled?                                          ;$1D12
+                ; $00 = no, $FF = yes
+                ; note that despite this option being present,
+                ; there is no method to change it in the original game
         .byte   $00
+
 _1d13:
         .byte   $00
 
-        ; default values (or some-such) for the above flags?
+;-------------------------------------------------------------------------------
+
 _1d14:
         .byte   $01, $36, $29, $2b, $27, $1e, $1b, $1c
         .byte   $2e, $17, $2c, $32, $24
