@@ -26,7 +26,7 @@
 
 .include        "gfx/gfx_font.asm"                                      ;$0B00
 
-.include        "vars_user.asm"                                         ;$1D00
+.include        "vars_flags.asm"                                        ;$1D00
 
 .segment        "CODE_1D81"
 .include        "code_1D81.asm"                                         ;$1D81

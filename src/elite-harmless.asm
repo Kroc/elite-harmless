@@ -29,7 +29,7 @@
 
 .include        "gfx/gfx_font.asm"                                      ;$0B00
 
-.include        "vars_user.asm"                                         ;$1D00
+.include        "vars_flags.asm"                                        ;$1D00
 
 ; in elite-harmless we conjoin these code segments together
 ;

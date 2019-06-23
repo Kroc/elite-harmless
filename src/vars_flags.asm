@@ -3,9 +3,9 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; user preferences
+; user preferences & some runtime flags
 
-.segment        "VARS_USER"
+.segment        "VARS_FLAGS"
 
 _1d00:  ; nothing appears to actually reference $1D00 itself            ;$1D00
         .byte   $00
