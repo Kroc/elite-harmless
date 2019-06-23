@@ -6647,10 +6647,10 @@ get_ctrl:                                                               ;$8E92
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        sei
+        sei                     ; disable interrupts
         stx CIA1_PORTA
         ldx CIA1_PORTB
-        cli
+        cli                     ; enable interrupts
         inx
         beq _8eab
         ldx # $ff

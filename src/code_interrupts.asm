@@ -469,7 +469,7 @@ init_mem:                                                               ;$AAB2
         lda # 15                ; max volume, filters off
         sta SID_VOLUME_CTRL
 
-        ; frame indicator?
+        ; begin with the first interrupt split
         ldx # $00
         stx interrupt_split
 

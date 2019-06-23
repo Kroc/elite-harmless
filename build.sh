@@ -390,7 +390,7 @@ echo "* elite-harmless-hiram.d64"
 echo "  --------------------------------------"
 clean
 
-options=""
+options="--cpu 6502X"
 
 echo -n "- assembling                        "
 

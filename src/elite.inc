@@ -73,7 +73,7 @@ ELITE_SPRITES_INDEX     = <((ELITE_SPRITES_ADDR - ELITE_VIC_ADDR) / 64)
 ; to the structure of the source code -- CHANGING ANY OF THESE IS ALMOST
 ; CERTAINLY GOING TO RENDER THE GAME INOPERABLE
 
-.define ELITE_SEED      $5a4a, $0248, $B753
+.define ELITE_SEED      $5a4a, $0248, $b753
 
 ; the BBC micro used a 256-px wide screen mode, but the C64 has a 320-px wide
 ; screen. therefore the C64 only draws in a 256-px wide centered 'screen'.
