@@ -5808,7 +5808,9 @@ _8920:                                                                  ;$8920
 
         lda # $ff
         sta _1d13
-        jsr _83ca               ; this has nothing to do with `_1d13`??
+
+        jsr _83ca
+
         lda # $00
         sta _1d13
 
@@ -7197,25 +7199,34 @@ _91fd:                                                                  ;$91FD
 ; if sound is disabled, this entire block can be ignored
 ;
 _91fe:                                                                  ;$91FE
+;-------------------------------------------------------------------------------
+        ; title screen music?
         lda #< (_c164 - 1)
         ldx #> (_c164 - 1)
-        bne _920d
+        bne _920d               ; (always branches, unless somehow
+                                ;  the music data was in zero-page :P)
 
 _9204:                                                                  ;$9204
 ;-------------------------------------------------------------------------------
-        bit _1d11
+        bit _1d11               ; docking music enabled?
         bmi _91fe
 
+        ; docking music?
         lda #< (_b72d - 1)
         ldx #> (_b72d - 1)
+
 _920d:                                                                  ;$920D
+        ; set the address of the song data to play;
+        ; the interrupt routine ("code_interrupts.asm")
         sta sound_play_addr_lo
         stx sound_play_addr_hi
 
-        bit opt_music           ; is music enabled?
-        bmi _91fd               ; no, exit
+        bit flag_music_playing  ; is any music currently playing?
+        bmi _91fd               ; yes, exit
+
         bit _1d10
         bmi _9222
+        
         bit _1d0d
         bmi _91fd               ; rts
 
@@ -7232,6 +7243,7 @@ _9222:                                                                  ;$9222
         inc CPU_CONTROL         ; enable I/O
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+        ; stop the currently playing song
         jsr sound_stop
 
 .ifndef OPTION_ORIGINAL
@@ -7239,15 +7251,17 @@ _9222:                                                                  ;$9222
         dec CPU_CONTROL         ; disable I/O
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda # $ff               ; enable music
-        sta opt_music
+        ; set flag to say music is playing?
+        lda # $ff
+        sta flag_music_playing
         bne _9266               ; (always branches)
 
 _9231:                                                                  ;$9231
-        sta _1d02
+        sta _1d02               ;=$FF
         eor # %11111111
         and DOCKCOM_STATE
         bmi _9222
+
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
@@ -7263,8 +7277,8 @@ _923b:                                                                  ;$923B
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _9245:                                                                  ;$9245
-        bit opt_music           ; is music enabled?
-        bpl _91fd
+        bit flag_music_playing
+        bpl _91fd               ; $00 = no, exit
 
         jsr _a817
 
@@ -7279,12 +7293,16 @@ _9245:                                                                  ;$9245
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+        ; set flag to signal music is not currently playing
         lda # $00
-        sta opt_music
+        sta flag_music_playing
 
         ; clear the SID registers
-        ; ($D400..$D418)
-        ldx # $18
+        ; ($D400...$D418)
+        ldx # (SID_VOLUME_CTRL - SID_REGISTERS)
+        ; interrupts must be disabled whilst we clear the SID registers as
+        ; the interrupt routine ("code_interrupts.asm") writes to the SID
+        ; if music is currently playing
         sei
 
 :       sta SID_REGISTERS, x                                            ;$925A
@@ -7299,7 +7317,7 @@ _9245:                                                                  ;$9245
         ;///////////////////////////////////////////////////////////////////////
         dec CPU_CONTROL         ; disable I/O
 .endif  ;///////////////////////////////////////////////////////////////////////
-        cli
+        cli                     ; enable interrupts
 
 _9266:                                                                  ;$9266
 

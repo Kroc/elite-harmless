@@ -87,7 +87,7 @@ clear_screen:                                                           ;$B21A
         lda # ELITE_VIC_LAYOUT_MENUSCR
         sta interrupt_layout2
 
-        lda # %11000000         ; default value
+        lda # vic_screen_ctl2::unused
         sta interrupt_screenmode2
 
         jsr hide_all_ships
@@ -184,7 +184,7 @@ clear_screen:                                                           ;$B21A
         lda # ELITE_VIC_LAYOUT_MENUSCR
         sta interrupt_layout2
 
-        lda # %11000000         ; default value
+        lda # vic_screen_ctl2::unused
         sta interrupt_screenmode2
 
         ; erase bitmap to end?
@@ -469,6 +469,7 @@ hide_all_ships:                                                         ;$B341
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 ; fill the borders down the sides of the viewport!
+; not required in elite-harmless because the bitmap is pre-filled
 ;
 ; (probably used to clip the explosion sprite -- it appears below graphics --
 ;  but that doesn't cover the borders to the sides of the viewport)

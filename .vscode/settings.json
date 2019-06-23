@@ -23,8 +23,9 @@
         "**/*.crt": true,
     },
     "search.exclude": {
-        // don't search the auto-generated symbol files
+        // don't search the auto-generated files
         "**/*.map": true,
+        "**/*.ll": true,
         "bin": true,
         "build": true,
         "release": true,
@@ -36,4 +37,12 @@
     },
     "terminal.integrated.shell.windows": "C:\\Windows\\sysnative\\bash.exe",
     "python.linting.enabled": false,
+    // the TODO-tree extension is recommended for finding the TODOs scattered in the code
+    "todo-tree.excludeGlobs": [
+        // exclude any source that might be in our 3rd-party binaries folder
+        "bin",
+        // these folders contain generated content
+        "build",
+        "release"
+    ],
 }

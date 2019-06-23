@@ -14,8 +14,9 @@ _1d01:
 _1d02:
         .byte   $00
 
-opt_music:      ; music enabled?                                        ;$1D03
-                ; $00 = off, $FF = on
+flag_music_playing:                                                     ;$1D03
+        ; music currently playing?
+        ; $00 = no, $FF = yes
         .byte   $00
 
 _1d04:
@@ -57,8 +58,8 @@ _1d11:
 
 opt_sfx:        ; SFX enabled?                                          ;$1D12
                 ; $00 = no, $FF = yes
-                ; note that despite this option being present,
-                ; there is no method to change it in the original game
+                ; (this interpretation of this flag might be incorrect;
+                ;  it could be an "SFX playing" flag, or for music instead)
         .byte   $00
 
 _1d13:

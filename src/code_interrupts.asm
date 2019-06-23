@@ -68,20 +68,19 @@ _a8e6:                                                                  ;$A8E6
         .byte   $00
         .byte   $00
 
-; e-bomb explosion?
-;
 _a8e8:                                                                  ;$A8E8
-        ;-----------------------------------------------------------------------
-        dey
+;===============================================================================
+        dey 
         bpl _a958
-        pla
-        tay
+
+       .ply                     ; restore Y (via A)
+                                ; (note fall-through to below)
 
 interrupt_end_XA:                                                       ;$A8ED
-        ;=======================================================================
-        ; interrupt finished! restores X & A.
-        ;
-       .plx                     ; restore X
+;===============================================================================
+; interrupt finished! restores X & A
+;
+       .plx                     ; restore X (via A)
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -210,8 +209,8 @@ interrupt:                                                              ;$A8FA
 
 .ifndef OPTION_NOSOUND
         ;///////////////////////////////////////////////////////////////////////
-        bit opt_music           ; is music enabled?
-        bpl do_sfx              ; no, skip ahead (do SFX)
+        bit flag_music_playing  ; is music currently playing?
+        bpl do_sfx              ; no, skip ahead to SFX
 
         jsr _b4d2               ; handle music?
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -219,16 +218,16 @@ interrupt:                                                              ;$A8FA
         bit opt_sfx             ; sound effects enabled?
         bmi do_sfx              ; yes, do SFX
 
-        ; end the interrupt, but X has been
+        ; end the interrupt, but Y & X have been
         ; used so must be restored first
         jmp interrupt_end_YXA
 
 do_sfx:                                                                 ;$A956
         ;=======================================================================
-        ldy # $02
+        ldy # 2                 ; begin with `_aa15`?
 _a958:                                                                  ;$A958
         lda _aa13, y
-        beq _a8e8
+       .bze _a8e8               ; if zero... exit?
         bmi _a969
 
         ldx _aa2f, y
@@ -237,7 +236,7 @@ _a958:                                                                  ;$A958
         bne _a990
 _a969:                                                                  ;$A969
         lda _aa2f, y
-        sta _a973+1             ;low-byte, i.e. $d4xx
+        sta _a973+1             ; low-byte, i.e. $d4xx
         lda # $00
         ldx # $06
 _a973:                                                                  ;$A973
@@ -410,7 +409,7 @@ init_mem:                                                               ;$AAB2
 
         lda #< __VARS_MAIN_RUN__
         sta ZP_TEMP_ADDR1_LO
-        tay                     ; =0
+        tay                     ;=0
 
 :       sta [ZP_TEMP_ADDR1], y                                          ;$AABD
         iny
@@ -432,7 +431,7 @@ init_mem:                                                               ;$AAB2
         lda #> nmi_null
         sta KERNAL_VECTOR_NMI+1
 
-        ; set new KERNAL_CHROUT (print character) routine
+        ; set new `KERNAL_CHROUT` (print character) routine
         ; -- re-route printing to the bitmap screen
         ;
         lda #< chrout
