@@ -3019,11 +3019,12 @@ _79a9:                                                                  ;$79A9
 
         lda ZP_POLYOBJ_ZPOS_MI
         cmp # $07
-        lda # $fd
+        lda # %11111101
         ldx # $2c
         ldy # $28
         bcs _79c0
-        lda # $ff
+
+        lda # %11111111
         ldx # $20
         ldy # $1e
 _79c0:                                                                  ;$79C0
@@ -4890,10 +4891,23 @@ _8437:                                                                  ;$8437
         jsr _7b1a
         jsr _8ac7               ; clear ship slots and other vars
 
+        ; TODO: this appears to be a line-buffer.
+        ;       this address appears to be an upper-bound?
+.ifdef  OPTION_ORIGINAL
         lda #< $ffc0            ;?
         sta SHIP_LINES_LO
         lda #> $ffc0            ;?
         sta SHIP_LINES_HI
+.else
+        ; for elite-harmless, the bitmap screen ends at $FF40 and therefore
+        ; the line-buffer must be placed higher than in the original game
+        ; (~$FF20..$FFC0), without affecting the hardware vectors at
+        ; $FFFA-$FFFF which would crash the machine if overwritten
+        lda #< $fff8
+        sta SHIP_LINES_LO
+        lda #> $fff8
+        sta SHIP_LINES_HI
+.endif
 
 clear_zp_polyobj:                                                       ;$8447
         ;-----------------------------------------------------------------------

@@ -1128,23 +1128,25 @@ _9fb8:                                                                  ;$9FB8
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9fd9
 _9fd6:                                                                  ;$9FD6
-        jmp _a15b
+        jmp _a15b               ; "edge not visible"?
 
 _9fd9:                                                                  ;$9FD9
-        lda [ZP_TEMP_ADDR3], y
-        tax
-        iny
-        lda [ZP_TEMP_ADDR3], y
-        sta ZP_VAR_Q
+        lda [ZP_TEMP_ADDR3], y  ; "edge data byte #2"
+        tax                     ; "index into node heap for first node of edge"
+        iny                     ; "Y = 3"
+        lda [ZP_TEMP_ADDR3], y  ; "edge data byte #3"
+        sta ZP_VAR_Q            ; "index into node heap for other node of edge"
+
         lda $0101, x
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y1
         lda $0100, x
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
         lda $0102, x
         sta ZP_VAR_X2
         lda $0103, x
         sta ZP_VAR_Y2
-        ldx ZP_VAR_Q
+
+        ldx ZP_VAR_Q            ; "other index into node heap for second node"
         lda $0100, x
         sta ZP_6F
         lda $0103, x
@@ -1153,42 +1155,58 @@ _9fd9:                                                                  ;$9FD9
         sta ZP_71
         lda $0101, x
         sta ZP_70
-        jsr _a01a
-        bcs _9fd6
+
+        jsr _a01a               ; "CLIP2, take care of swop and clips"?
+        bcs _9fd6               ; "edge not visible"?
+
+        ; add lines to heap / draw lines?
+        ; TODO: only ever called here -- we could inline it here
         jmp _a13f
 
 ;===============================================================================
-
+; "CLIP"
+;
 _a013:                                                                  ;$A013
         lda # $00
         sta VAR_06F4
-        lda ZP_70
+        lda ZP_70               ; "X2 HI"
+
+; "CLIP2 arrives here from LL79 to do swop and clip"
 _a01a:                                                                  ;$A01A
         bit ZP_B7
         bmi _a03c
-        ldx # $8f
+
+        ldx # ELITE_VIEWPORT_HEIGHT-1
+        
         ora ZP_72
-        bne _a02a
+        bne @_a02a
+
         cpx ZP_71
-        bcc _a02a
+        bcc @_a02a
+
         ldx # $00
-_a02a:                                                                  ;$A02A
+@_a02a:                                                                 ;$A02A
         stx ZP_A2
+
         lda ZP_VAR_Y
         ora ZP_VAR_Y2
         bne _a04e
-        lda # $8f
+
+        lda # ELITE_VIEWPORT_HEIGHT-1
         cmp ZP_VAR_X2
         bcc _a04e
+
         lda ZP_A2
         bne _a04c
 _a03c:                                                                  ;$A03C
+        ; swap co-ordinates
         lda ZP_VAR_X2
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y1
         lda ZP_6F
         sta ZP_VAR_X2
         lda ZP_71
         sta ZP_VAR_Y2
+
         clc
         rts
 
@@ -1345,13 +1363,27 @@ _a13b:                                                                  ;$A13B
         rts
 
 ;===============================================================================
-
+; BBC code says "Shove visible edge onto XX19 ship lines heap counter U"
+; TODO: this appears to write into the $FF20-$FFC0 range
+;
+; ZP_TEMP_ADDR2 = address of heap?
+;      ZP_VAR_U = "clipped ship lines heap index"?
+;     ZP_VAR_Y1 = line-coord Y1
+;     ZP_VAR_Y2 = line-coord Y2
+;     ZP_VAR_X1 = line-coord X1
+;     ZP_VAR_X2 = line-coord X2
+;       
 _a13f:                                                                  ;$A13F
+        ; get the current index within the heap
         ldy ZP_VAR_U
-        lda ZP_VAR_X
+
+        ; push the line's co-ordinates (X1, Y1, X2, Y2),
+        ; one after the other, onto the heap
+        ; 
+        lda ZP_VAR_X1
         sta [ZP_TEMP_ADDR2], y
         iny
-        lda ZP_VAR_Y
+        lda ZP_VAR_Y1
         sta [ZP_TEMP_ADDR2], y
         iny
         lda ZP_VAR_X2
@@ -1360,57 +1392,68 @@ _a13f:                                                                  ;$A13F
         lda ZP_VAR_Y2
         sta [ZP_TEMP_ADDR2], y
         iny
+        ; the index has moved forward 4 bytes accordingly
         sty ZP_VAR_U
-        cpy ZP_TEMP_VAR
+
+        cpy ZP_TEMP_VAR         ; some kind of upper limit?
         bcs _a172
 _a15b:                                                                  ;$A15B
-        inc ZP_9F
+        inc ZP_9F               ; edge index?
         ldy ZP_9F
-        cpy ZP_AE
-        bcs _a172
+        cpy ZP_AE               ; edge count?
+        bcs _a172               ; heap full, draw it?
+
         ldy # $00
-        lda ZP_TEMP_ADDR3_LO
-        adc # $04
-        sta ZP_TEMP_ADDR3_LO
-        bcc _a16f
-        inc ZP_TEMP_ADDR3_HI
-_a16f:                                                                  ;$A16F
-        jmp _9fb8
+
+        ; move forward 4 bytes
+        lda ZP_TEMP_ADDR3_LO    ; take the low-address
+        adc # 4                 ; add 4-bytes
+        sta ZP_TEMP_ADDR3_LO    ; write it back...
+        bcc :+                  ; but, did it overflow?
+        inc ZP_TEMP_ADDR3_HI    ; yes, also increment the high-byte
+
+:       jmp _9fb8                                                       ;$A16F
 
         ;-----------------------------------------------------------------------
 
 _a172:                                                                  ;$A172
-        lda ZP_VAR_U
+        lda ZP_VAR_U            ; heap index?
 _a174:                                                                  ;$A174
         ldy # $00
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_TEMP_ADDR2], y  ; store size of heap?
 _a178:                                                                  ;$A178
         ldy # $00
+        lda [ZP_TEMP_ADDR2], y  ; get size of heap?
+        sta ZP_AE               ; set this as number of points?
+        cmp # 4                 ; 1-point only?
+        bcc @rts                ; exit, not enough points for a line!
+
+        iny 
+
+@draw:  ; draw a line from the line-heap:                               ;$A183
+        ;-----------------------------------------------------------------------
+        ; read line start and end co-ords from the heap
         lda [ZP_TEMP_ADDR2], y
-        sta ZP_AE
-        cmp # $04
-        bcc _a19e
+        sta ZP_VAR_X1
         iny
-_a183:                                                                  ;$A183
         lda [ZP_TEMP_ADDR2], y
-        sta ZP_VAR_X
-        iny
-        lda [ZP_TEMP_ADDR2], y
-        sta ZP_VAR_Y
+        sta ZP_VAR_Y1
         iny
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_X2
         iny
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_Y2
+
         ; TODO: do validation of line direction here so as to allow
         ;       removal of validation in the line routine
         jsr draw_line
+        
         iny
-        cpy ZP_AE
-        bcc _a183
-_a19e:                                                                  ;$A19E
-        rts
+        cpy ZP_AE               ; keep drawing?
+        bcc @draw
+
+@rts:   rts                                                             ;$A19E
 
 ;===============================================================================
 

@@ -327,7 +327,7 @@ ZP_VAR_S                = $9c   ; a common variable named "S"
 
 ZP_9D                   = $9d   ;? x11
 ZP_9E                   = $9e   ;? x12
-ZP_9F                   = $9f   ;? x10
+ZP_9F                   = $9f   ; edge index
 
 ; which screen the game is on, e.g. cockpit-view, galactic chart &c.
 ; not to be confused with the bitmap screen and colour screens
