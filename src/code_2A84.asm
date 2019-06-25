@@ -3272,9 +3272,9 @@ _3981:                                                                  ;$3981
         rts 
 
 ;===============================================================================
-; insert some routines from "math.inc"
+; insert math square (?^2) routine
 ;
-.math_square                                                            ;$3986
+.include        "math/math_square.asm"                                  ;$3986
 
 ;===============================================================================
 ; calculate ZP_VALUE_pt1 * abs(sin(A))
@@ -3360,8 +3360,9 @@ _3a3f:                                                                  ;$3A3F
         rts 
 
 ;===============================================================================
-; insert `multiply_signed` (and some precedents) from "math_3d.inc"
-.multiply_signed                                                        ;$3A48
+; insert `multiply_signed` (and some precedents)
+;
+.include        "math/math_multiply_signed.asm"                         ;$3A48
 
 ;===============================================================================
 
@@ -3381,9 +3382,9 @@ _3ab2:                                                                  ;$3AB2
         lda ZP_VAR_X2
 
 ;===============================================================================
-; insert the `multiply_and_add` routine from "math.inc"
+; insert the `multiply_and_add` routine
 ;
-.multiply_and_add                                                       ;$3ACE 
+.include        "math/math_multiply+add.asm"                            ;$3ACE 
 
 ;===============================================================================
 

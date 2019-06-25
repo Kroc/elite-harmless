@@ -5,9 +5,8 @@
 
 .include        "elite.inc"
 
-.include        "math.inc"
-.include        "math_3d.inc"
-.include        "math_data.asm"
+.include        "math/math_3d.inc"
+.include        "math/math_data.asm"
 
 .include        "gfx/hull_struct.inc"
 
