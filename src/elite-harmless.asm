@@ -6,7 +6,6 @@
 .include        "elite.inc"
 
 .include        "math/math_3d.inc"
-.include        "math/math_data.asm"
 
 .include        "gfx/hull_struct.inc"
 
@@ -15,6 +14,8 @@
 .include        "code_keyboard.inc"
 
 .include        "code_init.asm"                                         ;$0400
+; (must be below "code_init.asm" due to appending of code to `CODE_INIT` above)
+.include        "math/math_data.asm"
 
 ; due to a limitation, CA65 cannot 'look-ahead' for scopes (including procs &
 ; structs) and therefore our `PolyObject` struct must be loaded in before it

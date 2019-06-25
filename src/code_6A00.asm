@@ -4893,12 +4893,15 @@ _8437:                                                                  ;$8437
 
         ; TODO: this appears to be a line-buffer.
         ;       this address appears to be an upper-bound?
+        ; TODO: use a segment when we know the full bounds of the buffer
+        ;
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda #< $ffc0            ;?
         sta SHIP_LINES_LO
         lda #> $ffc0            ;?
         sta SHIP_LINES_HI
-.else
+.else   ;///////////////////////////////////////////////////////////////////////
         ; for elite-harmless, the bitmap screen ends at $FF40 and therefore
         ; the line-buffer must be placed higher than in the original game
         ; (~$FF20..$FFC0), without affecting the hardware vectors at
@@ -4907,7 +4910,7 @@ _8437:                                                                  ;$8437
         sta SHIP_LINES_LO
         lda #> $fff8
         sta SHIP_LINES_HI
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 clear_zp_polyobj:                                                       ;$8447
         ;-----------------------------------------------------------------------
@@ -5038,15 +5041,21 @@ _84e2:                                                                  ;$84E2
 
 ; main loop?
 ;
+; ".TT100 ; Start of Main loop and check messages"
 _84ed:                                                                  ;$84ED
         jsr _1ec1
+
         dec VAR_048B            ; reduce delay?
         beq _8475
         bpl _84fa
         inc VAR_048B
+
+; ".me3 ; also arrive back from me2"
 _84fa:                                                                  ;$84FA
         dec ZP_A3               ; move counter?
         beq _8501
+
+; ".ytq ; a lot of this not needed while docked"
 _84fe:                                                                  ;$84FE
         jmp _8627               ; jump down to main loop?
 
@@ -5057,6 +5066,7 @@ _8501:                                                                  ;$8501
         jsr get_random_number
         cmp # $23
         bcs _8562
+
         lda VAR_047F            ; number of asteroids?
         cmp # $03               ; more than 2?
         bcs _8562
@@ -5224,10 +5234,14 @@ _8612:                                                                  ;$8612
         dec ZP_A2
         bpl _8612
 
+;===============================================================================
 ; main loop?
 ;
 _8627:                                                                  ;$8627
-        ;=======================================================================
+;;.ifndef OPTION_ORIGINAL
+;;        inc VIC_BORDER
+;;.endif
+
         ; reset the stack pointer!
         ldx # $ff
         txs
@@ -5303,8 +5317,9 @@ _8627:                                                                  ;$8627
         cmp ZP_VAR_T            ; compare against our odds
         bcs @_86a1              ; if random number >= odds, skip
 
-        jsr get_random_number
-        ora # %01000000         ;?
+        ; get random number between 64 and 255
+        jsr get_random_number   ; get random number 0-255
+        ora # %01000000         ; always at least 64
         tax
 
         lda # $80
@@ -5325,13 +5340,22 @@ _8627:                                                                  ;$8627
         jsr _81fb
 _86a4:                                                                  ;$86A4
         jsr @_86b1
+
+;;.ifndef OPTION_ORIGINAL
+;;        dec VIC_BORDER
+;;.endif
+
         lda ZP_A7
         beq :+
+
+        ; begin next frame?
+        ; (restart main loop)
         jmp _8627
+
 :       jmp _84ed                                                       ;$86AE
 
-        ; key commands:
-        ;-----------------------------------------------------------------------
+; key commands:
+;===============================================================================
 @_86b1:                                                                 ;$86B1
         ; key for status page pressed?
         ; (default '8' in original Elite)
@@ -5437,14 +5461,14 @@ _86a4:                                                                  ;$86A4
 
 @_8724:                                                                 ;$872F
         ;-----------------------------------------------------------------------
-        ; TODO: why not `cmp #xx`? (2 cycles faster)
         bit key_hyperspace      ; hyperspace key pressed?
         bpl :+
 
-        jmp _715c
+        jmp _715c               ; do hyperspace jump
 
 :       cmp # $2e               ; 'f'?                                  ;$872C
         beq _877e
+
         cmp # $2b               ; 'c'?
         bne :+
         lda ZP_A7
@@ -5511,7 +5535,8 @@ _877e:                                                                  ;$877E
         jmp _6a68
 
 ;===============================================================================
-
+; illegal cargo?
+;
 _8798:                                                                  ;$8798
         lda VAR_CARGO_SLAVES
         clc

@@ -260,6 +260,7 @@ _9a83:                                                                  ;$9A83
 _9a86:                                                                  ;$9A86
         lda ZP_A5
         bmi _9a83
+        
         lda # $1f
         sta ZP_AD
 
@@ -289,15 +290,22 @@ _9a86:                                                                  ;$9A86
 
         ldy # $02                       ;?
         sta [ZP_TEMP_ADDR2], y
+
+; ".EE55 ; counter Y, 4 rnd bytes to edge heap"
 _9abb:                                                                  ;$9ABB
         iny
         jsr get_random_number
         sta [ZP_TEMP_ADDR2], y
         cpy # $06
         bne _9abb
+
 _9ac5:                                                                  ;$9AC5
+        ; ".EE28 ; bit5 set do explosion, or bit7 clear, dont kill"
         lda ZP_POLYOBJ_ZPOS_HI
+        ; ".EE49 ; In view?"
         bpl _9ae6
+
+; ".LL14 ; Test to remove object"
 _9ac9:                                                                  ;$9AC9
         lda ZP_POLYOBJ_VISIBILITY
         and # visibility::display
@@ -308,6 +316,7 @@ _9ac9:                                                                  ;$9AC9
         sta ZP_POLYOBJ_VISIBILITY
         jmp _7866
 
+; ".EE51 ; if bit3 set draw lines in XX19 heap"
 _9ad8:                                                                  ;$9AD8
         lda # visibility::redraw
         bit ZP_POLYOBJ_VISIBILITY
@@ -319,6 +328,7 @@ _9ad8:                                                                  ;$9AD8
 _9ae5:                                                                  ;$9AE5
         rts
 
+; ".LL10 ; object in front of you"
 _9ae6:                                                                  ;$9AE6
         lda ZP_POLYOBJ_ZPOS_MI
         cmp # $c0
@@ -359,17 +369,21 @@ _9ae6:                                                                  ;$9AE6
         lsr
         sta ZP_AD
         bpl _9b3a
+
+; ".LL13 ; hopped to as far"
 _9b29:                                                                  ;$9B29
-        ldy # Hull::_0d                 ;=$0D: level-of-detail distance
+        ldy # Hull::_0d         ;=$0D: level-of-detail distance
         lda [ZP_HULL_ADDR], y
         cmp ZP_POLYOBJ_ZPOS_MI
         bcs _9b3a
 
         lda # visibility::display
         and ZP_POLYOBJ_VISIBILITY
-        bne _9b3a
+        bne _9b3a               ; "hop over to Draw wireframe or exploding"
+
         jmp _9932
 
+; ".LL17 ; draw Wireframe (including nodes exploding)"
 _9b3a:                                                                  ;$9B3A
         ldx # $05                       ; 6-byte counter
 
