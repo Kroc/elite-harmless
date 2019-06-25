@@ -44,7 +44,7 @@ menuscr_hi:                                                             ;$9919
         .hibytes menuscr_pos
 
 ;===============================================================================
-
+; ".SHPPT ; ship plot as point from LL10"
 _9932:                                                                  ;$9932
         jsr _9ad8
         jsr _7d1f
@@ -52,27 +52,29 @@ _9932:                                                                  ;$9932
         bne _995d
 
         lda ZP_43
-        cmp # $8e
-        bcs _995d
+        cmp # ELITE_VIEWPORT_HEIGHT-2   ; why "-2", height of dot?
+        bcs _995d               ; "off top of screen"
 
-        ldy # $02
-        jsr _9964
-        ldy # $06
+        ldy # $02               ; "index for edge heap"
+        jsr _9964               ; "Ship is point, could end if nono-2"
+        ldy # $06               ; "index for edge heap"
 
-        lda ZP_43
-        adc # $01
-        jsr _9964
+        lda ZP_43               ; "#Y"
+        adc # $01               ; "1 pixel up"
+        jsr _9964               ; "Ship is point, could end if nono-2"
 
         lda # visibility::redraw
         ora ZP_POLYOBJ_VISIBILITY
         sta ZP_POLYOBJ_VISIBILITY
 
-        lda # $08
+        lda # $08               ; "skip first two edges on heap"
         jmp _a174
 
 _995b:                                                                  ;$995B
-        pla
-        pla
+        pla                     ; change return address?
+        pla                     ; change return address?
+
+; ".nono ; clear bit3 nothing to erase in next round, no draw."
 _995d:                                                                  ;$995D
         lda # visibility::redraw ^$FF   ;=%11110111
         and ZP_POLYOBJ_VISIBILITY
@@ -81,6 +83,7 @@ _995d:                                                                  ;$995D
 
 ;===============================================================================
 
+; ".Shpt ; ship is point at screen center"
 _9964:                                                                  ;$9964
         sta [ZP_TEMP_ADDR2], y
         iny
@@ -97,8 +100,8 @@ _9964:                                                                  ;$9964
         rts
 
 ;===============================================================================
-;   this calculates a very good approximation of the square root of R.Q
-;   Q = sqrt(R.Q)
+; this calculates a very good approximation of the square root of R.Q
+; Q = sqrt(R.Q)
 ;
 square_root:                                                            ;$9978
 
@@ -178,10 +181,11 @@ _99d6:                                                                  ;$99D6
         rts
 
 ;===============================================================================
-; unused / unreferenced?
 ; divides A=R = A/Q*256, possibly abandoned in favor of log-table division?
 ; this is of course slower, but does not use X
 ; the first statement, cmp ZP_VAR_Q seems to be missing
+
+; unused / unreferenced entry point?
 ;$99e9:
         bcs _9a07           ; -> return $FF, presumably when A > Q
         ldx # $fe           ; 1-bit is not set and serves as the ending flag
@@ -197,7 +201,7 @@ _99f8:                                                                  ;$99F8
         bcs _99ef           ; test for the ending flag, else continue division
         rts
 
-_99fd:  ; the first bit is shiftet out of A into the carry              ;$99FD
+_99fd:  ; the first bit is shifted out of A into the carry              ;$99FD
         sbc ZP_VAR_Q        ; no test needed, A+carry is > Q
         sec
         rol ZP_VAR_R
@@ -794,6 +798,7 @@ _9d91:                                                                  ;$9D91
 _9db3:                                                                  ;$9DB3
         jmp _9dd9
 
+; ".LL52 ; -ve x sign"
 _9db6:                                                                  ;$9DB6
         lda ZP_POLYOBJ_XPOS_LO
         sec
@@ -814,6 +819,8 @@ _9dd3:                                                                  ;$9DD3
         lda ZP_VAR_X2
         eor # %10000000
         sta ZP_VAR_X2
+
+; ".LL53 ; Both x signs arrive here, Onto y"
 _9dd9:                                                                  ;$9DD9
         lda ZP_POLYOBJ_YPOS_HI
         sta ZP_70
@@ -831,6 +838,7 @@ _9dee:                                                                  ;$9DEE
 
         ;-----------------------------------------------------------------------
 
+; ".LL54 ; -ve y sign"
 _9df1:                                                                  ;$9DF1
         lda ZP_POLYOBJ_YPOS_LO
         sec
@@ -851,6 +859,8 @@ _9df1:                                                                  ;$9DF1
         sta ZP_70
         bcc _9e16
         inc ZP_6F
+
+; ".LL55 ; Both y signs arrive here, Onto z"
 _9e16:                                                                  ;$9E16
         lda ZP_76
         bmi _9e64
@@ -865,11 +875,13 @@ _9e27:                                                                  ;$9E27
         jmp _9e83
 
 ;===============================================================================
-
+; ".LL61 ; Handling division R=A/Q for case further down"
 _9e2a:                                                                  ;$9E2A
         ldx ZP_VAR_Q
         beq _9e4a
         ldx # $00
+
+; ".LL63 ; roll Acc count Xreg"
 _9e30:                                                                  ;$9E30
         lsr
         inx
@@ -879,6 +891,8 @@ _9e30:                                                                  ;$9E30
         jsr _99af
         ldx ZP_VAR_S
         lda ZP_VAR_R
+
+; ".LL64 ; counter Xreg"
 _9e3f:                                                                  ;$9E3F
         asl
         rol ZP_VAR_U
@@ -888,6 +902,7 @@ _9e3f:                                                                  ;$9E3F
         sta ZP_VAR_R
         rts
 
+; ".LL84 ; div error R=U=#50"
 _9e4a:                                                                  ;$9E4A
         lda # $32
         sta ZP_VAR_R
@@ -896,6 +911,8 @@ _9e4a:                                                                  ;$9E4A
 
 ;===============================================================================
 
+; ".LL62 ; Arrive from LL65 just below,
+;  screen for -ve RU onto XX3 heap, index X=CNT"
 _9e51:                                                                  ;$9E51
         lda # $80
         sec
@@ -907,26 +924,31 @@ _9e51:                                                                  ;$9E51
         sta $0100, x
         jmp _9ec3
 
-;===============================================================================
-
+; ".LL56 ; Enter XX12+5 -ve Z node case from above"
 _9e64:                                                                  ;$9E64
-        lda ZP_POLYOBJ_ZPOS_LO
+        lda ZP_POLYOBJ_ZPOS_LO  ; "z org lo"
         sec
-        sbc ZP_75
+        sbc ZP_75               ; "rotated z node lo"
         sta ZP_VAR_T
-        lda ZP_POLYOBJ_ZPOS_MI
+
+        lda ZP_POLYOBJ_ZPOS_MI  ; "z hi"
         sbc # $00
         sta ZP_VAR_U
-        bcc _9e7b
-        bne _9e83
-        lda ZP_VAR_T
-        cmp # $04
-        bcs _9e83
+        bcc _9e7b               ; "underflow, make node close"
+        bne _9e83               ; "Enter Node additions done, UT=z"
+        
+        lda ZP_VAR_T            ; "restore z lo"
+        cmp # 4                 ; "">= 4?"
+        bcs _9e83               ; "zlo big enough, Enter Node additions done"
+
+; ".LL140 ; else make node close"
 _9e7b:                                                                  ;$9E7B
-        lda # $00
+        lda # $00               ; "hi"?
         sta ZP_VAR_U
-        lda # $04
+        lda # $04               ; "lo"?
         sta ZP_VAR_T
+
+; ".LL57 ; -> &4404 ; Enter Node additions done, z=T.U  set up from LL55"
 _9e83:                                                                  ;$9E83
         lda ZP_VAR_U
         ora ZP_VAR_Y
@@ -940,6 +962,7 @@ _9e83:                                                                  ;$9E83
         ror ZP_VAR_T
         jmp _9e83
 
+; ".LL60 ; hi U rolled to 0, exited loop above."
 _9e9a:                                                                  ;$9E9A
         lda ZP_VAR_T
         sta ZP_VAR_Q
@@ -949,8 +972,11 @@ _9e9a:                                                                  ;$9E9A
         jsr _9e2a
         jmp _9ead
 
+; ".LL69 ; small x angle"
 _9eaa:                                                                  ;$9EAA
         jsr _99af
+
+; ".LL65 ; both continue for scaling based on z"
 _9ead:                                                                  ;$9EAD
         ldx ZP_AA
         lda ZP_VAR_X2
@@ -963,6 +989,8 @@ _9ead:                                                                  ;$9EAD
         lda ZP_VAR_U
         adc # $00
         sta $0100, x
+
+; ".LL66 ; also from LL62, XX3 node heap has xscreen node so far"
 _9ec3:                                                                  ;$9EC3
        .phx                     ; push X to stack (via A)
         lda # $00
@@ -975,6 +1003,7 @@ _9ec3:                                                                  ;$9EC3
         jsr _9e2a
         jmp _9eef
 
+; ".LL70 ; arrive from below, Yscreen for -ve RU onto XX3 node heap, index X=CNT"
 _9ed9:                                                                  ;$9ED9
         lda # $48
         clc
@@ -986,8 +1015,11 @@ _9ed9:                                                                  ;$9ED9
         sta $0100, x
         jmp _9f06
 
+; ".LL67 ; Arrive from LL66 above if XX15+3 < Q ; small yangle"
 _9eec:                                                                  ;$9EEC
         jsr _99af
+
+; ".LL68 ; both carry on, also arrive from LL66, scaling y based on z."
 _9eef:                                                                  ;$9EEF
         pla
         tax
@@ -1002,6 +1034,8 @@ _9eef:                                                                  ;$9EEF
         lda # $00
         sbc ZP_VAR_U
         sta $0100, x
+
+; ".LL50 ; also from LL70, Also from LL49-3. XX3 heap has yscreen, Next vertex."
 _9f06:                                                                  ;$9F06
         clc
         lda ZP_AA
@@ -1015,6 +1049,7 @@ _9f06:                                                                  ;$9F06
         bcs _9f1b
         jmp _9d45
 
+; ".LL72 ; XX3 node heap already Loaded with all 16bit xy screen"
 _9f1b:                                                                  ;$9F1B
         lda ZP_POLYOBJ_VISIBILITY
         and # visibility::display
@@ -1025,12 +1060,15 @@ _9f1b:                                                                  ;$9F1B
         sta ZP_POLYOBJ_VISIBILITY
         jmp _7866
 
+; ".EE31 ; no explosion"
 _9f2a:                                                                  ;$9F2A
         lda # visibility::redraw
         bit ZP_POLYOBJ_VISIBILITY
         beq _9f35
         jsr _a178
         lda # visibility::redraw
+
+; ".LL74 ; do New lines"
 _9f35:                                                                  ;$9F35
         ora ZP_POLYOBJ_VISIBILITY
         sta ZP_POLYOBJ_VISIBILITY
@@ -1090,6 +1128,8 @@ _9f82:                                                                  ;$9F82
         sta [ZP_TEMP_ADDR2], y
         iny
         sty ZP_VAR_U
+
+; ".LL170 ; (laser not firing) ; Calculate new lines ; their comment"
 _9f9f:                                                                  ;$9F9F
         ldy # Hull::edge_data_lo
         clc
@@ -1107,6 +1147,8 @@ _9f9f:                                                                  ;$9F9F
         sta ZP_TEMP_VAR
 
         ldy ZP_9F
+
+; ".LL75 ; -> &4539 ; count Visible edges"
 _9fb8:                                                                  ;$9FB8
         lda [ZP_TEMP_ADDR3], y
         cmp ZP_AD
@@ -1127,9 +1169,12 @@ _9fb8:                                                                  ;$9FB8
         tax
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9fd9
+
+; ".LLx78 ; edge not visible"
 _9fd6:                                                                  ;$9FD6
         jmp _a15b               ; "edge not visible"?
 
+; ".LL79 ; Visible edge"
 _9fd9:                                                                  ;$9FD9
         lda [ZP_TEMP_ADDR3], y  ; "edge data byte #2"
         tax                     ; "index into node heap for first node of edge"
@@ -2192,11 +2237,11 @@ _a65f:                                                                  ;$A65F
         ldx ZP_POLYOBJ_ZPOS_MI
         sta ZP_POLYOBJ_ZPOS_MI
         stx ZP_POLYOBJ_XPOS_MI
-        lda ZP_POLYOBJ_XPOS_HI  
-        eor ZP_B0                   ; invert X-sign when looking LEFT
+        lda ZP_POLYOBJ_XPOS_HI
+        eor ZP_B0               ; invert X-sign when looking LEFT
         tax
         lda ZP_POLYOBJ_ZPOS_HI
-        eor ZP_B1                   ; invert X-sign when looking RIGHT
+        eor ZP_B1               ; invert X-sign when looking RIGHT
         sta ZP_POLYOBJ_XPOS_HI
         stx ZP_POLYOBJ_ZPOS_HI
         ldy # $09
@@ -2276,6 +2321,7 @@ _a6d4:                                                                  ;$A6D4
         ; sprites are located in the selected VIC bank; see "elite.inc"
         ; for where this value is defined
         ldy # ELITE_SPRITES_INDEX
+        
         cmp # $0f               ; a type of laser?
         beq :+
         iny                     ; select next sprite index
