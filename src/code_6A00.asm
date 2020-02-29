@@ -5238,13 +5238,8 @@ _8612:                                                                  ;$8612
 ; main loop?
 ;
 _8627:                                                                  ;$8627
-;;.ifndef OPTION_ORIGINAL
-;;        inc VIC_BORDER
-;;.endif
-
-        ; reset the stack pointer!
-        ldx # $ff
-        txs
+        ldx # $ff               ; reset the stack pointer,
+        txs                     ; we won't be returning to BASIC :P
 
         ; cool down lasers:
         ;
@@ -5265,7 +5260,7 @@ _8627:                                                                  ;$8627
 
         jsr _2ff3               ; update dials?
 
-:       lda ZP_SCREEN                                                ;$8645
+:       lda ZP_SCREEN                                                   ;$8645
        .bze @_8654              ; on flight screen? skip
 
         and _1d08
@@ -5340,10 +5335,6 @@ _8627:                                                                  ;$8627
         jsr _81fb
 _86a4:                                                                  ;$86A4
         jsr @_86b1
-
-;;.ifndef OPTION_ORIGINAL
-;;        dec VIC_BORDER
-;;.endif
 
         lda ZP_A7
         beq :+
@@ -5440,22 +5431,22 @@ _86a4:                                                                  ;$86A4
         bne @_8724
 
         ; select right view:
+        ;
 @right: ldx # $03
-
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
 
         ; select left view:
+        ;
 @left:  ldx # $02                                                       ;$871C
-
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
 
         ; select rear view:
+        ;
 @rear:  ldx # $01                                                       ;$871F
-
         ; set cockpit camera view?
         jmp _a6ba
 
@@ -6669,57 +6660,40 @@ get_ctrl:                                                               ;$8E92
 
         rts
 
-;===============================================================================
-; read key?
-
-; ununsed / unreferenced?
-; $8e99:
 
 .ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
+;///////////////////////////////////////////////////////////////////////////////
+; read key?
+; ununsed / unreferenced?
+
         ; turn the I/O area on to manage the CIA ports
-        lda # C64_MEM::IO_ONLY
+        lda # C64_MEM::IO_ONLY                                          ;$8E99
         jsr set_memory_layout
-.else   ;///////////////////////////////////////////////////////////////////////
-        ; optimisation for changing the memory map,
-        ; with thanks to: <http://www.c64os.com/post?p=83>
-        inc CPU_CONTROL
-.endif  ;///////////////////////////////////////////////////////////////////////
 
         sei                     ; disable interrupts
         stx CIA1_PORTA
         ldx CIA1_PORTB
         cli                     ; enable interrupts
         inx
-        beq _8eab
+        beq :+
         ldx # $ff
 
-_8eab:                                                                  ;$8EAB
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
         ; turn off I/O, go back to 64K RAM
-        lda # C64_MEM::ALL
+:       lda # C64_MEM::ALL                                              ;$8EAB
         jsr set_memory_layout
-.else   ;///////////////////////////////////////////////////////////////////////
-        ; optimisation for changing the memory map,
-        ; with thanks to: <http://www.c64os.com/post?p=83>
-        dec CPU_CONTROL
-.endif  ;///////////////////////////////////////////////////////////////////////
-
         txa
         rts
 
-;$8eb2:
-        rts
+        rts                                                             ;$8EB2
 
-;===============================================================================
-
-;$8eb3: unused / unreferenced?
-
-        lda _9274, x
+        ; unused / unreferenced?
+        lda _9274, x                                                    ;$8EB3
         eor opt_flipaxis
 
         rts
+
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 ;===============================================================================
 ; flip flags?

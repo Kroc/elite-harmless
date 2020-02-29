@@ -45,4 +45,9 @@
         "build",
         "release"
     ],
+    "todo-tree.filtering.excludeGlobs": [
+        "bin",
+        "build",
+        "release"
+    ],
 }

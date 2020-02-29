@@ -183,8 +183,8 @@ populate_multiply_tables:
 ;    precision becomes
 ;
 ; 2. it's not possible to use these log-tables for typical multiplication.
-;    Elite has its own multiplication routine (see "math.inc") required to
-;    produce correct results
+;    Elite has its own multiplication tables (see "math_data.inc")
+;    required to produce correct results
 ;
 ; =============================================
 ; ==  USE OF THE LOGARITHM TABLES IN ELITE:  ==

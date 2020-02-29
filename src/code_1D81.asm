@@ -153,13 +153,12 @@ _1d81:                                                                  ;$1D81
 
 :       jmp _88e7                                                       ;$1E11
 
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
 ; the unused and incomplete debug code can be removed
 ; in non-original builds
 ;
-.ifdef  OPTION_ORIGINAL
-;///////////////////////////////////////////////////////////////////////////////
 debug_for_brk:                                                          ;$1E14
-        ;=======================================================================
         ; set a routine to capture use of the `brk` instruction.
         ; not actually used, but present, in original Elite
         ;
@@ -546,6 +545,7 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
         cmp # $f2
         bcs _202d
 
+        ; is there a laser mounted on this direction?
         ldx COCKPIT_VIEW
         lda PLAYER_LASERS, x
         beq _202d
@@ -1088,8 +1088,8 @@ _22c2:                                                                  ;$22C2
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; halve the number of Trumbles™
-        lsr PLAYER_TRUMBLES_HI
-        ror PLAYER_TRUMBLES_LO
+        lsr PLAYER_TRUMBLES_HI  ; divide the top 8-bits by two, with carry out
+        ror PLAYER_TRUMBLES_LO  ; divide bottom 8-bits by two, with carry in
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _2303:                                                                  ;$2303
@@ -1336,24 +1336,23 @@ print_docked_token:                                                     ;$23CF
 
 _2404:  ; print a character                                             ;$2404
         ;-----------------------------------------------------------------------
-
         ; print the punctuation characters ($20...$40), as is
-
+        ;
         cmp # '@'+1
        .blt @print
 
         ; shall we change the letter case?
-
+        ;
         ; check for the upper-case flag: -- note that this will have no effect
         ; if the upper-case mask is not set or if the lower-case mask is set
         ; which takes precedence
-
+        ;
         bit txt_ucase_flag      ; check if bit 7 is set
         bmi @ucase              ; if so, skip ahead
 
         ; check for the lower-case flag: -- this will only have an effect if
         ; the lower-case mask is set to remove bit 5
-
+        ;
         bit txt_lcase_flag      ; check if bit 7 is set
         bmi @lcase              ; if so, skip ahead
 

@@ -83,6 +83,7 @@ sm4:    sbc square2_hi, x
         rts 
 
 .else   ;///////////////////////////////////////////////////////////////////////
+        ; if not using the extra math tables, fall-back to an algorithm;
         ;
         ; the algorithm used here is a common type, best described in context
         ; of the 6502 here: <http://nparker.llx.com/a2/mult.html> under the

@@ -2909,6 +2909,10 @@ wait_for_frame:                                                         ;$B148
         ;=======================================================================
         ; I think this function waits for a frame to complete
         ;
+        ; TODO: we may be able to do this more consistently by waiting
+        ;       on the current scanline value ($D012), as this would work
+        ;       regardless of what interrupt code was running (or not!) 
+        ;
         pha                     ; preserve A
 
         ; wait for non-zero in the frame status?
@@ -2967,7 +2971,6 @@ _b16e:                                                                  ;$B16E
         jmp _b189
 
         ;-----------------------------------------------------------------------
-
         ; this is a trampoline to account for a branch range limitation below
         ; TODO: this could be combined with the one at `_b168` to save 3 bytes
         ;
