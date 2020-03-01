@@ -3176,7 +3176,12 @@ _b210:  ; restore registers before returning                            ;$B210
 ; routine(s) for clearing the screen, i.e. when changing screen pages between
 ; flight screen and menu screens. clears or redraws the HUD accordingly
 ;
-.include        "gfx/clear_screen.asm"                                  ;$B21A
+.ifdef  OPTION_ORIGINAL
+.include        "orig/clear_screen.asm"                                 ;$B21A
+.else
+.include        "gfx/clear_screen.asm"
+.endif
+
 
 txt_docked_token15:                                                     ;$B3D4
 ;===============================================================================

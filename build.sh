@@ -58,6 +58,7 @@ clean() {
     rm -f src/boot/*.o
     rm -f src/c64/*.o
     rm -f src/gfx/*.o
+    rm -f src/orig/*.o
     rm -f src/text/*.o
 
     echo "[OK]"
