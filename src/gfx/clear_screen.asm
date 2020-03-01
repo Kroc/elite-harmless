@@ -10,7 +10,7 @@ clear_screen:                                                           ;$B21A
 ;===============================================================================
 .ifndef OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        ; improved screen-clearing code for elite-harmless
+        ; improved screen-clearing code for elite-harmless:
         ; (doesn't erase the bytes outside of the 256px-wide viewport)
         ;
         ; erase the bitmap area above the HUD,
@@ -29,9 +29,8 @@ clear_screen:                                                           ;$B21A
         ; back to $FF and we loop around until back to $00 where the loop
         ; will exit without repeating the 0'th iteration
         ;
-        dex 
-        ; erasing bitmap bits...
-        txa 
+        dex                     ; X = 0
+        txa                     ; A = %00000000 (i.e. erase bitmap bits...)
 
 :       ; begin loop, erasing one byte
         ; of all viewport rows at once
@@ -57,19 +56,23 @@ clear_screen:                                                           ;$B21A
         dex 
        .bnz :-
         
+        ; TODO: we need to restore (or skip)
+        ;       the top/bottom screen border 
+
         ; are we in the cockpit-view?
         ldy ZP_SCREEN           ; (Y is used here to keep A & X = $00)
        .bze :+                  ; yes -- HUD will be redrawn
 
         cpy # $0d               ;?
-        bne @hud
+        bne @nohud
 
         ; redraw the HUD
 :       jmp _b301
 
+        ;-----------------------------------------------------------------------
         ; erase the HUD to make way for the menu screen:
-@hud:   ; begin loop, erasing one byte of all HUD rows at once
-        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 0) * 320) + (4 * 8), x
+        ; (begin loop, erasing one byte of all HUD rows at once)
+@nohud: sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 0) * 320) + (4 * 8), x
         sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 1) * 320) + (4 * 8), x
         sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 2) * 320) + (4 * 8), x
         sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 3) * 320) + (4 * 8), x
@@ -77,7 +80,7 @@ clear_screen:                                                           ;$B21A
         sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 5) * 320) + (4 * 8), x
         sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 6) * 320) + (4 * 8), x
         dex 
-       .bnz @hud
+       .bnz @nohud
 
         ; (note that X will be $00 due to loop condition above)
         stx _1d01               ;?
@@ -95,24 +98,30 @@ clear_screen:                                                           ;$B21A
 
         ;-----------------------------------------------------------------------
         ; apply the yellow colour to the second header-border on some screens
+        ;
         ; TODO: can we get away with this on every menu screen, and just bake
         ;       it into the menu-screen data?
         ;
-        ldx ZP_SCREEN
-        cpx # $02
-        beq _b2a5
+;;        ldx ZP_SCREEN
+;;        cpx # $02
+;;        beq drawViewportBorders
 
-        cpx # $40
-        beq _b2a5
-        cpx # $80
-        beq _b2a5
+;;        cpx # $40
+;;        beq drawViewportBorders
+;;        cpx # $80
+;;        beq drawViewportBorders
 
-        ldy # ELITE_VIEWPORT_COLS-1
-:       sta ELITE_MENUSCR_ADDR + .scrpos( 2, 4 ), y
-        dey
-        bpl :-
+;;        ldy # ELITE_VIEWPORT_COLS-1
+;;:       sta ELITE_MENUSCR_ADDR + .scrpos( 2, 4 ), y
+;;        dey
+;;        bpl :-
+
+        rts
 
 .else   ;///////////////////////////////////////////////////////////////////////
+        ; original screen-clearing routine for Elite:
+        ; (erases the whole HUD, every frame!)
+        ;
         ; reset the colour-map (the colour-nybbles held in the text screen)
         ;-----------------------------------------------------------------------
         ; set starting position in top-left of the centred
@@ -216,59 +225,77 @@ clear_screen:                                                           ;$B21A
 
         ldx ZP_SCREEN
         cpx # $02
-        beq _b2a5
+        beq drawViewportBorders
 
         cpx # $40
-        beq _b2a5
+        beq drawViewportBorders
         cpx # $80
-        beq _b2a5
+        beq drawViewportBorders
         
         ; apply the yellow colour to the second header-border on some screens
         ldy # ELITE_VIEWPORT_COLS-1
 :       sta ELITE_MENUSCR_ADDR + .scrpos( 2, 4 ), y                     ;$B29F
         dey
         bpl :-
-.endif  ;///////////////////////////////////////////////////////////////////////
 
-_b2a5:                                                                  ;$B2A5
+drawViewportBorders:                                                    ;$B2A5
+        ;-----------------------------------------------------------------------
         ldx # 199               ; last pixel row
-        jsr _b2d5               ; draw the bottom screen border
+        jsr drawViewportBorderH ; draw the bottom screen border
 
+        ; ?
         lda # %11111111
         sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )                   ;=$5F1F
 
+        ; for menu, draw the side-borders
+        ; down the whole screen (25 rows)
         ldx # 25
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
 
-_b2b2:                                                                  ;$B2B2
+drawViewportBordersV:                                                   ;$B2B2
+        ;-----------------------------------------------------------------------
+        ; for the flight screen, draw the side borders
+        ; just for the viewport portion of the screen
         ldx # ELITE_VIEWPORT_ROWS
+        ; remember line-length for later
         stx ZP_C0
 
+        ; the bitmap address for the start of
+        ; the line must be set in ZP_TEMP_ADDR1
+        ;
+        ; the viewport begins at the 4th column,
+        ; so the border is drawn down the 3rd column
+        ;
         ldy # 3 * 8             ; 3rd char in bitmap cells
-        sty ZP_TEMP_ADDR1_LO
+        sty ZP_TEMP_ADDR1_LO    ; set as the bitmap address lo-byte
+
+        ; this is the hi-byte of the bitmap address
+        ; which is passed into the routine
         ldy #> ELITE_BITMAP_ADDR
+        ; this is the pixel pattern to draw down the rows
         lda # %00000011
-        jsr _b2e1
+        jsr drawViewportBorderV
 
         ldy #< (ELITE_BITMAP_ADDR + .bmppos( 0, 36 ))   ;=$4120
         sty ZP_TEMP_ADDR1_LO
 
         ldy #> (ELITE_BITMAP_ADDR + .bmppos( 0, 36 ))   ;=$4120
         lda # %11000000
-        ldx ZP_C0
-        jsr _b2e1
+        ldx ZP_C0               ; length of line in screen rows
+        jsr drawViewportBorderV
 
         lda # $01
         sta ELITE_BITMAP_ADDR + .bmppos( 0, 35 )                        ;=$4118
 
         ldx # $00
 
-_b2d5:                                                                  ;$B2D5
+drawViewportBorderH:                                                    ;$B2D5
         ;-----------------------------------------------------------------------
-        ; draw the horizontal border
-        ; X = pixel row (i.e. 0 or 199)
+        ; draw a horizontal viewport border:
+        ;
+        ; in:    X       pixel row (i.e. 0 or 199)
         ;
         stx ZP_VAR_Y            ; first pixel row
         ldx # $00
@@ -277,20 +304,28 @@ _b2d5:                                                                  ;$B2D5
         stx ZP_VAR_X2           ; X2 = 255
         jmp draw_straight_line
 
-_b2e1:                                                                  ;$B2E1
+drawViewportBorderV:                                                    ;$B2E1
         ;-----------------------------------------------------------------------
-        ; draw the vertical border
-        sta ZP_BE
-        sty ZP_TEMP_ADDR1_HI
+        ; draw a vertical viewport border:
+        ;
+        ; in:   A       pixel pattern to draw line, e.g. %00010000
+        ;       X       length of line, in rows
+        ;       Y       hi-byte of bitmap address to use as starting position
+        ;               (lo-byte must already be set in ZP_TEMP_ADDR1_LO)
+        ;
+        sta ZP_BE               ; put aside the pixel pattern to draw
+        sty ZP_TEMP_ADDR1_HI    ; set the starting bitmap address, hi-byte
+
 @loop:                                                                  ;$B2E5
-        ldy # $07
-:       lda ZP_BE                                                       ;$B2E7
-.ifdef  OPTION_ORIGINAL
-        eor [ZP_TEMP_ADDR1], y
-.endif
-        sta [ZP_TEMP_ADDR1], y
-        dey
-        bpl :-
+        ldy # 7                 ; 8 pixel rows per cell
+:       lda ZP_BE               ; retrieve pixel pattern to draw        ;$B2E7
+        eor [ZP_TEMP_ADDR1], y  ; mask out the existing pixels
+        sta [ZP_TEMP_ADDR1], y  ; apply the new pixels
+        dey                     ; one less pixel row
+        bpl :-                  ; any remain?
+
+        ; add 320 to the bitmap address
+        ; to move to the next row:
         lda ZP_TEMP_ADDR1_LO
         clc
         adc #< 320
@@ -299,14 +334,21 @@ _b2e1:                                                                  ;$B2E1
         adc #> 320
         sta ZP_TEMP_ADDR1_HI
 
-        dex
-        bne @loop
+        dex                     ; one less screen row
+        bne @loop               ; any more?
 
         rts
 
-_b301:                                                                  ;$B301
-        jsr _b2b2
+.endif  ;///////////////////////////////////////////////////////////////////////
 
+; redraw the HUD:
+;
+_b301:                                                                  ;$B301
+;-------------------------------------------------------------------------------
+.ifdef  OPTION_ORIGINAL
+        ; restore the borders around the viewport
+        jsr drawViewportBordersV
+.endif
         lda # ELITE_VIC_LAYOUT_MAINSCR
         sta interrupt_layout2
 
@@ -443,7 +485,7 @@ _b335:                                                                  ;$B335
 
 hide_all_ships:                                                         ;$B341
 ;===============================================================================
-; appears to make all entities invisible to the radar scanner.
+; appears to make all entities invisible to the radar scanner?
 ;
         ; search through the poly objects in-play
         ldx # $00
@@ -518,14 +560,14 @@ fill_sides:                                                             ;$B359
 .endif
 
 ;===============================================================================
-; clear screen?
+; clear the screen when switching between cockpit/menus:
 ;
 _b384:                                                                  ;$B384
         ldx # 8
         ldy # 0
         clc
-_b389:                                                                  ;$B389
-        lda row_to_bitmap_lo, x
+
+@loop:  lda row_to_bitmap_lo, x                                         ;$B389
         sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, x
         sta ZP_TEMP_ADDR1_HI
@@ -537,12 +579,12 @@ _b389:                                                                  ;$B389
         bne :-
 
         txa
-        adc # $08
+        adc # 8
         tax
-        cmp # $c0
-        bcc _b389
+        cmp # 8 * 24            ;=$C0
+        bcc @loop
 
-        iny
+        iny                     ; Y = 0
         sty ZP_CURSOR_COL
         sty ZP_CURSOR_ROW
 

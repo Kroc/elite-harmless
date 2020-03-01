@@ -5607,7 +5607,9 @@ _87d0:                                                                  ;$87D0
         jsr _7b5e               ; dead code, just an rts
 .endif  ;///////////////////////////////////////////////////////////////////////
         jsr set_page
-        jsr _b2a5
+.ifdef  OPTION_ORIGINAL
+        jsr drawViewportBorders
+.endif
         lda # $00
 
         sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )

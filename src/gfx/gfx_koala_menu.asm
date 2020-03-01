@@ -4,10 +4,10 @@
 ;===============================================================================
 
 ; this file can be used to assemble a Koala-painter image file,
-; containing elite's default menu screen (no HUD)
+; containing Elite's default menu screen (no HUD)
 ;
-; a Koala format is essentially a memory-dump of the separate graphics/colour
-; components the VIC-II uses:
+; a Koala format is essentially a memory-dump of
+; the separate graphics/colour components the VIC-II uses:
 ;
 ;          2 bytes - PRG header (deafult "$6000")
 ;       8000 bytes - bitmap data

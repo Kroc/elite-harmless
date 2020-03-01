@@ -60,6 +60,7 @@
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
+; bitmap screen:
 ;===============================================================================
 ; reserve the bitmap screen in the C64 memory map
 ;
@@ -69,6 +70,7 @@
 ; area is instead used as packing space for initialisation. in elite-harmless
 ; we store a pre-constructed bitmap screen in the binary, doing away with
 ; a lot of code spread throughout the game to erase and rebuild the screen
+;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; simply reserve the 8K of space for the original game
@@ -81,26 +83,31 @@
         ; it doesn't occupy all of them. 8 bytes per char, times 40 columns,
         ; times 25 rows equals 8'000 bytes. typically code just writes/erases
         ; the whole 8'192 bytes, but when VIC bank #3 is being used with the
-        ; bitamp at $E000-$FFFF, the last few bytes hold the hardware registers
-        ; and erasing these will crash the machine!
+        ; bitamp at $E000-$FFFF, the last few bytes hold the hardware
+        ; interrupt vectors and erasing these will crash the machine!
         ;
         .koala_bitmap   "build/screen_main.koa", 0, 0, 1000
 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+
+; bitmap colour:
 ;===============================================================================
 ; Elite uses two screens for bitmap colour data (excluding colour RAM at $D800)
 ; one for the main "flight screen" which needs to include the colour data for
 ; the HUD and a second screen for the "menu", which doesn't have the HUD
 ; 
-; the linker script ("link/elite-*.cfg") defines where these screens are
-; in RAM, we only have to reserve their bytes here
+; the linker script ("link/elite-*.cfg") defines where these
+; screens are in RAM, we only have to reserve their bytes here
 ;
 .segment        "VIC_SCR_MAIN"
 ;-------------------------------------------------------------------------------
 .ifndef OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        ; include the entire default main screen RAM
+        ; in elite-harmless we include the screen RAM, as it will be used,
+        ; in the binary so that we don't waste code space programatically
+        ; constructing the screen
+        ;
         .koala_screen   "build/screen_main.koa", 0, 0, 1000
 .else   ;///////////////////////////////////////////////////////////////////////
         .res            $0400
@@ -116,6 +123,8 @@
         .res            $0400
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+
+; HUD backup:
 ;===============================================================================
 ; this is the multi-colour bitmap data for the HUD. note that this is the
 ; copy of the HUD kept in RAM for restoring a fresh copy of the HUD when
@@ -207,6 +216,7 @@
         .koala_bitmap   "build/screen_main.koa", 24, 4, 32
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+
 ;===============================================================================
 ; screen RAM colour:
 ;
@@ -235,12 +245,12 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
-;===============================================================================
+
 ; colour RAM ($D800..) nybbles:
-;
+;===============================================================================
 ; this data is used only once to initialise colour RAM and is not referred to
 ; again. ergo, the segment address is not colour RAM itself ($D800) but the
-; address in the game binary where the data is to copy to colour RAM during
+; address in the game binary where the data is, to copy to colour RAM during
 ; initialisation
 ;
 ; in the original game, this is only the colour data for the HUD (7 rows)
@@ -274,8 +284,8 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ; but on the C64 the screen is always 320-px wide and has a non-linear bitmap
 ; layout (pixels are in order of char-cells, not scanlines)
 ;
-; therefore on the C64, there is some level of translation between a centred
-; 256-px (32 char) display and the C64 screen (40 chars).
+; therefore on the C64, there is some level of translation between
+; a centred 256-px (32 char) display and the C64 screen (40 chars)
 ;
 ;        1  4                             36  40
 ;       +---=------------------------------=---+
@@ -289,34 +299,33 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ; to a bitmap address for the 1st column of the centred display. each entry
 ; is repeated 8 times, probably to account for scanlines-per-char(?)
 
-; TODO: could this be shortened by doing away with the 8x repetition?
-
-; first, calculate each row address:
-_bmprow00 = ELITE_BITMAP_ADDR + .bmppos(  0, 4 ) ;=$4020
-_bmprow01 = ELITE_BITMAP_ADDR + .bmppos(  1, 4 ) ;=$4160
-_bmprow02 = ELITE_BITMAP_ADDR + .bmppos(  2, 4 ) ;=$42A0
-_bmprow03 = ELITE_BITMAP_ADDR + .bmppos(  3, 4 ) ;=$43E0
-_bmprow04 = ELITE_BITMAP_ADDR + .bmppos(  4, 4 ) ;=$4520
-_bmprow05 = ELITE_BITMAP_ADDR + .bmppos(  5, 4 ) ;=$4660
-_bmprow06 = ELITE_BITMAP_ADDR + .bmppos(  6, 4 ) ;=$47A0
-_bmprow07 = ELITE_BITMAP_ADDR + .bmppos(  7, 4 ) ;=$48E0
-_bmprow08 = ELITE_BITMAP_ADDR + .bmppos(  8, 4 ) ;=$4A20
-_bmprow09 = ELITE_BITMAP_ADDR + .bmppos(  9, 4 ) ;=$4B60
-_bmprow10 = ELITE_BITMAP_ADDR + .bmppos( 10, 4 ) ;=$4CA0
-_bmprow11 = ELITE_BITMAP_ADDR + .bmppos( 11, 4 ) ;=$4DE0
-_bmprow12 = ELITE_BITMAP_ADDR + .bmppos( 12, 4 ) ;=$4F20
-_bmprow13 = ELITE_BITMAP_ADDR + .bmppos( 13, 4 ) ;=$5060
-_bmprow14 = ELITE_BITMAP_ADDR + .bmppos( 14, 4 ) ;=$51A0
-_bmprow15 = ELITE_BITMAP_ADDR + .bmppos( 15, 4 ) ;=$52E0
-_bmprow16 = ELITE_BITMAP_ADDR + .bmppos( 16, 4 ) ;=$5420
-_bmprow17 = ELITE_BITMAP_ADDR + .bmppos( 17, 4 ) ;=$5560
-_bmprow18 = ELITE_BITMAP_ADDR + .bmppos( 18, 4 ) ;=$56A0
-_bmprow19 = ELITE_BITMAP_ADDR + .bmppos( 19, 4 ) ;=$57E0
-_bmprow20 = ELITE_BITMAP_ADDR + .bmppos( 20, 4 ) ;=$5920
-_bmprow21 = ELITE_BITMAP_ADDR + .bmppos( 21, 4 ) ;=$5A60
-_bmprow22 = ELITE_BITMAP_ADDR + .bmppos( 22, 4 ) ;=$5BA0
-_bmprow23 = ELITE_BITMAP_ADDR + .bmppos( 23, 4 ) ;=$5CE0
-_bmprow24 = ELITE_BITMAP_ADDR + .bmppos( 24, 4 ) ;=$5E20
+; first, calculate each row address:             ; VIC#1  VIC#3
+;-------------------------------------------------------------------------------
+_bmprow00 = ELITE_BITMAP_ADDR + .bmppos(  0, 4 ) ;=$4020  $E000
+_bmprow01 = ELITE_BITMAP_ADDR + .bmppos(  1, 4 ) ;=$4160  $E160
+_bmprow02 = ELITE_BITMAP_ADDR + .bmppos(  2, 4 ) ;=$42A0  $E2A0
+_bmprow03 = ELITE_BITMAP_ADDR + .bmppos(  3, 4 ) ;=$43E0  $E3E0
+_bmprow04 = ELITE_BITMAP_ADDR + .bmppos(  4, 4 ) ;=$4520  $E520
+_bmprow05 = ELITE_BITMAP_ADDR + .bmppos(  5, 4 ) ;=$4660  $E660
+_bmprow06 = ELITE_BITMAP_ADDR + .bmppos(  6, 4 ) ;=$47A0  $E7A0
+_bmprow07 = ELITE_BITMAP_ADDR + .bmppos(  7, 4 ) ;=$48E0  $E8E0
+_bmprow08 = ELITE_BITMAP_ADDR + .bmppos(  8, 4 ) ;=$4A20  $EA20
+_bmprow09 = ELITE_BITMAP_ADDR + .bmppos(  9, 4 ) ;=$4B60  $EB60
+_bmprow10 = ELITE_BITMAP_ADDR + .bmppos( 10, 4 ) ;=$4CA0  $ECA0
+_bmprow11 = ELITE_BITMAP_ADDR + .bmppos( 11, 4 ) ;=$4DE0  $EDE0
+_bmprow12 = ELITE_BITMAP_ADDR + .bmppos( 12, 4 ) ;=$4F20  $EF20
+_bmprow13 = ELITE_BITMAP_ADDR + .bmppos( 13, 4 ) ;=$5060  $F060
+_bmprow14 = ELITE_BITMAP_ADDR + .bmppos( 14, 4 ) ;=$51A0  $F1A0
+_bmprow15 = ELITE_BITMAP_ADDR + .bmppos( 15, 4 ) ;=$52E0  $F2E0
+_bmprow16 = ELITE_BITMAP_ADDR + .bmppos( 16, 4 ) ;=$5420  $F420
+_bmprow17 = ELITE_BITMAP_ADDR + .bmppos( 17, 4 ) ;=$5560  $F560
+_bmprow18 = ELITE_BITMAP_ADDR + .bmppos( 18, 4 ) ;=$56A0  $F6A0
+_bmprow19 = ELITE_BITMAP_ADDR + .bmppos( 19, 4 ) ;=$57E0  $F7E0
+_bmprow20 = ELITE_BITMAP_ADDR + .bmppos( 20, 4 ) ;=$5920  $F920
+_bmprow21 = ELITE_BITMAP_ADDR + .bmppos( 21, 4 ) ;=$5A60  $FA60
+_bmprow22 = ELITE_BITMAP_ADDR + .bmppos( 22, 4 ) ;=$5BA0  $FBA0
+_bmprow23 = ELITE_BITMAP_ADDR + .bmppos( 23, 4 ) ;=$5CE0  $FCE0
+_bmprow24 = ELITE_BITMAP_ADDR + .bmppos( 24, 4 ) ;=$5E20  $FE20
 
 ; what is this madness!? despite the C64 screen being 25 rows, the data table
 ; just keeps going! this is purely because the lo/hi tables are indexed and it
@@ -331,6 +340,7 @@ _bmprow30 = ELITE_BITMAP_ADDR + .bmppos( 30, 4 ) ;=$65A0
 _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
 
 ; repeat each row address 8 times:
+;
 .define _rowtobmp_rows \
         _bmprow00, _bmprow00, _bmprow00, _bmprow00, \
         _bmprow00, _bmprow00, _bmprow00, _bmprow00, \
