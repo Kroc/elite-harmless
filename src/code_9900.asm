@@ -79,25 +79,25 @@ _995d:                                                                  ;$995D
         lda # visibility::redraw ^$FF   ;=%11110111
         and ZP_POLYOBJ_VISIBILITY
         sta ZP_POLYOBJ_VISIBILITY
-        rts
+        rts 
 
 ;===============================================================================
 
 ; ".Shpt ; ship is point at screen center"
 _9964:                                                                  ;$9964
         sta [ZP_TEMP_ADDR2], y
-        iny
-        iny
+        iny 
+        iny 
         sta [ZP_TEMP_ADDR2], y
         lda ZP_POLYOBJ01_XPOS_pt1
-        dey
+        dey 
         sta [ZP_TEMP_ADDR2], y
         adc # $03
         bcs _995b
-        dey
-        dey
+        dey 
+        dey 
         sta [ZP_TEMP_ADDR2], y
-        rts
+        rts 
 
 ;===============================================================================
 .include        "math/math_square_root.asm"                             ;$9978
@@ -108,11 +108,11 @@ _99af:                                                                  ;$99AF
         cmp ZP_VAR_Q
         bcs _9a07           ; if (A>=Q) return $FF
         sta ZP_B6
-        tax
+        tax 
         beq _99d3           ; if (A==0) return 0
         lda table_logdiv, x
         ldx ZP_VAR_Q
-        sec
+        sec 
         sbc table_logdiv, x
         bmi _99d6
         ldx ZP_B6
@@ -120,7 +120,7 @@ _99af:                                                                  ;$99AF
         ldx ZP_VAR_Q
         sbc table_log, x
         bcs _9a07           ; if (log(A)>=log(Q)) return $FF
-        tax
+        tax 
         lda _9500, x
 _99d3:                                                                  ;$99D3
         sta ZP_VAR_R
@@ -132,10 +132,10 @@ _99d6:                                                                  ;$99D6
         ldx ZP_VAR_Q
         sbc table_log, x
         bcs _9a07           ; if (log(A)>=log(Q)) return $FF
-        tax
+        tax 
         lda _9600, x
         sta ZP_VAR_R
-        rts
+        rts 
 
 ;===============================================================================
 ; divides A=R = A/Q*256, possibly abandoned in favor of log-table division?
@@ -148,7 +148,7 @@ _99d6:                                                                  ;$99D6
         ldx # $fe           ; 1-bit is not set and serves as the ending flag
         stx ZP_VAR_R
 _99ef:                                                                  ;$99EF
-        asl
+        asl 
         bcs _99fd           ; A overflows? continue at _99fd
         cmp ZP_VAR_Q
         bcc _99f8
@@ -156,20 +156,20 @@ _99ef:                                                                  ;$99EF
 _99f8:                                                                  ;$99F8
         rol ZP_VAR_R
         bcs _99ef           ; test for the ending flag, else continue division
-        rts
+        rts 
 
 _99fd:  ; the first bit is shifted out of A into the carry              ;$99FD
         sbc ZP_VAR_Q        ; no test needed, A+carry is > Q
-        sec
+        sec 
         rol ZP_VAR_R
         bcs _99ef           ; test for the ending flag, else continue division
         lda ZP_VAR_R
-        rts
+        rts 
 
 _9a07:                                                                  ;$9A07
         lda # $ff
         sta ZP_VAR_R
-        rts
+        rts 
 
 ;===============================================================================
 ; returns A=Q+R, sign-bit S. regards two sign-bits in A,S.
@@ -182,27 +182,27 @@ _9a0c:                                                                  ;$9A0C
         eor ZP_VAR_S
         bmi _9a16           ; if (sign1 == sign2) return Q+R, keep sign
         lda ZP_VAR_Q
-        clc
+        clc 
         adc ZP_VAR_R
-        rts
+        rts 
 
 _9a16:                                                                  ;$9A16
         lda ZP_VAR_R
-        sec
+        sec 
         sbc ZP_VAR_Q
         bcc _9a1f           ; if (R>=Q) return R-Q
-        clc
-        rts
+        clc 
+        rts 
 
 _9a1f:                                                                  ;$9A1F
-        pha
+        pha 
         lda ZP_VAR_S        ; if (R<Q) sign=-sign; return Q-R
         eor # %10000000
         sta ZP_VAR_S
-        pla
+        pla 
         eor # %11111111
         adc # $01
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -242,15 +242,15 @@ _9a30:                                                                  ;$9A30
         sta ZP_71, y
         lda ZP_VAR_S
         sta ZP_72, y
-        iny
-        iny
-        txa
-        clc
+        iny 
+        iny 
+        txa 
+        clc 
         adc # $06
-        tax
+        tax 
         cmp # $11
         bcc _9a30
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -293,7 +293,7 @@ _9a86:                                                                  ;$9A86
 
 ; ".EE55 ; counter Y, 4 rnd bytes to edge heap"
 _9abb:                                                                  ;$9ABB
-        iny
+        iny 
         jsr get_random_number
         sta [ZP_TEMP_ADDR2], y
         cpy # $06
@@ -326,7 +326,7 @@ _9ad8:                                                                  ;$9AD8
         jmp _a178
 
 _9ae5:                                                                  ;$9AE5
-        rts
+        rts 
 
 ; ".LL10 ; object in front of you"
 _9ae6:                                                                  ;$9AE6
@@ -346,7 +346,7 @@ _9ae6:                                                                  ;$9AE6
 
         ldy # Hull::_06                 ;=$06: "gun vertex"?
         lda [ZP_HULL_ADDR], y
-        tax
+        tax 
 
         lda # $ff
         sta $0100, x
@@ -354,19 +354,19 @@ _9ae6:                                                                  ;$9AE6
         lda ZP_POLYOBJ_ZPOS_LO
         sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_MI
-        lsr
+        lsr 
         ror ZP_VAR_T
-        lsr
+        lsr 
         ror ZP_VAR_T
-        lsr
+        lsr 
         ror ZP_VAR_T
-        lsr
+        lsr 
         bne _9b29
         lda ZP_VAR_T
-        ror
-        lsr
-        lsr
-        lsr
+        ror 
+        lsr 
+        lsr 
+        lsr 
         sta ZP_AD
         bpl _9b3a
 
@@ -396,7 +396,7 @@ _9b3a:                                                                  ;$9B3A
         ; take a copy of matrix 0x0, 0x1 & 0x2
         lda ZP_POLYOBJ_M0x0, x
         sta ZP_TEMPOBJ_M0x0, x
-        dex
+        dex 
         bpl :-
 
         lda # $c5
@@ -404,20 +404,20 @@ _9b3a:                                                                  ;$9B3A
         ldy # $10
 _9b51:                                                                  ;$9B51
         lda ZP_TEMPOBJ_M2x0_LO, y
-        asl
+        asl 
         lda ZP_TEMPOBJ_M2x0_HI, y
-        rol
+        rol 
         jsr _99af
         ldx ZP_VAR_R
         stx ZP_TEMPOBJ_MATRIX, y
-        dey
-        dey
+        dey 
+        dey 
         bpl _9b51
         ldx # $08
 _9b66:                                                                  ;$9B66
         lda ZP_POLYOBJ_XPOS_LO, x
         sta ZP_85, x
-        dex
+        dex 
         bpl _9b66
 
         lda # $ff
@@ -428,15 +428,15 @@ _9b66:                                                                  ;$9B66
         and # visibility::display
         beq _9b8b
         lda [ZP_HULL_ADDR], y
-        lsr
-        lsr
-        tax
+        lsr 
+        lsr 
+        tax 
         lda # $ff
 _9b80:                                                                  ;$9B80
         sta ZP_POLYOBJ01_XPOS_pt1, x
-        dex
+        dex 
         bpl _9b80
-        inx
+        inx 
         stx ZP_AD
 _9b88:                                                                  ;$9B88
         jmp _9cfe
@@ -448,19 +448,19 @@ _9b8b:                                                                  ;$9B8B
 
         ldy # Hull::_12                 ;=$12: "scaling of normals"?
         lda [ZP_HULL_ADDR], y
-        tax
+        tax 
         lda ZP_8C
-        tay
+        tay 
         beq _9baa
 _9b9b:                                                                  ;$9B9B
-        inx
+        inx 
         lsr ZP_89
         ror ZP_88
         lsr ZP_86
         ror ZP_85
-        lsr
+        lsr 
         ror ZP_8B
-        tay
+        tay 
         bne _9b9b
 _9baa:                                                                  ;$9BAA
         stx ZP_9F
@@ -492,7 +492,7 @@ _9baa:                                                                  ;$9BAA
 
         ldy # Hull::face_data_lo
         lda [ZP_HULL_ADDR], y
-        clc
+        clc 
         adc ZP_HULL_ADDR_LO
         sta ZP_TEMP_ADDR3_LO
 
@@ -508,30 +508,30 @@ _9bf2:                                                                  ;$9BF2
         and # %00011111
         cmp ZP_AD
         bcs _9c0b
-        tya
-        lsr
-        lsr
-        tax
+        tya 
+        lsr 
+        lsr 
+        tax 
         lda # $ff
         sta ZP_POLYOBJ01_XPOS_pt1, x
-        tya
+        tya 
         adc # $04
-        tay
+        tay 
         jmp _9cf7
 
 _9c0b:                                                                  ;$9C0B
         lda ZP_72
-        asl
+        asl 
         sta ZP_74
-        asl
+        asl 
         sta ZP_76
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_71
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_73
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_75
         ldx ZP_9F
@@ -564,13 +564,13 @@ _9c4b:                                                                  ;$9C4B
         lda ZP_73
         sta ZP_VAR_X2
         lda ZP_75
-        dex
+        dex 
         bmi _9c60
 _9c58:                                                                  ;$9C58
         lsr ZP_VAR_X
         lsr ZP_VAR_X2
-        lsr
-        dex
+        lsr 
+        dex 
         bpl _9c58
 _9c60:                                                                  ;$9C60
         sta ZP_VAR_R
@@ -638,18 +638,18 @@ _9ca9:                                                                  ;$9CA9
         lda ZP_70
         eor ZP_76
         jsr _9a0c
-        pha
-        tya
-        lsr
-        lsr
-        tax
-        pla
+        pha 
+        tya 
+        lsr 
+        lsr 
+        tax 
+        pla 
         bit ZP_VAR_S
         bmi _9cf4
         lda # $00
 _9cf4:                                                                  ;$9CF4
         sta ZP_POLYOBJ01_XPOS_pt1, x
-        iny
+        iny 
 _9cf7:                                                                  ;$9CF7
         cpy ZP_AE
         bcs _9cfe
@@ -688,7 +688,7 @@ _9cfe:                                                                  ;$9CFE
         sta ZP_AE
 
         lda ZP_HULL_ADDR_LO
-        clc
+        clc 
         adc # $14
         sta ZP_TEMP_ADDR3_LO
         lda ZP_HULL_ADDR_HI
@@ -700,46 +700,46 @@ _9d45:                                                                  ;$9D45
         sty ZP_9F
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VAR_X
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VAR_X2
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_6F
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VAR_T
         and # %00011111
         cmp ZP_AD
         bcc _9d8e
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VAR_P1
         and # %00001111
-        tax
+        tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
         lda ZP_VAR_P1
-        lsr
-        lsr
-        lsr
-        lsr
-        tax
+        lsr 
+        lsr 
+        lsr 
+        lsr 
+        tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VAR_P1
         and # %00001111
-        tax
+        tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
         lda ZP_VAR_P1
-        lsr
-        lsr
-        lsr
-        lsr
-        tax
+        lsr 
+        lsr 
+        lsr 
+        lsr 
+        tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9d91
 _9d8e:                                                                  ;$9D8E
@@ -750,16 +750,16 @@ _9d8e:                                                                  ;$9D8E
 _9d91:                                                                  ;$9D91
         lda ZP_VAR_T
         sta ZP_VAR_Y
-        asl
+        asl 
         sta ZP_VAR_Y2
-        asl
+        asl 
         sta ZP_70
         jsr _9a2c
         lda ZP_POLYOBJ_XPOS_HI
         sta ZP_VAR_X2
         eor ZP_72
         bmi _9db6
-        clc
+        clc 
         lda ZP_71
         adc ZP_POLYOBJ_XPOS_LO
         sta ZP_VAR_X
@@ -772,7 +772,7 @@ _9db3:                                                                  ;$9DB3
 ; ".LL52 ; -ve x sign"
 _9db6:                                                                  ;$9DB6
         lda ZP_POLYOBJ_XPOS_LO
-        sec
+        sec 
         sbc ZP_71
         sta ZP_VAR_X
         lda ZP_POLYOBJ_XPOS_MI
@@ -797,7 +797,7 @@ _9dd9:                                                                  ;$9DD9
         sta ZP_70
         eor ZP_74
         bmi _9df1
-        clc
+        clc 
         lda ZP_73
         adc ZP_POLYOBJ_YPOS_LO
         sta ZP_VAR_Y2
@@ -812,7 +812,7 @@ _9dee:                                                                  ;$9DEE
 ; ".LL54 ; -ve y sign"
 _9df1:                                                                  ;$9DF1
         lda ZP_POLYOBJ_YPOS_LO
-        sec
+        sec 
         sbc ZP_73
         sta ZP_VAR_Y2
         lda ZP_POLYOBJ_YPOS_MI
@@ -836,7 +836,7 @@ _9e16:                                                                  ;$9E16
         lda ZP_76
         bmi _9e64
         lda ZP_75
-        clc
+        clc 
         adc ZP_POLYOBJ_ZPOS_LO
         sta ZP_VAR_T
         lda ZP_POLYOBJ_ZPOS_MI
@@ -854,8 +854,8 @@ _9e2a:                                                                  ;$9E2A
 
 ; ".LL63 ; roll Acc count Xreg"
 _9e30:                                                                  ;$9E30
-        lsr
-        inx
+        lsr 
+        inx 
         cmp ZP_VAR_Q
         bcs _9e30
         stx ZP_VAR_S
@@ -865,20 +865,20 @@ _9e30:                                                                  ;$9E30
 
 ; ".LL64 ; counter Xreg"
 _9e3f:                                                                  ;$9E3F
-        asl
+        asl 
         rol ZP_VAR_U
         bmi _9e4a
-        dex
+        dex 
         bne _9e3f
         sta ZP_VAR_R
-        rts
+        rts 
 
 ; ".LL84 ; div error R=U=#50"
 _9e4a:                                                                  ;$9E4A
         lda # $32
         sta ZP_VAR_R
         sta ZP_VAR_U
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -886,10 +886,10 @@ _9e4a:                                                                  ;$9E4A
 ;  screen for -ve RU onto XX3 heap, index X=CNT"
 _9e51:                                                                  ;$9E51
         lda # $80
-        sec
+        sec 
         sbc ZP_VAR_R
         sta $0100, x
-        inx
+        inx 
         lda # $00
         sbc ZP_VAR_U
         sta $0100, x
@@ -898,7 +898,7 @@ _9e51:                                                                  ;$9E51
 ; ".LL56 ; Enter XX12+5 -ve Z node case from above"
 _9e64:                                                                  ;$9E64
         lda ZP_POLYOBJ_ZPOS_LO  ; "z org lo"
-        sec
+        sec 
         sbc ZP_75               ; "rotated z node lo"
         sta ZP_VAR_T
 
@@ -953,10 +953,10 @@ _9ead:                                                                  ;$9EAD
         lda ZP_VAR_X2
         bmi _9e51
         lda ZP_VAR_R
-        clc
+        clc 
         adc # $80
         sta $0100, x
-        inx
+        inx 
         lda ZP_VAR_U
         adc # $00
         sta $0100, x
@@ -977,10 +977,10 @@ _9ec3:                                                                  ;$9EC3
 ; ".LL70 ; arrive from below, Yscreen for -ve RU onto XX3 node heap, index X=CNT"
 _9ed9:                                                                  ;$9ED9
         lda # $48
-        clc
+        clc 
         adc ZP_VAR_R
         sta $0100, x
-        inx
+        inx 
         lda # $00
         adc ZP_VAR_U
         sta $0100, x
@@ -992,29 +992,29 @@ _9eec:                                                                  ;$9EEC
 
 ; ".LL68 ; both carry on, also arrive from LL66, scaling y based on z."
 _9eef:                                                                  ;$9EEF
-        pla
-        tax
-        inx
+        pla 
+        tax 
+        inx 
         lda ZP_70
         bmi _9ed9
         lda # $48
-        sec
+        sec 
         sbc ZP_VAR_R
         sta $0100, x
-        inx
+        inx 
         lda # $00
         sbc ZP_VAR_U
         sta $0100, x
 
 ; ".LL50 ; also from LL70, Also from LL49-3. XX3 heap has yscreen, Next vertex."
 _9f06:                                                                  ;$9F06
-        clc
+        clc 
         lda ZP_AA
         adc # $04
         sta ZP_AA
         lda ZP_9F
         adc # $06
-        tay
+        tay 
         bcs _9f1b
         cmp ZP_AE
         bcs _9f1b
@@ -1060,14 +1060,14 @@ _9f35:                                                                  ;$9F35
 
         ldy # Hull::_06         ;=$06: gun vertex
         lda [ZP_HULL_ADDR], y
-        tay
+        tay 
         ldx $0100, y
         stx ZP_VAR_X
-        inx
+        inx 
         beq _9f9f
         ldx $0101, y
         stx ZP_VAR_Y
-        inx
+        inx 
         beq _9f9f
         ldx $0102, y
         stx ZP_VAR_X2
@@ -1088,22 +1088,22 @@ _9f82:                                                                  ;$9F82
         ldy ZP_VAR_U
         lda ZP_VAR_X
         sta [ZP_TEMP_ADDR2], y
-        iny
+        iny 
         lda ZP_VAR_Y
         sta [ZP_TEMP_ADDR2], y
-        iny
+        iny 
         lda ZP_VAR_X2
         sta [ZP_TEMP_ADDR2], y
-        iny
+        iny 
         lda ZP_VAR_Y2
         sta [ZP_TEMP_ADDR2], y
-        iny
+        iny 
         sty ZP_VAR_U
 
 ; ".LL170 ; (laser not firing) ; Calculate new lines ; their comment"
 _9f9f:                                                                  ;$9F9F
         ldy # Hull::edge_data_lo
-        clc
+        clc 
         lda [ZP_HULL_ADDR], y
         adc ZP_HULL_ADDR_LO
         sta ZP_TEMP_ADDR3_LO
@@ -1124,20 +1124,20 @@ _9fb8:                                                                  ;$9FB8
         lda [ZP_TEMP_ADDR3], y
         cmp ZP_AD
         bcc _9fd6
-        iny
+        iny 
         lda [ZP_TEMP_ADDR3], y
-        iny
+        iny 
         sta ZP_VAR_P1
         and # %00001111
-        tax
+        tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9fd9
         lda ZP_VAR_P1
-        lsr
-        lsr
-        lsr
-        lsr
-        tax
+        lsr 
+        lsr 
+        lsr 
+        lsr 
+        tax 
         lda ZP_POLYOBJ01_XPOS_pt1, x
         bne _9fd9
 
@@ -1223,14 +1223,14 @@ _a03c:                                                                  ;$A03C
         lda ZP_71
         sta ZP_VAR_Y2
 
-        clc
-        rts
+        clc 
+        rts 
 
 ;===============================================================================
 
 _a04a:                                                                  ;$A04A
-        sec
-        rts
+        sec 
+        rts 
 
 _a04c:                                                                  ;$A04C
         lsr ZP_A2
@@ -1244,10 +1244,10 @@ _a04e:                                                                  ;$A04E
         and ZP_72
         bmi _a04a
         ldx ZP_VAR_Y
-        dex
-        txa
+        dex 
+        txa 
         ldx ZP_70
-        dex
+        dex 
         stx ZP_73
         ora ZP_73
         bpl _a04a
@@ -1265,14 +1265,14 @@ _a04e:                                                                  ;$A04E
 _a081:                                                                  ;$A081
        .phy                     ; push Y to stack (via A)
         lda ZP_6F
-        sec
+        sec 
         sbc ZP_VAR_X
         sta ZP_73
         lda ZP_70
         sbc ZP_VAR_Y
         sta ZP_74
         lda ZP_71
-        sec
+        sec 
         sbc ZP_VAR_X2
         sta ZP_75
         lda ZP_72
@@ -1283,7 +1283,7 @@ _a081:                                                                  ;$A081
         lda ZP_76
         bpl _a0b2
         lda # $00
-        sec
+        sec 
         sbc ZP_75
         sta ZP_75
         lda # $00
@@ -1292,19 +1292,19 @@ _a081:                                                                  ;$A081
 _a0b2:                                                                  ;$A0B2
         lda ZP_74
         bpl _a0c1
-        sec
+        sec 
         lda # $00
         sbc ZP_73
         sta ZP_73
         lda # $00
         sbc ZP_74
 _a0c1:                                                                  ;$A0C1
-        tax
+        tax 
         bne _a0c8
         ldx ZP_76
         beq _a0d2
 _a0c8:                                                                  ;$A0C8
-        lsr
+        lsr 
         ror ZP_73
         lsr ZP_76
         ror ZP_75
@@ -1366,17 +1366,17 @@ _a110:                                                                  ;$A110
         jsr _a19f
         dec VAR_06F4
 _a136:                                                                  ;$A136
-        pla
-        tay
+        pla 
+        tay 
         jmp _a03c
 
         ;-----------------------------------------------------------------------
 
 _a13b:                                                                  ;$A13B
-        pla
-        tay
-        sec
-        rts
+        pla 
+        tay 
+        sec 
+        rts 
 
 ;===============================================================================
 ; BBC code says "Shove visible edge onto XX19 ship lines heap counter U"
@@ -1398,16 +1398,16 @@ _a13f:                                                                  ;$A13F
         ; 
         lda ZP_VAR_X1
         sta [ZP_TEMP_ADDR2], y
-        iny
+        iny 
         lda ZP_VAR_Y1
         sta [ZP_TEMP_ADDR2], y
-        iny
+        iny 
         lda ZP_VAR_X2
         sta [ZP_TEMP_ADDR2], y
-        iny
+        iny 
         lda ZP_VAR_Y2
         sta [ZP_TEMP_ADDR2], y
-        iny
+        iny 
         ; the index has moved forward 4 bytes accordingly
         sty ZP_VAR_U
 
@@ -1451,13 +1451,13 @@ _a178:                                                                  ;$A178
         ; read line start and end co-ords from the heap
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_X1
-        iny
+        iny 
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_Y1
-        iny
+        iny 
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_X2
-        iny
+        iny 
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_Y2
 
@@ -1465,7 +1465,7 @@ _a178:                                                                  ;$A178
         ;       removal of validation in the line routine
         jsr draw_line
         
-        iny
+        iny 
         cpy ZP_AE               ; keep drawing?
         bcc @draw
 
@@ -1478,32 +1478,32 @@ _a19f:                                                                  ;$A19F
         bpl _a1ba
         sta ZP_VAR_S
         jsr _a219
-        txa
-        clc
+        txa 
+        clc 
         adc ZP_VAR_X2
         sta ZP_VAR_X2
-        tya
+        tya 
         adc ZP_VAR_Y2
         sta ZP_VAR_Y2
         lda # $00
         sta ZP_VAR_X
         sta ZP_VAR_Y
-        tax
+        tax 
 _a1ba:                                                                  ;$A1BA
         beq _a1d5
         sta ZP_VAR_S
         dec ZP_VAR_S
         jsr _a219
-        txa
-        clc
+        txa 
+        clc 
         adc ZP_VAR_X2
         sta ZP_VAR_X2
-        tya
+        tya 
         adc ZP_VAR_Y2
         sta ZP_VAR_Y2
         ldx # $ff
         stx ZP_VAR_X
-        inx
+        inx 
         stx ZP_VAR_Y
 _a1d5:                                                                  ;$A1D5
         lda ZP_VAR_Y2
@@ -1512,11 +1512,11 @@ _a1d5:                                                                  ;$A1D5
         lda ZP_VAR_X2
         sta ZP_VAR_R
         jsr _a248
-        txa
-        clc
+        txa 
+        clc 
         adc ZP_VAR_X
         sta ZP_VAR_X
-        tya
+        tya 
         adc ZP_VAR_Y
         sta ZP_VAR_Y
         lda # $00
@@ -1524,7 +1524,7 @@ _a1d5:                                                                  ;$A1D5
         sta ZP_VAR_Y2
 _a1f3:                                                                  ;$A1F3
         lda ZP_VAR_X2
-        sec
+        sec 
         sbc # $90
         sta ZP_VAR_R
         lda ZP_VAR_Y2
@@ -1532,11 +1532,11 @@ _a1f3:                                                                  ;$A1F3
         sta ZP_VAR_S
         bcc _a218
         jsr _a248
-        txa
-        clc
+        txa 
+        clc 
         adc ZP_VAR_X
         sta ZP_VAR_X
-        tya
+        tya 
         adc ZP_VAR_Y
         sta ZP_VAR_Y
         lda # $8f
@@ -1544,7 +1544,7 @@ _a1f3:                                                                  ;$A1F3
         lda # $00
         sta ZP_VAR_Y2
 _a218:                                                                  ;$A218
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -1552,47 +1552,47 @@ _a219:                                                                  ;$A219
         lda ZP_VAR_X
         sta ZP_VAR_R
         jsr _a284
-        pha
+        pha 
         ldx ZP_VAR_T
         bne _a250
 _a225:                                                                  ;$A225
         lda # $00
-        tax
-        tay
+        tax 
+        tay 
         lsr ZP_VAR_S
         ror ZP_VAR_R
         asl ZP_VAR_Q
         bcc _a23a
 _a231:                                                                  ;$A231
-        txa
-        clc
+        txa 
+        clc 
         adc ZP_VAR_R
-        tax
-        tya
+        tax 
+        tya 
         adc ZP_VAR_S
-        tay
+        tay 
 _a23a:                                                                  ;$A23A
         lsr ZP_VAR_S
         ror ZP_VAR_R
         asl ZP_VAR_Q
         bcs _a231
         bne _a23a
-        pla
+        pla 
         bpl _a277
-        rts
+        rts 
 
 ;===============================================================================
 
 _a248:                                                                  ;$A248
         jsr _a284
-        pha
+        pha 
         ldx ZP_VAR_T
         bne _a225
 _a250:                                                                  ;$A250
         lda # $ff
-        tay
-        asl
-        tax
+        tay 
+        asl 
+        tax 
 _a255:                                                                  ;$A255
         asl ZP_VAR_R
         rol ZP_VAR_S
@@ -1606,28 +1606,28 @@ _a261:                                                                  ;$A261
         lda ZP_VAR_R
         sbc # $00
         sta ZP_VAR_R
-        sec
+        sec 
 _a26c:                                                                  ;$A26C
-        txa
-        rol
-        tax
-        tya
-        rol
-        tay
+        txa 
+        rol 
+        tax 
+        tya 
+        rol 
+        tay 
         bcs _a255
-        pla
+        pla 
         bmi _a283
 _a277:                                                                  ;$A277
-        txa
+        txa 
         eor # %11111111
         adc # $01
-        tax
-        tya
+        tax 
+        tya 
         eor # %11111111
         adc # $00
-        tay
+        tay 
 _a283:                                                                  ;$A283
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -1637,18 +1637,18 @@ _a284:                                                                  ;$A284
         lda ZP_VAR_S
         bpl _a29d
         lda # $00
-        sec
+        sec 
         sbc ZP_VAR_R
         sta ZP_VAR_R
         lda ZP_VAR_S
-        pha
+        pha 
         eor # %11111111
         adc # $00
         sta ZP_VAR_S
-        pla
+        pla 
 _a29d:                                                                  ;$A29D
         eor ZP_74
-        rts
+        rts 
 
 ;===============================================================================
 ; process object? checks if A.I. needs running and appears to rotate and move
@@ -1731,7 +1731,7 @@ _a2cb:                                                                  ;$A2CB
         ldx # $06
         jsr .move_polyobj_x_small
         lda ZP_POLYOBJ_VERTX_LO
-        clc
+        clc 
         adc ZP_POLYOBJ_VERTX_HI
         bpl :+
         lda # $00
@@ -1850,7 +1850,7 @@ _a3bf:                                                                  ;$A3BF
         cmp # $81
         bne :+
 
-        rts
+        rts 
 
         ;-----------------------------------------------------------------------
         ; apply the roll & pitch rotation to the poly-object's compound matrix.
@@ -1952,7 +1952,7 @@ _a3bf:                                                                  ;$A3BF
 :       lda ZP_POLYOBJ_VISIBILITY                                       ;$A443
         and # visibility::scanner ^$FF
         sta ZP_POLYOBJ_VISIBILITY
-        rts
+        rts 
 
 ;===============================================================================
 ; insert these routines from "math_3d.inc"
@@ -1963,33 +1963,33 @@ _a3bf:                                                                  ;$A3BF
 ;===============================================================================
 
 _a508:                                                                  ;$A508
-        tay
+        tay 
         eor ZP_POLYOBJ_XPOS_HI, x
         bmi _a51c
         lda ZP_VAR_P2
-        clc
+        clc 
         adc ZP_POLYOBJ_XPOS_LO, x
         sta ZP_VAR_P2
         lda ZP_VAR_P3
         adc ZP_POLYOBJ_XPOS_MI, x
         sta ZP_VAR_P3
-        tya
-        rts
+        tya 
+        rts 
 
         ;-----------------------------------------------------------------------
 
 _a51c:                                                                  ;$A51C
         lda ZP_POLYOBJ_XPOS_LO, x
-        sec
+        sec 
         sbc ZP_VAR_P2
         sta ZP_VAR_P2
         lda ZP_POLYOBJ_XPOS_MI, x
         sbc ZP_VAR_P3
         sta ZP_VAR_P3
         bcc _a52f
-        tya
+        tya 
         eor # %10000000
-        rts
+        rts 
 
         ;-----------------------------------------------------------------------
 
@@ -2000,8 +2000,8 @@ _a52f:                                                                  ;$A52F
         lda # $00
         sbc ZP_VAR_P3
         sta ZP_VAR_P3
-        tya
-        rts
+        tya 
+        rts 
 
 ;===============================================================================
 
@@ -2061,7 +2061,7 @@ _a53d:                                                                  ;$A53D
         bmi _a5a8
 
         lda ZP_VALUE_pt1
-        clc
+        clc 
         adc ZP_B2
 
         lda ZP_VALUE_pt2
@@ -2079,7 +2079,7 @@ _a53d:                                                                  ;$A53D
 
 _a5a8:                                                                  ;$A5A8
         lda ZP_VALUE_pt1
-        sec
+        sec 
         sbc ZP_B2
         lda ZP_VALUE_pt2
         sbc ZP_B3
@@ -2130,27 +2130,27 @@ _a5db:                                                                  ;$A5DB
 ; what calls in to this, where?
 
 _a604:                                                                  ;$A604
-        sec
+        sec 
         ldy # $00
         sty ZP_TEMP_ADDR3_LO
         ldx # $10
         lda [ZP_TEMP_ADDR1], y
-        txa
+        txa 
 _a60e:                                                                  ;$A60E
         stx ZP_TEMP_ADDR3_HI
         sty ZP_VAR_T
         adc [ZP_TEMP_ADDR3], y
         eor ZP_VAR_T
         sbc ZP_TEMP_ADDR3_HI
-        dey
+        dey 
         bne _a60e
-        inx
+        inx 
         cpx # $a0
         bcc _a60e
         cmp _1d21
         bne _a604
 
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -2158,7 +2158,7 @@ _a626:                                                                  ;$A626
 
         ldx COCKPIT_VIEW
         beq _a65e
-        dex
+        dex 
         bne _a65f
         ; adjust for rear view: invert sign of X,Z. Up stays up, so Y is ok.
         lda ZP_POLYOBJ_XPOS_HI
@@ -2187,7 +2187,7 @@ _a626:                                                                  ;$A626
         sta ZP_POLYOBJ_M2x2_HI
 _a65e:                                                                  ;$A65E
         ; adjust for front view: this is the default view, all is ok.
-        rts
+        rts 
 
         ;-----------------------------------------------------------------------
 
@@ -2196,7 +2196,7 @@ _a65f:                                                                  ;$A65F
         ; B0 is set when view is RIGHT (see)
         lda # $00
         cpx # $02               ; X is COCKPIT_VIEW-1, so this checks for RIGHT
-        ror
+        ror 
         sta ZP_B1               
         eor # %10000000
         sta ZP_B0
@@ -2210,7 +2210,7 @@ _a65f:                                                                  ;$A65F
         stx ZP_POLYOBJ_XPOS_MI
         lda ZP_POLYOBJ_XPOS_HI
         eor ZP_B0               ; invert X-sign when looking LEFT
-        tax
+        tax 
         lda ZP_POLYOBJ_ZPOS_HI
         eor ZP_B1               ; invert X-sign when looking RIGHT
         sta ZP_POLYOBJ_XPOS_HI
@@ -2227,13 +2227,13 @@ _a693:                                                                  ;$A693
         stx ZP_POLYOBJ_XPOS_LO, y
         lda ZP_POLYOBJ_XPOS_MI, y
         eor ZP_B0
-        tax
+        tax 
         lda ZP_POLYOBJ_YPOS_HI, y
         eor ZP_B1
         sta ZP_POLYOBJ_XPOS_MI, y
         stx ZP_POLYOBJ_YPOS_HI, y
 _a6ad:                                                                  ;$A6AD
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -2328,11 +2328,11 @@ _a700:                                                                  ;$A700
 
         lda PLAYER_TRUMBLES_HI
         and # %01111111
-        lsr
-        lsr
-        lsr
-        lsr
-        tax
+        lsr 
+        lsr 
+        lsr 
+        lsr 
+        tax 
         lda trumbles_sprite_count, x
         sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
         lda trumbles_sprite_mask, x
@@ -2349,7 +2349,7 @@ _a700:                                                                  ;$A700
         ; optimisation for changing the memory map,
         ; with thanks to: <http://www.c64os.com/post?p=83>
         dec CPU_CONTROL
-        rts
+        rts 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 .ifndef OPTION_NOTRUMBLES
@@ -2438,17 +2438,17 @@ _a75d:                                                                  ;$A75D
         stx ZP_CURSOR_COL
         stx ZP_CURSOR_ROW
 
-        dex
+        dex 
         stx ZP_34
 
 .ifdef  OPTION_ORIGINAL
-        rts
+        rts 
 .endif
 
 ;===============================================================================
 
 _a785:                                                                  ;$A785
-        rts
+        rts 
 
 _a786:                                                                  ;$A786
         lda # $00
@@ -2475,7 +2475,7 @@ _a7a6:                                                                  ;$A7A6
 ; kill a PolyObject?
 ;
         lda VAR_04CB
-        clc
+        clc 
         adc hull_d062, x
         sta VAR_04CB
 
@@ -2495,22 +2495,22 @@ _a7c3:                                                                  ;$A7C3
         ldx # $0b
         cmp # $10
         bcs _a7db
-        inx
+        inx 
         cmp # $08
         bcs _a7db
-        inx
+        inx 
         cmp # $06
         bcs _a7db
-        inx
+        inx 
         cmp # $03
         bcs _a7db
-        inx
+        inx 
 _a7db:                                                                  ;$A7DB
-        txa
-        asl
-        asl
-        asl
-        asl
+        txa 
+        asl 
+        asl 
+        asl 
+        asl 
         ora # %00000011
         ldy # $03
         ldx # $51
@@ -2523,22 +2523,22 @@ _a7e9:                                                                  ;$A7E9
         ldx # $0b
         cmp # $08
         bcs _a801
-        inx
+        inx 
         cmp # $04
         bcs _a801
-        inx
+        inx 
         cmp # $03
         bcs _a801
-        inx
+        inx 
         cmp # $02
         bcs _a801
-        inx
+        inx 
 _a801:                                                                  ;$A801
-        txa
-        asl
-        asl
-        asl
-        asl
+        txa 
+        asl 
+        asl 
+        asl 
+        asl 
         ora # %00000011
         ldy # $02
         ldx # $d0
@@ -2561,19 +2561,19 @@ _a817:                                                                  ;$A817
         lda # $01
 
 :       sta _aa15, y                                                    ;$A81B
-        dey
+        dey 
         bne :-
 _a821:                                                                  ;$A821
-        rts
+        rts 
 
 ;===============================================================================
 
 _a822:                                                                  ;$A822
         ldx # $03
-        iny
+        iny 
         sty ZP_VAR_X2
 _a827:                                                                  ;$A827
-        dex
+        dex 
         bmi _a821
         lda _aa13, x
         and # %00111111
@@ -2581,7 +2581,7 @@ _a827:                                                                  ;$A827
         bne _a827
         lda # $01
         sta _aa16, x
-        rts
+        rts 
 
 
 _a839:                                                                  ;$A839
@@ -2610,8 +2610,8 @@ _a839:                                                                  ;$A839
 ;       Y = ?
 ;
 _a850:                                                                  ;$A850
-        bit _a821               ; an unused skip?
-
+        bit _a821               ; an unused skip? = `and [ZP_A8, x]`
+        
         sta ZP_VAR_X1
         stx ZP_VAR_Y1
         ; this causes the `clv` below to become a `branch on overflow clear`
@@ -2625,7 +2625,7 @@ _a850:                                                                  ;$A850
 _a858:                                                                  ;$A858
 ;       Y = $00-$0F?
 
-        clv
+        clv 
 
         ; do nothing if an option is set?
         lda _1d05
@@ -2643,7 +2643,7 @@ _a858:                                                                  ;$A858
         and # %00111111
         cmp ZP_VAR_X2
         beq @_a88b
-        dex
+        dex 
         bpl :-
 
 @_a876:                                                                 ;$A876
@@ -2651,7 +2651,7 @@ _a858:                                                                  ;$A858
         lda _aa19
         cmp _aa1a
         bcc :+
-        inx
+        inx 
         lda _aa1a
 
 :       cmp _aa1b                                                       ;$A884
@@ -2659,9 +2659,9 @@ _a858:                                                                  ;$A858
         ldx # $02
 
 @_a88b:                                                                  ;$A88B
-        tya
+        tya 
         and # %01111111
-        tay
+        tay 
         lda _aa32, y
         cmp _aa19, x
         bcc _a821
@@ -2690,14 +2690,14 @@ _a8bd:                                                                  ;$A8BD
         sta _aa26, x
         lda _aaa2, y
         sta _aa2c, x
-        iny
-        tya
+        iny 
+        tya 
         ora # %10000000
         sta _aa13, x
 
         cli                     ; enable interrupts
         sec                     ; exit with carry set
-        rts
+        rts 
 
 ;===============================================================================
 .include        "code_interrupts.asm"
@@ -2708,10 +2708,10 @@ _a8bd:                                                                  ;$A8BD
 
         lda # $ff                                                       ;$AB29
         sta ZP_32
-        rts
+        rts 
 
         sta ZP_32                                                       ;$AB2E
-        rts
+        rts 
 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
@@ -2763,7 +2763,7 @@ _b0b5:                                                                  ;$B0B5
         ldy ZP_VAR_Y
         lda ZP_VAR_X                    ; X-position, in pixels
         and # %11111000                 ; clip X to a char-cell
-        clc
+        clc 
         adc row_to_bitmap_lo, y         ; add X to the bitmap address by row
         sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
@@ -2771,14 +2771,14 @@ _b0b5:                                                                  ;$B0B5
         sta ZP_TEMP_ADDR1_HI
 
         ; let Y be the row within the char-cell (0-7)
-        tya
+        tya 
         and # %00000111
-        tay
+        tay 
 
         ; let X be the column within the char-cell (0-7)
         lda ZP_VAR_X
         and # %00000111
-        tax
+        tax 
 
         ; multi-colour pixels are made from pairs of pixels. this lookup
         ; translates a pixel from 0-7 to the nearest multi-colour pixel
@@ -2817,7 +2817,7 @@ _b0b5:                                                                  ;$B0B5
         bpl @_b0ed
 
         lda ZP_TEMP_ADDR1_LO
-        clc
+        clc 
         adc # $08
         sta ZP_TEMP_ADDR1_LO
         bcc :+
@@ -2828,7 +2828,7 @@ _b0b5:                                                                  ;$B0B5
         and ZP_32                       ; apply the colour-mask to the pixel
         eor [ZP_TEMP_ADDR1], y          ; mask new pixel against existing ones
         sta [ZP_TEMP_ADDR1], y          ; update the screen
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -2846,7 +2846,7 @@ _b0fd:                                                                  ;$B0FD
         eor # %11100000
         sta ELITE_MAINSCR_ADDR + .scrpos( 24, 11 )      ;=$67CB
 
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -2859,24 +2859,24 @@ _b10e:                                                                  ;$B10E
         eor # %11100000
         sta ELITE_MAINSCR_ADDR + .scrpos( 24, 28 )      ;=$67DC
 
-        rts
+        rts 
 
 ;===============================================================================
 ; "draw missile block"
 ;
 _b11f:                                                                  ;$B11F
 
-        dex
-        txa
-        inx
+        dex 
+        txa 
+        inx 
         eor # %00000011
         sty ZP_TEMP_ADDR1_LO
-        tay
+        tay 
         lda ZP_TEMP_ADDR1_LO
         sta ELITE_MAINSCR_ADDR + .scrpos( 24, 6 ), y    ;=$67C6
         ldy # $00
 
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -2889,8 +2889,8 @@ _b11f:                                                                  ;$B11F
 
 _b136:                                                                  ;$B136
         lda # $07
-        clc
-        rts
+        clc 
+        rts 
 
         ;-----------------------------------------------------------------------
 
@@ -2902,8 +2902,8 @@ _b13a:                                                                  ;$B13A
         cmp # $15
         bne _b136
 _b146:                                                                  ;$B146
-        clc
-        rts
+        clc 
+        rts 
 
 wait_for_frame:                                                         ;$B148
         ;=======================================================================
@@ -2923,7 +2923,7 @@ wait_for_frame:                                                         ;$B148
         bne :-
 
         pla                     ; restore A
-        rts
+        rts 
 
 
 ;===============================================================================
@@ -2951,7 +2951,7 @@ chrout:                                                                 ;$B155
 
         lda # $0d
 :       clc                     ; clear carry flag before returning     ;$B166
-        rts
+        rts 
 
 ;define the use of some zero-page variables for this routine
 ZP_CHROUT_CHARADDR      := $2f  ; $2F/$30
@@ -3045,8 +3045,8 @@ _b1a1:                                                                  ;$B1A1
 
         ; if you shift any number twice to the left
         ; then numbers 64 or above will carry (> 255)
-        asl
-        asl
+        asl 
+        asl 
         bcc :+                  ; no carry (char code was < 64),
                                 ; char is in the 0th (unlikely) or 1st page
 
@@ -3095,7 +3095,7 @@ _b1a1:                                                                  ;$B1A1
         ; divide into 64?
 :       lsr                                                             ;$B1C5
         ror ZP_CHROUT_DRAWADDR_LO
-        lsr
+        lsr 
         ror ZP_CHROUT_DRAWADDR_LO
 
         ; taking a number and making it the high-byte of a word is just
@@ -3144,7 +3144,7 @@ _b1a1:                                                                  ;$B1A1
 :       lda [ZP_CHROUT_CHARADDR], y                                     ;$B1F4
         eor [ZP_CHROUT_DRAWADDR], y
         sta [ZP_CHROUT_DRAWADDR], y
-        dey
+        dey 
         bpl :-
 
         ; lookup the character colour cell from the row/col index:
@@ -3169,8 +3169,8 @@ _b210:  ; restore registers before returning                            ;$B210
         ldx VAR_048F
         lda ZP_POLYOBJ01_XPOS_pt1
 
-        clc
-        rts
+        clc 
+        rts 
 
 ;===============================================================================
 ; routine(s) for clearing the screen, i.e. when changing screen pages between
@@ -3197,43 +3197,50 @@ txt_docked_token15:                                                     ;$B3D4
         lda # %10000000
         sta ZP_34
 
+        ; clears rows 21, 22 & 23?? (goat soup description?)
+        ;-----------------------------------------------------------------------
         lda # 21
         sta ZP_CURSOR_ROW
         lda # 1
         sta ZP_CURSOR_COL
 
-        txt_bmp_addr = ELITE_BITMAP_ADDR + .bmppos( 21, 4 )
+        @txt_bmp_addr = ELITE_BITMAP_ADDR + .bmppos( 21, 4 )
 
-        lda #> txt_bmp_addr     ;=$5A60
+        lda #> @txt_bmp_addr     ;=$5A60
         sta ZP_TEMP_ADDR1_HI
-        lda #< txt_bmp_addr     ;=$5A60
+        lda #< @txt_bmp_addr     ;=$5A60
         sta ZP_TEMP_ADDR1_LO
+
         ldx # $03
 
 @_b3f7:                                                                 ;$B3F7
         lda # $00
-        tay
+        tay 
 
 :       sta [ZP_TEMP_ADDR1], y                                          ;$B3FA
-        dey
+        dey 
         bne :-
-        clc
+
+        ; add 320 to the bitmap address
+        ; (move to the next pixel row)
+        clc 
         lda ZP_TEMP_ADDR1_LO
-        adc # $40
+        adc #< 320
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        adc # $01
+        adc #> 320
         sta ZP_TEMP_ADDR1_HI
-        dex
+        dex 
         bne @_b3f7
+
 _b40f:                                                                  ;$B40F
-        rts
+        rts 
 
 ;===============================================================================
 
 _b410:                                                                  ;$B410
-        lda ZP_SCREEN
-        bne _b40f
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz _b40f               ; no? exit now (RTS above us)
 
         lda ZP_POLYOBJ_VISIBILITY
         and # visibility::scanner
@@ -3251,7 +3258,7 @@ _b410:                                                                  ;$B410
         bne _b40f
 
         lda ZP_POLYOBJ_XPOS_MI
-        clc
+        clc 
 
         ldx ZP_POLYOBJ_XPOS_HI
         bpl :+
@@ -3261,24 +3268,24 @@ _b410:                                                                  ;$B410
         sta ZP_VAR_X
 
         lda ZP_POLYOBJ_ZPOS_MI
-        lsr
-        lsr
-        clc
+        lsr 
+        lsr 
+        clc 
         ldx ZP_POLYOBJ_ZPOS_HI
         bpl :+
         eor # %11111111
-        sec
+        sec 
 :       adc # $53                                                       ;$B448
         eor # %11111111
         sta ZP_TEMP_ADDR1_LO
 
         lda ZP_POLYOBJ_YPOS_MI
-        lsr
-        clc
+        lsr 
+        clc 
         ldx ZP_POLYOBJ_YPOS_HI
         bmi :+
         eor # %11111111
-        sec
+        sec 
 :       adc ZP_TEMP_ADDR1_LO                                            ;$B459
         cmp # $92
         bcs :+
@@ -3288,25 +3295,25 @@ _b410:                                                                  ;$B410
         lda # $c6
 :       sta ZP_VAR_Y                                                    ;$B467
 
-        sec
+        sec 
         sbc ZP_TEMP_ADDR1_LO
-        php
-        pha
+        php 
+        pha 
         jsr _b0b0                       ; draw two multi-color pixels?
         lda _ab49, x
         and ZP_32
         sta ZP_VAR_X
-        pla
-        plp
-        tax
+        pla 
+        plp 
+        tax 
         beq _b49a
         bcc _b49b
 _b47f:                                                                  ;$B47F
-        dey
+        dey 
         bpl _b491
         ldy # $07
         lda ZP_TEMP_ADDR1_LO
-        sec
+        sec 
         sbc # $40
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
@@ -3316,15 +3323,15 @@ _b491:                                                                  ;$B491
         lda ZP_VAR_X
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-        dex
+        dex 
         bne _b47f
 _b49a:                                                                  ;$B49A
-        rts
+        rts 
 
         ;-----------------------------------------------------------------------
 
 _b49b:                                                                  ;$B49B
-        iny
+        iny 
         cpy # $08
         bne _b4ae
         ldy # $00
@@ -3335,7 +3342,7 @@ _b49b:                                                                  ;$B49B
         adc # $01
         sta ZP_TEMP_ADDR1_HI
 _b4ae:                                                                  ;$B4AE
-        iny
+        iny 
         cpy # $08
         bne _b4c1
         ldy # $00
@@ -3349,7 +3356,7 @@ _b4c1:                                                                  ;$B4C1
         lda ZP_VAR_X
         eor [ZP_TEMP_ADDR1], y
         sta [ZP_TEMP_ADDR1], y
-        inx
+        inx 
         bne _b4ae
 
         rts                                                             ;$B4CA

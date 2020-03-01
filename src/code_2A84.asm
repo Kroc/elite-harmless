@@ -2268,7 +2268,6 @@ _336e:                                                                  ;$336E
 _3381:                                                                  ;$3381
         cmp # $0e
         bne _339a
-_3385:                                                                  ;$3385
         jsr get_random_number
         cmp # $c8
         bcc _339a
@@ -2977,15 +2976,17 @@ _379e:                                                                  ;$397E
 _37a5:                                                                  ;$37A5
         sta ZP_AC
 
-        lda ZP_SCREEN
-        pha 
+        ; TODO: why does this change the screen,
+        ;       but keep the ZP_SCREEN value?
+        ;
+        lda ZP_SCREEN           ; backup current screen number
+        pha                     ; (i.e. cockpit / menu-page)
         
-        ; switch to cockpit-view?
-        lda # $00
+        lda # $00               ; switch to cockpit-view?
         jsr set_page
         
-        pla 
-        sta ZP_SCREEN
+        pla                     ; restore screen number
+        sta ZP_SCREEN           ; (i.e. cockpit / menu-page)
 
 _37b2:                                                                  ;$37B2
         ldx # $80
@@ -3782,9 +3783,8 @@ shoot_lasers:                                                           ;$3CDB
 
 _3cfa:                                                                  ;$3CFA
         ;=======================================================================
-        ; are we in the cockpit-view?
-        lda ZP_SCREEN
-        bne _3cda                       ; no, exit (`rts` above us)
+        lda ZP_SCREEN                   ; are we in the cockpit-view?
+       .bnz _3cda                       ; no, exit (`rts` above us)
 
         lda # 32                        ; X2
         ldy # 224

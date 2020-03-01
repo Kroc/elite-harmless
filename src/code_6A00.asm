@@ -608,24 +608,21 @@ _6c40:                                                                  ;$6C40
 _6c6d:                                                                  ;$6C6D
         lda # $18
         ldx ZP_SCREEN
-        bpl _6c75
-        lda # $00
-_6c75:                                                                  ;$6C75
-        sta ZP_93
+        bpl :+
+        lda # $00                                                                  
+:       sta ZP_93                                                       ;$6C75
         lda ZP_8E
         sec
         sbc ZP_90
-        bcs _6c80
+        bcs :+
         lda # $00
-_6c80:                                                                  ;$6C80
-        sta ZP_VAR_X
+:       sta ZP_VAR_X                                                    ;$6C80
         lda ZP_8E
         clc
         adc ZP_90
-        bcc _6c8b
+        bcc :+
         lda # $ff
-_6c8b:                                                                  ;$6C8B
-        sta ZP_VAR_X2
+:       sta ZP_VAR_X2                                                   ;$6C8B
         lda ZP_8F
         clc
         adc ZP_93
@@ -637,10 +634,9 @@ _6c8b:                                                                  ;$6C8B
         lda ZP_8F
         sec
         sbc ZP_90
-        bcs _6ca2
+        bcs :+
         lda # $00
-_6ca2:                                                                  ;$6CA2
-        clc
+:       clc                                                             ;$6CA2
         adc ZP_93
         sta ZP_VAR_Y
         lda ZP_8F
@@ -648,12 +644,11 @@ _6ca2:                                                                  ;$6CA2
         adc ZP_90
         adc ZP_93
         cmp # $98
-        bcc _6cb8
+        bcc :+
         ldx ZP_SCREEN
-        bmi _6cb8
+        bmi :+
         lda # $97
-_6cb8:                                                                  ;$6CB8
-        sta ZP_VAR_Y2
+:       sta ZP_VAR_Y2                                                   ;$6CB8
         lda ZP_8E
         sta ZP_VAR_X1
         sta ZP_VAR_X2
@@ -1444,9 +1439,8 @@ _7165:                                                                  ;$7165
         jsr get_ctrl
         bmi _71ca
 
-        ; are we in the cockpit-view?
-        lda ZP_SCREEN
-        beq _71c4
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+        beq _71c4               ; yes? skip ahead
 
         and # %11000000
         bne _7173
@@ -1472,14 +1466,14 @@ _7181:                                                                  ;$7181
         lda # 7
         jsr set_cursor_col
 
-        lda # $17
-        ldy ZP_SCREEN
-        bne _7196
+        lda # 23                ; screen row 23(?)
+        ldy ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz :+                  ; no? skip over
 
-        lda # $11
-_7196:                                                                  ;$7196
-        jsr set_cursor_row
-        lda # $00
+        lda # 17                ; screen row 17(?)
+:       jsr set_cursor_row                                              ;$7196
+
+        lda # %00000000
         sta ZP_34
 
 .import TXT_HYPERSPACE:direct
@@ -1868,8 +1862,8 @@ _73dd:                                                                  ;$73DD
 _73e8:                                                                  ;$73E8
         sta PLAYER_FUEL
 
-        lda ZP_SCREEN
-        bne _73f5
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz _73f5
 
         jsr set_page
         jsr _3795
@@ -1891,7 +1885,7 @@ _73f5:                                                                  ;$73F5
         jsr _a731
 
         lda ZP_SCREEN
-        bne _7452
+       .bnz _7452
         inc ZP_SCREEN
 
 _741c:  ; launch ship from docking?                                     ;$741C
@@ -1912,7 +1906,7 @@ _741c:  ; launch ship from docking?                                     ;$741C
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
 
-        lda # $ff
+        lda # $ff               ;?
         sta ZP_SCREEN
 
         jsr _37b2
@@ -3212,8 +3206,8 @@ _7ac2:                                                                  ;$7AC2
         lda # $81
         jsr _7c6b
 _7af3:                                                                  ;$7AF3
-        lda ZP_SCREEN
-        bne _7b1a
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz _7b1a               ; no? skip ahead
 _7af7:                                                                  ;$7AF7
         ldy DUST_COUNT          ; number of dust particles
 _7afa:                                                                  ;$7AFA
@@ -4462,14 +4456,15 @@ _81ee:                                                                  ;$81EE
 ;===============================================================================
 
 _81fb:                                                                  ;$81FB
-        lda ZP_SCREEN
-        bne _8204
+        lda ZP_SCREEN           ; are we in the cockpit view?
+       .bnz _8204               ; no? skip over
 
         jsr _8ee3
         txa
         rts
 
 _8204:                                                                  ;$8204
+        ;-----------------------------------------------------------------------
         jsr _8ee3
         lda _1d0c
         beq _8244
@@ -4958,8 +4953,8 @@ _845c:                                                                  ;$845C
 ;===============================================================================
 
 _8475:                                                                  ;$8475
-        lda ZP_SCREEN
-        bne _8487
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz _8487               ; no? skip over
 
         lda VAR_04E6
         jsr _900d
@@ -4968,7 +4963,7 @@ _8475:                                                                  ;$8475
         jmp _84fa
 
 _8487:                                                                  ;$8487
-        jsr txt_docked_token15
+        jsr txt_docked_token15  ; clear rows 21, 22 & 23(?)
         jmp _84fa
 
 ;===============================================================================
@@ -5255,13 +5250,13 @@ _8627:                                                                  ;$8627
 :       stx VAR_0487                                                    ;$863B
 
 @_863e:                                                                 ;$863E
-        lda ZP_SCREEN
-       .bnz :+                  ; not flight screen? skip
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz :+                  ; no, skip over
 
-        jsr _2ff3               ; update dials?
+        jsr _2ff3               ; update dials(?)
 
-:       lda ZP_SCREEN                                                   ;$8645
-       .bze @_8654              ; on flight screen? skip
+:       lda ZP_SCREEN           ; are we in the cockpit-view?           ;$8645
+       .bze @_8654              ; yes, skip ahead
 
         and _1d08
         lsr
@@ -5274,7 +5269,8 @@ _8627:                                                                  ;$8627
         ; handle breeding for < 256 Trumbles™
         ;-----------------------------------------------------------------------
         ; does the player have more than 256 Trumbles™?
-        lda PLAYER_TRUMBLES_HI
+        ;
+        lda PLAYER_TRUMBLES_HI  ; (hi-byte of Trumble™ count)
        .bze :+                  ; no? skip ahead
 
         ; check for breeding:
@@ -5628,8 +5624,10 @@ _87fd:                                                                  ;$87FD
         lsr
         sta ZP_POLYOBJ_XPOS_LO
 
+        ; switch to cockpit-view(?)
         ldy # $00
         sty ZP_SCREEN
+
         sty ZP_POLYOBJ_XPOS_MI
         sty ZP_POLYOBJ_YPOS_MI
         sty ZP_POLYOBJ_ZPOS_MI
@@ -5800,12 +5798,16 @@ _88e7:                                                                  ;$88E7
 ; new game file?
 ;
 _88f0:                                                                  ;$88F0
+        ; copy the default game file into the current game state(?)
+        ;
         ldx # 84                ; size of new-game data?
 :       lda _25aa, x                                                    ;$88F2
         sta VAR_0490, x         ; seed goes in $049C+
         dex
         bne :-
 
+        ; set the screen to cockpit-view
+        ; (note that X = 0 due to the loop logic above)
         stx ZP_SCREEN
 _88fd:                                                                  ;$88FD
         jsr _89eb
@@ -5857,6 +5859,7 @@ _8920:                                                                  ;$8920
         lda # $0d
         jsr set_page
 
+        ; set screen to cockpit-view
         lda # $00
         sta ZP_SCREEN
 
@@ -6932,19 +6935,20 @@ _900d:                                                                  ;$900D
 
         lda # $10
         ldx ZP_SCREEN
-        beq _9019+1
+        beq _901a
 
         jsr txt_docked_token15
         lda # $19
 _9019:                                                                  ;$9019
-        bit _3385
+       .bit
+_901a:  sta ZP_CURSOR_ROW                                               ;$901A
         ldx # $00
         stx ZP_34
 
         lda ZP_B9
         jsr set_cursor_col
 
-        pla
+        pla 
         ldy # $14
         cpx VAR_048B
         bne _9002
@@ -6953,7 +6957,7 @@ _9019:                                                                  ;$9019
         lda # $c0
         sta txt_buffer_flag
         lda VAR_048C
-        lsr
+        lsr 
         lda # $00
         bcc _9042
         lda # $0a
@@ -6964,9 +6968,9 @@ _9042:                                                                  ;$9042
         jsr print_flight_token
 
         lda # $20
-        sec
+        sec 
         sbc txt_buffer_index
-        lsr
+        lsr 
         sta ZP_B9
         jsr set_cursor_col
 
@@ -6999,7 +7003,7 @@ _906a:                                                                  ;$906A
         sta VAR_CARGO, x
         cpx # $11
         bcs _908f
-        txa
+        txa 
         adc # $d0
         jmp _900d
 
@@ -7007,7 +7011,7 @@ _908f:                                                                  ;$908F
         beq _909b
         cpx # $12
         beq _90a0
-        txa
+        txa 
         adc # $5d
         jmp _900d
 
@@ -7043,7 +7047,7 @@ _90a8:                                                                  ;$90A8
         cpy # $07
 
 _90e9:                                                                  ;$90E9
-        tya
+        tya 
         ldy # $02
         jsr _91b8
         sta ZP_POLYOBJ_M1x2_HI
@@ -7052,7 +7056,7 @@ _90e9:                                                                  ;$90E9
 ;===============================================================================
 
 _90f4:                                                                  ;$90F4
-        tax
+        tax 
         lda ZP_VAR_Y
         and # %01100000
         beq _90e9
@@ -7126,22 +7130,22 @@ _9131:                                                                  ;$9131
         ldx # $0e
 _9184:                                                                  ;$9184
         sta ZP_POLYOBJ_M0x0_LO, x
-        dex
-        dex
+        dex 
+        dex 
         bpl _9184
-        rts
+        rts 
 
 ;===============================================================================
 
 _918b:                                                                  ;$918B
-        tay
+        tay 
         and # %01111111
         cmp ZP_VAR_Q
         bcs _91b2
         ldx # $fe
         stx ZP_VAR_T
 _9196:                                                                  ;$9196
-        asl
+        asl 
         cmp ZP_VAR_Q
         bcc _919d
         sbc ZP_VAR_Q
@@ -7149,22 +7153,22 @@ _919d:                                                                  ;$919D
         rol ZP_VAR_T
         bcs _9196
         lda ZP_VAR_T
-        lsr
-        lsr
+        lsr 
+        lsr 
         sta ZP_VAR_T
-        lsr
+        lsr 
         adc ZP_VAR_T
         sta ZP_VAR_T
-        tya
+        tya 
         and # %10000000
         ora ZP_VAR_T
-        rts
+        rts 
 
 _91b2:                                                                  ;$91B2
-        tya
+        tya 
         and # %10000000
         ora # %01100000
-        rts
+        rts 
 
 ;===============================================================================
 
@@ -7194,19 +7198,19 @@ _91b8:                                                                  ;$91B8
         asl ZP_VAR_Q
         lsr ZP_VAR_Q
 _91eb:                                                                  ;$91EB
-        rol
+        rol 
         cmp ZP_VAR_Q
         bcc _91f2
         sbc ZP_VAR_Q
 _91f2:                                                                  ;$91F2
         rol ZP_VAR_P1
         rol ZP_VAR_P2
-        dex
+        dex 
         bne _91eb
         lda ZP_VAR_P1
         ora ZP_VAR_T
 _91fd:                                                                  ;$91FD
-        rts
+        rts 
 
 ;===============================================================================
 .ifndef OPTION_NOSOUND

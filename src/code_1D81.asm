@@ -771,9 +771,8 @@ _2131:                                                                  ;$2131
         bpl _2138
         jsr _b410
 _2138:                                                                  ;$2138
-        ; are we in the cockpit-view?
-        lda ZP_SCREEN
-        bne _21ab
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz _21ab               ; no? skip ahead
 
         jsr _a626
         jsr _363f
@@ -1131,9 +1130,8 @@ _233a:                                                                  ;$233A
 _2342:                                                                  ;$2342
         jsr _a786
 _2345:                                                                  ;$2345
-        ; are we in the cockpit-view?
-        lda ZP_SCREEN
-        bne _2366
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz _2366               ; (no? skip over)
 
         jmp _animate_dust
 
