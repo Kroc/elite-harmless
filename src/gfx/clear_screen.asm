@@ -434,38 +434,6 @@ _b301:                                                                  ;$B301
         dex
        .bnz :-
 
-        ; borders to the left and right of the HUD
-        ; lay outside the 256px centred HUD
-        ;
-        ; NOTE: these only have to be redrawn because in the hires bitmap
-        ;       area (viewport) the border pixels are %11, but in the
-        ;       multi-color bitmap area (HUD), the yellow colour is %10.
-        ;       if we remap the colours, maybe we can do away with this?
-        ;
-        ; TODO: this should be drawn only once during initialisation,
-        ;       as with the new HUD-copying method it never gets erased
-        ;
-        ldx # $08
-:       dex
-        lda # %00000010                 ; yellow multi-color pixel on the right
-        sta bmp + .bmppos( 18, 3 ), x   ; draw left-border on bitmap row 18
-        sta bmp + .bmppos( 19, 3 ), x   ; draw left-border on bitmap row 19
-        sta bmp + .bmppos( 20, 3 ), x   ; draw left-border on bitmap row 20
-        sta bmp + .bmppos( 21, 3 ), x   ; draw left-border on bitmap row 21
-        sta bmp + .bmppos( 22, 3 ), x   ; draw left-border on bitmap row 22
-        sta bmp + .bmppos( 23, 3 ), x   ; draw left-border on bitmap row 23
-        sta bmp + .bmppos( 24, 3 ), x   ; draw left-border on bitmap row 24
-        lda # %10000000                 ; yellow multi-color pixel on the left
-        sta bmp + .bmppos( 18, 36 ), x  ; draw right-border on bitmap row 18
-        sta bmp + .bmppos( 19, 36 ), x  ; draw right-border on bitmap row 19
-        sta bmp + .bmppos( 20, 36 ), x  ; draw right-border on bitmap row 20
-        sta bmp + .bmppos( 21, 36 ), x  ; draw right-border on bitmap row 21
-        sta bmp + .bmppos( 22, 36 ), x  ; draw right-border on bitmap row 22
-        sta bmp + .bmppos( 23, 36 ), x  ; draw right-border on bitmap row 23
-        sta bmp + .bmppos( 24, 36 ), x  ; draw right-border on bitmap row 24
-        txa
-        bne :-
-
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         jsr hide_all_ships

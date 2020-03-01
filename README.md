@@ -61,6 +61,10 @@ This work was made possible by various resources available on the web, for which
 
 [6510]: http://www.c64os.com/post?p=83
 
+* [Pixcen], a C64 image editor by Hammarberg/CensorDesign(?)
+
+[Pixcen]: https://github.com/Hammarberg/pixcen
+
 ## Legal ##
 
 "Elite" is copyright David Braben & Ian Bell, Acornsoft (BBC / Electron versions), Firebird / British Telecom (C64 version), 1984-1985, all rights reserved. The name "Elite" is used in this project for historical, educational and archival purposes only.

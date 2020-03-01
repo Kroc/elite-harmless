@@ -220,8 +220,6 @@
 ;===============================================================================
 ; screen RAM colour:
 ;
-; TODO: like the HUD, there's wasted bytes here too
-;
 ; in the original game this is a block of data that is copied to the screen RAM
 ; during initialisation and then erased by the bitmap. in elite-harmless we are
 ; including the screens pre-filled in the binary, so this temporary copy is not
