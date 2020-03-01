@@ -4,7 +4,7 @@
 ;===============================================================================
 ;
 ; this file can be used to assemble a Koala-painter image file,
-; containing Elite : Harmless' default menu screen (no HUD)
+; containing Elite's default menu screen (no HUD)
 ;
 ; a Koala format is essentially a memory-dump of the
 ; separate graphics/colour components the VIC-II uses:

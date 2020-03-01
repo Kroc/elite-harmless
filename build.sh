@@ -47,6 +47,7 @@ clean() {
     rm -rf build/*.prg
     rm -rf build/*.d64
     rm -rf build/*.crt
+    rm -rf build/*.koa
 
     rm -f bin/*.prg
     rm -f bin/*.d64
@@ -83,7 +84,7 @@ $cl65 $options \
     --target none \
     --start-addr \$4000 \
      -o "build/screen_main.koa" \
-        "src/gfx/gfx_koala_main.asm"
+        "src/orig/gfx_koala_main.asm"
 
 echo "[OK]"
 echo -n "- assemble 'screen_menu.koa'        "
@@ -91,7 +92,7 @@ $cl65 $options \
     --target none \
     --start-addr \$4000 \
      -o "build/screen_menu.koa" \
-        "src/gfx/gfx_koala_menu.asm"
+        "src/orig/gfx_koala_menu.asm"
 
 echo "[OK]"
 
@@ -278,6 +279,28 @@ cd ..
 echo "  ======================================"
 echo "* build Elite : Harmless (disk images)"
 echo "  ======================================"
+
+# assemble the HUD bitmap into a Koala file we can pick bytes from.
+# we won't use a linker script for this as we don't need to include
+# any external symbols or definitions
+echo -n "- assemble 'screen_main.koa'        "
+$cl65 $options \
+    --target none \
+    --start-addr \$4000 \
+     -o "build/screen_main.koa" \
+        "src/gfx/gfx_koala_main.asm"
+
+echo "[OK]"
+echo -n "- assemble 'screen_menu.koa'        "
+$cl65 $options \
+    --target none \
+    --start-addr \$4000 \
+     -o "build/screen_menu.koa" \
+        "src/gfx/gfx_koala_menu.asm"
+
+echo "[OK]"
+
+echo "  --------------------------------------"
 echo "* elite-harmless.d64"
 echo "  --------------------------------------"
 clean
