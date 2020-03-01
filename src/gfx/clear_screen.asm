@@ -53,9 +53,15 @@ clear_screen:
         sta ELITE_BITMAP_ADDR + .bmppos( 17, 4 ), x
         dex 
        .bnz :-
-        
+
         ; TODO: we need to restore (or skip)
         ;       the top/bottom screen border 
+        ;
+        ; for now, we're going to fully redraw the top-border,
+        ; but if we can avoid this somehow, I'd be pleased
+        ;
+        ldy # 0
+        jsr drawViewportBorderH
 
         ; are we in the cockpit-view?
         ldy ZP_SCREEN           ; (Y is used here to keep A & X = $00)
@@ -69,16 +75,18 @@ clear_screen:
 
         ;-----------------------------------------------------------------------
         ; erase the HUD to make way for the menu screen:
-        ; (begin loop, erasing one byte of all HUD rows at once)
-@nohud: sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 0) * 320) + (4 * 8), x
-        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 1) * 320) + (4 * 8), x
-        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 2) * 320) + (4 * 8), x
-        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 3) * 320) + (4 * 8), x
-        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 4) * 320) + (4 * 8), x
-        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 5) * 320) + (4 * 8), x
-        sta ELITE_BITMAP_ADDR + ((ELITE_HUD_TOP_ROW + 6) * 320) + (4 * 8), x
+        ;
+@nohud: ldx # 0                 ; begin loop, erasing 1 byte of all HUD rows
+        txa                     ; A = %00000000 (i.e. erase bitmap bits...)
+:       sta ELITE_BITMAP_ADDR + .bmppos( (ELITE_HUD_TOP_ROW + 0), 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( (ELITE_HUD_TOP_ROW + 1), 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( (ELITE_HUD_TOP_ROW + 2), 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( (ELITE_HUD_TOP_ROW + 3), 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( (ELITE_HUD_TOP_ROW + 4), 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( (ELITE_HUD_TOP_ROW + 5), 4 ), x
+        sta ELITE_BITMAP_ADDR + .bmppos( (ELITE_HUD_TOP_ROW + 6), 4 ), x
         dex 
-       .bnz @nohud
+       .bnz :-
 
         ; (note that X will be $00 due to loop condition above)
         stx _1d01               ;?
@@ -114,7 +122,23 @@ clear_screen:
 ;;        dey
 ;;        bpl :-
 
-        rts
+;;        rts
+
+        ; when switching to the menu pages, redraw the bottom border
+        ; as it gets removed when erasing the HUD
+        ;
+        ldy # 199
+
+drawViewportBorderH:
+        ;-----------------------------------------------------------------------
+        ; in:   Y       pixel row to draw border line across
+        ;
+        sty ZP_VAR_Y            ; set the pixel row
+        ldx # 0                 ; setup the X-positions:
+        stx ZP_VAR_X1           ; X1 = 0
+        dex                     ; ($00 -> $FF)
+        stx ZP_VAR_X2           ; X2 = 255
+        jmp draw_straight_line
 
 
 ; redraw the HUD:
