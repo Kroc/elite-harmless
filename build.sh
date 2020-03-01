@@ -47,7 +47,6 @@ clean() {
     rm -rf build/*.prg
     rm -rf build/*.d64
     rm -rf build/*.crt
-    rm -rf build/*.koa
 
     rm -f bin/*.prg
     rm -f bin/*.d64
