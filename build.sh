@@ -279,27 +279,11 @@ echo "  ======================================"
 echo "* build Elite : Harmless (disk images)"
 echo "  ======================================"
 
-# assemble the HUD bitmap into a Koala file we can pick bytes from.
-# we won't use a linker script for this as we don't need to include
-# any external symbols or definitions
-echo -n "- assemble 'screen_main.koa'        "
-$cl65 $options \
-    --target none \
-    --start-addr \$4000 \
-     -o "build/screen_main.koa" \
-        "src/gfx/gfx_koala_main.asm"
+# copy the elite : harmless screen bitmap images into the build directory.
+# note that elite-harmless does not assemble the screens from a source file
+cp "src/gfx/screen_main.koa" \
+   "build/screen_main.koa"
 
-echo "[OK]"
-echo -n "- assemble 'screen_menu.koa'        "
-$cl65 $options \
-    --target none \
-    --start-addr \$4000 \
-     -o "build/screen_menu.koa" \
-        "src/gfx/gfx_koala_menu.asm"
-
-echo "[OK]"
-
-echo "  --------------------------------------"
 echo "* elite-harmless.d64"
 echo "  --------------------------------------"
 clean
