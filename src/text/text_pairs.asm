@@ -17,8 +17,8 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 
 ; this first macro helps us define a pair of characters without having to
 ; write it multiple times. it writes the two charcters into the program,
-; but also defines an external name used by "text_flight.asm" to place the
-; correct token number (once scrambled) into the text data
+; but also defines an external name used by "text_flight.asm" to place
+; the correct token number (once scrambled) into the text data
 ;
 .macro  .docked_pair    str
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

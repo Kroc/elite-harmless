@@ -169,7 +169,7 @@ debug_for_brk:                                                          ;$1E14
         sta KERNAL_VECTOR_BRK+1
         cli                     ; enable interrupts
 
-        rts
+        rts 
 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
@@ -206,7 +206,7 @@ _1e35:
         ; take the counter 0-7 and multiply by 2
         ; for use in a table of 16-bit values later
 :       asl                                                             ;$1E41
-        tay
+        tay 
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -252,12 +252,12 @@ _1e35:
 
         ; move the Trumble™ sprite vertically
         lda VIC_SPRITE2_Y, y
-        clc
+        clc 
         adc TRUMBLES_MOVE_Y, y
         sta VIC_SPRITE2_Y, y
 
         ; move the Trumble™ sprite horizontally
-        clc
+        clc 
         lda VIC_SPRITE2_X, y
         adc TRUMBLES_MOVE_X, y
         sta ZP_VAR_T
@@ -334,7 +334,7 @@ _1ece:                                                                  ;$1ECE
         jsr _3c58
         jsr _3c58
 
-        txa
+        txa 
         eor # %10000000         ; flip the sign bit
         tay                     ; put aside
         and # %10000000         ; strip down to just the sign bit
@@ -344,19 +344,19 @@ _1ece:                                                                  ;$1ECE
         eor # %10000000
         sta ZP_6A               ; inverse roll direction
 
-        tya
+        tya 
         bpl :+
 
         ; negate
         eor # %11111111
-        clc
+        clc 
         adc # $01
 
 :       lsr                                                             ;$1EEE
-        lsr
+        lsr 
         cmp # $08
         bcs :+
-        lsr
+        lsr 
 
 :       sta ZP_ROLL_MAGNITUDE                                           ;$1EF5
         ora ZP_ROLL_SIGN        ; add sign
@@ -367,26 +367,26 @@ _1ece:                                                                  ;$1ECE
         ldx VAR_048E
         jsr _3c58
 
-        txa
+        txa 
         eor # %10000000
-        tay
+        tay 
         and # %10000000
         stx VAR_048E
         sta ZP_95
         eor # %10000000
         sta ZP_PITCH_SIGN
-        tya
+        tya 
         bpl _1f15
         eor # %11111111
 _1f15:                                                                  ;$1F15
         adc # $04
-        lsr
-        lsr
-        lsr
-        lsr
+        lsr 
+        lsr 
+        lsr 
+        lsr 
         cmp # $03
         bcs _1f20
-        lsr
+        lsr 
 _1f20:                                                                  ;$1F20
         ; get the player ship's pitch;
         ; stored as separate sign & magnitude
@@ -529,9 +529,9 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
         sta ZP_97
 
         lda PLAYER_SPEED
-        lsr
+        lsr 
         ror ZP_97
-        lsr
+        lsr 
         ror ZP_97
         sta ZP_98               ; ZP_98.ZP_97 = PLAYER_SPEED*64
 
@@ -550,14 +550,14 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
         lda PLAYER_LASERS, x
         beq _202d
 
-        pha
+        pha 
         and # %01111111
         sta ZP_7B
         sta VAR_0484
 
         ldy # $00
-        pla
-        pha
+        pla 
+        pha 
         bmi _2014
         cmp # $32
         bne _2012
@@ -577,7 +577,7 @@ _201b:                                                                  ;$201B
 _201d:                                                                  ;$201D
         jsr _a858
         jsr shoot_lasers
-        pla
+        pla 
         bpl _2028
         lda # $00
 _2028:                                                                  ;$2028
@@ -605,14 +605,14 @@ _2039:                                                                  ;$2039
         ldy # .sizeof(PolyObject) - 1
 :       lda [ZP_POLYOBJ_ADDR], y                                        ;$2040
         sta ZP_POLYOBJ, y
-        dey
+        dey 
         bpl :-
 
         lda ZP_A5               ; get ship type back
         bmi @skip               ; if sun / planet, skip over
 
-        asl
-        tay
+        asl 
+        tay 
         lda hull_pointers - 2, y
         sta ZP_HULL_ADDR_LO
         lda hull_pointers - 1, y
@@ -638,7 +638,7 @@ _2039:                                                                  ;$2039
         bne @skip
 
         asl ZP_POLYOBJ_VISIBILITY
-        sec
+        sec 
         ror ZP_POLYOBJ_VISIBILITY
 
         ldx ZP_A5
@@ -651,7 +651,7 @@ _2039:                                                                  ;$2039
         ldy # .sizeof(PolyObject) - 1
 :       lda ZP_POLYOBJ, y                                               ;$207E
         sta [ZP_POLYOBJ_ADDR], y
-        dey
+        dey 
         bpl :-
 
         lda ZP_POLYOBJ_VISIBILITY
@@ -683,10 +683,10 @@ _2039:                                                                  ;$2039
 
         ldy # Hull::_00         ;=$00: "scoop / debris"?
         lda [ZP_HULL_ADDR], y
-        lsr
-        lsr
-        lsr
-        lsr
+        lsr 
+        lsr 
+        lsr 
+        lsr 
         beq _2122
         adc # $01
         bne _20c5
@@ -701,12 +701,12 @@ _20c5:                                                                  ;$20C5
         ldy VAR_04EF            ; item index?
         adc VAR_CARGO, y
         sta VAR_CARGO, y
-        tya
+        tya 
         adc # $d0
         jsr _900d
 
         asl ZP_POLYOBJ_BEHAVIOUR
-        sec
+        sec 
         ror ZP_POLYOBJ_BEHAVIOUR
 _20e0:                                                                  ;$20E0
         jmp _2131
@@ -748,7 +748,7 @@ _2110:                                                                  ;$2110
 
         ; set top-bit of visibility state?
         asl ZP_POLYOBJ_VISIBILITY
-        sec
+        sec 
         ror ZP_POLYOBJ_VISIBILITY
         bne _2131
 _211a:                                                                  ;$211A
@@ -758,11 +758,11 @@ _211a:                                                                  ;$211A
         bne _212b
 _2122:                                                                  ;$2122
         asl ZP_POLYOBJ_VISIBILITY
-        sec
+        sec 
         ror ZP_POLYOBJ_VISIBILITY
         lda ZP_POLYOBJ_ENERGY
-        sec
-        ror
+        sec 
+        ror 
 _212b:                                                                  ;$212B
         jsr _7bd2
         jsr _a813
@@ -802,12 +802,12 @@ _2153:                                                                  ;$2153
         lsr ZP_7B
 _2170:                                                                  ;$2170
         lda ZP_POLYOBJ_ENERGY
-        sec
+        sec 
         sbc ZP_7B
         bcs _21a1
 
         asl ZP_POLYOBJ_VISIBILITY
-        sec
+        sec 
         ror ZP_POLYOBJ_VISIBILITY
 
         lda ZP_A5
@@ -861,10 +861,10 @@ _21ab:                                                                  ;$21AB
         lda [ZP_HULL_ADDR], y
         beq _21e2
 
-        tax
+        tax 
         iny                     ;=$0B: (bounty hi-byte)
         lda [ZP_HULL_ADDR], y
-        tay
+        tay 
         jsr _7481
         lda # $00
         jsr _900d
@@ -884,7 +884,7 @@ _21ee:                                                                  ;$21EE
         sta [ZP_POLYOBJ_ADDR], y
 
         ldx ZP_9D
-        inx
+        inx 
         jmp _202f
 
         ;-----------------------------------------------------------------------
@@ -911,7 +911,7 @@ _2207:                                                                  ;$2207
         jsr _7b61
         stx PLAYER_SHIELD_FRONT
 _2224:                                                                  ;$2224
-        sec
+        sec 
         lda VAR_04C4            ; energy charge rate?
         adc PLAYER_ENERGY
         bcs _2230
@@ -927,7 +927,7 @@ _2230:                                                                  ;$2230
         lda VAR_045F
         bne _2277
 
-        tay
+        tay 
         jsr _2c50
         bne _2277
 
@@ -963,10 +963,10 @@ _2230:                                                                  ;$2230
         ;?
 :       lda POLYOBJ_00, x       ;=$F900                                 ;$2248
         sta ZP_POLYOBJ, x       ;=$09
-        dex
+        dex 
         bpl :-
 
-        inx
+        inx 
         ldy # $09
         jsr _2c2d
         bne _2277
@@ -1002,12 +1002,12 @@ _2283:                                                                  ;$2283
         lda # $32
         cmp PLAYER_ENERGY
         bcc _2292
-        asl
+        asl 
         jsr _900d
 _2292:                                                                  ;$2292
         ldy # $ff
         sty VAR_06F3
-        iny
+        iny 
         jsr _2c4e
         bne _231c
         jsr _2c5c
@@ -1096,7 +1096,7 @@ _2303:                                                                  ;$2303
         beq _231c
 
         lda ZP_98
-        lsr
+        lsr 
         adc PLAYER_FUEL
         cmp # $46
         bcc _2314
@@ -1141,8 +1141,8 @@ _234c:                                                                  ;$234C
         jsr get_random_number
         bpl _2366
 
-        tya
-        tax
+        tya 
+        tax 
         ldy # Hull::_00         ;=$00: "scoop / debris"?
         and [ZP_HULL_ADDR], y
         and # %00001111
@@ -1155,7 +1155,7 @@ _235d:                                                                  ;$235D
         dec ZP_AA
         bne _235d
 _2366:                                                                  ;$2366
-        rts
+        rts 
 
 _2367:                                                                  ;$2367
 ;===============================================================================
@@ -1165,7 +1165,7 @@ _2367:                                                                  ;$2367
         lda # $00
         sta _a8e6
 
-        rts
+        rts 
 
 ;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
@@ -1179,13 +1179,13 @@ _2367:                                                                  ;$2367
 ; 
 _237e:                                                                  ;$237E
         ; push the current state:
-        pha
-        tax
+        pha 
+        tax 
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha
+        pha 
         lda ZP_TEMP_ADDR3_HI
-        pha
+        pha 
 
         ; switch base-address of the message pool and jump into the print
         ; routine using this new address. note that in this case, X is the
@@ -1216,9 +1216,9 @@ print_docked_str:                                                       ;$2390
         ; current position in the message data
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha
+        pha 
         lda ZP_TEMP_ADDR3_HI
-        pha
+        pha 
 
         ; load the message table
         lda #< _0e00
@@ -1271,15 +1271,14 @@ _23a0:                                                                  ;$23A0
 
 @rts:   ; finished printing, clean up and exit                          ;$23C5
         ;-----------------------------------------------------------------------
-        pla
+        pla 
         sta ZP_TEMP_ADDR3_HI
-        pla
+        pla 
         sta ZP_TEMP_ADDR3_LO
-        pla
-        tay
-        pla
+       .ply 
+        pla 
 
-        rts
+        rts 
 
 print_docked_token:                                                     ;$23CF
         ;=======================================================================
@@ -1329,7 +1328,7 @@ print_docked_token:                                                     ;$23CF
         jsr _2404
 
         pla                     ; get the offset again
-        tax
+        tax 
         lda txt_docked_pair2, x ; read 2nd character and print it
 
 _2404:  ; print a character                                             ;$2404
@@ -1400,18 +1399,18 @@ _format_code:                                                           ;$241B
 
         ; snapshot current state:
         ; -- these format codes can get recursive
-        tax
+        tax 
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha
+        pha 
         lda ZP_TEMP_ADDR3_HI
-        pha
+        pha 
 
         ; multiply token by two
         ; (lookup into table)
-        txa
-        asl
-        tax
+        txa 
+        asl 
+        tax 
 
         ; note that the lookup table is indexed two-bytes early, making an
         ; index of zero land in some code -- this is why token $00 is invalid
@@ -1427,21 +1426,20 @@ _format_code:                                                           ;$241B
 
         ; convert the token back to its original value
         ; (to be used as a parameter for whatever we jump to)
-        txa
-        lsr
+        txa 
+        lsr 
 
         ; NOTE: this address gets overwritten by the code above!!
 @jsr:   jsr print_char                                                  ;$2435
 
 _2438:  ; restore state and exit                                        ;$2438
         ;-----------------------------------------------------------------------
-        pla
+        pla 
         sta ZP_TEMP_ADDR3_HI
-        pla
+        pla 
         sta ZP_TEMP_ADDR3_LO
-        pla
-        tay
-        rts
+       .ply 
+        rts 
 
 _2441:  ; process msg tokens $5B..$80                                   ;$2441
         ;-----------------------------------------------------------------------
@@ -1450,14 +1448,14 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
         ; put aside our current location in the text data
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha
+        pha 
         lda ZP_TEMP_ADDR3_HI
-        pha
+        pha 
 
         ; choose planet description template 0-4:
 
         jsr get_random_number
-        tax
+        tax 
         lda # $00               ; select description template 0
         cpx # $33               ; is random number over $33?
         adc # $00               ; select description template 1
@@ -1506,7 +1504,7 @@ is_vowel:                                                               ;$24F3
         cmp # $75               ; 'U'?
         beq :+
 
-        clc
+        clc 
 :       rts                                                             ;$250A
 
 .ifdef  OPTION_ORIGINAL

@@ -16,7 +16,7 @@
 ; https://xania.org/201406/elites-crazy-string-format
 .export TXT_FLIGHT_XOR := $23
 
-; all tokens on disk are scrambled in this way:
+; all flight tokens on disk are scrambled in this way:
 .define .encrypt(value) value ^ TXT_FLIGHT_XOR
 
 
