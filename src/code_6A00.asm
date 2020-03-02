@@ -245,10 +245,15 @@ _6a93:                                                                  ;$6A93
         jsr print_flight_token
         jmp _6ad3
 
-_6a9b:                                                                  ;$6A9B
+
+print_flight_token_and_space:                                           ;$6A9B
 ;===============================================================================
+; prints the given flight token and then a space
+;
+;-------------------------------------------------------------------------------
         jsr print_flight_token
         jmp print_space
+
 
 ;===============================================================================
 ; planetary information screen
@@ -265,7 +270,7 @@ planet_screen:                                                          ;$6AA1
         ; print "DATA ON " ...
 .import TXT_DATA_ON:direct
         lda # TXT_DATA_ON
-        jsr _28d9
+        jsr print_flight_token_and_divider
 
         jsr _6a87
         jsr _6a68
@@ -289,11 +294,10 @@ planet_screen:                                                          ;$6AA1
         sbc # $05
         clc 
 _6ace:                                                                  ;$6ACE
-.import TXT_RICH:direct
-
         ; "RICH" / "AVERAGE" / "POOR"
         ;
-        adc # TXT_RICH
+.import TXT_WEALTH:direct
+        adc # TXT_WEALTH
         jsr print_flight_token
 _6ad3:                                                                  ;$6AD3
         lda TSYSTEM_ECONOMY
@@ -344,7 +348,8 @@ _6ad3:                                                                  ;$6AD3
         lda # TXT_BILLION
         jsr _6a84
 
-        lda # '('
+.import TXT_LPAREN:direct
+        lda # TXT_LPAREN
         jsr print_flight_token
 
         lda ZP_SEED_W2_LO
@@ -369,7 +374,7 @@ _6ad3:                                                                  ;$6AD3
         ; "LARGE" / "FIERCE" / "SMALL" / ?
 
         adc # TXT_LARGE
-        jsr _6a9b
+        jsr print_flight_token_and_space
 :       pla                                                             ;$6B2E
         lsr 
         lsr 
@@ -382,7 +387,7 @@ _6ad3:                                                                  ;$6AD3
         ; "GREEN" / "RED" / "YELLOW" / "BLUE" / "BLACK" / ?
 
         adc # TXT_COLORS
-        jsr _6a9b
+        jsr print_flight_token_and_space
 _6b3b:                                                                  ;$6B3B
         lda ZP_SEED_W1_HI
         eor ZP_SEED_W0_HI
@@ -397,7 +402,7 @@ _6b3b:                                                                  ;$6B3B
         ; "BONY" / "FAT" / "FURRY"
 
         adc # TXT_ADJECTIVES+1  ; +1, because of borrow?
-        jsr _6a9b
+        jsr print_flight_token_and_space
 _6b4c:                                                                  ;$6B4C
         lda ZP_SEED_W2_HI
         and # %00000011
@@ -413,11 +418,12 @@ _6b4c:                                                                  ;$6B4C
         adc # TXT_SPECIES
         jsr print_flight_token
 _6b5a:                                                                  ;$6B5A
-        ; append an "s"
-        lda # 's'
+        ; append "s)"
+.import TXT_S:direct
+        lda # TXT_S
         jsr print_flight_token
-
-        lda # ')'
+.import TXT_RPAREN:direct
+        lda # TXT_RPAREN
         jsr _6a84
 
 .import TXT_GROSS_PRODUCTIVITY:direct
@@ -431,7 +437,8 @@ _6b5a:                                                                  ;$6B5A
         lda # $00
         sta ZP_34
 
-        lda # 'm'
+.import TXT_M:direct
+        lda # TXT_M
         jsr print_flight_token
 
 .import TXT_CR:direct
@@ -765,12 +772,14 @@ _6d3e:                                                                  ;$6D3E
         adc # TXT_FOOD
         jsr print_flight_token
 
-        lda # $2f
+.import TXT_SLASH:direct
+        lda # TXT_SLASH
         jsr print_flight_token
 
         jsr _72b8
 
-        lda # $3f
+.import TXT_QMARK:direct
+        lda # TXT_QMARK
         jsr print_flight_token
 
         jsr print_newline
@@ -911,7 +920,7 @@ sell_cargo:                                                             ;$6E41
 
 .import TXT_CARGO:direct
         lda # TXT_CARGO
-        jsr _28d9
+        jsr print_flight_token_and_divider
 
         jsr print_newline
 _6e58:                                                                  ;$6E58
@@ -1198,7 +1207,7 @@ local_chart:                                                            ;$6FDB
 
 .import TXT_SHORT_RANGE_CHART:direct
         lda # TXT_SHORT_RANGE_CHART
-        jsr _28d9
+        jsr print_flight_token_and_divider
 
         jsr _6cda
         jsr _6f82
@@ -1491,7 +1500,8 @@ _71af:                                                                  ;$71AF
         jmp _723a
 
 _71b2:                                                                  ;$71B2
-        lda # $2d
+.import TXT_HYPHEN:direct
+        lda # TXT_HYPHEN
         jsr print_flight_token
 
         jsr _76e9
@@ -1583,7 +1593,8 @@ _723a:                                                                  ;$723A
 _723c:                                                                  ;$723C
         jsr print_flight_token
 
-        lda # $3f
+.import TXT_QMARK:direct
+        lda # TXT_QMARK
         jmp print_flight_token
 
 ;===============================================================================
@@ -1667,7 +1678,9 @@ _72b8:                                                                  ;$72B8
         jsr _72d6
 
 print_space:                                                            ;$72C5
-        lda # $20
+
+.import TXT__:direct            ;=" "
+        lda # TXT__
 _72c7:                                                                  ;$72C7
         jmp print_flight_token
 
@@ -1701,7 +1714,7 @@ market_screen:                                                          ;$72E4
 
 .import TXT_MARKET_PRICES:direct
         lda # TXT_MARKET_PRICES
-        jsr _28d9
+        jsr print_flight_token_and_divider
 
         lda # 3
         jsr set_cursor_row
@@ -1851,7 +1864,8 @@ _73c1:                                                                  ;$73C1
         rts 
 
 ;===============================================================================
-
+; enter / escape from Witchspace? escape pod?
+;
 _73dc:                                                                  ;$73DC
         rts 
 
@@ -1859,10 +1873,10 @@ _73dd:                                                                  ;$73DD
         lda PLAYER_FUEL
         sec 
         sbc TSYSTEM_DISTANCE_LO
-        bcs _73e8
+        bcs :+
+
         lda # $00
-_73e8:                                                                  ;$73E8
-        sta PLAYER_FUEL
+:       sta PLAYER_FUEL                                                 ;$73E8
 
         lda ZP_SCREEN           ; are we in the cockpit-view?
        .bnz :+                  ; no? skip over
@@ -1925,6 +1939,9 @@ _7457:                                                                  ;$7457
 
 
 ; increase / decrease cash
+;
+; TODO: must fix the overflow bug here
+;       (earning more than 64K Cr at once fails)
 
 _745a:                                                                  ;$745A
 ;===============================================================================
@@ -1992,24 +2009,29 @@ _74b8:   jmp _88e7                                                      ;$74B8
 
 equipment_screen:                                                       ;$74BB
 ;===============================================================================
-        lda # page::buy_equipment
-        jsr set_page_6a2f
+; switches to the "buy equipment" screen?
+; TODO: is this the player status/equipment screen instead?
+;
+;-------------------------------------------------------------------------------
+        lda # page::buy_equip   ; change the screen to a menu page,
+        jsr set_page_6a2f       ; clearing off the HUD if present
 
         lda # 12
         jsr set_cursor_col
 
-        lda # $cf               ;="EQUIP"?
-        jsr _6a9b
+.import TXT_EQUIP:direct
+        lda # TXT_EQUIP
+        jsr print_flight_token_and_space
 
 .import TXT_SHIP:direct
         lda # TXT_SHIP
-        jsr _28d9
+        jsr print_flight_token_and_divider
 
         lda # $80
         sta ZP_34
         jsr cursor_down
         lda PSYSTEM_TECHLEVEL
-        clc
+        clc 
         adc # $03
         cmp # $0c
         bcc _74e2
@@ -2034,7 +2056,7 @@ _74f5:                                                                  ;$74F5
 
         lda ZP_A2
         clc 
-        adc # $68
+        adc # $68               ; TODO: what's being calculated here?
         jsr print_flight_token
 
         lda ZP_A2
@@ -2087,9 +2109,12 @@ _7549:                                                                  ;$7549
         jsr _845c               ; update missile blocks on HUD
         lda # $01
 _755f:                                                                  ;$755F
-        ldy # $6b
+.import TXT_LARGE_CARGO_BAY:direct
+        ldy # TXT_LARGE_CARGO_BAY
+
         cmp # $02
         bne _756f
+        
         ldx # $25
         cpx SHIP_HOLD           ; cargo capacity of the player's ship
         beq _75a1
@@ -2115,17 +2140,18 @@ _758a:                                                                  ;$758A
         lda # $8f
         jsr _76a1
 _7596:                                                                  ;$7596
-        ldy # $6f
+.import TXT_FUEL_SCOOPS:direct
+        ldy # TXT_FUEL_SCOOPS
         cmp # $06
         bne _75bc
         ldx VAR_04C2
         beq _75b9
 _75a1:                                                                  ;$75A1
-        sty ZP_VALUE_pt1
+        sty ZP_VALUE_pt1        ; (being used as a temp value)
         jsr _7642
         jsr _7481
-        lda ZP_VALUE_pt1
-        jsr _6a9b
+        lda ZP_VALUE_pt1        ; (being used as a temp value)
+        jsr print_flight_token_and_space
 
 .import TXT_PRESENT:direct
         lda # TXT_PRESENT       ;?
@@ -2197,8 +2223,10 @@ _7619:                                                                  ;$7619
 _761f:                                                                  ;$761F
         jsr print_space
 
-        lda # $77
-        jsr _6a9b
+        ; print "CASH:"
+.import TXT_CASH_:direct
+        lda # TXT_CASH_
+        jsr print_flight_token_and_space
 _7627:                                                                  ;$7627
         jsr _a80f
 
@@ -2249,13 +2277,16 @@ _765e:                                                                  ;$765E
         lda # 12
         jsr set_cursor_col
 
+        ; print character and space
         tya 
         clc 
-        adc # $20
-        jsr _6a9b
+.import TXT__:direct            ; (beginning of ASCII flight-tokens)
+        adc # TXT__
+        jsr print_flight_token_and_space
         lda ZP_CURSOR_ROW
         clc 
-        adc # $50
+.import TXT_P:direct
+        adc # TXT_P
         jsr print_flight_token
 
         jsr cursor_down
@@ -2341,10 +2372,13 @@ _76e9:                                                                  ;$76E9
 :       sty ZP_VAR_T                                                    ;$76F9
 
 @_76fb:                                                                 ;$76FB
+        ; print a random letter pair?:
+        ;-----------------------------------------------------------------------
+        ; TODO: this effectively hard-codes the order of flight-tokens
         lda ZP_SEED_W2_HI
         and # %00011111
         beq :+
-        ora # %10000000
+        ora # %10000000         ; flight-token letter pairs $80-$9F
         jsr print_flight_token
 
 :       jsr randomize_once                                              ;$7706
@@ -2477,7 +2511,7 @@ print_flight_token:                                                     ;$777E
         ; letter, a variable (like cash or planet name), a string-expansion,
         ; or a meta-command
         ;
-        ;    A = an already *de-scrambled* string token
+        ; in:   A       an already *de-scrambled* string token
         ;
         ; brief token breakdown:
         ;
@@ -2496,9 +2530,10 @@ print_flight_token:                                                     ;$777E
         ;      $0C = newline
         ;      $0D = (also newline)
         ;  $0E-$20 = canned messages 128-146
-        ;  $21-$5F = ASCII characters $21-$5F -- see "gfx/font.asm"
+        ;  $21-$5F = ASCII characters $21-$5F -- see "gfx/gfx_font.asm"
         ;  $60-$7F = canned messages  96-127
-        ;  $80-$BF = canned messages   0-95
+        ;  $80-$9F = flight letter pairs 0-31
+        ;  $A0-$FF = canned messages 0-95
         ;
 .export print_flight_token
 
@@ -2672,7 +2707,7 @@ _print_str:                                                             ;$77F9
         cmp # 160               ; is token >= 160?
        .bge @canned_token       ; if yes, go to canned messages 33+
 
-        ; token is a character pair
+        ; token is a character pair:
         ;
         and # %01111111         ; clear token flag, leave message index
         asl                     ; double it for a lookup-table offset,
@@ -2680,8 +2715,8 @@ _print_str:                                                             ;$77F9
         lda txt_flight_pair1, y ; read the first character,
         jsr print_flight_token  ; print it
         lda txt_flight_pair2, y ; read second character
-        cmp # $3f               ; is it 63? (some kind of continuation token?)
-        beq _784e               ; yes, skip -- although never seen in practice
+        cmp # $3f               ; no second character? (print nothing)
+        beq _784e               ; yes, skip
         jmp print_flight_token  ; print second character (and return)
 
 @canned_token:                                                          ;$7811

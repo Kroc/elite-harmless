@@ -332,31 +332,20 @@ ZP_9F                   = $9f   ; edge index
 ; which screen the game is on, e.g. cockpit-view, galactic chart &c.
 ; not to be confused with the bitmap screen and colour screens
 ;
-;       $00 = cockpit-view 
-;       $01 = ?
-;       $03 = ?
-;       $04 = ?
-;       $08 = status screen
-;       $0D = ?
-;       $10 = ?
-;       $20 = ?
-;       $40 = galactic chart
-;       $80 = short-range (local) chart
+; NOTE: for the cockpit view, fore/left/right/aft-view
+;       is a separate variable
 ;
 ZP_SCREEN               = $a0
 
 .enum   page
         ;-----------------------------------------------------------------------
-        ; NOTE: for the cockpit view, fore/left/right/aft-view
-        ;       is a separate variable
-        ;
         cockpit         = $00   ; MUST BE ZERO (due to numerous BEQ/BNE checks)
         buy_cargo       = $02   ;=%00000010
         sell_cargo      = $04   ;=%00000100
         status          = $08   ;=%00001000
         inventory       = $08   ;=%00001000     ; same, why?
         market          = $10   ;=%00010000
-        buy_equipment   = $20   ;=%00100000
+        buy_equip       = $20   ;=%00100000
         chart_galaxy    = $40   ;=%01000000
         chart_local     = $80   ;=%10000000
 .endenum

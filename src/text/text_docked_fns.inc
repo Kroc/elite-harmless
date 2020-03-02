@@ -185,7 +185,7 @@ txt_docked_token11:                                                     ;$24B0
         and # %10111111         ;=$BF
         sta ZP_34
 
-        lda # $03
+        lda # $03               ;?
         jsr print_flight_token
         
         ldx txt_buffer_index

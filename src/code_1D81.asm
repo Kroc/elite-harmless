@@ -1290,13 +1290,13 @@ print_docked_token:                                                     ;$23CF
         bpl :+                  ; skip the next bit
 
        ; save state before we recurse
-        tax
+        tax 
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
-        pha
+        pha 
         lda ZP_TEMP_ADDR3_HI
-        pha
-        txa
+        pha 
+        txa 
 
         ; print from the commonly shared 'flight' strings
         jsr print_flight_token

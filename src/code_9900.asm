@@ -2427,8 +2427,10 @@ _a75d:                                                                  ;$A75D
         lda # 11
         jsr set_cursor_col
 
-        lda COCKPIT_VIEW        ; TODO: is this the right constant?
-        ora # %01100000
+.import TXT_DIRECTIONS:direct
+        lda COCKPIT_VIEW
+        ora # TXT_DIRECTIONS    ;=$60
+        ; TODO: can we just use `jsr print_flight_token_and_space`?
         jsr print_flight_token
         jsr print_space
 

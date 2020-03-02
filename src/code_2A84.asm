@@ -76,12 +76,17 @@ _28d5:                                                                  ;$28D5
         tax 
         rts 
 
-_28d9:                                                                  ;$28D9
+
+print_flight_token_and_divider:                                         ;$28D9
 ;===============================================================================
 ; print a flight token and then draw a line across the screen
 ; i.e. screen titles
 ;
+; in:   A       flight-token, already descrambled
+;
+;-------------------------------------------------------------------------------
         jsr print_flight_token
+
 
 txt_docked_token0B:                                                     ;$28DC
 ;===============================================================================
@@ -773,37 +778,56 @@ status_screen:                                                          ;$2C9B
         lda # 7
         jsr set_cursor_col
         
-        lda # $7e               ; txt token -- status line?
-        jsr _28d9
+        ; "COMMANDER ... PRESENT SYSTEM ... HYPERSPACE SYSTEM ... CONDITION"
+.import TXT_STATUS_TITLE:direct
+        lda # TXT_STATUS_TITLE
+        jsr print_flight_token_and_divider
         
         lda # $0f
         ldy ZP_A7
         bne _2c7d
-        lda # $e6
+
+        ; print "GREEN", "RED" or "YELLOW":
+        ;-----------------------------------------------------------------------
+        ; NOTE: the list of colour name strings begins
+        ;       with "GREEN", "RED" & "YELLOW"
+        ;
+.import TXT_COLORS:direct
+        lda # TXT_COLORS        ; flight token: $E6, "GREEN"
         ldy VAR_047F
         ldx SHIP_SLOT2, y
-        beq _2cc4
+        beq :+                  ; print "GREEN"
+
         ldy PLAYER_ENERGY
-        cpy # $80
-        adc # $01
-_2cc4:                                                                  ;$2CC4
-        jsr print_flight_token_and_newline
+        cpy # $80               ; +1 if PLAYER_ENERGY > $80?
+        adc # $01               ; print "RED" or "YELLOW"
+:       jsr print_flight_token_and_newline                              ;$2CC4
+
 _2cc7:                                                                  ;$2CC7
-        lda # $7d
-        jsr _6a9b
-        lda # $13
-        ldy PLAYER_LEGAL
-        beq _2cd7
-        cpy # $32
-        adc # $01
-_2cd7:                                                                  ;$2CD7
-        jsr print_flight_token_and_newline
+        ; print legal status:
+        ;-----------------------------------------------------------------------
+        ; print "LEGAL STATUS:"
+.import TXT_LEGAL_STATUS:direct
+        lda # TXT_LEGAL_STATUS
+        jsr print_flight_token_and_space
 
-        lda # $10
-        jsr _6a9b
+.import TXT_LEGAL_STATE:direct
+        lda # TXT_LEGAL_STATE   ;="CLEAN"
+        ldy PLAYER_LEGAL        ; get player's legal status
+       .bze :+                  ; print "CLEAN"
+        cpy # $32               ; +1 if legal state is >= $32 (TODO: why $32?)
+        adc # $01               ; print "OFFENDER" or "FUGITIVE"
+:       jsr print_flight_token_and_newline                              ;$2CD7
 
-        lda PLAYER_KILLS
-        bne _2c88
+        ; print player rating:
+        ;-----------------------------------------------------------------------
+        ; print "RATING:"
+.import TXT_RATING:direct
+        lda # TXT_RATING
+        jsr print_flight_token_and_space
+
+        lda PLAYER_KILLS        ; number of kills
+       .bnz _2c88               ; >0, skip ahead
         
         tax 
         lda VAR_04E0
@@ -814,36 +838,46 @@ _2cea:                                                                  ;$2CEA
         lsr 
         bne _2cea
 _2cee:                                                                  ;$2CEE
+        ; TODO: what is X if the player has 0 kills?
         txa 
         
+        ; print "FUGITIVE"?
         clc 
         adc # $15
         jsr print_flight_token_and_newline
 
-        lda # $12
-        jsr _2d61
+        ; print "EQUIPMENT:"
+.import TXT_EQUIPMENT:direct
+        lda # TXT_EQUIPMENT
+        jsr print_flight_token_and_newline_and_indent
         lda PLAYER_ESCAPEPOD
         beq _2d04
-        lda # $70
-        jsr _2d61
+
+        ; print "ESCAPE POD"
+.import TXT_ESCAPE_POD:direct
+        lda # TXT_ESCAPE_POD
+        jsr print_flight_token_and_newline_and_indent
+
 _2d04:                                                                  ;$2D04
         lda VAR_04C2
         beq _2d0e
-        lda # $6f
-        jsr _2d61
+.import TXT_FUEL_SCOOPS:direct
+        lda # TXT_FUEL_SCOOPS
+        jsr print_flight_token_and_newline_and_indent
 _2d0e:                                                                  ;$2D0E
         lda PLAYER_ECM
         beq _2d18
-        lda # $6c
-        jsr _2d61
+.import TXT_ECM_SYSTEM:direct
+        lda # TXT_ECM_SYSTEM
+        jsr print_flight_token_and_newline_and_indent
 _2d18:                                                                  ;$2D18
-        lda # $71
+        lda # $71               ;="ENERGY BOMB"
         sta ZP_AD
 _2d1c:                                                                  ;$2D1C
         tay 
         ldx SHIP_SLOTS, y       ; ship slots? NB: "$04c3 - $71"
         beq _2d25
-        jsr _2d61
+        jsr print_flight_token_and_newline_and_indent
 _2d25:                                                                  ;$2D25
         inc ZP_AD
         lda ZP_AD
@@ -852,12 +886,16 @@ _2d25:                                                                  ;$2D25
         ldx # $00
 _2d2f:                                                                  ;$2D2F
         stx ZP_AA
+        
+        ; print "FRONT" / "REAR" / "LEFT" / "RIGHT"
+.import TXT_DIRECTIONS:direct
         ldy PLAYER_LASERS, x
         beq _2d59
         txa 
         clc 
-        adc # $60
-        jsr _6a9b
+        adc # TXT_DIRECTIONS
+        jsr print_flight_token_and_space
+
         lda # $67
         ldx ZP_AA
         ldy PLAYER_LASERS, x
@@ -871,9 +909,11 @@ _2d4a:                                                                  ;$2D4A
 _2d50:                                                                  ;$2D50
         cpy # $32
         bne _2d56
-        lda # $76
+
+.import TXT_MINING_LASER:direct
+        lda # TXT_MINING_LASER
 _2d56:                                                                  ;$2D56
-        jsr _2d61
+        jsr print_flight_token_and_newline_and_indent
 _2d59:                                                                  ;$2D59
         ldx ZP_AA
         inx 
@@ -881,16 +921,16 @@ _2d59:                                                                  ;$2D59
         bcc _2d2f
         rts 
 
-;===============================================================================
 
-_2d61:                                                                  ;$2D61
+print_flight_token_and_newline_and_indent:                              ;$2D61
+;===============================================================================
         jsr print_flight_token_and_newline
         lda # 6
         jmp set_cursor_col
 
-;===============================================================================
 
 _2d69:                                                                  ;$2D69
+;===============================================================================
         lda ZP_VALUE_pt4
         sta ZP_VAR_S
         and # %10000000
