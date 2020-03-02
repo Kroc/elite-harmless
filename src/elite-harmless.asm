@@ -30,19 +30,21 @@
 
 .include        "vars_flags.asm"                                        ;$1D00
 
-; in elite-harmless we conjoin these code segments together
+; in elite-harmless we conjoin
+; these code segments together:
 ;
 .segment        "CODE_LORAM"
+;-------------------------------------------------------------------------------
 .include        "code_1D81.asm"                                         ;$1D81
 .include        "code_2A84.asm"                                         ;$2A84
-
 .include        "save_data.asm"                                         ;$25A6
-
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
 
-; in elite-harmless we conjoin these code segments together
+; in elite-harmless we conjoin
+; these code segments together:
 ;
 .segment        "CODE_HIRAM"
+;-------------------------------------------------------------------------------
 .include        "code_6A00.asm"                                         ;$6A00
 .include        "code_9900.asm"                                         ;$9900
 

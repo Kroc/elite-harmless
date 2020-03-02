@@ -9,16 +9,10 @@
 ;
 .ifndef  USE_ILLEGAL_OPS
         .fatal .concat( \
-                "please enable the extended 6502 instruction set for the ", \
+                "please enable the extended 6510 instruction set for the ", \
                 "fastlines option (option: --cpu 6502X)" \
         )
 .endif
-
-.include        "draw_fastlines_h.inc"
-.include        "draw_fastlines_v.inc"
-
-.macro  .draw_lines
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 ZP_LINE_HEIGHT          = ZP_REG_H
 ZP_LINE_WIDTH           = ZP_REG_W
@@ -121,5 +115,6 @@ draw_line:
 @flat:  ; a perfectly flat line
         jmp draw_straight_line
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
+
+.include        "draw_fastlines_h.asm"
+.include        "draw_fastlines_v.asm"

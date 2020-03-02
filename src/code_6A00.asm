@@ -4,18 +4,7 @@
 ;===============================================================================
 .linecont+
 
-; use replacement line-drawing routines if specified
-;
-.ifdef  OPTION_DYME_FASTLINE
-        ;///////////////////////////////////////////////////////////////////////
-        .include        "draw_fastlines.inc"
-.else   ;///////////////////////////////////////////////////////////////////////
-        ; original Elite line-drawing routine. pretty fast actually,
-        ; but it doesn't batch pixels together before writing
-        .include        "draw_lines.inc"
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-; yes, I am aware that cc65 allows for 'default import of undefined labels'
+; yes, I am aware that ca65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
 
 ; from "text_flight.asm"

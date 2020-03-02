@@ -63,8 +63,6 @@
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .vline_draw
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 _vline_bitmask:
         .byte   %10000000
@@ -249,6 +247,3 @@ _vline_right_slope:         ; AXS ignores carry for input, but sets it on out
 _vline_right_exit:
         ldy ZP_LINE_RESTORE_Y
         rts 
-        
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro

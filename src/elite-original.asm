@@ -22,35 +22,27 @@
 .include        "vars_polyobj.asm"                                      ;$F900
 
 .include        "vars_main.inc"                                         ;$0400
-
 .include        "gfx/gfx_font.asm"                                      ;$0B00
-
 .include        "vars_flags.asm"                                        ;$1D00
 
 .segment        "CODE_1D81"
 ;-------------------------------------------------------------------------------
 .include        "code_1D81.asm"                                         ;$1D81
-
 .include        "save_data.asm"                                         ;$25A6
 
 .segment        "CODE_28A4"
 ;-------------------------------------------------------------------------------
 .include        "code_2A84.asm"                                         ;$2A84
-
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
 
 .segment        "CODE_6A00"
 ;-------------------------------------------------------------------------------
 .include        "code_6A00.asm"                                         ;$6A00
-
 .include        "orig/orig_init.asm"                                    ;$75E4
-
 .include        "gfx/gfx_bitmap.asm"
 
 .segment        "CODE_9900"
 ;-------------------------------------------------------------------------------
 .include        "code_9900.asm"                                         ;$9900
-
 .include        "sound.asm"                                             ;$B4CB
-
 .include        "gfx/hull_data.asm"                                     ;$D000

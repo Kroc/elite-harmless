@@ -134,9 +134,8 @@ nextpos:
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .hline_draw
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-; 8 bytes table for last block mask
+
+; 8 byte table for last block mask
 ;
 _hline_endmask = _2900
 ;    .byte   %10000000
@@ -579,6 +578,3 @@ _sline_singleblock:
 _sline_exit2:
         ldy ZP_LINE_RESTORE_Y
         rts 
-
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro

@@ -2,14 +2,7 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-;
-; code for drawing lines
-;
-; this is a macro because it is located in the
-; middle of other code in the original game
-;
-.macro  .draw_lines
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+; code for drawing lines:
 ;
 ; line-drawing data:
 ;-------------------------------------------------------------------------------
@@ -754,7 +747,7 @@ line_done2:                                                             ;$AD88
         rts                             ; line has been drawn!
 
 
-;=======================================================================
+;===============================================================================
 ; draws a horizontally sloped line from the top down
 ;
 ; if calling into this point externally,
@@ -1583,6 +1576,3 @@ draw_straight_line:                                                     ;$AFFA
         .byte   %00000111
         .byte   %00000011
         .byte   %00000001
-
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
