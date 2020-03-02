@@ -2235,13 +2235,8 @@ _a693:                                                                  ;$A693
 _a6ad:                                                                  ;$A6AD
         rts 
 
-;===============================================================================
 
-_a6ae:                                                                  ;$A6AE
-        stx COCKPIT_VIEW
-        jsr set_page
-        jsr _a6d4
-        jmp _7af3
+
 
 ;===============================================================================
 ; set cockpit view (front / rear / left / right)
@@ -2251,16 +2246,22 @@ _a6ae:                                                                  ;$A6AE
 ;           $02 = left
 ;           $03 = right
 ;
+_a6ae:                                                                  ;$A6AE
+        stx COCKPIT_VIEW
+        jsr set_page
+        jsr _a6d4
+        jmp _7af3
+
 _a6ba:                                                                  ;$A6BA
-        lda # $00
+        lda # page::cockpit
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ldy ZP_SCREEN
-        bne _a6ae
+        ldy ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz _a6ae               ; no? skip ahead
 
         cpx COCKPIT_VIEW
         beq _a6ad               ; view did not change, rts
@@ -2377,13 +2378,16 @@ trumbles_sprite_mask:                                                   ;$A727
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
+
+set_page:                                                               ;$A72F
 ;===============================================================================
 ; switch screen page?
 ;
-;       A = page to switch to; e.g. cockpit-view, galactic chart &c.
+; in:   A       page to switch to; e.g. cockpit-view, galactic chart &c.
 ;
-set_page:                                                               ;$A72F
-        sta ZP_SCREEN
+;-------------------------------------------------------------------------------
+        sta ZP_SCREEN           ; set the variable for current page
+
 _a731:                                                                  ;$A731
         jsr txt_docked_token02
 
@@ -2417,14 +2421,13 @@ _a75d:                                                                  ;$A75D
         lda # 1
         jsr set_cursor_row
 
-        ; are we in the cockpit-view?
-        lda ZP_SCREEN
-        bne :+
+        lda ZP_SCREEN           ; are we in the cockpit-view?
+       .bnz :+                  ; no? skip ahead
 
         lda # 11
         jsr set_cursor_col
 
-        lda COCKPIT_VIEW
+        lda COCKPIT_VIEW        ; TODO: is this the right constant?
         ora # %01100000
         jsr print_flight_token
         jsr print_space

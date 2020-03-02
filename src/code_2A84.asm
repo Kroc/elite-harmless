@@ -760,13 +760,14 @@ _2c88:                                                                  ;$2C88
         dex                     ; "Competent" status or below
         bne _2cee
 
+
 status_screen:                                                          ;$2C9B
 ;===============================================================================
 ; display status page
 ;
-        ; switch to page "8"(?)
-        lda # $08
-        jsr _6a2f
+;-------------------------------------------------------------------------------
+        lda # page::status
+        jsr set_page_6a2f
         jsr _70ab
 
         lda # 7
@@ -2982,8 +2983,8 @@ _37a5:                                                                  ;$37A5
         lda ZP_SCREEN           ; backup current screen number
         pha                     ; (i.e. cockpit / menu-page)
         
-        lda # $00               ; switch to cockpit-view?
-        jsr set_page
+        lda # page::cockpit     ; switch to cockpit-view
+        jsr set_page            ; update the screen
         
         pla                     ; restore screen number
         sta ZP_SCREEN           ; (i.e. cockpit / menu-page)
