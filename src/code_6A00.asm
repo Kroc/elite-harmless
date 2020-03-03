@@ -656,24 +656,29 @@ _6c6d:                                                                  ;$6C6D
         jmp draw_line
 
 ;===============================================================================
-
-dial_addr = ELITE_BITMAP_ADDR + .bmppos( 21, 5 )
-
+; BBC: ".TT126 ; default Circle with a cross-hair"
+;
 _6cc3:                                                                  ;$6CC3
-        lda #< dial_addr
+        lda # 104               ; cross-hair X-position?
         sta ZP_8E
-        lda #> dial_addr
+        lda # 90                ; cross-hair Y-position?
         sta ZP_8F
-        lda # $10
-        sta ZP_90
-        jsr _6c6d
-        lda PLAYER_FUEL
-        sta ZP_VALUE_pt1
-        jmp _6cfe
 
+        lda # $10               ; cross-hair size?
+        sta ZP_90
+
+        jsr _6c6d               ; draw cross-hair?
+        
+        lda PLAYER_FUEL         ; use the player's fuel count...
+        sta ZP_VALUE_pt1        ; ... as the jump-radius!
+
+        jmp _6cfe               ; continue drawing the circle
+
+; called by local chart
+;
 _6cda:                                                                  ;$6CDA
-        lda ZP_SCREEN
-        bmi _6cc3
+        lda ZP_SCREEN           ; are we on the local chart?
+        bmi _6cc3               ; ...
 
         lda PLAYER_FUEL
         lsr 
@@ -4047,18 +4052,25 @@ _7f22:                                                                  ;$7F22
         lda # $01
         sta CIRCLE_BUFFER
 
+        ; check the circle is within bounds:
+        ;
+        ; carry will be clear if the circle is valid; for drawing the short-
+        ; range chart this will always be the case, but if the sun goes out
+        ; of drawing range it will be erased
+        ;
         jsr check_circle
-        bcs _7f13
+        bcs _7f13               ; if carry set, erase the sun
 
         lda # $00
-        ldx ZP_VALUE_pt1
-        cpx # $60
+        ldx ZP_VALUE_pt1        ; circle radius
+        cpx # $60               ;=96?
         rol 
-        cpx # $28
+        cpx # $28               ;=40?
         rol 
-        cpx # $10
+        cpx # $10               ;=32?
         rol 
-        sta ZP_AA
+        sta ZP_AA               ; the `rol`s do nothing!
+
         lda ZP_B8
         ldx ZP_VAR_P3
         bne :+
@@ -4068,7 +4080,6 @@ _7f22:                                                                  ;$7F22
         bne :+
 
         lda # $01
-
 :       sta ZP_A8               ; first scanline of the sun             ;$7F4B
 
         lda ZP_B8               ; last scanline of the sun
@@ -4102,16 +4113,16 @@ _7f67:                                                                  ;$7F67
 
         ;-----------------------------------------------------------------------
 
-        ldy ZP_B8               ; begin with the lowest scanline for the sun
+        ldy ZP_B8               ; begin with the lowest scanline for the circle
 
-        ; copy sun middle-point to YY-LO/HI for the
+        ; copy circle middle-point to YY-LO/HI for the
         ; line-clipping and drawing routines used
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
 _7f80:                                                                  ;$7F80
-        cpy ZP_A8               ; have we reach the top of the sun?
+        cpy ZP_A8               ; have we reach the top of the circle?
         beq _7f8f               ; if yes, move ahead with next step
 
         lda CIRCLE_BUFFER, y
