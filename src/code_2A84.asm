@@ -105,10 +105,16 @@ _28e5:                                                                  ;$28E5
 ; called from galactic chart screen;
 ; draws a line across the screen
 ;
-;       A = Y-position of line
+; in:   A       Y-position of line
 ;
+;-------------------------------------------------------------------------------
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         sta ZP_VAR_Y1                   ; set Y-position of line,
         sta ZP_VAR_Y2                   ; both start and end (straight)
+.else   ;///////////////////////////////////////////////////////////////////////
+        sta ZP_VAR_Y
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; set X to go from 0 to 255
         ldx # $00                       ; begin with zero
@@ -116,9 +122,15 @@ _28e5:                                                                  ;$28E5
         dex                             ; roll around to 255
         stx ZP_VAR_X2                   ; set line-end
         
-        ; TODO: could we not use the faster `draw_straight_line`,
-        ;       rather than the generic line-drawing routine?
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         jmp draw_line
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; use the faster straight-line routine,
+        ; rather than the generic line routine
+        jmp draw_straight_line
+.endif  ;///////////////////////////////////////////////////////////////////////
+
 
 _28f3:                                                                  ;$28F3
 ;===============================================================================

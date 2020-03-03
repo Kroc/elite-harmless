@@ -1687,8 +1687,8 @@ _a2b8:  lda ZP_POLYOBJ_ATTACK   ; check current A.I. state              ;$A2B8
         beq :+
 
         ; should we run an A.I. check? when the A.I. is not "active",
-        ; it runs at a much lower rate. these instructions here gear-down
-        ; the ratio
+        ; it runs at a much lower rate. these instructions here
+        ; gear-down the ratio
         ;
         lda ZP_A3               ; move counter?
         eor ZP_9D
@@ -1699,7 +1699,7 @@ _a2b8:  lda ZP_POLYOBJ_ATTACK   ; check current A.I. state              ;$A2B8
 :       jsr _32ad                                                       ;$A2C8
 
 _a2cb:                                                                  ;$A2CB
-        jsr _b410
+        jsr _b410               ; draw stalk on scanner?
 
         lda ZP_POLYOBJ_VERTX_LO
         asl                     ; x2
@@ -3242,34 +3242,48 @@ _b40f:                                                                  ;$B40F
         rts 
 
 ;===============================================================================
-
+; draw scanner stalk?
+;
 _b410:                                                                  ;$B410
         lda ZP_SCREEN           ; are we in the cockpit-view?
        .bnz _b40f               ; no? exit now (RTS above us)
 
+        ; is the object visible?
         lda ZP_POLYOBJ_VISIBILITY
         and # visibility::scanner
-        beq _b40f
+        beq _b40f               ; no? exit now (RTS above us)
 
-        ldx ZP_A5
-        bmi _b40f
+        ldx ZP_A5               ;?
+        bmi _b40f               ; no? exit now (RTS above us)
+
         lda _267e, x
         sta ZP_32
 
+        ; within range? (scanner shows 16-bits of 24-bit range?)
+        ; object X/Y/Z position is 24-bits, so this is the
+        ; 2nd byte, what would be the hi-byte in a word
         lda ZP_POLYOBJ_XPOS_MI
         ora ZP_POLYOBJ_YPOS_MI
         ora ZP_POLYOBJ_ZPOS_MI
-        and # %11000000
+        ; the maximum value of a 24-bit number is $FF_FFFF,
+        ; or +/- 8388607 signed, or 16'777'215 unsigned
+        ;
+        and # %11000000         ; modulo 16'384? (1024 divisions of 24-bits)
         bne _b40f
 
         lda ZP_POLYOBJ_XPOS_MI
         clc 
 
+        ; if the middle-byte is within range,
+        ; we still need to check the hi-byte
+        ;
         ldx ZP_POLYOBJ_XPOS_HI
-        bpl :+
-        eor # %11111111
-        adc # $01
-:       adc # $7b                                                       ;$B438
+        bpl :+                  ; if positive, skip over the invert
+
+        eor # %11111111         ; flip the bits...
+        adc # $01               ; and add 1
+
+:       adc # $7b               ;=123 (centre X on scanner?)            ;$B438
         sta ZP_VAR_X
 
         lda ZP_POLYOBJ_ZPOS_MI
@@ -3280,7 +3294,7 @@ _b410:                                                                  ;$B410
         bpl :+
         eor # %11111111
         sec 
-:       adc # $53                                                       ;$B448
+:       adc # $53               ;=83                                    ;$B448
         eor # %11111111
         sta ZP_TEMP_ADDR1_LO
 
@@ -3341,10 +3355,10 @@ _b49b:                                                                  ;$B49B
         bne _b4ae
         ldy # $00
         lda ZP_TEMP_ADDR1_LO
-        adc # $3f
+        adc #< (320-1)
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        adc # $01
+        adc #> (320-1)
         sta ZP_TEMP_ADDR1_HI
 _b4ae:                                                                  ;$B4AE
         iny 
@@ -3352,10 +3366,10 @@ _b4ae:                                                                  ;$B4AE
         bne _b4c1
         ldy # $00
         lda ZP_TEMP_ADDR1_LO
-        adc # $3f
+        adc #< (320-1)
         sta ZP_TEMP_ADDR1_LO
         lda ZP_TEMP_ADDR1_HI
-        adc # $01
+        adc #> (320-1)
         sta ZP_TEMP_ADDR1_HI
 _b4c1:                                                                  ;$B4C1
         lda ZP_VAR_X

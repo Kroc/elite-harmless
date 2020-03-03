@@ -564,7 +564,7 @@ galactic_chart:                                                         ;$6C1C
         jsr _28e0               ; cursor down 23 times!!!
                                 ; (clear HUD colours off screen?)
 
-        ; draw line across bottom of chart?
+        ; draw line across bottom of chart
         ;
         lda # $98               ; Y=152
         jsr _28e5
@@ -1173,12 +1173,14 @@ _6fce:                                                                  ;$6FCE
         sta ZP_90
         jmp _6c6d
 
+
+local_chart:                                                            ;$6FDB
 ;===============================================================================
 ; short-range (local) chart
 ;
-local_chart:                                                            ;$6FDB
-
-        lda # $c7
+; TODO: currently glitched in hiram build!
+;-------------------------------------------------------------------------------
+        lda # $c7               ;=199 (height of screen)
         sta ZP_B8
         sta ZP_B7
 
@@ -1191,6 +1193,8 @@ local_chart:                                                            ;$6FDB
         jsr _6a2e               ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+        ; print the page title:
+        ;
         lda # 7
         jsr set_cursor_col
 
@@ -1201,87 +1205,150 @@ local_chart:                                                            ;$6FDB
         jsr _6cda
         jsr _6f82
         jsr _70a0
+
         lda # $00
         sta ZP_AE
-        ldx # $18
-_7004:                                                                  ;$7004
-        sta ZP_POLYOBJ_XPOS_LO, x
+        
+        ; to avoid names overlapping, the chart will not print any two planet
+        ; names on the same screen row (even if they would fit). the zero-page
+        ; 'current' poly-object is erased to use that space
+        ;
+        ldx # 24                ; make room for 24 screen rows
+:       sta ZP_POLYOBJ, x                                               ;$7004
         dex 
-        bpl _7004
-_7009:                                                                  ;$7009
-        lda ZP_SEED_W1_HI
-        sec 
-        sbc PSYSTEM_POS_X
-        bcs _7015
-        eor # %11111111
-        adc # $01
-_7015:                                                                  ;$7015
-        cmp # $14
-        bcs _708d
+        bpl :-
+
+        ;-----------------------------------------------------------------------
+        ; loop through all planets in the galaxy
+        ; and display those visible locally:
+        ;
+        ; the X-coordinate of a planet is taken from the hi-byte of W1:
+        ; <http://wiki.alioth.net/index.php/Random_number_generator>
+        ;
+@loop:  lda ZP_SEED_W1_HI                                               ;$7009
+        sec                     ; subtract our current X location,
+        sbc PSYSTEM_POS_X       ; from the given planet
+        bcs :+
+
+        ; we want to reduce the relative distance to a positive number;
+        ; negate the result when the subtraction happens to do so
+        eor # %11111111         ; flip the bits,
+        adc # 1                 ; add 1: -ve => +ve
+
+        ; is the given planet within the
+        ; visible range of the local chart?
+        ;
+:       cmp # $14               ;=20                                    ;$7015
+        bcs @next               ; no? move to the next planet
+
+        ; the Y-coordinate of a planet is taken from the hi-byte of W0:
+        ; <http://wiki.alioth.net/index.php/Random_number_generator>
+        ;
         lda ZP_SEED_W0_HI
-        sec 
-        sbc PSYSTEM_POS_Y
-        bcs _7025
-        eor # %11111111
-        adc # $01
-_7025:                                                                  ;$7025
-        cmp # $26
-        bcs _708d
-        lda ZP_SEED_W1_HI
-        sec 
-        sbc PSYSTEM_POS_X
-        asl 
-        asl 
-        adc # $68
+        sec                     ; subtract our current Y location,
+        sbc PSYSTEM_POS_Y       ; from the given planet
+        bcs :+
+
+        ; we want to reduce the relative distance to a positive number;
+        ; negate the result when the subtraction happens to do so
+        eor # %11111111         ; flip the bits,
+        adc # 1                 ; add 1: -ve => +ve
+
+        ; within visible range of the local chart(?)
+:       cmp # $26               ;=38                                    ;$7025
+        bcs @next               ; no? move to the next planet
+
+        ; planet is visible locally:
+        ;-----------------------------------------------------------------------
+        lda ZP_SEED_W1_HI       ; get planet X-coordinate again
+        sec                     ; subtract from our current location,
+        sbc PSYSTEM_POS_X       ; to get the relative X-coord (signed)
+        
+        ; scale the local chart to 4x zoom, horizontally
+        asl                     ; zoom, enhance
+        asl                     ; again
+
+        ; offset so that the centre-point
+        ; is in the middle of the screen
+        adc # 104               ; why 104?
         sta ZP_71
-        lsr 
-        lsr 
-        lsr 
+
+        ; for printing the planet name,
+        ; work out the column number
+        lsr                     ; /2 
+        lsr                     ; /4
+        lsr                     ; /8
         clc 
         adc # 1
         jsr set_cursor_col
 
-        lda ZP_SEED_W0_HI
-        sec 
-        sbc PSYSTEM_POS_Y
-        asl 
-        adc # $5a
+        ;-----------------------------------------------------------------------
+        lda ZP_SEED_W0_HI       ; get planet Y-coordinate again
+        sec                     ; subtract from our current location,
+        sbc PSYSTEM_POS_Y       ; to get the relative X-coord (signed)
+
+        ; the Y-range is at 2x scale, not 4x so that the galaxy map
+        ; fits on the screen, 256x128, rather than 256x256
+        ;
+        asl                     ; zoom, enhance!
+
+        ; offset so that the centre-point
+        ; is in the middle of the screen
+        adc # 90                ; why 90?
         sta ZP_43
 
-        lsr 
-        lsr 
-        lsr 
+        ; for printing the planet name,
+        ; work out the row number
+        lsr                     ; /2
+        lsr                     ; /4
+        lsr                     ; /8
         tay 
-        ldx ZP_POLYOBJ_XPOS_LO, y
-        beq _705c
+
+        ; check if a planet-name has already
+        ; been printed on this row:
+        ;
+        ldx ZP_POLYOBJ, y       ; look up the current row
+       .bze @name               ; empty? ok, print name here
         iny 
-        ldx ZP_POLYOBJ_XPOS_LO, y
-        beq _705c
+        ldx ZP_POLYOBJ, y       ; look up the row below
+       .bze @name               ; empty? ok, print name here
         dey 
         dey 
-        ldx ZP_POLYOBJ_XPOS_LO, y
-        bne _7070
-_705c:                                                                  ;$705C
-        tya 
-        jsr set_cursor_row
+        ldx ZP_POLYOBJ, y       ; look up the row above
+       .bnz @draw               ; in use? can't print name anywhere, skip
 
+        ; print planet's name:
+        ;-----------------------------------------------------------------------
+@name:  tya                     ; set the row number                    ;$705C
+        jsr set_cursor_row      ; to print at
+
+        ; we cannot print within the title space,
+        ; so skip attempting to print there or above
         cpy # $03
-        bcc _708d
+        bcc @next
+        ; mark the given row as "full" so other
+        ; other names are not printed there
         lda # $ff
-        sta ZP_POLYOBJ_XPOS_LO, y
+        sta ZP_POLYOBJ, y
 
-        lda # $80
+        ; capitalise the first letter of the name
+        lda # %10000000
         sta ZP_34
 
+        ; print planet name?
         jsr _76e9
-_7070:                                                                  ;$7070
-        lda # $00
+
+        ; draw the planet's shape:
+        ;-----------------------------------------------------------------------
+@draw:  lda # $00                                                       ;$7070
         sta ZP_POLYOBJ01_XPOS_pt2
         sta ZP_44
         sta ZP_VALUE_pt2
 
         lda ZP_71
         sta ZP_POLYOBJ01_XPOS_pt1
+
+        ; planet size?
         lda ZP_SEED_W2_HI
         and # %00000001
         adc # $02
@@ -1289,16 +1356,18 @@ _7070:                                                                  ;$7070
         jsr _7b4f
         jsr _7f22
         jsr _7b4f
-_708d:                                                                  ;$708D
-        jsr randomize
-        inc ZP_AE
-        beq _7097
-        jmp _7009
 
-_7097:                                                                  ;$7097
-        lda #< $8F00            ;?
+        ; move to next planet in the galaxy
+        ;-----------------------------------------------------------------------
+@next:  jsr randomize                                                   ;$708D
+        inc ZP_AE
+        beq :+
+        jmp @loop
+
+        ;-----------------------------------------------------------------------
+:       lda # $00               ;?                                      ;$7097
         sta ZP_B7
-        lda #> $8F00            ;?
+        lda # $8F               ;?
         sta ZP_B8
 
         rts 
@@ -1364,8 +1433,6 @@ _70f1:                                                                  ;$70F1
         sta ZP_SEED, x
         dex 
         bpl _70f1
-
-        ; select a random planet?
 
         lda ZP_SEED_W0_HI
         sta TSYSTEM_POS_Y
@@ -5855,7 +5922,7 @@ _8912:                                                                  ;$8912
 ; draw the title screen?
 ;
 ;       A = a docked-string token to print
-;       X = ? e.g. $0B
+;       X = ? e.g. $0B          ; ship-type?
 ;       Y = ? e.g. $D2
 ;
 _8920:                                                                  ;$8920
@@ -6786,7 +6853,7 @@ _8ee3:                                                                  ;$8EE3
         lda PLAYER_SPEED
         sta ZP_POLYOBJ_VERTX_LO
         jsr _34bc
-        lda ZP_POLYOBJ_VERTX_LO                                         ;$8EFF
+        lda ZP_POLYOBJ_VERTX_LO
 _8f01:                                                                  ;$8F01
         cmp # $16
         bcc :+

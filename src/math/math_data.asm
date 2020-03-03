@@ -163,8 +163,8 @@ populate_multiply_tables:
 ; tables and addition. a multiplication of X & Y can be reduced to adding
 ; two logs together and then using exponention to restore the number base
 ;
-; likewise, a division can be done by subtracting the logarithms of two numbers
-; end exponentiating the result.
+; likewise, a division can be done by subtracting the logarithms of two
+; numbers end exponentiating the result.
 ;
 ; however, given that the input number is not always going to be a square
 ; number the answer is, more often than not, going to be a fraction, e.g.
@@ -178,12 +178,12 @@ populate_multiply_tables:
 ; for its log numbers -- given that the viewport is only 256px wide, this is
 ; sufficient but it menas that the log tables here have two major drawbacks:
 ;
-; 1. compound use increases the error drastically; that is, the more times
-;    a value goes through the log tables the more severe the loss of
-;    precision becomes
+; 1. compound use increases the error drastically; that is, the more
+;    times a value goes through the log tables the more severe the
+;    loss of precision becomes
 ;
 ; 2. it's not possible to use these log-tables for typical multiplication.
-;    Elite has its own multiplication tables (see "math_data.inc")
+;    Elite has its own multiplication tables (see "math_data.asm")
 ;    required to produce correct results
 ;
 ; =============================================
@@ -382,6 +382,9 @@ _9600:                                                                  ;$9600
 ; are filled with junk data (stuff left over in the C64 RAM when the game was
 ; assembled) and occupy space in the disk-file. for elite-harmless we make
 ; these buffers blocks of reserved RAM that do not exist in the disk-file
+;
+; TODO: this understanding is incorrect!
+;       something else is happening here
 ;
 .segment        "LINE_DATA"
 
