@@ -131,6 +131,13 @@ ZP_32                   = $32   ;?
 ZP_CURSOR_ROW           = $33
 ZP_34                   = $34   ; case switch for flight strings?
 
+; a variable named "K3" in the BBC code; used as a 16-bit X-position
+; when drawing circles -- note that the address is reused below!
+;
+ZP_VAR_K3               = $35
+ZP_VAR_K3_LO            = $35   ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt1 
+ZP_VAR_K3_HI            = $36   ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt2
+
 ;-------------------------------------------------------------------------------
 
 ; the X/Y/Z-position of `POLYOBJ_01` are copied here
@@ -159,8 +166,11 @@ ZP_3F                   = $3f   ; a flag, but never gets set; see `_3571`
 ;                       = $41   ;UNUSED?
 ;                       = $42   ;UNUSED?
 
-ZP_43                   = $43   ; something to do with viewport height
-ZP_44                   = $44   ; often related to `ZP_POLYOBJ01_XPOS_pt2`
+; a variable named "K$" in the BBC code;
+; used as a 16-bit Y-position when drawing circles
+;
+ZP_VAR_K4_LO            = $43
+ZP_VAR_K4_HI            = $44
 
 ;-------------------------------------------------------------------------------
 
@@ -180,7 +190,7 @@ ZP_TEMPOBJ_M2x2_HI      = $4a
 ZP_TEMPOBJ_M1x0         = $4b
 ZP_TEMPOBJ_M1x0_LO      = $4b
 ZP_TEMPOBJ_M1x0_HI      = $4c
-ZP_TEMPOBJ_M1x1         = $4d   ;TODO: not referenced directly?
+ZP_TEMPOBJ_M1x1         = $4d   ; NOTE: not referenced directly?
 ZP_TEMPOBJ_M1x1_LO      = $4d   ; "
 ZP_TEMPOBJ_M1x1_HI      = $4e   ; "
 ZP_TEMPOBJ_M1x2         = $4f
@@ -193,7 +203,7 @@ ZP_TEMPOBJ_M0x0_HI      = $52
 ZP_TEMPOBJ_M0x1         = $53
 ZP_TEMPOBJ_M0x1_LO      = $53
 ZP_TEMPOBJ_M0x1_HI      = $54
-ZP_TEMPOBJ_M0x2         = $55   ;TODO: not referenced directly?
+ZP_TEMPOBJ_M0x2         = $55   ; NOTE: not referenced directly?
 ZP_TEMPOBJ_M0x2_LO      = $55   ; "
 ZP_TEMPOBJ_M0x2_HI      = $56   ; "
 

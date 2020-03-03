@@ -701,10 +701,10 @@ _6cfe:                                                                  ;$6CFE
         sta ZP_POLYOBJ01_XPOS_pt1
 
         lda ZP_8F
-        sta ZP_43
+        sta ZP_VAR_K4_LO
 
         ldx # $00
-        stx ZP_44
+        stx ZP_VAR_K4_HI
         stx ZP_POLYOBJ01_XPOS_pt2
 
         inx 
@@ -1294,8 +1294,9 @@ local_chart:                                                            ;$6FDB
 
         ; offset so that the centre-point
         ; is in the middle of the screen
+        ;
         adc # 90                ; why 90?
-        sta ZP_43
+        sta ZP_VAR_K4_LO        ; set circle Y-position, lo-byte
 
         ; for printing the planet name,
         ; work out the row number
@@ -1340,29 +1341,47 @@ local_chart:                                                            ;$6FDB
 
         ; draw the planet's shape:
         ;-----------------------------------------------------------------------
-@draw:  lda # $00                                                       ;$7070
-        sta ZP_POLYOBJ01_XPOS_pt2
-        sta ZP_44
-        sta ZP_VALUE_pt2
+        ; NOTE: the X-position on screen of a circle is a 16-bit number
+        ; (this is to handle suns, where the centre of the sun can be
+        ; off-screen, but the sides can be visible on-screen)
+        ;
+@draw:  lda # $00               ; clear some variables:                 ;$7070
+        sta ZP_VAR_K3_HI        ; set circle X-position hi-byte to 0
+        sta ZP_VAR_K4_HI        ; set circle Y-position hi-byte to 0
+        sta ZP_VALUE_pt2        ;?
 
-        lda ZP_71
-        sta ZP_POLYOBJ01_XPOS_pt1
+        lda ZP_71               ; retrieve screen X-positon of planet
+        sta ZP_VAR_K3_LO        ; set the circle X-position lo-byte
 
-        ; planet size?
+        ; the hi-byte of W2 is used to calculate both the planet's
+        ; radius and determine the first two letters of the planet's name:
+        ; <http://wiki.alioth.net/index.php/Random_number_generator>
+        ;
         lda ZP_SEED_W2_HI
         and # %00000001
         adc # $02
         sta ZP_VALUE_pt1
-        jsr _7b4f
-        jsr _7f22
-        jsr _7b4f
+
+        ; draw the planet:
+        ;
+        ; TODO: investiage if we can remember the first & last scanlines
+        ;       used for drawing a circle, and do away with the need to
+        ;       clear the circle buffer -- twice! -- every time
+        ;
+        jsr clear_circle_buffer
+        jsr _7f22               ; draw the circle?
+        jsr clear_circle_buffer
 
         ; move to next planet in the galaxy
         ;-----------------------------------------------------------------------
+        ; the randomiser will cycle the seed bytes such that the next planet's
+        ; information can be extracted. every 256 cycles, it will repeat, so we
+        ; don't need to backup / restore the seed
+        ;
 @next:  jsr randomize                                                   ;$708D
-        inc ZP_AE
-        beq :+
-        jmp @loop
+        inc ZP_AE               ; increment the planet counter
+       .bze :+                  ; 256 planets done? exit
+        jmp @loop               ; more planets to go, loop
 
         ;-----------------------------------------------------------------------
 :       lda # $00               ;?                                      ;$7097
@@ -2868,6 +2887,7 @@ swap_zp_shadow:                                                         ;$784F
 
         rts 
 
+
 ;===============================================================================
 ; unused / unreferenced?
 ;
@@ -3350,21 +3370,23 @@ _7b44:                                                                  ;$7B44
         stx ZP_7E
         dex                     ; change X to $FF
         stx line_points_x       ; mark line-buffer-X as 'empty'
-        stx line_points_y       ; makr line-buffer-Y as 'empty'
+        stx line_points_y       ; mark line-buffer-Y as 'empty'
 
-_7b4f:                                                                  ;$7B4F
-        ; clear $0580..$0647
+clear_circle_buffer:                                                    ;$7B4F
+        ;-----------------------------------------------------------------------
+        ; clear the circle buffer:
         ;
-        ldy # $c7               ; length of thing at $0580
-        lda # $00               ; erase...
+        ldy # 199               ; length of the circle buffer (199 scanlines)
+        lda # 0                 ; erase...
 
-:       sta VAR_0580, y         ; set sun scanline half-width to 0      ;$7B53
-        dey 
-       .bnz :-
+:       sta CIRCLE_BUFFER, y    ; set to 0                              ;$7B53
+        dey                     ; move to next line
+       .bnz :-                  ; all lines?
+
         dey                     ; change Y to $FF
-        sty VAR_0580            ; write to first entry
+        sty CIRCLE_BUFFER       ; write to first entry (TODO: why?)
 
-        rts
+        rts 
 
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
@@ -3570,9 +3592,9 @@ _7c24:                                                                  ;$7C24
         sta hull_pointer_current_hi
 _7c61:                                                                  ;$7C61
         ; scanlines for sun?
-        lda #< VAR_0580
+        lda #< CIRCLE_BUFFER
         sta ZP_TEMP_ADDR2_LO
-        lda #> VAR_0580
+        lda #> CIRCLE_BUFFER
         sta ZP_TEMP_ADDR2_HI
 
         lda # $02
@@ -3705,7 +3727,8 @@ _7d0e:                                                                  ;$7D0E
         rts 
 
 ;===============================================================================
-
+; something to do with circles
+;
 ;$7d1a:
         .byte   $04, $00, $00, $00, $00
 
@@ -3734,11 +3757,11 @@ _7d1f:                                                                  ;$7D1F
 
         lda ZP_VALUE_pt1
         adc # $48               ;TODO: half viewport height?
-        sta ZP_43
+        sta ZP_VAR_K4_LO        ; set circle Y-position, lo-byte
 
         txa 
         adc # $00
-        sta ZP_44
+        sta ZP_VAR_K4_HI
 
         clc 
 _7d56:                                                                  ;$7D56
@@ -3779,7 +3802,7 @@ _7d84:                                                                  ;$7D84
         lda ZP_A5
         lsr 
         bcc _7d8c
-        jmp _7f22
+        jmp _7f22               ; draw a circle?
 
 _7d8c:                                                                  ;$7D8C
         jsr _80bb
@@ -3837,16 +3860,16 @@ _7de0:                                                                  ;$7DE0
         jsr _8189
         sta ZP_VAR_P1
 
-        lda ZP_43
+        lda ZP_VAR_K4_LO
         sec 
         sbc ZP_VAR_P1
-        sta ZP_43
+        sta ZP_VAR_K4_LO
 
         sty ZP_VAR_P1
 
-        lda ZP_44
+        lda ZP_VAR_K4_HI
         sbc ZP_VAR_P1
-        sta ZP_44
+        sta ZP_VAR_K4_HI
 
         ldx # $09
         jsr _7e36
@@ -4014,12 +4037,17 @@ _7f1d:                                                                  ;$7F1D
         jmp _7f67
 
 ;-------------------------------------------------------------------------------
-
+; calculate a cricle's scan-lines?
+;
+; NOTE: also used when drawing the planets in the local chart
+;
 _7f22:                                                                  ;$7F22
+        ; enable the circle buffer?
+        ; (value is $FF when buffer is clear)
         lda # $01
-        sta VAR_0580
+        sta CIRCLE_BUFFER
 
-        jsr _814f
+        jsr check_circle
         bcs _7f13
 
         lda # $00
@@ -4045,11 +4073,11 @@ _7f22:                                                                  ;$7F22
 
         lda ZP_B8               ; last scanline of the sun
         sec 
-        sbc ZP_43
+        sbc ZP_VAR_K4_LO
         tax 
 
         lda # $00
-        sbc ZP_44
+        sbc ZP_VAR_K4_HI
         bmi _7f16
         bne _7f63
 
@@ -4086,7 +4114,7 @@ _7f80:                                                                  ;$7F80
         cpy ZP_A8               ; have we reach the top of the sun?
         beq _7f8f               ; if yes, move ahead with next step
 
-        lda VAR_0580, y
+        lda CIRCLE_BUFFER, y
        .bze :+                  ; if half-width is 0, no line
         jsr _28f3               ; calculate the line-width/pos & draw
 :       dey                     ; next scanline                         ;$7F8C
@@ -4116,8 +4144,8 @@ _7f8f:                                                                  ;$7F8F
         bcc _7fb6
         lda # $ff
 _7fb6:                                                                  ;$7FB6
-        ldx VAR_0580, y
-        sta VAR_0580, y
+        ldx CIRCLE_BUFFER, y
+        sta CIRCLE_BUFFER, y
         beq _8008
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
@@ -4133,7 +4161,7 @@ _7fb6:                                                                  ;$7FB6
         sta ZP_VAR_YY_LO
         lda ZP_POLYOBJ01_XPOS_pt2
         sta ZP_VAR_YY_HI
-        lda VAR_0580, y
+        lda CIRCLE_BUFFER, y
         jsr clip_horz_line
         bcs _7fed
         lda ZP_VAR_X2
@@ -4167,7 +4195,7 @@ _8008:                                                                  ;$8008
         jsr clip_horz_line
         bcc _7ff5
         lda # $00
-        sta VAR_0580, y
+        sta CIRCLE_BUFFER, y
         beq _7ff8
 _801c:                                                                  ;$801C
         ldx ZP_TEMP_ADDR3_LO
@@ -4181,7 +4209,7 @@ _801c:                                                                  ;$801C
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
 _802f:                                                                  ;$02F
-        lda VAR_0580, y
+        lda CIRCLE_BUFFER, y
         beq _8037
         jsr _28f3               ;...draw_straight_line
 _8037:                                                                  ;$8037
@@ -4199,7 +4227,7 @@ _8043:                                                                  ;$8043
 ;===============================================================================
 
 _8044:                                                                  ;$8044
-        jsr _814f
+        jsr check_circle
         bcs _8043
 
         lda # $00
@@ -4320,10 +4348,8 @@ _80fe:                                                                  ;$80FE
 
 wipe_sun:                                                               ;$80FF
 ;===============================================================================
-; wipe sun
-;
-        lda VAR_0580
-        bmi _80fe
+        lda CIRCLE_BUFFER
+        bmi _80fe               ; $FF = nothing to draw, exit
 
         ; copy sun's horizontal position to YY-LO/HI,
         ; as this is what the drawing operations use
@@ -4336,7 +4362,7 @@ wipe_sun:                                                               ;$80FF
         ldy # ELITE_VIEWPORT_HEIGHT-1
 @loop:                                                                  ;$810E
         ; check if a line needs to be drawn at this Y-position
-        lda VAR_0580, y         ; read half-width of line
+        lda CIRCLE_BUFFER, y    ; read half-width of line
        .bze:+                   ; if zero, skip
 
         jsr _28f3               ; work out X1/X2 from middle+width, and draw
@@ -4345,7 +4371,7 @@ wipe_sun:                                                               ;$80FF
        .bnz @loop
 
         dey 
-        sty VAR_0580
+        sty CIRCLE_BUFFER
 
         rts 
 
@@ -4407,8 +4433,7 @@ clip_horz_line:                                                         ;$811E
         lda # $00
         sta ZP_VAR_X1
 
-        ; return carry clear = OK
-        clc 
+        clc                     ; return carry clear = OK 
         rts 
 
 @clear:                                                                  ;$8148
@@ -4416,58 +4441,81 @@ clip_horz_line:                                                         ;$811E
         ; remove the line from the line-queue
         ;
         lda # $00
-        sta VAR_0580, y
+        sta CIRCLE_BUFFER, y
 
-        ; return carry set = error
-        sec 
+        sec                     ; return carry set = error 
         rts 
 
+
+check_circle:                                                           ;$814F
 ;===============================================================================
-; ".CHKON ; check extent of circles, P+1 set to maxY, Y protected."
+; BBC: ".CHKON ; check extent of circles, P+1 set to maxY, Y protected."
 ;
-_814f:                                                                  ;$814F
-
-        lda ZP_POLYOBJ01_XPOS_pt1
+; the position of the circle is 16-bits, so as to be able to place
+; a circle off-screen, whose diameter reaches into the screen
+;
+; in:   ZP_VAR_K3       signed 16-bit X-position
+;       ZP_VAR_K4       signed 16-bit Y-position
+;
+; out:  carry           returns carry set if the circle is invalid,
+;                       otherwise carry is clear
+;
+;-------------------------------------------------------------------------------
+        ; check the circle doesn't extend
+        ; past the right-most limit:
+        ;
+        lda ZP_VAR_K3_LO        ; circle X-position, lo-byte
         clc 
-        adc ZP_VALUE_pt1
-        lda ZP_POLYOBJ01_XPOS_pt2
-        adc # $00
-        bmi _8187
-        lda ZP_POLYOBJ01_XPOS_pt1
+        adc ZP_VALUE_pt1        ; add the radius
+        lda ZP_VAR_K3_HI        ; circle X-position, hi-byte
+        adc # 0                 ; (ripple the carry)
+        bmi _8187               ; if the sign flips, exit
+
+        ; check the circle doesn't extend
+        ; past the left-most limit:
+        ;
+        lda ZP_VAR_K3_LO        ; circle X-position, hi-byte
         sec 
-        sbc ZP_VALUE_pt1
-        lda ZP_POLYOBJ01_XPOS_pt2
-        sbc # $00
-        bmi _8167
-        bne _8187
-_8167:                                                                  ;$8167
-        lda ZP_43
+        sbc ZP_VALUE_pt1        ; subtract the radius
+        lda ZP_VAR_K3_HI        ; circle X-position, hi-byte
+        sbc # 0                 ; (ripple the carry)
+        bmi :+                  ; result should remain negative
+        bne _8187               ; if result is positive, exit
+
+        ; check the circle doesn't extend
+        ; past the bottom-most limit:
+        ;
+:       lda ZP_VAR_K4_LO        ; get circle Y-position, lo-byte        ;$8167
         clc 
-        adc ZP_VALUE_pt1
-        sta ZP_VAR_P2
+        adc ZP_VALUE_pt1        ; add the radius
+        sta ZP_VAR_P2           ; = last pixel row to draw
+        lda ZP_VAR_K4_HI        ; get circle Y-position, hi-byte
+        adc # 0                 ; (ripple the carry)
+        bmi _8187               ; if sign flips, overflow! exit
+        sta ZP_VAR_P3           ; (why store the hi-byte?)
 
-        lda ZP_44
-        adc # $00
-        bmi _8187
-        sta ZP_VAR_P3
-
-        lda ZP_43
+        ; check the circle doesn't extend
+        ; past the top-most limit:
+        ;
+        lda ZP_VAR_K4_LO        ; get circle Y-position, lo-byte
         sec 
-        sbc ZP_VALUE_pt1
-        tax 
-
-        lda ZP_44
-        sbc # $00
+        sbc ZP_VALUE_pt1        ; subtract the radius
+        tax                     ; put this (signed value) aside
+        lda ZP_VAR_K4_HI        ; get circle Y-position, hi-byte
+        sbc # 0                 ; (ripple the carry)
         bmi _81ec
         bne _8187
-        cpx ZP_B8
+        
+        ; TODO: what value is this?
+        cpx ZP_B8               ; should return c=1 for error
         rts 
 
-_8187:                                                                  ;$8187
-        sec 
+_8187:  sec                     ; error?                                ;$8187
         rts 
+
 
 _8189:                                                                  ;$8189
+        ;-----------------------------------------------------------------------
         jsr _7e36
         sta ZP_VAR_P1
         lda # $de
@@ -4528,10 +4576,9 @@ _81c9:                                                                  ;$81C9
         eor # %11111111
         adc # $00
         tax 
-_81ec:                                                                  ;$81EC
-        clc 
-_81ed:                                                                  ;$81ED
-        rts 
+
+_81ec:  clc                                                             ;$81EC 
+_81ed:  rts                                                             ;$81ED
 
 ;===============================================================================
 
@@ -4695,7 +4742,7 @@ _829a:                                                                  ;$829A
 
 _82a4:                                                                  ;$82A4
         jsr clear_zp_polyobj
-        jsr _7b4f
+        jsr clear_circle_buffer
         sta SHIP_SLOT1
         sta VAR_045F
         jsr _b10e

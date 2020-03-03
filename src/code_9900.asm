@@ -51,7 +51,7 @@ _9932:                                                                  ;$9932
         ora ZP_POLYOBJ01_XPOS_pt2
         bne _995d
 
-        lda ZP_43
+        lda ZP_VAR_K4_LO
         cmp # ELITE_VIEWPORT_HEIGHT-2   ; why "-2", height of dot?
         bcs _995d               ; "off top of screen"
 
@@ -59,7 +59,7 @@ _9932:                                                                  ;$9932
         jsr _9964               ; "Ship is point, could end if nono-2"
         ldy # $06               ; "index for edge heap"
 
-        lda ZP_43               ; "#Y"
+        lda ZP_VAR_K4_LO        ; "#Y"
         adc # $01               ; "1 pixel up"
         jsr _9964               ; "Ship is point, could end if nono-2"
 
@@ -421,7 +421,7 @@ _9b66:                                                                  ;$9B66
         bpl _9b66
 
         lda # $ff
-        sta ZP_44
+        sta ZP_VAR_K4_HI
 
         ldy # Hull::face_count          ;=$0C: face count
         lda ZP_POLYOBJ_VISIBILITY
@@ -2398,7 +2398,7 @@ _a731:                                                                  ;$A731
         sta ZP_34
         sta txt_lcase_flag
 
-        jsr _7b4f
+        jsr clear_circle_buffer
 
         lda # $00
         sta VAR_0484

@@ -150,7 +150,7 @@ _28f3:                                                                  ;$28F3
         
         ; remove this line from the scanline cache
         lda # $00
-        sta VAR_0580, y
+        sta CIRCLE_BUFFER, y
         
         jmp draw_straight_line
 
@@ -309,10 +309,10 @@ _2976:                                                                  ;$2976
 ;
 _2977:                                                                  ;$2977
         txa 
-        adc ZP_43
+        adc ZP_VAR_K4_LO
         sta ZP_8B
 
-        lda ZP_44
+        lda ZP_VAR_K4_HI
         adc ZP_VAR_T
         sta ZP_8C
         
@@ -3043,15 +3043,15 @@ _37a5:                                                                  ;$37A5
 
 _37b2:                                                                  ;$37B2
         ldx # $80
-        stx ZP_POLYOBJ01_XPOS_pt1
+        stx ZP_VAR_K3_LO
 
-        ldx # $48               ;TODO: half viewport height?
-        stx ZP_43
+        ldx # $48               ; half viewport height?
+        stx ZP_VAR_K4_LO        ; circle Y-position, lo-byte
         
         ldx # $00
         stx ZP_AD
-        stx ZP_POLYOBJ01_XPOS_pt2
-        stx ZP_44
+        stx ZP_VAR_K3_HI
+        stx ZP_VAR_K4_HI
 _37c2:                                                                  ;$37C2
         jsr _37ce
         inc ZP_AD
