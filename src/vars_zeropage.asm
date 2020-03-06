@@ -138,6 +138,9 @@ ZP_VAR_K3               = $35
 ZP_VAR_K3_LO            = $35   ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt1 
 ZP_VAR_K3_HI            = $36   ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt2
 
+; (the circle radius re-uses part of the temporary big-integer buffer)
+ZP_CIRCLE_RADIUS        = ZP_VALUE_pt1
+
 ;-------------------------------------------------------------------------------
 
 ; the X/Y/Z-position of `POLYOBJ_01` are copied here
@@ -166,7 +169,7 @@ ZP_3F                   = $3f   ; a flag, but never gets set; see `_3571`
 ;                       = $41   ;UNUSED?
 ;                       = $42   ;UNUSED?
 
-; a variable named "K$" in the BBC code;
+; a variable named "K4" in the BBC code;
 ; used as a 16-bit Y-position when drawing circles
 ;
 ZP_VAR_K4_LO            = $43
@@ -356,6 +359,7 @@ ZP_SCREEN               = $a0
         inventory       = $08   ;=%00001000     ; same, why?
         market          = $10   ;=%00010000
         buy_equip       = $20   ;=%00100000
+        
         chart_galaxy    = $40   ;=%01000000
         chart_local     = $80   ;=%10000000
 .endenum

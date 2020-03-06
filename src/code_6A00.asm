@@ -244,11 +244,11 @@ print_flight_token_and_space:                                           ;$6A9B
         jmp print_space
 
 
+planet_screen:                                                          ;$6AA1
 ;===============================================================================
 ; planetary information screen
 ;
-planet_screen:                                                          ;$6AA1
-
+;-------------------------------------------------------------------------------
         ; switch to planetary information page
         lda # $01
         jsr set_page_6a2f
@@ -655,16 +655,17 @@ _6c6d:                                                                  ;$6C6D
         ;       removal of validation in the line routine
         jmp draw_line
 
+
 ;===============================================================================
 ; BBC: ".TT126 ; default Circle with a cross-hair"
 ;
 _6cc3:                                                                  ;$6CC3
-        lda # 104               ; cross-hair X-position?
+        lda # 104               ; cross-hair X-position
         sta ZP_8E
-        lda # 90                ; cross-hair Y-position?
+        lda # 90                ; cross-hair Y-position
         sta ZP_8F
 
-        lda # $10               ; cross-hair size?
+        lda # 16                ; cross-hair size
         sta ZP_90
 
         jsr _6c6d               ; draw cross-hair?
@@ -674,11 +675,12 @@ _6cc3:                                                                  ;$6CC3
 
         jmp _6cfe               ; continue drawing the circle
 
-; called by local chart
-;
+
 _6cda:                                                                  ;$6CDA
+        ; is this the short-range or the galactic chart?
+        ;
         lda ZP_SCREEN           ; are we on the local chart?
-        bmi _6cc3               ; ...
+        bmi _6cc3               ; do setup for the local chart...
 
         lda PLAYER_FUEL
         lsr 
@@ -701,24 +703,29 @@ _6cda:                                                                  ;$6CDA
         clc 
         adc # $18
         sta ZP_8F
-_6cfe:                                                                  ;$6CFE
-        lda ZP_8E
-        sta ZP_POLYOBJ01_XPOS_pt1
 
-        lda ZP_8F
+_6cfe:                                                                  ;$6CFE
+        lda ZP_8E               ; cross-hair X-position / centre-point?
+        sta ZP_VAR_K3_LO
+
+        lda ZP_8F               ; cross-hair Y-position / centre-point?
         sta ZP_VAR_K4_LO
 
+        ; the circle X & Y positions are 16-bit, so set the hi-bytes to 0
+        ; as our centre-point is guaranteed to be within the screen
         ldx # $00
         stx ZP_VAR_K4_HI
-        stx ZP_POLYOBJ01_XPOS_pt2
+        stx ZP_VAR_K3_HI
 
+        ; BBC: "LSP : step size for circle = 1"
         inx 
-        stx ZP_7E
+        stx ZP_7E               ;?
 
+        ; BBC: "STP : load step =2, fairly big circle with small step size"
         ldx # $02
-        stx ZP_AC
+        stx ZP_AC               ;?
 
-        jmp _805e
+        jmp _805e               ; draw circle?
 
 
 buy_screen:                                                             ;$6D16
@@ -1183,9 +1190,10 @@ local_chart:                                                            ;$6FDB
 ;===============================================================================
 ; short-range (local) chart
 ;
-; TODO: currently glitched in hiram build!
 ;-------------------------------------------------------------------------------
-        lda # $c7               ;=199 (height of screen)
+        ; set the clipping height?
+        ;
+        lda # 199               ; (height of screen)
         sta ZP_B8
         sta ZP_B7
 
@@ -1330,7 +1338,7 @@ local_chart:                                                            ;$6FDB
 
         ; we cannot print within the title space,
         ; so skip attempting to print there or above
-        cpy # $03
+        cpy # 3
         bcc @next
         ; mark the given row as "full" so other
         ; other names are not printed there
@@ -1353,7 +1361,7 @@ local_chart:                                                            ;$6FDB
 @draw:  lda # $00               ; clear some variables:                 ;$7070
         sta ZP_VAR_K3_HI        ; set circle X-position hi-byte to 0
         sta ZP_VAR_K4_HI        ; set circle Y-position hi-byte to 0
-        sta ZP_VALUE_pt2        ;?
+        sta ZP_VALUE_pt2        ; circle-radius hi-byte(?)
 
         lda ZP_71               ; retrieve screen X-positon of planet
         sta ZP_VAR_K3_LO        ; set the circle X-position lo-byte
@@ -1374,7 +1382,7 @@ local_chart:                                                            ;$6FDB
         ;       clear the circle buffer -- twice! -- every time
         ;
         jsr clear_circle_buffer
-        jsr _7f22               ; draw the circle?
+        jsr calculate_circle
         jsr clear_circle_buffer
 
         ; move to next planet in the galaxy
@@ -1391,7 +1399,7 @@ local_chart:                                                            ;$6FDB
         ;-----------------------------------------------------------------------
 :       lda # $00               ;?                                      ;$7097
         sta ZP_B7
-        lda # $8F               ;?
+        lda # $8F               ;=143, viewport height-1?
         sta ZP_B8
 
         rts 
@@ -3807,7 +3815,8 @@ _7d84:                                                                  ;$7D84
         lda ZP_A5
         lsr 
         bcc _7d8c
-        jmp _7f22               ; draw a circle?
+
+        jmp calculate_circle
 
 _7d8c:                                                                  ;$7D8C
         jsr _80bb
@@ -4041,12 +4050,12 @@ _7f1d:                                                                  ;$7F1D
         lda # $ff
         jmp _7f67
 
+
+calculate_circle:                                                       ;$7F22
 ;-------------------------------------------------------------------------------
-; calculate a cricle's scan-lines?
+; calculates the scan-lines of a circle and draws it:
 ;
-; NOTE: also used when drawing the planets in the local chart
-;
-_7f22:                                                                  ;$7F22
+;-------------------------------------------------------------------------------
         ; enable the circle buffer?
         ; (value is $FF when buffer is clear)
         lda # $01
@@ -4054,41 +4063,56 @@ _7f22:                                                                  ;$7F22
 
         ; check the circle is within bounds:
         ;
-        ; carry will be clear if the circle is valid; for drawing the short-
-        ; range chart this will always be the case, but if the sun goes out
-        ; of drawing range it will be erased
+        ; carry will be clear if the circle is valid; for drawing the planets
+        ; on the short-range chart this will always be the case, but if the
+        ; sun goes out of drawing range it will be erased
         ;
         jsr check_circle
         bcs _7f13               ; if carry set, erase the sun
 
-        lda # $00
+        ; calculate extent of fringes?
+        ; (i.e. firery edge of the sun)
+        ;
+        ; the circle's radius is checked against three different scales
+        ; and for each, a true/false bit is shifted into the bottom of
+        ; register A. this should give the results:
+        ;
+        ;       r >= 96         %111
+        ;       r >= 40         %011
+        ;       r >= 16         %001
+        ;       r < 16          %000
+        ;
+        lda # %00000000
         ldx ZP_VALUE_pt1        ; circle radius
-        cpx # $60               ;=96?
-        rol 
-        cpx # $28               ;=40?
-        rol 
-        cpx # $10               ;=32?
-        rol 
-        sta ZP_AA               ; the `rol`s do nothing!
+        cpx # 96
+        rol                     ; (shift the carry bit in)
+        cpx # 40
+        rol                     ; (shift the carry bit in)
+        cpx # 16
+        rol                     ; (shift the carry bit in)
+        sta ZP_AA
 
-        lda ZP_B8
-        ldx ZP_VAR_P3
-        bne :+
+        lda ZP_B8               ; screen bottom clipping
+                                ; (144 for viewport, 199 for menu pages)
+
+        ldx ZP_VAR_P3           ; height (or last scanline?) > 256?
+       .bnz :+
+
         cmp ZP_VAR_P2
         bcc :+
         lda ZP_VAR_P2
-        bne :+
+       .bnz :+
+        lda # $01               ; bottom of screen?
 
-        lda # $01
-:       sta ZP_A8               ; first scanline of the sun             ;$7F4B
+:       sta ZP_A8               ; last scanline of the sun?             ;$7F4B
 
-        lda ZP_B8               ; last scanline of the sun
+        lda ZP_B8               ; first scanline of the sun?
         sec 
-        sbc ZP_VAR_K4_LO
+        sbc ZP_VAR_K4_LO        ; cirlce Y-position, lo-byte
         tax 
 
         lda # $00
-        sbc ZP_VAR_K4_HI
+        sbc ZP_VAR_K4_HI        ; cirlce Y-position, hi-byte
         bmi _7f16
         bne _7f63
 
@@ -4104,10 +4128,12 @@ _7f67:                                                                  ;$7F67
         stx ZP_TEMP_ADDR3_LO
         sta ZP_TEMP_ADDR3_HI    ; flag $00 = up, $FF = down?
 
-        lda ZP_VALUE_pt1
-        jsr math_square         ; square the number
+        ; even if you have no background in math, like me, you probably have
+        ; at least heard of "πr²" ("pi R squared") ...
+        ;
+        lda ZP_VALUE_pt1        ; radius
+        jsr math_square         ; square the radius
         sta ZP_B3               ; squared 16-bit radius hi
-
         lda ZP_VAR_P1
         sta ZP_B2               ; squared 16-bit radius lo
 
@@ -4235,11 +4261,11 @@ _803a:                                                                  ;$803A
 _8043:                                                                  ;$8043
         rts 
 
-;===============================================================================
 
 _8044:                                                                  ;$8044
+;===============================================================================
         jsr check_circle
-        bcs _8043
+        bcs _8043               ; circle not valid? exit (RTS above us)
 
         lda # $00
         sta line_points_x
@@ -4386,6 +4412,8 @@ wipe_sun:                                                               ;$80FF
 
         rts 
 
+
+clip_horz_line:                                                         ;$811E
 ;===============================================================================
 ; clip a centred, horizontal line so that it fits within the viewport. this
 ; routine is used when drawing the sun as that is stored as a centre-point
@@ -4398,8 +4426,7 @@ wipe_sun:                                                               ;$80FF
 ;       A = half-width
 ;       Y must be preserved!
 ;
-clip_horz_line:                                                         ;$811E
-
+;-------------------------------------------------------------------------------
         sta ZP_VAR_T            ; put aside half-width
 
         ; find right-hand point (X2); i.e. middle (YY) + half-width (T)
@@ -4418,12 +4445,11 @@ clip_horz_line:                                                         ;$811E
         lda # ELITE_VIEWPORT_WIDTH-1
         sta ZP_VAR_X2
 
-@left:                                                                  ;$8131
         ;-----------------------------------------------------------------------
         ; find left-hand point (X1); i.e. middle (YY) - half-width (T)
         ; and clip if it goes byeond the viewport left edge (0)
         ;
-        lda ZP_VAR_YY_LO        ; begin with middle-point
+@left:  lda ZP_VAR_YY_LO        ; begin with middle-point               ;$8131
         sec 
         sbc ZP_VAR_T            ; subtract the half-width
         sta ZP_VAR_X1           ; this is the left-hand X-coord
@@ -4437,8 +4463,7 @@ clip_horz_line:                                                         ;$811E
         rts 
 
         ;-----------------------------------------------------------------------
-        ; too large, don't draw?
-:       bpl @clear                                                      ;$8140
+:       bpl @clear              ; too large, don't draw?                ;$8140
 
         ; line clips to the left of the viewport (0)
         lda # $00
@@ -4447,11 +4472,10 @@ clip_horz_line:                                                         ;$811E
         clc                     ; return carry clear = OK 
         rts 
 
-@clear:                                                                  ;$8148
         ;-----------------------------------------------------------------------
         ; remove the line from the line-queue
         ;
-        lda # $00
+@clear: lda # $00                                                       ;$8148
         sta CIRCLE_BUFFER, y
 
         sec                     ; return carry set = error 
@@ -4460,16 +4484,20 @@ clip_horz_line:                                                         ;$811E
 
 check_circle:                                                           ;$814F
 ;===============================================================================
-; BBC: ".CHKON ; check extent of circles, P+1 set to maxY, Y protected."
+; check a circle (to be drawn) is within bounds:
 ;
-; the position of the circle is 16-bits, so as to be able to place
-; a circle off-screen, whose diameter reaches into the screen
+; the position of the circle is 16-bits, so as to be able to place a circle
+; off-screen, whose radius reaches into the screen. note that for simplicity
+; in calculations, a 16-bit position of 0 matches position 0 on the screen,
+; so the 16-bit range is not exactly centre
 ;
-; in:   ZP_VAR_K3       signed 16-bit X-position
-;       ZP_VAR_K4       signed 16-bit Y-position
+; in:   K3      signed 16-bit X-position
+;       K4      signed 16-bit Y-position
 ;
-; out:  carry           returns carry set if the circle is invalid,
-;                       otherwise carry is clear
+; out:  carry   returns carry set if the circle is invalid,
+;               otherwise carry is clear
+;
+;       P2      last scanline the circle would appear on
 ;
 ;-------------------------------------------------------------------------------
         ; check the circle doesn't extend
@@ -4477,17 +4505,18 @@ check_circle:                                                           ;$814F
         ;
         lda ZP_VAR_K3_LO        ; circle X-position, lo-byte
         clc 
-        adc ZP_VALUE_pt1        ; add the radius
+        adc ZP_CIRCLE_RADIUS    ; add the radius
         lda ZP_VAR_K3_HI        ; circle X-position, hi-byte
         adc # 0                 ; (ripple the carry)
         bmi _8187               ; if the sign flips, exit
 
-        ; check the circle doesn't extend
-        ; past the left-most limit:
+        ; check the circle doesn't extend past the left-most limit:
+        ; note that the left-limit is -32768 (the sign bit is set), therefore
+        ; the sign-bit will go positive if the circle exceeds the left-limit
         ;
-        lda ZP_VAR_K3_LO        ; circle X-position, hi-byte
+        lda ZP_VAR_K3_LO        ; circle X-position, lo-byte
         sec 
-        sbc ZP_VALUE_pt1        ; subtract the radius
+        sbc ZP_CIRCLE_RADIUS    ; subtract the radius
         lda ZP_VAR_K3_HI        ; circle X-position, hi-byte
         sbc # 0                 ; (ripple the carry)
         bmi :+                  ; result should remain negative
@@ -4498,7 +4527,7 @@ check_circle:                                                           ;$814F
         ;
 :       lda ZP_VAR_K4_LO        ; get circle Y-position, lo-byte        ;$8167
         clc 
-        adc ZP_VALUE_pt1        ; add the radius
+        adc ZP_CIRCLE_RADIUS    ; add the radius
         sta ZP_VAR_P2           ; = last pixel row to draw
         lda ZP_VAR_K4_HI        ; get circle Y-position, hi-byte
         adc # 0                 ; (ripple the carry)
@@ -4510,18 +4539,24 @@ check_circle:                                                           ;$814F
         ;
         lda ZP_VAR_K4_LO        ; get circle Y-position, lo-byte
         sec 
-        sbc ZP_VALUE_pt1        ; subtract the radius
+        sbc ZP_CIRCLE_RADIUS    ; subtract the radius
         tax                     ; put this (signed value) aside
         lda ZP_VAR_K4_HI        ; get circle Y-position, hi-byte
         sbc # 0                 ; (ripple the carry)
-        bmi _81ec
-        bne _8187
+        bmi _81ec               ; result should remain negative
+                                ; -- circle is valid (jump to CLC, RTS)
+        bne _8187               ; if sign flips, overflow! exit
         
-        ; TODO: what value is this?
+        ; TODO: does this code even ever run?
+        ; 
+        ; check against the screen height limit set
+        ; (143 for viewport, 199 for menu pages)
         cpx ZP_B8               ; should return c=1 for error
         rts 
 
-_8187:  sec                     ; error?                                ;$8187
+        ; circle is not valid (within bounds)
+        ;
+_8187:  sec                     ; return carry set                      ;$8187
         rts 
 
 
@@ -5099,11 +5134,11 @@ _845c:                                                                  ;$845C
 
         rts 
 
-;===============================================================================
 
 _8475:                                                                  ;$8475
+;===============================================================================
         lda ZP_SCREEN           ; are we in the cockpit-view?
-       .bnz _8487               ; no? skip over
+       .bnz :+                  ; no? skip over
 
         lda VAR_04E6
         jsr _900d
@@ -5111,13 +5146,12 @@ _8475:                                                                  ;$8475
         sta VAR_048B
         jmp _84fa
 
-_8487:                                                                  ;$8487
-        jsr txt_docked_token15  ; clear rows 21, 22 & 23(?)
+:       jsr txt_docked_token15  ; clear rows 21, 22 & 23(?)             ;$8487
         jmp _84fa
 
-;===============================================================================
 
 _848d:                                                                  ;$848D
+;===============================================================================
         jsr clear_zp_polyobj
         jsr get_random_number
         sta ZP_TEMP_VAR
@@ -7362,10 +7396,10 @@ _91fd:                                                                  ;$91FD
         rts 
 
 ;===============================================================================
-.ifndef OPTION_NOSOUND
-;///////////////////////////////////////////////////////////////////////////////
 ; if sound is disabled, this entire block can be ignored
 ;
+.ifndef OPTION_NOSOUND
+;///////////////////////////////////////////////////////////////////////////////
 _91fe:                                                                  ;$91FE
 ;-------------------------------------------------------------------------------
         ; title screen music?
