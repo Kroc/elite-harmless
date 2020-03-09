@@ -394,7 +394,9 @@ ZP_B4                   = $b4   ;? x9
 ZP_B5                   = $b5   ;? x10
 ZP_B6                   = $b6   ;? x9
 ZP_B7                   = $b7   ;? x4
-ZP_B8                   = $b8   ;? x7
+
+ZP_CLIPY                = $b8   ; screen Y-value for clipping drawing
+
 ZP_B9                   = $b9   ;? x2
 ZP_BA                   = $ba   ;? x2
 
