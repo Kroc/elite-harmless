@@ -3,11 +3,13 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+square_root:                                                            ;$9978
+;===============================================================================
 ; this calculates a very good approximation of the square root of R.Q
 ; Q = sqrt(R.Q)
 ;
-square_root:                                                            ;$9978
-
+; TODO: create a lookup table for this, for cart ROM
+;-------------------------------------------------------------------------------
         ldy ZP_VAR_R
         lda ZP_VAR_Q
         sta ZP_VAR_S
@@ -18,10 +20,10 @@ square_root:                                                            ;$9978
 @loop:                                                                  ;$9986
         cpx ZP_VAR_Q
         bcc @next       ; blt
-        bne @increase
+        bne @inc
         cpy # $40
         bcc @next       ; if (X.Y >= Q.$40) increase else next
-@increase:                                                              ;$9990
+@inc:                                                                   ;$9990
         tya
         sbc # $40       ; carry is set
         tay

@@ -3,34 +3,40 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
+
+math_square_7bit:                                                       ;$3986
+;===============================================================================
 ; square a 7-bit number:
-;-------------------------------------------------------------------------------
+;
 ; removes the sign-bit and then does A * A. see the next procedure for details.
 ; the caller should save and restore the sign if desired
 ;
-math_square_7bit:                                                       ;$3986
-
+;-------------------------------------------------------------------------------
         and # %01111111         ; remove sign
 
+
+math_square:                                                            ;$3988
+;===============================================================================
 ; square a number:
 ; (i.e. A * A)
+;
+; in:   A       number to multiply with itself
+; out:  A.P     16-bit result in A = hi, P = lo
+;
 ;-------------------------------------------------------------------------------
-;       A = number to multiply with itself
-;
-; returns a 16-bit number in A.P
-;
-math_square:                                                            ;$3988
-;
 ; if the math lookup tables are being included,
 ; we can use these to go faster
 ; 
 .ifdef  OPTION_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
         tax                     ; use A as index into tables (i.e. A * A)
-        bne _399f
+        bne _399f               ; non-zero value?
 
-        sta ZP_VAR_P
+        ; zero-squared is zero!
+        ;
+        sta ZP_VAR_P            ; make it 16-bits
         rts 
+        ;-----------------------------------------------------------------------
 
 _3992:  ;?
         tax 
@@ -44,8 +50,9 @@ _399b:  ;?
 
         ldx ZP_VAR_Q
 
-_399f:  
-        txa 
+        ;-----------------------------------------------------------------------
+        ; NOTE: must preserve Y
+_399f:  txa 
         sta @sm1+1
         sta @sm3+1
         eor # $ff
@@ -63,7 +70,7 @@ _399f:
 
 .else   ;///////////////////////////////////////////////////////////////////////
         ; original elite square routine, or elite-harmless
-        ; without the math lookup tables
+        ; without the math lookup tables:
         ; 
         sta ZP_VAR_P            ; put aside initial value
         tax                     ; and again
@@ -93,6 +100,8 @@ _399b:                                                                  ;$399B
         beq _398d               ; are we multiplying by zero!?
 
 _399f:                                                                  ;$399F
+        ; NOTE: this routine must preserve Y
+        
         ; subtract 1 because carry will add one already
         dex 
         stx ZP_VAR_T

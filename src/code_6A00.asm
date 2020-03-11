@@ -4108,17 +4108,17 @@ draw_circle:                                                            ;$7F22
         ; is the bottom of the circle outside the viewport?
         ;
         ; compare the viewport height against the last-scanline of the circle:
-        ; as this is the other way round (comparing the last-scanline against
-        ; the viewport height), carry-clear will tell us that the circle
-        ; extends beyond the viewport
+        ; as this is done the other way round (normally you would compare the
+        ; last-scanline against the viewport height), carry-clear will tell us
+        ; that the circle extends beyond the viewport
         ;
         lda ZP_CLIPY            ; viewport height
                                 ; (143 for cockpit, 199 for menu pages)
         ldx ZP_VAR_P3           ; last scanline of circle, hi byte
        .bnz :+                  ; any bit there indicates >256 value
         cmp ZP_VAR_P2           ; if the circle's last-scanline extends below
-        bcc :+                  ; the viewport, set the viewport height as
-                                ; the circle's last-scanline
+        bcc :+                  ; the viewport, set the circle's last-scanline
+                                ; to the viewport height
 
         ; circle's last scanline is within the viewport
         ; -- it must be a non-zero value however
@@ -4141,9 +4141,9 @@ draw_circle:                                                            ;$7F22
 
         ; validate the hi-byte portion:
         ;
-        ; if the circle's Y position is off-screen, the hi-byte
-        ; will be a non-zero value. we want to work out if the
-        ; circle's centre is ABOVE or BELOW the screen
+        ; if the circle's Y position is off-screen, the hi-byte will be
+        ; a non-zero value. we want to work out if the circle's centre
+        ; is ABOVE or BELOW the screen
         ;
         ; subtracting from zero will give us:
         ;
@@ -4171,15 +4171,14 @@ draw_circle:                                                            ;$7F22
         dex                     ;  if X is currently zero)
         beq _7f1d               ; if zero, draw top-half only(?)
 
-        ; although we've determined that the circle's Y-centre point
-        ; is within the viewport, we still need to know how much of
-        ; the circle's radius is within that viewport, as this will
-        ; be the actual number of scanlines we need to draw for
-        ; the bottom half of the circle
+        ; although we've determined that the circle's Y-centre point is within
+        ; the viewport, we still need to know how much of the circle's radius
+        ; is within that viewport, as this will be the actual number of scan-
+        ; lines we need to draw for the bottom half of the circle
         ;
-        ; where the X-register is currently the amount of scanlines
-        ; between the circle's Y-centre and the bottom of the viewport,
-        ; check if the circle's radius fits within that space:
+        ; where the X-register is currently the number of scanlines between
+        ; the circle's Y-centre and the bottom of the viewport, check if
+        ; the circle's radius fits within that space:
         ;
         cpx ZP_CIRCLE_RADIUS
         bcc _7f67
@@ -4220,6 +4219,8 @@ _7f80:                                                                  ;$7F80
         ;-----------------------------------------------------------------------
         ; is the last scanline of the circle on the viewport border(?)
         ; this will never be the case with the short-range chart, so it skips
+        ; TODO: where does this come into play?
+        ;
         cpy ZP_A8
         beq _7f8f               ; if yes, move ahead with next step
 
@@ -4232,36 +4233,59 @@ _7f80:                                                                  ;$7F80
 
 _7f8f:                                                                  ;$7F8F
         ;-----------------------------------------------------------------------
-        ; TODO: this appears to do a division via squares/square-roots,
-        ;       as we've seen described in the math module
-
+        ; TODO: this appears to do a multiplication or division via squares /
+        ;       square-roots, as we've seen described in the math tables.
+        ;       just need to work out what's happening and why
+        ;
+        ; TODO: could we use our SQR/EXP lookup tables? (if present)
+        ;
+        ; calcuate:
+        ;
+        ;       B3.B2 = r^2
+        ;
+        ;       A     = clipped radius; (number of scanlines for circle's
+        ;               bottom half, clipped against the viewport height)
+        ;
+        ;       T.P   = A^2
+        ;
+        ;       R.Q   = B3.B2 - T.P
+        ;
+        ;       Q     = SQR(R.Q)
+        ;
         ; square the remaining-radius (the portion of
         ; the radius that fits within the viewport)
         ;
         lda ZP_TEMP_ADDR3_LO    ; number of scanlines for circle's bottom half
         jsr math_square         ; note that the hi-byte will be in P
-        sta ZP_VAR_T
+        sta ZP_VAR_T            ; (scanlines^2)
 
-        lda ZP_B2               ; squared 16-bit radius lo
-        sec 
-        sbc ZP_VAR_P
-        sta ZP_VAR_Q
+        ; calculate the difference between the squares of the
+        ; circle's radius and the visible portion of the radius:
+        ;
+        lda ZP_B2               ; squared 16-bit whole radius, lo byte
+        sec                     ; subtract:
+        sbc ZP_VAR_P            ; squared 16-bit visible radius, lo-byte
+        sta ZP_VAR_Q            ; result, lo-byte
 
-        lda ZP_B3
-        sbc ZP_VAR_T
-        sta ZP_VAR_R
+        lda ZP_B3               ; squared 16-bit whole radius, hi-byte
+        sbc ZP_VAR_T            ; squared 16-bit visible radius, hi byte
+        sta ZP_VAR_R            ; result, hi-byte
+
+        ; (set aside the last-scanline of the circle,
+        ;  as the square root routine clobbers Y)
         sty ZP_VAR_Y
+        ; calculate the square root of radii difference
         jsr square_root
-        
+        ; restore Y-register
         ldy ZP_VAR_Y
+
         jsr get_random_number
-        and ZP_AA
+        and ZP_AA               ; add the "fringe"
         clc 
         adc ZP_VAR_Q
-        bcc _7fb6
+        bcc :+
         lda # $ff
-_7fb6:                                                                  ;$7FB6
-        ldx CIRCLE_BUFFER, y
+:       ldx CIRCLE_BUFFER, y                                            ;$7FB6
         sta CIRCLE_BUFFER, y
         beq _8008
         lda ZP_SUNX_LO
@@ -4541,10 +4565,8 @@ clip_horz_line:                                                         ;$811E
         sbc # 0                 ; apply the carry
        .bnz :+                  ; did it overflow?
 
-        ; it fits, X1 is fine
-        ; return carry clear = OK
-        clc 
-        rts 
+        clc                     ; it fits, X1 is fine
+        rts                     ; return carry clear = OK
 
         ;-----------------------------------------------------------------------
 :       bpl @clear              ; too large, don't draw?                ;$8140
@@ -4557,7 +4579,7 @@ clip_horz_line:                                                         ;$811E
         rts 
 
         ;-----------------------------------------------------------------------
-        ; remove the line from the line-queue
+        ; remove the scanline from the circle buffer
         ;
 @clear: lda # $00                                                       ;$8148
         sta CIRCLE_BUFFER, y
@@ -4646,7 +4668,7 @@ _8187:  sec                     ; return carry set                      ;$8187
 
 
 _8189:                                                                  ;$8189
-        ;-----------------------------------------------------------------------
+;===============================================================================
         jsr _7e36
         sta ZP_VAR_P1
         lda # $de
