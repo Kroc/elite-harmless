@@ -51,4 +51,18 @@
         "release"
     ],
     "python.pythonPath": "C:\\Program Files\\Python38\\python.exe",
+    "spellright.language": [
+        "en"
+    ],
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext",
+        "cc65"
+    ],
+    "spellright.parserByClass": {
+        "cc65": {
+            "parser": "code"
+        }
+    },
 }

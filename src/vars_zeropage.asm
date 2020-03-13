@@ -140,6 +140,8 @@ ZP_VAR_K3_HI            = $36   ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt2
 
 ; (the circle radius re-uses part of the temporary big-integer buffer)
 ZP_CIRCLE_RADIUS        = ZP_VALUE_pt1
+ZP_CIRCLE_RADIUS_LO     = ZP_VALUE_pt1
+ZP_CIRCLE_RADIUS_HI     = ZP_VALUE_pt2
 
 ;-------------------------------------------------------------------------------
 

@@ -1361,7 +1361,7 @@ local_chart:                                                            ;$6FDB
 @draw:  lda # $00               ; clear some variables:                 ;$7070
         sta ZP_VAR_K3_HI        ; set circle X-position hi-byte to 0
         sta ZP_VAR_K4_HI        ; set circle Y-position hi-byte to 0
-        sta ZP_VALUE_pt2        ; circle-radius hi-byte(?)
+        sta ZP_CIRCLE_RADIUS_HI ; circle-radius hi-byte(?)
 
         lda ZP_71               ; retrieve screen X-positon of planet
         sta ZP_VAR_K3_LO        ; set the circle X-position lo-byte
@@ -1377,7 +1377,7 @@ local_chart:                                                            ;$6FDB
 
         ; draw the planet:
         ;
-        ; TODO: investiage if we can remember the first & last scanlines
+        ; TODO: investigate if we can remember the first & last scanlines
         ;       used for drawing a circle, and do away with the need to
         ;       clear the circle buffer -- twice! -- every time
         ;
@@ -1399,7 +1399,7 @@ local_chart:                                                            ;$6FDB
         ;-----------------------------------------------------------------------
 :       lda # $00               ;?                                      ;$7097
         sta ZP_B7
-        lda # $8F               ;=143, viewport height-1?
+        lda # ELITE_VIEWPORT_HEIGHT-1
         sta ZP_CLIPY
 
         rts 
@@ -2499,6 +2499,7 @@ print_local_planet_name:                                                ;$7727
 ;===============================================================================
 ; print planet name for the system the player is currently in
 ;
+;-------------------------------------------------------------------------------
         ; if the player is in witchspace, there is no planet!
         bit IS_WITCHSPACE
         bmi @rts
@@ -2517,19 +2518,23 @@ print_local_planet_name:                                                ;$7727
 
 @rts:   rts                                                             ;$7741
 
+
 print_galaxy_no:                                                        ;$7742
 ;===============================================================================
 ; print galaxy number
-
+;
+;-------------------------------------------------------------------------------
         clc 
         ldx PLAYER_GALAXY       ; current galaxy number
         inx                     ; print as 1-8, not 0-7
         jmp print_tiny_value
 
+
 print_fuel_and_cash:                                                    ;$774A
 ;===============================================================================
 ; print fuel & cash totals
 ;
+;-------------------------------------------------------------------------------
 .import TXT_FUEL:direct
 
         ; print "FUEL:"
@@ -4055,7 +4060,19 @@ _7f1d:                                                                  ;$7F1D
 
 draw_circle:                                                            ;$7F22
 ;===============================================================================
-; calculates the scan-lines of a circle and draws it:
+; calculate the scan-lines of a circle and draw it:
+;
+; rather than tracing the perimiter of the circle as you might have seen with
+; BASIC or a number of generalised circle routines, Elite breaks the circle
+; down into scanlines, computing each slice of the circle as a distance from
+; the horizontal midpoint. this distance is then mirrored right-to-left, and
+; the whole line mirrored from the bottom half of the circle to the top half
+;
+; this approach achieves more than just minimising the number of calculations
+; needed; a clever algorithm is used to approximate the curve without using
+; sine / cosine or pi. I'm certain this routine would have been written by
+; Ian Bell; it's wicked-smart but coded in a text-book fashion, unlike
+; Braben's more pragmatic, hacker approach to code
 ;
 ; in:   ZP_VAR_K3               circle X-position (16-bits)
 ;       ZP_VAR_K4               circle Y-position (16-bits)
@@ -4069,19 +4086,20 @@ draw_circle:                                                            ;$7F22
 
         ; check the circle is within bounds:
         ;-----------------------------------------------------------------------
-        ; carry will be clear if the circle is valid; for drawing the planets
+        ; carry will be clear if the circle is valid; for drawing the stars
         ; on the short-range chart this will always be the case, but if the
-        ; sun goes out of drawing range it will be erased
+        ; sun in the cockpit-view goes out of drawing range it will be erased
         ;
         ; note that this routine sets some
         ; variables required for drawing:
         ;
-        ;       P2/P3           last scan-line of the circle (16-bits)
-        ;
+        ;       P3.P2           bottom (Y-position + radius) of the circle
+        ;                       (16-bits)
+        ;                       
         jsr check_circle        ; is the circle valid?
         bcs _7f13               ; if circle is invalid, erase the sun
 
-        ; calculate extent of fringes?
+        ; calculate extent of fringes:
         ; (i.e. firery edge of the sun)
         ;-----------------------------------------------------------------------
         ; the circle's radius is checked against three different scales
@@ -4103,22 +4121,22 @@ draw_circle:                                                            ;$7F22
         rol                     ; (shift the carry bit in)
         sta ZP_AA               ; "fringe size"
 
-        ; clip bottom of circle:
+        ; clip bottom of circle to viewport:
         ;-----------------------------------------------------------------------
         ; is the bottom of the circle outside the viewport?
         ;
-        ; compare the viewport height against the last-scanline of the circle:
-        ; as this is done the other way round (normally you would compare the
-        ; last-scanline against the viewport height), carry-clear will tell us
-        ; that the circle extends beyond the viewport
-        ;
-        lda ZP_CLIPY            ; viewport height
+        lda ZP_CLIPY            ; viewport height (-1)
                                 ; (143 for cockpit, 199 for menu pages)
+        
+        ; the last-scanline value is 16-bit, so anything > 256 automatically
+        ; implies that the circle extends below the viewport
+        ;
         ldx ZP_VAR_P3           ; last scanline of circle, hi byte
        .bnz :+                  ; any bit there indicates >256 value
-        cmp ZP_VAR_P2           ; if the circle's last-scanline extends below
-        bcc :+                  ; the viewport, set the circle's last-scanline
-                                ; to the viewport height
+
+        ; compare the viewport height against the last-scanline of the circle
+        cmp ZP_VAR_P2
+       .blt :+
 
         ; circle's last scanline is within the viewport
         ; -- it must be a non-zero value however
@@ -4129,11 +4147,7 @@ draw_circle:                                                            ;$7F22
         lda # $01               ; set to 1 (TODO: why?)
 :       sta ZP_A8               ; circle's last scanline (clipped)      ;$7F4B
 
-        ; calculate visible size of circle's bottom-half:
         ;-----------------------------------------------------------------------
-        ; get distance from bottom of viewport to the circle Y-position; i.e.
-        ; number of visible scanlines of the bottom half of the circle
-        ;
         lda ZP_CLIPY            ; height of the viewport
         sec                     ; (e.g. 143 for cockpit, 199 for menu pages)
         sbc ZP_VAR_K4_LO        ; subtract cirlce Y-position, lo-byte
@@ -4215,66 +4229,77 @@ _7f67:                                                                  ;$7F67
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
 
-_7f80:                                                                  ;$7F80
+@_7f80:                                                                 ;$7F80
         ;-----------------------------------------------------------------------
         ; is the last scanline of the circle on the viewport border(?)
         ; this will never be the case with the short-range chart, so it skips
         ; TODO: where does this come into play?
         ;
         cpy ZP_A8
-        beq _7f8f               ; if yes, move ahead with next step
+        beq @calc               ; if yes, move ahead with next step
 
         lda CIRCLE_BUFFER, y
        .bze :+                  ; if half-width is 0, no line
         jsr _28f3               ; calculate the line-width/pos & draw
 :       dey                     ; next scanline                         ;$7F8C
-       .bnz _7f80               ; continue scanning. reaching zero
+       .bnz @_7f80              ; continue scanning. reaching zero
                                 ; (top of screen) also exits
 
-_7f8f:                                                                  ;$7F8F
-        ;-----------------------------------------------------------------------
-        ; TODO: this appears to do a multiplication or division via squares /
-        ;       square-roots, as we've seen described in the math tables.
-        ;       just need to work out what's happening and why
+@calc:  ; slice & draw circle:                                          ;$7F8F
+        ;=======================================================================
+        ; this is the main loop that walks along the scanlines of the circle,
+        ; calculating the width of each to form the curvature of the circle,
+        ; i.e, as we approach the bottom of the circle, the width becomes less
         ;
-        ; TODO: could we use our SQR/EXP lookup tables? (if present)
+        ; this curvature is produced via a form of Pythagoras' theorem (the
+        ; thing about right-angled triangles and their sides) which does not
+        ; require the use of sine / cosine tables or pi, making it relatively
+        ; easy to implement on an 8-bit micro
         ;
-        ; calcuate:
+        ; the equation used is:
+        ; 
+        ;       w = SQR( r^2 - n^2 )
         ;
-        ;       B3.B2 = r^2
+        ; where r is the circle's radius, and n is the position within the
+        ; radius to 'slice' the circle. the result, w, is the distance from
+        ; the horizontal mid-point of the circle to the edge (for the given
+        ; scanline, n) -- the result is doubled to mirror horizontally
         ;
-        ;       A     = clipped radius; (number of scanlines for circle's
-        ;               bottom half, clipped against the viewport height)
+        ; why exactly this is able to produce a curve is beyond me,
+        ; but it is easier to digest visualised as a graph:
         ;
-        ;       T.P   = A^2
+        ; https://www.wolframalpha.com/input/?i=sqrt%28x%5E2+-+y%5E2%29
+        ; 
+        ; (with thanks to Roel Nieskens, @PixelAmbacht
+        ;  on Twitter, for pointing this out to me)
         ;
-        ;       R.Q   = B3.B2 - T.P
+        ; "r^2" has already been calculated previously and
+        ; is stored in ZP_VAR_B2+B3 ("B3.B2" -- hi, lo)
         ;
-        ;       Q     = SQR(R.Q)
+        ; begin by squaring the current circle scanline:
         ;
-        ; square the remaining-radius (the portion of
-        ; the radius that fits within the viewport)
-        ;
-        lda ZP_TEMP_ADDR3_LO    ; number of scanlines for circle's bottom half
-        jsr math_square         ; note that the hi-byte will be in P
-        sta ZP_VAR_T            ; (scanlines^2)
+        lda ZP_TEMP_ADDR3_LO    ; current scanline "n"
+        jsr math_square         ; square, the hi-byte will be in P
+        sta ZP_VAR_T            ; (n^2)
 
-        ; calculate the difference between the squares of the
-        ; circle's radius and the visible portion of the radius:
+        ; calculate the difference between the squares of
+        ; the circle's radius and the current scanline:
+        ; (i.e. "r^2 - n^2")
         ;
-        lda ZP_B2               ; squared 16-bit whole radius, lo byte
+        lda ZP_B2               ; r^2, lo byte
         sec                     ; subtract:
-        sbc ZP_VAR_P            ; squared 16-bit visible radius, lo-byte
+        sbc ZP_VAR_P            ; n^2, lo-byte
         sta ZP_VAR_Q            ; result, lo-byte
 
-        lda ZP_B3               ; squared 16-bit whole radius, hi-byte
-        sbc ZP_VAR_T            ; squared 16-bit visible radius, hi byte
+        lda ZP_B3               ; r^2, hi-byte
+        sbc ZP_VAR_T            ; subtract n^2, hi byte
         sta ZP_VAR_R            ; result, hi-byte
 
-        ; (set aside the last-scanline of the circle,
-        ;  as the square root routine clobbers Y)
+        ; backup Y as the square-root routine clobbers it
         sty ZP_VAR_Y
-        ; calculate the square root of radii difference
+        ; calculate the square-root:
+        ; i.e. "SQR( r^2 - n^2 )"
+        ; result is placed in Q
         jsr square_root
         ; restore Y-register
         ldy ZP_VAR_Y
@@ -4285,9 +4310,10 @@ _7f8f:                                                                  ;$7F8F
         adc ZP_VAR_Q
         bcc :+
         lda # $ff
+
 :       ldx CIRCLE_BUFFER, y                                            ;$7FB6
         sta CIRCLE_BUFFER, y
-        beq _8008
+        beq @_8008
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
@@ -4304,59 +4330,59 @@ _7f8f:                                                                  ;$7F8F
         sta ZP_VAR_YY_HI
         lda CIRCLE_BUFFER, y
         jsr clip_horz_line
-        bcs _7fed
+        bcs :+
         lda ZP_VAR_X2
         ldx ZP_VAR_XX_LO
         stx ZP_VAR_X2
         sta ZP_VAR_XX_LO
         jsr draw_straight_line
-_7fed:                                                                  ;$7FED
-        lda ZP_VAR_XX_LO
+
+:       lda ZP_VAR_XX_LO                                                ;$7FED
         sta ZP_VAR_X
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X2
-_7ff5:                                                                  ;$7FF5
+@_7ff5:                                                                 ;$7FF5
         jsr draw_straight_line
-_7ff8:                                                                  ;$7FF8
+@_7ff8:                                                                 ;$7FF8
         dey 
-        beq _803a
+        beq @_803a
         lda ZP_TEMP_ADDR3_HI
-        bne _801c
+        bne @_801c
         dec ZP_TEMP_ADDR3_LO
-        bne _7f8f
+        bne @calc
         dec ZP_TEMP_ADDR3_HI
-_8005:                                                                  ;$8005
-        jmp _7f8f
+@_8005:                                                                 ;$8005
+        jmp @calc
 
-_8008:                                                                  ;$8008
+@_8008:                                                                 ;$8008
         ldx ZP_VAR_K3_LO
         stx ZP_VAR_YY_LO
         ldx ZP_VAR_K3_HI
         stx ZP_VAR_YY_HI
         jsr clip_horz_line
-        bcc _7ff5
+        bcc @_7ff5
         lda # $00
         sta CIRCLE_BUFFER, y
-        beq _7ff8
-_801c:                                                                  ;$801C
+        beq @_7ff8
+@_801c:                                                                 ;$801C
         ldx ZP_TEMP_ADDR3_LO
         inx 
         stx ZP_TEMP_ADDR3_LO
         cpx ZP_VALUE_pt1
-        bcc _8005
-        beq _8005
+        bcc @_8005
+        beq @_8005
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
-_802f:                                                                  ;$02F
+@_802f:                                                                 ;$02F
         lda CIRCLE_BUFFER, y
-        beq _8037
+        beq @_8037
         jsr _28f3               ;...draw_straight_line
-_8037:                                                                  ;$8037
+@_8037:                                                                 ;$8037
         dey 
-        bne _802f
-_803a:                                                                  ;$803A
+        bne @_802f
+@_803a:                                                                 ;$803A
         clc 
         lda ZP_VAR_K3_LO
         sta ZP_SUNX_LO
@@ -4590,58 +4616,74 @@ clip_horz_line:                                                         ;$811E
 
 check_circle:                                                           ;$814F
 ;===============================================================================
-; check a circle (to be drawn) is within bounds:
+; check a circle (to be drawn) is visible:
 ;
 ; the position of the circle is 16-bits, so as to be able to place a circle
-; off-screen, whose radius reaches into the screen. note that for simplicity
-; in calculations, a 16-bit position of 0 matches position 0 on the screen,
-; so the 16-bit range is not exactly centre
+; off-screen, whose radius reaches into the viewport
 ;
-; in:   K3      signed 16-bit X-position
-;       K4      signed 16-bit Y-position
+; NOTE: for simplicity in calculations, the signed 16-bit circle X/Y position
+;       of 0 matches position 0 in the *viewport*, so the 16-bit range is not
+;       exactly centred, and coordinates are relative to the viewport (0-256),
+;       not the C64's screen (0-320 px)
 ;
-; out:  carry   returns carry set if the circle is invalid,
-;               otherwise carry is clear
+; in:   ZP_VAR_K3       signed 16-bit X-position
+;       ZP_VAR_K4       signed 16-bit Y-position
+;       ZP_CLIPY        viewport height to clip against:
+;                       143 = cockpit-view, 199 = menu pages
 ;
-;       P2/P3   last scanline the circle would appear on
+; out:  carry           returns carry set if the circle is invalid,
+;                       otherwise carry is clear
 ;
+;       P3.P2           last scanline the circle would appear on
+;
+; TODO: is there a way to optimise this using CMP, to subtract the radius
+;       without altering the value?
 ;-------------------------------------------------------------------------------
-        ; check the circle doesn't extend
-        ; past the right-most limit:
+        ; the circle will become invisible if the circle's
+        ; right-edge goes off the left-edge of the viewport
+        ;
+        ; when we add the circle's radius to the X-position, the result should
+        ; be positive. it'll be negative if the circle's centre position is off
+        ; the left-edge of the screen, but the radius does not reach into the
+        ; visible portion of the screen
         ;
         lda ZP_VAR_K3_LO        ; circle X-position, lo-byte
         clc 
-        adc ZP_CIRCLE_RADIUS    ; add the radius
+        adc ZP_CIRCLE_RADIUS    ; add the radius (i.e. bottom of circle)
         lda ZP_VAR_K3_HI        ; circle X-position, hi-byte
         adc # 0                 ; (ripple the carry)
-        bmi _8187               ; if the sign flips, exit
+        bmi _8187               ; if still negative, circle is not visible!
 
-        ; check the circle doesn't extend past the left-most limit:
-        ; note that the left-limit is -32768 (the sign bit is set), therefore
-        ; the sign-bit will go positive if the circle exceeds the left-limit
+        ; the circle will become invisible if the left-edge goes off
+        ; the right-edge of the screen, indicated by the hi-byte of
+        ; the X-position + radius being > 0 (i.e. left-edge is > 255)
         ;
         lda ZP_VAR_K3_LO        ; circle X-position, lo-byte
         sec 
         sbc ZP_CIRCLE_RADIUS    ; subtract the radius
         lda ZP_VAR_K3_HI        ; circle X-position, hi-byte
         sbc # 0                 ; (ripple the carry)
-        bmi :+                  ; result should remain negative
-        bne _8187               ; if result is positive, exit
+        bmi :+                  ; the left-edge is allowed to be off-screen
+        bne _8187               ; left-edge is > 255, circle is not visible!
 
-        ; check the circle doesn't extend
-        ; past the bottom-most limit:
+        ; the circle will become invisible if the circle's bottom-edge goes
+        ; off the top of the viewport. the 16-bit Y-position of the circle's
+        ; bottom- edge is saved to P2/P3 for the circle-drawing routine
         ;
 :       lda ZP_VAR_K4_LO        ; get circle Y-position, lo-byte        ;$8167
         clc 
         adc ZP_CIRCLE_RADIUS    ; add the radius
-        sta ZP_VAR_P2           ; = last pixel row to draw
+        sta ZP_VAR_P2           ; save bottom of circle, lo-byte for drawing
         lda ZP_VAR_K4_HI        ; get circle Y-position, hi-byte
         adc # 0                 ; (ripple the carry)
-        bmi _8187               ; if sign flips, overflow! exit
-        sta ZP_VAR_P3           ; circle last scanline, hi-byte
+        bmi _8187               ; if negative, the bottom is above the top!
+        sta ZP_VAR_P3           ; save bottom of circle, hi-byte for drawing
 
-        ; check the circle doesn't extend
-        ; past the top-most limit:
+        ; the circle will become invisible if the circle's top-edge goes off
+        ; the bottom of the viewport. although the height of the viewport is
+        ; < 256 -- 144 for cockpit view, 200 for menu pages -- we check first
+        ; if the circle's top-edge is < 256 as is this is very easily done
+        ; (any value > 1 in the hi-byte)
         ;
         lda ZP_VAR_K4_LO        ; get circle Y-position, lo-byte
         sec 
@@ -4649,19 +4691,17 @@ check_circle:                                                           ;$814F
         tax                     ; put this (signed value) aside
         lda ZP_VAR_K4_HI        ; get circle Y-position, hi-byte
         sbc # 0                 ; (ripple the carry)
-        bmi _81ec               ; result should remain negative
-                                ; -- circle is valid (jump to CLC, RTS)
-        bne _8187               ; if sign flips, overflow! exit
+        bmi _81ec               ; the top-egde is allowed to be off-screen
+                                ; -- circle is visible (jump to CLC, RTS)
+        bne _8187               ; top-edge is > 255, circle is not visible!
         
-        ; TODO: does this code even ever run?
-        ; 
-        ; check against the screen height limit set
-        ; (143 for viewport, 199 for menu pages)
+        ; lastly, although we have determined the circle's top-edge is within
+        ; 0-255, the viewport is shorter than that, so do one final check:
         ;
-        cpx ZP_CLIPY            ; should return c=1 for error
+        cpx ZP_CLIPY            ; return c=1 if circle is outside viewport 
         rts 
 
-        ; circle is not valid (outside bounds)
+        ; circle is invisible (outside bounds)
         ;-----------------------------------------------------------------------
 _8187:  sec                     ; return carry set                      ;$8187
         rts 
