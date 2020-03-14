@@ -1194,7 +1194,7 @@ local_chart:                                                            ;$6FDB
         ; set the clipping height?
         ;
         lda # 199               ; (height of screen)
-        sta ZP_CLIPY
+        sta ZP_VIEWH
         sta ZP_B7
 
         lda # page::chart_local ; screen-ID for short-range (local) chart
@@ -1400,7 +1400,7 @@ local_chart:                                                            ;$6FDB
 :       lda # $00               ;?                                      ;$7097
         sta ZP_B7
         lda # ELITE_VIEWPORT_HEIGHT-1
-        sta ZP_CLIPY
+        sta ZP_VIEWH
 
         rts 
 
@@ -4084,20 +4084,20 @@ draw_circle:                                                            ;$7F22
         lda # $01
         sta CIRCLE_BUFFER
 
-        ; check the circle is within bounds:
+        ; check the circle is visible in the viewport:
         ;-----------------------------------------------------------------------
-        ; carry will be clear if the circle is valid; for drawing the stars
-        ; on the short-range chart this will always be the case, but if the
-        ; sun in the cockpit-view goes out of drawing range it will be erased
+        ; carry will be clear if the circle is out of sight; for drawing the
+        ; stars on the short-range chart this will always be the case, but if
+        ; the sun in the cockpit-view goes out of sight it will be erased
         ;
         ; note that this routine sets some
         ; variables required for drawing:
         ;
-        ;       P3.P2           bottom (Y-position + radius) of the circle
-        ;                       (16-bits)
+        ;       P3.P2           bottom-edge (Y-position + radius)
+        ;                       of the circle (signed, 16-bits)
         ;                       
-        jsr check_circle        ; is the circle valid?
-        bcs _7f13               ; if circle is invalid, erase the sun
+        jsr check_circle        ; is the circle visible?
+        bcs _7f13               ; if circle is out of sight, erase the sun
 
         ; calculate extent of fringes:
         ; (i.e. firery edge of the sun)
@@ -4123,32 +4123,37 @@ draw_circle:                                                            ;$7F22
 
         ; clip bottom of circle to viewport:
         ;-----------------------------------------------------------------------
-        ; is the bottom of the circle outside the viewport?
+        ; we have determined that the circle is visible, even partially, within
+        ; the viewport, but it may be overlapping the edges
         ;
-        lda ZP_CLIPY            ; viewport height (-1)
+        lda ZP_VIEWH            ; viewport height (-1)
                                 ; (143 for cockpit, 199 for menu pages)
         
-        ; the last-scanline value is 16-bit, so anything > 256 automatically
-        ; implies that the circle extends below the viewport
+        ; the circle's bottom-edge value is 16-bit, so anything > 256
+        ; automatically implies the circle extends below the viewport.
+        ; since A is currently the viewport height, a branch here
+        ; clips the circle's bottom-edge to the viewport's
         ;
-        ldx ZP_VAR_P3           ; last scanline of circle, hi byte
+        ldx ZP_VAR_P3           ; bottom of circle, hi byte
        .bnz :+                  ; any bit there indicates >256 value
 
-        ; compare the viewport height against the last-scanline of the circle
-        cmp ZP_VAR_P2
-       .blt :+
+        ; the circle's bottom edge is somewhere 0-256;
+        ; now compare against the viewport height:
+        ;
+        cmp ZP_VAR_P2           ; circle's bottom edge, lo-byte
+       .blt :+                  ; if over, clip to the viewport
 
-        ; circle's last scanline is within the viewport
+        ; circle's bottom-edge is within the viewport
         ; -- it must be a non-zero value however
         ;
-        lda ZP_VAR_P2
+        lda ZP_VAR_P2           ; circle's bottom-edge, lo-byte
        .bnz :+                  ; non-zero is okay, skip over
 
         lda # $01               ; set to 1 (TODO: why?)
-:       sta ZP_A8               ; circle's last scanline (clipped)      ;$7F4B
+:       sta ZP_A8               ; circle's bottom-edge (clipped)        ;$7F4B
 
         ;-----------------------------------------------------------------------
-        lda ZP_CLIPY            ; height of the viewport
+        lda ZP_VIEWH            ; height of the viewport
         sec                     ; (e.g. 143 for cockpit, 199 for menu pages)
         sbc ZP_VAR_K4_LO        ; subtract cirlce Y-position, lo-byte
         tax                     ; put aside the calculated lo-byte
@@ -4219,7 +4224,7 @@ _7f67:                                                                  ;$7F67
         lda ZP_VAR_P            ; (set by the `math_square` call above)
         sta ZP_B2               ; squared 16-bit radius lo
 
-        ldy ZP_CLIPY            ; height of viewport
+        ldy ZP_VIEWH            ; height of viewport
 
         ; copy circle centre-point to YY-LO/HI for the
         ; line-clipping and drawing routines used later
@@ -4628,7 +4633,7 @@ check_circle:                                                           ;$814F
 ;
 ; in:   ZP_VAR_K3       signed 16-bit X-position
 ;       ZP_VAR_K4       signed 16-bit Y-position
-;       ZP_CLIPY        viewport height to clip against:
+;       ZP_VIEWH        viewport height to clip against:
 ;                       143 = cockpit-view, 199 = menu pages
 ;
 ; out:  carry           returns carry set if the circle is invalid,
@@ -4698,7 +4703,7 @@ check_circle:                                                           ;$814F
         ; lastly, although we have determined the circle's top-edge is within
         ; 0-255, the viewport is shorter than that, so do one final check:
         ;
-        cpx ZP_CLIPY            ; return c=1 if circle is outside viewport 
+        cpx ZP_VIEWH            ; return c=1 if circle is outside viewport 
         rts 
 
         ; circle is invisible (outside bounds)
@@ -5204,7 +5209,7 @@ _83ed:                                                                  ;$83ED
         lda # $00               ;?
         sta ZP_B7
         lda # $8F               ;?
-        sta ZP_CLIPY
+        sta ZP_VIEWH
 
         lda VAR_045F
         beq _8430
