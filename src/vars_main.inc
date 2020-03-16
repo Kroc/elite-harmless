@@ -43,7 +43,7 @@ VAR_047A                = $047a ;?
 
 VAR_047C                = $047c ;?
 
-VAR_047F                = $047f ;?
+NUM_ASTEROIDS           = $047f ; number of asteroids present
 
 DOCKCOM_STATE           = $0480 ; docking computer state: $00 = OFF, $FF = ON
 

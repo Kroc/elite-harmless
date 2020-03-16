@@ -807,7 +807,7 @@ status_screen:                                                          ;$2C9B
         ;
 .import TXT_COLORS:direct
         lda # TXT_COLORS        ; flight token: $E6, "GREEN"
-        ldy VAR_047F
+        ldy NUM_ASTEROIDS
         ldx SHIP_SLOT2, y
         beq :+                  ; print "GREEN"
 

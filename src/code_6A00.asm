@@ -3701,7 +3701,7 @@ _7cd4:                                                                  ;$7CD4
         cpx # $0b
         bcs _7ce9
 _7ce6:                                                                  ;$7CE6
-        inc VAR_047F
+        inc NUM_ASTEROIDS
 _7ce9:                                                                  ;$7CE9
         inc VAR_045D, x
 
@@ -4152,21 +4152,33 @@ draw_circle:                                                            ;$7F22
         lda # $01               ; set to 1 (TODO: why?)
 :       sta ZP_A8               ; circle's bottom-edge (clipped)        ;$7F4B
 
+        ; determine portion of circle to draw(?)
         ;-----------------------------------------------------------------------
-        lda ZP_VIEWH            ; height of the viewport
+        ; since we draw circles as a series of horizontal scanlines, we need
+        ; to determine the visible portion of the circle in terms of a first
+        ; and last scanline because we may have a complex situation such as a
+        ; circle whose centre-point is *above* the viewport, but the radius is
+        ; so large that the bottom-edge of the circle is *below* the viewport,
+        ; meaning that only a sub-portion of the radius (both top and bottom)
+        ; is visible! 
+        ; 
+        ; the first task is check where the circle's
+        ; centre point is in relation to the viewport
+        ;
+        lda ZP_VIEWH            ; height of the viewport (-1)
         sec                     ; (e.g. 143 for cockpit, 199 for menu pages)
         sbc ZP_VAR_K4_LO        ; subtract cirlce Y-position, lo-byte
         tax                     ; put aside the calculated lo-byte
 
-        ; validate the hi-byte portion:
+        ; validate the hi-byte:
         ;
         ; if the circle's Y position is off-screen, the hi-byte will be
         ; a non-zero value. we want to work out if the circle's centre
-        ; is ABOVE or BELOW the screen
+        ; is ABOVE, WITHIN, or BELOW the screen
         ;
-        ; subtracting from zero will give us:
+        ; subtracting the hi-byte from zero will give us:
         ;
-        ; 0     the circle's centre is within the screen Y=0-255,
+        ; 0     the circle's centre is within the screen Y=0...255,
         ;       as the hi-bytes are both zero
         ;
         ; 128+  the circle's hi-byte is positive (0-127),
@@ -4199,10 +4211,10 @@ draw_circle:                                                            ;$7F22
         ; the circle's Y-centre and the bottom of the viewport, check if
         ; the circle's radius fits within that space:
         ;
-        cpx ZP_CIRCLE_RADIUS
-        bcc _7f67
+        cpx ZP_CIRCLE_RADIUS    ; when the radius doesn't fit,
+       .blt _7f67               ; clip it using the value we calculated (X)
 
-        ; if the circle's radius fits within the viewport, that's how
+        ; the circle's south radius fits within the viewport: that's how
         ; many scanlines to draw for the bottom half of the cirlce
         ;
 :       ldx ZP_CIRCLE_RADIUS                                            ;$7F63
@@ -4210,25 +4222,25 @@ draw_circle:                                                            ;$7F22
 
 _7f67:                                                                  ;$7F67
         ;-----------------------------------------------------------------------
-        ; number of scanlines(?)
-        ; why 16-bit?
+        ; X = number of scanlines to draw for the bottom-half of the circle?
         stx ZP_TEMP_ADDR3_LO
         sta ZP_TEMP_ADDR3_HI    ; can be $FF?
 
-        ; even if you have no background in math, like me, you probably have
-        ; at least heard of "πr²" ("pi R squared") ...
+        ; the specifics of the algorithm used to generate the circle are
+        ; explained in the section below, but for now just know that we
+        ; need to square (multiply by itself) the radius and put it aside
         ;
         lda ZP_CIRCLE_RADIUS
         jsr math_square         ; square the radius
         sta ZP_B3               ; squared 16-bit radius hi
-        lda ZP_VAR_P            ; (set by the `math_square` call above)
+        lda ZP_VAR_P            ; (P = result, lo-byte)
         sta ZP_B2               ; squared 16-bit radius lo
 
         ldy ZP_VIEWH            ; height of viewport
 
         ; copy circle centre-point to YY-LO/HI for the
         ; line-clipping and drawing routines used later
-        ; TODO: where does planet-drawing set SUNX??
+        ; TODO: where does short-range chart set SUNX??
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
@@ -4263,10 +4275,10 @@ _7f67:                                                                  ;$7F67
         ;
         ; the equation used is:
         ; 
-        ;       w = SQR( r^2 - n^2 )
+        ;       q = SQR( r^2 - n^2 )
         ;
         ; where r is the circle's radius, and n is the position within the
-        ; radius to 'slice' the circle. the result, w, is the distance from
+        ; radius to 'slice' the circle. the result, q, is the distance from
         ; the horizontal mid-point of the circle to the edge (for the given
         ; scanline, n) -- the result is doubled to mirror horizontally
         ;
@@ -4300,32 +4312,35 @@ _7f67:                                                                  ;$7F67
         sbc ZP_VAR_T            ; subtract n^2, hi byte
         sta ZP_VAR_R            ; result, hi-byte
 
-        ; backup Y as the square-root routine clobbers it
-        sty ZP_VAR_Y
-        ; calculate the square-root:
+        ; do the square root:
         ; i.e. "SQR( r^2 - n^2 )"
-        ; result is placed in Q
-        jsr square_root
-        ; restore Y-register
-        ldy ZP_VAR_Y
+        ;
+        sty ZP_VAR_Y            ; backup Y; the square-root routine clobbers it
+        jsr square_root         ; calculate the square-root, result in Q
+        ldy ZP_VAR_Y            ; restore Y-register
 
-        jsr get_random_number
-        and ZP_AA               ; add the "fringe"
-        clc 
-        adc ZP_VAR_Q
-        bcc :+
-        lda # $ff
+        ; add the "fringe"
+        ;-----------------------------------------------------------------------
+        jsr get_random_number   ; randomise the fringe each frame
+        and ZP_AA               ; limit to the fringe-size chosen earlier
+        clc                     ; add the fringe to
+        adc ZP_VAR_Q            ; the scanline's half-width
+        bcc :+                  ; if adding the fringe takes it over 256,
+        lda # $ff               ; clip it to 256 
 
-:       ldx CIRCLE_BUFFER, y                                            ;$7FB6
-        sta CIRCLE_BUFFER, y
-        beq @_8008
+        ;-----------------------------------------------------------------------
+:       ldx CIRCLE_BUFFER, y    ; old value from circle buffer (why?)   ;$7FB6
+        sta CIRCLE_BUFFER, y    ; put the scanline half-width in the buffer
+        beq @clip               ; was the old-value 0? (why?)
+        
+        ; TODO: is this some sun-only code?
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
         txa 
         jsr clip_horz_line
-        lda ZP_VAR_X
+        lda ZP_VAR_X1
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X2
         sta ZP_VAR_XX_HI
@@ -4343,13 +4358,14 @@ _7f67:                                                                  ;$7F67
         jsr draw_straight_line
 
 :       lda ZP_VAR_XX_LO                                                ;$7FED
-        sta ZP_VAR_X
+        sta ZP_VAR_X1
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X2
-@_7ff5:                                                                 ;$7FF5
-        jsr draw_straight_line
-@_7ff8:                                                                 ;$7FF8
-        dey 
+
+        ;-----------------------------------------------------------------------
+@draw:  jsr draw_straight_line                                          ;$7FF5
+
+@next:  dey                                                             ;$7FF8
         beq @_803a
         lda ZP_TEMP_ADDR3_HI
         bne @_801c
@@ -4359,17 +4375,37 @@ _7f67:                                                                  ;$7F67
 @_8005:                                                                 ;$8005
         jmp @calc
 
-@_8008:                                                                 ;$8008
-        ldx ZP_VAR_K3_LO
-        stx ZP_VAR_YY_LO
-        ldx ZP_VAR_K3_HI
-        stx ZP_VAR_YY_HI
-        jsr clip_horz_line
-        bcc @_7ff5
-        lda # $00
-        sta CIRCLE_BUFFER, y
-        beq @_7ff8
+        ; clip circle scanline to viewport:
+        ;-----------------------------------------------------------------------
+        ; working from the horizontal centre-point of the circle (16-bits),
+        ; and given the width of the circle's scanline, calculate the actual
+        ; bounds of the line to be drawn in the viewport (0-255); e.g. the
+        ; circle might be outside the viewport, but a portion of its radius
+        ; within the viewport, this needs to be reduced to just the line of
+        ; pixels to actually be drawn between 0 & 255 in the viewport
+        ;
+        ; note that at this point the A-register contains
+        ; the half-width of the circle's scanline
+        ;
+@clip:  ldx ZP_VAR_K3_LO        ; get circle Y-position, lo             ;$8008
+        stx ZP_VAR_YY_LO        ; set line mid-point, lo
+        ldx ZP_VAR_K3_HI        ; get circle Y-position, hi
+        stx ZP_VAR_YY_HI        ; set line mid-point, hi
+        jsr clip_horz_line      ; do the line clipping
+        bcc @draw               ; if line is visible, go draw it
+
+        ; NOTE: `clip_horz_line` already removes the line from
+        ;       the circle-buffer, so this is redundant
+        ;
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        lda # $00               ; clear the line from the circle-buffer,
+        sta CIRCLE_BUFFER, y    ; and move to the next
+.endif  ;///////////////////////////////////////////////////////////////////////
+        beq @next               ; (always branches)
+
 @_801c:                                                                 ;$801C
+        ;-----------------------------------------------------------------------
         ldx ZP_TEMP_ADDR3_LO
         inx 
         stx ZP_TEMP_ADDR3_LO
@@ -4558,10 +4594,11 @@ clip_horz_line:                                                         ;$811E
 ; note that YY is a signed 16-bit number because the sun can be so large as to
 ; be way off the sides of the screen, but still be partially visible on screen
 ;
-; in:   YY      middle-point of line (16-bit)
+; in:   YY      middle-point of line (16-bits)
 ;       A       half-width
 ;
-; out:  X1      X-position of the left end of the line
+; out:  c       c=0 if line is visible, c=1 if outside viewport bounds
+;       X1      X-position of the left end of the line
 ;       X2      X-position of the right end of the line
 ;       Y       (preserved)
 ;
@@ -4610,10 +4647,8 @@ clip_horz_line:                                                         ;$811E
         rts 
 
         ;-----------------------------------------------------------------------
-        ; remove the scanline from the circle buffer
-        ;
-@clear: lda # $00                                                       ;$8148
-        sta CIRCLE_BUFFER, y
+@clear: lda # $00               ; remove the scanline                   ;$8148
+        sta CIRCLE_BUFFER, y    ; from the circle buffer
 
         sec                     ; return carry set = error 
         rts 
@@ -5033,7 +5068,7 @@ _831d:                                                                  ;$831D
         cpx # $0b               ; is cobra mk-III? (trader)
         bcs _832c
 _8329:                                                                  ;$8329
-        dec VAR_047F
+        dec NUM_ASTEROIDS
 _832c:                                                                  ;$832C
         dec VAR_045D, x
 
@@ -5375,10 +5410,10 @@ _84e2:                                                                  ;$84E2
 _84ed:                                                                  ;$84ED
         jsr _1ec1
 
-        dec VAR_048B            ; reduce delay?
-        beq _8475
-        bpl _84fa
-        inc VAR_048B
+        dec VAR_048B            ; "reduce delay?"
+        beq _8475               ; "if 0 erase message, up"
+        bpl _84fa               ; "skip inc"
+        inc VAR_048B            ; "else undershot, set to 0"
 
 ; ".me3 ; also arrive back from me2"
 _84fa:                                                                  ;$84FA
@@ -5397,7 +5432,7 @@ _8501:                                                                  ;$8501
         cmp # $23
         bcs _8562
 
-        lda VAR_047F            ; number of asteroids?
+        lda NUM_ASTEROIDS
         cmp # $03               ; more than 2?
         bcs _8562
 
@@ -5675,6 +5710,7 @@ _86a4:                                                                  ;$86A4
         jmp _8627
 
 :       jmp _84ed                                                       ;$86AE
+
 
 ; key commands:
 ;===============================================================================
@@ -6922,8 +6958,9 @@ _8cc2:                                                                  ;$8CC2
 
 do_quickjump:                                                           ;$8E29
 ;===============================================================================
-        ; reasons not to quickjump:
-        ldx VAR_047F            ; there are asteroids?
+        ; reasons not to quick-jump:
+        ;
+        ldx NUM_ASTEROIDS       ; there are asteroids?
         lda SHIP_SLOT2, x
         ora VAR_045F            ;?
         ora IS_WITCHSPACE       ; we are in witchspace
