@@ -43,9 +43,12 @@ menuscr_lo:                                                             ;$9900
 menuscr_hi:                                                             ;$9919
         .hibytes menuscr_pos
 
+
+_9932:                                                                  ;$9932
 ;===============================================================================
 ; ".SHPPT ; ship plot as point from LL10"
-_9932:                                                                  ;$9932
+;
+;-------------------------------------------------------------------------------
         jsr _9ad8
         jsr _7d1f
         ora ZP_POLYOBJ01_XPOS_pt2
@@ -1378,20 +1381,23 @@ _a13b:                                                                  ;$A13B
         sec 
         rts 
 
+
+_a13f:                                                                  ;$A13F
 ;===============================================================================
 ; BBC code says "Shove visible edge onto XX19 ship lines heap counter U"
-; TODO: this appears to write into the $FF20-$FFC0 range
 ;
-; ZP_TEMP_ADDR2 = address of heap?
-;      ZP_VAR_U = "clipped ship lines heap index"?
-;     ZP_VAR_Y1 = line-coord Y1
-;     ZP_VAR_Y2 = line-coord Y2
-;     ZP_VAR_X1 = line-coord X1
-;     ZP_VAR_X2 = line-coord X2
-;       
-_a13f:                                                                  ;$A13F
-        ; get the current index within the heap
-        ldy ZP_VAR_U
+; in:   ZP_TEMP_ADDR2   address of heap
+;       ZP_VAR_U        heap-index
+;       ZP_VAR_X1       line-coord X1
+;       ZP_VAR_X2       line-coord X2
+;       ZP_VAR_Y1       line-coord Y1
+;       ZP_VAR_Y2       line-coord Y2
+;       ZP_TEMP_VAR     TODO: unknown
+;
+; TODO: this appears to write into the $FF20-$FFC0 range
+; TODO: is the heap-address fixed? can we optimise that?
+;-------------------------------------------------------------------------------
+        ldy ZP_VAR_U            ; get the current index within the heap
 
         ; push the line's co-ordinates (X1, Y1, X2, Y2),
         ; one after the other, onto the heap
@@ -1408,11 +1414,10 @@ _a13f:                                                                  ;$A13F
         lda ZP_VAR_Y2
         sta [ZP_TEMP_ADDR2], y
         iny 
-        ; the index has moved forward 4 bytes accordingly
-        sty ZP_VAR_U
+        sty ZP_VAR_U            ; update new index position
 
         cpy ZP_TEMP_VAR         ; some kind of upper limit?
-        bcs _a172
+       .bge _a172
 _a15b:                                                                  ;$A15B
         inc ZP_9F               ; edge index?
         ldy ZP_9F
@@ -1462,7 +1467,7 @@ _a178:                                                                  ;$A178
         sta ZP_VAR_Y2
 
         ; TODO: do validation of line direction here so as to allow
-        ;       removal of validation in the line routine
+        ;       removal of validation in the line routine?
         jsr draw_line
         
         iny 
@@ -2257,7 +2262,7 @@ _a6ba:                                                                  ;$A6BA
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr _6a2e               ; DEAD CODE! this is just an RTS!
+        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ldy ZP_SCREEN           ; are we in the cockpit-view?
@@ -2384,12 +2389,14 @@ set_page:                                                               ;$A72F
 ; switch screen page?
 ;
 ; in:   A       page to switch to; e.g. cockpit-view, galactic chart &c.
+;               see the `page` constants defined in `vars_zeropage.asm`
 ;
 ;-------------------------------------------------------------------------------
-        sta ZP_SCREEN           ; set the variable for current page
+        sta ZP_SCREEN           ; set the variable for current active page
 
-_a731:                                                                  ;$A731
-        jsr txt_docked_token02
+_set_page:                                                              ;$A731
+        ;-----------------------------------------------------------------------
+        jsr txt_docked_token02  ; reset text case-shifting?
 
         lda # $00
         sta ZP_7E               ; "arc counter"?
@@ -2398,6 +2405,9 @@ _a731:                                                                  ;$A731
         sta ZP_34
         sta txt_lcase_flag
 
+        ; because the screen will be erased, we need to clear the circle
+        ; buffer (used to erase the previous frame's sun) to avoid trying
+        ; to erase a circle that's no longer there
         jsr clear_circle_buffer
 
         lda # $00
@@ -2405,6 +2415,7 @@ _a731:                                                                  ;$A731
         sta VAR_048B
         sta VAR_048C
 
+        ; clear the screen and 'home' the cursor
         lda # 1
         sta ZP_CURSOR_COL
         sta ZP_CURSOR_ROW
@@ -2738,11 +2749,12 @@ _b09d:                                                                  ;$B09D
 ;===============================================================================
 ; plot a multi-color pixel
 ;
-;       VAR_04EB        = Y position, in view-port pixels (0-255). adjusted
-;                         automatically to nearest multi-color pixel (0-127)
-;       VAR_04EA        = X position, in view-port pixels
-;       _1d01           = colour-mask
+; in:   VAR_04EB        Y position, in view-port pixels (0-255). adjusted
+;                       automatically to nearest multi-color pixel (0-127)
+;       VAR_04EA        X position, in view-port pixels
+;       _1d01           colour-mask
 ;
+;-------------------------------------------------------------------------------
         lda VAR_04EB
         sta ZP_VAR_Y
 
@@ -2789,10 +2801,10 @@ _b0b5:                                                                  ;$B0B5
         ; translates a pixel from 0-7 to the nearest multi-colour pixel
         ; e.g.
         ;
-        ;       %10------ & %01------ = %11000000
-        ;       %--10---- & %--01---- = %00110000
-        ;       %----10-- & %----01-- = %00001100
-        ;       %------10 & %------01 = %00000011
+        ;       %10------ | %01------ = %11000000
+        ;       %--10---- | %--01---- = %00110000
+        ;       %----10-- | %----01-- = %00001100
+        ;       %------10 | %------01 = %00000011
         ;
         lda _ab47, x
         ;
@@ -2866,11 +2878,12 @@ _b10e:                                                                  ;$B10E
 
         rts 
 
+
+_b11f:                                                                  ;$B11F
 ;===============================================================================
 ; "draw missile block"
 ;
-_b11f:                                                                  ;$B11F
-
+;-------------------------------------------------------------------------------
         dex 
         txa 
         inx 
@@ -2878,7 +2891,7 @@ _b11f:                                                                  ;$B11F
         sty ZP_TEMP_ADDR1_LO
         tay 
         lda ZP_TEMP_ADDR1_LO
-        sta ELITE_MAINSCR_ADDR + .scrpos( 24, 6 ), y    ;=$67C6
+        sta ELITE_MAINSCR_ADDR + .scrpos( 24, 6 ), y                    ;=$67C6
         ldy # $00
 
         rts 
@@ -2910,14 +2923,14 @@ _b146:                                                                  ;$B146
         clc 
         rts 
 
+
 wait_for_frame:                                                         ;$B148
-        ;=======================================================================
-        ; I think this function waits for a frame to complete
-        ;
-        ; TODO: we may be able to do this more consistently by waiting
-        ;       on the current scanline value ($D012), as this would work
-        ;       regardless of what interrupt code was running (or not!) 
-        ;
+;===============================================================================
+; TODO: we may be able to do this more consistently by waiting
+;       on the current scanline value ($D012), as this would work
+;       regardless of what interrupt code was running (or not!) 
+;
+;-------------------------------------------------------------------------------
         pha                     ; preserve A
 
         ; wait for non-zero in the frame status?
@@ -2931,8 +2944,9 @@ wait_for_frame:                                                         ;$B148
         rts 
 
 
+chrout:                                                                 ;$B155
 ;===============================================================================
-; print a charcter to the bitmap screen
+; print a charcter to the bitmap screen:
 ;
 ; replaces the KERNAL's `CHROUT` routine for printing text to screen
 ; (since Elite uses only the bitmap screen)
@@ -2940,9 +2954,14 @@ wait_for_frame:                                                         ;$B148
 ; IMPORTANT NOTE: Elite stores its text in ASCII, not PETSCII!
 ; this is due to the data being copied over as-is from the BBC
 ;
-;       A = ASCII code of character to print
+; in:   A       ASCII code of character to print
 ;
-chrout:                                                                 ;$B155
+;-------------------------------------------------------------------------------
+        ; re-define the use of some zero-page variables for this routine
+        ZP_CHROUT_CHARADDR      := ZP_VAR_P2
+        ZP_CHROUT_DRAWADDR      := ZP_TEMP_ADDR1
+        ZP_CHROUT_DRAWADDR_LO   := ZP_TEMP_ADDR1_LO
+        ZP_CHROUT_DRAWADDR_HI   := ZP_TEMP_ADDR1_HI
 
         cmp # $7b               ; is code greater than or equal to $7B?
         bcs :+                  ; if yes, skip it
@@ -2957,12 +2976,6 @@ chrout:                                                                 ;$B155
         lda # $0d
 :       clc                     ; clear carry flag before returning     ;$B166
         rts 
-
-;define the use of some zero-page variables for this routine
-ZP_CHROUT_CHARADDR      := $2f  ; $2F/$30
-ZP_CHROUT_DRAWADDR      := $07  ; $07/$08
-ZP_CHROUT_DRAWADDR_LO   := $07
-ZP_CHROUT_DRAWADDR_HI   := $08
 
 _b168:                                                                  ;$B168
         jsr _a80f               ; BEEP?
@@ -2992,9 +3005,10 @@ paint_char:                                                             ;$B17B
 ; draws a character on the bitmap screen as if it were the text screen
 ; (automatically advances the cursor)
 ;
+;-------------------------------------------------------------------------------
         ; store current registers
         ; (compatibility with KERNAL_CHROUT?)
-        sta ZP_POLYOBJ01_XPOS_pt1
+        sta ZP_VAR_K3
         sty VAR_0490
         stx VAR_048F
 
@@ -3172,7 +3186,7 @@ _b210:  ; restore registers before returning                            ;$B210
         ;
         ldy VAR_0490
         ldx VAR_048F
-        lda ZP_POLYOBJ01_XPOS_pt1
+        lda ZP_VAR_K3
 
         clc 
         rts 

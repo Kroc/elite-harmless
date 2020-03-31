@@ -134,7 +134,7 @@ _28e5:                                                                  ;$28E5
 
 _28f3:                                                                  ;$28F3
 ;===============================================================================
-; for `clip_horz_line`:
+; for `clip_circle_line`:
 ;
 ;      YY = middle-point of line, in viewport px (0-255)
 ;       A = half-width of line
@@ -143,7 +143,7 @@ _28f3:                                                                  ;$28F3
 ;
 ;       Y = Y-pos of line, in viewport px (0-144)
 ;
-        jsr clip_horz_line
+        jsr clip_circle_line
 
         ; set parameter for drawing line
         sty ZP_VAR_Y

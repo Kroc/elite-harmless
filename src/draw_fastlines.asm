@@ -46,14 +46,14 @@ _ab49:
         .byte   %11000000
         .byte   %11000000
 
+draw_line:
 ;===============================================================================
-; draw a line:
 ;
-;       ZP_VAR_X1 = horizontal "beginning" of line in viewport, in pixels
-;       ZP_VAR_X2 = horizontal "end" of line in viewport, in pixels
-;       ZP_VAR_Y1 = vertical "beginning" of line in viewport, in pixels
-;       ZP_VAR_Y2 = vertical "end" of line in viewport, in pixels
-;       Y is preserved
+; in:   ZP_VAR_X1       horizontal "beginning" of line in viewport, in pixels
+;       ZP_VAR_X2       horizontal "end" of line in viewport, in pixels
+;       ZP_VAR_Y1       vertical "beginning" of line in viewport, in pixels
+;       ZP_VAR_Y2       vertical "end" of line in viewport, in pixels
+;       Y               (preserved)
 ;
 ;       note that the "beginning" and "end" of the line is not necessarily
 ;       left-to-right, top-to-bottom; the routine flips these as necessary
@@ -65,8 +65,8 @@ _ab49:
 ; lines are drawn using a form of Bresenham's Line Algorithm;
 ; <https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm>
 ;
-; Bresenham's algorithm works on the principal that a solid line will only
-; ever step 1 pixel at a time in one of the directions but potentially multiple
+; Bresenham's algorithm works on the principal that a solid line will only ever
+; step 1 pixel at a time in one of the directions but potentially multiple
 ; pixels in the other. therefore, there are two distinct types of lines --
 ; "horizontal" lines are wider than they are tall, thus step multiple pixels
 ; across X, but only one at a time in Y. "vertical" lines are taller than they
@@ -75,14 +75,14 @@ _ab49:
 ; this routine determines what type of line the coordinates describe
 ; and uses either a horizontal or vertical algorithm accordingly
 ;
-draw_line:
-        ; TODO: since every line is drawn twice (drawn once, then erased next
-        ;       frame), the line-flipping checks here should really be done
-        ;       when building the list of lines to draw, rather than every
-        ;       time a line is drawn
+; TODO: since every line is drawn twice (drawn once, then erased next frame),
+;       the line-flipping checks here should really be done when building
+;       the list of lines to draw, rather than every time a line is drawn
+;
+;-------------------------------------------------------------------------------
+        ; get abs height of the line:
         ;
         sec 
-        ; get abs height of line:
         lda ZP_VAR_Y2           ; take line-ending Y pos
         sbc ZP_VAR_Y1           ; subtract the line-starting Y pos
         beq @flat               ; completely flat line? use specific routine
@@ -107,7 +107,7 @@ draw_line:
         ; note: A = line-width
         ;
         cmp ZP_LINE_HEIGHT      ; compare line-height with width
-        bcs draw_line_horz      ; a "horiztonal" line?
+        bcs draw_line_horz      ; a "horizontal" line?
 
 @vert:  ; handle "vertical" line
         jmp draw_line_vert

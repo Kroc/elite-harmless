@@ -20,14 +20,13 @@ _6a00:                                                                  ;$6A00
 ;===============================================================================
 ; count your current cargo in-use capacity
 ;
-;       A = index of cargo item;
-;           see `Cargo` struct for order
+; in:   A       index of cargo item;
+;               see `Cargo` struct for order
 ;
-; returns:
+; out:  carry   unset = OK
+;               set   = cargo overflow
 ;
-;       carry unset = OK
-;       carry set   = cargo overflow
-;
+;-------------------------------------------------------------------------------
         sta VAR_04EF            ; item index?
         lda # $01
 
@@ -72,7 +71,6 @@ _6a05:                                                                  ;$6A05
         pla                     ; restore A
         rts 
 
-@kg:                                                                    ;$6A1B
         ;-----------------------------------------------------------------------
         ; will the selected cargo fit? for precious materials, the limit
         ; is 200 Kg, not taken from your ships hold capacity. maybe you
@@ -81,19 +79,21 @@ _6a05:                                                                  ;$6A05
         ; carry unset = OK
         ; carry set   = overflow
         ;
-        ldy VAR_04EF
+@kg:    ldy VAR_04EF                                                    ;$6A1B
         adc VAR_CARGO, y        ; number of Kg of selected item
         cmp # 200               ; maximum of 200 Kg
 
         pla                     ; restore A
         rts 
 
+
 set_cursor_col:                                                         ;$6A25
 ;===============================================================================
 ; set the cursor column (where text printing occurs)
 ;
-;     A = column number
+; in:   A       column number
 ;
+;-------------------------------------------------------------------------------
         sta ZP_CURSOR_COL
         rts 
 
@@ -101,8 +101,9 @@ set_cursor_row:                                                         ;$6A28
 ;===============================================================================
 ; set the cursor row (where text printing occurs)
 ;
-;     A = row number
+; in:   A       row number
 ;
+;-------------------------------------------------------------------------------
         sta ZP_CURSOR_ROW
         rts 
 
@@ -110,6 +111,7 @@ cursor_down:                                                            ;$6A2B
 ;===============================================================================
 ; move the cursor down a row (does not change column!)
 ;
+;-------------------------------------------------------------------------------
         inc ZP_CURSOR_ROW
         rts 
 
@@ -117,7 +119,7 @@ cursor_down:                                                            ;$6A2B
 ;///////////////////////////////////////////////////////////////////////////////
 ; stubbed-out routine in the original code
 ;
-_6a2e:                                                                  ;$6A2E
+unused__6a2e:                                                           ;$6A2E
         rts 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
@@ -138,7 +140,7 @@ set_page_6a2f:                                                          ;$6A2F
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr _6a2e               ; DEAD CODE! this is just an RTS!
+        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         rts 
@@ -466,6 +468,8 @@ _6b5a:                                                                  ;$6B5A
 
         rts 
 
+
+_6ba9:                                                                  ;$6BA9
 ;===============================================================================
 ; extract target planet information
 ;
@@ -473,7 +477,7 @@ _6b5a:                                                                  ;$6B5A
 ; is generated from the seed can be seen here:
 ; http://wiki.alioth.net/index.php/Random_number_generator
 ;
-_6ba9:                                                                  ;$6BA9
+;-------------------------------------------------------------------------------
         lda ZP_SEED_W0_HI
         and # %00000111
         sta TSYSTEM_ECONOMY
@@ -550,8 +554,9 @@ galactic_chart:                                                         ;$6C1C
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # $10
-        jsr _6a2e               ; DEAD CODE! this is just an RTS!
+        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
+        
         lda # 7
         jsr set_cursor_col
 
@@ -658,6 +663,7 @@ _6c6d:                                                                  ;$6C6D
 
 ;===============================================================================
 ; BBC: ".TT126 ; default Circle with a cross-hair"
+; TODO: calculate position from constants
 ;
 _6cc3:                                                                  ;$6CC3
         lda # 104               ; cross-hair X-position
@@ -671,7 +677,7 @@ _6cc3:                                                                  ;$6CC3
         jsr _6c6d               ; draw cross-hair?
         
         lda PLAYER_FUEL         ; use the player's fuel count...
-        sta ZP_VALUE_pt1        ; ... as the jump-radius!
+        sta ZP_VALUE_pt1        ; ... as the circle-radius!
 
         jmp _6cfe               ; continue drawing the circle
 
@@ -706,10 +712,10 @@ _6cda:                                                                  ;$6CDA
 
 _6cfe:                                                                  ;$6CFE
         lda ZP_8E               ; cross-hair X-position / centre-point?
-        sta ZP_VAR_K3_LO
+        sta ZP_VAR_K3_LO        ; set circle X-position, lo-byte
 
         lda ZP_8F               ; cross-hair Y-position / centre-point?
-        sta ZP_VAR_K4_LO
+        sta ZP_VAR_K4_LO        ; set circle Y-position, lo-byte
 
         ; the circle X & Y positions are 16-bit, so set the hi-bytes to 0
         ; as our centre-point is guaranteed to be within the screen
@@ -1203,7 +1209,7 @@ local_chart:                                                            ;$6FDB
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # $10
-        jsr _6a2e               ; DEAD CODE! this is just an RTS!
+        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; print the page title:
@@ -1986,7 +1992,8 @@ _73dd:                                                                  ;$73DD
         and # %00111111
         bne _73dc
 
-        jsr _a731
+        ; changes the screen page, without setting `ZP_SCREEN`
+        jsr _set_page
 
         lda ZP_SCREEN
        .bnz _7452
@@ -2006,7 +2013,7 @@ _741c:  ; launch ship from docking?                                     ;$741C
         jsr _7c24
         lda # $0c
         sta PLAYER_SPEED
-        jsr _8798
+        jsr illegal_cargo
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
 
@@ -2495,26 +2502,26 @@ _7719:                                                                  ;$7719
 _7726:                                                                  ;$7726
         rts 
 
+
 print_local_planet_name:                                                ;$7727
 ;===============================================================================
-; print planet name for the system the player is currently in
+; print the name of the system the player is currently in
 ;
 ;-------------------------------------------------------------------------------
-        ; if the player is in witchspace, there is no planet!
-        bit IS_WITCHSPACE
-        bmi @rts
+        bit IS_WITCHSPACE       ; if the player is in witchspace,
+        bmi @rts                ; there is no sun / planet!
 
-        jsr :+                          ; copy the seed for name-expansion
+        jsr :+                  ; copy the seed for name-expansion
         jsr _76e9
 
 :       ldx # $05                                                       ;$7732
 
-:       lda ZP_SEED, x                                                  ;$7734
+@loop:  lda ZP_SEED, x                                                  ;$7734
         ldy VAR_04F4, x
         sta VAR_04F4, x
         sty ZP_SEED, x
         dex 
-        bpl :-
+        bpl @loop
 
 @rts:   rts                                                             ;$7741
 
@@ -4067,12 +4074,18 @@ draw_circle:                                                            ;$7F22
 ; down into scanlines, computing each slice of the circle as a distance from
 ; the horizontal midpoint. this distance is then mirrored right-to-left, and
 ; the whole line mirrored from the bottom half of the circle to the top half
+; TODO: check this is the case, not there yet in the disassembly commenting
 ;
 ; this approach achieves more than just minimising the number of calculations
 ; needed; a clever algorithm is used to approximate the curve without using
 ; sine / cosine or pi. I'm certain this routine would have been written by
 ; Ian Bell; it's wicked-smart but coded in a text-book fashion, unlike
 ; Braben's more pragmatic, hacker approach to code
+;
+; the sun, being solid, is too large to draw and erase each frame so instead
+; one scanline is erased and redrawn at a time. this means that the circle-
+; buffer (used to store circle-width per scanline) is used to erase the
+; previous frame, before being updated with new values
 ;
 ; in:   ZP_VAR_K3               circle X-position (16-bits)
 ;       ZP_VAR_K4               circle Y-position (16-bits)
@@ -4236,6 +4249,13 @@ _7f67:                                                                  ;$7F67
         lda ZP_VAR_P            ; (P = result, lo-byte)
         sta ZP_B2               ; squared 16-bit radius lo
 
+        ; IMPORTANT: because we erase and redraw each scanline of the circle,
+        ; and the circle from the previous frame is likely to be in a different
+        ; position, we must walk all scanlines of the viewport to ensure that
+        ; every line of the previous frame is erased, not just the ones that
+        ; lie within the new circle. for speed/simplicity of code, the walk
+        ; is done from the bottom of the viewport, upwards
+        ;
         ldy ZP_VIEWH            ; height of viewport
 
         ; copy circle centre-point to YY-LO/HI for the
@@ -4297,7 +4317,7 @@ _7f67:                                                                  ;$7F67
         ;
         lda ZP_TEMP_ADDR3_LO    ; current scanline "n"
         jsr math_square         ; square, the hi-byte will be in P
-        sta ZP_VAR_T            ; (n^2)
+        sta ZP_VAR_T            ; (P.T = n^2)
 
         ; calculate the difference between the squares of
         ; the circle's radius and the current scanline:
@@ -4329,28 +4349,40 @@ _7f67:                                                                  ;$7F67
         lda # $ff               ; clip it to 256 
 
         ;-----------------------------------------------------------------------
-:       ldx CIRCLE_BUFFER, y    ; old value from circle buffer (why?)   ;$7FB6
-        sta CIRCLE_BUFFER, y    ; put the scanline half-width in the buffer
-        beq @clip               ; was the old-value 0? (why?)
+        ; check the circle buffer for a scanline from the previous frame:
+        ;
+:       ldx CIRCLE_BUFFER, y    ; read old value from circle buffer     ;$7FB6
+        sta CIRCLE_BUFFER, y    ; replace with the just-calculated value
+       .bze @clip               ; if there was no scanline (=0) from the
+                                ; previous frame, skip to drawing the new one
         
-        ; TODO: is this some sun-only code?
+        ; erase the previous frame's scanline:
+        ;-----------------------------------------------------------------------
+        ; set up the line-drawing routine with the circle's
+        ; centre-point in the previous frame 
+        ;
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
-        txa 
-        jsr clip_horz_line
+        txa                     ; previous scanline width
+        jsr clip_circle_line    ; clip the old line against the viewport
+
+        ; put aside the result (X1, X2)
         lda ZP_VAR_X1
         sta ZP_VAR_XX_LO
         lda ZP_VAR_X2
         sta ZP_VAR_XX_HI
+
+        ; now clip the new line
         lda ZP_VAR_K3_LO
         sta ZP_VAR_YY_LO
         lda ZP_VAR_K3_HI
         sta ZP_VAR_YY_HI
         lda CIRCLE_BUFFER, y
-        jsr clip_horz_line
+        jsr clip_circle_line
         bcs :+
+        
         lda ZP_VAR_X2
         ldx ZP_VAR_XX_LO
         stx ZP_VAR_X2
@@ -4366,14 +4398,15 @@ _7f67:                                                                  ;$7F67
 @draw:  jsr draw_straight_line                                          ;$7FF5
 
 @next:  dey                                                             ;$7FF8
-        beq @_803a
+        beq @done               ; exit once we hit the top of the viewport
+
         lda ZP_TEMP_ADDR3_HI
         bne @_801c
         dec ZP_TEMP_ADDR3_LO
         bne @calc
         dec ZP_TEMP_ADDR3_HI
-@_8005:                                                                 ;$8005
-        jmp @calc
+
+@_calc: jmp @calc                                                       ;$8005
 
         ; clip circle scanline to viewport:
         ;-----------------------------------------------------------------------
@@ -4391,10 +4424,10 @@ _7f67:                                                                  ;$7F67
         stx ZP_VAR_YY_LO        ; set line mid-point, lo
         ldx ZP_VAR_K3_HI        ; get circle Y-position, hi
         stx ZP_VAR_YY_HI        ; set line mid-point, hi
-        jsr clip_horz_line      ; do the line clipping
+        jsr clip_circle_line    ; do the line clipping
         bcc @draw               ; if line is visible, go draw it
 
-        ; NOTE: `clip_horz_line` already removes the line from
+        ; NOTE: `clip_circle_line` already removes the line from
         ;       the circle-buffer, so this is redundant
         ;
 .ifdef  OPTION_ORIGINAL
@@ -4410,8 +4443,9 @@ _7f67:                                                                  ;$7F67
         inx 
         stx ZP_TEMP_ADDR3_LO
         cpx ZP_VALUE_pt1
-        bcc @_8005
-        beq @_8005
+        bcc @_calc
+        beq @_calc
+
         lda ZP_SUNX_LO
         sta ZP_VAR_YY_LO
         lda ZP_SUNX_HI
@@ -4423,14 +4457,16 @@ _7f67:                                                                  ;$7F67
 @_8037:                                                                 ;$8037
         dey 
         bne @_802f
-@_803a:                                                                 ;$803A
-        clc 
+
+        ; copy circle X-position into SUNX
+        ; (TODO: for overdrawing?)
+@done:  clc                                                             ;$803A 
         lda ZP_VAR_K3_LO
         sta ZP_SUNX_LO
         lda ZP_VAR_K3_HI
         sta ZP_SUNX_HI
-_8043:                                                                  ;$8043
-        rts 
+
+_8043:  rts                                                             ;$8043
 
 
 _8044:                                                                  ;$8044
@@ -4476,9 +4512,9 @@ _8065:                                                                  ;$8065
         txa 
         clc 
 _8081:                                                                  ;$8081
-        adc ZP_POLYOBJ01_XPOS_pt1
+        adc ZP_VAR_K3_LO
         sta ZP_89
-        lda ZP_POLYOBJ01_XPOS_pt2
+        lda ZP_VAR_K3_HI
         adc ZP_VAR_T
         sta ZP_8A
         lda ZP_AA
@@ -4585,22 +4621,22 @@ wipe_sun:                                                               ;$80FF
         rts 
 
 
-clip_horz_line:                                                         ;$811E
+clip_circle_line:                                                       ;$811E
 ;===============================================================================
 ; clip a centred, horizontal line so that it fits within the viewport. this
-; routine is used when drawing the sun as that is stored as a centre-point
+; routine is used when drawing circles as that is stored as a centre-point
 ; and a series of half-widths for each scanline to trace the shape
 ;
 ; note that YY is a signed 16-bit number because the sun can be so large as to
 ; be way off the sides of the screen, but still be partially visible on screen
 ;
-; in:   YY      middle-point of line (16-bits)
-;       A       half-width
+; in:   ZP_VAR_YY       *horizontal* middle-point of line (16-bits)
+;       A               half-width
 ;
-; out:  c       c=0 if line is visible, c=1 if outside viewport bounds
-;       X1      X-position of the left end of the line
-;       X2      X-position of the right end of the line
-;       Y       (preserved)
+; out:  carry           c=0 if line is visible, c=1 if outside viewport bounds
+;       ZP_VAR_X1       X-position (viewport) of the left end of the line
+;       ZP_VAR_X2       X-position (viewport) of the right end of the line
+;       Y               (preserved)
 ;
 ;-------------------------------------------------------------------------------
         sta ZP_VAR_T            ; put aside half-width
@@ -5297,10 +5333,11 @@ clear_zp_polyobj:                                                       ;$8447
 
         rts 
 
+_845c:                                                                  ;$845C
 ;===============================================================================
 ; update missile blocks on HUD?
 ;
-_845c:                                                                  ;$845C
+;-------------------------------------------------------------------------------
         ldx # $04               ; number of missile blocks
 
 :       cpx PLAYER_MISSILES     ; player missile count                  ;$845E
@@ -5360,9 +5397,10 @@ _84ae:                                                                  ;$84AE
         clc 
 
 get_random_number:                                                      ;$84AF
-        ;=======================================================================
-        ; generate an 8-bit 'random' number
-        ;
+;===============================================================================
+; generate an 8-bit 'random' number
+;
+;-------------------------------------------------------------------------------
         lda ZP_GOATSOUP_pt1
         rol 
         tax 
@@ -5376,9 +5414,9 @@ get_random_number:                                                      ;$84AF
         stx ZP_GOATSOUP_pt4
         rts 
 
-;===============================================================================
 
 _84c3:                                                                  ;$84C3
+;===============================================================================
         jsr get_random_number
         lsr 
         sta ZP_POLYOBJ_ATTACK
@@ -5487,7 +5525,7 @@ _8567:                                                                  ;$8567
         jmp _8627
 
 _856a:                                                                  ;$856A
-        jsr _8798
+        jsr illegal_cargo
         asl 
         ldx VAR_046D
         beq _8576
@@ -5892,10 +5930,13 @@ _877e:                                                                  ;$877E
 
         jmp _6a68
 
+
+illegal_cargo:                                                          ;$8798
 ;===============================================================================
-; illegal cargo?
+; do you have any illegal cargo?
 ;
-_8798:                                                                  ;$8798
+; TODO: is this a quantity (like tonnes), or just bit-flags?
+;-------------------------------------------------------------------------------
         lda VAR_CARGO_SLAVES
         clc 
         adc VAR_CARGO_NARCOTICS
@@ -5903,9 +5944,10 @@ _8798:                                                                  ;$8798
         adc VAR_CARGO_FIREARMS
         rts 
 
-;===============================================================================
 
 _87a4:                                                                  ;$87A4
+;===============================================================================
+
         lda # $e0
 _87a6:                                                                  ;$87A6
         cmp ZP_POLYOBJ_XPOS_MI
@@ -5996,6 +6038,7 @@ _87fd:                                                                  ;$87FD
         sta ZP_POLYOBJ_XPOS_LO
 
         ; switch to cockpit-view(?)
+        ; (does not call `set_page` though)
         ldy # $00
         sty ZP_SCREEN
 
@@ -6224,10 +6267,11 @@ _8920:                                                                  ;$8920
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # $20
-        jsr _6a2e               ; DEAD CODE! this is just an RTS!
+        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda # $0d               ;?
+        ; clear the screen, setting the 'page' for the title screen
+        lda # page::title
         jsr set_page
 
         ; set screen to cockpit-view
@@ -6271,6 +6315,7 @@ _8920:                                                                  ;$8920
         lda # $0d
         jsr print_docked_str
 
+        ; NOTE: `_87b8` appears in the unused debug handler
 :       lda _87b8                                                       ;$8978
         beq @_8994
         inc _87b8

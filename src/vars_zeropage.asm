@@ -359,6 +359,7 @@ ZP_SCREEN               = $a0
         sell_cargo      = $04   ;=%00000100
         status          = $08   ;=%00001000
         inventory       = $08   ;=%00001000     ; same, why?
+        title           = $0d   ;=%00001101     ;?
         market          = $10   ;=%00010000
         buy_equip       = $20   ;=%00100000
         
