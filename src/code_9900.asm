@@ -375,7 +375,7 @@ _9ae6:                                                                  ;$9AE6
 
 ; ".LL13 ; hopped to as far"
 _9b29:                                                                  ;$9B29
-        ldy # Hull::_0d         ;=$0D: level-of-detail distance
+        ldy # Hull::lod_distance
         lda [ZP_HULL_ADDR], y
         cmp ZP_POLYOBJ_ZPOS_MI
         bcs _9b3a
@@ -504,7 +504,7 @@ _9baa:                                                                  ;$9BAA
         adc ZP_HULL_ADDR_HI
         sta ZP_TEMP_ADDR3_HI
 
-        ldy # Hull::_00         ;=$00: "scoop / debris"?
+        ldy # Hull::scoop_debris
 _9bf2:                                                                  ;$9BF2
         lda [ZP_TEMP_ADDR3], y
         sta ZP_72
@@ -2492,12 +2492,12 @@ _a7a6:                                                                  ;$A7A6
 ;
         lda VAR_04CB
         clc 
-        adc hull_d062, x
+        adc hull_d063 - 1, x
         sta VAR_04CB
 
         ; add fractional kill value?
         lda VAR_04E0
-        adc hull_d083, x
+        adc hull_d084 - 1, x
         sta VAR_04E0
 
         bcc _a7c3               ; < 1.0

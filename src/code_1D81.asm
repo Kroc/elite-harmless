@@ -681,7 +681,7 @@ _2039:                                                                  ;$2039
         cpx # $05
         beq _20c0
 
-        ldy # Hull::_00         ;=$00: "scoop / debris"?
+        ldy # Hull::scoop_debris
         lda [ZP_HULL_ADDR], y
         lsr 
         lsr 
@@ -1143,7 +1143,7 @@ _234c:                                                                  ;$234C
 
         tya 
         tax 
-        ldy # Hull::_00         ;=$00: "scoop / debris"?
+        ldy # Hull::scoop_debris
         and [ZP_HULL_ADDR], y
         and # %00001111
 _2359:                                                                  ;$2359

@@ -2139,7 +2139,7 @@ _74e2:                                                                  ;$74E2
         sec 
         sbc PLAYER_FUEL
         asl 
-        sta _76cd+0
+        sta price_list+0
         ldx # $01
 _74f5:                                                                  ;$74F5
         stx ZP_A2
@@ -2349,8 +2349,8 @@ _763f:                                                                  ;$763F
 _7642:                                                                  ;$7642
         asl 
         tay 
-        ldx _76cd+0, y
-        lda _76cd+1, y
+        ldx price_list+0, y
+        lda price_list+1, y
         tay 
 _764b:                                                                  ;$764B
         rts 
@@ -2441,13 +2441,28 @@ _76c7:                                                                  ;$76C7
         sta PLAYER_LASERS, x
         rts 
 
-;===============================================================================
-; price list?
 
-_76cd:                                                                  ;$76CD
-        .word   $0001, $012c, $0fa0, $1770, $0fa0
-        .word   $2710, $1482, $2710, $2328, $3a98
-        .word   $2710, $c350, $ea60, $1f40
+price_list:                                                             ;$76CD
+;===============================================================================
+; the associations here were gleaned from Andy McFadden's Apple ][ Elite
+; disassembly: <https://6502disassembly.com/a2-elite/Elite.html>
+;
+;-------------------------------------------------------------------------------
+        .word   1               ; fuel -- updated according to ship qty
+        .word   300             ; missile: 30.0 Cr
+        .word   4000            ; large cargo bay: 400.0 Cr
+        .word   6000            ; E.C.M: 600.0 Cr
+        .word   4000            ; pulse laser: 400.0 Cr
+        .word   10000           ; beam laser: 1000.0 Cr
+        .word   5250            ; fuel scoops: 525.0 Cr
+        .word   10000           ; escape pod: 1000.0 Cr
+        .word   9000            ; energy bomb: 900.0 Cr
+        .word   15000           ; energy unit: 1500.0 Cr
+        .word   10000           ; docking computer: 1000.0 Cr
+        .word   50000           ; galatic hyperdrive: 5000.0 Cr
+        .word   60000           ; military laser: 6000.0 Cr
+        .word   8000            ; mining laser: 800.0 Cr
+
 
 ;===============================================================================
 
@@ -3603,18 +3618,18 @@ _7c24:                                                                  ;$7C24
         jsr _7d03
 
         lda _8861
-        sta hull_pointer_current_lo
+        sta hull_pointer_station_lo
         lda _8862
-        sta hull_pointer_current_hi
+        sta hull_pointer_station_hi
 
         lda PSYSTEM_TECHLEVEL
         cmp # $0a
         bcc _7c61
 
         lda hull_pointer_dodo_lo
-        sta hull_pointer_current_lo
+        sta hull_pointer_station_lo
         lda hull_pointer_dodo_hi
-        sta hull_pointer_current_hi
+        sta hull_pointer_station_hi
 _7c61:                                                                  ;$7C61
         ; scanlines for sun?
         lda #< CIRCLE_BUFFER
@@ -3690,7 +3705,7 @@ _7cc4:                                                                  ;$7CC4
         lda [ZP_HULL_ADDR], y
         sta ZP_POLYOBJ_ENERGY
 
-        ldy # Hull::_13         ;=$13: "laser / missile count"?
+        ldy # Hull::laser_missiles
         lda [ZP_HULL_ADDR], y
         and # visibility::missiles
         sta ZP_POLYOBJ_VISIBILITY
@@ -3714,7 +3729,7 @@ _7ce9:                                                                  ;$7CE9
 
 _7cec:  ; sun or planet                                                 ;$7CEC
         ldy ZP_VAR_T
-        lda hull_d042 - 1, y
+        lda hull_type - 1, y
         and # (behaviour::remove | behaviour::docking)^$FF    ;=%01101111
         ora ZP_POLYOBJ_BEHAVIOUR
         sta ZP_POLYOBJ_BEHAVIOUR
@@ -6119,9 +6134,9 @@ _8863:                                                                  ;$8863
 
         ; backup the original hull address (which 3D object to display)
         ; as we will change this on the title screen
-        lda hull_pointer_current_lo
+        lda hull_pointer_station_lo
         sta _8861
-        lda hull_pointer_current_hi
+        lda hull_pointer_station_hi
         sta _8862
 
         jsr _8a0c               ; reset the save data to default

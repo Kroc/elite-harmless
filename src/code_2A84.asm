@@ -2356,7 +2356,7 @@ _33a8:                                                                  ;$33A8
         cmp # $e6
         bcc _33d6
         ldx ZP_A5
-        lda hull_d042 - 1, x
+        lda hull_type - 1, x
         bpl _33d6
         lda ZP_POLYOBJ_BEHAVIOUR
         and # behaviour::remove    | behaviour::police \
@@ -2409,7 +2409,7 @@ _33fd:                                                                  ;$33FD
         cpx # $a0
         bcc _3434
 
-        ldy # Hull::_13         ;=$13: "laser / missile count"?
+        ldy # Hull::laser_missiles
         lda [ZP_HULL_ADDR], y
         and # %11111000
         beq _3434
