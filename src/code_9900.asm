@@ -2492,12 +2492,12 @@ _a7a6:                                                                  ;$A7A6
 ;
         lda VAR_04CB
         clc 
-        adc hull_d063 - 1, x
+        adc hull_kill_lo - 1, x
         sta VAR_04CB
 
         ; add fractional kill value?
         lda VAR_04E0
-        adc hull_d084 - 1, x
+        adc hull_kill_hi - 1, x
         sta VAR_04E0
 
         bcc _a7c3               ; < 1.0
