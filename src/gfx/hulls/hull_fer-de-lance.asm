@@ -7,6 +7,10 @@
 hull_index           .set hull_index + 1
 hull_ferdelance_index  := hull_index
 
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_ferdelance_kill    = 320   ;= 1.25
+
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
         .addr   hull_ferdelance                                         ;$D034/5
@@ -17,11 +21,11 @@ hull_ferdelance_index  := hull_index
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $40                                                     ;$D07D
+        .byte   < hull_ferdelance_kill                                  ;$D07D
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $01                                                     ;$D09E
+        .byte   > hull_ferdelance_kill                                  ;$D09E
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

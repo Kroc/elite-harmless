@@ -5,11 +5,15 @@
 ; $1A: python (pirate)
 ;-------------------------------------------------------------------------------
 hull_index           .set hull_index + 1
-hull_e7bd_index        := hull_index
+hull_py_pirate_index    := hull_index
+
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_py_pirate_kill     = 298   ;= 1.16
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
-        .addr   _e7bd                                                   ;$D032/3
+        .addr   hull_py_pirate                                          ;$D032/3
 
 .segment        "HULL_TYPE"                                             ;$D042..
 ;===============================================================================
@@ -17,15 +21,15 @@ hull_e7bd_index        := hull_index
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $2a                                                     ;$D07C
+        .byte   < hull_py_pirate_kill                                   ;$D07C
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $01                                                     ;$D09D
+        .byte   > hull_py_pirate_kill                                   ;$D09D
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================
-.proc   _e7bd                                                           ;$E7BD
+.proc   hull_py_pirate                                                  ;$E7BD
         ;-----------------------------------------------------------------------
         .byte                            $02, $00, $19                  ;$E7BD
         .byte   $56, $be, $59, $00, $2a, $42, $1a, $c8                  ;$E7C0

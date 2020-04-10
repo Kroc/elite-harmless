@@ -5,11 +5,15 @@
 ; $18: combra mk-III (pirate)
 ;-------------------------------------------------------------------------------
 hull_index           .set hull_index + 1
-hull_e50b_index        := hull_index
+hull_mk3_pirate_index  := hull_index
+
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_mk3_pirate_kill    = 298   ;= 1.16
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
-        .addr   _e50b                                                   ;$D02E/F
+        .addr   hull_mk3_pirate                                         ;$D02E/F
 
 .segment        "HULL_TYPE"                                             ;$D042..
 ;===============================================================================
@@ -17,15 +21,15 @@ hull_e50b_index        := hull_index
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $2a                                                     ;$D07A
+        .byte   < hull_mk3_pirate_kill                                  ;$D07A
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $01                                                     ;$D09B
+        .byte   > hull_mk3_pirate_kill                                  ;$D09B
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================
-.proc   _e50b                                                           ;$E50B
+.proc   hull_mk3_pirate                                                 ;$E50B
         ;-----------------------------------------------------------------------
         .byte                  $01, $41, $23, $bc, $54                  ;$E50B
         .byte   $9d, $54, $2a, $a8, $26, $af, $00, $34                  ;$E510

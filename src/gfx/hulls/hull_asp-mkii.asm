@@ -7,6 +7,10 @@
 hull_index           .set hull_index + 1
 hull_aspmk2_index      := hull_index
 
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_aspmk2_kill        = 277   ;= 1.08
+
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
         .addr   hull_aspmk2                                             ;$D030/1
@@ -17,11 +21,11 @@ hull_aspmk2_index      := hull_index
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $15                                                     ;$D07B
+        .byte   < hull_aspmk2_kill                                      ;$D07B
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $01                                                     ;$D09C
+        .byte   > hull_aspmk2_kill                                      ;$D09C
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

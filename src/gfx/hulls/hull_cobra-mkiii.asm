@@ -5,11 +5,15 @@
 ; $0B: cobra mk-III
 ;-------------------------------------------------------------------------------
 hull_index           .set hull_index + 1
-hull_d8c3_index        := hull_index
+hull_cobramk3_index    := hull_index
+
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_cobramk3_kill      = 234   ;= 0.91
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
-        .addr   _d8c3                                                   ;$D014/5
+        .addr   hull_cobramk3                                           ;$D014/5
 
 .segment        "HULL_TYPE"                                             ;$D042..
 ;===============================================================================
@@ -17,15 +21,15 @@ hull_d8c3_index        := hull_index
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $ea                                                     ;$D06D
+        .byte   < hull_cobramk3_kill                                    ;$D06D
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $00                                                     ;$D08E
+        .byte   > hull_cobramk3_kill                                    ;$D08E
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================
-.proc   _d8c3                                                           ;$D8C3
+.proc   hull_cobramk3                                                   ;$D8C3
         ;-----------------------------------------------------------------------
         .byte                  $03, $41, $23, $bc, $54                  ;$D8C3
         .byte   $9d, $54, $2a, $a8, $26, $00, $00, $34

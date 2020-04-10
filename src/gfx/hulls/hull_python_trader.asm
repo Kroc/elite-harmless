@@ -7,6 +7,10 @@
 hull_index           .set hull_index + 1
 hull_da4b_index        := hull_index
 
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_python_kill        = 170   ;= 0.66
+
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
         .addr   _da4b                                                   ;$D016/7
@@ -17,11 +21,11 @@ hull_da4b_index        := hull_index
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $aa                                                     ;$D06E
+        .byte   < hull_python_kill                                      ;$D06E
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $00                                                     ;$D08F
+        .byte   > hull_python_kill                                      ;$D08F
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

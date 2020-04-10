@@ -7,6 +7,10 @@
 hull_index           .set hull_index + 1
 hull_anaconda_index    := hull_index
 
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_anaconda_kill      = 256   ;= 1.00
+
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
         .addr   hull_anaconda                                           ;$D01A/B
@@ -17,11 +21,11 @@ hull_anaconda_index    := hull_index
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $00                                                     ;$D070
+        .byte   < hull_anaconda_kill                                    ;$D070
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $01                                                     ;$D091
+        .byte   > hull_anaconda_kill                                    ;$D091
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

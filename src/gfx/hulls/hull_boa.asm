@@ -7,6 +7,10 @@
 hull_index           .set hull_index + 1
 hull_boa_index         := hull_index
 
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_boa_kill           = 213   ;= 0.83
+
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
         .addr   hull_boa                                                ;$D018/9
@@ -17,11 +21,11 @@ hull_boa_index         := hull_index
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $d5                                                     ;$D06F
+        .byte   < hull_boa_kill                                         ;$D06F
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $00                                                     ;$D090
+        .byte   > hull_boa_kill                                         ;$D090
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

@@ -7,6 +7,10 @@
 hull_index           .set hull_index + 1
 hull_coreolis_index    := hull_index
 
+; in the BBC version every kill was worth one point but in other ports the
+; kill value is fractional and varies by object, where $0100 (256) = 1 point
+hull_coreolis_kill      = 0     ;= 0.00
+
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
 hull_pointer_station:                                                   ;$D002
@@ -26,11 +30,11 @@ hull_pointer_station:                                                   ;$D002
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   $00                                                     ;$D064
+        .byte   < hull_coreolis_kill                                    ;$D064
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   $00                                                     ;$D085
+        .byte   > hull_coreolis_kill                                    ;$D085
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

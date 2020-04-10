@@ -244,9 +244,9 @@
           +---------------+
     $D000 | HULL_TABLE    |
           |---------------|
-    $D042 | HULL_D042     |
-    $D062 | HULL_D062     |
-    $D083 | HULL_D083     |
+    $D042 | HULL_TYPE     |
+    $D063 | HULL_KILL_LO  |
+    $D084 | HULL_KILL_HI  |
           |---------------|
     $D0A5 | HULL_DATA     |
           |               |
