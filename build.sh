@@ -113,7 +113,7 @@ $ca65 $options -o build/text_docked.o       src/text/text_docked.asm
 echo "[OK]"
 
 # let's build an original floppy disk to verify that we haven't broken
-# the code or failed to preserve the original somewhere along the lines
+# the code or failed to preserve the original somewhere along the line
 
 echo "  --------------------------------------"
 echo "* assemble GMA86 loader"

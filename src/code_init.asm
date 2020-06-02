@@ -206,7 +206,7 @@ init:
         lda # %0000010
         sta VIC_SPRITE_PRIORITY
 
-        ; sprite indicies:
+        ; sprite indices:
         ; (crosshair)
         lda # ELITE_SPRITES_INDEX + 0
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR

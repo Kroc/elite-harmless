@@ -420,8 +420,8 @@ _77a3:  sta $d802,y
         dey 
         bne _77a3
 
-        ; sprite indicies
-        ; TODO: define these indicies based on the acutal sprite patterns order
+        ; sprite indices
+        ; TODO: define these indices based on the acutal sprite patterns order
         lda # ELITE_SPRITES_INDEX + 0
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE0_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE0_PTR

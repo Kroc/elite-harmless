@@ -88,11 +88,14 @@ print_flight_token_and_divider:                                         ;$28D9
         jsr print_flight_token
 
 
-txt_docked_token0B:                                                     ;$28DC
+draw_title_divider:                                                     ;$28DC
 ;===============================================================================
-.export txt_docked_token0B
+; draws a line across the screen at Y = 19:
+;
+;-------------------------------------------------------------------------------
+.export draw_title_divider
 
-        lda # $13
+        lda # 19
         bne _28e5               ; (always branches)
 
 _28e0:                                                                  ;$28E0
@@ -271,8 +274,8 @@ paint_particle:                                                         ;$293A
         
         ; the Z-check makes effectively the same paint operation for Z>=144
         ; and Z>=80, this seems to be a remnant from a different implementation
-        ; we could instead use this to grow dust in more detail  using a
-        ; single-pixel bitmask for far far away dust particles
+        ; we could instead use this to grow dust in more detail, using
+        ; a single-pixel bitmask for far, far away dust particles
         ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -3813,6 +3816,7 @@ shoot_lasers:                                                           ;$3CDB
 ;===============================================================================
 ; pew! pew!
 ;
+;-------------------------------------------------------------------------------
         ; jitter the laser beam's position a bit:
         ; pick the starting Y-position (Y1)
         ;
@@ -4091,7 +4095,7 @@ _3e31:                                                                  ;$3E31
         bne _3dbe               ; always branches
 
 ;===============================================================================
-; insert these docked token functions from "text_docked_fns.asm"
+; insert these docked-token functions from "text_docked_fns.asm"
 ;
 .txt_docked_incoming_message                                            ;$3E37
 .txt_docked_token16_17_1D                                               ;$3E41
@@ -4106,10 +4110,11 @@ get_polyobj:                                                            ;$3E87
 ; given an index for a poly-object 0-10, this routine will
 ; return an address for the poly-object's variable storage
 ;
-;       X = index
+; in:   X       index
 ;
-; returns address in $59/$5A
+; out:  $59/A   returns address
 ;
+;-------------------------------------------------------------------------------
         txa 
         asl                     ; multiply by 2 (for 2-byte table-lookup)
         tay 
@@ -4125,6 +4130,7 @@ set_psystem_to_tsystem:                                                 ;$3E95
 ; copy present system co-ordinates to target system co-ordinates,
 ; i.e. you have arrived at your destination
 ;
+;-------------------------------------------------------------------------------
         ldx # 1
 :       lda PSYSTEM_POS, x                                              ;$3E97
         sta TSYSTEM_POS, x
@@ -4135,10 +4141,11 @@ set_psystem_to_tsystem:                                                 ;$3E95
 
 wait_frames:                                                            ;$3EA1
 ;===============================================================================
-; wait for a given number of frames to complete
+; wait for a given number of frames to complete:
 ;
-;       Y = number of frames to wait
+; in:   Y       number of frames to wait
 ;
+;-------------------------------------------------------------------------------
         jsr wait_for_frame
         dey 
         bne wait_frames

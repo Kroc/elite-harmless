@@ -1453,7 +1453,7 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
         pha 
 
         ; choose planet description template 0-4:
-
+        ;
         jsr get_random_number
         tax 
         lda # $00               ; select description template 0
@@ -1466,10 +1466,11 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
         cpx # $cc               ; is random number over $CC? note that if so,
                                 ; carry is set, to be added later
 
-.import _3eac
-
         ; get back the token value and lookup another message index to print
         ; (since these tokens are $5B..$80, we index the table back $5B bytes)
+        ;
+.import _3eac
+        
         ldx ZP_TEMP_ADDR1_LO
         adc _3eac - $5B, x
 

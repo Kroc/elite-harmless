@@ -46,8 +46,8 @@ _fn_index       .set 1
 .macro  .define_fn      fn_import, fn_id
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
-        ; encrypt the function index to
-        ; produce the token ID used in strings
+        ; encrypt the function index to produce
+        ; the token ID used in strings
         .local  _value
         _value  .set .encrypt( _fn_index )
         ; define the function token locally,
@@ -105,8 +105,8 @@ txt_docked_functions:                                                   ;$250C
 .define_fn      txt_docked_token09,             "F09"                   ;=$5E
 ; $0A           print character $0A -- ?
 .define_fn      print_char,                     "F0A"                   ;=$5D
-; $0B           ?
-.define_fn      txt_docked_token0B,             "F0B"                   ;=$5C
+; $0B           draw a divider across the screen; used for page titles
+.define_fn      draw_title_divider,             "F0B"                   ;=$5C
 ; $0C           print a newline character -- $0C
 .define_fn      print_char,                     "F0C"                   ;=$5B
 ; $0D           ?
@@ -147,7 +147,7 @@ txt_docked_functions:                                                   ;$250C
 .define_fn      txt_docked_token_mediaCurrent,  "MEDIA_CURRENT"         ;=$49
 ; $1F           print the non-selected load/save media -- disk / tape 
 .define_fn      txt_docked_token_mediaOther,    "MEDIA_OTHER"           ;=$48
-; $20           print space, unused in practice though as space
+; $20           print space. unused in practice though as space
 ;               is already handled in the code before we get here 
 .define_fn      print_char,                     "F20"                   ;=$77
 
@@ -157,7 +157,7 @@ txt_docked_functions:                                                   ;$250C
 
 ; import the token numbers for the common charcter pairs used by docked
 ; strings ("text_pairs.asm"). these come unencrypted; we encrypt them
-; for the on-disk format
+; here, for the on-disk format
 ;
 .import txt_docked_ab:direct
 _AB     = .encrypt( txt_docked_ab )     ;=$8F
@@ -304,11 +304,13 @@ _msg_index     .set 0
 
 .define .skip_msg       _msg_index .set _msg_index + 1
 
-;===============================================================================
-
+; begin the "docked" text database:
+;
 _0e00:                                                                  ;$0E00
+;===============================================================================
 .export _0e00
-        ; 0.
+
+        ; 0.    index 0 is always invalid
         .byte   __end
         .skip_msg
 
@@ -930,7 +932,7 @@ _0e00:                                                                  ;$0E00
         .byte   _I, _M, _P, _EN, _ET, _RA, _B, _LE, __end
         .define_msg "_IMPENETRABLE"
         
-        ; message indicies $81..$D6 are expandable via msgtokens $81..$D6
+        ; message indices $81..$D6 are expandable via msgtokens $81..$D6
         ;-----------------------------------------------------------------------
 
         ; 129.

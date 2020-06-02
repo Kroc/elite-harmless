@@ -16,7 +16,7 @@
 ; will be used in the code to refer to them, in the order they are added to
 ; this table
 ;
-; NOTE: the order of the indicies here does not have to
+; NOTE: the order of the indices here does not have to
 ;       match the order of the actual data that follows
 ;
 hull_index      .set    0

@@ -92,7 +92,7 @@ interrupt_end_XA:                                                       ;$A8ED
 .else   ;///////////////////////////////////////////////////////////////////////
         ; in elite-harmless the previous memory layout state
         ; has been pushed to the stack
-        pla
+        pla 
 .endif  ;///////////////////////////////////////////////////////////////////////
         sta CPU_CONTROL         ; restore the memory map
 

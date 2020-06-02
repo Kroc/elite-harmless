@@ -1070,7 +1070,7 @@ inventory_screen:                                                       ;$6F16
         lda # TXT_INVENTORY
         jsr _6a84
 
-        jsr txt_docked_token0B
+        jsr draw_title_divider
         jsr print_fuel_and_cash
         lda SHIP_HOLD            ; cargo capacity of the player's ship
         cmp # $1a
