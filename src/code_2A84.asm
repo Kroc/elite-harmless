@@ -1390,11 +1390,11 @@ print_crlf:                                                             ;$2F1F
         ; instruction, a very handy way of skipping without branching
        .bit
 
-txt_docked_token10:                                                     ;$2F22
+print_a:                                                                ;$2F22
 ;===============================================================================
-; print "A"!?
+; print "a". that's it.
 ;
-.export txt_docked_token10
+.export print_a
 
         lda # 'a'
 
@@ -4096,7 +4096,8 @@ _3e31:                                                                  ;$3E31
 ;
 .txt_docked_incoming_message                                            ;$3E37
 .txt_docked_token16_17_1D                                               ;$3E41
-.txt_docked_token18                                                     ;$3E7C
+.txt_docked_waitForAnyKey                                               ;$3E7C
+
 
 get_polyobj:                                                            ;$3E87
 ;===============================================================================

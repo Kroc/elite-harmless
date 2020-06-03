@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "text_docked_fns.asm" -- a series of in-string functions, assigned to the
+; "text_docked_fns.inc" -- a series of in-string functions, assigned to the
 ; first 32 "docked" string tokens. these are stored as macros in this file
 ; because their physical location in the original code is all over the place
 
@@ -109,7 +109,7 @@ txt_docked_token0D:                                                     ;$248B
         lda # %10000000
         sta txt_ucase_flag
         
-        ; enable upper-casing
+        ; enable upper-casing?
         lda # %00100000
         sta txt_ucase_mask
 
@@ -319,19 +319,23 @@ _3e65:                                                                  ;$3E65
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token18
+.macro  .txt_docked_waitForAnyKey
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; press any key!
 ;
-txt_docked_token18:                                                     ;$3E7C
+txt_docked_waitForAnyKey:                                               ;$3E7C
 ;-------------------------------------------------------------------------------
-.export txt_docked_token18
+.export txt_docked_waitForAnyKey
         
+        ; check for key down...
         jsr get_input
-        bne txt_docked_token18
+        ; keep checking until non-zero value
+        bne txt_docked_waitForAnyKey
 
+        ; check for key up...
         jsr get_input
-        beq txt_docked_token18
+        ; keep checking until zero (no key pressed)
+        beq txt_docked_waitForAnyKey
         
         rts 
 

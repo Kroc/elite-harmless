@@ -1211,7 +1211,7 @@ print_docked_str:                                                       ;$2390
         pha                     ; preserve A (message index)
         tax                     ; move message index to X
 
-        ; when recursing, $5B/$5C+Y represent the
+        ; when recursing, [ZP_TEMP_ADDR3]+Y represent the
         ; current position in the message data
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
@@ -1258,7 +1258,7 @@ _23a0:                                                                  ;$23A0
         ; $20-$40 = print ASCII chars $20-$40 (space, punctuation, numbers)
         ; $41-$5A = print ASCII characters @, A-Z
         ; $5B-$80 = planet description tokens
-        ; $81-$D6 = ?
+        ; $81-$D6 = text expansions
         ; $D7-$FF = some pre-defined character pairs ("text_pairs.asm")
         ;
         lda [ZP_TEMP_ADDR3], y  ; read a token
@@ -1287,7 +1287,7 @@ print_docked_token:                                                     ;$23CF
         bit txt_flight_flag     ; if flight string mode is off,
         bpl :+                  ; skip the next bit
 
-       ; save state before we recurse
+        ; save state before we recurse
         tax 
        .phy                     ; push Y to stack (via A)
         lda ZP_TEMP_ADDR3_LO
@@ -1301,9 +1301,9 @@ print_docked_token:                                                     ;$23CF
 
         jmp _2438
 
-:                                                                       ;$23E8
+        ; print docked token:
         ;-----------------------------------------------------------------------
-        cmp # 'z'+1             ; letters "A" to "Z"?
+:       cmp # 'z'+1             ; letters "A" to "Z"?                   ;$23E8
        .blt _2404               ; print letters, handling auto-casing
 
         cmp # $81               ; tokens $5B...$80?
@@ -1312,9 +1312,8 @@ print_docked_token:                                                     ;$23CF
         cmp # $d7               ; tokens $81...$D6 are expansions,
        .blt print_docked_str    ; use the token as a message index
 
-        ; tokens $D7 and above:
-        ; (character pairs)
-
+        ; tokens $D7 and above: (character pairs)
+        ;-----------------------------------------------------------------------
 .import txt_docked_pair1
 .import txt_docked_pair2
 

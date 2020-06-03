@@ -12,7 +12,7 @@
 
 .segment        "TEXT_PAIRS"
 
-index_docked    .set    $d8     ; pair tokens for docked-text begin at $D8
+index_docked    .set    $d7     ; pair tokens for docked-text begin at $D7
 index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 
 ; this first macro helps us define a pair of characters without having to
@@ -23,26 +23,40 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 .macro  .docked_pair    str
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-        ; export the pair's token name
-.export .ident( .concat( "txt_docked_", str ) ) = index_docked
+        ; special case the first pair that doesn't have
+        ; a string value that can be used as an identifier
+        .if .xmatch( str, "crlf" )
+                ; export the CRLF-specific name
+                .export .ident( "txt_docked_crlf" ) = index_docked
+        .else
+                ; export the pair's token name
+                .export .ident( .concat( "txt_docked_", str ) ) = index_docked
+        .endif
+
         ; move to the next token number
         index_docked    .set    index_docked + 1
 
         ; write the pair of characters to the disk
-        .byte   str
+        .if .xmatch( str, "crlf" )
+                .byte   TXT_NEWLINE
+                .byte   $0a             ;?
+        .else
+                .byte   str
+        .endif
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
 txt_docked_pairs:                                                       ;$254C
 ;-------------------------------------------------------------------------------
-; docked text compression character pairs:
+; docked text-compression character pairs:
 ;
 .export txt_docked_pair1 := txt_docked_pairs+0
 .export txt_docked_pair2 := txt_docked_pairs+1
 
-        .byte           TXT_NEWLINE
-        .byte           $0a
+        ; the first pair is used in messages,
+        ; but not during name generation
+        .docked_pair    "crlf"
 
 _254e:
 .export _254e

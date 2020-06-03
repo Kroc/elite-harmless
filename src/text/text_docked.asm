@@ -115,8 +115,8 @@ txt_docked_functions:                                                   ;$250C
 .define_fn      txt_docked_token0E,             "F0E"                   ;=$59
 ; $0F           ?
 .define_fn      txt_docked_token0F,             "F0F"                   ;=$58
-; $10           ?
-.define_fn      txt_docked_token10,             "F10"                   ;=$47
+; $10           print "a". truly, truly, a bizzare use of a function token
+.define_fn      print_a,                        "A"                     ;=$47
 ; $11           ?
 .define_fn      txt_docked_token11,             "F11"                   ;=$46
 ; $12           ?
@@ -131,8 +131,8 @@ txt_docked_functions:                                                   ;$250C
 .define_fn      txt_docked_token16,             "F16"                   ;=$41
 ; $17           ?
 .define_fn      txt_docked_token17,             "F17"                   ;=$40
-; $18           ?
-.define_fn      txt_docked_token18,             "F18"                   ;=$4F
+; $18           wait for any key to be pressed
+.define_fn      txt_docked_waitForAnyKey,       "WAIT_FOR_KEY"          ;=$4F
 ; $19           flash "incoming message" on screen
 .define_fn      txt_docked_incoming_message,    "INCOMING_MESSAGE"      ;=$4E
 ; $1A           ?
@@ -160,6 +160,8 @@ txt_docked_functions:                                                   ;$250C
 ; strings ("text_pairs.asm"). these come unencrypted; we encrypt them
 ; here, for the on-disk format
 ;
+.import txt_docked_crlf:direct
+CRLF    = .encrypt( txt_docked_crlf )   ;=$80
 .import txt_docked_ab:direct
 _AB     = .encrypt( txt_docked_ab )     ;=$8F
 .import txt_docked_ou:direct
@@ -241,10 +243,21 @@ _QU     = .encrypt( txt_docked_qu )     ;=$A9
 .import txt_docked_an:direct
 _AN     = .encrypt( txt_docked_an )     ;=$A8
 
-
+; encrypt regular ASCII characters:
+;-------------------------------------------------------------------------------
 __end   = .encrypt ( $00 )              ;=$57
 __      = .encrypt ( $20 )              ;=$77
 _DOT    = .encrypt ( $2E )              ;=$79
+_0      = .encrypt ( $30 )              ;=$67
+_1      = .encrypt ( $31 )              ;=$66
+_2      = .encrypt ( $32 )              ;=$65
+_3      = .encrypt ( $33 )              ;=$64
+_4      = .encrypt ( $34 )              ;=$63
+_5      = .encrypt ( $35 )              ;=$62
+_6      = .encrypt ( $36 )              ;=$61
+_7      = .encrypt ( $37 )              ;=$60
+_8      = .encrypt ( $38 )              ;=$6F
+_9      = .encrypt ( $39 )              ;=$6E
 _A      = .encrypt ( $41 )              ;=$16
 _B      = .encrypt ( $42 )              ;=$15
 _C      = .encrypt ( $43 )              ;=$14
@@ -319,13 +332,13 @@ _0e00:                                                                  ;$0E00
         ; 1.    disk / tape access menu
         .byte   FN_CLEAR_SCREEN, FN_DIVIDER, FN_F01, FN_F08, __
         .byte   FN_MEDIA_CURRENT, __, _A, _C, _CE, _S, _S, __, _M, _E, _NU
-        .byte   $80, FN_F0A, FN_F02, $66, _DOT, __, _95
-        .byte   $80, $65, _DOT, __, _S, _A, _VE, __
-        .byte   _COMMANDER, __, FN_F04, $80, $64
-        .byte   _DOT, __, _C, _H, _AN, _GE, _TO, FN_MEDIA_OTHER, $80, $63
-        .byte   _DOT, __, _D, _E, _F, _A, _U, _L, _T, __
-        .byte   FN_F01, _J, _A, _M, _E, _S, _O, _N, FN_F02, $80, $62
-        .byte   _DOT, __, _E, _X, _IT, $80
+        .byte   CRLF, FN_F0A, FN_F02
+        .byte   _1, _DOT, __, _95, CRLF
+        .byte   _2, _DOT, __, _S, _A, _VE, __, _COMMANDER, __, FN_F04, CRLF
+        .byte   _3, _DOT, __, _C, _H, _AN, _GE, _TO, FN_MEDIA_OTHER, CRLF
+        .byte   _4, _DOT, __, _D, _E, _F, _A, _U, _L, _T, __
+        .byte   FN_F01, _J, _A, _M, _E, _S, _O, _N, FN_F02, CRLF
+        .byte   $62, _DOT, __, _E, _X, _IT, CRLF
         .byte   __end
         .define_msg "_DATA_MENU"
         
@@ -334,6 +347,7 @@ _0e00:                                                                  ;$0E00
         .define_msg "_DISK"
         
         ; 3.
+        ; TODO: remove tape code / references
         .byte   _T, _A, _P, _E, __end
         .define_msg "_TAPE"
         
@@ -348,14 +362,13 @@ _0e00:                                                                  ;$0E00
         .define_msg "_05"
         
         ; 6.
-        .byte   __, __, _95, __, FN_F01, $7f, _Y
-        .byte   $78, _N, $7e, $68, FN_F02, FN_NEWLINE, FN_NEWLINE, __end
+        .byte   __, __, _95, __, FN_F01, $7f, _Y, $78, _N, $7e, $68
+        .byte   FN_F02, FN_NEWLINE, FN_NEWLINE, __end
         .define_msg "_06"
 
         ; 7.
-        .byte   _P, _RE, _S, _S, __, _S, _P, _A, _CE, __
-        .byte   _OR, __, _F, _I, _RE, _COMMA, _COMMANDER, _DOT
-        .byte   FN_NEWLINE, FN_NEWLINE, __end
+        .byte   _P, _RE, _S, _S, __, _S, _P, _A, _CE, __, _OR, __, _F, _I, _RE
+        .byte   _COMMA, _COMMANDER, _DOT, FN_NEWLINE, FN_NEWLINE, __end
         .define_msg "_07"
         
         ; 8.
@@ -363,9 +376,8 @@ _0e00:                                                                  ;$0E00
         .define_msg "_08"
         
         ; 9.
-        .byte   FN_NEWLINE, FN_F01, _IL, _LE, _G, _AL
-        .byte   __, _E, _L, _I, _T, _E, __, _I
-        .byte   _I, __, _F, _I, _LE, __end
+        .byte   FN_NEWLINE, FN_F01, _IL, _LE, _G, _AL, __
+        .byte   _E, _L, _I, _T, _E, __, _I, _I, __, _F, _I, _LE, __end
         .define_msg "_ILLEGAL_FILE"
         
         ; 10.
@@ -374,50 +386,45 @@ _0e00:                                                                  ;$0E00
         .byte   _AND_, FN_CAPNEXT, _I, __, _BE, _G, _A_, _M, _O, _M, _EN, _T
         .byte   __, _O, _F, __, _YOU, _R, __, _V, _AL, _U, _AB, _LE
         .byte   __, _TI, _M, _E, _NEW_SENTENCE
-        .byte   _W, _E, __
-        .byte   _W, _OU, _L, _D, __, _L, _I, _K
-        .byte   _E, __, _YOU, _TO, _D, _O, _A_, _L
-        .byte   _IT, _T, _LE, __, _J, _O, _B, __
-        .byte   _F, _OR, __, _US, _NEW_SENTENCE
-        .byte   _THE, _SHIP, __
-        .byte   _YOU, __, _SE, _E, __, _H, _E, _RE
-        .byte   _IS, _A, _NEW, _M, _O, _D, _E, _L
-        .byte   _COMMA, __, _THE, FN_CAPNEXT, _C, _ON, _ST, _R
-        .byte   _I, _C, _T, _OR, _COMMA, __, _E, _QU
-        .byte   _I, _P, _ED_, _W, _I, _TH, _A_, _T
-        .byte   _O, _P, __, _SE, _C, _R, _ET, _NEW
-        .byte   _S, _H, _I, _E, _L, _D, __, _G
-        .byte   _EN, _ER, _AT, _OR, _NEW_SENTENCE
-        .byte   _U, _N, _F
-        .byte   _OR, _T, _U, _N, _AT, _E, _L, _Y
-        .byte   __, _IT, $70, _S, __, _BE, _EN, __
-        .byte   _ST, _O, _L, _EN, _NEW_SENTENCE
+
+        .byte   _W, _E, __, _W, _OU, _L, _D, __, _L, _I, _K, _E, __, _YOU, _TO
+        .byte   _D, _O, _A_, _L, _IT, _T, _LE, __, _J, _O, _B, __, _F, _OR, __
+        .byte   _US, _NEW_SENTENCE
+
+        .byte   _THE, _SHIP, __, _YOU, __, _SE, _E, __, _H, _E, _RE, _IS, _A
+        .byte   _NEW, _M, _O, _D, _E, _L, _COMMA, __, _THE, FN_CAPNEXT
+        .byte   _C, _ON, _ST, _R, _I, _C, _T, _OR, _COMMA, __
+        .byte   _E, _QU, _I, _P, _ED_, _W, _I, _TH, _A_, _T, _O, _P, __
+        .byte   _SE, _C, _R, _ET, _NEW, _S, _H, _I, _E, _L, _D, __
+        .byte   _G, _EN, _ER, _AT, _OR, _NEW_SENTENCE
+
+        .byte   _U, _N, _F, _OR, _T, _U, _N, _AT, _E, _L, _Y, __, _IT
+        .byte   $70, _S, __, _BE, _EN, __, _ST, _O, _L, _EN
+        .byte   _NEW_SENTENCE
 
         .byte   FN_F16, _IT, __, _W, _EN, _T, __, _M, _I, _S, _S, _ING_
         .byte   _F, _R, _O, _M, __, _OU, _R, __, _SHIP, __, _Y, _AR, _D, __
         .byte   _ON, __, FN_CAPNEXT, _XE, _ER, __, _F, _I, _VE, __
         .byte   _M, _ON, _TH, _S, __, _A, _G, _O, _AND_
-        ;       "is believe"
+        ;       "is believed to have jumped to this galaxy"
         ;       (see msg index 221)
         .byte   FN_PROTO_GALAXY, _NEW_SENTENCE
 
         .byte   _YOU, _R, __, _M, _I, _S, _S, _I, _ON, _COMMA, __
         .byte   _S, _H, _OU, _L, _D, __, _YOU, __, _D, _E, _C, _I, _D, _E, _TO
-        .byte   _A, _C, _CE, _P, _T, __, _IT, _COMMA, __, _I
-        .byte   _S, _TO, _SE, _E, _K, _AND_, _D, _ES
-        .byte   _T, _R, _O, _Y, __, _THIS, _SHIP, _NEW_SENTENCE
-        .byte   _YOU, __, _A, _RE, __, _C, _A, _U
-        .byte   _TI, _ON, _ED_, _TH, _AT, __, _ON, _L
-        .byte   _Y, __, FN_F06, $22, FN_F05, _S, __, _W
-        .byte   _IL, _L, __, _P, _EN, _ET, _RA, _T
-        .byte   _E, __, _THE, _N, _E, _W, __, _S
-        .byte   _H, _I, _E, _L, _D, _S, _AND_, _TH
-        .byte   _AT, __, _THE, FN_CAPNEXT, _C, _ON, _ST, _R
-        .byte   _I, _C, _T, _OR, _IS, _F, _IT, _T
-        .byte   _ED_, _W, _I, _TH, __, _AN, __, FN_F06
-        .byte   $3b, FN_F05, _B1, FN_F02, FN_F08, _G, _O, _O
-        .byte   _D, __, _L, _U, _C, _K, _COMMA, __
-        .byte   _COMMANDER, _D4, FN_F16, __end
+        .byte   _A, _C, _CE, _P, _T, __, _IT, _COMMA, __, _I, _S, _TO
+        .byte   _SE, _E, _K, _AND_, _D, _ES, _T, _R, _O, _Y, __, _THIS, _SHIP
+        .byte   _NEW_SENTENCE
+
+        .byte   _YOU, __, _A, _RE, __, _C, _A, _U, _TI, _ON, _ED_, _TH, _AT, __
+        .byte   _ON, _L, _Y, __, FN_F06, $22, FN_F05, _S, __, _W, _IL, _L, __
+        .byte   _P, _EN, _ET, _RA, _T, _E, __, _THE, _N, _E, _W, __
+        .byte   _S, _H, _I, _E, _L, _D, _S, _AND_, _TH, _AT, __, _THE
+        .byte   FN_CAPNEXT, _C, _ON, _ST, _R, _I, _C, _T, _OR, _IS
+        .byte   _F, _IT, _T, _ED_, _W, _I, _TH, __, _AN, __, FN_F06
+        .byte   $3b, FN_F05, _B1, FN_F02, FN_F08
+        .byte   _G, _O, _O, _D, __, _L, _U, _C, _K, _COMMA, __, _COMMANDER
+        .byte   _D4, FN_F16, __end
         .define_msg "_0A"
         
         ; 11.
@@ -437,12 +444,13 @@ _0e00:                                                                  ;$0E00
         .byte   _S, _U, _C, _CE, _S, _S, _F, _U
         .byte   _L, _COMMA, __, _YOU, __, _W, _IL, _L
         .byte   __, _BE, __, _W, _E, _L, _L, __
-        .byte   _RE, _W, _AR, _D, _ED, _D4, FN_F18, __end
+        .byte   _RE, _W, _AR, _D, _ED, _D4
+        .byte   FN_WAIT_FOR_KEY, __end
         .define_msg "_0B"
 
         ; 12.
-        .byte   $7f, FN_CAPNEXT, _C, $7e, _C5, __, $66, $6e
-        .byte   $6f, $62, __end
+        .byte   $7f, FN_CAPNEXT, _C, $7e, _C5
+        .byte   __, _1, _9, _8, _5, __end
         .define_msg "_0C"
         
         ; 13.
@@ -455,18 +463,19 @@ _0e00:                                                                  ;$0E00
 
         ; 15.
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN, FN_F17, FN_F0E
-        .byte   FN_F02, __, __, _C, _ON, _G, _RA, _T
-        .byte   _U, _LA, _TI, _ON, _S, __, _COMMANDER, $76
-        .byte   FN_NEWLINE, FN_NEWLINE, _TH, _ER, _E, FN_F0D, __, _W
-        .byte   _IL, _L, __, _AL, _W, _A, _Y, _S
-        .byte   __, _BE, _A_, _P, _LA, _CE, __, _F
-        .byte   _OR, __, _YOU, __, _IN, _D3, _NEW_SENTENCE
-        .byte   _AN
-        .byte   _D, __, _MA, _Y, _BE, __, _SO, _ON
-        .byte   _ER, __, _TH, _AN, __, _YOU, __, _TH
-        .byte   _IN, _K, _DOT, _DOT, _D4, FN_F18, __end
+        .byte   FN_F02, __, __, _C, _ON, _G, _RA, _T, _U, _LA, _TI, _ON, _S, __
+        .byte   _COMMANDER, $76, FN_NEWLINE, FN_NEWLINE
+
+        .byte   _TH, _ER, _E, FN_F0D, __, _W, _IL, _L, __, _AL, _W, _A, _Y, _S
+        .byte   __, _BE, _A_, _P, _LA, _CE, __, _F, _OR, __, _YOU, __, _IN
+        .byte   _D3, _NEW_SENTENCE
+
+        .byte   _AN, _D, __, _MA, _Y, _BE, __, _SO, _ON, _ER, __, _TH, _AN, __
+        .byte   _YOU, __, _TH, _IN, _K, _DOT, _DOT, _D4
+        .byte   FN_WAIT_FOR_KEY, __end
         .define_msg "_0F"
 
+        ;-----------------------------------------------------------------------
         ; 16.
         .byte   _F, _AB, _LE, _D, __end
         .define_msg "FN_FABLED"
@@ -1247,8 +1256,8 @@ _0e00:                                                                  ;$0E00
         .byte   _F, _F, _ER, _ING_, _Y, _OU, _COMMA, __
         .byte   _F, _OR, __, _THE, _P, _A, _L, _T
         .byte   _R, _Y, __, _S, _U, _M, __, _O
-        .byte   _F, __, _J, _U, _ST, __, $62, $67
-        .byte   $67, $67, FN_CAPNEXT, _C, FN_CAPNEXT, _R, __, _THE
+        .byte   _F, __, _J, _U, _ST, __, _5, _0
+        .byte   _0, _0, FN_CAPNEXT, _C, FN_CAPNEXT, _R, __, _THE
         .byte   _RA, _RE, _ST, __, _TH, _ING_, __, _IN
         .byte   __, _THE, FN_F02, _K, _NO, _W, _N, __
         .byte   _U, _N, _I, _VE, _R, _SE, _NEW_SENTENCE, FN_F0D
@@ -1372,8 +1381,10 @@ _0e00:                                                                  ;$0E00
         ;-----------------------------------------------------------------------
         ; 222.
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
-        .byte   FN_F1D, FN_F0E, FN_F02, _G, _O, _O, _D, __
-        .byte   _D, _A, _Y, __, _COMMANDER, __, FN_F04, _NEW_SENTENCE
+        .byte   FN_F1D, FN_F0E, FN_F02
+        .byte   _G, _O, _O, _D, __, _D, _A, _Y, __, _COMMANDER, __
+        .byte   FN_F04, _NEW_SENTENCE
+
         .byte   _I, FN_F0D, __, _A, _M, __, FN_CAPNEXT, _A
         .byte   _G, _EN, _T, __, FN_CAPNEXT, _B, _LA, _K
         .byte   _E, __, _O, _F, __, FN_CAPNEXT, _N, _A
@@ -1398,7 +1409,7 @@ _0e00:                                                                  ;$0E00
         .byte   __, _TH, _O, _SE, __, _M, _U, _R, _D, _ER, _ER, _S
         .byte   _NEW_SENTENCE
 
-        .byte   FN_F18, FN_CLEAR_SCREEN, FN_F1D
+        .byte   FN_WAIT_FOR_KEY, FN_CLEAR_SCREEN, FN_F1D
         .byte   _I, FN_F0D, __, _H, _A, _VE, __, _O, _B, _T, _A, _IN, _ED_
         .byte   _THE, _D, _E, _F, _EN, _CE, __, _P, _LA, _N, _S, __, _F, _OR
         .byte   __, _TH, _E, _I, _R, __, FN_CAPNEXT, _H, _I, _VE, __
@@ -1432,7 +1443,7 @@ _0e00:                                                                  ;$0E00
         .byte   _BE, __, _P, _A, _I, _D, _NEW_SENTENCE
         .byte   __, __, __, __, FN_CAPNEXT, _G, _O, _O, _D
         .byte   __, _L, _U, _C, _K, __, _COMMANDER, _D4
-        .byte   FN_F18, __end
+        .byte   FN_WAIT_FOR_KEY, __end
         .define_msg "_DE"
         
         ; 223.
@@ -1454,9 +1465,10 @@ _0e00:                                                                  ;$0E00
         .byte   _P, _T, __, _THIS, FN_CAPNEXT, _N, _A, _V
         .byte   _Y, __, FN_F06, $25, FN_F05, __, _A, _S
         .byte   __, _P, _A, _Y, _M, _EN, _T, _D4
-        .byte   FN_F18, __end
+        .byte   FN_WAIT_FOR_KEY, __end
         .define_msg "_DF"
         
+        ;-----------------------------------------------------------------------
         ; 224.
         .byte   _A, _RE, __, _YOU, __, _S, _U, _RE, $68, __end
         .define_msg "_ARE_YOU_SURE"
@@ -1541,6 +1553,8 @@ _0e00:                                                                  ;$0E00
         .byte   _SO, _U, _P, __end
         .define_msg "_SOUP"
         
+        ; sport prefixes: (e.g. Brockian Ultra Cricket)
+        ;-----------------------------------------------------------------------
         ; 245.
         .byte   _I, _CE, __end
         .define_msg "_ICE"
@@ -1561,6 +1575,8 @@ _0e00:                                                                  ;$0E00
         .byte   FN_F11, __, _U, _L, _T, _RA, __end
         .define_msg "_F9"
         
+        ; sports:
+        ;-----------------------------------------------------------------------
         ; 250.
         .byte   _H, _O, _C, _K, _E, _Y, __end
         .define_msg "_HOCKEY"
@@ -1581,7 +1597,8 @@ _0e00:                                                                  ;$0E00
         .byte   _T, _EN, _N, _I, _S, __end
         .define_msg "_TENNIS"
         
-        ; 255.
+        ;-----------------------------------------------------------------------
+        ; 255.  disk / tape error
         .byte   FN_NEWLINE, FN_MEDIA_CURRENT, __, _ER, _R, _OR
         .define_msg "_ERROR"
 
@@ -1765,7 +1782,7 @@ _3eac:                                                                  ;$3EAC
         .byte   $38             ; msg token $67
         .byte   $aa             ; msg token $68
         .byte   FN_F15          ; msg token $69
-        .byte   FN_F10          ; msg token $6A
+        .byte   FN_A            ; msg token $6A
         .byte   FN_THEIR_NAME   ; msg token $6B
         .byte   FN_F06          ; msg token $6C
         .byte   FN_F01          ; msg token $6D
