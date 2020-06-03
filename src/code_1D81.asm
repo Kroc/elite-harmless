@@ -1170,7 +1170,7 @@ _2367:                                                                  ;$2367
 ;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
 ;
-.txt_docked_token1B                                                     ;$2372
+.txt_docked_theirName                                                   ;$2372
 .txt_docked_token1C                                                     ;$2376
 
 ;===============================================================================

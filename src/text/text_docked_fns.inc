@@ -144,17 +144,18 @@ txt_docked_token0F:                                                     ;$24A6
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token1B
+.macro  .txt_docked_theirName
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token1B:                                                     ;$2372
+txt_docked_theirName:                                                   ;$2372
 ;-------------------------------------------------------------------------------
-.export txt_docked_token1B
+.export txt_docked_theirName
 
-        ; print some message from msg index $D9(217)+?
+        ; print a name from the docked token list:
         ; ("CURRUTHERS" / "FOSDYKE_SMYTHE" / "FORTESQUE")
-        lda # $d9
-        bne _2378               ; always branches
+.import TXT_DOCKED_CURRUTHERS:direct
+        lda # TXT_DOCKED_CURRUTHERS
+        bne _2378               ; (always branches)
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -168,10 +169,10 @@ txt_docked_token1C:                                                     ;$2376
 
         ; print some message from msg index $DC(220)+?
         lda # $dc
-_2378:                                                                  ;$2378
-        clc 
+
+_2378:  clc                                                             ;$2378
         adc PLAYER_GALAXY
-        bne print_docked_str    ; always branches
+        bne print_docked_str    ; (always branches)
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro

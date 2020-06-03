@@ -137,8 +137,8 @@ txt_docked_functions:                                                   ;$250C
 .define_fn      txt_docked_incoming_message,    "INCOMING_MESSAGE"      ;=$4E
 ; $1A           ?
 .define_fn      txt_docked_token1A,             "F1A"                   ;=$4D
-; $1B           ?
-.define_fn      txt_docked_token1B,             "F1B"                   ;=$4C
+; $1B           prints an NPC's name (based on the current galaxy number)
+.define_fn      txt_docked_theirName,           "THEIR_NAME"            ;=$4C
 ; $1C           ?
 .define_fn      txt_docked_token1C,             "F1C"                   ;=$4B
 ; $1D           ?
@@ -1314,7 +1314,7 @@ _0e00:                                                                  ;$0E00
         ; 213.
         .byte   __, _COMMANDER, __, FN_F04, $7b, __, _I, __
         .byte   FN_F0D, _A, _M, FN_F02, __, _C, _A, _P
-        .byte   _T, _A, _IN, __, FN_F1B, __, FN_F0D, _O
+        .byte   _T, _A, _IN, __, FN_THEIR_NAME, __, FN_F0D, _O
         .byte   _F, _D3, __end
         .define_msg "_D5"
         
@@ -1333,6 +1333,7 @@ _0e00:                                                                  ;$0E00
         .byte   _ING_, _M, _ES, _S, _A, _GE, __end
         .define_msg "_INCOMING_MESSAGE"
         
+        ;----------------------------------------------------------------------
         ; 217.
         .byte   _C, _U, _R, _R, _U, _TH, _ER, _S, __end
         .define_msg "_CURRUTHERS"
@@ -1717,13 +1718,13 @@ _1a5c:                                                                  ;$1A5C
         .byte   _G, _A, _L, _A, _X, _Y, $76, __end
         
         ; 27.
-        .byte   $3a, FN_F1B, FN_CAPNEXT
+        .byte   $3a, FN_THEIR_NAME, FN_CAPNEXT
         .byte   FN_F16, FN_F0F, FN_F0F, $31, $2b, $31, $3a, FN_F16
         .byte   FN_CAPNEXT, FN_F14, $23, $30, $3a, FN_F04, FN_PRINT_FLIGHT_TOKEN
         .byte   FN_F16,FN_F0F, FN_F0F, $31, $35, $2b, $31, $3a, FN_F1D
-        .byte   FN_F1A, FN_F07, FN_F1B, FN_F1B, $35, $33, _Z, $21
-        .byte   _HYPHEN, $3d, $2e, FN_F1B, FN_F1B, $35, $32, $20
-        .byte   FN_F1B, FN_CAPNEXT, FN_F16, FN_F0F, FN_F0F, $31, $3a, FN_F04
+        .byte   FN_F1A, FN_F07, FN_THEIR_NAME, FN_THEIR_NAME, $35, $33, _Z, $21
+        .byte   _HYPHEN, $3d, $2e, FN_THEIR_NAME, FN_THEIR_NAME, $35, $32, $20
+        .byte   FN_THEIR_NAME, FN_CAPNEXT, FN_F16, FN_F0F, FN_F0F, $31, $3a, FN_F04
 
 ;$1D00
 
@@ -1752,7 +1753,7 @@ _3eac:                                                                  ;$3EAC
         .byte   $aa             ; msg token $68
         .byte   FN_F15          ; msg token $69
         .byte   FN_F10          ; msg token $6A
-        .byte   FN_F1B          ; msg token $6B
+        .byte   FN_THEIR_NAME   ; msg token $6B
         .byte   FN_F06          ; msg token $6C
         .byte   FN_F01          ; msg token $6D
         .byte   $8c             ; msg token $6E
