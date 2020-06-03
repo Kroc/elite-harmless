@@ -11,8 +11,7 @@ The game is disassembled but documentation is on-going.
 Some improvements have been implemented, see below.
 Help is needed in these areas:
 
-* Understanding / commenting the 3D math code;  
-  working out how to rebuild the math tables from macros
+* Understanding / commenting the 3D math code
 * Commenting SID code (I know literally nothing of audio theory)
 * See also the [list of "Help Wanted" issues][helpw]
 
@@ -21,6 +20,8 @@ Help is needed in these areas:
 ## Improvements Implemented ##
 
 * _Multiplication routine upgraded to a faster version:_ I was able to free up 2 KB and insert some multiplication look-up tables which gives a general speed-up for 3D math
+
+* Faster line-drawing code, provided by [dyme](https://github.com/dyme6510)
 
 * _The code was unnecessarily storing and copying the blank space either side of the HUD_, where the C64's screen is 320px wide rather than 256px on the BBC, on *every frame*; and with an inefficient copy routine. Needless to say, in _Elite : Harmless_ the blank space is neither stored nor copied and the copy method is much faster
 
@@ -42,7 +43,9 @@ Due to legal concerns, _Elite : Harmless_ binaries (i.e. disk images) are not ma
 
 ## Acknowledgements ##
 
-This work was made possible by various resources available on the web, for which I would like to give thanks to the people involved and for the love and effort they've poured into their work.
+This work was made possible by various resources available on the web, for which I would like to give thanks to the people involved and for the love and effort they've poured into their work:
+
+* Both [Dyme](https://github.com/dyme6510) and nc513 ([Lemon64 forums](https://www.lemon64.com/forum/)) have contributed solid technical understanding and code to the project
 
 * [Ian Bell's Elite Archives][ian] for providing the original BBC Tape source code, as well as numerous resources for all classic _Elite_ fans
 
@@ -52,6 +55,8 @@ This work was made possible by various resources available on the web, for which
 
 [bbc-flight]: http://www.elitehomepage.org/archive/a/d4090012.txt
 [bbc-docked]: http://www.elitehomepage.org/archive/a/d4090010.txt
+
+* Andy McFadden's [Apple \]\[ Elite disassembly](https://6502disassembly.com/a2-elite)
 
 * [Elite's crazy tokenised string routine][crazy] by Matt Godbolt
 
