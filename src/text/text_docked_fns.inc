@@ -80,17 +80,19 @@ txt_docked_token08:                                                     ;$2478
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token09
+.macro  .txt_docked_clearScreen
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-; switch to view "1"(?)
-;
-txt_docked_token09:                                                     ;$2483
+
+txt_docked_clearScreen:                                                 ;$2483
 ;-------------------------------------------------------------------------------
-.export txt_docked_token09
+; move the cursor to the left and switch to an empty menu page:
+; the game uses this for various interstitial screens such as
+; "INCOMING MESSAGE"
+;
+.export txt_docked_clearScreen
 
-        lda # 1
+        lda # 1                 ;=page::empty
         jsr set_cursor_col
-
         jmp set_page
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -207,7 +209,7 @@ txt_docked_token12:                                                     ;$24CE
 ;-------------------------------------------------------------------------------
 .export txt_docked_token12
 
-        jsr txt_docked_token_set_lowercase
+        jsr txt_docked_capitalizeNext
 
         jsr get_random_number
         and # %00000011
@@ -233,15 +235,14 @@ _24d7:                                                                  ;$24D7
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token_set_lowercase ;(docked token $13)
+.macro  .txt_docked_capitalizeNext ;(docked token $13)
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token_set_lowercase:                                         ;$24ED
+txt_docked_capitalizeNext:                                              ;$24ED
 ;-------------------------------------------------------------------------------
-.export txt_docked_token_set_lowercase
+.export txt_docked_capitalizeNext
         
-        ; msg token $13
-        ;
+        ; set ASCII upper-case (for next character)
         lda # %11011111
         sta txt_lcase_mask
 

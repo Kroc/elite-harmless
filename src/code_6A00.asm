@@ -251,8 +251,7 @@ planet_screen:                                                          ;$6AA1
 ; planetary information screen
 ;
 ;-------------------------------------------------------------------------------
-        ; switch to planetary information page
-        lda # $01
+        lda # page::empty
         jsr set_page_6a2f
 
         lda # 9
@@ -1975,7 +1974,7 @@ _73dd:                                                                  ;$73DD
         lda ZP_SCREEN           ; are we in the cockpit-view?
        .bnz :+                  ; no? skip over
 
-        jsr set_page
+        jsr set_page            ; switch to cockpit view (A = 0)
         jsr _3795
 
 :       jsr get_ctrl                                                    ;$73F5
@@ -2362,7 +2361,7 @@ _764c:                                                                  ;$764C
         cmp # $08
         bcc _7658
 
-        lda # $20               ;? (probably planet info page)
+        lda # $20               ;?
         jsr set_page
 _7658:                                                                  ;$7658
         lda # 16
@@ -6054,7 +6053,7 @@ _87fd:                                                                  ;$87FD
 
         ; switch to cockpit-view(?)
         ; (does not call `set_page` though)
-        ldy # $00
+        ldy # page::cockpit     ; NOTE: Y = 0
         sty ZP_SCREEN
 
         sty ZP_POLYOBJ_XPOS_MI

@@ -4051,13 +4051,10 @@ _3dff:                                                                  ;$3DFF
         sta ZP_A5
         jsr _7c6b
 
-        lda # 1
+        lda # 1                 ;=page::empty
         jsr set_cursor_col
-        
         sta ZP_POLYOBJ_ZPOS_MI
-        
-        ; switch to page "1"(?)
-        jsr set_page
+        jsr set_page            ; switch to an empty menu page
 
         lda # $40
         sta ZP_A3               ; move counter?

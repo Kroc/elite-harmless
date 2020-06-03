@@ -2241,17 +2241,15 @@ _a6ad:                                                                  ;$A6AD
         rts 
 
 
-
-
-;===============================================================================
-; set cockpit view (front / rear / left / right)
-;
-;       X = $00 = front
-;           $01 = rear
-;           $02 = left
-;           $03 = right
-;
 _a6ae:                                                                  ;$A6AE
+;===============================================================================
+; set cockpit view:
+;
+; in:   X       $00 = front
+;               $01 = rear ("aft")
+;               $02 = left
+;               $03 = right
+;-------------------------------------------------------------------------------
         stx COCKPIT_VIEW
         jsr set_page
         jsr _a6d4
@@ -2272,9 +2270,10 @@ _a6ba:                                                                  ;$A6BA
         beq _a6ad               ; view did not change, rts
         stx COCKPIT_VIEW
 
-        jsr set_page
+        jsr set_page            ; switch to cockpit view
         jsr dust_swap_xy        ; is this an opt: avoid rand
         jsr _7b1a
+
 _a6d4:                                                                  ;$A6D4
 
 .ifdef  OPTION_ORIGINAL
@@ -2288,7 +2287,6 @@ _a6d4:                                                                  ;$A6D4
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ; TODO: is this instruction unecessary?
         ldy COCKPIT_VIEW        ; current viewpoint (front, rear, left, right)
 
         lda PLAYER_LASERS, y    ; get type of laser for current viewpoint
@@ -2299,13 +2297,13 @@ _a6d4:                                                                  ;$A6D4
         ; for where this value is defined
         ldy # ELITE_SPRITES_INDEX
         
-        cmp # $0f               ; a type of laser?
+        cmp # $0f               ; TODO: a type of laser?
         beq :+
         iny                     ; select next sprite index
-        cmp # $8f               ; a type of laser?
+        cmp # $8f               ; TODO: a type of laser?
         beq :+
         iny                     ; select next sprite index
-        cmp # $97               ; a type of laser?
+        cmp # $97               ; TODO: a type of laser?
         beq :+
         iny                     ; select next sprite index
 
@@ -2386,7 +2384,7 @@ trumbles_sprite_mask:                                                   ;$A727
 
 set_page:                                                               ;$A72F
 ;===============================================================================
-; switch screen page?
+; switch screen page:
 ;
 ; in:   A       page to switch to; e.g. cockpit-view, galactic chart &c.
 ;               see the `page` constants defined in `vars_zeropage.asm`

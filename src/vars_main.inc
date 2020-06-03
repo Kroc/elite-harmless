@@ -13,7 +13,7 @@ VAR_0403                = $0403
 VAR_0441                = $0441 ;?
 
 ;-------------------------------------------------------------------------------
-; up to 11 3D-objects ("poly objcets") can be in the game at a time.
+; up to 11 3D-objects ("poly objects") can be in the game at a time.
 ; these are the 11 available slots; a value of $00 represents an unused slot,
 ; otherwise the value is a hull index (see "hull_data.asm") 
 

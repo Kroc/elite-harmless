@@ -355,11 +355,13 @@ ZP_SCREEN               = $a0
 .enum   page
         ;-----------------------------------------------------------------------
         cockpit         = $00   ; MUST BE ZERO (due to numerous BEQ/BNE checks)
+        
+        empty           = $01   ;=%00000001     a non-specific, empty menu page
         buy_cargo       = $02   ;=%00000010
         sell_cargo      = $04   ;=%00000100
         status          = $08   ;=%00001000
-        inventory       = $08   ;=%00001000     ; same, why?
-        title           = $0d   ;=%00001101     ;?
+        inventory       = $08   ;=%00001000     same, why?
+        title           = $0d   ;=%00001101     ?
         market          = $10   ;=%00010000
         buy_equip       = $20   ;=%00100000
         

@@ -1483,13 +1483,13 @@ _2441:  ; process msg tokens $5B..$80                                   ;$2441
 ;
 .txt_docked_token01_02                                                  ;$246A
 .txt_docked_token08                                                     ;$2478
-.txt_docked_token09                                                     ;$2483
+.txt_docked_clearScreen                                                 ;$2483
 .txt_docked_token0D                                                     ;$248B
 .txt_docked_token06_05                                                  ;$2496
 .txt_docked_token0E_0F                                                  ;$24A3
 .txt_docked_token11                                                     ;$24B0
 .txt_docked_token12                                                     ;$24CE
-.txt_docked_token_set_lowercase                                         ;$24ED
+.txt_docked_capitalizeNext                                              ;$24ED
 
 is_vowel:                                                               ;$24F3
         ;=======================================================================
