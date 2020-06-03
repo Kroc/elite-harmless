@@ -306,6 +306,8 @@ _msg_index     .set 0
 
         _value .set .encrypt( _msg_index )
         
+        ; define the locally encrypted name, e.g. "_A",
+        ; used for the text database
         .ident(msg_id) = _value
 
         ; define an export for the index-number of the message;
@@ -364,7 +366,7 @@ _0e00:                                                                  ;$0E00
         .define_msg "_COMPETITION_NUMBER"
         
         ; 5.
-        .byte   _B0, $3a, _IS, $39, _B1, __end
+        .byte   _B0, ($6d ^ TXT_DOCKED_XOR), _IS, ($6e ^ TXT_DOCKED_XOR), _B1, __end
         .define_msg "_05"
         
         ; 6.
@@ -388,8 +390,8 @@ _0e00:                                                                  ;$0E00
         .define_msg "_ILLEGAL_FILE"
         
         ; 10.
-        .byte   FN_F17, FN_F0E, FN_F02
-        .byte   _G, _RE, _ET, _IN, _G, _S, _D5
+        .byte   FN_F17, FN_F0E, FN_F02, _G, _RE, _ET, _IN, _G, _S
+        .byte   _COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY
         .byte   _AND_, FN_CAPNEXT, _I, __, _BE, _G, _A_, _M, _O, _M, _EN, _T
         .byte   __, _O, _F, __, _YOU, _R, __, _V, _AL, _U, _AB, _LE
         .byte   __, _TI, _M, _E, _NEW_SENTENCE
@@ -424,12 +426,12 @@ _0e00:                                                                  ;$0E00
         .byte   _NEW_SENTENCE
 
         .byte   _YOU, __, _A, _RE, __, _C, _A, _U, _TI, _ON, _ED_, _TH, _AT, __
-        .byte   _ON, _L, _Y, __, FN_F06, $22, FN_F05, _S, __, _W, _IL, _L, __
-        .byte   _P, _EN, _ET, _RA, _T, _E, __, _THE, _N, _E, _W, __
+        .byte   _ON, _L, _Y, __, FN_F06, ($75 ^ TXT_DOCKED_XOR), FN_F05, _S, __
+        .byte   _W, _IL, _L, __, _P, _EN, _ET, _RA, _T, _E, __, _THE, _N, _E, _W, __
         .byte   _S, _H, _I, _E, _L, _D, _S, _AND_, _TH, _AT, __, _THE
         .byte   FN_CAPNEXT, _C, _ON, _ST, _R, _I, _C, _T, _OR, _IS
         .byte   _F, _IT, _T, _ED_, _W, _I, _TH, __, _AN, __, FN_F06
-        .byte   $3b, FN_F05, _B1, FN_F02, FN_F08
+        .byte   ($6c ^ TXT_DOCKED_XOR), FN_F05, _B1, FN_F02, FN_F08
         .byte   _G, _O, _O, _D, __, _L, _U, _C, _K, _COMMA, __, _COMMANDER
         .byte   _D4, FN_F16, __end
         .define_msg "_0A"
@@ -437,7 +439,7 @@ _0e00:                                                                  ;$0E00
         ; 11.
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN, FN_F17, FN_F0E
         .byte   FN_F02, __, __, _AT, _T, _EN, _TI, _ON
-        .byte   $82, _DOT, __, FN_CAPNEXT, _W, _E, __, _H
+        .byte   _COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY, _DOT, __, FN_CAPNEXT, _W, _E, __, _H
         .byte   _A, _VE, __, _N, _E, _ED_, _O, _F
         .byte   __, _YOU, _R, __, _SE, _R, _V, _I
         .byte   _C, _ES, __, _A, _G, _A, _IN, _NEW_SENTENCE
@@ -528,7 +530,7 @@ _0e00:                                                                  ;$0E00
         .define_msg "_1A"
 
         ; 27.
-        .byte   $25, __end
+        .byte   ($72 ^ TXT_DOCKED_XOR), __end
         .define_msg "_1B"
 
         ; 28.
@@ -544,7 +546,7 @@ _0e00:                                                                  ;$0E00
         .define_msg "_PINK"
         
         ; 31.
-        .byte   FN_F02, $20, __, $21
+        .byte   FN_F02, ($77 ^ TXT_DOCKED_XOR), __, ($76 ^ TXT_DOCKED_XOR)
         .byte   FN_F0D, __, _PLANT, _A, _TI, _ON, _S, __end
         .define_msg "_1F"
 
@@ -854,14 +856,14 @@ _0e00:                                                                  ;$0E00
         ;-----------------------------------------------------------------------
         ; 106.
         .byte   _I, __, _H, _E, _AR
-        .byte   _A_, $25, __, _LO, _O, _K, _ING_, _SHIP
+        .byte   _A_, ($72 ^ TXT_DOCKED_XOR), __, _LO, _O, _K, _ING_, _SHIP
         .byte   __, _A, _P, _P, _E, _AR, _ED_, _AT
         .byte   _ERRIUS, __end
         .define_msg "_6A"
         
         ; 107.
         .byte   _Y, _E, _A, _H, _COMMA, __
-        .byte   _I, __, _H, _E, _AR, _A_, $25, __
+        .byte   _I, __, _H, _E, _AR, _A_, ($72 ^ TXT_DOCKED_XOR), __
         .byte   _SHIP, __, _LE, _F, _T, _ERRIUS, _A_, __
         .byte   _W, _H, _I, _LE, __, _B, _A, _C
         .byte   _K, __end
@@ -1022,7 +1024,7 @@ _0e00:                                                                  ;$0E00
         .define_msg "_8F"
         
         ; 144.
-        .byte   __, _A, $38, __, $27, __end
+        .byte   __, _A, ($6f ^ TXT_DOCKED_XOR), __, $27, __end
         .define_msg "_90"
         
         ; 145.
@@ -1122,7 +1124,7 @@ _0e00:                                                                  ;$0E00
         .define_msg "_INGRAINED"
         
         ; 169.
-        .byte   $25, __end
+        .byte   ($72 ^ TXT_DOCKED_XOR), __end
         .define_msg "_A9"
         
         ; 170.
@@ -1340,7 +1342,7 @@ _0e00:                                                                  ;$0E00
         .byte   __, _COMMANDER, __, FN_F04, _COMMA, __, _I, __, FN_F0D, _A, _M
         .byte   FN_F02, __, _C, _A, _P, _T, _A, _IN, __, FN_THEIR_NAME, __
         .byte   FN_F0D, _O, _F, _HER_MAJESTYS_SPACE_NAVY, __end
-        .define_msg "_D5"
+        .define_msg "_COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY"
         
         ; 214.
         .byte   __end
@@ -1469,7 +1471,7 @@ _0e00:                                                                  ;$0E00
         .byte   _F, _OR, __, _THE, _M, _O, _M, _EN, _T, __
         .byte   _P, _LE, _A, _SE, __, _A, _C, _CE
         .byte   _P, _T, __, _THIS, FN_CAPNEXT, _N, _A, _V
-        .byte   _Y, __, FN_F06, $25, FN_F05, __, _A, _S
+        .byte   _Y, __, FN_F06, ($72 ^ TXT_DOCKED_XOR), FN_F05, __, _A, _S
         .byte   __, _P, _A, _Y, _M, _EN, _T, _D4
         .byte   FN_WAIT_FOR_KEY, __end
         .define_msg "_DF"
@@ -1641,21 +1643,22 @@ _1a5c:                                                                  ;$1A5C
         .byte   __end
         
         ; 2.
+        ; TODO: "constrictor" should be capitalised
         .byte   _THE, _C, _ON, _ST, _R, _I, _C, _T, _OR, __, _CB
+        ; TODO: "reesdice" should be capitalised
         .byte   _RE, _ES, _DI, _CE, _COMMA, __, _COMMANDER
         .byte   __end
 
         ; 3.
-        .byte   _A, __, $25, __, _LO, _O, _K, _ING_
-        .byte   _SHIP, __, _LE, _F, _T, __, _H, _E
-        .byte   _RE, _A_, _W, _H, _I, _LE, __, _B
-        .byte   _A, _C, _K, _DOT, __, _L, _O, _O
-        .byte   _K, _ED_, _B, _OU, _N, _D, __, _F
-        .byte   _OR, __, _AR, _E, _XE, __end
+        .byte   _A, __, ($72 ^ TXT_DOCKED_XOR), __, _LO, _O, _K, _ING_, _SHIP
+        .byte   __, _LE, _F, _T, __, _H, _E, _RE, _A_, _W, _H, _I, _LE, __
+        .byte   _B, _A, _C, _K, _DOT, __, _L, _O, _O, _K, _ED_
+        ; TODO: "arexe" should be capitalised
+        .byte   _B, _OU, _N, _D, __, _F, _OR, __, _AR, _E, _XE, __end
         
         ; 4.
         .byte   _Y, _E
-        .byte   _P, _COMMA, _A_, $25, _NEW, _SHIP, __, _H
+        .byte   _P, _COMMA, _A_, ($72 ^ TXT_DOCKED_XOR), _NEW, _SHIP, __, _H
         .byte   _A, _D, _A_, _G, _AL, _A, _C, _TI
         .byte   _C, __, _H, _Y, _P, _ER, _D, _R
         .byte   _I, _VE, __, _F, _IT, _T, _ED_, _H
@@ -1663,7 +1666,7 @@ _1a5c:                                                                  ;$1A5C
         .byte   _T, _O, _O, __end
         
         ; 5.
-        .byte   _THIS, __, $25, __
+        .byte   _THIS, __, ($72 ^ TXT_DOCKED_XOR), __
         .byte   _SHIP, __, _D, _E, _H, _Y, _P, _ED_
         .byte   _H, _E, _RE, __, _F, _R, _O, _M
         .byte   __, _NO, _W, _H, _E, _RE, _COMMA, __
@@ -1683,30 +1686,26 @@ _1a5c:                                                                  ;$1A5C
         .byte   __, _THE, $24, __end
         
         ; 7.
-        .byte   _O, _H, __, _D
-        .byte   _E, _AR, __, _M, _E, __, _Y, _ES
-        .byte   _DOT, _A_, _F, _R, _I, _G, _H, _T
-        .byte   _F, _U, _L, __, _R, _O, _G, _U
-        .byte   _E, __, _W, _I, _TH, __, _W, _H
-        .byte   _AT, __, _I, __, _BE, _L, _I, _E
-        .byte   _VE, __, _YOU, __, _P, _E, _O, _P
-        .byte   _LE, __, _C, _AL, _L, _A_, _LE, _A
-        .byte   _D, __, _P, _O, _ST, _ER, _I, _OR
-        .byte   __, _S, _H, _O, _T, __, _U, _P
-        .byte   __, _LO, _T, _S, __, _O, _F, __
-        .byte   _TH, _O, _SE, __, _BE, _A, _ST, _L
-        .byte   _Y, __, _P, _I, _RA, _T, _ES, _AND_
+        .byte   _O, _H, __, _D, _E, _AR, __, _M, _E, __, _Y, _ES, _DOT
+        .byte   _A_, _F, _R, _I, _G, _H, _T, _F, _U, _L, __
+        .byte   _R, _O, _G, _U, _E, __, _W, _I, _TH, __, _W, _H, _AT, __
+        .byte   _I, __, _BE, _L, _I, _E, _VE, __, _YOU, __
+        .byte   _P, _E, _O, _P, _LE, __, _C, _AL, _L, _A_, _LE, _A, _D, __
+        .byte   _P, _O, _ST, _ER, _I, _OR, __, _S, _H, _O, _T, __, _U, _P, __
+        .byte   _LO, _T, _S, __, _O, _F, __, _TH, _O, _SE, __
+        .byte   _BE, _A, _ST, _L, _Y, __, _P, _I, _RA, _T, _ES, _AND_
+        ; TODO: "usleri" should be capitalised
         .byte   _W, _EN, _T, _TO, _US, _LE, _R, _I
         .byte   __end
         
         ; 8.
-        .byte   _YOU, __, _C, _AN, __, _T, _A
-        .byte   _C, _K, _LE, __, _THE, $3f, __, $24
-        .byte   __, _I, _F, __, _YOU, __, _L, _I
-        .byte   _K, _E, _DOT, __, _H, _E, _APOS, _S
-        .byte   __, _AT, __, _OR, _AR, _RA, __end
+        .byte   _YOU, __, _C, _AN, __, _T, _A, _C, _K, _LE, __, _THE
+        .byte   $3f, __, $24, __
+        .byte   _I, _F, __, _YOU, __, _L, _I, _K, _E, _DOT, __
+        ; TODO: "orarra" should be capitalised
+        .byte   _H, _E, _APOS, _S, __, _AT, __, _OR, _AR, _RA, __end
         
-        ; 9.
+        ; 9.    still waiting on OP...
         .byte   FN_F01
         .byte   _C, _O, _M, _ING_, _SO, _ON, _COLON, __
         .byte   _E, _L, _IT, _E, __, _I, _I, __end
@@ -1731,9 +1730,8 @@ _1a5c:                                                                  ;$1A5C
         
         ; 24.
         .byte   _TH, _ER, _E, _APOS, _S, _A_
-        .byte   _RE, _AL, __, $24, __, _P, _I, _RA
-        .byte   _T, _E, __, _OU, _T, __, _TH, _ER
-        .byte   _E, __end
+        .byte   _RE, _AL, __, ($73 ^ TXT_DOCKED_XOR), __, _P, _I, _RA
+        .byte   _T, _E, __, _OU, _T, __, _TH, _ER, _E, __end
         
         ; 25.
         .byte   _THE, _INHABITANT, _S, __, _O, _F
@@ -1769,7 +1767,15 @@ _1a5c:                                                                  ;$1A5C
 ; I believe these are a series of expansion-tokens
 ; that act as templates for planet descriptions
 
+; docked tokens $5B...$80 (unscrambled) are re-routed through this table:
+; $5B is subtracted so that a docked token of $5B will read the first entry
+; in this table, and the value is re-used as a new docked token to print.
+; ergo, the tokens this table refers to are the *UNSCRAMBLED* indices,
+; unlike the codes used in the text-database. this is why this table can't
+; use the existing token names
+;
 _3eac:                                                                  ;$3EAC
+;-------------------------------------------------------------------------------
 .export _3eac
         .byte   $10             ; msg token $5B
         .byte   $15             ; msg token $5C
@@ -1785,17 +1791,17 @@ _3eac:                                                                  ;$3EAC
         .byte   $33             ; msg token $66
         .byte   $38             ; msg token $67
         .byte   $aa             ; msg token $68
-        .byte   FN_F15          ; msg token $69
-        .byte   FN_A            ; msg token $6A
-        .byte   FN_THEIR_NAME   ; msg token $6B
-        .byte   FN_F06          ; msg token $6C
-        .byte   FN_F01          ; msg token $6D
+        .byte   $42             ; msg token $69
+        .byte   $47             ; msg token $6A
+        .byte   $4c             ; msg token $6B
+        .byte   $51             ; msg token $6C
+        .byte   $56             ; msg token $6D
         .byte   $8c             ; msg token $6E
         .byte   $60             ; msg token $6F
         .byte   $65             ; msg token $70
-        .byte   _A_             ; msg token $71
+        .byte   $8f             ; msg token $71
         .byte   $82             ; msg token $72
-        .byte   FN_NEWLINE      ; msg token $73
+        .byte   $5b             ; msg token $73
         .byte   $6a             ; msg token $74
         .byte   $b4             ; msg token $75
         .byte   $b9             ; msg token $76

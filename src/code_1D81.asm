@@ -1439,7 +1439,7 @@ _2438:  ; restore state and exit                                        ;$2438
        .ply 
         rts 
 
-_2441:  ; process msg tokens $5B..$80                                   ;$2441
+_2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
         ;-----------------------------------------------------------------------
         sta ZP_TEMP_ADDR1_LO    ; put token aside
 
