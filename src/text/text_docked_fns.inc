@@ -144,7 +144,7 @@ txt_docked_token0F:                                                     ;$24A6
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_theirName
+.macro  .txt_docked_tokens_theirName_protoGalaxy
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 txt_docked_theirName:                                                   ;$2372
@@ -157,21 +157,22 @@ txt_docked_theirName:                                                   ;$2372
         lda # TXT_DOCKED_CURRUTHERS
         bne _2378               ; (always branches)
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
-
-.macro  .txt_docked_token1C
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-txt_docked_token1C:                                                     ;$2376
+txt_docked_protoGalaxy:                                                 ;$2376
 ;-------------------------------------------------------------------------------
-.export txt_docked_token1C
+.export txt_docked_protoGalaxy
 
-        ; print some message from msg index $DC(220)+?
-        lda # $dc
+        ; when receiving the mission for tracking down the prototype ship,
+        ; the last part of the sentence "it went missing from our ship yard
+        ; on Xeer five months ago and..." is appended with a message based
+        ; upon the current galaxy number; it was probably intended to chase
+        ; the prototype ship across multiple galaxies, but this idea appears
+        ; to have been scrapped
+        ;
+.import TXT_DOCKED_IS_BELIEVED_TO_HAVE_JUMPED_TO_THIS_GALAXY:direct
+        lda # TXT_DOCKED_IS_BELIEVED_TO_HAVE_JUMPED_TO_THIS_GALAXY-1
 
 _2378:  clc                                                             ;$2378
-        adc PLAYER_GALAXY
+        adc PLAYER_GALAXY       ; add galaxy number to message index
         bne print_docked_str    ; (always branches)
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

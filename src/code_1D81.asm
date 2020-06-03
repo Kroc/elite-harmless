@@ -1170,8 +1170,7 @@ _2367:                                                                  ;$2367
 ;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
 ;
-.txt_docked_theirName                                                   ;$2372
-.txt_docked_token1C                                                     ;$2376
+.txt_docked_tokens_theirName_protoGalaxy                                ;$2372
 
 ;===============================================================================
 ; print a message from the message table at `_1a5c` rather than the
@@ -1202,11 +1201,11 @@ print_docked_str:                                                       ;$2390
 ;===============================================================================
 ; prints one of the strings from "text_docked.asm"
 ;
-;       A = index of string to print
+; in:   A       index of string to print
 ;
-; preserves A, Y & $5B/$5C
-; (due to recursion)
-;
+; out:  A, Y    preserves A, Y & ZP_TEMP_ADDR3
+;               (due to recursion)
+;-------------------------------------------------------------------------------
 .import _0e00
 
         pha                     ; preserve A (message index)
