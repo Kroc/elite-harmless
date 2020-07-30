@@ -99,14 +99,14 @@ interrupt_end_XA:                                                       ;$A8ED
         pla                     ; restore A
         rti                     ; "ReTurn from Interrupt"
 
+
+interrupt:                                                              ;$A8FA
 ;===============================================================================
 ; this is Elite's main interrupt routine
 ;
 ; note that this routine gets called by both raster splits,
-; so functionality for both is combined in the one routine
-;
-interrupt:                                                              ;$A8FA
-
+; so functionality for both is combined into the one routine
+;-------------------------------------------------------------------------------
         pha                     ; preserve A
 
         ; the current memory map (BASIC, KERNAL, and/or I/O) could be anything
@@ -329,7 +329,7 @@ interrupt_end_YXA:                                                      ;$AA04
 .else   ;///////////////////////////////////////////////////////////////////////
         ; in elite-harmless the previous memory layout state
         ; has been pushed to the stack
-        pla
+        pla 
 .endif  ;///////////////////////////////////////////////////////////////////////
         sta CPU_CONTROL         ; restore the memory map
 
@@ -391,12 +391,12 @@ _aaa2:                                                                  ;$AAA2
         .byte   $03, $03, $03, $0f, $0f, $ff, $ff, $1f
         .byte   $ff, $ff, $03, $03, $0f, $ff, $ff, $03
 
+
+init_mem:                                                               ;$AAB2
 ;===============================================================================
 ; clear the main variable space and initialise the interrupts:
 ; CALL FROM LOADER; this is the first thing called after initialisation
-;
-init_mem:                                                               ;$AAB2
-
+;-------------------------------------------------------------------------------
 .export init_mem
 .import __VARS_MAIN_RUN__       ; runtime location
 .import __VARS_MAIN_SIZE__      ; and length
@@ -475,7 +475,7 @@ init_mem:                                                               ;$AAB2
 
         ; set the flag for raster interrupts, but note that with CIA1 & 2
         ; interrupts currently enabled, the raster interrupt won't fire
-        inx
+        inx 
         stx VIC_INTERRUPT_CONTROL
 
         ; the 9th bit (for scanlines 256-312) of the raster line register
@@ -532,13 +532,12 @@ init_mem:                                                               ;$AAB2
         sta HW_VECTOR_IRQ+0
 
         cli                     ; enable interrupts
-        rts
+        rts 
 
+nmi_null:                                                               ;$AB27
 ;===============================================================================
 ; a Non-Maskable-Interrupt that does nothing; used to disable the
 ; RESTORE key and to prevent crashes when the KERNAL ROM is off
-;
-nmi_null:                                                               ;$AB27
-
+;-------------------------------------------------------------------------------
         cli                     ; re-enable interrupts
         rti                     ; "ReTurn from Interrupt"

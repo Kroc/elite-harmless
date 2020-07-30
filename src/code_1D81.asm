@@ -1172,11 +1172,11 @@ _2367:                                                                  ;$2367
 ;
 .txt_docked_tokens_theirName_protoGalaxy                                ;$2372
 
-;===============================================================================
-; print a message from the message table at `_1a5c` rather than the
-; standard one (`_0e00`)
-; 
 _237e:                                                                  ;$237E
+;===============================================================================
+; print a message from the message table at `_1a5c`
+; rather than the standard one (`_0e00`)
+;-------------------------------------------------------------------------------
         ; push the current state:
         pha 
         tax 
@@ -1279,8 +1279,9 @@ _23a0:                                                                  ;$23A0
 
         rts 
 
+
 print_docked_token:                                                     ;$23CF
-        ;=======================================================================
+;===============================================================================
         cmp # ' '               ; tokens less than $20 (space)
        .blt _format_code        ; are format codes
 
@@ -1304,7 +1305,7 @@ print_docked_token:                                                     ;$23CF
         ; print docked token:
         ;-----------------------------------------------------------------------
 :       cmp # 'z'+1             ; letters "A" to "Z"?                   ;$23E8
-       .blt _2404               ; print letters, handling auto-casing
+       .blt print_docked_char   ; print letters, handling auto-casing
 
         cmp # $81               ; tokens $5B...$80?
        .blt _2441               ; handle planet description tokens
@@ -1317,19 +1318,20 @@ print_docked_token:                                                     ;$23CF
 .import txt_docked_pair1
 .import txt_docked_pair2
 
+        ; TODO: use a constant
         sbc # $d7               ; re-index as $00...$28
         asl                     ; double, for lookup-table
         pha                     ; (put aside)
         tax                     ; use as index to table
-        lda txt_docked_pair1, x ; read 1st character and print it
-
-        jsr _2404
+        lda txt_docked_pair1, x ; read 1st character...
+        jsr print_docked_char   ; ...and print it
 
         pla                     ; get the offset again
-        tax 
-        lda txt_docked_pair2, x ; read 2nd character and print it
-
-_2404:  ; print a character                                             ;$2404
+        tax                     ; use as index to table
+        lda txt_docked_pair2, x ; read 2nd character...
+                                ; ...and print it (fallthrough)
+        
+print_docked_char:                                                      ;$2404
         ;-----------------------------------------------------------------------
         ; print the punctuation characters ($20...$40), as is
         ;
@@ -1361,39 +1363,7 @@ _2404:  ; print a character                                             ;$2404
 _format_code:                                                           ;$241B
         ;=======================================================================
         ; tokens $00..$1F are format codes, each has a different behaviour:
-        ;
-        ;    $00 = invalid
-        ;    $01 = ?
-        ;    $02 = ?
-        ;    $03 = ?
-        ;    $04 = ?
-        ;    $05 = ?
-        ;    $06 = ?
-        ;    $07 = ?
-        ;    $08 = ?
-        ;    $09 = ?
-        ;    $0A = ?
-        ;    $0B = ?
-        ;    $0C = ?
-        ;    $0D = ?
-        ;    $0E = ?
-        ;    $0F = ?
-        ;    $10 = ?
-        ;    $11 = ?
-        ;    $12 = ?
-        ;    $13 = set lower-case
-        ;    $14 = ?
-        ;    $15 = ?
-        ;    $16 = ?
-        ;    $17 = ?
-        ;    $18 = ?
-        ;    $19 = ?
-        ;    $1A = ?
-        ;    $1B = ?
-        ;    $1C = ?
-        ;    $1D = ?
-        ;    $1E = ?
-        ;    $1F = ?
+        ; see "txt_docked.asm" for details
 
         ; snapshot current state:
         ; -- these format codes can get recursive
@@ -1470,8 +1440,7 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
 .import _3eac
         
         ldx ZP_TEMP_ADDR1_LO
-        adc _3eac - $5B, x
-
+        adc _3eac - $5B, x      ; TODO: use a constant for $5B
         jsr print_docked_str    ; print the new message
 
         jmp _2438               ; clean up and exit
@@ -1490,8 +1459,8 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
 .txt_docked_capitalizeNext                                              ;$24ED
 
 is_vowel:                                                               ;$24F3
-        ;=======================================================================
-        ora # %00100000
+;===============================================================================
+        ora # %00100000         ; force upper-case for comparison
         cmp # $61               ; 'A'?
         beq :+
         cmp # $65               ; 'E'?
@@ -1508,7 +1477,9 @@ is_vowel:                                                               ;$24F3
 
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
-_250b:  rts                                                             ;$250B
+original_250b:                                                          ;$250B
+;===============================================================================
+        rts
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 

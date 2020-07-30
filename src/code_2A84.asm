@@ -187,12 +187,12 @@ _290f:                                                                  ;$209F
 
 draw_particle:                                                          ;$2918
 ;===============================================================================
-; draw a single dust particle
+; draw a single dust particle:
 ;
-;   ZP_VAR_X = X-distance from middle of screen
-;   ZP_VAR_Y = Y-distance from middle of screen
-;   ZP_VAR_Z = dust Z-distance;
-;
+; in:   ZP_VAR_X        X-distance from middle of screen
+;       ZP_VAR_Y        Y-distance from middle of screen
+;       ZP_VAR_Z        dust Z-distance
+;-------------------------------------------------------------------------------
         lda ZP_VAR_X
         bpl :+                  ; handle dust to the right
         
@@ -234,16 +234,18 @@ draw_particle:                                                          ;$2918
 
         ; fall through to the routine that does
         ; the actual bitmap manipulation
+        ;
 
 paint_particle:                                                         ;$293A
 ;===============================================================================
-; paint a dust particle to the bitmap screen
+; paint a dust particle to the bitmap screen:
 ;
-;        A = Y-position (px)
-;        X = X-position (px)
-; ZP_VAR_Z = dust Z-distance
-;        Y is preserved
+; in:   A               Y-position (px)
+;       X               X-position (px)
+;       ZP_VAR_Z        dust Z-distance
 ;
+; out:  Y               (preserved)
+;-------------------------------------------------------------------------------
         sty ZP_TEMP_VAR         ; preserve Y through this ordeal
         tay                     ; get a copy of our Y-coordinate
         
@@ -428,21 +430,17 @@ dust_swap_xy:                                                           ;$2A12
 
         rts 
 
+
+_animate_dust:                                                          ;$2A32
 ;===============================================================================
 ; animate dust particles based on COCKPIT_VIEW
-;
-_animate_dust:                                                          ;$2A32
-
+;-------------------------------------------------------------------------------
         ldx COCKPIT_VIEW
         beq _animate_dust_front ; COCKPIT_VIEW == front
         dex 
-        bne _2a3d
+        bne :+                  ; animate left/right?
         jmp _animate_dust_rear
-
-;===============================================================================
-
-_2a3d:                                                                  ;$2A3D
-        jmp _37e9
+:       jmp _37e9                                                       ;$2A3D
 
 _animate_dust_front:                                                    ;$2A40
 
@@ -1351,7 +1349,7 @@ _2f06:
 
 ;===============================================================================
 ; a block of text-printing related flags and variables
-
+;
 txt_ucase_mask:                                                         ;$2F18
         ; a mask for converting a character A-Z to upper-case.
         ; this byte gets changed to 0 to neuter the effect
@@ -1383,7 +1381,7 @@ txt_lcase_mask:                                                         ;$2F1E
 print_crlf:                                                             ;$2F1F
 ;===============================================================================
 ; 'print' a new-line character. i.e. move to the next row, starting column
-;
+;-------------------------------------------------------------------------------
         lda # TXT_NEWLINE
 
         ; this causes the next instruction to become a meaningless `bit`
@@ -1393,7 +1391,7 @@ print_crlf:                                                             ;$2F1F
 print_a:                                                                ;$2F22
 ;===============================================================================
 ; print "a". that's it.
-;
+;-------------------------------------------------------------------------------
 .export print_a
 
         lda # 'a'
@@ -1406,7 +1404,7 @@ print_char:                                                             ;$2F24
 ; the text-handling works with
 ;
 ;       A = ASCII code
-;
+;-------------------------------------------------------------------------------
 .export print_char
 
 ; TODO: this to be defined structurally at some point
@@ -3478,6 +3476,8 @@ _3b33:                                                                  ;$3B33
 
         lda PLAYER_SPEED
 
+
+divide_unsigned:                                                        ;$3B37
 ;===============================================================================
 ; unsigned integer division
 ;
@@ -3487,9 +3487,7 @@ _3b33:                                                                  ;$3B33
 ;
 ; returns:
 ;       A/Q*256 as 16-bit value in P.R  (A is the same as R on exit)
-;
-divide_unsigned:                                                        ;$3B37
-
+;-------------------------------------------------------------------------------
         ; This calculates A / Q by repeatedly shifting A (16bit) left
         ; and subtracting from the hi-byte whenever possible.
 _3b37:                                                                  ;$3B37
@@ -3947,9 +3945,9 @@ _3d7a:  jmp print_docked_str                                            ;$3D7A
 
 
 mission_blueprints_begin:                                               ;$3D7D
-        ;=======================================================================
-        ; begin the Thargoid Blueprints mission:
-        ;
+;===============================================================================
+; begin the Thargoid Blueprints mission:
+;-------------------------------------------------------------------------------
         lda MISSION_FLAGS
         ora # missions::blueprints_begin
         sta MISSION_FLAGS
@@ -3965,17 +3963,17 @@ _3d8a:                                                                  ;$3D8A
 
 
 mission_blueprints_ceerdi:                                              ;$3D8D
-        ;=======================================================================
+;===============================================================================
         lda MISSION_FLAGS
         and # %11110000
         ora # %00001010
         sta MISSION_FLAGS
 
         lda # $de
-        bne _3d87
+        bne _3d87               ; (always branches)
 
 mission_blueprints_birera:                                              ;$3D9B
-        ;=======================================================================
+;===============================================================================
         lda MISSION_FLAGS
         ora # %00000100
         sta MISSION_FLAGS
@@ -3987,10 +3985,10 @@ mission_blueprints_birera:                                              ;$3D9B
         inc PLAYER_KILLS
         
         lda # $df
-        bne _3d87               ; always branches
+        bne _3d87               ; (always branches)
 
 _3daf:                                                                  ;$3DAF
-        ;=======================================================================
+;===============================================================================
         lsr MISSION_FLAGS
         asl MISSION_FLAGS
         
@@ -4006,9 +4004,9 @@ _3dbe:                                                                  ;$3DBE
 ;///////////////////////////////////////////////////////////////////////////////
 
 mission_trumbles:                                                       ;$3DC0
-        ;=======================================================================
-        ; begin Trumbles™ mission
-        ;
+;===============================================================================
+; begin Trumbles™ mission
+;-------------------------------------------------------------------------------
         ;set the mission bit:
         lda MISSION_FLAGS
         ora # missions::trumbles
@@ -4123,6 +4121,7 @@ get_polyobj:                                                            ;$3E87
         
         rts 
 
+
 set_psystem_to_tsystem:                                                 ;$3E95
 ;===============================================================================
 ; copy present system co-ordinates to target system co-ordinates,
@@ -4137,6 +4136,7 @@ set_psystem_to_tsystem:                                                 ;$3E95
         
         rts 
 
+
 wait_frames:                                                            ;$3EA1
 ;===============================================================================
 ; wait for a given number of frames to complete:
@@ -4148,6 +4148,7 @@ wait_frames:                                                            ;$3EA1
         dey 
         bne wait_frames
         rts 
+
 
 ;===============================================================================
 ; colour of different type of laser cross-hairs?

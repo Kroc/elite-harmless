@@ -224,10 +224,10 @@ _24d7:                                                                  ;$24D7
 .import _254e
 
         lda _254e+0, x
-        jsr _2404
+        jsr print_docked_char
         
         lda _254e+1, x
-        jsr _2404
+        jsr print_docked_char
         
         dey 
         bpl _24d7
@@ -294,7 +294,7 @@ txt_docked_token1D:                                                     ;$3E5A
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr _250b               ; dead code, just an RTS
+        jsr original_250b       ; dead code, just an RTS
 .endif  ;///////////////////////////////////////////////////////////////////////
         
         jmp txt_docked_token0D

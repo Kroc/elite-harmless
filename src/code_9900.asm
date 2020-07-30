@@ -1655,13 +1655,14 @@ _a29d:                                                                  ;$A29D
         eor ZP_74
         rts 
 
+_a2a0:                                                                  ;$A2A0
 ;===============================================================================
 ; process object? checks if A.I. needs running and appears to rotate and move
 ; the objcet
 ;
-;       X = ship type (i.e. a `hull_pointers` index)
+; in:   X       ship type (i.e. a `hull_pointers` index)
 ;
-_a2a0:                                                                  ;$A2A0
+;-------------------------------------------------------------------------------
         ; is the ship exploding? must be 'near'
         ; (i.e. not a distant dot), and in exploding state
         lda ZP_POLYOBJ_VISIBILITY
@@ -2264,7 +2265,7 @@ _a6ba:                                                                  ;$A6BA
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ldy ZP_SCREEN           ; are we in the cockpit-view?
-       .bnz _a6ae               ; no? skip ahead
+       .bnz _a6ae               ; no? switch to cockpit-view now
 
         cpx COCKPIT_VIEW
         beq _a6ad               ; view did not change, rts

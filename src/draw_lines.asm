@@ -205,6 +205,8 @@ draw_line:                                                              ;$AB91
         ; handle "vertical" line
         jmp draw_line_vert
 
+
+draw_line_horz:                                                         ;$ABBB
 ;===============================================================================
 ; a "horizontal" line is one which is wider than it is tall, having the
 ; property that the line only ever steps one pixel vertically at a time
@@ -224,9 +226,7 @@ draw_line:                                                              ;$AB91
 ;       ZP_REG_H  = height of line, i.e. ABS(Y2-Y1)
 ;
 ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
-;
-draw_line_horz:                                                         ;$ABBB
-
+;-------------------------------------------------------------------------------
         ldx ZP_VAR_X1
         cpx ZP_VAR_X2
        .blt :+                          ; line is left-to-right, skip ahead.
@@ -313,6 +313,7 @@ draw_line_horz:                                                         ;$ABBB
 
         jmp draw_line_horzdn
 
+draw_line_horzup:                                                       ;$AC19
 ;=======================================================================
 ; draws a horizontally sloped line from the bottom up
 ;
@@ -326,9 +327,7 @@ draw_line_horz:                                                         ;$ABBB
 ;        ZP_REG_H = height of line
 ;
 ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
-;
-draw_line_horzup:                                                       ;$AC19
-       
+;-------------------------------------------------------------------------------       
         ; get the address within the bitmap where we will be drawing,
         ; stored into `ZP_TEMP_ADDR1`
         ;
@@ -747,6 +746,7 @@ line_done2:                                                             ;$AD88
         rts                             ; line has been drawn!
 
 
+draw_line_horzdn:                                                       ;$AD8B
 ;===============================================================================
 ; draws a horizontally sloped line from the top down
 ;
@@ -760,9 +760,7 @@ line_done2:                                                             ;$AD88
 ;        ZP_REG_H = height of line
 ;
 ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
-;
-draw_line_horzdn:                                                       ;$AD8B
-
+;-------------------------------------------------------------------------------
         ; get the char-cell bitmap address
         ; for the given X & Y pixel coords:
         ;
@@ -1191,6 +1189,8 @@ line_done4:                                                             ;$AF05
         ldy ZP_9E                       ; restore Y
         rts                             ; line has been drawn!
 
+
+draw_line_vert:                                                         ;$AF08
 ;===============================================================================
 ; a "vertical" line is one which is taller than it is wide, having the
 ; property that the line only ever steps one pixel horizontally at a
@@ -1201,9 +1201,7 @@ line_done4:                                                             ;$AF05
 ;
 ; the first thing we have to do is determine which way the line goes
 ; and flip top-down lines so we always work bottom-up
-;
-draw_line_vert:                                                         ;$AF08
-
+;-------------------------------------------------------------------------------
         ldy ZP_VAR_Y1                   ; get "starting" Y-position
         tya 
         ldx ZP_VAR_X1                   ; (get starting X-position, for later)
@@ -1415,6 +1413,8 @@ _vertlt_pixel_next:                                                     ;$AFCA
         ldy ZP_9E               ; restore Y
 :       rts                     ; line has been drawn!                  ;$AFF9
 
+
+draw_straight_line:                                                     ;$AFFA
 ;===============================================================================
 ; draw a straight, horizontal line:
 ;
@@ -1425,9 +1425,7 @@ _vertlt_pixel_next:                                                     ;$AFCA
 ;
 ; this is reasonably fast as it marches 8-pixels
 ; at a time in the middle of the line
-;
-draw_straight_line:                                                     ;$AFFA
-
+;-------------------------------------------------------------------------------
         sty ZP_9E               ; preserve Y
 
         ldx ZP_VAR_X1

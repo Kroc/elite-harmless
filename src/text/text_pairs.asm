@@ -56,7 +56,7 @@ txt_docked_pairs:                                                       ;$254C
 
         ; the first pair is used in messages,
         ; but not during name generation
-        .docked_pair    "crlf"
+        .docked_pair    "crlf"  ;=$D7 (docked)
 
 _254e:
 .export _254e

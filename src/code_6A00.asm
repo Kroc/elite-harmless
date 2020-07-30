@@ -1088,7 +1088,7 @@ _6f37:                                                                  ;$6F37
 _6f3a:                                                                  ;$6F3a
         jsr print_flight_token
 
-        lda # $ce
+        lda # $ce               ; TODO: what is this?
         jsr print_docked_str
 
         jsr _8fea
@@ -2090,11 +2090,8 @@ _74a5:                                                                  ;$74A5
         rts 
 
 ;===============================================================================
-
-;$74af  unused?
-
-        .byte   $52, $2e, $44, $2e, $43, $4f ,$44, $45  ;"R.D.CODE"
-        .byte   $0d
+        .byte   $52, $2e, $44, $2e, $43, $4f ,$44, $45  ;="R.D.CODE"    ;$74AF
+        .byte   $0d                                     ;=\n
 
 ;-------------------------------------------------------------------------------
 
@@ -2915,10 +2912,10 @@ swap_zp_shadow:                                                         ;$784F
 ;===============================================================================
 ; swap zero-page with its shadow
 ; (copies $36...$FF to $CE36...$CEFF)
-;
+;-------------------------------------------------------------------------------
         ldx # $36               ; $36 makes no sense
-:       lda $00, x              ; read A from the zero-page               ;$7851
-        ldy ELITE_ZP_SHADOW, x  ; read Y form the shadow
+:       lda $00, x              ; read A from the zero-page             ;$7851
+        ldy ELITE_ZP_SHADOW, x  ; read Y from the shadow
         sta ELITE_ZP_SHADOW, x  ; write A to the shadow
         sty $00, x              ; write Y to the zero-page
         inx 
@@ -4957,6 +4954,7 @@ disable_sprites:                                                        ;$8273
 ;===============================================================================
 ; disable all sprites: (for example, when switching to menu screen)
 ;
+;-------------------------------------------------------------------------------
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; ensure the I/O is enabled so we can talk to the VIC-II:
@@ -6031,8 +6029,9 @@ _87d0:                                                                  ;$87D0
 .endif  ;///////////////////////////////////////////////////////////////////////
         jsr set_page
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         jsr drawViewportBorders
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
         lda # $00
 
         sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )
@@ -7777,7 +7776,7 @@ _9266:                                                                  ;$9266
         lda # C64_MEM::ALL
         jmp set_memory_layout
 .else   ;///////////////////////////////////////////////////////////////////////
-        ; we must *not* decrement the memory map twice so the decrements have
+        ; we must *not* decrement the memory map twice, so the decrements have
         ; been moved above to avoid a fall-through condition that would crash
         ; the machine if we decrement here at the end of the routine
         rts 

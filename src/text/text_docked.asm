@@ -16,13 +16,13 @@
 ;
 .export TXT_DOCKED_XOR := $57
 
-; all tokens on disk are scrambled in this way:
+; tokens in the text database are scrambled in this way:
 .define .encrypt(value) value ^ TXT_DOCKED_XOR
 
 ;-------------------------------------------------------------------------------
-; 32 of the docked string tokens are functions called when the token is
-; encountered in a string. this segment defines a look-up table of which
-; function to call for each token (once descrambled)
+; 32 of the docked tokens are functions called when the token is encountered
+; in a string. this segment defines a look-up table of which function to call
+; for each token (once descrambled)
 ; 
 .segment "TEXT_TOKENS"
 
@@ -31,17 +31,17 @@
 ;
 _fn_index       .set 1
 
-; in order to build the table, we need a macro
-; because each entry in the table must do three things:
+; in order to build the table, we need a macro because
+; each entry in the table must do three things:
 ;
-; 1. import the symbol for the function -- the functions are not in this file
-;    but in "text_docked_fns.asm" instead
+; 1.    import the symbol for the function -- the functions are not
+;       in this file but in "text_docked_fns.asm" instead
 ;
-; 2. define a local symbol for the token ID as the strings containing the
-;    token are defined within this file. these will be in the form "FN_*"
+; 2.    define a local symbol for the token ID as the strings containing the
+;       token are defined within this file. these will be in the form "FN_*"
 ;
-; 3. define a global version of the symbol for when it appears outside
-;    of the text strings data. these will be in the form "TXTFN_*"
+; 3.    define a global version of the symbol for when it appears outside
+;       of the text database. these will be in the form "TXTFN_*"
 ;
 .macro  .define_fn      fn_import, fn_id
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -54,7 +54,7 @@ _fn_index       .set 1
         ; using the name part given
         .ident( .concat( "FN_", fn_id )) = _value
         ; define an export for the index-number of the function;
-        ; this is how the outside world will specify the message to print
+        ; this is how the outside world will specify the token ID
 .export .ident( .concat( "TXTFN_", fn_id )) = _fn_index
 
         ; import the function from "txt_docked_fns.asm",
@@ -79,7 +79,7 @@ txt_docked_functions:                                                   ;$250C
 ;               symbol will be prefixed with "FN_" and the global symbol
 ;               will be prefixed with "TXTFN_" and exported
 ; token         the index is encrypted (XOR $57) and this becomes
-;               the token ID that is used within the string database
+;               the token ID that is used within the text database
 ;
 .export txt_docked_functions
 ;-------------------------------------------------------------------------------
@@ -248,11 +248,12 @@ _AN     = .encrypt( txt_docked_an )     ;=$A8
 __end   = .encrypt ( $00 )              ;=$57
 __      = .encrypt ( $20 )              ;=$77
 _XMARK  = .encrypt ( $21 )              ;=$76
+_APOS   = .encrypt ( $27 )              ;=$70
 _LPAREN = .encrypt ( $28 )              ;=$7F
 _RPAREN = .encrypt ( $29 )              ;=$7E
-_DOT    = .encrypt ( $2e )              ;=$79
+_COMMA  = .encrypt ( $2c )              ;=$7B
 _HYPHEN = .encrypt ( $2d )              ;=$7A
-_APOS   = .encrypt ( $27 )              ;=$70
+_DOT    = .encrypt ( $2e )              ;=$79
 _SLASH  = .encrypt ( $2f )              ;=$78
 _0      = .encrypt ( $30 )              ;=$67
 _1      = .encrypt ( $31 )              ;=$66
@@ -264,6 +265,7 @@ _6      = .encrypt ( $36 )              ;=$61
 _7      = .encrypt ( $37 )              ;=$60
 _8      = .encrypt ( $38 )              ;=$6F
 _9      = .encrypt ( $39 )              ;=$6E
+_COLON  = .encrypt ( $3a )              ;=$6D
 _QMARK  = .encrypt ( $3f )              ;=$68
 _A      = .encrypt ( $41 )              ;=$16
 _B      = .encrypt ( $42 )              ;=$15
@@ -291,8 +293,6 @@ _W      = .encrypt ( $57 )              ;=$00
 _X      = .encrypt ( $58 )              ;=$0F
 _Y      = .encrypt ( $59 )              ;=$0E
 _Z      = .encrypt ( $5a )              ;=$0D
-_COMMA  = .encrypt ( $2c )              ;=$7B
-_COLON  = .encrypt ( $3a )              ;=$6D
 
 ;===============================================================================
 
@@ -301,10 +301,13 @@ _msg_index     .set 0
 .macro  .define_msg     msg_id
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
+        ; define a reference for the un-encrypted index value,
+        ; (should it be needed)
+        .ident(.concat("ID", msg_id)) = _msg_index
+
         .local  _value
         _value  .set 0
-
-        _value .set .encrypt( _msg_index )
+        _value  .set .encrypt( _msg_index )
         
         ; define the locally encrypted name, e.g. "_A",
         ; used for the text database
@@ -332,13 +335,15 @@ _msg_index     .set 0
 _0e00:                                                                  ;$0E00
 ;===============================================================================
 .export _0e00
-
-        ; 0.    index 0 is always invalid
+        ; index (unscrambled)
+        ;-----------------------------------------------------------------------
+        ; $00:  index 0 is always invalid
         .byte   __end
         .skip_msg
 
-        ; 1.    disk / tape access menu
+        ; $01:  disk / tape access menu
         .byte   FN_CLEAR_SCREEN, FN_DIVIDER, FN_F01, FN_F08, __
+        ;       "disk" / "tape" "access menu"
         .byte   FN_MEDIA_CURRENT, __, _A, _C, _CE, _S, _S, __, _M, _E, _NU
         .byte   CRLF, FN_F0A, FN_F02
         .byte   _1, _DOT, __, _LOAD_NEW_COMMANDER, CRLF
@@ -350,46 +355,46 @@ _0e00:                                                                  ;$0E00
         .byte   __end
         .define_msg "_DATA_MENU"
         
-        ; 2.
+        ; $02:
         .byte   _DI, _S, _K, __end
         .define_msg "_DISK"
         
-        ; 3.
+        ; $03:
         ; TODO: remove tape code / references
         .byte   _T, _A, _P, _E, __end
         .define_msg "_TAPE"
         
-        ; 4.
+        ; $04:
         ; TODO: build option to remove competition number
         .byte   _C, _O, _M, _P, _E, _TI, _TI, _ON, __
         .byte   _NU, _M, _B, _ER, _COLON, __end
         .define_msg "_COMPETITION_NUMBER"
         
-        ; 5.
-        .byte   _B0, ($6d ^ TXT_DOCKED_XOR), _IS, ($6e ^ TXT_DOCKED_XOR), _B1, __end
+        ; $05:
+        .byte   _B0, .encrypt($6d), _IS, .encrypt($6e), _B1, __end
         .define_msg "_05"
         
-        ; 6.
+        ; $06:
         .byte   __, __, _LOAD_NEW_COMMANDER, __, FN_F01
         .byte   _LPAREN, _Y, _SLASH, _N, _RPAREN, _QMARK
         .byte   FN_F02, FN_NEWLINE, FN_NEWLINE, __end
         .define_msg "_06"
 
-        ; 7.
+        ; $07:
         .byte   _P, _RE, _S, _S, __, _S, _P, _A, _CE, __, _OR, __, _F, _I, _RE
         .byte   _COMMA, _COMMANDER, _DOT, FN_NEWLINE, FN_NEWLINE, __end
         .define_msg "_07"
         
-        ; 8.
+        ; $08:
         .byte   _COMMANDER, _APOS, _S, _C8, __end
         .define_msg "_08"
         
-        ; 9.
+        ; $09:
         .byte   FN_NEWLINE, FN_F01, _IL, _LE, _G, _AL, __
         .byte   _E, _L, _I, _T, _E, __, _I, _I, __, _F, _I, _LE, __end
         .define_msg "_ILLEGAL_FILE"
         
-        ; 10.
+        ; $0A:
         .byte   FN_F17, FN_F0E, FN_F02, _G, _RE, _ET, _IN, _G, _S
         .byte   _COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY
         .byte   _AND_, FN_CAPNEXT, _I, __, _BE, _G, _A_, _M, _O, _M, _EN, _T
@@ -400,8 +405,8 @@ _0e00:                                                                  ;$0E00
         .byte   _D, _O, _A_, _L, _IT, _T, _LE, __, _J, _O, _B, __, _F, _OR, __
         .byte   _US, _NEW_SENTENCE
 
-        .byte   _THE, _SHIP, __, _YOU, __, _SE, _E, __, _H, _E, _RE, _IS, _A
-        .byte   _NEW, _M, _O, _D, _E, _L, _COMMA, __, _THE, FN_CAPNEXT
+        .byte   _THE_, _SHIP, __, _YOU, __, _SE, _E, __, _H, _E, _RE, _IS, _A
+        .byte   _NEW, _M, _O, _D, _E, _L, _COMMA, __, _THE_, FN_CAPNEXT
         .byte   _C, _ON, _ST, _R, _I, _C, _T, _OR, _COMMA, __
         .byte   _E, _QU, _I, _P, _ED_, _W, _I, _TH, _A_, _T, _O, _P, __
         .byte   _SE, _C, _R, _ET, _NEW, _S, _H, _I, _E, _L, _D, __
@@ -426,51 +431,50 @@ _0e00:                                                                  ;$0E00
         .byte   _NEW_SENTENCE
 
         .byte   _YOU, __, _A, _RE, __, _C, _A, _U, _TI, _ON, _ED_, _TH, _AT, __
-        .byte   _ON, _L, _Y, __, FN_F06, ($75 ^ TXT_DOCKED_XOR), FN_F05, _S, __
-        .byte   _W, _IL, _L, __, _P, _EN, _ET, _RA, _T, _E, __, _THE, _N, _E, _W, __
-        .byte   _S, _H, _I, _E, _L, _D, _S, _AND_, _TH, _AT, __, _THE
-        .byte   FN_CAPNEXT, _C, _ON, _ST, _R, _I, _C, _T, _OR, _IS
+        .byte   _ON, _L, _Y, __, FN_F06, .encrypt($75), FN_F05, _S, __
+        .byte   _W, _IL, _L, __, _P, _EN, _ET, _RA, _T, _E, __, _THE_
+        .byte   _N, _E, _W, __, _S, _H, _I, _E, _L, _D, _S, _AND_, _TH, _AT, __
+        .byte   _THE_, FN_CAPNEXT, _C, _ON, _ST, _R, _I, _C, _T, _OR, _IS
         .byte   _F, _IT, _T, _ED_, _W, _I, _TH, __, _AN, __, FN_F06
-        .byte   ($6c ^ TXT_DOCKED_XOR), FN_F05, _B1, FN_F02, FN_F08
+        .byte   .encrypt($6c), FN_F05, _B1, FN_F02, FN_F08
         .byte   _G, _O, _O, _D, __, _L, _U, _C, _K, _COMMA, __, _COMMANDER
         .byte   _D4, FN_F16, __end
         .define_msg "_0A"
         
-        ; 11.
-        .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN, FN_F17, FN_F0E
-        .byte   FN_F02, __, __, _AT, _T, _EN, _TI, _ON
-        .byte   _COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY, _DOT, __, FN_CAPNEXT, _W, _E, __, _H
-        .byte   _A, _VE, __, _N, _E, _ED_, _O, _F
-        .byte   __, _YOU, _R, __, _SE, _R, _V, _I
-        .byte   _C, _ES, __, _A, _G, _A, _IN, _NEW_SENTENCE
-        .byte   _I, _F, __, _YOU, __, _W, _OU, _L
-        .byte   _D, __, _BE, __, _SO, __, _G, _O
-        .byte   _O, _D, __, _A, _S, _TO, _G, _O
-        .byte   _TO, FN_CAPNEXT, _CE, _ER, _DI, __, _YOU, __
-        .byte   _W, _IL, _L, __, _BE, __, _B, _R
-        .byte   _I, _E, _F, _ED, _NEW_SENTENCE
-        .byte   _I, _F, __
-        .byte   _S, _U, _C, _CE, _S, _S, _F, _U
-        .byte   _L, _COMMA, __, _YOU, __, _W, _IL, _L
-        .byte   __, _BE, __, _W, _E, _L, _L, __
+        ; $0B:
+        .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
+        .byte   FN_F17, FN_F0E, FN_F02, __, __, _AT, _T, _EN, _TI, _ON
+        .byte   _COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY, _DOT, __
+        .byte   FN_CAPNEXT, _W, _E, __, _H, _A, _VE, __, _N, _E, _ED_, _O, _F
+        .byte   __, _YOU, _R, __, _SE, _R, _V, _I, _C, _ES, __, _A, _G, _A, _IN
+        .byte   _NEW_SENTENCE
+
+        .byte   _I, _F, __, _YOU, __, _W, _OU, _L, _D, __, _BE, __, _SO, __
+        .byte   _G, _O, _O, _D, __, _A, _S, _TO, _G, _O, _TO
+        .byte   FN_CAPNEXT, _CE, _ER, _DI, __, _YOU, __, _W, _IL, _L, __
+        .byte   _BE, __, _B, _R, _I, _E, _F, _ED, _NEW_SENTENCE
+
+        .byte   _I, _F, __, _S, _U, _C, _CE, _S, _S, _F, _U, _L, _COMMA, __
+        .byte   _YOU, __, _W, _IL, _L, __, _BE, __, _W, _E, _L, _L, __
         .byte   _RE, _W, _AR, _D, _ED, _D4
         .byte   FN_WAIT_FOR_KEY, __end
         .define_msg "_0B"
 
-        ; 12.   "(C) D.Braben & I.Bell 1985"
+        ;-----------------------------------------------------------------------
+        ; $0C:  "(C) D.Braben & I.Bell 1985"
         .byte   _LPAREN, FN_CAPNEXT, _C, _RPAREN, _DBRABEN_AND_IBELL
         .byte   __, _1, _9, _8, _5, __end
         .define_msg "_0C"
         
-        ; 13.   "by D.Braben & I.Bell"
+        ; $0D:  "by D.Braben & I.Bell"
         .byte   _B, _Y, _DBRABEN_AND_IBELL, __end
         .define_msg "_0D"
 
-        ; 14.
+        ; $0E:
         .byte   FN_F15, _PLANET, _C8, FN_F1A, __end
         .define_msg "_0E"
 
-        ; 15.
+        ; $0F:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN, FN_F17, FN_F0E
         .byte   FN_F02, __, __, _C, _ON, _G, _RA, _T, _U, _LA, _TI, _ON, _S, __
         .byte   _COMMANDER, _XMARK, FN_NEWLINE, FN_NEWLINE
@@ -485,383 +489,394 @@ _0e00:                                                                  ;$0E00
         .define_msg "_0F"
 
         ;-----------------------------------------------------------------------
-        ; 16.
+        ; $10:  "fabled"
         .byte   _F, _AB, _LE, _D, __end
-        .define_msg "FN_FABLED"
+        .define_msg "_FABLED"
 
-        ; 17.
+        ; $11:  "notable"
         .byte   _NO, _T, _AB, _LE, __end
         .define_msg "_NOTABLE"
 
-        ; 18.
+        ; $12:  "well known"
         .byte   _W, _E, _L, _L, __, _K, _NO, _W, _N, __end
         .define_msg "_WELL_KNOWN"
 
-        ; 19.
+        ; $13:  "famous"
         .byte   _F, _A, _M, _O, _US, __end
         .define_msg "FN_FAMOUS"
 
-        ; 20.
+        ; $14:  "noted"
         .byte   _NO, _T, _ED, __end
         .define_msg "_NOTED"
 
-        ; 21.
+        ;-----------------------------------------------------------------------
+        ; $15:  "very"
         .byte   _VE, _R, _Y, __end
         .define_msg "_VERY"
 
-        ; 22.
+        ; $16:  "mildly"
         .byte   _M, _IL, _D, _L, _Y, __end
         .define_msg "_MILDLY"
 
-        ; 23.
+        ; $17:  "most"
         .byte   _M, _O, _ST, __end
         .define_msg "_MOST"
 
-        ; 24.
+        ; $18:  "reasonably"
         .byte   _RE, _A, _S, _ON, _AB, _L, _Y, __end
         .define_msg "_REASONABLY"
 
-        ; 25.
+        ; $19:
         .byte   __end
         .skip_msg
         
-        ; 26.
+        ;-----------------------------------------------------------------------
+        ; $1A:
         .byte   _ANCIENT, __end
         .define_msg "_1A"
 
-        ; 27.
-        .byte   ($72 ^ TXT_DOCKED_XOR), __end
+        ; $1B:
+        .byte   .encrypt($72), __end
         .define_msg "_1B"
 
-        ; 28.
+        ; $1C:  "great"
         .byte   _G, _RE, _AT, __end
         .define_msg "_GREAT"
         
-        ; 29.
+        ; $1D:  "vast"
         .byte   _V, _A, _ST, __end
         .define_msg "_VAST"
 
-        ; 30.
+        ; $1E:  "pink"
         .byte   _P, _IN, _K, __end
         .define_msg "_PINK"
         
-        ; 31.
-        .byte   FN_F02, ($77 ^ TXT_DOCKED_XOR), __, ($76 ^ TXT_DOCKED_XOR)
+        ;-----------------------------------------------------------------------
+        ; $1F:
+        .byte   FN_F02, .encrypt($77), __, .encrypt($76)
         .byte   FN_F0D, __, _PLANT, _A, _TI, _ON, _S, __end
         .define_msg "_1F"
 
-        ; 32.
+        ; $20:  "mountains"
         .byte   _MOUNTAIN, _S, __end
         .define_msg "_20"
 
-        ; 33.
-        .byte   $22, __end
+        ; $21:
+        .byte   .encrypt($75), __end
         .define_msg "_21"
         
-        ; 34.
-        .byte   $d7, __, _F, _OR, _ES, _T, _S, __end
+        ; $22:
+        .byte   .encrypt($80), __, _F, _OR, _ES, _T, _S, __end
         .define_msg "_22"
         
-        ; 35.
+        ; $23:  "oceans"
         .byte   _O, _CE, _AN, _S, __end
         .define_msg "_OCEANS"
         
-        ; 36.
+        ;-----------------------------------------------------------------------
+        ; $24:  "shyness"
         .byte   _S, _H, _Y, _N, _ES, _S, __end
         .define_msg "_SHYNESS"
         
-        ; 37.
+        ; $25:  "silliness"
         .byte   _S, _IL, _L, _IN, _ES, _S, __end
         .define_msg "_SILLINESS"
         
-        ; 38.
+        ; $26:  "mating traditions"
         .byte   _MA, _T, _ING_, _T, _RA, _DI, _TI, _ON, _S, __end
         .define_msg "_26"
         
-        ; 39.
+        ; $27:
         .byte   _LO, _AT, _H, _ING_, _O, _F, __, $33, __end
         .define_msg "_27"
         
-        ; 40.
+        ; $28:
         .byte   _LO, _VE, __, _F, _OR, __, $33, __end
         .define_msg "_28"
         
-        ; 41.
+        ; $29:  "food blenders"
         .byte   _F, _O, _O, _D, __, _B, _LE, _N, _D, _ER, _S, __end
         .define_msg "_FOOD_BLENDERS"
         
-        ; 42.
+        ; $2A:  "tourists"
         .byte   _T, _OU, _R, _I, _ST, _S, __end
         .define_msg "_TOURISTS"
         
-        ; 43.
+        ; $2B:  "poetry"
         .byte   _P, _O, _ET, _R, _Y, __end
         .define_msg "_POETRY"
         
-        ; 44.
+        ; $2C:  "discos"
         .byte   _DI, _S, _C, _O, _S, __end
         .define_msg "_DISCOS"
         
-        ; 45.
+        ; $2D:
         .byte   $3b, __end
         .define_msg "_2D"
         
-        ; 46.
+        ;-----------------------------------------------------------------------
+        ; $2E:  "walking tree"
         .byte   _W, _AL, _K, _ING_, _TREE, __end
-        .define_msg "_2E"
+        .define_msg "_WALKING_TREE"
         
-        ; 47.
+        ; $2F:  "crab"
         .byte   _C, _RA, _B, __end
         .define_msg "_CRAB"
         
-        ; 48.
+        ; $30:  "bat"
         .byte   _B, _AT, __end
         .define_msg "_BAT"
         
-        ; 49.
+        ; $31:  "lobst"?
         .byte   _LO, _B, _ST, __end
         .define_msg "_LOBST"
         
-        ; 50.
+        ; $32:
         .byte   FN_F12, __end
         .define_msg "_32"
         
-        ; 51.
+        ;-----------------------------------------------------------------------
+        ; $33:  "beset"
         .byte   _BE, _S, _ET, __end
         .define_msg "_BESET"
         
-        ; 52.
+        ; $34:  "plagued"
         .byte   _P, _LA, _G, _U, _ED, __end
         .define_msg "_PLAGUED"
         
-        ; 53.
+        ; $35:  "ravaged"
         .byte   _RA, _V, _A, _G, _ED, __end
         .define_msg "_RAVAGED"
         
-        ; 54.
+        ; $36:  "cursed"
         .byte   _C, _U, _R, _S, _ED, __end
         .define_msg "_CURSED"
         
-        ; 55.
+        ; $37:  "scourged"
         .byte   _S, _C, _OU, _R, _G, _ED, __end
         .define_msg "_SCOURGED"
         
-        ; 56.
-        .byte   $26, __, _C, _I, _V, _IL, __, _W, _AR, __end
+        ;-----------------------------------------------------------------------
+        ; $38:
+        .byte   .encrypt($71), __, _C, _I, _V, _IL, __, _W, _AR, __end
         .define_msg "_38"
         
-        ; 57.
+        ; $39:
         .byte   $3f, __, $08, __, $37, _S, __end
         .define_msg "_39"
         
-        ; 58.
+        ; $3A:
         .byte   _A, __, $3f, __, _DI, _SE, _A, _SE, __end
         .define_msg "_3A"
         
-        ; 59.
+        ; $3B:
         .byte   $26, __, _E, _AR, _TH, _QU, _A, _K, _ES, __end
         .define_msg "_3B"
         
-        ; 60.
-        .byte   $26, __, _SO, _LA, _R, __, _A, _C
-        .byte   _TI, _V, _IT, _Y, __end
+        ; $3C:
+        .byte   $26, __, _SO, _LA, _R, __, _A, _C, _TI, _V, _IT, _Y, __end
         .define_msg "_3C"
         
-        ; 61.
+        ;-----------------------------------------------------------------------
+        ; $3D:
         .byte   _ITS, $0a, __, $09, __end
         .define_msg "_3D"
         
-        ; 62.
-        .byte   _THE, FN_F11, __, $08, __, $37, __end
+        ; $3E:
+        .byte   _THE_, FN_F11, __, $08, __, $37, __end
         .define_msg "_3E"
         
-        ; 63.
+        ; $3F:
         .byte   _ITS, _INHABITANT, _S, _APOS, __, $35, __, $34, __end
         .define_msg "_3F"
         
-        ; 64.
+        ; $40:
         .byte   FN_F02, $2d, FN_F0D, __end
         .define_msg "_40"
         
-        ; 65.
+        ; $41:
         .byte   _ITS, $3c, __, $3b, __end
         .define_msg "_41"
         
-        ; 66.
+        ;-----------------------------------------------------------------------
+        ; $42:  "juice"
         .byte   _J, _U, _I, _CE, __end
         .define_msg "_JUICE"
         
-        ; 67.
+        ; $43:  "brandy"
         .byte   _B, _RA, _N, _D, _Y, __end
         .define_msg "_BRANDY"
         
-        ; 68.
+        ; $44:  "water"
         .byte   _W, _AT, _ER, __end
         .define_msg "_WATER"
         
-        ; 69.
+        ; $45:  "brew"
         .byte   _B, _RE, _W, __end
         .define_msg "_BREW"
         
-        ; 70.
+        ; $46:  "gargle blasters"
         .byte   _G, _AR, _G, _LE, __, _B, _LA, _ST, _ER, _S, __end
         .define_msg "_GARGLE_BLASTERS"
         
-        ; 71.
+        ;-----------------------------------------------------------------------
+        ; $47:
         .byte   FN_F12, __end
         .define_msg "_47"
         
-        ; 72.
+        ; $48:
         .byte   FN_F11, __, $37, __end
         .define_msg "_48"
         
-        ; 73.
+        ; $49:
         .byte   FN_F11, __, FN_F12, __end
         .define_msg "_49"
         
-        ; 74.
+        ; $4A:
         .byte   FN_F11, __, $3f, __end
         .define_msg "_4A"
         
-        ; 75.
+        ; $4B:
         .byte   $3f, __, FN_F12, __end
         .define_msg "_4B"
         
-        ; 76.
+        ;-----------------------------------------------------------------------
+        ; $4C:  "fabulous"
         .byte   _F, _AB, _U, _LO, _US, __end
         .define_msg "_FABULOUS"
         
-        ; 77.
+        ; $4D:  "exotic"
         .byte   _E, _X, _O, _TI, _C, __end
         .define_msg "_EXOTIC"
         
-        ; 78.
+        ; $4E:  "hoopy"
         .byte   _H, _O, _O, _P, _Y, __end
         .define_msg "_HOOPY"
         
-        ; 79.
+        ; $4F:  "unusual"
         .byte   _U, _NU, _S, _U, _AL, __end
-        ;.define_msg "_UNUSUAL"
+        ;;.define_msg "_UNUSUAL"
         .skip_msg
         
-        ; 80.
+        ; $50:  "exciting"
         .byte   _E, _X, _C, _IT, _IN, _G, __end
         .define_msg "_EXCITING"
         
-        ; 81.
+        ;-----------------------------------------------------------------------
+        ; $51:  "cuisine"
         .byte   _C, _U, _I, _S, _IN, _E, __end
         .define_msg "_CUISINE"
         
-        ; 82.
+        ; $52:  "night life"
         .byte   _N, _I, _G, _H, _T, __, _L, _I, _F, _E, __end
         .define_msg "_NIGHT_LIFE"
         
-        ; 83.
+        ; $53:  "casinos"
         .byte   _C, _A, _S, _I, _NO, _S, __end
         .define_msg "_CASINOS"
         
-        ; 84.
+        ; $54:  "sit coms"
         .byte   _S, _IT, __, _C, _O, _M, _S, __end
         .define_msg "_SIT_COMS"
         
-        ; 85.
+        ; $55:
         .byte   FN_F02, $2d, FN_F0D, __end
         .define_msg "_55"
         
-        ; 86.
+        ;-----------------------------------------------------------------------
+        ; $56:
         .byte   FN_PRINT_FLIGHT_TOKEN, __end
         .define_msg "_56"
         
-        ; 87.
-        .byte   _THE, _PLANET, __, FN_PRINT_FLIGHT_TOKEN, __end
+        ; $57:
+        .byte   _THE_, _PLANET, __, FN_PRINT_FLIGHT_TOKEN, __end
         .define_msg "_57"
         
-        ; 88.
-        .byte   _THE, _WORLD, __, FN_PRINT_FLIGHT_TOKEN, __end
+        ; $58:
+        .byte   _THE_, _WORLD, __, FN_PRINT_FLIGHT_TOKEN, __end
         .define_msg "_58"
         
-        ; 89.
+        ; $59:
         .byte   _THIS, _PLANET, __end
         .define_msg "_59"
         
-        ; 90.
+        ; $5A
         .byte   _THIS, _WORLD, __end
         .define_msg "_5A"
         
-        ; 91.
+        ;-----------------------------------------------------------------------
+        ; $5B:  "son of a bitch"
         .byte   _S, _ON, __, _O, _F, _A_, _B, _IT, _C, _H, __end
         .define_msg "_SON_OF_A_BITCH"
         
-        ; 92.
+        ; $5C:  "scoundrel"
         .byte   _S, _C, _OU, _N, _D, _RE, _L, __end
         .define_msg "_SCOUNDRELL"
         
-        ; 93.
+        ; $5D:  "blackguard"
         .byte   _B, _LA, _C, _K, _G, _U, _AR, _D, __end
         .define_msg "_BLACKGUARD"
         
-        ; 94.
+        ; $5E:  "rogue"
         .byte   _R, _O, _G, _U, _E, __end
         .define_msg "_ROGUE"
         
-        ; 95.
-        .byte   _W, _H, _OR, _ES, _ON
-        .byte   __, _BE, _ET, _LE, __, _H, _E, _A
-        .byte   _D, _ED_, _F, _LA, _P, __, _E, _AR
-        .byte   _APOS, _D, __, _K, _N, _A, _VE, __end
+        ; $5F:  "whoreson beetle headed flap ear'd knave"
+        .byte   _W, _H, _OR, _ES, _ON, __, _BE, _ET, _LE, __
+        .byte   _H, _E, _A, _D, _ED_, _F, _LA, _P, __, _E, _AR, _APOS, _D, __
+        .byte   _K, _N, _A, _VE, __end
         .define_msg "_5F"
         
-        ; 96.
-        .byte   _N, __, _U, _N, _RE, _MA, _R, _K
-        .byte   _AB, _LE, __end
+        ;-----------------------------------------------------------------------
+        ; $60:  "n unremarkable"?
+        .byte   _N, __, _U, _N, _RE, _MA, _R, _K, _AB, _LE, __end
         .define_msg "_60"
         
-        ; 97.
+        ; $61:
         .byte   __, _B, _OR, _IN, _G, __end
         .define_msg "_BORING"
         
-        ; 98.
+        ; $62:
         .byte   __, _D, _U, _L, _L, __end
         .define_msg "_DULL"
         
-        ; 99.
+        ; $63:
         .byte   __, _T, _E, _DI, _O, _US, __end
         .define_msg "_TEDIOUS"
         
-        ; 100.
+        ; $64:
         .byte   __, _RE, _V, _O, _L, _T, _IN, _G, __end
         .define_msg "_REVOLTING"
         
-        ; 101.
+        ; $65:
         .byte   _PLANET, __end
         .define_msg "_65"
         
-        ; 102.
+        ; $66:
         .byte   _WORLD, __end
         .define_msg "_66"
         
-        ; 103.
+        ; $67:
         .byte   _P, _LA, _CE, __end
         .define_msg "_PLACE"
         
-        ; 104.
+        ; $68:
         .byte   _L, _IT, _T, _LE, __, _PLANET, __end
         .define_msg "_LITTLE_PLANET"
         
-        ; 105.
+        ; $69:
         .byte   _D, _U, _M, _P, __end
         .define_msg "_DUMP"
         
         ; hints on finding the prototype ship:
         ;-----------------------------------------------------------------------
-        ; 106.
-        .byte   _I, __, _H, _E, _AR
-        .byte   _A_, ($72 ^ TXT_DOCKED_XOR), __, _LO, _O, _K, _ING_, _SHIP
-        .byte   __, _A, _P, _P, _E, _AR, _ED_, _AT
-        .byte   _ERRIUS, __end
+        ; $6A:
+        .byte   _I, __, _H, _E, _AR, _A_, ($72 ^ TXT_DOCKED_XOR), __
+        .byte   _LO, _O, _K, _ING_, _SHIP, __, _A, _P, _P, _E, _AR, _ED_
+        .byte   _AT, _ERRIUS, __end
         .define_msg "_6A"
         
-        ; 107.
+        ; $6B:
         .byte   _Y, _E, _A, _H, _COMMA, __
         .byte   _I, __, _H, _E, _AR, _A_, ($72 ^ TXT_DOCKED_XOR), __
         .byte   _SHIP, __, _LE, _F, _T, _ERRIUS, _A_, __
@@ -869,517 +884,512 @@ _0e00:                                                                  ;$0E00
         .byte   _K, __end
         .define_msg "_6B"
         
-        ; 108.
+        ; $6C:
         .byte   _G, _ET, __, _YOU, _R, __, _I, _R, _ON, __, _A, _S, _S, __
         .byte   _O, _V, _ER, __, _T, _O, _ERRIUS, __end
         .define_msg "_6C"
         
-        ; 109.
+        ; $6D:
         .byte   _SO, _M, _E, __, $24, _NEW, _SHIP, __
         .byte   _W, _A, _S, __, _SE, _EN, __, _AT
         .byte   _ERRIUS, __end
         .define_msg "_6D"
         
-        ; 110.
+        ; $6E:
         .byte   _T, _R, _Y, _ERRIUS, __end
         .define_msg "_6E"
         
+        ; Trumble™ descriptions?
         ;-----------------------------------------------------------------------
-
-        ; 111.
+        ; $6F:  " cuddly"
         .byte   __, _C, _U, _D, _D, _L, _Y, __end
         .define_msg "_CUDDLY"
         
-        ; 112.
+        ; $70:  " cute"
         .byte   __, _C, _U, _T, _E, __end
         .define_msg "_CUTE"
         
-        ; 113.
+        ; $71:  " furry"
         .byte   __, _F, _U, _R, _R, _Y, __end
         .define_msg "_FURRY"
         
-        ; 114.
+        ; $72:  " friendly"
         .byte   __, _F, _R, _I, _EN, _D, _L, _Y, __end
         .define_msg "_FRIENDLY"
         
         ;-----------------------------------------------------------------------
-
-        ; 115.
+        ; $73:
         .byte   _W, _A, _S, _P, __end
         .define_msg "_WASP"
         
-        ; 116.
+        ; $74:
         .byte   _M, _O, _TH, __end
         .define_msg "_MOTH"
         
-        ; 117.
+        ; $75:
         .byte   _G, _R, _U, _B, __end
         .define_msg "_GRUB"
         
-        ; 118.
+        ; $76:
         .byte   _AN, _T, __end
         .define_msg "_ANT"
         
-        ; 119.
+        ; $77:
         .byte   FN_F12, __end
         .define_msg "_77"
         
-        ; 120.
+        ; $78:
         .byte   _P, _O, _ET, __end
         .define_msg "_POET"
         
-        ; 121.
+        ; $79:
         .byte   _AR, _T, _S, __, _G, _RA, _D, _U, _AT, _E, __end
         .define_msg "_ARTS_GRADUATE"
         
-        ; 122.
+        ; $7A:
         .byte   _Y, _A, _K, __end
         .define_msg "_YAK"
         
-        ; 123.
+        ; $7B:
         .byte   _S, _N, _A, _IL, __end
         .define_msg "_SNAIL"
         
-        ; 124.
+        ; $7C:
         .byte   _S, _L, _U, _G, __end
         .define_msg "_SLUG"
         
-        ; 125.
+        ; $7D:
         .byte   _T, _R, _O, _P, _I, _C, _AL, __end
         .define_msg "_TROPICAL"
         
-        ; 126.
+        ; $7E:
         .byte   _D, _EN, _SE, __end
         .define_msg "_DENSE"
         
-        ; 127.
+        ; $7F:
         .byte   _RA, _IN, __end
         .define_msg "_RAIN"
         
-        ; 128.
+        ; $80:
         .byte   _I, _M, _P, _EN, _ET, _RA, _B, _LE, __end
         .define_msg "_IMPENETRABLE"
         
-        ; message indices $81..$D6 are expandable via msgtokens $81..$D6
-        ;-----------------------------------------------------------------------
-
-        ; 129.
+        ; message indices $81..$D6 are expandable via tokens $81..$D6
+        ;=======================================================================
+        ; TODO: define a constant for this barrier -- if we add or remove
+        ;       messages, then the code needs to update CMP checks
+        ; 
+        ; $81:  "exuberant"
         .byte   _E, _X, _U, _BE, _RA, _N, _T, __end
         .define_msg "_EXUBERANT"
         
-        ; 130.
+        ; $82:  "funny"
         .byte   _F, _U, _N, _N, _Y, __end
         .define_msg "_FUNNY"
         
-        ; 131.
+        ; $83:  "weird"
         .byte   _W, _E, _I, _R, _D, __end
         .define_msg "_WEIRD"
         
-        ; 132.
+        ; $84:  "unusual"
         .byte   _U, _NU, _S, _U, _AL, __end
         .define_msg "_UNUSUAL"
         
-        ; 133.
+        ; $85:  "strange"
         .byte   _ST, _RA, _N, _GE, __end
         .define_msg "_STRANGE"
         
-        ; 134.
+        ; $86:  "preculiar"
         .byte   _P, _E, _C, _U, _L, _I, _AR, __end
         .define_msg "_PECULIAR"
         
-        ; 135.
+        ; $87:  "frequent"
         .byte   _F, _RE, _QU, _EN, _T, __end
         .define_msg "_FREQUENT"
         
-        ; 136.
+        ; $88:  "occasional"
         .byte   _O, _C, _C, _A, _S, _I, _ON, _AL, __end
         .define_msg "_OCCASIONAL"
         
-        ; 137.
+        ; $89:  "unpredicatble"
         .byte   _U, _N, _P, _RE, _DI, _C, _T, _AB, _LE, __end
         .define_msg "_UNPREDICTABLE"
         
-        ; 138.
+        ; $8A:  "dreadful"
         .byte   _D, _RE, _A, _D, _F, _U, _L, __end
         .define_msg "_DREADFUL"
         
-        ; 139.
+        ; $8B:  "deadly"
         .byte   _DEADLY, __end
         .define_msg "_8B"
 
-        ; 140.
+        ;-----------------------------------------------------------------------
+        ; $8C:
         .byte   $0b, __, $0c, __, _F, _OR, __, $32, __end
         .define_msg "_8C"
         
-        ; 141.
+        ; $8D:
         .byte   _8C, _AND_, $32, __end
         .define_msg "_8D"
         
-        ; 142.
+        ; $8E:
         .byte   $31, __, _B, _Y, __, $30, __end
         .define_msg "_8E"
         
-        ; 143.
+        ; $8F:
         .byte   _8C, __, _B, _U, _T, __, _8E, __end
         .define_msg "_8F"
         
-        ; 144.
+        ; $90:
         .byte   __, _A, ($6f ^ TXT_DOCKED_XOR), __, $27, __end
         .define_msg "_90"
         
-        ; 145.
+        ; $91:
         .byte   _P, _L, _AN, _ET, __end
         .define_msg "_PLANET"
         
-        ; 146.
+        ; $92:
         .byte   _W, _OR, _L, _D, __end
         .define_msg "_WORLD"
         
-        ; 147.
+        ; $93:  "the "
         .byte   _TH, _E, __, __end
-        .define_msg "_THE"
+        .define_msg "_THE_"
         
-        ; 148.
+        ; $94:  "this "
         .byte   _TH, _I, _S, __, __end
         .define_msg "_THIS"
         
-        ; 149.
+        ; $95:  "load new Commander"
         .byte   _LO, _A, _D, _NEW, _COMMANDER, __end
         .define_msg "_LOAD_NEW_COMMANDER"
         
-        ; 150.
+        ; $96:
         .byte   FN_CLEAR_SCREEN, FN_DIVIDER, FN_F01, FN_F08, __end
         .define_msg "_96"
         
-        ; 151.
+        ; $97:  "drive"
         .byte   _D, _R, _I, _VE, __end
         .define_msg "_DRIVE"
         
-        ; 152.
+        ; $98:  " catalogue"
         .byte   __, _C, _AT, _A, _LO, _G, _U, _E, __end
         .define_msg "_CATALOGUE"
         
-        ; 153.
+        ; $99:  "ian"
         .byte   _I, _AN, __end
         .define_msg "_IAN"
         
-        ; 154.
+        ; $9A:  "Commander"
         .byte   FN_CAPNEXT, _C, _O, _M, _M, _AN, _D, _ER, __end
         .define_msg "_COMMANDER"
         
-        ; 155.
+        ; $9B:
         .byte   $3f, __end
         .define_msg "_9B"
         
-        ; 156.
+        ; $9C:  "mountain"
         .byte   _M, _OU, _N, _T, _A, _IN, __end
         .define_msg "_MOUNTAIN"
         
-        ; 157.
+        ; $9D:  "edible"
         .byte   _ED, _I, _B, _LE, __end
         .define_msg "_EDIBLE"
         
-        ; 158.
+        ; $9E:  "tree"
         .byte   _T, _RE, _E, __end
         .define_msg "_TREE"
         
-        ; 159.
+        ; $9F:  "spotted"
         .byte   _S, _P, _O, _T, _T, _ED, __end
         .define_msg "_SPOTTED"
         
-        ; 160.
+        ; $A0:
         .byte   $2f, __end
         .define_msg "_A0"
         
-        ; 161.
+        ; $A1:
         .byte   $2e, __end
         .define_msg "_A1"
         
-        ; 162.
+        ; $A2:
         .byte   $36, _O, _I, _D, __end
         .define_msg "_A2"
         
-        ; 163.
+        ; $A3:
         .byte   $28, __end
         .define_msg "_A3"
         
-        ; 164.
+        ; $A4:
         .byte   $29, __end
         .define_msg "_A4"
         
-        ; 165.
+        ; $A5:
         .byte   _AN, _C, _I, _EN, _T, __end
         .define_msg "_ANCIENT"
         
-        ; 166.
+        ; $A6:
         .byte   _E, _X, _CE, _P, _TI, _ON, _AL, __end
         .define_msg "_EXCEPTIONAL"
         
-        ; 167.
+        ; $A7:
         .byte   _E, _C, _CE, _N, _T, _R, _I, _C, __end
         .define_msg "_ECCENTRIC"
         
-        ; 168.
+        ; $A8:
         .byte   _IN, _G, _RA, _IN, _ED, __end
         .define_msg "_INGRAINED"
         
-        ; 169.
+        ; $A9:
         .byte   ($72 ^ TXT_DOCKED_XOR), __end
         .define_msg "_A9"
         
-        ; 170.
+        ;-----------------------------------------------------------------------
+        ; $AA:  "killer"
         .byte   _K, _IL, _L, _ER, __end
         .define_msg "_KILLER"
         
-        ; 171.
+        ; $AB:  "deadly"
         .byte   _D, _E, _A, _D, _L, _Y, __end
         .define_msg "_DEADLY"
         
-        ; 172.
+        ; $AC:  "evil"
         .byte   _E, _V, _IL, __end
         .define_msg "_EVIL"
         
-        ; 173.
+        ; $AD:  "lethal"
         .byte   _LE, _TH, _AL, __end
         .define_msg "_LETHAL"
         
-        ; 174.
+        ; $AE:  "vicious"
         .byte   _V, _I, _C, _I, _O, _US, __end
         .define_msg "_VICIOUS"
         
-        ; 175.
+        ;-----------------------------------------------------------------------
+        ; $AF:  "its "
         .byte   _IT, _S, __, __end
         .define_msg "_ITS"
         
-        ; 176.
+        ; $B0:
         .byte   FN_F0D, FN_F0E, FN_CAPNEXT, __end
         .define_msg "_B0"
         
-        ; 177.
+        ; $B1:
         .byte   _DOT, FN_NEWLINE, FN_F0F, __end
         .define_msg "_B1"
         
-        ; 178.
+        ; $B2:
         .byte   __, _AN, _D, __, __end
         .define_msg "_AND_"
         
-        ; 179.
+        ; $B3:
         .byte   _Y, _OU, __end
         .define_msg "_YOU"
         
-        ; 180.
+        ;-----------------------------------------------------------------------
+        ; $B4:  "parking meters"
         .byte   _P, _AR, _K, _ING_, _M, _ET, _ER, _S, __end
-        .define_msg "_B4"
+        .define_msg "_PARKING_METERS"
         
-        ; 181.
+        ; $B5:  "dust clouds"
         .byte   _D, _US, _T, __, _C, _LO, _U, _D, _S, __end
         .define_msg "_DUST_CLOUDS"
         
-        ; 182.
+        ; $B6:  "ice bergs"
         .byte   _I, _CE, __, _BE, _R, _G, _S, __end
         .define_msg "_ICE_BERGS"
         
-        ; 183.
+        ; $B7:  "rock formations"
         .byte   _R, _O, _C, _K, __, _F, _OR, _MA, _TI, _ON, _S, __end
         .define_msg "_ROCK_FORMATIONS"
         
-        ; 184.
+        ; $B8:  "volcanoes"
         .byte   _V, _O, _L, _C, _A, _NO, _ES, __end
         .define_msg "_VOLCANOES"
         
-        ; 185.
+        ;-----------------------------------------------------------------------
+        ; $B9:  "plant"
         .byte   _P, _L, _AN, _T, __end
         .define_msg "_PLANT"
         
-        ; 186.
+        ; $BA:  "tulip"
         .byte   _T, _U, _L, _I, _P, __end
         .define_msg "_TULIP"
         
-        ; 187.
+        ; $BB:  "banana"
         .byte   _B, _AN, _AN, _A, __end
         .define_msg "_BANANA"
         
-        ; 188.
+        ; $BC:  "corn"
         .byte   _C, _OR, _N, __end
         .define_msg "_CORN"
         
-        ; 189.
+        ; $BD:
         .byte   FN_F12, _W, _E, _ED, __end
         .define_msg "_WEED"
         
-        ; 190.
+        ; $BE:
         .byte   FN_F12, __end
         .define_msg "_BE_"
         
-        ; 191.
+        ; $BF:
         .byte   FN_F11, __, FN_F12, __end
         .define_msg "_BF"
         
-        ; 192.
+        ; $C0:
         .byte   FN_F11, __, $3f, __end
         .define_msg "_C0"
         
-        ; 193.
+        ; $C1:
         .byte   _IN, _H, _A, _BI, _T, _AN, _T, __end
         .define_msg "_INHABITANT"
         
-        ; 194.
+        ; $C2:
         .byte   _BF, __end
         .define_msg "_C2"
         
-        ; 195.
+        ; $C3:
         .byte   _IN, _G, __, __end
         .define_msg "_ING_"
         
-        ; 196.
+        ; $C4:
         .byte   _ED, __, __end
         .define_msg "_ED_"
         
-        ; 197.
+        ; $C5:
         .byte   __, _D, _DOT, _B, _RA, _BE, _N, __
         .byte   $71, __, _I, _DOT, _BE, _L, _L, __end
         .define_msg "_DBRABEN_AND_IBELL"
         
-        ; 198.
-        .byte   __, _L, _IT, _T, _LE, __, _T, _R
-        .byte   _U, _M, _B, _LE, __end
+        ; $C6:  " little trumble"
+        .byte   __, _L, _IT, _T, _LE, __, _T, _R, _U, _M, _B, _LE, __end
         .define_msg "_LITTLE_TRUMBLE"
         
-        ; 199.
+        ; $C7:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN, FN_F1D
-        .byte   FN_F0E, FN_CAPNEXT, _G, _O, _O, _D, FN_F0D, __
-        .byte   _D, _A, _Y, __, _COMMANDER, __, FN_F04, _COMMA
-        .byte   __, _AL, _LO, _W, __, _M, _E, _TO
-        .byte   _IN, _T, _R, _O, _D, _U, _CE, __
-        .byte   _M, _Y, _SE, _L, _F, _DOT, __, FN_CAPNEXT
-        .byte   _I, __, _A, _M, FN_F02, __, _THE, _M
-        .byte   _ER, _C, _H, _AN, _T, __, _P, _R
-        .byte   _IN, _CE, __, _O, _F, __, _TH, _R
-        .byte   _U, _N, FN_F0D, _AND_, FN_CAPNEXT, _I, __, _F
-        .byte   _IN, _D, __, _M, _Y, _SE, _L, _F
-        .byte   __, _F, _OR, _CE, _D, _TO, _SE, _L
-        .byte   _L, __, _M, _Y, __, _M, _O, _ST
-        .byte   __, _T, _RE, _A, _S, _U, _R, _ED
-        .byte   __, _P, _O, _S, _S, _ES, _S, _I
-        .byte   _ON, _NEW_SENTENCE
-        .byte   _I, __, _A, _M, __, _O
-        .byte   _F, _F, _ER, _ING_, _Y, _OU, _COMMA, __
-        .byte   _F, _OR, __, _THE, _P, _A, _L, _T
-        .byte   _R, _Y, __, _S, _U, _M, __, _O
-        .byte   _F, __, _J, _U, _ST, __, _5, _0
-        .byte   _0, _0, FN_CAPNEXT, _C, FN_CAPNEXT, _R, __, _THE
-        .byte   _RA, _RE, _ST, __, _TH, _ING_, __, _IN
-        .byte   __, _THE, FN_F02, _K, _NO, _W, _N, __
-        .byte   _U, _N, _I, _VE, _R, _SE, _NEW_SENTENCE, FN_F0D
-        .byte   _W, _IL, _L, __, _Y, _OU, __, _T
-        .byte   _A, _K, _E, __, _IT
+        .byte   FN_F0E, FN_CAPNEXT, _G, _O, _O, _D, FN_F0D, __, _D, _A, _Y, __
+        .byte   _COMMANDER, __, FN_F04, _COMMA, __, _AL, _LO, _W, __, _M, _E
+        .byte   _TO, _IN, _T, _R, _O, _D, _U, _CE, __, _M, _Y, _SE, _L, _F
+        .byte   _DOT, __, FN_CAPNEXT, _I, __, _A, _M, FN_F02, __, _THE_
+        .byte   _M, _ER, _C, _H, _AN, _T, __, _P, _R, _IN, _CE, __, _O, _F, __
+        .byte   _TH, _R, _U, _N, FN_F0D, _AND_, FN_CAPNEXT, _I, __, _F, _IN, _D
+        .byte   __, _M, _Y, _SE, _L, _F, __, _F, _OR, _CE, _D, _TO, _SE, _L, _L
+        .byte   __, _M, _Y, __, _M, _O, _ST, __, _T, _RE, _A, _S, _U, _R, _ED
+        .byte   __, _P, _O, _S, _S, _ES, _S, _I, _ON, _NEW_SENTENCE
+
+        .byte   _I, __, _A, _M, __, _O, _F, _F, _ER, _ING_, _Y, _OU, _COMMA, __
+        .byte   _F, _OR, __, _THE_, _P, _A, _L, _T, _R, _Y, __, _S, _U, _M, __
+        .byte   _O, _F, __, _J, _U, _ST, __, _5, _0, _0, _0
+        .byte   FN_CAPNEXT, _C, FN_CAPNEXT, _R, __, _THE_, _RA, _RE, _ST, __
+        .byte   _TH, _ING_, __, _IN, __, _THE_, FN_F02, _K, _NO, _W, _N, __
+        .byte   _U, _N, _I, _VE, _R, _SE, _NEW_SENTENCE
+        
+        .byte   FN_F0D, _W, _IL, _L, __, _Y, _OU, __, _T, _A, _K, _E, __, _IT
         .byte   FN_F01, _LPAREN, _Y, _SLASH, _N, _RPAREN, _QMARK, FN_NEWLINE
         .byte   FN_F0F, FN_F01, FN_F08
         .byte   __end
         .define_msg "_TRUMBLES"
         
-        ; 200.
+        ; $C8:  " name?"
         .byte   __, _N, _A, _M, _E, _QMARK, __
         .byte   __end
         .define_msg "_C8"
         
-        ; 201.
+        ; $C9:  " to "
         .byte   __, _T, _O, __, __end
         .define_msg "_TO"
         
-        ; 202.
+        ; $CA:  " is "
         .byte   __, _I, _S, __, __end
         .define_msg "_IS"
         
-        ; 203.
-        .byte   _W, _A, _S, __, _LA
-        .byte   _ST, __, _SE, _EN, __, _AT, __, FN_CAPNEXT
+        ; $CB:  "was last seen at "
+        .byte   _W, _A, _S, __, _LA, _ST, __, _SE, _EN, __, _AT, __, FN_CAPNEXT
         .byte   __end
-        .define_msg "_CB"
+        .define_msg "_WAS_LAST_SEEN_AT_"
         
-        ; 204.  "new sentence" -- fullstop, new line, captialise next letter
+        ; $CC:  new sentence -- fullstop, new line, captialise next letter
         .byte   _DOT, FN_NEWLINE, __, FN_CAPNEXT
         .byte   __end
         .define_msg "_NEW_SENTENCE"
         
-        ; 205.
+        ; $CD:  "docked"
         .byte   _D, _O, _C, _K, _ED, __end
         .define_msg "_DOCKED"
         
-        ; 206.
+        ; $CE:
         .byte   FN_F01, _LPAREN, _Y, _SLASH, _N, _RPAREN, _QMARK, __end
         .define_msg "_CE_"
         
-        ; 207.
+        ; $CF:  "ship"
         .byte   _S, _H, _I, _P, __end
         .define_msg "_SHIP"
         
-        ; 208.
+        ; $D0:  " a "
         .byte   __, _A, __, __end
         .define_msg "_A_"
         
-        ; 209.
+        ; $D1:
         .byte   __, _ER, _R, _I, _US, __end
         .define_msg "_ERRIUS"
         
-        ; 210.
+        ; $D2:
         .byte   __, _N, _E, _W, __, __end
         .define_msg "_NEW"
         
-        ; 211.
+        ; $D3:
         .byte   FN_F02, __, _H, _ER, __, _MA, _J, _ES, _T, _Y, _APOS, _S, __
         .byte   _S, _P, _A, _CE, __, _N, _A, _V, _Y, FN_F0D
         .byte   __end
         .define_msg "_HER_MAJESTYS_SPACE_NAVY"
         
-        ; 212.
+        ; $D4:
         .byte   _B1, FN_F08, FN_F01, __, __
         .byte   _M, _ES, _S, _A, _GE, __, _EN, _D, _S
         .byte   __end
         .define_msg "_D4"
         
-        ; 213.
+        ; $D5:
         .byte   __, _COMMANDER, __, FN_F04, _COMMA, __, _I, __, FN_F0D, _A, _M
         .byte   FN_F02, __, _C, _A, _P, _T, _A, _IN, __, FN_THEIR_NAME, __
         .byte   FN_F0D, _O, _F, _HER_MAJESTYS_SPACE_NAVY, __end
         .define_msg "_COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY"
         
-        ; 214.
+        ; $D6:
         .byte   __end
         .skip_msg
 
         ;-----------------------------------------------------------------------
         
-        ; 215.
+        ; $D7:
         .byte   FN_F0F, __, _U, _N, _K, _NO, _W, _N, __, _PLANET, __end
         .define_msg "_D7"
         
-        ; 216.
+        ; $D8:
         .byte   FN_CLEAR_SCREEN, FN_F08, FN_F17, FN_F01, __, _IN, _C, _O, _M
         .byte   _ING_, _M, _ES, _S, _A, _GE, __end
         .define_msg "_INCOMING_MESSAGE"
         
         ; the names of NPCs; selected by galaxy number
         ;----------------------------------------------------------------------
-        ; 217.
+        ; $D9:  "curruthers"
         .byte   _C, _U, _R, _R, _U, _TH, _ER, _S, __end
         .define_msg "_CURRUTHERS"
         
-        ; 218.
-        .byte   _F, _O, _S, _D, _Y, _K, _E, __
-        .byte   _S, _M, _Y, _TH, _E, __end
+        ; $DA:  "fosdyke smythe"
+        .byte   _F, _O, _S, _D, _Y, _K, _E, __, _S, _M, _Y, _TH, _E, __end
         .define_msg "_FOSDYKE_SMYTHE"
         
-        ; 219.
+        ; $DB:  "fortesque"
         .byte   _F, _OR, _T, _ES, _QU, _E, __end
         .define_msg "_FORTESQUE"
         
-        ; 220.  TODO: is this an NPC name, a planet name, or unused?
-        .byte   _CB, _RE, _ES, _DI, _CE, __end
+        ; $DC:
+        .byte   _WAS_LAST_SEEN_AT_, _RE, _ES, _DI, _CE, __end
         .skip_msg
         
-        ; 221.  NOTE: this gets printed by docked token function $1C,
-        ;       which adds the galaxy number to index 220; it was probably
+        ; $DD:  NOTE: this gets printed by docked token function $1C,
+        ;       which adds the galaxy number to index $DC; it was probably
         ;       intended to chase the prototype ship across multiple galaxies,
         ;       but this idea appears to have been scrapped
         .byte   _I, _S, __, _BE, _L, _I, _E, _V, _ED, _TO, _H, _A, _VE, __
@@ -1387,74 +1397,68 @@ _0e00:                                                                  ;$0E00
         .define_msg "_IS_BELIEVED_TO_HAVE_JUMPED_TO_THIS_GALAXY"
         
         ;-----------------------------------------------------------------------
-        ; 222.
+        ; $DE:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
         .byte   FN_F1D, FN_F0E, FN_F02
         .byte   _G, _O, _O, _D, __, _D, _A, _Y, __, _COMMANDER, __
         .byte   FN_F04, _NEW_SENTENCE
 
-        .byte   _I, FN_F0D, __, _A, _M, __, FN_CAPNEXT, _A
-        .byte   _G, _EN, _T, __, FN_CAPNEXT, _B, _LA, _K
-        .byte   _E, __, _O, _F, __, FN_CAPNEXT, _N, _A
-        .byte   _V, _AL, __, FN_CAPNEXT, _IN, _T, _E, _L
-        .byte   _LE, _G, _EN, _CE, _NEW_SENTENCE
-        .byte   _A, _S, __, _YOU, __, _K, _NO, _W, _COMMA, __, _THE
-        .byte   FN_CAPNEXT, _N, _A, _V, _Y, __, _H, _A
-        .byte   _VE, __, _BE, _EN, __, _K, _E, _E
-        .byte   _P, _ING_, _THE, FN_CAPNEXT, _TH, _AR, _G, _O
-        .byte   _I, _D, _S, __, _O, _F, _F, __
-        .byte   _YOU, _R, __, _A, _S, _S, __, _OU
-        .byte   _T, __, _IN, __, _D, _E, _E, _P
-        .byte   __, _S, _P, _A, _CE, __, _F, _OR
-        .byte   __, _MA, _N, _Y, __, _Y, _E, _AR
-        .byte   _S, __, _NO, _W, _DOT, __, FN_CAPNEXT, _W
-        .byte   _E, _L, _L, __, _THE, _S, _IT, _U
-        .byte   _A, _TI, _ON, __, _H, _A, _S, __
-        .byte   _C, _H, _AN, _G, _ED, _NEW_SENTENCE
+        .byte   _I, FN_F0D, __, _A, _M, __, FN_CAPNEXT, _A, _G, _EN, _T, __
+        .byte   FN_CAPNEXT, _B, _LA, _K, _E, __, _O, _F, __, FN_CAPNEXT
+        .byte   _N, _A, _V, _AL, __, FN_CAPNEXT
+        .byte   _IN, _T, _E, _L, _LE, _G, _EN, _CE, _NEW_SENTENCE
+        
+        .byte   _A, _S, __, _YOU, __, _K, _NO, _W, _COMMA, __, _THE_
+        .byte   FN_CAPNEXT, _N, _A, _V, _Y, __, _H, _A, _VE, __, _BE, _EN, __
+        .byte   _K, _E, _E, _P, _ING_, _THE_, FN_CAPNEXT
+        .byte   _TH, _AR, _G, _O, _I, _D, _S, __, _O, _F, _F, __, _YOU, _R, __
+        .byte   _A, _S, _S, __, _OU, _T, __, _IN, __, _D, _E, _E, _P
+        .byte   __, _S, _P, _A, _CE, __, _F, _OR, __, _MA, _N, _Y, __
+        .byte   _Y, _E, _AR, _S, __, _NO, _W, _DOT, __, FN_CAPNEXT
+        .byte   _W, _E, _L, _L, __, _THE_, _S, _IT, _U, _A, _TI, _ON, __
+        .byte   _H, _A, _S, __, _C, _H, _AN, _G, _ED, _NEW_SENTENCE
+
         .byte   _OU, _R, __, _B, _O, _Y, _S, __, _AR, _E, __, _RE, _A, _D, _Y
         .byte   __, _F, _OR, _A_, _P, _U, _S, _H, __, _R, _I, _G, _H, _T, _TO
-        .byte   _THE, _H, _O, _M, _E, __, _S, _Y, _S, _T, _E, _M, __, _O, _F
+        .byte   _THE_, _H, _O, _M, _E, __, _S, _Y, _S, _T, _E, _M, __, _O, _F
         .byte   __, _TH, _O, _SE, __, _M, _U, _R, _D, _ER, _ER, _S
         .byte   _NEW_SENTENCE
 
         .byte   FN_WAIT_FOR_KEY, FN_CLEAR_SCREEN, FN_F1D
         .byte   _I, FN_F0D, __, _H, _A, _VE, __, _O, _B, _T, _A, _IN, _ED_
-        .byte   _THE, _D, _E, _F, _EN, _CE, __, _P, _LA, _N, _S, __, _F, _OR
+        .byte   _THE_, _D, _E, _F, _EN, _CE, __, _P, _LA, _N, _S, __, _F, _OR
         .byte   __, _TH, _E, _I, _R, __, FN_CAPNEXT, _H, _I, _VE, __
         .byte   FN_CAPNEXT, _W, _OR, _L, _D, _S, _NEW_SENTENCE
 
-        .byte   _THE, _BE, _ET, _LE, _S, __, _K, _NO
-        .byte   _W, __, _W, _E, _APOS, _VE, __, _G
-        .byte   _O, _T, __, _SO, _M, _E, _TH, _ING_
-        .byte   _B, _U, _T, __, _NO, _T, __, _W
-        .byte   _H, _AT, _NEW_SENTENCE
-        .byte   _I, _F, __, FN_CAPNEXT, _I
-        .byte   __, _T, _RA, _N, _S, _M, _IT, __
-        .byte   _THE, _P, _LA, _N, _S, _TO, _OU, _R
-        .byte   __, _B, _A, _SE, __, _ON, __, FN_CAPNEXT
-        .byte   _BI, _RE, _RA, __, _TH, _E, _Y, _APOS
-        .byte   _L, _L, __, _IN, _T, _ER, _CE, _P
-        .byte   _T, __, _THE, _T, _R, _AN, _S, _M
-        .byte   _I, _S, _S, _I, _ON, _DOT, __, FN_CAPNEXT
-        .byte   _I, __, _N, _E, _ED, _A_, _SHIP, _TO
-        .byte   _MA, _K, _E, __, _THE, _R, _U, _N
+        .byte   _THE_, _BE, _ET, _LE, _S, __, _K, _NO, _W, __
+        .byte   _W, _E, _APOS, _VE, __, _G, _O, _T, __, _SO, _M, _E, _TH, _ING_
+        .byte   _B, _U, _T, __, _NO, _T, __, _W, _H, _AT, _NEW_SENTENCE
+
+        .byte   _I, _F, __, FN_CAPNEXT, _I, __, _T, _RA, _N, _S, _M, _IT, __
+        .byte   _THE_, _P, _LA, _N, _S, _TO, _OU, _R, __, _B, _A, _SE, __, _ON
+        .byte   __, FN_CAPNEXT, _BI, _RE, _RA, __, _TH, _E, _Y, _APOS, _L, _L
+        .byte   __, _IN, _T, _ER, _CE, _P, _T, __, _THE_
+        .byte   _T, _R, _AN, _S, _M, _I, _S, _S, _I, _ON, _DOT, __
+        .byte   FN_CAPNEXT, _I, __, _N, _E, _ED, _A_, _SHIP, _TO, _MA, _K, _E
+        .byte   __, _THE_, _R, _U, _N, _NEW_SENTENCE
+
+        .byte   _YOU, _APOS, _RE, __, _E, _LE, _C, _T, _ED, _NEW_SENTENCE
+        
+        .byte   _THE_, _P, _LA, _N, _S, __, _A, _RE, __
+        .byte   _U, _N, _I, _P, _U, _L, _SE, __, _C, _O, _D, _ED_
+        .byte   _W, _I, _TH, _IN, __, _THIS
+        .byte   _T, _R, _AN, _S, _M, _I, _S, _S, _I, _ON
         .byte   _NEW_SENTENCE
-        .byte   _YOU, _APOS, _RE, __, _E, _LE, _C
-        .byte   _T, _ED, _NEW_SENTENCE
-        .byte   _THE, _P, _LA, _N, _S
-        .byte   __, _A, _RE, __, _U, _N, _I, _P
-        .byte   _U, _L, _SE, __, _C, _O, _D, _ED_
-        .byte   _W, _I, _TH, _IN, __, _THIS, _T, _R
-        .byte   _AN, _S, _M, _I, _S, _S, _I, _ON
+
+        .byte   FN_F08, _YOU, __, _W, _IL, _L, __, _BE, __, _P, _A, _I, _D
         .byte   _NEW_SENTENCE
-        .byte   FN_F08, _YOU, __, _W, _IL, _L, __
-        .byte   _BE, __, _P, _A, _I, _D, _NEW_SENTENCE
+        
         .byte   __, __, __, __, FN_CAPNEXT, _G, _O, _O, _D
         .byte   __, _L, _U, _C, _K, __, _COMMANDER, _D4
         .byte   FN_WAIT_FOR_KEY, __end
         .define_msg "_DE"
         
-        ; 223.
+        ; $DF:  
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
         .byte   FN_F1D, FN_F08, FN_F0E, FN_F0D
         .byte   FN_CAPNEXT, _W, _E, _L, _L, __, _D, _ON
@@ -1464,11 +1468,11 @@ _0e00:                                                                  ;$0E00
         .byte   __, _S, _H, _AL, _L, __, _RE, _M
         .byte   _E, _M, _B, _ER, _NEW_SENTENCE
         .byte   _W, _E, __, _D, _I, _D, __, _NO, _T, __, _E
-        .byte   _X, _P, _E, _C, _T, __, _THE, FN_CAPNEXT
+        .byte   _X, _P, _E, _C, _T, __, _THE_, FN_CAPNEXT
         .byte   _TH, _AR, _G, _O, _I, _D, _S, _TO
         .byte   _F, _IN, _D, __, _OU, _T, __, _A
         .byte   _B, _OU, _T, __, _YOU, _NEW_SENTENCE
-        .byte   _F, _OR, __, _THE, _M, _O, _M, _EN, _T, __
+        .byte   _F, _OR, __, _THE_, _M, _O, _M, _EN, _T, __
         .byte   _P, _LE, _A, _SE, __, _A, _C, _CE
         .byte   _P, _T, __, _THIS, FN_CAPNEXT, _N, _A, _V
         .byte   _Y, __, FN_F06, ($72 ^ TXT_DOCKED_XOR), FN_F05, __, _A, _S
@@ -1477,136 +1481,137 @@ _0e00:                                                                  ;$0E00
         .define_msg "_DF"
         
         ;-----------------------------------------------------------------------
-        ; 224.
+        ; $E0:  "are you sure?"
         .byte   _A, _RE, __, _YOU, __, _S, _U, _RE, _QMARK, __end
         .define_msg "_ARE_YOU_SURE"
         
-        ; 225.
+        ; $E1:  "shrew"
         .byte   _S, _H, _RE, _W, __end
         .define_msg "_SHREW"
         
-        ; 226.
+        ; $E2:  "beast"
         .byte   _BE, _A, _ST, __end
         .define_msg "_BEAST"
         
-        ; 227.
+        ; $E3:  "bison"
         .byte   _B, _I, _S, _ON, __end
         .define_msg "_BISON"
         
-        ; 228.
+        ; $E4:  "snake"
         .byte   _S, _N, _A, _K, _E, __end
         .define_msg "_SNAKE"
         
-        ; 229.
+        ; $E5:  "wolf"
         .byte   _W, _O, _L, _F, __end
         .define_msg "_WOLF"
         
-        ; 230.
+        ; $E6:  "leopard"
         .byte   _LE, _O, _P, _AR, _D, __end
         .define_msg "_LEOPARD"
         
-        ; 231.
+        ; $E7:  "cat"
         .byte   _C, _AT, __end
         .define_msg "_CAT"
         
-        ; 232.
+        ; $E8:  "monkey"
         .byte   _M, _ON, _K, _E, _Y, __end
         .define_msg "_MONKEY"
         
-        ; 233.
+        ; $E9:  "goat"
         .byte   _G, _O, _AT, __end
         .define_msg "_GOAT"
         
-        ; 234.
+        ; $EA:  "fish"
         .byte   _F, _I, _S, _H, __end
         .define_msg "_FISH"
         
-        ; 235.
+        ; $EB:  
         .byte   $3d, __, $3e, __end
         .define_msg "_EB"
         
-        ; 236.
+        ; $EC:
         .byte   FN_F11, __, $2f, __, $2c, __end
         .define_msg "_EC"
         
-        ; 237.
+        ; $ED:
         .byte   _ITS, $3c, __, $2e, __, $2c, __end
         .skip_msg
         
-        ; 238.
+        ; $EE:
         .byte   $2b, __, $2a, __end
         .define_msg "_EE"
         
-        ; 239.
+        ; $EF:
         .byte   $3d, __, $3e, __end
         .define_msg "_EF"
         
-        ; 240.
+        ;-----------------------------------------------------------------------
+        ; $F0:  "meat"
         .byte   _M, _E, _AT, __end
         .define_msg "_MEAT"
         
-        ; 241.
+        ; $F1:  "cutlet"
         .byte   _C, _U, _T, _L, _ET, __end
         .define_msg "_CUTLET"
         
-        ; 242.
+        ; $F2:  "steak"
         .byte   _ST, _E, _A, _K, __end
         .define_msg "_STEAK"
         
-        ; 243.
+        ; $F3:  "burgers"
         .byte   _B, _U, _R, _G, _ER, _S, __end
         .define_msg "_BURGERS"
         
-        ; 244.
+        ; $F4:  "soup"
         .byte   _SO, _U, _P, __end
         .define_msg "_SOUP"
         
         ; sport prefixes: (e.g. Brockian Ultra Cricket)
         ;-----------------------------------------------------------------------
-        ; 245.
+        ; $F5:  "ice"
         .byte   _I, _CE, __end
         .define_msg "_ICE"
         
-        ; 246.
+        ; $F6:  "mud"
         .byte   _M, _U, _D, __end
         .define_msg "_MUD"
         
-        ; 247.
+        ; $F7:  "zero-G"
         .byte   _Z, _ER, _O, _HYPHEN, FN_CAPNEXT, _G, __end
         .define_msg "_F7"
         
-        ; 248.
+        ; $F8:  "vacuum"
         .byte   _V, _A, _C, _U, _U, _M, __end
         .define_msg "_VACUUM"
         
-        ; 249.
+        ; $F9:
         .byte   FN_F11, __, _U, _L, _T, _RA, __end
         .define_msg "_F9"
         
         ; sports:
         ;-----------------------------------------------------------------------
-        ; 250.
+        ; $FA:  "hockey"
         .byte   _H, _O, _C, _K, _E, _Y, __end
         .define_msg "_HOCKEY"
         
-        ; 251.
+        ; $FB:  "cricket"
         .byte   _C, _R, _I, _C, _K, _ET, __end
         .define_msg "_CRICKET"
         
-        ; 252.
+        ; $FC:  "karate"
         .byte   _K, _AR, _AT, _E, __end
         .define_msg "_KARATE"
         
-        ; 253.
+        ; $FD:  "polo"
         .byte   _P, _O, _LO, __end
         .define_msg "_POLO"
         
-        ; 254.
+        ; $FE:  "tennis"
         .byte   _T, _EN, _N, _I, _S, __end
         .define_msg "_TENNIS"
         
         ;-----------------------------------------------------------------------
-        ; 255.  disk / tape error
+        ; $FF:  disk / tape error
         .byte   FN_NEWLINE, FN_MEDIA_CURRENT, __, _ER, _R, _OR
         .define_msg "_ERROR"
 
@@ -1635,7 +1640,7 @@ _1a5c:                                                                  ;$1A5C
         .byte   __end
         
         ; 1.
-        .byte   _THE, _C, _O, _LO, _N, _I, _ST, _S, __, _H, _E, _RE, __
+        .byte   _THE_, _C, _O, _LO, _N, _I, _ST, _S, __, _H, _E, _RE, __
         .byte   _H, _A, _VE, __, _V, _I, _O, _L, _AT, _ED, FN_F02, __
         .byte   _IN, _T, _ER, _G, _AL, _A, _C, _TI, _C, __, _C, _LO, _N, _ING_
         .byte   _P, _R, _O, _T, _O, _C, _O, _L, FN_F0D, _AND_
@@ -1644,8 +1649,7 @@ _1a5c:                                                                  ;$1A5C
         
         ; 2.
         ; TODO: "constrictor" should be capitalised
-        .byte   _THE, _C, _ON, _ST, _R, _I, _C, _T, _OR, __, _CB
-        ; TODO: "reesdice" should be capitalised
+        .byte   _THE_, _C, _ON, _ST, _R, _I, _C, _T, _OR, __, _WAS_LAST_SEEN_AT_
         .byte   _RE, _ES, _DI, _CE, _COMMA, __, _COMMANDER
         .byte   __end
 
@@ -1683,7 +1687,7 @@ _1a5c:                                                                  ;$1A5C
         .byte   _Y, __, _LA, _S, _ER, _S, __, _D
         .byte   _I, _D, _N, _APOS, _T, __, _E, _V
         .byte   _EN, __, _S, _C, _RA, _T, _C, _H
-        .byte   __, _THE, $24, __end
+        .byte   __, _THE_, $24, __end
         
         ; 7.
         .byte   _O, _H, __, _D, _E, _AR, __, _M, _E, __, _Y, _ES, _DOT
@@ -1699,7 +1703,7 @@ _1a5c:                                                                  ;$1A5C
         .byte   __end
         
         ; 8.
-        .byte   _YOU, __, _C, _AN, __, _T, _A, _C, _K, _LE, __, _THE
+        .byte   _YOU, __, _C, _AN, __, _T, _A, _C, _K, _LE, __, _THE_
         .byte   $3f, __, $24, __
         .byte   _I, _F, __, _YOU, __, _L, _I, _K, _E, _DOT, __
         ; TODO: "orarra" should be capitalised
@@ -1725,7 +1729,7 @@ _1a5c:                                                                  ;$1A5C
         .byte   $23, __end      ; 22.
         
         ; 23.
-        .byte   _B, _O, _Y, __, _A, _RE, __, _YOU, __, _IN, __, _THE
+        .byte   _B, _O, _Y, __, _A, _RE, __, _YOU, __, _IN, __, _THE_
         .byte   _W, _R, _ON, _G, __, _G, _AL, _A, _X, _Y, _XMARK, __end
         
         ; 24.
@@ -1734,7 +1738,7 @@ _1a5c:                                                                  ;$1A5C
         .byte   _T, _E, __, _OU, _T, __, _TH, _ER, _E, __end
         
         ; 25.
-        .byte   _THE, _INHABITANT, _S, __, _O, _F
+        .byte   _THE_, _INHABITANT, _S, __, _O, _F
         .byte   __, $3a, __, _A, _RE, __, _SO, __
         .byte   _A, _MA, _Z, _IN, _G, _L, _Y, __
         .byte   _P, _R, _I, _M, _I, _TI, _VE, __
@@ -1777,43 +1781,93 @@ _1a5c:                                                                  ;$1A5C
 _3eac:                                                                  ;$3EAC
 ;-------------------------------------------------------------------------------
 .export _3eac
-        .byte   $10             ; msg token $5B
-        .byte   $15             ; msg token $5C
-        .byte   $1a             ; msg token $5D
-        .byte   $1f             ; msg token $5E
-        .byte   $9b             ; msg token $5F
-        .byte   $a0             ; msg token $60
-        .byte   $2e             ; msg token $61
-        .byte   $a5             ; msg token $62
-        .byte   $24             ; msg token $63
-        .byte   $29             ; msg token $64
-        .byte   $3d             ; msg token $65
-        .byte   $33             ; msg token $66
-        .byte   $38             ; msg token $67
-        .byte   $aa             ; msg token $68
-        .byte   $42             ; msg token $69
-        .byte   $47             ; msg token $6A
-        .byte   $4c             ; msg token $6B
-        .byte   $51             ; msg token $6C
-        .byte   $56             ; msg token $6D
-        .byte   $8c             ; msg token $6E
-        .byte   $60             ; msg token $6F
-        .byte   $65             ; msg token $70
-        .byte   $8f             ; msg token $71
-        .byte   $82             ; msg token $72
-        .byte   $5b             ; msg token $73
-        .byte   $6a             ; msg token $74
-        .byte   $b4             ; msg token $75
-        .byte   $b9             ; msg token $76
-        .byte   $be             ; msg token $77
-        .byte   $e1             ; msg token $78
-        .byte   $e6             ; msg token $79
-        .byte   $eb             ; msg token $7A
-        .byte   $f0             ; msg token $7B
-        .byte   $f5             ; msg token $7C
-        .byte   $fa             ; msg token $7D
-        .byte   $73             ; msg token $7E
-        .byte   $78             ; msg token $7F
-        .byte   $7d             ; msg token $80
+        ; token $5B = tokens $10...$14:
+        ;       "fabled", "notable", "well-known", "famous", "noted"
+        .byte   ID_FABLED
+        ; token $5C = tokens $15...$19:
+        ;       "very", "mildly", "most", "reasonably", "" 
+        .byte   ID_VERY
+        ; token $5D = tokens $1A...$1E:
+        ;       "ancient", "<$72>", "great", "vast", "pink"
+        .byte   ID_1A
+        ; token $5E = tokens $1F...$23:
+        ;       "<?> plantations", "mountains", "<$75>", "<?> forests", "oceans"
+        .byte   ID_1F
+        ; token $5F = $9B
+        .byte   ID_9B
+        ; token $60 = $A0
+        .byte   ID_A0
+        ; token $61 = tokens $2E...$32:
+        ;       "walking tree", "crab", "bat", "lobst"(er?), "<fn12>"(?)
+        .byte   ID_WALKING_TREE
+        ; token $62 = $A5: "ancient", letters
+        .byte   ID_ANCIENT
+        ; token $63 = $24: "shyness"
+        .byte   ID_SHYNESS
+        ; token $64 = $29: "food blenders"
+        .byte   ID_FOOD_BLENDERS
+        ; token $65 = $3D
+        .byte   ID_3D
+        ; token $66 = tokens $33...$37:
+        ;       "beset", "plagued", "ravaged", "cursed", "scourged"
+        .byte   ID_BESET
+        ; token $67 = $38
+        .byte   ID_38
+        ; token $68 = tokens $AA...$AE:
+        ;       "killer", "deadly", "evil", "lethal", "vicious"
+        .byte   ID_KILLER
+        ; token $69 = tokens $42...$46:
+        ;       "juice", "brandy", "water", "brew", "gargle blasters"
+        .byte   ID_JUICE
+        ; token $6A = $47
+        .byte   ID_47
+        ; token $6B = tokens $4C...$50:
+        ;       "fabulous", "exotic", "hoopy", "unusual", "exciting"
+        .byte   ID_FABULOUS
+        ; token $6C = $51: "cuisine"
+        .byte   ID_CUISINE
+        ; token $6D = $56: print flight-token?
+        .byte   ID_56
+        ; token $6E = $8C...
+        .byte   ID_8C
+        ; token $6F = $60? this table!?
+        .byte   $60
+        ; token $70 = $65
+        .byte   $65
+        ; token $71 = $8F: "<x> but <y>"?
+        .byte   ID_8F
+        ; token $72 = $82: "funny"
+        .byte   ID_FUNNY
+        ; token $73 = $5B
+        .byte   $5b
+        ; token $74 = $6A
+        .byte   $6a
+        ; token $75 = tokens $B4...$B8:
+        ;       "parking meters", "dust clouds", "ice bergs",
+        ;       "rock formations", "volcanoes"
+        .byte   ID_PARKING_METERS
+        ; token $76 = $B9: "plant"
+        .byte   ID_PLANT
+        ; token $77 = $BE...
+        .byte   ID_BE_
+        ; token $78 = $E1
+        .byte   $e1
+        ; token $79 = $E6
+        .byte   $e6
+        ; token $7A = $EB
+        .byte   $eb
+        ; token $7B = tokens $F0..$F4:
+        ;       "meat", "cutlet", "steak", "burgers", "soup"
+        .byte   ID_MEAT
+        ; token $7C = $F5
+        .byte   $f5
+        ; token $7D = $FA
+        .byte   $fa
+        ; token $7E = $73
+        .byte   $73
+        ; token $7F = $78
+        .byte   $78
+        ; token $80 = $7D
+        .byte   $7d
 
 ;$3ED2
