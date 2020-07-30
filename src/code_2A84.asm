@@ -755,9 +755,9 @@ _2c7c:                                                                  ;$2C7C
 ;===============================================================================
 
 _2c7d:                                                                  ;$2C7D
-.import TXT_DOCKED_DOCKED:direct
+.import MSG_DOCKED_DOCKED:direct
 
-        lda # TXT_DOCKED_DOCKED
+        lda # MSG_DOCKED_DOCKED
         jsr print_docked_str
 
         jsr paint_newline
@@ -2029,7 +2029,7 @@ _31c6:                                                                  ;$31C6
         lda # $00
         sta ZP_AE
 _31d5:                                                                  ;$31D5
-        jsr txt_docked_token0E
+        jsr tkn_docked_fn0E
         jsr _76e9
 
         ldx txt_buffer_index
@@ -2065,7 +2065,7 @@ _3208:                                                                  ;$3208
         sta TSYSTEM_POS_Y
         jsr _70ab
         jsr _6f82
-        jsr txt_docked_token0F
+        jsr tkn_docked_fn0F
         jmp _877e
 
 ;===============================================================================
@@ -3913,7 +3913,7 @@ _3d3d:                                                                  ;$3D3D
         lsr 
         bcc _3d6f
         
-        jsr txt_docked_token0E
+        jsr tkn_docked_fn0E
         
         lda # $01
         ; this causes the next instruction to become a meaningless `bit`
@@ -3953,8 +3953,8 @@ mission_blueprints_begin:                                               ;$3D7D
         sta MISSION_FLAGS
 
         ; display "go to Ceerdi" mission text
-.import TXT_DOCKED_0B:direct
-        lda # TXT_DOCKED_0B
+.import MSG_DOCKED_0B:direct
+        lda # MSG_DOCKED_0B
 
 _3d87:                                                                  ;$3D87
         jsr print_docked_str
@@ -4013,8 +4013,8 @@ mission_trumbles:                                                       ;$3DC0
         sta MISSION_FLAGS
 
         ; display the Trumbles™ mission text
-.import TXT_DOCKED_TRUMBLES:direct
-        lda # TXT_DOCKED_TRUMBLES
+.import MSG_DOCKED_TRUMBLES:direct
+        lda # MSG_DOCKED_TRUMBLES
         jsr print_docked_str
         
         jsr _81ee
@@ -4042,7 +4042,7 @@ _3dff:                                                                  ;$3DFF
         sec                     ; put a 1 into the carry
         rol MISSION_FLAGS       ; push the carry into bit 0
 
-        jsr txt_docked_incoming_message
+        jsr tkn_docked_incoming_message
         jsr clear_zp_polyobj
         
         lda # $1f
@@ -4092,9 +4092,9 @@ _3e31:                                                                  ;$3E31
 ;===============================================================================
 ; insert these docked-token functions from "text_docked_fns.asm"
 ;
-.txt_docked_incoming_message                                            ;$3E37
-.txt_docked_token16_17_1D                                               ;$3E41
-.txt_docked_waitForAnyKey                                               ;$3E7C
+.tkn_docked_incoming_message                                            ;$3E37
+.tkn_docked_fn16_17_1D                                                  ;$3E41
+.tkn_docked_waitForAnyKey                                               ;$3E7C
 
 
 get_polyobj:                                                            ;$3E87

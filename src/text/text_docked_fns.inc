@@ -7,12 +7,12 @@
 ; first 32 "docked" string tokens. these are stored as macros in this file
 ; because their physical location in the original code is all over the place
 
-.macro  .txt_docked_token01_02
+.macro  .tkn_docked_fn01_02
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token01:                                                     ;$246A
+tkn_docked_fn01:                                                        ;$246A
 ;-------------------------------------------------------------------------------
-.export txt_docked_token01
+.export tkn_docked_fn01
 
         lda # %00000000
 
@@ -20,9 +20,9 @@ txt_docked_token01:                                                     ;$246A
         ; instruction, a very handy way of skipping without branching
        .bit
 
-txt_docked_token02:                                                     ;$246D
+tkn_docked_fn02:                                                        ;$246D
 ;-------------------------------------------------------------------------------
-.export txt_docked_token02
+.export tkn_docked_fn02
 
         lda # %00100000
         sta txt_ucase_mask
@@ -35,12 +35,12 @@ txt_docked_token02:                                                     ;$246D
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token06_05
+.macro  .tkn_docked_fn06_05
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token06:                                                     ;$2496
+tkn_docked_fn06:                                                        ;$2496
 ;-------------------------------------------------------------------------------
-.export txt_docked_token06
+.export tkn_docked_fn06
         
         lda # %10000000
         sta ZP_34
@@ -50,9 +50,9 @@ txt_docked_token06:                                                     ;$2496
         ; instruction, a very handy way of skipping without branching
        .bit
 
-txt_docked_token05:                                                     ;$249D
+tkn_docked_fn05:                                                        ;$249D
 ;-------------------------------------------------------------------------------
-.export txt_docked_token05
+.export tkn_docked_fn05
 
         lda # %00000000
         sta txt_flight_flag
@@ -62,12 +62,12 @@ txt_docked_token05:                                                     ;$249D
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token08
+.macro  .tkn_docked_fn08
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token08:                                                     ;$2478
+tkn_docked_fn08:                                                        ;$2478
 ;-------------------------------------------------------------------------------
-.export txt_docked_token08
+.export tkn_docked_fn08
 
         lda # 6
         jsr set_cursor_col
@@ -80,16 +80,16 @@ txt_docked_token08:                                                     ;$2478
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_clearScreen
+.macro  .tkn_docked_clearScreen
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_clearScreen:                                                 ;$2483
+tkn_docked_clearScreen:                                                 ;$2483
 ;-------------------------------------------------------------------------------
 ; move the cursor to the left and switch to an empty menu page:
 ; the game uses this for various interstitial screens such as
 ; "INCOMING MESSAGE"
 ;
-.export txt_docked_clearScreen
+.export tkn_docked_clearScreen
 
         lda # 1                 ;=page::empty
         jsr set_cursor_col
@@ -98,12 +98,12 @@ txt_docked_clearScreen:                                                 ;$2483
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token0D
+.macro  .tkn_docked_fn0D
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token0D:                                                     ;$248B
+tkn_docked_fn0D:                                                        ;$248B
 ;-------------------------------------------------------------------------------
-.export txt_docked_token0D
+.export tkn_docked_fn0D
         
         ; enable the change-case flag?
         lda # %10000000
@@ -118,12 +118,12 @@ txt_docked_token0D:                                                     ;$248B
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token0E_0F
+.macro  .tkn_docked_fn0E_0F
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token0E:                                                     ;$24A3
+tkn_docked_fn0E:                                                        ;$24A3
 ;-------------------------------------------------------------------------------
-.export txt_docked_token0E
+.export tkn_docked_fn0E
 
         lda # %10000000
 
@@ -131,9 +131,9 @@ txt_docked_token0E:                                                     ;$24A3
         ; instruction, a very handy way of skipping without branching
        .bit
 
-txt_docked_token0F:                                                     ;$24A6
+tkn_docked_fn0F:                                                        ;$24A6
         ;=======================================================================
-.export txt_docked_token0F
+.export tkn_docked_fn0F
         
         lda # %00000000
         sta txt_buffer_flag
@@ -144,22 +144,22 @@ txt_docked_token0F:                                                     ;$24A6
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_tokens_theirName_protoGalaxy
+.macro  .tkn_docked_fns_theirName_protoGalaxy
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_theirName:                                                   ;$2372
+tkn_docked_theirName:                                                   ;$2372
 ;-------------------------------------------------------------------------------
-.export txt_docked_theirName
+.export tkn_docked_theirName
 
         ; print a name from the docked token list:
         ; ("CURRUTHERS" / "FOSDYKE_SMYTHE" / "FORTESQUE")
-.import TXT_DOCKED_CURRUTHERS:direct
-        lda # TXT_DOCKED_CURRUTHERS
+.import MSG_DOCKED_CURRUTHERS:direct
+        lda # MSG_DOCKED_CURRUTHERS
         bne _2378               ; (always branches)
 
-txt_docked_protoGalaxy:                                                 ;$2376
+tkn_docked_protoGalaxy:                                                 ;$2376
 ;-------------------------------------------------------------------------------
-.export txt_docked_protoGalaxy
+.export tkn_docked_protoGalaxy
 
         ; when receiving the mission for tracking down the prototype ship,
         ; the last part of the sentence "it went missing from our ship yard
@@ -168,8 +168,8 @@ txt_docked_protoGalaxy:                                                 ;$2376
         ; the prototype ship across multiple galaxies, but this idea appears
         ; to have been scrapped
         ;
-.import TXT_DOCKED_IS_BELIEVED_TO_HAVE_JUMPED_TO_THIS_GALAXY:direct
-        lda # TXT_DOCKED_IS_BELIEVED_TO_HAVE_JUMPED_TO_THIS_GALAXY-1
+.import MSG_DOCKED_IS_BELIEVED_TO_HAVE_JUMPED_TO_THIS_GALAXY:direct
+        lda # MSG_DOCKED_IS_BELIEVED_TO_HAVE_JUMPED_TO_THIS_GALAXY-1
 
 _2378:  clc                                                             ;$2378
         adc PLAYER_GALAXY       ; add galaxy number to message index
@@ -178,12 +178,12 @@ _2378:  clc                                                             ;$2378
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token11
+.macro  .tkn_docked_fn11
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token11:                                                     ;$24B0
+tkn_docked_fn11:                                                        ;$24B0
 ;-------------------------------------------------------------------------------
-.export txt_docked_token11
+.export tkn_docked_fn11
 
         lda ZP_34
         and # %10111111         ;=$BF
@@ -204,14 +204,14 @@ _24c9:                                                                  ;$24C9
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token12
+.macro  .tkn_docked_fn12
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token12:                                                     ;$24CE
+tkn_docked_fn12:                                                        ;$24CE
 ;-------------------------------------------------------------------------------
-.export txt_docked_token12
+.export tkn_docked_fn12
 
-        jsr txt_docked_capitalizeNext
+        jsr tkn_docked_capitalizeNext
 
         jsr get_random_number
         and # %00000011
@@ -237,12 +237,12 @@ _24d7:                                                                  ;$24D7
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_capitalizeNext ;(docked token $13)
+.macro  .tkn_docked_capitalizeNext ;(docked token $13)
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_capitalizeNext:                                              ;$24ED
+tkn_docked_capitalizeNext:                                              ;$24ED
 ;-------------------------------------------------------------------------------
-.export txt_docked_capitalizeNext
+.export tkn_docked_capitalizeNext
         
         ; set ASCII upper-case (for next character)
         lda # %11011111
@@ -253,15 +253,15 @@ txt_docked_capitalizeNext:                                              ;$24ED
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token16_17_1D
+.macro  .tkn_docked_fn16_17_1D
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-txt_docked_token16:                                                     ;$3E41
+tkn_docked_fn16:                                                        ;$3E41
 ;-------------------------------------------------------------------------------
-.export txt_docked_token16
+.export tkn_docked_fn16
         
         jsr _3e65
-        bne txt_docked_token16
+        bne tkn_docked_fn16
 _3e46:                                                                  ;$3E46
         jsr _3e65
         beq _3e46
@@ -276,18 +276,18 @@ _3e46:                                                                  ;$3E46
 
         jsr _9a86
 
-txt_docked_token17:                                                     ;$3E57  
+tkn_docked_fn17:                                                        ;$3E57  
 ;-------------------------------------------------------------------------------
-.export txt_docked_token17
+.export tkn_docked_fn17
 
         lda # 10
         ; this causes the next instruction to become a meaningless `bit`
         ; instruction, a very handy way of skipping without branching
        .bit
 
-txt_docked_token1D:                                                     ;$3E5A
+tkn_docked_fn1D:                                                        ;$3E5A
 ;-------------------------------------------------------------------------------
-.export txt_docked_token1D
+.export tkn_docked_fn1D
 
         lda # 6
         jsr set_cursor_row
@@ -297,7 +297,7 @@ txt_docked_token1D:                                                     ;$3E5A
         jsr original_250b       ; dead code, just an RTS
 .endif  ;///////////////////////////////////////////////////////////////////////
         
-        jmp txt_docked_token0D
+        jmp tkn_docked_fn0D
 
 _3e65:                                                                  ;$3E65
         ;-----------------------------------------------------------------------
@@ -319,41 +319,41 @@ _3e65:                                                                  ;$3E65
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_waitForAnyKey
+.macro  .tkn_docked_waitForAnyKey
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; press any key!
 ;
-txt_docked_waitForAnyKey:                                               ;$3E7C
+tkn_docked_waitForAnyKey:                                               ;$3E7C
 ;-------------------------------------------------------------------------------
-.export txt_docked_waitForAnyKey
+.export tkn_docked_waitForAnyKey
         
         ; check for key down...
         jsr get_input
         ; keep checking until non-zero value
-        bne txt_docked_waitForAnyKey
+        bne tkn_docked_waitForAnyKey
 
         ; check for key up...
         jsr get_input
         ; keep checking until zero (no key pressed)
-        beq txt_docked_waitForAnyKey
+        beq tkn_docked_waitForAnyKey
         
         rts 
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_incoming_message
+.macro  .tkn_docked_incoming_message
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; print "INCOMING MESSAGE" on screen and wait a bit
 ;
-txt_docked_incoming_message:                                            ;$3E37
+tkn_docked_incoming_message:                                            ;$3E37
 ;-------------------------------------------------------------------------------
-.export txt_docked_incoming_message
+.export tkn_docked_incoming_message
 
         ; print "INCOMING MESSAGE"
         ;
-.import TXT_DOCKED_INCOMING_MESSAGE:direct
-        lda # TXT_DOCKED_INCOMING_MESSAGE
+.import MSG_DOCKED_INCOMING_MESSAGE:direct
+        lda # MSG_DOCKED_INCOMING_MESSAGE
         jsr print_docked_str
 
         ; wait 100 frames
@@ -364,16 +364,16 @@ txt_docked_incoming_message:                                            ;$3E37
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token_mediaCurrent
+.macro  .tkn_docked_fn_mediaCurrent
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; print the currently selected load/save media: "disk" or "tape"
 ;
-txt_docked_token_mediaCurrent:                                          ;$8AB5
+tkn_docked_fn_mediaCurrent:                                             ;$8AB5
 ;-------------------------------------------------------------------------------
-.export txt_docked_token_mediaCurrent
+.export tkn_docked_fn_mediaCurrent
 
-.import TXT_DOCKED_TAPE:direct
-        lda # TXT_DOCKED_TAPE   ; $02 = "DISK", $03 = "TAPE"
+.import MSG_DOCKED_TAPE:direct
+        lda # MSG_DOCKED_TAPE   ; $02 = "DISK", $03 = "TAPE"
         clc                     ; add the following:
         adc opt_device          ; $FF = disk,   $00 = tape
         jmp print_docked_str    ; $02 = "DISK", $03 = "TAPE"
@@ -381,17 +381,17 @@ txt_docked_token_mediaCurrent:                                          ;$8AB5
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .txt_docked_token_mediaOther
+.macro  .tkn_docked_fn_mediaOther
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; print the opposite of the currently selected load/save media,
 ; "disk" or "tape"
 ;
-txt_docked_token_mediaOther:                                            ;$8ABE
+tkn_docked_fn_mediaOther:                                               ;$8ABE
 ;-------------------------------------------------------------------------------
-.export txt_docked_token_mediaOther
-.import TXT_DOCKED_DISK:direct
+.export tkn_docked_fn_mediaOther
+.import MSG_DOCKED_DISK:direct
 
-        lda # TXT_DOCKED_DISK   ; $02 = "DISK", $03 = "TAPE"
+        lda # MSG_DOCKED_DISK   ; $02 = "DISK", $03 = "TAPE"
         sec                     ; subtract the following:
         sbc opt_device          ; $FF = disk,   $00 = tape
         jmp print_docked_str    ; $02 = "DISK", $03 = "TAPE"

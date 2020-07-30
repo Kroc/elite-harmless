@@ -2395,7 +2395,7 @@ set_page:                                                               ;$A72F
 
 _set_page:                                                              ;$A731
         ;-----------------------------------------------------------------------
-        jsr txt_docked_token02  ; reset text case-shifting?
+        jsr tkn_docked_fn02     ; reset text case-shifting?
 
         lda # $00
         sta ZP_7E               ; "arc counter"?
@@ -3201,9 +3201,9 @@ _b210:  ; restore registers before returning                            ;$B210
 .endif
 
 
-txt_docked_token15:                                                     ;$B3D4
+tkn_docked_fn15:                                                        ;$B3D4
 ;===============================================================================
-.export txt_docked_token15
+.export tkn_docked_fn15
 
         lda # $00
         sta VAR_048B

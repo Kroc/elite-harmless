@@ -27,10 +27,10 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
         ; a string value that can be used as an identifier
         .if .xmatch( str, "crlf" )
                 ; export the CRLF-specific name
-                .export .ident( "txt_docked_crlf" ) = index_docked
+                .export .ident( "tkn_docked_crlf" ) = index_docked
         .else
                 ; export the pair's token name
-                .export .ident( .concat( "txt_docked_", str ) ) = index_docked
+                .export .ident( .concat( "tkn_docked_", str ) ) = index_docked
         .endif
 
         ; move to the next token number
@@ -47,12 +47,12 @@ index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-txt_docked_pairs:                                                       ;$254C
+tkn_docked_pairs:                                                       ;$254C
 ;-------------------------------------------------------------------------------
 ; docked text-compression character pairs:
 ;
-.export txt_docked_pair1 := txt_docked_pairs+0
-.export txt_docked_pair2 := txt_docked_pairs+1
+.export tkn_docked_pair1 := tkn_docked_pairs+0
+.export tkn_docked_pair2 := tkn_docked_pairs+1
 
         ; the first pair is used in messages,
         ; but not during name generation
@@ -102,7 +102,7 @@ _254e:
         ; the madness continues because the docked tokens run out
         ; a little short of the shared portion of the table
         .if index_docked < $100
-                .export .ident(.concat( "txt_docked_", idstr )) = index_docked
+                .export .ident(.concat( "tkn_docked_", idstr )) = index_docked
                 index_docked    .set    index_docked + 1
         .endif
         

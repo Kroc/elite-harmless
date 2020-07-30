@@ -1170,7 +1170,7 @@ _2367:                                                                  ;$2367
 ;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
 ;
-.txt_docked_tokens_theirName_protoGalaxy                                ;$2372
+.tkn_docked_fns_theirName_protoGalaxy                                   ;$2372
 
 _237e:                                                                  ;$237E
 ;===============================================================================
@@ -1232,10 +1232,10 @@ _23a0:                                                                  ;$23A0
         ; skip over the messages until we find the one we want:
         ; -- this is insane!
         ;
-.import TXT_DOCKED_XOR:direct
+.import TKN_DOCKED_XOR:direct
 
         lda [ZP_TEMP_ADDR3], y
-        eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
+        eor # TKN_DOCKED_XOR    ;=$57 -- descramble token
         bne :+                  ; keep going if not a message terminator ($00)
         dex                     ; message has ended, decrement index
         beq @read_token         ; if we've found our message, exit loop
@@ -1262,7 +1262,7 @@ _23a0:                                                                  ;$23A0
         ; $D7-$FF = some pre-defined character pairs ("text_pairs.asm")
         ;
         lda [ZP_TEMP_ADDR3], y  ; read a token
-        eor # TXT_DOCKED_XOR    ;=$57 -- descramble token
+        eor # TKN_DOCKED_XOR    ;=$57 -- descramble token
         beq @rts                ; has message ended? (token $00)
 
         jsr print_docked_token
@@ -1315,20 +1315,20 @@ print_docked_token:                                                     ;$23CF
 
         ; tokens $D7 and above: (character pairs)
         ;-----------------------------------------------------------------------
-.import txt_docked_pair1
-.import txt_docked_pair2
+.import tkn_docked_pair1
+.import tkn_docked_pair2
 
         ; TODO: use a constant
         sbc # $d7               ; re-index as $00...$28
         asl                     ; double, for lookup-table
         pha                     ; (put aside)
         tax                     ; use as index to table
-        lda txt_docked_pair1, x ; read 1st character...
+        lda tkn_docked_pair1, x ; read 1st character...
         jsr print_docked_char   ; ...and print it
 
         pla                     ; get the offset again
         tax                     ; use as index to table
-        lda txt_docked_pair2, x ; read 2nd character...
+        lda tkn_docked_pair2, x ; read 2nd character...
                                 ; ...and print it (fallthrough)
         
 print_docked_char:                                                      ;$2404
@@ -1385,11 +1385,11 @@ _format_code:                                                           ;$241B
         ;
         ; we read an address from the table and rewrite a `jsr` instruction
         ; further down, i.e. the token is a lookup to a routine to call
-.import txt_docked_functions
+.import tkn_docked_functions
 
-        lda txt_docked_functions - 2, x
+        lda tkn_docked_functions - 2, x
         sta @jsr + 1
-        lda txt_docked_functions - 1, x
+        lda tkn_docked_functions - 1, x
         sta @jsr + 2
 
         ; convert the token back to its original value
@@ -1448,15 +1448,15 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
 ;===============================================================================
 ; insert these docked token functions from "text_docked_fns.asm"
 ;
-.txt_docked_token01_02                                                  ;$246A
-.txt_docked_token08                                                     ;$2478
-.txt_docked_clearScreen                                                 ;$2483
-.txt_docked_token0D                                                     ;$248B
-.txt_docked_token06_05                                                  ;$2496
-.txt_docked_token0E_0F                                                  ;$24A3
-.txt_docked_token11                                                     ;$24B0
-.txt_docked_token12                                                     ;$24CE
-.txt_docked_capitalizeNext                                              ;$24ED
+.tkn_docked_fn01_02                                                     ;$246A
+.tkn_docked_fn08                                                        ;$2478
+.tkn_docked_clearScreen                                                 ;$2483
+.tkn_docked_fn0D                                                        ;$248B
+.tkn_docked_fn06_05                                                     ;$2496
+.tkn_docked_fn0E_0F                                                     ;$24A3
+.tkn_docked_fn11                                                        ;$24B0
+.tkn_docked_fn12                                                        ;$24CE
+.tkn_docked_capitalizeNext                                              ;$24ED
 
 is_vowel:                                                               ;$24F3
 ;===============================================================================

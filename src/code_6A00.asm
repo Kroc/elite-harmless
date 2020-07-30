@@ -762,7 +762,7 @@ _6d34:                                                                  ;$6D34
         jsr _723c
         jsr _7627
 _6d3e:                                                                  ;$6D3E
-        jsr txt_docked_token15
+        jsr tkn_docked_fn15
 
 .import TXT_QUANTITY_OF:direct
         lda # TXT_QUANTITY_OF
@@ -1035,15 +1035,15 @@ _6eea:                                                                  ;$6EEA
         and # %00000011
 
         ; print "CUDDLY" / "CUTE" / "FURRY" or "FRIENDLY"
-.import TXT_DOCKED_CUDDLY:direct
+.import MSG_DOCKED_CUDDLY:direct
 
         clc 
-        adc # TXT_DOCKED_CUDDLY
+        adc # MSG_DOCKED_CUDDLY
         jsr print_docked_str
 
         ; print "LITTLE TRUMBLE"
-.import TXT_DOCKED_LITTLE_TRUMBLE:direct
-        lda # TXT_DOCKED_LITTLE_TRUMBLE
+.import MSG_DOCKED_LITTLE_TRUMBLE:direct
+        lda # MSG_DOCKED_LITTLE_TRUMBLE
         jsr print_docked_str
 
         ; more than 1?
@@ -1520,14 +1520,14 @@ _7135:                                                                  ;$7135
 ;===============================================================================
 
 _714f:                                                                  ;$714F
-        jsr txt_docked_token15
+        jsr tkn_docked_fn15
 
         lda # 15
         jsr set_cursor_col
 
         ; print "DOCKED"...
-.import TXT_DOCKED_DOCKED:direct
-        lda # TXT_DOCKED_DOCKED
+.import MSG_DOCKED_DOCKED:direct
+        lda # MSG_DOCKED_DOCKED
         jmp print_docked_str
 
 _715c:                                                                  ;$715C
@@ -2163,7 +2163,7 @@ _74f5:                                                                  ;$74F5
         inx 
         cpx ZP_VAR_Q
         bcc _74f5
-        jsr txt_docked_token15
+        jsr tkn_docked_fn15
 
 .import TXT_ITEM:direct
         lda # TXT_ITEM
@@ -2384,7 +2384,7 @@ _765e:                                                                  ;$765E
         ldy ZP_CURSOR_ROW
         cpy # $14
         bcc _765e
-        jsr txt_docked_token15
+        jsr tkn_docked_fn15
 _767e:                                                                  ;$767E
 .import TXT_VIEW:direct
         lda # TXT_VIEW
@@ -2395,7 +2395,7 @@ _767e:                                                                  ;$767E
         sbc # $30
         cmp # $04
         bcc _7693
-        jsr txt_docked_token15
+        jsr tkn_docked_fn15
         jmp _767e
 
 _7693:                                                                  ;$7693
@@ -2408,7 +2408,7 @@ _7695:                                                                  ;$7695
         jsr _6f82
         jsr _70ab
         jsr _6f82
-        jmp txt_docked_token15
+        jmp tkn_docked_fn15
 
 ;===============================================================================
 
@@ -5382,7 +5382,7 @@ _8475:                                                                  ;$8475
         sta VAR_048B
         jmp _84fa
 
-:       jsr txt_docked_token15  ; clear rows 21, 22 & 23(?)             ;$8487
+:       jsr tkn_docked_fn15     ; clear rows 21, 22 & 23(?)             ;$8487
         jmp _84fa
 
 
@@ -6164,8 +6164,8 @@ _8882:                                                                  ;$8882
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ldx # $0b
-.import TXT_DOCKED_06:direct
-        lda # TXT_DOCKED_06
+.import MSG_DOCKED_06:direct
+        lda # MSG_DOCKED_06
         ldy # $d2
         jsr _8920
 
@@ -6186,8 +6186,8 @@ _88ac:                                                                  ;$88AC
         jsr _845c               ; update missile blocks on HUD
 
         ; "press space or fire commander"
-.import TXT_DOCKED_07:direct
-        lda # TXT_DOCKED_07
+.import MSG_DOCKED_07:direct
+        lda # MSG_DOCKED_07
         ldx # $14
         ldy # $30
         jsr _8920
@@ -6480,7 +6480,7 @@ _8a3a:                                                                  ;$8A3A
         lda # $08
         jsr print_docked_str
 
-        jsr txt_docked_token1A
+        jsr tkn_docked_fn1A
         lda # $09
         sta _8ab2
         tya 
@@ -6488,9 +6488,9 @@ _8a3a:                                                                  ;$8A3A
         sty _8bbe
         rts 
 
-txt_docked_token1A:                                                     ;$8A5B
+tkn_docked_fn1A:                                                        ;$8A5B
         ;=======================================================================
-.export txt_docked_token1A
+.export tkn_docked_fn1A
 
         lda # $40
         sta VAR_050C
@@ -6559,8 +6559,8 @@ _8ab4:                                                                  ;$8AB4
 ;===============================================================================
 ; insert from "text/text_docked_fns.asm"
 ;
-.txt_docked_token_mediaCurrent                                          ;$8AB5
-.txt_docked_token_mediaOther                                            ;$8ABE
+.tkn_docked_fn_mediaCurrent                                             ;$8AB5
+.tkn_docked_fn_mediaOther                                               ;$8ABE
 
 ;===============================================================================
 ; erase $0452...$048C
@@ -6604,9 +6604,9 @@ _8ad9:                                                                  ;$8AD9
 ;
 _8ae7:                                                                  ;$8AE7
         ; display the data menu on screen
-.import TXT_DOCKED_DATA_MENU:direct
+.import MSG_DOCKED_DATA_MENU:direct
 
-        lda # TXT_DOCKED_DATA_MENU
+        lda # MSG_DOCKED_DATA_MENU
         jsr print_docked_str
 
         jsr wait_for_input
@@ -6619,8 +6619,8 @@ _8ae7:                                                                  ;$8AE7
         cmp # '4'
         bne @_8b0f
 
-.import TXT_DOCKED_ARE_YOU_SURE:direct
-        lda # TXT_DOCKED_ARE_YOU_SURE
+.import MSG_DOCKED_ARE_YOU_SURE:direct
+        lda # MSG_DOCKED_ARE_YOU_SURE
         jsr print_docked_str
 
         jsr _81ee
@@ -6656,8 +6656,8 @@ _8ae7:                                                                  ;$8AE7
         jsr _8a1d
         lsr VAR_04E2
 
-.import TXT_DOCKED_COMPETITION_NUMBER:direct
-        lda # TXT_DOCKED_COMPETITION_NUMBER     ;=$04
+.import MSG_DOCKED_COMPETITION_NUMBER:direct
+        lda # MSG_DOCKED_COMPETITION_NUMBER
         jsr print_docked_str
 
         ; copy $0499..$04E5 (data to be saved?)
@@ -6892,8 +6892,8 @@ _illegal:                                                               ;$8C55
         ;-----------------------------------------------------------------------
         ; file is invalid
         ;
-.import TXT_DOCKED_ILLEGAL_FILE:direct
-        lda # TXT_DOCKED_ILLEGAL_FILE   ; display "illegal Elite II file"
+.import MSG_DOCKED_ILLEGAL_FILE:direct
+        lda # MSG_DOCKED_ILLEGAL_FILE   ; display "illegal Elite II file"
         jsr print_docked_str
 
         jsr wait_for_input              ; press any key
@@ -6906,8 +6906,8 @@ _8c60:  rts                                                             ;$8C60
 .endif
 
 _8c61:                                                                  ;$8C61
-.import TXT_DOCKED_ERROR:direct
-        lda # TXT_DOCKED_ERROR
+.import MSG_DOCKED_ERROR:direct
+        lda # MSG_DOCKED_ERROR
         jsr print_docked_str
 
         jsr wait_for_input
@@ -7367,7 +7367,7 @@ _900d:                                                                  ;$900D
         ldx ZP_SCREEN           ; are we in the cockpit-view?
         beq _901a               ; yes, skip over
 
-        jsr txt_docked_token15
+        jsr tkn_docked_fn15
         lda # $19
 _9019:                                                                  ;$9019
        .bit
@@ -7404,7 +7404,7 @@ _9042:                                                                  ;$9042
         sta ZP_B9
         jsr set_cursor_col
 
-        jsr txt_docked_token0F
+        jsr tkn_docked_fn0F
         lda VAR_04E6
 _905d:                                                                  ;$905D
         jsr print_flight_token
