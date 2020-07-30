@@ -8,7 +8,7 @@
 ; there wasn't any room left in the commonly shared 'flight' strings
 ;
 ; it's important to note that these strings use an entirely different set of
-; encrypted, compressed tokens than the flight strings, but can also include
+; scrambled, compressed tokens than the flight strings, but can also include
 ; flight strings when needed. needless to say, it's complex
 ;
 ; this is the 'key' used to scramble / unscramble the docked token symbols
@@ -17,7 +17,7 @@
 .export TXT_DOCKED_XOR := $57
 
 ; tokens in the text database are scrambled in this way:
-.define .encrypt(value) value ^ TXT_DOCKED_XOR
+.define .scramble(value) value ^ TXT_DOCKED_XOR
 
 ;-------------------------------------------------------------------------------
 ; 32 of the docked tokens are functions called when the token is encountered
@@ -46,10 +46,10 @@ _fn_index       .set 1
 .macro  .define_fn      fn_import, fn_id
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
-        ; encrypt the function index to produce
+        ; scramble the function index to produce
         ; the token ID used in strings
         .local  _value
-        _value  .set .encrypt( _fn_index )
+        _value  .set .scramble( _fn_index )
         ; define the function token locally,
         ; using the name part given
         .ident( .concat( "FN_", fn_id )) = _value
@@ -70,15 +70,15 @@ _fn_index       .set 1
 
 txt_docked_functions:                                                   ;$250C
 ;===============================================================================
-; here begins the table of unscrambled token -> function to call
-; mappings. the columns given are:
+; here begins the table of unscrambled token -> function to call mappings.
+; the columns given are:
 ; 
-; index         the index in the table, basis for the encrypted token
+; index         the index in the table, basis for the scrambled token
 ; function      the function to import & call for the token
 ; symbol        name slug to define the local and global symbol; the local
 ;               symbol will be prefixed with "FN_" and the global symbol
 ;               will be prefixed with "TXTFN_" and exported
-; token         the index is encrypted (XOR $57) and this becomes
+; token         the index is scrambled (XOR $57) and this becomes
 ;               the token ID that is used within the text database
 ;
 .export txt_docked_functions
@@ -157,142 +157,142 @@ txt_docked_functions:                                                   ;$250C
 .segment        "TEXT_DOCKED"
 
 ; import the token numbers for the common charcter pairs used by docked
-; strings ("text_pairs.asm"). these come unencrypted; we encrypt them
+; strings ("text_pairs.asm"). these come unscrambled; we scramble them
 ; here, for the on-disk format
 ;
 .import txt_docked_crlf:direct
-CRLF    = .encrypt( txt_docked_crlf )   ;=$80
+CRLF    = .scramble( txt_docked_crlf )  ;=$80
 .import txt_docked_ab:direct
-_AB     = .encrypt( txt_docked_ab )     ;=$8F
+_AB     = .scramble( txt_docked_ab )    ;=$8F
 .import txt_docked_ou:direct
-_OU     = .encrypt( txt_docked_ou )     ;=$8E
+_OU     = .scramble( txt_docked_ou )    ;=$8E
 .import txt_docked_se:direct
-_SE     = .encrypt( txt_docked_se )     ;=$8D
+_SE     = .scramble( txt_docked_se )    ;=$8D
 .import txt_docked_it:direct
-_IT     = .encrypt( txt_docked_it )     ;=$8C
+_IT     = .scramble( txt_docked_it )    ;=$8C
 .import txt_docked_il:direct
-_IL     = .encrypt( txt_docked_il )     ;=$8B
+_IL     = .scramble( txt_docked_il )    ;=$8B
 .import txt_docked_et:direct
-_ET     = .encrypt( txt_docked_et )     ;=$8A
+_ET     = .scramble( txt_docked_et )    ;=$8A
 .import txt_docked_st:direct
-_ST     = .encrypt( txt_docked_st )     ;=$89
+_ST     = .scramble( txt_docked_st )    ;=$89
 .import txt_docked_on:direct
-_ON     = .encrypt( txt_docked_on )     ;=$88
+_ON     = .scramble( txt_docked_on )    ;=$88
 .import txt_docked_lo:direct
-_LO     = .encrypt( txt_docked_lo )     ;=$B7
+_LO     = .scramble( txt_docked_lo )    ;=$B7
 .import txt_docked_nu:direct
-_NU     = .encrypt( txt_docked_nu )     ;=$B6
+_NU     = .scramble( txt_docked_nu )    ;=$B6
 .import txt_docked_th:direct
-_TH     = .encrypt( txt_docked_th )     ;=$B5
+_TH     = .scramble( txt_docked_th )    ;=$B5
 .import txt_docked_no:direct
-_NO     = .encrypt( txt_docked_no )     ;=$B4
+_NO     = .scramble( txt_docked_no )    ;=$B4
 .import txt_docked_al:direct
-_AL     = .encrypt( txt_docked_al )     ;=$B3
+_AL     = .scramble( txt_docked_al )    ;=$B3
 .import txt_docked_le:direct
-_LE     = .encrypt( txt_docked_le )     ;=$B2
+_LE     = .scramble( txt_docked_le )    ;=$B2
 .import txt_docked_xe:direct
-_XE     = .encrypt( txt_docked_xe )     ;=$B1
+_XE     = .scramble( txt_docked_xe )    ;=$B1
 .import txt_docked_ge:direct
-_GE     = .encrypt( txt_docked_ge )     ;=$B0
+_GE     = .scramble( txt_docked_ge )    ;=$B0
 .import txt_docked_za:direct
-_ZA     = .encrypt( txt_docked_za )     ;=$BF -- unused here
+_ZA     = .scramble( txt_docked_za )    ;=$BF -- unused here
 .import txt_docked_ce:direct
-_CE     = .encrypt( txt_docked_ce )     ;=$BE
+_CE     = .scramble( txt_docked_ce )    ;=$BE
 .import txt_docked_bi:direct
-_BI     = .encrypt( txt_docked_bi )     ;=$BD
+_BI     = .scramble( txt_docked_bi )    ;=$BD
 .import txt_docked_so:direct
-_SO     = .encrypt( txt_docked_so )     ;=$BC
+_SO     = .scramble( txt_docked_so )    ;=$BC
 .import txt_docked_us:direct
-_US     = .encrypt( txt_docked_us )     ;=$BB
+_US     = .scramble( txt_docked_us )    ;=$BB
 .import txt_docked_es:direct
-_ES     = .encrypt( txt_docked_es )     ;=$BA
+_ES     = .scramble( txt_docked_es )    ;=$BA
 .import txt_docked_ar:direct
-_AR     = .encrypt( txt_docked_ar )     ;=$B9
+_AR     = .scramble( txt_docked_ar )    ;=$B9
 .import txt_docked_ma:direct
-_MA     = .encrypt( txt_docked_ma )     ;=$B8
+_MA     = .scramble( txt_docked_ma )    ;=$B8
 .import txt_docked_in:direct
-_IN     = .encrypt( txt_docked_in )     ;=$A7
+_IN     = .scramble( txt_docked_in )    ;=$A7
 .import txt_docked_di:direct
-_DI     = .encrypt( txt_docked_di )     ;=$A6
+_DI     = .scramble( txt_docked_di )    ;=$A6
 .import txt_docked_re:direct
-_RE     = .encrypt( txt_docked_re )     ;=$A5
+_RE     = .scramble( txt_docked_re )    ;=$A5
 .import txt_docked_a_:direct
-__A     = .encrypt( txt_docked_a_ )     ;=$A4
+__A     = .scramble( txt_docked_a_ )    ;=$A4
 .import txt_docked_er:direct
-_ER     = .encrypt( txt_docked_er )     ;=$A3
+_ER     = .scramble( txt_docked_er )    ;=$A3
 .import txt_docked_at:direct
-_AT     = .encrypt( txt_docked_at )     ;=$A2
+_AT     = .scramble( txt_docked_at )    ;=$A2
 .import txt_docked_en:direct
-_EN     = .encrypt( txt_docked_en )     ;=$A1
+_EN     = .scramble( txt_docked_en )    ;=$A1
 .import txt_docked_be:direct
-_BE     = .encrypt( txt_docked_be )     ;=$A0
+_BE     = .scramble( txt_docked_be )    ;=$A0
 .import txt_docked_ra:direct
-_RA     = .encrypt( txt_docked_ra )     ;=$AF
+_RA     = .scramble( txt_docked_ra )    ;=$AF
 .import txt_docked_la:direct
-_LA     = .encrypt( txt_docked_la )     ;=$AE
+_LA     = .scramble( txt_docked_la )    ;=$AE
 .import txt_docked_ve:direct
-_VE     = .encrypt( txt_docked_ve )     ;=$AD
+_VE     = .scramble( txt_docked_ve )    ;=$AD
 .import txt_docked_ti:direct
-_TI     = .encrypt( txt_docked_ti )     ;=$AC
+_TI     = .scramble( txt_docked_ti )    ;=$AC
 .import txt_docked_ed:direct
-_ED     = .encrypt( txt_docked_ed )     ;=$AB
+_ED     = .scramble( txt_docked_ed )    ;=$AB
 .import txt_docked_or:direct
-_OR     = .encrypt( txt_docked_or )     ;=$AA
+_OR     = .scramble( txt_docked_or )    ;=$AA
 .import txt_docked_qu:direct
-_QU     = .encrypt( txt_docked_qu )     ;=$A9
+_QU     = .scramble( txt_docked_qu )    ;=$A9
 .import txt_docked_an:direct
-_AN     = .encrypt( txt_docked_an )     ;=$A8
+_AN     = .scramble( txt_docked_an )    ;=$A8
 
-; encrypt regular ASCII characters:
+; scramble regular ASCII characters:
 ;-------------------------------------------------------------------------------
-__end   = .encrypt ( $00 )              ;=$57
-__      = .encrypt ( $20 )              ;=$77
-_XMARK  = .encrypt ( $21 )              ;=$76
-_APOS   = .encrypt ( $27 )              ;=$70
-_LPAREN = .encrypt ( $28 )              ;=$7F
-_RPAREN = .encrypt ( $29 )              ;=$7E
-_COMMA  = .encrypt ( $2c )              ;=$7B
-_HYPHEN = .encrypt ( $2d )              ;=$7A
-_DOT    = .encrypt ( $2e )              ;=$79
-_SLASH  = .encrypt ( $2f )              ;=$78
-_0      = .encrypt ( $30 )              ;=$67
-_1      = .encrypt ( $31 )              ;=$66
-_2      = .encrypt ( $32 )              ;=$65
-_3      = .encrypt ( $33 )              ;=$64
-_4      = .encrypt ( $34 )              ;=$63
-_5      = .encrypt ( $35 )              ;=$62
-_6      = .encrypt ( $36 )              ;=$61
-_7      = .encrypt ( $37 )              ;=$60
-_8      = .encrypt ( $38 )              ;=$6F
-_9      = .encrypt ( $39 )              ;=$6E
-_COLON  = .encrypt ( $3a )              ;=$6D
-_QMARK  = .encrypt ( $3f )              ;=$68
-_A      = .encrypt ( $41 )              ;=$16
-_B      = .encrypt ( $42 )              ;=$15
-_C      = .encrypt ( $43 )              ;=$14
-_D      = .encrypt ( $44 )              ;=$13
-_E      = .encrypt ( $45 )              ;=$12
-_F      = .encrypt ( $46 )              ;=$11
-_G      = .encrypt ( $47 )              ;=$10
-_H      = .encrypt ( $48 )              ;=$1F
-_I      = .encrypt ( $49 )              ;=$1E
-_J      = .encrypt ( $4a )              ;=$1D
-_K      = .encrypt ( $4b )              ;=$1C
-_L      = .encrypt ( $4c )              ;=$1B
-_M      = .encrypt ( $4d )              ;=$1A
-_N      = .encrypt ( $4e )              ;=$19
-_O      = .encrypt ( $4f )              ;=$18
-_P      = .encrypt ( $50 )              ;=$07
-_Q      = .encrypt ( $51 )              ;=$06
-_R      = .encrypt ( $52 )              ;=$05
-_S      = .encrypt ( $53 )              ;=$04
-_T      = .encrypt ( $54 )              ;=$03
-_U      = .encrypt ( $55 )              ;=$02
-_V      = .encrypt ( $56 )              ;=$01
-_W      = .encrypt ( $57 )              ;=$00
-_X      = .encrypt ( $58 )              ;=$0F
-_Y      = .encrypt ( $59 )              ;=$0E
-_Z      = .encrypt ( $5a )              ;=$0D
+__end   = .scramble( $00 )              ;=$57
+__      = .scramble( $20 )              ;=$77
+_XMARK  = .scramble( $21 )              ;=$76
+_APOS   = .scramble( $27 )              ;=$70
+_LPAREN = .scramble( $28 )              ;=$7F
+_RPAREN = .scramble( $29 )              ;=$7E
+_COMMA  = .scramble( $2c )              ;=$7B
+_HYPHEN = .scramble( $2d )              ;=$7A
+_DOT    = .scramble( $2e )              ;=$79
+_SLASH  = .scramble( $2f )              ;=$78
+_0      = .scramble( $30 )              ;=$67
+_1      = .scramble( $31 )              ;=$66
+_2      = .scramble( $32 )              ;=$65
+_3      = .scramble( $33 )              ;=$64
+_4      = .scramble( $34 )              ;=$63
+_5      = .scramble( $35 )              ;=$62
+_6      = .scramble( $36 )              ;=$61
+_7      = .scramble( $37 )              ;=$60
+_8      = .scramble( $38 )              ;=$6F
+_9      = .scramble( $39 )              ;=$6E
+_COLON  = .scramble( $3a )              ;=$6D
+_QMARK  = .scramble( $3f )              ;=$68
+_A      = .scramble( $41 )              ;=$16
+_B      = .scramble( $42 )              ;=$15
+_C      = .scramble( $43 )              ;=$14
+_D      = .scramble( $44 )              ;=$13
+_E      = .scramble( $45 )              ;=$12
+_F      = .scramble( $46 )              ;=$11
+_G      = .scramble( $47 )              ;=$10
+_H      = .scramble( $48 )              ;=$1F
+_I      = .scramble( $49 )              ;=$1E
+_J      = .scramble( $4a )              ;=$1D
+_K      = .scramble( $4b )              ;=$1C
+_L      = .scramble( $4c )              ;=$1B
+_M      = .scramble( $4d )              ;=$1A
+_N      = .scramble( $4e )              ;=$19
+_O      = .scramble( $4f )              ;=$18
+_P      = .scramble( $50 )              ;=$07
+_Q      = .scramble( $51 )              ;=$06
+_R      = .scramble( $52 )              ;=$05
+_S      = .scramble( $53 )              ;=$04
+_T      = .scramble( $54 )              ;=$03
+_U      = .scramble( $55 )              ;=$02
+_V      = .scramble( $56 )              ;=$01
+_W      = .scramble( $57 )              ;=$00
+_X      = .scramble( $58 )              ;=$0F
+_Y      = .scramble( $59 )              ;=$0E
+_Z      = .scramble( $5a )              ;=$0D
 
 ;===============================================================================
 
@@ -301,15 +301,15 @@ _msg_index     .set 0
 .macro  .define_msg     msg_id
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
-        ; define a reference for the un-encrypted index value,
+        ; define a reference for the un-scrambled index value,
         ; (should it be needed)
         .ident(.concat("ID", msg_id)) = _msg_index
 
         .local  _value
         _value  .set 0
-        _value  .set .encrypt( _msg_index )
+        _value  .set .scramble( _msg_index )
         
-        ; define the locally encrypted name, e.g. "_A",
+        ; define the locally scrambled name, e.g. "_A",
         ; used for the text database
         .ident(msg_id) = _value
 
@@ -371,7 +371,7 @@ _0e00:                                                                  ;$0E00
         .define_msg "_COMPETITION_NUMBER"
         
         ; $05:
-        .byte   _B0, .encrypt($6d), _IS, .encrypt($6e), _B1, __end
+        .byte   _B0, .scramble($6d), _IS, .scramble($6e), _B1, __end
         .define_msg "_05"
         
         ; $06:
@@ -431,12 +431,12 @@ _0e00:                                                                  ;$0E00
         .byte   _NEW_SENTENCE
 
         .byte   _YOU, __, _A, _RE, __, _C, _A, _U, _TI, _ON, _ED_, _TH, _AT, __
-        .byte   _ON, _L, _Y, __, FN_F06, .encrypt($75), FN_F05, _S, __
+        .byte   _ON, _L, _Y, __, FN_F06, .scramble($75), FN_F05, _S, __
         .byte   _W, _IL, _L, __, _P, _EN, _ET, _RA, _T, _E, __, _THE_
         .byte   _N, _E, _W, __, _S, _H, _I, _E, _L, _D, _S, _AND_, _TH, _AT, __
         .byte   _THE_, FN_CAPNEXT, _C, _ON, _ST, _R, _I, _C, _T, _OR, _IS
         .byte   _F, _IT, _T, _ED_, _W, _I, _TH, __, _AN, __, FN_F06
-        .byte   .encrypt($6c), FN_F05, _B1, FN_F02, FN_F08
+        .byte   .scramble($6c), FN_F05, _B1, FN_F02, FN_F08
         .byte   _G, _O, _O, _D, __, _L, _U, _C, _K, _COMMA, __, _COMMANDER
         .byte   _D4, FN_F16, __end
         .define_msg "_0A"
@@ -536,7 +536,7 @@ _0e00:                                                                  ;$0E00
         .define_msg "_1A"
 
         ; $1B:
-        .byte   .encrypt($72), __end
+        .byte   .scramble($72), __end
         .define_msg "_1B"
 
         ; $1C:  "great"
@@ -553,7 +553,7 @@ _0e00:                                                                  ;$0E00
         
         ;-----------------------------------------------------------------------
         ; $1F:
-        .byte   FN_F02, .encrypt($77), __, .encrypt($76)
+        .byte   FN_F02, .scramble($77), __, .scramble($76)
         .byte   FN_F0D, __, _PLANT, _A, _TI, _ON, _S, __end
         .define_msg "_1F"
 
@@ -562,11 +562,11 @@ _0e00:                                                                  ;$0E00
         .define_msg "_20"
 
         ; $21:
-        .byte   .encrypt($75), __end
+        .byte   .scramble($75), __end
         .define_msg "_21"
         
         ; $22:
-        .byte   .encrypt($80), __, _F, _OR, _ES, _T, _S, __end
+        .byte   .scramble($80), __, _F, _OR, _ES, _T, _S, __end
         .define_msg "_22"
         
         ; $23:  "oceans"
@@ -658,7 +658,7 @@ _0e00:                                                                  ;$0E00
         
         ;-----------------------------------------------------------------------
         ; $38:
-        .byte   .encrypt($71), __, _C, _I, _V, _IL, __, _W, _AR, __end
+        .byte   .scramble($71), __, _C, _I, _V, _IL, __, _W, _AR, __end
         .define_msg "_38"
         
         ; $39:

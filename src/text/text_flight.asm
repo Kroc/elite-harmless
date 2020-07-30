@@ -17,73 +17,73 @@
 .export TXT_FLIGHT_XOR := $23
 
 ; all flight tokens on disk are scrambled in this way:
-.define .encrypt(value) value ^ TXT_FLIGHT_XOR
+.define .scramble(value) value ^ TXT_FLIGHT_XOR
 
 
 .import txt_flight_al:direct            ;=$80:
-_AL     = .encrypt( txt_flight_al )     ;^23=$A3
+_AL     = .scramble( txt_flight_al )    ;^23=$A3
 .import txt_flight_le:direct            ;=$81:
-_LE     = .encrypt( txt_flight_le )     ;^$23=$A2
+_LE     = .scramble( txt_flight_le )    ;^$23=$A2
 .import txt_flight_xe:direct            ;=$82:
-_XE     = .encrypt( txt_flight_xe )     ;^$23=$A1
+_XE     = .scramble( txt_flight_xe )    ;^$23=$A1
 .import txt_flight_ge:direct            ;=$83:
-_GE     = .encrypt( txt_flight_ge )     ;^$23=$A0
+_GE     = .scramble( txt_flight_ge )    ;^$23=$A0
 .import txt_flight_za:direct            ;=$84:
-_ZA     = .encrypt( txt_flight_za )     ;^$23=$A7
+_ZA     = .scramble( txt_flight_za )    ;^$23=$A7
 .import txt_flight_ce:direct            ;=$85:
-_CE     = .encrypt( txt_flight_ce )     ;^$23=$A6
+_CE     = .scramble( txt_flight_ce )    ;^$23=$A6
 .import txt_flight_bi:direct            ;=$86:
-_BI     = .encrypt( txt_flight_bi )     ;^$23=$A5
+_BI     = .scramble( txt_flight_bi )    ;^$23=$A5
 .import txt_flight_so:direct            ;=$87:
-_SO     = .encrypt( txt_flight_so )     ;^$23=$A4
+_SO     = .scramble( txt_flight_so )    ;^$23=$A4
 .import txt_flight_us:direct            ;=$88:
-_US     = .encrypt( txt_flight_us )     ;^$23=$AB
+_US     = .scramble( txt_flight_us )    ;^$23=$AB
 .import txt_flight_es:direct            ;=$89:
-_ES     = .encrypt( txt_flight_es )     ;^$23=$AA
+_ES     = .scramble( txt_flight_es )    ;^$23=$AA
 .import txt_flight_ar:direct            ;=$8A:
-_AR     = .encrypt( txt_flight_ar )     ;^$23=$A9
+_AR     = .scramble( txt_flight_ar )    ;^$23=$A9
 .import txt_flight_ma:direct            ;=$8B:
-_MA     = .encrypt( txt_flight_ma )     ;^$23=$A8
+_MA     = .scramble( txt_flight_ma )    ;^$23=$A8
 .import txt_flight_in:direct            ;=$8C:
-_IN     = .encrypt( txt_flight_in )     ;^$23=$AF
+_IN     = .scramble( txt_flight_in )    ;^$23=$AF
 .import txt_flight_di:direct            ;=$8D:
-_DI     = .encrypt( txt_flight_di )     ;^$23=$AE
+_DI     = .scramble( txt_flight_di )    ;^$23=$AE
 .import txt_flight_re:direct            ;=$8E:
-_RE     = .encrypt( txt_flight_re )     ;^$23=$AD
+_RE     = .scramble( txt_flight_re )    ;^$23=$AD
 .import txt_flight_a_:direct            ;=$8F:
-_A_     = .encrypt( txt_flight_a_ )     ;=$23=$AC
+_A_     = .scramble( txt_flight_a_ )    ;=$23=$AC
 .import txt_flight_er:direct            ;=$90:
-_ER     = .encrypt( txt_flight_er )     ;^$23=$B3
+_ER     = .scramble( txt_flight_er )    ;^$23=$B3
 .import txt_flight_at:direct            ;=$91:
-_AT     = .encrypt( txt_flight_at )     ;^$23=$B2
+_AT     = .scramble( txt_flight_at )    ;^$23=$B2
 .import txt_flight_en:direct            ;=$92:
-_EN     = .encrypt( txt_flight_en )     ;^$23=$B1
+_EN     = .scramble( txt_flight_en )    ;^$23=$B1
 .import txt_flight_be:direct            ;=$93:
-_BE     = .encrypt( txt_flight_be )     ;^$23=$B0
+_BE     = .scramble( txt_flight_be )    ;^$23=$B0
 .import txt_flight_ra:direct            ;=$94:
-_RA     = .encrypt( txt_flight_ra )     ;^$23=$B7
+_RA     = .scramble( txt_flight_ra )    ;^$23=$B7
 .import txt_flight_la:direct            ;=$95:
-_LA     = .encrypt( txt_flight_la )     ;^$23=$B6
+_LA     = .scramble( txt_flight_la )    ;^$23=$B6
 .import txt_flight_ve:direct            ;=$96:
-_VE     = .encrypt( txt_flight_ve )     ;^$23=$B5
+_VE     = .scramble( txt_flight_ve )    ;^$23=$B5
 .import txt_flight_ti:direct            ;=$97:
-_TI     = .encrypt( txt_flight_ti )     ;^$23=$B4
+_TI     = .scramble( txt_flight_ti )    ;^$23=$B4
 .import txt_flight_ed:direct            ;=$98:
-_ED     = .encrypt( txt_flight_ed )     ;^$23=$BB
+_ED     = .scramble( txt_flight_ed )    ;^$23=$BB
 .import txt_flight_or:direct            ;=$99:
-_OR     = .encrypt( txt_flight_or )     ;^$23=$BA
+_OR     = .scramble( txt_flight_or )    ;^$23=$BA
 .import txt_flight_qu:direct            ;=$9A:
-_QU     = .encrypt( txt_flight_qu )     ;^$23=$B9
+_QU     = .scramble( txt_flight_qu )    ;^$23=$B9
 .import txt_flight_an:direct            ;=$9B:
-_AN     = .encrypt( txt_flight_an )     ;^$23=$B8
+_AN     = .scramble( txt_flight_an )    ;^$23=$B8
 .import txt_flight_te:direct            ;=$9C:
-_TE     = .encrypt( txt_flight_te )     ;^$23=$BF
+_TE     = .scramble( txt_flight_te )    ;^$23=$BF
 .import txt_flight_is:direct            ;=$9D:
-_IS     = .encrypt( txt_flight_is )     ;^$23=$BE
+_IS     = .scramble( txt_flight_is )    ;^$23=$BE
 .import txt_flight_ri:direct            ;=$9E:
-_RI     = .encrypt( txt_flight_ri )     ;^$23=$BD
+_RI     = .scramble( txt_flight_ri )    ;^$23=$BD
 .import txt_flight_on:direct            ;=$9F:
-_ON     = .encrypt( txt_flight_on )     ;^$23=$BC
+_ON     = .scramble( txt_flight_on )    ;^$23=$BC
 
 .macro  .define_letter  id, index
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -91,7 +91,7 @@ _ON     = .encrypt( txt_flight_on )     ;^$23=$BC
         ; define the version as used in the flight
         ; strings database (scrambled)
         ;
-        .ident( id ) = .encrypt( index )
+        .ident( id ) = .scramble( index )
 
         ; define the public version used in code,
         ; (unscrambled)
@@ -166,18 +166,18 @@ _word_index     .set 0
         _word_index .set _word_index + 1
 
         .if _word_index < 96
-                _value .set .encrypt ($A0 + _word_index )
+                _value .set .scramble($A0 + _word_index )
 
         .elseif _word_index < 128
-                _value .set .encrypt( _word_index )
+                _value .set .scramble( _word_index )
         .else
-                _value .set .encrypt( _word_index - $72 )
+                _value .set .scramble( _word_index - $72 )
         .endif
 
         ;;.out .sprintf(": $%0.2x: TXT%s", _value, word_id)
         .ident(word_id) = _value
 
-.export .ident(.concat("TXT", word_id)) = .encrypt( _value )
+.export .ident(.concat("TXT", word_id)) = .scramble( _value )
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro

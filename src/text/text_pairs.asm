@@ -77,7 +77,7 @@ _254e:
 ; after the character pairs unique to the 'docked' string pool come the pairs
 ; for the 'flight' strings, however the table for docked string pairs overlaps,
 ; continuing into flight string pairs; since both 'docked' and 'flight' tokens
-; use different encryption this means that the *SAME CHARACTER PAIRS HAVE
+; are scrambled differently, this means that the *SAME CHARACTER PAIRS HAVE
 ; DIFFERENT TOKEN NUMBERS BETWEEN DOCKED AND FLIGHT STRINGS*
 ;
 ; ergo, this macro will take a pair of characters and define both a docked and
