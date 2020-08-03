@@ -4013,8 +4013,8 @@ mission_trumbles:                                                       ;$3DC0
         sta MISSION_FLAGS
 
         ; display the Trumbles™ mission text
-.import MSG_DOCKED_TRUMBLES:direct
-        lda # MSG_DOCKED_TRUMBLES
+.import MSG_DOCKED_MISSION_TRUMBLES:direct
+        lda # MSG_DOCKED_MISSION_TRUMBLES
         jsr print_docked_str
         
         jsr _81ee

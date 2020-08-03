@@ -22,38 +22,39 @@
 ; is referenced anywhere, even though the code segment might be addressed
 ; much higher up in memory than this line might imply
 ;
-.include        "vars_polyobj.asm"                                      ;$F900
+.include        "vars_polyobj.asm"
 
-.include        "vars_main.inc"                                         ;$0400
+.include        "vars_main.inc"
 
-.include        "gfx/gfx_font.asm"                                      ;$0B00
+.include        "gfx/gfx_font.asm"
 
-.include        "vars_flags.asm"                                        ;$1D00
+.include        "vars_flags.asm"
 
 ; in elite-harmless we conjoin
 ; these code segments together:
 ;
 .segment        "CODE_LORAM"
 ;-------------------------------------------------------------------------------
-.include        "code_1D81.asm"                                         ;$1D81
-.include        "code_2A84.asm"                                         ;$2A84
-.include        "save_data.asm"                                         ;$25A6
-.include        "gfx/gfx_sprites.asm"                                   ;$6800
+.include        "code_1D81.asm"
+.include        "text/code_docked.asm"
+.include        "code_2A84.asm"
+
+.include        "save_data.asm"
+.include        "gfx/gfx_sprites.asm"
 
 ; in elite-harmless we conjoin
 ; these code segments together:
 ;
 .segment        "CODE_HIRAM"
 ;-------------------------------------------------------------------------------
-.include        "code_6A00.asm"                                         ;$6A00
-.include        "code_9900.asm"                                         ;$9900
+.include        "code_6A00.asm"
+.include        "code_9900.asm"
 
 .ifndef         OPTION_NOSOUND
 ;///////////////////////////////////////////////////////////////////////////////
-.include        "sound.asm"                                             ;$B4CB
+.include        "sound.asm"
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
-.include        "gfx/hull_data.asm"                                     ;$D000
-
+.include        "gfx/hull_data.asm"
 .include        "gfx/gfx_bitmap.asm"

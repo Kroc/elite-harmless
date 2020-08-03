@@ -389,9 +389,9 @@ tkn_docked_fn_mediaCurrent:                                             ;$8AB5
 tkn_docked_fn_mediaOther:                                               ;$8ABE
 ;-------------------------------------------------------------------------------
 .export tkn_docked_fn_mediaOther
-.import MSG_DOCKED_DISK:direct
+.import MSG_DOCKED_MEDIAS:direct
 
-        lda # MSG_DOCKED_DISK   ; $02 = "DISK", $03 = "TAPE"
+        lda # MSG_DOCKED_MEDIAS ; $02 = "DISK", $03 = "TAPE"
         sec                     ; subtract the following:
         sbc opt_device          ; $FF = disk,   $00 = tape
         jmp print_docked_str    ; $02 = "DISK", $03 = "TAPE"

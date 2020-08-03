@@ -28,6 +28,7 @@
 .segment        "CODE_1D81"
 ;-------------------------------------------------------------------------------
 .include        "code_1D81.asm"                                         ;$1D81
+.include        "text/code_docked.asm"                                  ;$2372
 .include        "save_data.asm"                                         ;$25A6
 
 .segment        "CODE_28A4"
