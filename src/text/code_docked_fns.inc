@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "text_docked_fns.inc" -- a series of in-string functions, assigned to the
+; "code_docked_fns.inc" -- a series of in-string functions, assigned to the
 ; first 32 "docked" string tokens. these are stored as macros in this file
 ; because their physical location in the original code is all over the place
 
@@ -35,25 +35,34 @@ tkn_docked_fn02:                                                        ;$246D
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .tkn_docked_fn06_05
+.macro  .tkn_docked_flightTokens
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-tkn_docked_fn06:                                                        ;$2496
+use_flight_tokens:                                                      ;$2496
 ;-------------------------------------------------------------------------------
-.export tkn_docked_fn06
+; begin printing flight-tokens in docked strings!
+;
+.export use_flight_tokens
         
+        ; reset capitalisation?
         lda # %10000000
         sta ZP_34
-        lda # %11111111
 
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; enable the flag that causes docked tokens to be
+        ; interpretted as flight tokens instead
+        lda # %11111111
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit
 
-tkn_docked_fn05:                                                        ;$249D
+use_docked_tokens:                                                      ;$249D
 ;-------------------------------------------------------------------------------
-.export tkn_docked_fn05
+; stop flight-token printing in docked strings:
+;
+.export use_docked_tokens
 
+        ; disable the flag that causes docked tokens to be
+        ; interpretted as flight tokens instead
         lda # %00000000
         sta txt_flight_flag
 
@@ -118,27 +127,38 @@ tkn_docked_fn0D:                                                        ;$248B
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .tkn_docked_fn0E_0F
+.macro  .tkn_docked_textBuffer
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-tkn_docked_fn0E:                                                        ;$24A3
+tkn_docked_bufferOn:                                                    ;$24A3
+;===============================================================================
+; enable the text-buffer:
+;
+; this stops printing directly to the screen and holds new text in a buffer
+; until it is released. this can be used to full-justify the text or inspect
+; the characters in the buffer before they go to screen
 ;-------------------------------------------------------------------------------
-.export tkn_docked_fn0E
+.export tkn_docked_bufferOn
 
+        ; use a high-bit for the 'on' value
         lda # %10000000
-
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit
 
-tkn_docked_fn0F:                                                        ;$24A6
-        ;=======================================================================
-.export tkn_docked_fn0F
+tkn_docked_bufferOff:                                                   ;$24A6
+;===============================================================================
+; disable the text-buffer:
+;
+;-------------------------------------------------------------------------------
+.export tkn_docked_bufferOff
         
-        lda # %00000000
-        sta txt_buffer_flag
-        asl 
-        sta txt_buffer_index
+        lda # %00000000         ; 'off' value
+        sta txt_buffer_flag     ; set the text-buffer flag
+
+        ; reset the text-buffer's length / current index
+        asl                     ; A=0 (shift the flag off, if present)
+        sta txt_buffer_index    ; set the index to 0
+
         rts 
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -183,54 +203,67 @@ _2378:  clc                                                             ;$2378
 
 tkn_docked_fn11:                                                        ;$24B0
 ;-------------------------------------------------------------------------------
+; print an ending to a name, e.g. "ian" for "Lavian"?
+;
 .export tkn_docked_fn11
 
         lda ZP_34
-        and # %10111111         ;=$BF
+        and # %10111111
         sta ZP_34
 
-        lda # $03               ;?
+        ; print the target system name, e.g. "Lave"
+        ; TODO: import this flight-token
+        lda # $03
         jsr print_flight_token
         
         ldx txt_buffer_index
         lda VAR_0647, x
         jsr is_vowel
-        bcc _24c9
+        bcc :+
         dec txt_buffer_index
-_24c9:                                                                  ;$24C9
-        lda # $99
+
+        ; import the token for the -"ian" suffix (not Ian Bell!)
+.import MSG_DOCKED_IAN:direct
+:       lda # MSG_DOCKED_IAN                                            ;$24C9
         jmp print_docked_str
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .tkn_docked_fn12
+.macro  .tkn_docked_randomName
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-tkn_docked_fn12:                                                        ;$24CE
+; prints a randomised name:
+;
+tkn_docked_randomName:                                                  ;$24CE
 ;-------------------------------------------------------------------------------
-.export tkn_docked_fn12
+.export tkn_docked_randomName
 
+        ; automatically capitalise the next letter, whatever it is
         jsr tkn_docked_capitalizeNext
 
-        jsr get_random_number
-        and # %00000011
-        tay 
-_24d7:                                                                  ;$24D7
-        jsr get_random_number
-        and # %00111110
-        tax 
+        ; choose the length of the name:
+        ; (this is in character pairs)
+        ;
+        jsr get_random_number   ; choose a random number,
+        and # %00000011         ; between 0-7 (=2 to 16 characters)
+        tay                     ; put length random number in Y
 
-.import _254e
+        ; choose a character pair:
+        ;
+@loop:  jsr get_random_number   ; choose a random number                ;$24D7
+        and # %00111110         ; between 0 & 31, multiplied by 2
+        tax                     ; put index aside in X
 
-        lda _254e+0, x
-        jsr print_docked_char
+.import txt_pairs
+
+        lda txt_pairs+0, x      ; read the first character of the pair
+        jsr print_docked_char   ; print this...
         
-        lda _254e+1, x
-        jsr print_docked_char
+        lda txt_pairs+1, x      ; read the second character of the pair
+        jsr print_docked_char   ; print this...
         
-        dey 
-        bpl _24d7
+        dey                     ; one less character pair to print
+        bpl @loop               ; any remaining? keep printing...
         
         rts 
 
@@ -281,8 +314,8 @@ tkn_docked_fn17:                                                        ;$3E57
 .export tkn_docked_fn17
 
         lda # 10
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit
 
 tkn_docked_fn1D:                                                        ;$3E5A
@@ -298,23 +331,6 @@ tkn_docked_fn1D:                                                        ;$3E5A
 .endif  ;///////////////////////////////////////////////////////////////////////
         
         jmp tkn_docked_fn0D
-
-_3e65:                                                                  ;$3E65
-        ;-----------------------------------------------------------------------
-        lda # $50
-        sta ZP_POLYOBJ_YPOS_LO
-
-        lda # $00
-        sta ZP_POLYOBJ_XPOS_LO
-        sta ZP_POLYOBJ_ZPOS_LO
-        
-        lda # $02
-        sta ZP_POLYOBJ_ZPOS_MI
-        
-        jsr _9a86
-        jsr _a2a0
-        
-        jmp get_input
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -371,8 +387,8 @@ tkn_docked_incoming_message:                                            ;$3E37
 tkn_docked_fn_mediaCurrent:                                             ;$8AB5
 ;-------------------------------------------------------------------------------
 .export tkn_docked_fn_mediaCurrent
-
 .import MSG_DOCKED_TAPE:direct
+
         lda # MSG_DOCKED_TAPE   ; $02 = "DISK", $03 = "TAPE"
         clc                     ; add the following:
         adc opt_device          ; $FF = disk,   $00 = tape

@@ -11,7 +11,7 @@
 .include        "gfx/hull_struct.inc"
 
 .include        "vars_zeropage.asm"
-.include        "text/text_docked_fns.inc"
+.include        "text/code_docked_fns.inc"
 .include        "code_keyboard.inc"
 
 ; due to a limitation, CA65 cannot 'look-ahead' for scopes (including procs &

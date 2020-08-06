@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; insert these docked token functions from "text_docked_fns.asm"
+; insert these docked token functions from "code_docked_fns.asm"
 ;
 .tkn_docked_fns_theirName_protoGalaxy                                   ;$2372
 
@@ -123,6 +123,8 @@ print_docked_token:                                                     ;$23CF
         bit txt_flight_flag     ; if flight string mode is off,
         bpl :+                  ; skip the next bit
 
+        ; print a flight token instead of a docked token:
+        ;-----------------------------------------------------------------------
         ; save state before we recurse
         tax 
        .phy                     ; push Y to stack (via A)
@@ -137,8 +139,9 @@ print_docked_token:                                                     ;$23CF
 
         jmp _2438
 
-        ; print docked token:
         ;-----------------------------------------------------------------------
+        ; print docked token:
+        ;
 :       cmp # 'z'+1             ; letters "A" to "Z"?                   ;$23E8
        .blt print_docked_char   ; print letters, handling auto-casing
 
@@ -281,16 +284,16 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
         jmp _2438               ; clean up and exit
 
 ;===============================================================================
-; insert these docked token functions from "text_docked_fns.asm"
+; insert these docked token functions from "code_docked_fns.asm"
 ;
 .tkn_docked_fn01_02                                                     ;$246A
 .tkn_docked_fn08                                                        ;$2478
 .tkn_docked_clearScreen                                                 ;$2483
 .tkn_docked_fn0D                                                        ;$248B
-.tkn_docked_fn06_05                                                     ;$2496
-.tkn_docked_fn0E_0F                                                     ;$24A3
+.tkn_docked_flightTokens                                                ;$2496
+.tkn_docked_textBuffer                                                  ;$24A3
 .tkn_docked_fn11                                                        ;$24B0
-.tkn_docked_fn12                                                        ;$24CE
+.tkn_docked_randomName                                                  ;$24CE
 .tkn_docked_capitalizeNext                                              ;$24ED
 
 is_vowel:                                                               ;$24F3

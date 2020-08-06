@@ -58,8 +58,8 @@ tkn_docked_pairs:                                                       ;$254C
         ; but not during name generation
         .docked_pair    "crlf"  ;=$D7 (docked)
 
-_254e:
-.export _254e
+txt_pairs:                                                              ;$254E
+.export txt_pairs
 
         .docked_pair    "ab"    ;=$D8 (docked)
         .docked_pair    "ou"    ;=$D9 (docked)

@@ -319,6 +319,8 @@ ZP_8A                   = $8a   ;? x8
 ZP_8B                   = $8b   ;? x9
 ZP_8C                   = $8c   ;? x4
 ZP_8D                   = $8d   ;? x4
+
+; temp variable storage and seed backup?
 ZP_8E                   = $8e   ;? x18 "QQ19" -- cross-hair X-position
 ZP_8F                   = $8f   ;? x19 "QQ19" -- cross-hair Y-position
 ZP_90                   = $90   ;? x11 "QQ19" -- cross-hair size

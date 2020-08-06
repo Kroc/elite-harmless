@@ -2460,11 +2460,10 @@ price_list:                                                             ;$76CD
         .word   8000            ; mining laser: 800.0 Cr
 
 
-;===============================================================================
-
 _76e9:                                                                  ;$76E9
+;===============================================================================
+        ; backup seed?
         ldx # $05
-
 :       lda ZP_SEED, x                                                  ;$76EB
         sta ZP_8E, x
         dex 
@@ -2492,6 +2491,7 @@ _76e9:                                                                  ;$76E9
         bpl @_76fb
         ldx # $05
 
+        ;-----------------------------------------------------------------------
 :       lda ZP_8E, x                                                    ;$770F
         sta ZP_SEED, x
         dex 
@@ -2499,19 +2499,18 @@ _76e9:                                                                  ;$76E9
 
         rts 
 
-;===============================================================================
 
 _7717:                                                                  ;$7717
+;===============================================================================
         ldy # $00
-_7719:                                                                  ;$7719
-        lda VAR_0491, y
+:       lda VAR_0491, y                                                 ;$7719
         cmp # $0d
-        beq _7726
+        beq :+
         jsr print_char
         iny 
-        bne _7719
-_7726:                                                                  ;$7726
-        rts 
+        bne :-
+
+:       rts                                                             ;$7726 
 
 
 print_local_planet_name:                                                ;$7727
@@ -2597,55 +2596,57 @@ _775f:                                                                  ;$775F
         ;
 
 print_flight_token_and_newline:                                         ;$7773
-        ;=======================================================================
+;===============================================================================
         jsr print_flight_token
         jmp print_newline
 
 
 print_flight_token_with_colon:                                          ;$7779
-        ;=======================================================================
-        ; prints the string token in A and appends a colon character
-        ;
-        ;    A = an already *de-scrambled* string token
-        ;
+;===============================================================================
+; prints the flight token in A and appends a colon character:
+;
+; in:   A       an already *de-scrambled* flight token
+;-------------------------------------------------------------------------------
         jsr print_flight_token
 
 print_colon:                                                            ;$777C
-        ;=======================================================================
-        ; prints a colon, nothing else
-        ;
+;===============================================================================
+; prints a colon, nothing else:
+;
+;-------------------------------------------------------------------------------
         lda # ':'
 
 print_flight_token:                                                     ;$777E
-        ;=======================================================================
-        ; prints an already *de-scrambled* string token. this can be a single
-        ; letter, a variable (like cash or planet name), a string-expansion,
-        ; or a meta-command
-        ;
-        ; in:   A       an already *de-scrambled* string token
-        ;
-        ; brief token breakdown:
-        ;
-        ;      $00 = print "cash:" & cash value
-        ;      $01 = print current galaxy number?
-        ;      $02 = ?
-        ;      $03 = ?
-        ;      $04 = ?
-        ;      $05 = ?
-        ;      $06 = ?
-        ;      $07 = ?
-        ;      $08 = ?
-        ;      $09 = ?
-        ;      $0A = ?
-        ;      $0B = ?
-        ;      $0C = newline
-        ;      $0D = (also newline)
-        ;  $0E-$20 = canned messages 128-146
-        ;  $21-$5F = ASCII characters $21-$5F -- see "gfx/gfx_font.asm"
-        ;  $60-$7F = canned messages  96-127
-        ;  $80-$9F = flight letter pairs 0-31
-        ;  $A0-$FF = canned messages 0-95
-        ;
+;===============================================================================
+; prints an already *de-scrambled* flight token:
+;
+; this can be a single letter, a variable (like cash or planet name),
+; a string-expansion, or a meta-command
+;
+; in:   A       an already *de-scrambled* string token
+;
+; brief token breakdown:
+;
+;      $00 = print "cash:" & cash value
+;      $01 = print current galaxy number?
+;      $02 = ?
+;      $03 = ?
+;      $04 = ?
+;      $05 = ?
+;      $06 = ?
+;      $07 = ?
+;      $08 = ?
+;      $09 = ?
+;      $0A = ?
+;      $0B = ?
+;      $0C = newline
+;      $0D = (also newline)
+;  $0E-$20 = canned messages 128-146
+;  $21-$5F = ASCII characters $21-$5F -- see "gfx/gfx_font.asm"
+;  $60-$7F = canned messages  96-127
+;  $80-$9F = flight letter pairs 0-31
+;  $A0-$FF = canned messages 0-95
+;-------------------------------------------------------------------------------
 .export print_flight_token
 
         tax                     ; put aside token for later test
@@ -2838,7 +2839,7 @@ print_canned_message:                                                   ;$7813
         ;=======================================================================
         ; prints a canned message from the messages table
         ;
-        ;    A = message index
+        ; in:   A       message index
         ;
         tax                     ; put the message index aside
 
@@ -2924,10 +2925,10 @@ swap_zp_shadow:                                                         ;$784F
         rts 
 
 
+_785f:                                                                  ;$785F
 ;===============================================================================
 ; unused / unreferenced?
 ;
-_785f:                                                                  ;$785F
         lda ZP_POLYOBJ_VISIBILITY
         ora # visibility::exploding | visibility::display
         sta ZP_POLYOBJ_VISIBILITY
@@ -6557,7 +6558,7 @@ _8ab4:                                                                  ;$8AB4
         .byte   $7b
 
 ;===============================================================================
-; insert from "text/text_docked_fns.asm"
+; insert from "text/code_docked_fns.asm"
 ;
 .tkn_docked_fn_mediaCurrent                                             ;$8AB5
 .tkn_docked_fn_mediaOther                                               ;$8ABE
@@ -7404,7 +7405,7 @@ _9042:                                                                  ;$9042
         sta ZP_B9
         jsr set_cursor_col
 
-        jsr tkn_docked_fn0F
+        jsr tkn_docked_bufferOff
         lda VAR_04E6
 _905d:                                                                  ;$905D
         jsr print_flight_token

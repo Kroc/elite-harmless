@@ -1359,6 +1359,10 @@ txt_lcase_flag:                                                         ;$2F19
         .byte   %11111111
 
 txt_flight_flag:                                                        ;$2F1A
+        ; when printing docked strings ("text_docked.asm"), this flag causes
+        ; the docked tokens to be printed as flight tokens ("text_flight.asm")
+        ; instead! only function tokens ($00-$20, unscrambled) are exempt, so
+        ; as to be able to be able to switch back to docked tokens
         .byte   %00000000
 
 txt_buffer_flag:                                                        ;$2F1B
@@ -2029,7 +2033,7 @@ _31c6:                                                                  ;$31C6
         lda # $00
         sta ZP_AE
 _31d5:                                                                  ;$31D5
-        jsr tkn_docked_fn0E
+        jsr tkn_docked_bufferOn
         jsr _76e9
 
         ldx txt_buffer_index
@@ -2065,7 +2069,7 @@ _3208:                                                                  ;$3208
         sta TSYSTEM_POS_Y
         jsr _70ab
         jsr _6f82
-        jsr tkn_docked_fn0F
+        jsr tkn_docked_bufferOff
         jmp _877e
 
 ;===============================================================================
@@ -3883,10 +3887,9 @@ _3cfa:                                                                  ;$3CFA
         ;       the vertical up/down line routine?
         jmp draw_line
 
-;===============================================================================
 
 _3d2f:                                                                  ;$3D2F
-
+;===============================================================================
 ; from "text/text_docked.asm"
 .import _1a27
 .import _1a41
@@ -3913,11 +3916,11 @@ _3d3d:                                                                  ;$3D3D
         lsr 
         bcc _3d6f
         
-        jsr tkn_docked_fn0E
+        jsr tkn_docked_bufferOn
         
         lda # $01
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit
 
 :       lda # $b0                                                       ;$3D5F
@@ -4090,10 +4093,33 @@ _3e31:                                                                  ;$3E31
         bne _3dbe               ; always branches
 
 ;===============================================================================
-; insert these docked-token functions from "text_docked_fns.asm"
+; insert these docked-token functions from "code_docked_fns.asm"
 ;
 .tkn_docked_incoming_message                                            ;$3E37
 .tkn_docked_fn16_17_1D                                                  ;$3E41
+
+
+_3e65:                                                                  ;$3E65
+;===============================================================================
+        lda # $50
+        sta ZP_POLYOBJ_YPOS_LO
+
+        lda # $00
+        sta ZP_POLYOBJ_XPOS_LO
+        sta ZP_POLYOBJ_ZPOS_LO
+        
+        lda # $02
+        sta ZP_POLYOBJ_ZPOS_MI
+        
+        jsr _9a86
+        jsr _a2a0
+        
+        jmp get_input
+
+
+;===============================================================================
+; insert this docked-token function from "code_docked_fns.asm"
+;
 .tkn_docked_waitForAnyKey                                               ;$3E7C
 
 

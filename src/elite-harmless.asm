@@ -10,7 +10,7 @@
 .include        "gfx/hull_struct.inc"
 
 .include        "vars_zeropage.asm"
-.include        "text/text_docked_fns.inc"
+.include        "text/code_docked_fns.inc"
 .include        "code_keyboard.inc"
 
 .include        "code_init.asm"                                         ;$0400
