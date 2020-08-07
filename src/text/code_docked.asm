@@ -172,36 +172,33 @@ print_docked_token:                                                     ;$23CF
         
 print_docked_char:                                                      ;$2404
         ;-----------------------------------------------------------------------
-        ; print the punctuation characters ($20...$40), as is
+        ; print the punctuation characters ($20...$40)
+        ; as is, without changing case
         ;
         cmp # '@'+1
        .blt @print
 
-        ; shall we change the letter case?
+        ; NOTE: all characters A-Z in the text database are stored
+        ;       in upper-case and the game changes case as it goes
         ;
-        ; check for the upper-case flag: -- note that this will have no effect
-        ; if the upper-case mask is not set or if the lower-case mask is set
-        ; which takes precedence
-        ;
-        bit txt_ucase_flag      ; check if bit 7 is set
-        bmi @ucase              ; if so, skip ahead
-
-        ; check for the lower-case flag: -- this will only have an effect if
-        ; the lower-case mask is set to remove bit 5
-        ;
+        ; check for the lower-case flag:
         bit txt_lcase_flag      ; check if bit 7 is set
         bmi @lcase              ; if so, skip ahead
 
-@ucase: ora txt_ucase_mask      ; upper case (if enabled)               ;$2412
+        ; check for the upper-case flag:
+        bit txt_ucase_flag      ; check if bit 7 is set
+        bmi @ucase              ; if so, skip ahead
 
-@lcase: and txt_lcase_mask      ; lower-case (if enabled)               ;$2415
+@lcase: ora txt_lcase_mask      ; lower case (if enabled)               ;$2412
+
+@ucase: and txt_ucase_mask      ; upper case (if enabled)               ;$2415
 
 @print: jmp print_char                                                  ;$2418
 
 
 _format_code:                                                           ;$241B
         ;=======================================================================
-        ; tokens $00..$1F are format codes, each has a different behaviour:
+        ; docked tokens $00..$1F are functions, each has a different behaviour:
         ; see "txt_docked.asm" for details
 
         ; snapshot current state:
@@ -284,6 +281,7 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
 
         jmp _2438               ; clean up and exit
 
+
 ;===============================================================================
 ; insert these docked token functions from "code_docked_fns.asm"
 ;
@@ -296,6 +294,7 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
 .tkn_docked_provenance                                                  ;$24B0
 .print_random_name                                                      ;$24CE
 .tkn_docked_capitalizeNext                                              ;$24ED
+
 
 is_vowel:                                                               ;$24F3
 ;===============================================================================

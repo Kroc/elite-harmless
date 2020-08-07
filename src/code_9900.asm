@@ -84,10 +84,11 @@ _995d:                                                                  ;$995D
         sta ZP_POLYOBJ_VISIBILITY
         rts 
 
-;===============================================================================
-
-; ".Shpt ; ship is point at screen center"
 _9964:                                                                  ;$9964
+;===============================================================================
+; ".Shpt ; ship is point at screen center"
+;
+;-------------------------------------------------------------------------------
         sta [ZP_TEMP_ADDR2], y
         iny 
         iny 
@@ -105,9 +106,12 @@ _9964:                                                                  ;$9964
 ;===============================================================================
 .include        "math/math_square_root.asm"                             ;$9978
 
+
+_99af:                                                                  ;$99AF
 ;===============================================================================
 ; calculates A=R = A/Q*256 using log-tables. Uses A,X,B6
-_99af:                                                                  ;$99AF
+;
+;-------------------------------------------------------------------------------
         cmp ZP_VAR_Q
         bcs _9a07           ; if (A>=Q) return $FF
         sta ZP_B6
@@ -2402,7 +2406,7 @@ _set_page:                                                              ;$A731
 
         lda # %10000000
         sta ZP_34
-        sta txt_lcase_flag
+        sta txt_ucase_flag
 
         ; because the screen will be erased, we need to clear the circle
         ; buffer (used to erase the previous frame's sun) to avoid trying
@@ -2993,10 +2997,11 @@ _b16e:                                                                  ;$B16E
         ;
 _b176:  jmp _b210                                                       ;B176
 
+
 paint_newline:                                                          ;$B179
-        ;-----------------------------------------------------------------------
-        ; NOTE: called only ever by `_2c7d`!
-        ;
+;===============================================================================
+; NOTE: called only ever by `_2c7d`!
+;-------------------------------------------------------------------------------
         lda # TXT_NEWLINE
 
 paint_char:                                                             ;$B17B
@@ -3020,22 +3025,22 @@ _b189:                                                                  ;$B189
         cmp # $07               ; code $07? (unspecified in PETSCII)
         beq _b168
         cmp # $20               ; is it SPC or above? (i.e. printable)
-        bcs _b1a1
+        bcs @b1a1
         cmp # $0a               ; is it $0A? (unspecified in PETSCII)
-        beq _b199
-_b195:                                                                  ;$B195
+        beq @b199
+@b195:                                                                  ;$B195
         ; start at column 2, i.e. leave a one-char padding from the viewport
         ldx # 1
         stx ZP_CURSOR_COL
-_b199:                                                                  ;$B199
-        cmp # $0d               ; is it RETURN? although note that `chrout`
-                                ; replaces $0D codes with $0C
+
+@b199:  cmp # $0d               ; is it RETURN? although note that      ;$B199
+                                ; `chrout` replaces $0D codes with $0C
         beq _b176
 
         inc ZP_CURSOR_ROW
         bne _b176
 
-_b1a1:                                                                  ;$B1A1
+@b1a1:                                                                  ;$B1A1
         ;-----------------------------------------------------------------------
         ; convert the PETSCII code to an address in the char gfx (font):
         ; note that the font is ASCII so a few characters appear different
@@ -3090,7 +3095,7 @@ _b1a1:                                                                  ;$B1A1
         ;        have to be recalculated again!
         lda ZP_CURSOR_COL
         cmp # 31                ; max width of line? (32 chars = 256 px)
-        bcs _b195               ; reach the end of the line, carriage-return!
+        bcs @b195               ; reach the end of the line, carriage-return!
 
         lda # $80
         sta ZP_CHROUT_DRAWADDR_LO
@@ -3210,7 +3215,7 @@ tkn_docked_fn15:                                                        ;$B3D4
         sta VAR_048C
 
         lda # %11111111
-        sta txt_lcase_flag
+        sta txt_ucase_flag
 
         lda # %10000000
         sta ZP_34

@@ -562,10 +562,9 @@ _2b0a:                                                                  ;$2B0A
         lda ZP_VAR_Y
         jmp _2b00
 
-;===============================================================================
 
 _animate_dust_rear:                                                     ;$2B2D
-
+;===============================================================================
         ldy DUST_COUNT          ; number of dust particles
 _2b30:                                                                  ;$2B30
         jsr _3b30
@@ -1131,34 +1130,35 @@ _max_value:                                                             ;$2E51
         ; directly in the code itself
         .byte   $48, $76, $e8, $00
 
+
 print_tiny_value:                                                       ;$2E55
-        ;=======================================================================
-        ; print an 8-bit value, given in X, padded to 3 chars
-        ;
-        ;    X = value to print
-        ;
+;===============================================================================
+; print an 8-bit value, given in X, padded to 3 chars:
+;
+; in:   X       value to print
+;-------------------------------------------------------------------------------
         ; set the padding to a max. number of digits to 3, i.e. "  0"-"255"
         lda # $03
 
 print_small_value:                                                      ;$2E57
-        ;=======================================================================
-        ; print an 8-bit value, given in X, with A specifying the number of
-        ; characters to pad to
-        ;
-        ;    X = value to print
-        ;    A = width in chars to pad to
-        ;
+;===============================================================================
+; print an 8-bit value, given in X, with A specifying
+; the number of characters to pad to:
+;
+; in:   X       value to print
+;       A       width in chars to pad to
+;-------------------------------------------------------------------------------
         ; strip the hi-byte for what follows; only use X
         ldy # $00
 
 print_medium_value:                                                     ;$2E59
-        ;=======================================================================
-        ; print a 16-bit value stored in X/Y
-        ;
-        ;    A = max. no. of expected digits
-        ;    X = lo-byte of value
-        ;    Y = hi-byte of value
-        ;
+;===============================================================================
+; print a 16-bit value stored in X/Y:
+;
+; in:   A       max. no. of expected digits
+;       X       lo-byte of value
+;       Y       hi-byte of value
+;-------------------------------------------------------------------------------
         sta ZP_PADDING
 
         ; zero out the upper-bytes of the 32-bit value to print
@@ -1171,13 +1171,13 @@ print_medium_value:                                                     ;$2E59
         stx ZP_VALUE_pt4
 
 print_large_value:                                                      ;$2E65
-        ;=======================================================================
-        ; print a large value, up to 100-billion
-        ;
-        ; $77-$7A = numerical value (note: big-endian)
-        ;     $99 = max. number of expected digits, i.e. left-pad the number
-        ;       c = carry set: use decimal point
-        ;
+;===============================================================================
+; print a large value, up to 100-billion:
+;
+; in:   $77-$7A numerical value (note: big-endian)
+;       $99     max. number of expected digits, i.e. left-pad the number
+;       c       carry set: use decimal point
+;-------------------------------------------------------------------------------
         ; set max. text width
         ; i.e. for "100000000000" (100-billion)
         ldx # 11                ; 12 chars
@@ -1347,15 +1347,17 @@ _2f06:
 
 @rts:   rts                                                             ;$2F17 
 
-;===============================================================================
+
 ; a block of text-printing related flags and variables
-;
-txt_ucase_mask:                                                         ;$2F18
-        ; a mask for converting a character A-Z to upper-case.
-        ; this byte gets changed to 0 to neuter the effect
+;===============================================================================
+txt_lcase_mask:                                                         ;$2F18
+        ; this byte is used to lower-case charcters, it's ORed with the
+        ; character value. its default value $20 sets bit 5 of characters,
+        ; changing them to lower-case, e.g. $41 "A" > $61 "a". this byte
+        ; gets set to $00 to neuter the effect
         .byte   %00100000
 
-txt_lcase_flag:                                                         ;$2F19
+txt_ucase_flag:                                                         ;$2F19
         .byte   %11111111
 
 txt_flight_flag:                                                        ;$2F1A
@@ -1371,14 +1373,14 @@ txt_buffer_flag:                                                        ;$2F1B
 txt_buffer_index:                                                       ;$2F1C
         .byte   $00
 
-txt_ucase_flag:                                                         ;$2F1D
+txt_lcase_flag:                                                         ;$2F1D
         .byte   %00000000
 
-txt_lcase_mask:                                                         ;$2F1E
-        ; this byte is used to lower-case charcters, it's ANDed with the
+txt_ucase_mask:                                                         ;$2F1E
+        ; this byte is used to upper-case charcters, it's ANDed with the
         ; character value -- therefore its default value $FF does nothing.
-        ; this byte is changed to %11011111 to enable lower-casing, which
-        ; removes bit 5 ($20) from characters, e.g. $61 "A" > $41 "a"
+        ; this byte is changed to %11011111 to enable upper-casing, which
+        ; removes bit 5 ($20) from characters, e.g. $61 "a" > $41 "A"
         .byte   %11111111
 
 
@@ -1394,7 +1396,7 @@ print_crlf:                                                             ;$2F1F
 
 print_a:                                                                ;$2F22
 ;===============================================================================
-; print "a". that's it.
+; print "a". that's it
 ;-------------------------------------------------------------------------------
 .export print_a
 
@@ -1407,63 +1409,55 @@ print_char:                                                             ;$2F24
 ; that copies pixels to screen is `paint_char`, but this routine is the one
 ; the text-handling works with
 ;
-;       A = ASCII code
+; in:   A       ASCII code
 ;-------------------------------------------------------------------------------
 .export print_char
-
-; TODO: this to be defined structurally at some point
-TXT_BUFFER = $0648              ; $0648..$06A2? -- 3 lines
 
         ; put X parameter aside,
         ; we need the X register for now
         stx ZP_TEMP_ADDR1_LO
 
-        ; disable the automatic lower-case transformation
+        ; don't automatically upper-case letters?
+        ; the upper-case mask is ANDed with the character, so a value
+        ; of %11111111 does nothing (a value of %11011111 is used to
+        ; remove bit 5, converting characters to upper-case)
         ldx # %11111111
-        stx txt_lcase_mask
+        stx txt_ucase_mask
         
-        ; check for characters that aren't cased
-
-        cmp # '.'
+        cmp # '.'               ; end of sentence?
         beq :+
-        
-        cmp # ':'
+        cmp # ':'               ; colon?
         beq :+
-        
         cmp # $0a               ;?
         beq :+
-        
-        cmp # TXT_NEWLINE
+        cmp # TXT_NEWLINE       ; end of line
         beq :+
-        
         cmp # ' '
         beq :+
+        inx                     ; X = 0
 
-        ; X is $FF for all characters, except ".", ":", $0A, $0C & space,
-        ; otherwise $00 -- some kind of flag?
-        inx 
-
-:       stx txt_lcase_flag                                              ;$24F0
+        ; set the capitalisation: if X = $FF then the character
+        ; will be automatically upper-cased
+:       stx txt_ucase_flag                                              ;$24F0
 
         ; get back the original X value
         ldx ZP_TEMP_ADDR1_LO
 
         ; check 'use buffer' flag
         bit txt_buffer_flag     ; check if bit 7 is set
-        bmi _add_to_buffer      ; yes? switch to buffered printing
+        bmi @add_to_buffer      ; yes? switch to buffered printing
 
         ; no buffer, print character as-is
         jmp paint_char
         
 
-_add_to_buffer:                                                         ;$2F4D
+@add_to_buffer:                                                         ;$2F4D
         ;=======================================================================
-        ; a flag to ignore line-breaks?
         bit txt_buffer_flag     ; check bit 6
         bvs :+                  ; skip if bit 6 set
 
         cmp # TXT_NEWLINE       ; new-line character?
-        beq _flush_buffer       ; flush buffer
+        beq @flush_buffer       ; flush buffer
 
 :       ldx txt_buffer_index                                            ;$2F56
         sta TXT_BUFFER, x       ; add the character to the buffer
@@ -1474,7 +1468,7 @@ _add_to_buffer:                                                         ;$2F4D
         clc 
         rts 
 
-_flush_buffer:                                                          ;$2F63
+@flush_buffer:                                                          ;$2F63
         ;=======================================================================
         ; flush the text buffer to screen
         ;
@@ -1483,7 +1477,7 @@ _flush_buffer:                                                          ;$2F63
        .phx                     ; push X to stack (via A)
        .phy                     ; push Y to stack (via A)
 
-_flush_line:                                                            ;$2F67
+@flush_line:                                                            ;$2F67
         ;-----------------------------------------------------------------------
         ldx txt_buffer_index    ; get current buffer index
        .bze _exit               ; if buffer is empty, exit
@@ -1515,7 +1509,7 @@ _flush_line:                                                            ;$2F67
         ;
         lsr ZP_TEMP_ADDR1_HI
 
-_justify_line:                                                          ;$2F72
+@justify_line:                                                          ;$2F72
         ;-----------------------------------------------------------------------
         lda ZP_TEMP_ADDR1_HI    ; check the space-counter
         bmi :+                  
@@ -1535,8 +1529,8 @@ _justify_line:                                                          ;$2F72
 
 @find_spc:                                                              ;$2F83
         dey                     ; step back through the line-length     
-        bmi _justify_line       ; catch underflow? max buffer length is 90
-        beq _justify_line       ; hit the start of the line? go again
+        bmi @justify_line       ; catch underflow? max buffer length is 90
+        beq @justify_line       ; hit the start of the line? go again
 
         lda TXT_BUFFER, y       ; read character from buffer
         cmp # ' '               ; is it a space?
@@ -1567,7 +1561,7 @@ _justify_line:                                                          ;$2F72
         bne @justify
         dey 
         bpl :-
-        bmi _justify_line
+        bmi @justify_line
 
 @print_line:                                                            ;$2FB0
         ; a line is already 30-chars long, or has
@@ -1597,13 +1591,13 @@ _justify_line:                                                          ;$2F72
        .bnz :-
 
         ; go back and process the remaining buffer
-       .bze _flush_line         ; always branches!
+       .bze @flush_line         ; always branches!
 
 _print_chars:                                                           ;$2FD4
         ;=======================================================================
         ; print X number of characters in the buffer to the screen
         ;
-        ;       X = length of string to print from the buffer
+        ; in:   X       length of string to print from the buffer
         ;
         ldy # $00               ; begin at index 0
 :       lda TXT_BUFFER, y       ; read a character from the buffer      ;$2FD6
@@ -1628,8 +1622,8 @@ _exit:  stx txt_buffer_index    ; save remaining buffer length          ;$2FE4
 
         ; 'paint' a carriage return, which will move the cursor accordingly
         lda # TXT_NEWLINE
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit
 
 _2fee:                                                                  ;$2FEE
@@ -1638,6 +1632,7 @@ _2fee:                                                                  ;$2FEE
         ;
         lda # $07               ; BEEP?
         jmp paint_char
+
 
 ;===============================================================================
 ; BBC code says this is "update displayed dials"
@@ -2044,7 +2039,7 @@ _31e4:                                                                  ;$31E4
         dex 
         lda ZP_POLYOBJ_YPOS_HI, x       ;=$0E?
         ora # %00100000
-        cmp VAR_0648, x
+        cmp TXT_BUFFER, x
         beq _31e4
         txa 
         bmi _3208

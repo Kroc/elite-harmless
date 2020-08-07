@@ -14,7 +14,6 @@ tkn_docked_fn01:                                                        ;$246A
 .export tkn_docked_fn01
 
         lda # %00000000
-
         ; (this causes the next instruction to become a meaningless `bit`
         ;  instruction, a very handy way of skipping without branching)
        .bit
@@ -24,10 +23,10 @@ tkn_docked_fn02:                                                        ;$246D
 .export tkn_docked_fn02
 
         lda # %00100000
-        sta txt_ucase_mask
+        sta txt_lcase_mask
 
         lda # %00000000
-        sta txt_ucase_flag
+        sta txt_lcase_flag
 
         rts 
 
@@ -81,7 +80,7 @@ tkn_docked_fn08:                                                        ;$2478
         jsr set_cursor_col
 
         lda # %11111111
-        sta txt_lcase_flag
+        sta txt_ucase_flag
 
         rts 
 
@@ -114,11 +113,11 @@ tkn_docked_fn0D:                                                        ;$248B
         
         ; enable the change-case flag?
         lda # %10000000
-        sta txt_ucase_flag
+        sta txt_lcase_flag
         
-        ; enable upper-casing?
+        ; enable lower-casing
         lda # %00100000
-        sta txt_ucase_mask
+        sta txt_lcase_mask
 
         rts 
 
@@ -221,7 +220,7 @@ target_system_provenance:                                                       
         jsr print_flight_token
         
         ldx txt_buffer_index    ; read the last character...
-        lda VAR_0647, x         ; ...in the text-buffer
+        lda TXT_BUFFER-1, x     ; ...in the text-buffer
         jsr is_vowel            ; is it a vowel?
         bcc :+                  ; if no, add the -"ian" suffix
         dec txt_buffer_index    ; if yes, remove the vowel!
@@ -281,9 +280,9 @@ tkn_docked_capitalizeNext:                                              ;$24ED
 ;===============================================================================
 .export tkn_docked_capitalizeNext
         
-        ; set ASCII upper-case (for next character)
+        ; set ASCII upper-case
         lda # %11011111
-        sta txt_lcase_mask
+        sta txt_ucase_mask
 
         rts 
 
