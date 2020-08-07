@@ -567,10 +567,6 @@ _msg_index     .set 0
 
         .local  _value
         _value  .set .scramble( _msg_index )
-        
-        ; define the locally scrambled name, e.g. "_A",
-        ; used for the text database
-        .ident( msg_id ) = _value
 
         ; define an export for the index-number of the message;
         ; this is how the outside world will specify the message to print
@@ -1335,7 +1331,7 @@ txt_docked:                                                             ;$0E00
         .byte   .scramble($5c), __, .scramble($5b), __
         .byte   _F, _OR, __, .scramble($65), __end
         .msg_id "_8C"
-        .tkn
+        .tkn_id "_8C"
         
         ; $8D:
         .byte   _8C, _AND_, .scramble($65), __end
@@ -1345,8 +1341,8 @@ txt_docked:                                                             ;$0E00
         ; $8E:
         .byte   _BESET_PLAGUED_RAVAGED_CURSED_SCOURGED, __, _B, _Y, __
         .byte   .scramble($67), __end
-        .msg_id "_8E"
-        .tkn
+        .msg
+        .tkn_id "_8E"
         
         ; $8F:
         .byte   _8C, __, _B, _U, _T, __, _8E, __end
@@ -1362,28 +1358,28 @@ txt_docked:                                                             ;$0E00
         ;-----------------------------------------------------------------------
         ; $91:
         .byte   _P, _L, _AN, _ET, __end
-        .msg_id "_PLANET"
-        .tkn
+        .msg
+        .tkn_id "_PLANET"
 
         ; $92:
         .byte   _W, _OR, _L, _D, __end
-        .msg_id "_WORLD"
-        .tkn
+        .msg
+        .tkn_id "_WORLD"
 
         ; $93:  "the "
         .byte   _TH, _E, __, __end
-        .msg_id "_THE_"
-        .tkn
+        .msg
+        .tkn_id "_THE_"
 
         ; $94:  "this "
         .byte   _TH, _I, _S, __, __end
-        .msg_id "_THIS"
-        .tkn
+        .msg
+        .tkn_id "_THIS"
 
         ; $95:  "load new Commander"
         .byte   _LO, _A, _D, _NEW_, _COMMANDER, __end
-        .msg_id "_LOAD_NEW_COMMANDER"
-        .tkn
+        .msg
+        .tkn_id "_LOAD_NEW_COMMANDER"
 
         ; $96:
         .byte   FN_CLEAR_SCREEN, FN_DIVIDER, FN_01, FN_08, __end
@@ -1407,8 +1403,8 @@ txt_docked:                                                             ;$0E00
 
         ; $9A:  "Commander"
         .byte   FN_CAPNEXT, _C, _O, _M, _M, _AN, _D, _ER, __end
-        .msg_id "_COMMANDER"
-        .tkn
+        .msg
+        .tkn_id "_COMMANDER"
 
         ;-----------------------------------------------------------------------
         ; $9B:
@@ -1418,8 +1414,8 @@ txt_docked:                                                             ;$0E00
 
         ; $9C:  "mountain"
         .byte   _M, _OU, _N, _T, _A, _IN, __end
-        .msg_id "_MOUNTAIN"
-        .tkn
+        .msg
+        .tkn_id "_MOUNTAIN"
 
         ; $9D:  "edible"
         .byte   _ED, _I, _B, _LE, __end
@@ -1428,8 +1424,8 @@ txt_docked:                                                             ;$0E00
         
         ; $9E:  "tree"
         .byte   _T, _RE, _E, __end
-        .msg_id "_TREE"
-        .tkn
+        .msg
+        .tkn_id "_TREE"
 
         ; $9F:  "spotted"
         .byte   _S, _P, _O, _T, _T, _ED, __end
@@ -1466,7 +1462,7 @@ txt_docked:                                                             ;$0E00
         ; $A5:
         .byte   _AN, _C, _I, _EN, _T, __end
         .msg_id "_ANCIENT"
-        .tkn
+        .tkn_id "_ANCIENT"
         
         ; $A6:
         .byte   _E, _X, _CE, _P, _TI, _ON, _AL, __end
@@ -1496,8 +1492,8 @@ txt_docked:                                                             ;$0E00
 
         ; $AB:  "deadly"
         .byte   _D, _E, _A, _D, _L, _Y, __end
-        .msg_id "_DEADLY"
-        .tkn
+        .msg
+        .tkn_id "_DEADLY"
 
         ; $AC:  "evil"
         .byte   _E, _V, _IL, __end
@@ -1517,28 +1513,28 @@ txt_docked:                                                             ;$0E00
         ;-----------------------------------------------------------------------
         ; $AF:  "its "
         .byte   _IT, _S, __, __end
-        .msg_id "_ITS"
-        .tkn
+        .msg
+        .tkn_id "_ITS"
 
         ; $B0:
         .byte   FN_0D, FN_BUFFER_ON, FN_CAPNEXT, __end
-        .msg_id "_B0"
-        .tkn
+        .msg
+        .tkn_id "_B0"
 
         ; $B1:
         .byte   _DOT, FN_NEWLINE, FN_BUFFER_OFF, __end
-        .msg_id "_B1"
-        .tkn
+        .msg
+        .tkn_id "_B1"
 
         ; $B2:
         .byte   __, _AN, _D, __, __end
-        .msg_id "_AND_"
-        .tkn
+        .msg
+        .tkn_id "_AND_"
 
         ; $B3:
         .byte   _Y, _OU, __end
-        .msg_id "_YOU"
-        .tkn
+        .msg
+        .tkn_id "_YOU"
 
         ;-----------------------------------------------------------------------
         ; $B4:  "parking meters"
@@ -1570,7 +1566,7 @@ txt_docked:                                                             ;$0E00
         ; $B9:  "plant"
         .byte   _P, _L, _AN, _T, __end
         .msg_id "_PLANT"
-        .tkn
+        .tkn_id "_PLANT"
 
         ; $BA:  "tulip"
         .byte   _T, _U, _L, _I, _P, __end
@@ -1600,8 +1596,8 @@ txt_docked:                                                             ;$0E00
 
         ; $BF:
         .byte   FN_11, __, FN_RANDOM_NAME, __end
-        .msg_id "_BF"
-        .tkn
+        .msg
+        .tkn_id "_BF"
         
         ; $C0:
         .byte   FN_11, __, _KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __end
@@ -1610,8 +1606,8 @@ txt_docked:                                                             ;$0E00
         
         ; $C1:  "inhabitant"
         .byte   _IN, _H, _A, _BI, _T, _AN, _T, __end
-        .msg_id "_INHABITANT"
-        .tkn
+        .msg
+        .tkn_id "_INHABITANT"
         
         ; $C2:
         .byte   _BF, __end
@@ -1620,19 +1616,19 @@ txt_docked:                                                             ;$0E00
         
         ; $C3:  "ing "
         .byte   _IN, _G, __, __end
-        .msg_id "_ING_"
-        .tkn
+        .msg
+        .tkn_id "_ING_"
 
         ; $C4:  "ed "
         .byte   _ED, __, __end
-        .msg_id "_ED_"
-        .tkn
+        .msg
+        .tkn_id "_ED_"
 
         ; $C5:
         .byte   __, _D, _DOT, _B, _RA, _BE, _N, __
         .byte  .scramble($26), __, _I, _DOT, _BE, _L, _L, __end
-        .msg_id "_DBRABEN_AND_IBELL"
-        .tkn
+        .msg
+        .tkn_id "_DBRABEN_AND_IBELL"
 
         ; $C6:  " little trumble"
         .byte   __, _L, _IT, _T, _LE, __, _T, _R, _U, _M, _B, _LE, __end
@@ -1668,30 +1664,30 @@ txt_docked:                                                             ;$0E00
         ; $C8:  " name?"
         .byte   __, _N, _A, _M, _E, _QMARK, __
         .byte   __end
-        .msg_id "_C8"
-        .tkn
+        .msg
+        .tkn_id "_C8"
 
         ; $C9:  " to "
         .byte   __, _T, _O, __, __end
-        .msg_id "_TO_"
-        .tkn
+        .msg
+        .tkn_id "_TO_"
 
         ; $CA:  " is "
         .byte   __, _I, _S, __, __end
-        .msg_id "_IS_"
-        .tkn
+        .msg
+        .tkn_id "_IS_"
 
         ; $CB:  "was last seen at "
         .byte   _W, _A, _S, __, _LA, _ST, __, _SE, _EN, __, _AT, __, FN_CAPNEXT
         .byte   __end
-        .msg_id "_WAS_LAST_SEEN_AT_"
-        .tkn
+        .msg
+        .tkn_id "_WAS_LAST_SEEN_AT_"
 
         ; $CC:  new sentence -- fullstop, new line, captialise next letter
         .byte   _DOT, FN_NEWLINE, __, FN_CAPNEXT
         .byte   __end
-        .msg_id "_NEW_SENTENCE"
-        .tkn
+        .msg
+        .tkn_id "_NEW_SENTENCE"
 
         ; $CD:  "docked"
         .byte   _D, _O, _C, _K, _ED, __end
@@ -1705,44 +1701,44 @@ txt_docked:                                                             ;$0E00
 
         ; $CF:  "ship"
         .byte   _S, _H, _I, _P, __end
-        .msg_id "_SHIP"
-        .tkn
+        .msg
+        .tkn_id "_SHIP"
 
         ; $D0:  " a "
         .byte   __, _A, __, __end
-        .msg_id "_A_"
-        .tkn
+        .msg
+        .tkn_id "_A_"
 
         ; $D1:
         .byte   __, _ER, _R, _I, _US, __end
-        .msg_id "_ERRIUS"
-        .tkn
+        .msg
+        .tkn_id "_ERRIUS"
 
         ; $D2:
         .byte   __, _N, _E, _W, __, __end
-        .msg_id "_NEW_"
-        .tkn
+        .msg
+        .tkn_id "_NEW_"
 
         ; $D3:
         .byte   FN_02, __, _H, _ER, __, _MA, _J, _ES, _T, _Y, _APOS, _S, __
         .byte   _S, _P, _A, _CE, __, _N, _A, _V, _Y, FN_0D
         .byte   __end
-        .msg_id "_HER_MAJESTYS_SPACE_NAVY"
-        .tkn
+        .msg
+        .tkn_id "_HER_MAJESTYS_SPACE_NAVY"
 
         ; $D4:
         .byte   _B1, FN_08, FN_01, __, __
         .byte   _M, _ES, _S, _A, _GE, __, _EN, _D, _S
         .byte   __end
-        .msg_id "_D4"
-        .tkn
+        .msg
+        .tkn_id "_D4"
 
         ; $D5:
         .byte   __, _COMMANDER, __, FN_04, _COMMA, __, _I, __, FN_0D, _A, _M
         .byte   FN_02, __, _C, _A, _P, _T, _A, _IN, __, FN_THEIR_NAME, __
         .byte   FN_0D, _O, _F, _HER_MAJESTYS_SPACE_NAVY, __end
-        .msg_id "_COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY"
-        .tkn
+        .msg
+        .tkn_id "_COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY"
 
         ; $D6:
         .byte   __end
@@ -2074,13 +2070,11 @@ _1a5c:                                                                  ;$1A5C
         .byte   _IN, _BI, _BE, __end
         
         ; 6.
-        .byte   _RANDOM_INSULT, __, _SHIP, __, _W, _EN
-        .byte   _T, __, _F, _OR, __, _M, _E, __
-        .byte   _AT, __, _A, _US, _AR, _DOT, __, _M
-        .byte   _Y, __, _LA, _S, _ER, _S, __, _D
-        .byte   _I, _D, _N, _APOS, _T, __, _E, _V
-        .byte   _EN, __, _S, _C, _RA, _T, _C, _H
-        .byte   __, _THE_, _RANDOM_INSULT, __end
+        .byte   _RANDOM_INSULT, __, _SHIP, __, _W, _EN, _T, __, _F, _OR, __
+        .byte   _M, _E, __, _AT, __, _A, _US, _AR, _DOT, __, _M, _Y, __
+        .byte   _LA, _S, _ER, _S, __, _D, _I, _D, _N, _APOS, _T, __
+        .byte   _E, _V, _EN, __, _S, _C, _RA, _T, _C, _H, __, _THE_
+        .byte   _RANDOM_INSULT, __end
         
         ; 7.
         .byte   _O, _H, __, _D, _E, _AR, __, _M, _E, __, _Y, _ES, _DOT
