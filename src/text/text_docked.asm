@@ -285,7 +285,7 @@ _3eac:                                                                  ;$3EAC
 ;-------------------------------------------------------------------------------
 .export _3eac
 
-; $5B = tokens $10...$14:
+; $5B = messages $10...$14:
 .tkn_id "FABLED_NOTABLE_WELLKNOWN_FAMOUS_NOTED"                         ;=$0C
         ; $10:  "fabled"
         ; $11:  "notable"
@@ -294,7 +294,7 @@ _3eac:                                                                  ;$3EAC
         ; $14:  "noted"
         .byte   MSG_FABLED
 
-; $5C = tokens $15...$19:
+; $5C = messages $15...$19:
 .tkn_id "VERY_MILDLY_MOST_REASONABLY"                                   ;=$0B
         ; $15:  "very"
         ; $16:  "mildly"
@@ -303,7 +303,7 @@ _3eac:                                                                  ;$3EAC
         ; $19:  ""
         .byte   MSG_VERY
 
-; $5D = tokens $1A...$1E:
+; $5D = messages $1A...$1E:
 .tkn_id "ANCIENT_FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR_GREAT_VAST_PINK"  ;=$0A
         ; $1A:  "ancient"
         ; $1B:  "funny" / "weird" / "unusual" / "strange" / "peculiar"
@@ -312,7 +312,7 @@ _3eac:                                                                  ;$3EAC
         ; $1E:  "pink"
         .byte   MSG_1A
 
-; $5E = tokens $1F...$23:
+; $5E = messages $1F...$23:
 .tkn_id "RANDOM_GEOGRAPHY"                                              ;=$09
         ; $1F:  "<?> plantations"
         ; $20:  "mountains"
@@ -326,7 +326,7 @@ _3eac:                                                                  ;$3EAC
 .tkn_id "_5F"                                                           ;=$08
         .byte   MSG_9B
 
-; $60 = tokens $A0...$A4:
+; $60 = messages $A0...$A4:
 .tkn_id "_60"                                                           ;=$37
         ; $A0:  "shrew" / "beast" / "bison" / "snake" / "wolf"
         ; $A1:  "leopard" / "cat" / "monkey" / "goat" / "fish"
@@ -336,169 +336,243 @@ _3eac:                                                                  ;$3EAC
         ; $A4:  "wasp" / "moth" / "grub" / "ant" / <random-name>
         .byte   MSG_A0
 
-; $61 = tokens $2E...$32:
+; $61 = messages $2E...$32:
 .tkn_id "WALKINGTREE_CRAB_BAT_LOBST_RANDOMNAME"                         ;=$36
-        ; $2E: "walking tree"
-        ; $2F: "crab"
-        ; $30: "bat"
-        ; $31: "lobst"
-        ; $32: <random-name>
+        ; $2E:  "walking tree"
+        ; $2F:  "crab"
+        ; $30:  "bat"
+        ; $31:  "lobst"
+        ; $32:  <random-name>
         .byte   MSG_WALKING_TREE
 
-; $62 = tokens $A5...$A9:
+; $62 = messages $A5...$A9:
 .tkn_id "ANCIENT_EXCEPTIONAL_ECCENTRIC_INGRAINED_ETC"                   ;=$35
-        ; $A5: "ancient"
-        ; $A6: "exceptional"
-        ; $A7: "eccentric"
-        ; $A8: "ingrained"
-        ; $A9: "funny" / "weird" / "unusual" / "strange" / "peculiar"
+        ; $A5:  "ancient"
+        ; $A6:  "exceptional"
+        ; $A7:  "eccentric"
+        ; $A8:  "ingrained"
+        ; $A9:  "funny" / "weird" / "unusual" / "strange" / "peculiar"
         .byte   MSG_ANCIENT
 
-; $63 = tokens $24...$28:
+; $63 = messages $24...$28:
 .tkn_id "_63"                                                           ;=$34
         .byte   MSG_SHYNESS
 
-; $64 = tokens $29...$2D:
+; $64 = messages $29...$2D:
 .tkn_id "_64"                                                           ;=$33
-        ; $29: "food blenders"
-        ; $2A: "tourists"
-        ; $2B: "poetry"
-        ; $2C: "discos"
-        ; $2D: "cuisine" / "night life" / "casinos" / "sit coms", <?> 
+        ; $29:  "food blenders"
+        ; $2A:  "tourists"
+        ; $2B:  "poetry"
+        ; $2C:  "discos"
+        ; $2D:  "cuisine" / "night life" / "casinos" / "sit coms", <?> 
         .byte   MSG_FOOD_BLENDERS
 
-; $65 = tokens $3D...$41:
+; $65 = messages $3D...$41:
 .tkn_id "_65"                                                           ;=$32
         .byte   MSG_3D
 
-; $66 = tokens $33...$37:
+; $66 = messages $33...$37:
 .tkn_id "BESET_PLAGUED_RAVAGED_CURSED_SCOURGED"                         ;=$31
-        ; "beset", "plagued", "ravaged", "cursed", "scourged"
+        ; $33:  "beset"
+        ; $34:  "plagued"
+        ; $35:  "ravaged"
+        ; $36:  "cursed"
+        ; $37:  "scourged"
         .byte   MSG_BESET
 
-; $67 = tokens $38...$3C:
+; $67 = messages $38...$3C:
 .tkn_id "_67"                                                           ;=$30
         .byte   MSG_38
 
-; $68 = tokens $AA...$AE:
+; $68 = messages $AA...$AE:
 .tkn_id "KILLER_DEADLY_EVIL_LETHAL_VICIOUS"                             ;=$3F
-        ; "killer", "deadly", "evil", "lethal", "vicious"
+        ; $AA:  "killer"
+        ; $AB:  "deadly"
+        ; $AC:  "evil"
+        ; $AD:  "lethal"
+        ; $AE:  "vicious"
         .byte   MSG_KILLER
 
-; $69 = tokens $42...$46:
+; $69 = messages $42...$46:
 .tkn_id "RANDOM_DRINK"                                                  ;=$3E
-        ; "juice", "brandy", "water", "brew", "gargle blasters"
+        ; $42:  "juice"
+        ; $43:  "brandy"
+        ; $44:  "water"
+        ; $45:  "brew"
+        ; $46:  "gargle blasters"
         .byte   MSG_JUICE
 
-; $6A = tokens $47...$4B:
+; $6A = messages $47...$4B:
 .tkn_id "_6A"                                                           ;=$3D
         .byte   MSG_47
 
-; $6B = tokens $4C...$50:
+; $6B = messages $4C...$50:
 .tkn_id "FABULOUS_EXOTIC_HOOPY_UNUSUAL_EXCITING"                        ;=$3C
-        ; "fabulous", "exotic", "hoopy", "unusual", "exciting"
+        ; $4C:  "fabulous"
+        ; $4D:  "exotic"
+        ; $4E:  "hoopy"
+        ; $4F:  "unusual"
+        ; $50:  "exciting"
         .byte   MSG_FABULOUS
 
-; $6C = tokens $51...$55:
+; $6C = messages $51...$55:
 .tkn_id "CUISINE_NIGHTLIFE_CASINOS_SITCOMS_ETC"                         ;=$3B
-        ; TODO: this has a fifth entry of some complexity
+        ; $51:  "cuisine"
+        ; $52:  "night life"
+        ; $53:  "casinos"
+        ; $54:  "sit coms"
+        ; $55:  TODO: ...?
         .byte   MSG_CUISINE
 
-; $6D = tokens $56...$5A:
+; $6D = messages $56...$5A:
 .tkn_id "_6D"                                                           ;=$3A
         .byte   MSG_56
 
-; $6E = tokens $8C...$90:
+; $6E = messages $8C...$90:
 .tkn_id "_6E"                                                           ;=$39
         .byte   MSG_8C
 
-; $6F = tokens $60...$64:
+; $6F = messages $60...$64:
 .tkn_id "UNREMARKABLE_BORING_DULL_TEDIOUS_REVOLTING"                    ;=$38
-        ; "unremarkable", "boring", "dull", "tedious", "revolting"
+        ; $60:  "unremarkable"
+        ; $61:  "boring"
+        ; $62:  "dull"
+        ; $63:  "tedious"
+        ; $64:  "revolting"
         .byte   MSG_UNREMARKABLE
 
-; $70 = tokens $65...$69:
+; $70 = messages $65...$69:
 .tkn_id "PLANET_WORLD_PLACE_LITTLEPLANET_DUMP"                          ;=$27
-        ; "planet", "world", "place", "little planet", "dump"
+        ; $70:  "planet"
+        ; $71:  "world"
+        ; $72:  "place"
+        ; $73:  "little planet"
+        ; $74:  "dump"
         .byte   MSG_PLANET_SYNONYMS
 
-; $71 = tokens $8F...$93:
+; $71 = messages $8F...$93:
 .tkn_id "_71"                                                           ;=$26
         ; "<x> but <y>"?
         .byte   MSG_8F
 
-; $72 = tokens $82...$86:
+; $72 = messages $82...$86:
 .tkn_id "FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR"                          ;=$25
-        ; "funny", "weird", "unusual", "strange", "peculiar"
+        ; $82:  "funny"
+        ; $83:  "weird"
+        ; $84:  "unusual"
+        ; $85:  "strange"
+        ; $86:  "peculiar"
         .byte   MSG_FUNNY
 
-; $73 = tokens $5B...$5F:
+; $73 = messages $5B...$5F:
 .tkn_id "RANDOM_INSULT"                                                 ;=$24
-        ; "son of a bitch", "scoundrel", "blackguard", "rogue",
-        ; "whoreson beetle headed flap ear'd knave"
+        ; $5B:  "son of a bitch"
+        ; $5C:  "scoundrel"
+        ; $5D:  "blackguard"
+        ; $5E:  "rogue"
+        ; $5F:  "whoreson beetle headed flap ear'd knave"
         .byte   MSG_INSULTS
 
-; $74 = tokens $6A...$6E:
+; $74 = messages $6A...$6E:
 .tkn_id "_74"                                                           ;=$23
         .byte   MSG_PROTO_HINTS
 
-; $75 = tokens $B4...$B8:
+; $75 = messages $B4...$B8:
 .tkn_id "PARKINGMETERS_DUSTCLOUDS_ICEBERGS_ROCKFORMATIONS_VOLCANOES"    ;=$22
-        ; "parking meters", "dust clouds", "ice bergs",
-        ; "rock formations", "volcanoes"
+        ; $B4:  "parking meters"
+        ; $B5:  "dust clouds"
+        ; $B6:  "ice bergs"
+        ; $B7:  "rock formations"
+        ; $B8:  "volcanoes"
         .byte   MSG_PARKING_METERS
 
-; $76 = tokens $B9...$BD:
+; $76 = messages $B9...$BD:
 .tkn_id "RANDOM_PLANT"                                                  ;=$21
-        ; "plant", "tulip", "banana", "corn", <random-name> "weed"
+        ; $B9:  "plant"
+        ; $BA:  "tulip"
+        ; $BB:  "banana"
+        ; $BC:  "corn"
+        ; $BD:  <random-name> "weed"
         .byte   MSG_PLANT
 
-; $77 = tokens $BE...$C2:
+; $77 = messages $BE...$C2:
 .tkn_id "_77"                                                           ;=$20
         .byte   MSG_BE
 
-; $78 = tokens $E1...$E5:
+; $78 = messages $E1...$E5:
 .tkn_id "SHREW_BEAST_BISON_SNAKE_WOLF"                                  ;=$2F
-        ; "shrew", "beast", "bison", "snake", "wolf"
+        ; $E1:  "shrew"
+        ; $E2:  "beast"
+        ; $E3:  "bison"
+        ; $E4:  "snake"
+        ; $E5:  "wolf"
         .byte   MSG_SHREW
 
-; $79 = tokens $E6...$EA:
+; $79 = messages $E6...$EA:
 .tkn_id "LEOPARD_CAT_MONKEY_GOAT_FISH"                                  ;=$2E
-        ; "leopard", "cat", "monkey", "goat", "fish"
+        ; $E6:  "leopard"
+        ; $E7:  "cat"
+        ; $E8:  "monkey"
+        ; $E9:  "goat"
+        ; $EA:  "fish"
         .byte   MSG_LEOPARD
 
-; $7A = tokens $EB...$EF:
+; $7A = messages $EB...$EF:
 .tkn_id "_7A"                                                           ;=$2D
         .byte   MSG_EB
 
-; $7B = tokens $F0...$F4:
+; $7B = messages $F0...$F4:
 .tkn_id "RANDOM_FOOD"                                                   ;=$2C
-        ; "meat", "cutlet", "steak", "burgers", "soup"
-        .byte  MSG_MEAT
+        ; $F0:  "meat"
+        ; $F1:  "cutlet"
+        ; $F2:  "steak"
+        ; $F3:  "burgers"
+        ; $F4:  "soup"
+        .byte   MSG_MEAT
 
-; $7C = tokens $F5...$F9:
+; $7C = messages $F5...$F9:
 .tkn_id "RANDOM_ENVIRONMENT"                                            ;=$2B
-        ; "ice", "mud", "zero-G", "vacuum", "<?> ultra"
+        ; $F5:  "ice"
+        ; $F6:  "mud"
+        ; $F7:  "zero-G"
+        ; $F8:  "vacuum"
+        ; $F9:  <target-system>-"ian ultra"
         .byte   MSG_ICE
 
-; $7D = tokens $FA...$FE:
+; $7D = messages $FA...$FE:
 .tkn_id "RANDOM_SPORT"                                                  ;=$2A
-        ; "hockey", "cricket", "karate", "polo", "tennis"
+        ; $FA:  "hockey"
+        ; $FB:  "cricket"
+        ; $FC:  "karate"
+        ; $FD:  "polo"
+        ; $FE:  "tennis"
         .byte   MSG_HOCKEY
 
-; $7E = tokens $73...$88:
+; $7E = messages $73...$78:
 .tkn_id "RANDOM_PEST"                                                   ;=$29
-        ; "wasp", "moth", "grub", "ant", <random-name>
+        ; $73:  "wasp"
+        ; $74:  "moth"
+        ; $75:  "grub"
+        ; $76:  "ant"
+        ; $77:  <random-name>
         .byte   MSG_WASP
 
-; $7F = tokens $78...$7C:
+; $7F = messages $78...$7C:
 .tkn_id "POET_ARTSGRADUATE_YAK_SNAIL_SLUG"                              ;=$28
-        ; "poet", "arts graduate", "yak", "snail", "slug"
+        ; $78:  "poet"
+        ; $79:  "arts graduate"
+        ; $7A:  "yak"
+        ; $7B:  "snail"
+        ; $7C:  "slug"
         .byte   MSG_POET
 
-; $80 = tokens $7D...$81:
+; $80 = messages $7D...$81:
 .tkn_id "RANDOM_CLIMATE"                                                ;=$D7
-        ; "tropical", "dense", "rain", "impenetrable", "exuberant" 
+        ; $7D:  "tropical"
+        ; $7E:  "dense"
+        ; $7F:  "rain"
+        ; $80:  "impenetrable"
+        ; $81:  "exuberant" 
         .byte   MSG_TROPICAL                                            ;$3ED2
 
 
@@ -507,87 +581,87 @@ _3eac:                                                                  ;$3EAC
 ; here, for the on-disk format
 ;
 .import tkn_docked_crlf:direct
-CRLF    = .scramble( tkn_docked_crlf )  ;=$80
+CRLF    = .scramble( tkn_docked_crlf )                                  ;=$80
 .import tkn_docked_ab:direct
-AB      = .scramble( tkn_docked_ab )    ;=$8F
+AB      = .scramble( tkn_docked_ab )                                    ;=$8F
 .import tkn_docked_ou:direct
-OU      = .scramble( tkn_docked_ou )    ;=$8E
+OU      = .scramble( tkn_docked_ou )                                    ;=$8E
 .import tkn_docked_se:direct
-SE      = .scramble( tkn_docked_se )    ;=$8D
+SE      = .scramble( tkn_docked_se )                                    ;=$8D
 .import tkn_docked_it:direct
-IT      = .scramble( tkn_docked_it )    ;=$8C
+IT      = .scramble( tkn_docked_it )                                    ;=$8C
 .import tkn_docked_il:direct
-IL      = .scramble( tkn_docked_il )    ;=$8B
+IL      = .scramble( tkn_docked_il )                                    ;=$8B
 .import tkn_docked_et:direct
-ET      = .scramble( tkn_docked_et )    ;=$8A
+ET      = .scramble( tkn_docked_et )                                    ;=$8A
 .import tkn_docked_st:direct
-ST      = .scramble( tkn_docked_st )    ;=$89
+ST      = .scramble( tkn_docked_st )                                    ;=$89
 .import tkn_docked_on:direct
-ON      = .scramble( tkn_docked_on )    ;=$88
+ON      = .scramble( tkn_docked_on )                                    ;=$88
 .import tkn_docked_lo:direct
-LO      = .scramble( tkn_docked_lo )    ;=$B7
+LO      = .scramble( tkn_docked_lo )                                    ;=$B7
 .import tkn_docked_nu:direct
-NU      = .scramble( tkn_docked_nu )    ;=$B6
+NU      = .scramble( tkn_docked_nu )                                    ;=$B6
 .import tkn_docked_th:direct
-TH      = .scramble( tkn_docked_th )    ;=$B5
+TH      = .scramble( tkn_docked_th )                                    ;=$B5
 .import tkn_docked_no:direct
-NO      = .scramble( tkn_docked_no )    ;=$B4
+NO      = .scramble( tkn_docked_no )                                    ;=$B4
 .import tkn_docked_al:direct
-AL      = .scramble( tkn_docked_al )    ;=$B3
+AL      = .scramble( tkn_docked_al )                                    ;=$B3
 .import tkn_docked_le:direct
-LE      = .scramble( tkn_docked_le )    ;=$B2
+LE      = .scramble( tkn_docked_le )                                    ;=$B2
 .import tkn_docked_xe:direct
-XE      = .scramble( tkn_docked_xe )    ;=$B1
+XE      = .scramble( tkn_docked_xe )                                    ;=$B1
 .import tkn_docked_ge:direct
-GE      = .scramble( tkn_docked_ge )    ;=$B0
+GE      = .scramble( tkn_docked_ge )                                    ;=$B0
 .import tkn_docked_za:direct
-ZA      = .scramble( tkn_docked_za )    ;=$BF -- unused here
+ZA      = .scramble( tkn_docked_za )    ; -- unused here                ;=$BF
 .import tkn_docked_ce:direct
-CE      = .scramble( tkn_docked_ce )    ;=$BE
+CE      = .scramble( tkn_docked_ce )                                    ;=$BE
 .import tkn_docked_bi:direct
-BI      = .scramble( tkn_docked_bi )    ;=$BD
+BI      = .scramble( tkn_docked_bi )                                    ;=$BD
 .import tkn_docked_so:direct
-SO      = .scramble( tkn_docked_so )    ;=$BC
+SO      = .scramble( tkn_docked_so )                                    ;=$BC
 .import tkn_docked_us:direct
-US      = .scramble( tkn_docked_us )    ;=$BB
+US      = .scramble( tkn_docked_us )                                    ;=$BB
 .import tkn_docked_es:direct
-ES      = .scramble( tkn_docked_es )    ;=$BA
+ES      = .scramble( tkn_docked_es )                                    ;=$BA
 .import tkn_docked_ar:direct
-AR      = .scramble( tkn_docked_ar )    ;=$B9
+AR      = .scramble( tkn_docked_ar )                                    ;=$B9
 .import tkn_docked_ma:direct
-MA      = .scramble( tkn_docked_ma )    ;=$B8
+MA      = .scramble( tkn_docked_ma )                                    ;=$B8
 .import tkn_docked_in:direct
-IN      = .scramble( tkn_docked_in )    ;=$A7
+IN      = .scramble( tkn_docked_in )                                    ;=$A7
 .import tkn_docked_di:direct
-DI      = .scramble( tkn_docked_di )    ;=$A6
+DI      = .scramble( tkn_docked_di )                                    ;=$A6
 .import tkn_docked_re:direct
-RE      = .scramble( tkn_docked_re )    ;=$A5
+RE      = .scramble( tkn_docked_re )                                    ;=$A5
 .import tkn_docked_a_:direct
-A_      = .scramble( tkn_docked_a_ )    ;=$A4
+A_      = .scramble( tkn_docked_a_ )                                    ;=$A4
 .import tkn_docked_er:direct
-ER      = .scramble( tkn_docked_er )    ;=$A3
+ER      = .scramble( tkn_docked_er )                                    ;=$A3
 .import tkn_docked_at:direct
-AT      = .scramble( tkn_docked_at )    ;=$A2
+AT      = .scramble( tkn_docked_at )                                    ;=$A2
 .import tkn_docked_en:direct
-EN      = .scramble( tkn_docked_en )    ;=$A1
+EN      = .scramble( tkn_docked_en )                                    ;=$A1
 .import tkn_docked_be:direct
-BE      = .scramble( tkn_docked_be )    ;=$A0
+BE      = .scramble( tkn_docked_be )                                    ;=$A0
 .import tkn_docked_ra:direct
-RA      = .scramble( tkn_docked_ra )    ;=$AF
+RA      = .scramble( tkn_docked_ra )                                    ;=$AF
 .import tkn_docked_la:direct
-LA      = .scramble( tkn_docked_la )    ;=$AE
+LA      = .scramble( tkn_docked_la )                                    ;=$AE
 .import tkn_docked_ve:direct
-VE      = .scramble( tkn_docked_ve )    ;=$AD
+VE      = .scramble( tkn_docked_ve )                                    ;=$AD
 .import tkn_docked_ti:direct
-TI      = .scramble( tkn_docked_ti )    ;=$AC
+TI      = .scramble( tkn_docked_ti )                                    ;=$AC
 .import tkn_docked_ed:direct
-ED      = .scramble( tkn_docked_ed )    ;=$AB
+ED      = .scramble( tkn_docked_ed )                                    ;=$AB
 .import tkn_docked_or:direct
-OR      = .scramble( tkn_docked_or )    ;=$AA
+OR      = .scramble( tkn_docked_or )                                    ;=$AA
 .import tkn_docked_qu:direct
-QU      = .scramble( tkn_docked_qu )    ;=$A9
+QU      = .scramble( tkn_docked_qu )                                    ;=$A9
 .import tkn_docked_an:direct
-AN      = .scramble( tkn_docked_an )    ;=$A8
+AN      = .scramble( tkn_docked_an )                                    ;=$A8
 
 
 .segment        "TEXT_DOCKED"
@@ -597,13 +671,8 @@ _msg_index     .set 0
 .macro  .msg_alias      msg_id
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-        ; define a constant for the un-scrambled index value,
-        ; (should it be needed)
+        ; define a constant for the un-scrambled index value
         .ident( .concat( "MSG_", msg_id )) = _msg_index
-
-        .local  _value
-        _value  .set .scramble( _msg_index )
-
         ; define an export for the index-number of the message;
         ; this is how the outside world will specify the message to print
 .export .ident( .concat( "MSG_DOCKED_", msg_id )) = _msg_index
@@ -614,8 +683,8 @@ _msg_index     .set 0
 .macro  .msg_id         msg_id
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
+        ; define the message ID symbols
         .msg_alias      msg_id
-
         ; move to the next index number:
         ; doing this afterwards ensures that there is an index 0
         _msg_index .set _msg_index + 1
@@ -623,8 +692,14 @@ _msg_index     .set 0
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-; increment the msg ID, but don't define any symbol
-.define .msg            _msg_index .set _msg_index + 1
+.macro  .msg
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+        ; increment the msg ID, but don't define any symbol
+         _msg_index .set _msg_index + 1
+
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro
 
 
 ; begin the "docked" text database:
@@ -654,11 +729,9 @@ txt_docked:                                                             ;$0E00
         
         ; the list of supported save media-types:
         ;-----------------------------------------------------------------------
-        .msg_alias "MEDIAS"
-        
         ; $02:
         .byte   DI, "SK", __end
-        .msg
+        .msg_id "MEDIAS"
 
         ; $03:
         ; TODO: remove tape code / references
