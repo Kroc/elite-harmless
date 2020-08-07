@@ -2033,7 +2033,7 @@ _31c6:                                                                  ;$31C6
         lda # $00
         sta ZP_AE
 _31d5:                                                                  ;$31D5
-        jsr tkn_docked_bufferOn
+        jsr text_buffer_on
         jsr _76e9
 
         ldx txt_buffer_index
@@ -2069,7 +2069,7 @@ _3208:                                                                  ;$3208
         sta TSYSTEM_POS_Y
         jsr _70ab
         jsr _6f82
-        jsr tkn_docked_bufferOff
+        jsr text_buffer_off
         jmp _877e
 
 ;===============================================================================
@@ -3916,7 +3916,7 @@ _3d3d:                                                                  ;$3D3D
         lsr 
         bcc _3d6f
         
-        jsr tkn_docked_bufferOn
+        jsr text_buffer_on
         
         lda # $01
         ; (this causes the next instruction to become a meaningless `bit`

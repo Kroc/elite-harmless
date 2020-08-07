@@ -150,15 +150,16 @@ tkn_docked_functions:                                                   ;$250C
 ; $0E   enable the text-buffer that will hold text instead of printing
 ;       immediately. this can be used to full-justify text or inspect
 ;       the contents of the buffer
-.tkn_fn "BUFFER_ON",            tkn_docked_bufferOn                     ;=$59
+.tkn_fn "BUFFER_ON",            text_buffer_on                          ;=$59
 ; $0F   disables the text-buffer
-.tkn_fn "BUFFER_OFF",           tkn_docked_bufferOff                    ;=$58
+.tkn_fn "BUFFER_OFF",           text_buffer_off                         ;=$58
 ; $10   print "a". truly, truly, a bizzare use of a function token
 .tkn_fn "A",                    print_a                                 ;=$47
-; $11   ?
-.tkn_fn "11",                   tkn_docked_fn11                         ;=$46
+; $11   print the name of the target system, with an -"ian" suffix.
+;       if the system's last letter is a vowel it is removed, e.g. "Lavian"
+.tkn_fn "TARGET_SYSTEM",        target_system_provenance                ;=$46
 ; $12   print a randomly chosen name
-.tkn_fn "RANDOM_NAME",          tkn_docked_randomName                   ;=$45
+.tkn_fn "RANDOM_NAME",          print_random_name                       ;=$45
 ; $13   ?
 .tkn_fn "CAPNEXT",              tkn_docked_capitalizeNext               ;=$44
 ; $14   print character $14 -- ?
@@ -194,74 +195,85 @@ tkn_docked_functions:                                                   ;$250C
 _tkn_index      .set $20
 
 ; tokenise regular ASCII characters:
-;-------------------------------------------------------------------------------
+;===============================================================================
+.macro  .ascii          tkn_id
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+        .charmap        _tkn_index, .scramble( _tkn_index )
+        .tkn_id         tkn_id
+
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro
+
 ;       symbol                  ; token scrmbld note
-.tkn_id "__"                    ; $20   =$77
-.tkn_id "XMARK"                 ; $21   =$76    !
-.tkn_id "SPMARK"                ; $22   =$75    "
-.tkn_id "HASH"                  ; $23   =$74    #
-.tkn_id "DOLLAR"                ; $24   =$73    $
-.tkn_id "PCENT"                 ; $25   =$72    %
-.tkn_id "AMP"                   ; $26   =$71    &
-.tkn_id "APOS"                  ; $27   =$70    '
-.tkn_id "LPAREN"                ; $28   =$7F    (
-.tkn_id "RPAREN"                ; $29   =$7E    )
-.tkn_id "STAR"                  ; $2A   =$7D    *
-.tkn_id "PLUS"                  ; $2B   =$7C    +
-.tkn_id "COMMA"                 ; $2C   =$7B    ,
-.tkn_id "HYPHEN"                ; $2D   =$7A    -
-.tkn_id "DOT"                   ; $2E   =$79    .
-.tkn_id "FSLASH"                ; $2F   =$78    /
-.tkn_id "_0"                    ; $30   =$67    0
-.tkn_id "_1"                    ; $31   =$66    1
-.tkn_id "_2"                    ; $32   =$65    2
-.tkn_id "_3"                    ; $33   =$64    3
-.tkn_id "_4"                    ; $34   =$63    4
-.tkn_id "_5"                    ; $35   =$62    5
-.tkn_id "_6"                    ; $36   =$61    6
-.tkn_id "_7"                    ; $37   =$60    7
-.tkn_id "_8"                    ; $38   =$6F    8
-.tkn_id "_9"                    ; $39   =$6E    9
-.tkn_id "COLON"                 ; $3A   =$6D    :
-.tkn_id "SEMI"                  ; $3B   =$6C    ;
-.tkn_id "LT"                    ; $3C   =$6B    <
-.tkn_id "EQUALS"                ; $3D   =$6A    =
-.tkn_id "GT"                    ; $3E   =$69    >
-.tkn_id "QMARK"                 ; $3F   =$68    ?
-.tkn_id "COMAT"                 ; $40   =$17    @
-.tkn_id "_A"                    ; $41   =$16    A
-.tkn_id "_B"                    ; $42   =$15    B
-.tkn_id "_C"                    ; $43   =$14    C
-.tkn_id "_D"                    ; $44   =$13    D
-.tkn_id "_E"                    ; $45   =$12    E
-.tkn_id "_F"                    ; $46   =$11    F
-.tkn_id "_G"                    ; $47   =$10    G
-.tkn_id "_H"                    ; $48   =$1F    H
-.tkn_id "_I"                    ; $49   =$1E    I
-.tkn_id "_J"                    ; $4A   =$1D    J
-.tkn_id "_K"                    ; $4B   =$1C    K
-.tkn_id "_L"                    ; $4C   =$1B    L
-.tkn_id "_M"                    ; $4D   =$1A    M
-.tkn_id "_N"                    ; $4E   =$19    N
-.tkn_id "_O"                    ; $4F   =$18    O
-.tkn_id "_P"                    ; $50   =$07    P
-.tkn_id "_Q"                    ; $51   =$06    Q
-.tkn_id "_R"                    ; $52   =$05    R
-.tkn_id "_S"                    ; $53   =$04    S
-.tkn_id "_T"                    ; $54   =$03    T
-.tkn_id "_U"                    ; $55   =$02    U
-.tkn_id "_V"                    ; $56   =$01    V
-.tkn_id "_W"                    ; $57   =$00    W
-.tkn_id "_X"                    ; $58   =$0F    X
-.tkn_id "_Y"                    ; $59   =$0E    Y
-.tkn_id "_Z"                    ; $5A   =$0D    Z
+;-------------------------------------------------------------------------------
+.ascii  "__"                    ; $20   =$77
+.ascii  "XMARK"                 ; $21   =$76    !
+.ascii  "SPMARK"                ; $22   =$75    "
+.ascii  "HASH"                  ; $23   =$74    #
+.ascii  "DOLLAR"                ; $24   =$73    $
+.ascii  "PCENT"                 ; $25   =$72    %
+.ascii  "AMP"                   ; $26   =$71    &
+.ascii  "APOS"                  ; $27   =$70    '
+.ascii  "LPAREN"                ; $28   =$7F    (
+.ascii  "RPAREN"                ; $29   =$7E    )
+.ascii  "STAR"                  ; $2A   =$7D    *
+.ascii  "PLUS"                  ; $2B   =$7C    +
+.ascii  "COMMA"                 ; $2C   =$7B    ,
+.ascii  "HYPHEN"                ; $2D   =$7A    -
+.ascii  "DOT"                   ; $2E   =$79    .
+.ascii  "FSLASH"                ; $2F   =$78    /
+.ascii  "_0"                    ; $30   =$67    0
+.ascii  "_1"                    ; $31   =$66    1
+.ascii  "_2"                    ; $32   =$65    2
+.ascii  "_3"                    ; $33   =$64    3
+.ascii  "_4"                    ; $34   =$63    4
+.ascii  "_5"                    ; $35   =$62    5
+.ascii  "_6"                    ; $36   =$61    6
+.ascii  "_7"                    ; $37   =$60    7
+.ascii  "_8"                    ; $38   =$6F    8
+.ascii  "_9"                    ; $39   =$6E    9
+.ascii  "COLON"                 ; $3A   =$6D    :
+.ascii  "SEMI"                  ; $3B   =$6C    ;
+.ascii  "LT"                    ; $3C   =$6B    <
+.ascii  "EQUALS"                ; $3D   =$6A    =
+.ascii  "GT"                    ; $3E   =$69    >
+.ascii  "QMARK"                 ; $3F   =$68    ?
+.ascii  "COMAT"                 ; $40   =$17    @
+.ascii  "_A"                    ; $41   =$16    A
+.ascii  "_B"                    ; $42   =$15    B
+.ascii  "_C"                    ; $43   =$14    C
+.ascii  "_D"                    ; $44   =$13    D
+.ascii  "_E"                    ; $45   =$12    E
+.ascii  "_F"                    ; $46   =$11    F
+.ascii  "_G"                    ; $47   =$10    G
+.ascii  "_H"                    ; $48   =$1F    H
+.ascii  "_I"                    ; $49   =$1E    I
+.ascii  "_J"                    ; $4A   =$1D    J
+.ascii  "_K"                    ; $4B   =$1C    K
+.ascii  "_L"                    ; $4C   =$1B    L
+.ascii  "_M"                    ; $4D   =$1A    M
+.ascii  "_N"                    ; $4E   =$19    N
+.ascii  "_O"                    ; $4F   =$18    O
+.ascii  "_P"                    ; $50   =$07    P
+.ascii  "_Q"                    ; $51   =$06    Q
+.ascii  "_R"                    ; $52   =$05    R
+.ascii  "_S"                    ; $53   =$04    S
+.ascii  "_T"                    ; $54   =$03    T
+.ascii  "_U"                    ; $55   =$02    U
+.ascii  "_V"                    ; $56   =$01    V
+.ascii  "_W"                    ; $57   =$00    W
+.ascii  "_X"                    ; $58   =$0F    X
+.ascii  "_Y"                    ; $59   =$0E    Y
+.ascii  "_Z"                    ; $5A   =$0D    Z
 
 ; NOTE: ASCII codes $5B...$5F are not included!
-;;.tkn_id "_LSQB"                 ; $5B   =$0C    [
-;;.tkn_id "_BSLASH"               ; $5C   =$0B    \
-;;.tkn_id "_RSQB"                 ; $5D   =$0A    ]
-;;.tkn_id "_ACUTE"                ; $5E   =$09    ^
-;;.tkn_id "_USCORE"               ; $5F   =$08    _
+;;.ascii  "_LSQB"                 ; $5B   =$0C    [
+;;.ascii  "_BSLASH"               ; $5C   =$0B    \
+;;.ascii  "_RSQB"                 ; $5D   =$0A    ]
+;;.ascii  "_ACUTE"                ; $5E   =$09    ^
+;;.ascii  "_USCORE"               ; $5F   =$08    _
+
 
 .segment        "TEXT_PDESC"
 ;===============================================================================
@@ -275,69 +287,87 @@ _3eac:                                                                  ;$3EAC
 
 ; $5B = tokens $10...$14:
 .tkn_id "FABLED_NOTABLE_WELLKNOWN_FAMOUS_NOTED"                         ;=$0C
-        ; "fabled", "notable", "well-known", "famous", "noted"
+        ; $10:  "fabled"
+        ; $11:  "notable"
+        ; $12:  "well-known"
+        ; $13:  "famous"
+        ; $14:  "noted"
         .byte   MSG_FABLED
 
 ; $5C = tokens $15...$19:
 .tkn_id "VERY_MILDLY_MOST_REASONABLY"                                   ;=$0B
-        ; "very", "mildly", "most", "reasonably", ""
+        ; $15:  "very"
+        ; $16:  "mildly"
+        ; $17:  "most"
+        ; $18:  "reasonably"
+        ; $19:  ""
         .byte   MSG_VERY
 
 ; $5D = tokens $1A...$1E:
 .tkn_id "ANCIENT_FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR_GREAT_VAST_PINK"  ;=$0A
-        ; 1. "ancient"
-        ; 2. <"funny", "weird", "unusual", "strange", "peculiar">
-        ; 3. "great"
-        ; 4. "vast"
-        ; 5. "pink"
+        ; $1A:  "ancient"
+        ; $1B:  "funny" / "weird" / "unusual" / "strange" / "peculiar"
+        ; $1C:  "great"
+        ; $1D:  "vast"
+        ; $1E:  "pink"
         .byte   MSG_1A
 
 ; $5E = tokens $1F...$23:
-.tkn_id "_5E"                                                           ;=$09
-        ; "<?> plantations", "mountains", <"parking meters", "dust clouds",
-        ; "ice bergs", "rock formations", "volcanoes">, "<?> forests", "oceans"
+.tkn_id "RANDOM_GEOGRAPHY"                                              ;=$09
+        ; $1F:  "<?> plantations"
+        ; $20:  "mountains"
+        ; $21:  "parking meters" / "dust clouds" / "ice bergs" / 
+        ;       "rock formations" / "volcanoes"
+        ; $22:  "<?> forests"
+        ; $23:  "oceans"
         .byte   MSG_1F
 
 ; $5F = tokens $9B...$9F:
 .tkn_id "_5F"                                                           ;=$08
         .byte   MSG_9B
 
-; $60 = $A0
+; $60 = tokens $A0...$A4:
 .tkn_id "_60"                                                           ;=$37
+        ; $A0:  "shrew" / "beast" / "bison" / "snake" / "wolf"
+        ; $A1:  "leopard" / "cat" / "monkey" / "goat" / "fish"
+        ; $A2:  "walking treeoid" / "craboid" / "lobstoid" /
+        ;        <random-name>-"oid"
+        ; $A3:  "poet" / "arts graduate" / "yak" / "snail" / "slug"
+        ; $A4:  "wasp" / "moth" / "grub" / "ant" / <random-name>
         .byte   MSG_A0
 
 ; $61 = tokens $2E...$32:
-.tkn_id "_61"                                                           ;=$36
-        ; "walking tree", "crab", "bat", "lobst"(er?), "<fn12>"(?)
+.tkn_id "WALKINGTREE_CRAB_BAT_LOBST_RANDOMNAME"                         ;=$36
+        ; $2E: "walking tree"
+        ; $2F: "crab"
+        ; $30: "bat"
+        ; $31: "lobst"
+        ; $32: <random-name>
         .byte   MSG_WALKING_TREE
 
 ; $62 = tokens $A5...$A9:
-        ; 1. "ancient"
-        ; 2. "exceptional"
-        ; 3. "eccentric"
-        ; 4. "ingrained"
-        ; 5. <"funny", "weird", "unusual", "strange", "peculiar">
 .tkn_id "ANCIENT_EXCEPTIONAL_ECCENTRIC_INGRAINED_ETC"                   ;=$35
+        ; $A5: "ancient"
+        ; $A6: "exceptional"
+        ; $A7: "eccentric"
+        ; $A8: "ingrained"
+        ; $A9: "funny" / "weird" / "unusual" / "strange" / "peculiar"
         .byte   MSG_ANCIENT
 
-; $63 = $24: "shyness"
+; $63 = tokens $24...$28:
 .tkn_id "_63"                                                           ;=$34
         .byte   MSG_SHYNESS
 
 ; $64 = tokens $29...$2D:
 .tkn_id "_64"                                                           ;=$33
-        ; 1. "food blenders"
-        ; 2. "tourists"
-        ; 3. "poetry"
-        ; 4. "discos"
-        ; 5.1. "cuisine"
-        ;   2. "night life"
-        ;   3. "casinos"
-        ;   4. "sit coms"
-        ;   5. <?> 
+        ; $29: "food blenders"
+        ; $2A: "tourists"
+        ; $2B: "poetry"
+        ; $2C: "discos"
+        ; $2D: "cuisine" / "night life" / "casinos" / "sit coms", <?> 
         .byte   MSG_FOOD_BLENDERS
 
-; $65 = $3D
+; $65 = tokens $3D...$41:
 .tkn_id "_65"                                                           ;=$32
         .byte   MSG_3D
 
@@ -346,7 +376,7 @@ _3eac:                                                                  ;$3EAC
         ; "beset", "plagued", "ravaged", "cursed", "scourged"
         .byte   MSG_BESET
 
-; $67 = $38
+; $67 = tokens $38...$3C:
 .tkn_id "_67"                                                           ;=$30
         .byte   MSG_38
 
@@ -360,7 +390,7 @@ _3eac:                                                                  ;$3EAC
         ; "juice", "brandy", "water", "brew", "gargle blasters"
         .byte   MSG_JUICE
 
-; $6A = $47
+; $6A = tokens $47...$4B:
 .tkn_id "_6A"                                                           ;=$3D
         .byte   MSG_47
 
@@ -369,16 +399,16 @@ _3eac:                                                                  ;$3EAC
         ; "fabulous", "exotic", "hoopy", "unusual", "exciting"
         .byte   MSG_FABULOUS
 
-; $6C = $51: "cuisine"
-        ; TODO: this has a fifth entry of some complexity
+; $6C = tokens $51...$55:
 .tkn_id "CUISINE_NIGHTLIFE_CASINOS_SITCOMS_ETC"                         ;=$3B
+        ; TODO: this has a fifth entry of some complexity
         .byte   MSG_CUISINE
 
-; $6D = $56: print flight-token?
+; $6D = tokens $56...$5A:
 .tkn_id "_6D"                                                           ;=$3A
         .byte   MSG_56
 
-; $6E = $8C...
+; $6E = tokens $8C...$90:
 .tkn_id "_6E"                                                           ;=$39
         .byte   MSG_8C
 
@@ -392,8 +422,9 @@ _3eac:                                                                  ;$3EAC
         ; "planet", "world", "place", "little planet", "dump"
         .byte   MSG_PLANET_SYNONYMS
 
-; $71 = $8F: "<x> but <y>"?
+; $71 = tokens $8F...$93:
 .tkn_id "_71"                                                           ;=$26
+        ; "<x> but <y>"?
         .byte   MSG_8F
 
 ; $72 = tokens $82...$86:
@@ -403,9 +434,11 @@ _3eac:                                                                  ;$3EAC
 
 ; $73 = tokens $5B...$5F:
 .tkn_id "RANDOM_INSULT"                                                 ;=$24
-        .byte   MSG_SON_OF_A_BITCH
+        ; "son of a bitch", "scoundrel", "blackguard", "rogue",
+        ; "whoreson beetle headed flap ear'd knave"
+        .byte   MSG_INSULTS
 
-; $74 = $6A
+; $74 = tokens $6A...$6E:
 .tkn_id "_74"                                                           ;=$23
         .byte   MSG_PROTO_HINTS
 
@@ -415,23 +448,26 @@ _3eac:                                                                  ;$3EAC
         ; "rock formations", "volcanoes"
         .byte   MSG_PARKING_METERS
 
-; $76 = $B9: "plant"
-.tkn_id "_76"                                                           ;=$21
+; $76 = tokens $B9...$BD:
+.tkn_id "RANDOM_PLANT"                                                  ;=$21
+        ; "plant", "tulip", "banana", "corn", <random-name> "weed"
         .byte   MSG_PLANT
 
-; $77 = $BE...
+; $77 = tokens $BE...$C2:
 .tkn_id "_77"                                                           ;=$20
         .byte   MSG_BE
 
-; $78 = $E1
-.tkn_id "_78"                                                           ;=$2F
+; $78 = tokens $E1...$E5:
+.tkn_id "SHREW_BEAST_BISON_SNAKE_WOLF"                                  ;=$2F
+        ; "shrew", "beast", "bison", "snake", "wolf"
         .byte   MSG_SHREW
 
-; $79 = $E6
-.tkn_id "_79"                                                           ;=$2E
+; $79 = tokens $E6...$EA:
+.tkn_id "LEOPARD_CAT_MONKEY_GOAT_FISH"                                  ;=$2E
+        ; "leopard", "cat", "monkey", "goat", "fish"
         .byte   MSG_LEOPARD
 
-; $7A = $EB
+; $7A = tokens $EB...$EF:
 .tkn_id "_7A"                                                           ;=$2D
         .byte   MSG_EB
 
@@ -606,14 +642,13 @@ txt_docked:                                                             ;$0E00
         ; $01:  disk / tape access menu
         .byte   FN_CLEAR_SCREEN, FN_DIVIDER, FN_01, FN_08, __
         ;       "disk" / "tape" "access menu"
-        .byte   FN_MEDIA_CURRENT, __, _A, _C, CE, _S, _S, __, _M, _E, NU
+        .byte   FN_MEDIA_CURRENT, " AC", CE, "SS ME", NU
         .byte   CRLF, FN_0A, FN_02
-        .byte   _1, DOT, __, LOAD_NEW_COMMANDER, CRLF
-        .byte   _2, DOT, __, _S, _A, VE, __, COMMANDER, __, FN_04, CRLF
-        .byte   _3, DOT, __, _C, _H, AN, GE, __TO__, FN_MEDIA_OTHER, CRLF
-        .byte   _4, DOT, __, _D, _E, _F, _A, _U, _L, _T, __
-        .byte             FN_01, _J, _A, _M, _E, _S, _O, _N, FN_02, CRLF
-        .byte   _5, DOT, __, _E, _X, IT, CRLF
+        .byte   "1. ", LOAD_NEW_COMMANDER, CRLF
+        .byte   "2. ", "SA", VE, __, COMMANDER, __, FN_04, CRLF
+        .byte   "3. ", "CH", AN, GE, __TO__, FN_MEDIA_OTHER, CRLF
+        .byte   "4. ", "DEFAULT ", FN_01, "JAMESON", FN_02, CRLF
+        .byte   "5. ", "EX", IT, CRLF
         .byte   __end
         .msg_id "DATA_MENU"
         
@@ -622,19 +657,18 @@ txt_docked:                                                             ;$0E00
         .msg_alias "MEDIAS"
         
         ; $02:
-        .byte   DI, _S, _K, __end
+        .byte   DI, "SK", __end
         .msg
 
         ; $03:
         ; TODO: remove tape code / references
-        .byte   _T, _A, _P, _E, __end
+        .byte   "TAPE", __end
         .msg_id "TAPE"
         
         ;-----------------------------------------------------------------------
         ; $04:
         ; TODO: build option to remove competition number
-        .byte   _C, _O, _M, _P, _E, TI, TI, ON, __
-        .byte   NU, _M, _B, ER, COLON, __end
+        .byte   "COMPE", TI, TI, ON, __, NU, "MB", ER, COLON, __end
         .msg_id "COMPETITION_NUMBER"
         
         ; $05:
@@ -642,103 +676,94 @@ txt_docked:                                                             ;$0E00
         .msg
         
         ; $06:
-        .byte   __, __, LOAD_NEW_COMMANDER, __, FN_01
-        .byte   LPAREN, _Y, FSLASH, _N, RPAREN, QMARK
-        .byte   FN_02, FN_NEWLINE, FN_NEWLINE, __end
+        .byte   __, __, LOAD_NEW_COMMANDER, __, FN_01, "(Y/N)?", FN_02
+        .byte   FN_NEWLINE, FN_NEWLINE, __end
         .msg_id "06"
 
         ; $07:
-        .byte   _P, RE, _S, _S, __, _S, _P, _A, CE, __, OR, __, _F, _I, RE
-        .byte   COMMA, COMMANDER, DOT, FN_NEWLINE, FN_NEWLINE, __end
-        .msg_id "07"
+        .byte   "P", RE, "SS SPA", CE, __, OR, __, "FI", RE
+        .byte   ",", COMMANDER, ".", FN_NEWLINE, FN_NEWLINE, __end
+        .msg_id "PRESS_SPACE_OR_FIRE_COMMANDER"
         
         ; $08:
-        .byte   COMMANDER, APOS, _S, __NAME_QMARK__, __end
+        .byte   COMMANDER, "'S", __NAME_QMARK__, __end
         .msg
         
         ; $09:
-        .byte   FN_NEWLINE, FN_01, IL, LE, _G, AL, __
-        .byte   _E, _L, _I, _T, _E, __, _I, _I, __, _F, _I, LE, __end
+        .byte   FN_NEWLINE, FN_01
+        .byte   IL, LE, "G", AL, " ELITE II FI", LE, __end
         .msg_id "ILLEGAL_FILE"
         
         ; $0A:
-        .byte   FN_17, FN_BUFFER_ON, FN_02, _G, RE, ET, IN, _G, _S
+        .byte   FN_17, FN_BUFFER_ON, FN_02, "G", RE, ET, IN, "GS"
         .byte   __COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY
-        .byte   __AND__, FN_CAPNEXT, _I, __, BE, _G, __A__, _M, _O, _M, EN, _T
-        .byte   __, _O, _F, __, YOU, _R, __, _V, AL, _U, AB, LE
-        .byte   __, TI, _M, _E, NEW_SENTENCE
-
-        .byte   _W, _E, __, _W, OU, _L, _D, __, _L, _I, _K, _E, __, YOU, __TO__
-        .byte   _D, _O, __A__, _L, IT, _T, LE, __, _J, _O, _B, __, _F, OR, __
-        .byte   US, NEW_SENTENCE
-
-        .byte   THE__, SHIP, __, YOU, __, SE, _E, __, _H, _E, RE, __IS__
-        .byte   _A, __NEW__, _M, _O, _D, _E, _L, COMMA, __, THE__, FN_CAPNEXT
-        .byte   _C, ON, ST, _R, _I, _C, _T, OR, COMMA, __
-        .byte   _E, QU, _I, _P, ED__, _W, _I, TH, __A__, _T, _O, _P, __
-        .byte   SE, _C, _R, ET, __NEW__, _S, _H, _I, _E, _L, _D, __
-        .byte   _G, EN, ER, AT, OR, NEW_SENTENCE
-
-        .byte   _U, _N, _F, OR, _T, _U, _N, AT, _E, _L, _Y, __, IT
-        .byte   APOS, _S, __, BE, EN, __, ST, _O, _L, EN
+        .byte   __AND__, FN_CAPNEXT, "I ", BE, "G", __A__, "MOM", EN, "T "
+        .byte   "OF", __, YOU, "R", __, "V", AL, "U", AB, LE, __, TI, "ME"
         .byte   NEW_SENTENCE
 
-        .byte   FN_16, IT, __, _W, EN, _T, __, _M, _I, _S, _S, ING__
-        .byte   _F, _R, _O, _M, __, OU, _R, __, SHIP, __, _Y, AR, _D, __
-        .byte   ON, __, FN_CAPNEXT, XE, ER, __, _F, _I, VE, __
-        .byte   _M, ON, TH, _S, __, _A, _G, _O, __AND__
+        .byte   "WE", __, "W", OU, "LD LIKE ", YOU, __TO__, "DO", __A__
+        .byte   "L", IT, "T", LE, __, "JOB", __, "F", OR, __, US
+        .byte   NEW_SENTENCE
+
+        .byte   THE__, SHIP, __, YOU, __, SE, "E", __, "HE", RE, __IS__
+        .byte   "A", __NEW__, "MODEL, ", THE__, FN_CAPNEXT
+        .byte   "C", ON, ST, "RICT", OR, ",", __, "E", QU, "IP", ED__
+        .byte   "WI", TH, __A__, "TOP", __, SE, "CR", ET, __NEW__, "SHIELD"
+        .byte   __, "G", EN, ER, AT, OR, NEW_SENTENCE
+
+        .byte   "UNF", OR, "TUN", AT, "ELY", __, IT, "'S", __, BE, EN, __
+        .byte   ST, "OL", EN, NEW_SENTENCE
+
+        .byte   FN_16, IT, __, "W", EN, "T", __, "MISS", ING__, "FROM", __
+        .byte   OU, "R", __, SHIP, __, "Y", AR, "D", __, ON, __, FN_CAPNEXT
+        .byte   XE, ER, __, "FI", VE, __, "M", ON, TH, "S", __, "AGO", __AND__
         ;       "is believed to have jumped to this galaxy"
         ;       (see msg index $DD)
         .byte   FN_PROTO_GALAXY, NEW_SENTENCE
 
-        .byte   YOU, _R, __, _M, _I, _S, _S, _I, ON, COMMA, __
-        .byte   _S, _H, OU, _L, _D, __, YOU, __, _D, _E, _C, _I, _D, _E, __TO__
-        .byte   _A, _C, CE, _P, _T, __, IT, COMMA, __, _I, _S, __TO__
-        .byte   SE, _E, _K, __AND__, _D, ES, _T, _R, _O, _Y, __, THIS__, SHIP
+        .byte   YOU, "R", __, "MISSI", ON, ",", __, "SH", OU, "LD", __, YOU, __
+        .byte   "DECIDE", __TO__, "AC", CE, "PT", __, IT, ",", __, "IS", __TO__
+        .byte   SE, "EK", __AND__, "D", ES, "TROY", __, THIS__, SHIP
         .byte   NEW_SENTENCE
 
-        .byte   YOU, __, _A, RE, __, _C, _A, _U, TI, ON, ED__, TH, AT, __
+        .byte   YOU, __, "A", RE, __, "CAU", TI, ON, ED__, TH, AT, __, ON, "LY" 
         ;       TODO: import correct flight token
-        .byte   ON, _L, _Y, __, FN_FLIGHT_ON, $22, FN_FLIGHT_OFF, _S, __
-        .byte   _W, IL, _L, __, _P, EN, ET, RA, _T, _E, __, THE__
-        .byte   _N, _E, _W, __, _S, _H, _I, _E, _L, _D, _S, __AND__, TH, AT, __
-        .byte   THE__, FN_CAPNEXT, _C, ON, ST, _R, _I, _C, _T, OR, __IS__
-        .byte   _F, IT, _T, ED__, _W, _I, TH, __, AN, __
+        .byte   __, FN_FLIGHT_ON, $22, FN_FLIGHT_OFF, "S", __, "W", IL, "L", __
+        .byte   "P", EN, ET, RA, "TE", __, THE__, "NEW", __, "SHIELDS", __AND__
+        .byte   TH, AT, __, THE__, FN_CAPNEXT, "C", ON, ST, "RICT", OR, __IS__
+        .byte   "F", IT, "T", ED__, "WI", TH, __, AN, __
         ;       TODO: import correct flight token
         .byte   FN_FLIGHT_ON, $3b, FN_FLIGHT_OFF
 
         .byte   _B1, FN_02, FN_08
-        .byte   _G, _O, _O, _D, __, _L, _U, _C, _K, COMMA, __, COMMANDER
+        .byte   "GOOD", __, "LUCK,", __, COMMANDER
         .byte   _D4, FN_16, __end
         .msg
         
         ; $0B:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
-        .byte   FN_17, FN_BUFFER_ON, FN_02, __, __, AT, _T, EN, TI, ON
-        .byte   __COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY, DOT, __
-        .byte   FN_CAPNEXT, _W, _E, __, _H, _A, VE, __, _N, _E, ED__, _O, _F
-        .byte   __, YOU, _R, __, SE, _R, _V, _I, _C, ES, __, _A, _G, _A, IN
+        .byte   FN_17, FN_BUFFER_ON, FN_02, __, __, AT, "T", EN, TI, ON
+        .byte   __COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY, ".", __
+        .byte   FN_CAPNEXT, "WE", __, "HA", VE, __, "NE", ED__, "OF", __
+        .byte   YOU, "R", __, SE, "RVIC", ES, __, "AGA", IN
         .byte   NEW_SENTENCE
 
-        .byte   _I, _F, __, YOU, __, _W, OU, _L, _D, __, BE, __, SO, __
-        .byte   _G, _O, _O, _D, __, _A, _S, __TO__, _G, _O, __TO__
-        .byte   FN_CAPNEXT, CE, ER, DI, __, YOU, __, _W, IL, _L, __
-        .byte   BE, __, _B, _R, _I, _E, _F, ED, NEW_SENTENCE
+        .byte   "IF", __, YOU, __, "W", OU, "LD", __, BE, __, SO, __, "GOOD"
+        .byte   __, "AS", __TO__, "GO", __TO__, FN_CAPNEXT, CE, ER, DI, __
+        .byte   YOU, __, "W", IL, "L", __, BE, __, "BRIEF", ED, NEW_SENTENCE
 
-        .byte   _I, _F, __, _S, _U, _C, CE, _S, _S, _F, _U, _L, COMMA, __
-        .byte   YOU, __, _W, IL, _L, __, BE, __, _W, _E, _L, _L, __
-        .byte   RE, _W, AR, _D, ED, _D4
+        .byte   "IF", __, "SUC", CE, "SSFUL,", __, YOU, __, "W", IL, "L", __
+        .byte   BE, __, "WELL", __, RE, "W", AR, "D", ED, _D4
         .byte   FN_WAIT_FOR_KEY, __end
         .msg_id "0B"
 
         ;-----------------------------------------------------------------------
         ; $0C:  "(C) D.Braben & I.Bell 1985"
-        .byte   LPAREN, FN_CAPNEXT, _C, RPAREN, __DBRABEN_AND_IBELL
-        .byte   __, _1, _9, _8, _5, __end
+        .byte   "(", FN_CAPNEXT, "C)", __DBRABEN_AND_IBELL, __, "1985", __end
         .msg
         
         ; $0D:  "by D.Braben & I.Bell"
-        .byte   _B, _Y, __DBRABEN_AND_IBELL, __end
+        .byte   "BY", __DBRABEN_AND_IBELL, __end
         .msg
 
         ; $0E:
@@ -747,54 +772,54 @@ txt_docked:                                                             ;$0E00
 
         ; $0F:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN, FN_17, FN_BUFFER_ON
-        .byte   FN_02, __, __, _C, ON, _G, RA, _T, _U, LA, TI, ON, _S, __
-        .byte   COMMANDER, XMARK, FN_NEWLINE, FN_NEWLINE
+        .byte   FN_02, __, __, "C", ON, "G", RA, "TU", LA, TI, ON, "S", __
+        .byte   COMMANDER, "!", FN_NEWLINE, FN_NEWLINE
 
-        .byte   TH, ER, _E, FN_0D, __, _W, IL, _L, __, AL, _W, _A, _Y, _S
-        .byte   __, BE, __A__, _P, LA, CE, __, _F, OR, __, YOU, __, IN
+        .byte   TH, ER, "E", FN_0D, __, "W", IL, "L", __, AL, "WAYS", __
+        .byte   BE, __A__, "P", LA, CE, __, "F", OR, __, YOU, __, IN
         .byte   HER_MAJESTYS_SPACE_NAVY, NEW_SENTENCE
 
-        .byte   AN, _D, __, MA, _Y, BE, __, SO, ON, ER, __, TH, AN, __
-        .byte   YOU, __, TH, IN, _K, DOT, DOT, _D4
+        .byte   AN, "D", __, MA, "Y", BE, __, SO, ON, ER, __, TH, AN, __
+        .byte   YOU, __, TH, IN, "K..", _D4
         .byte   FN_WAIT_FOR_KEY, __end
         .msg
 
         ;-----------------------------------------------------------------------
         ; $10:  "fabled"
-        .byte   _F, AB, LE, _D, __end
+        .byte   "F", AB, LE, "D", __end
         .msg_id "FABLED"
 
         ; $11:  "notable"
-        .byte   NO, _T, AB, LE, __end
+        .byte   NO, "T", AB, LE, __end
         .msg
 
         ; $12:  "well known"
-        .byte   _W, _E, _L, _L, __, _K, NO, _W, _N, __end
+        .byte   "WELL", __, "K", NO, "WN", __end
         .msg
 
         ; $13:  "famous"
-        .byte   _F, _A, _M, _O, US, __end
+        .byte   "FAMO", US, __end
         .msg
 
         ; $14:  "noted"
-        .byte   NO, _T, ED, __end
+        .byte   NO, "T", ED, __end
         .msg
 
         ;-----------------------------------------------------------------------
         ; $15:  "very"
-        .byte   VE, _R, _Y, __end
+        .byte   VE, "RY", __end
         .msg_id "VERY"
 
         ; $16:  "mildly"
-        .byte   _M, IL, _D, _L, _Y, __end
+        .byte   "M", IL, "DLY", __end
         .msg
 
         ; $17:  "most"
-        .byte   _M, _O, ST, __end
+        .byte   "MO", ST, __end
         .msg
 
         ; $18:  "reasonably"
-        .byte   RE, _A, _S, ON, AB, _L, _Y, __end
+        .byte   RE, "AS", ON, AB, "LY", __end
         .msg
 
         ; $19:
@@ -811,24 +836,25 @@ txt_docked:                                                             ;$0E00
         .msg
 
         ; $1C:  "great"
-        .byte   _G, RE, AT, __end
+        .byte   "G", RE, AT, __end
         .msg
         
         ; $1D:  "vast"
-        .byte   _V, _A, ST, __end
+        .byte   "VA", ST, __end
         .msg
 
         ; $1E:  "pink"
-        .byte   _P, IN, _K, __end
+        .byte   "P", IN, "K", __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $1F:
-        .byte   FN_02, _77, __, _76, FN_0D, __, PLANT, _A, TI, ON, _S, __end
+        .byte   FN_02, _77, __, RANDOM_PLANT, FN_0D, __
+        .byte   PLANT, "A", TI, ON, "S", __end
         .msg_id "1F"
 
         ; $20:  "mountains"
-        .byte   MOUNTAIN, _S, __end
+        .byte   MOUNTAIN, "S", __end
         .msg
 
         ; $21:
@@ -837,51 +863,51 @@ txt_docked:                                                             ;$0E00
         .msg
         
         ; $22:
-        .byte   RANDOM_CLIMATE, __, _F, OR, ES, _T, _S, __end
+        .byte   RANDOM_CLIMATE, __, "F", OR, ES, "TS", __end
         .msg
         
         ; $23:  "oceans"
-        .byte   _O, CE, AN, _S, __end
+        .byte   "O", CE, AN, "S", __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $24:  "shyness"
-        .byte   _S, _H, _Y, _N, ES, _S, __end
+        .byte   "SHYN", ES, "S", __end
         .msg_id "SHYNESS"
         
         ; $25:  "silliness"
-        .byte   _S, IL, _L, IN, ES, _S, __end
+        .byte   "S", IL, "L", IN, ES, "S", __end
         .msg
         
         ; $26:  "mating traditions"
-        .byte   MA, _T, ING__, _T, RA, DI, TI, ON, _S, __end
+        .byte   MA, "T", ING__, "T", RA, DI, TI, ON, "S", __end
         .msg
         
         ; $27:  "loathing of ", <"food blenders", "tourists", "poetry",
         ;       "discos", <?>>
-        .byte   LO, AT, _H, ING__, _O, _F, __, _64, __end
+        .byte   LO, AT, "H", ING__, "OF", __, _64, __end
         .msg
         
         ; $28:  "love for ", <"food blenders" / "tourists" / "poetry" /
         ;       "discos" / <?>>
-        .byte   LO, VE, __, _F, OR, __, _64, __end
+        .byte   LO, VE, __, "F", OR, __, _64, __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $29:  "food blenders"
-        .byte   _F, _O, _O, _D, __, _B, LE, _N, _D, ER, _S, __end
+        .byte   "FOOD", __, "B", LE, "ND", ER, "S", __end
         .msg_id "FOOD_BLENDERS"
         
         ; $2A:  "tourists"
-        .byte   _T, OU, _R, _I, ST, _S, __end
+        .byte   "T", OU, "RI", ST, "S", __end
         .msg
         
         ; $2B:  "poetry"
-        .byte   _P, _O, ET, _R, _Y, __end
+        .byte   "PO", ET, "RY", __end
         .msg
         
         ; $2C:  "discos"
-        .byte   DI, _S, _C, _O, _S, __end
+        .byte   DI, "SCOS", __end
         .msg
         
         ; $2D:
@@ -890,87 +916,87 @@ txt_docked:                                                             ;$0E00
         
         ;-----------------------------------------------------------------------
         ; $2E:  "walking tree"
-        .byte   _W, AL, _K, ING__, TREE, __end
+        .byte   "W", AL, "K", ING__, TREE, __end
         .msg_id "WALKING_TREE"
         
         ; $2F:  "crab"
-        .byte   _C, RA, _B, __end
+        .byte   "C", RA, "B", __end
         .msg
         
         ; $30:  "bat"
-        .byte   _B, AT, __end
+        .byte   "B", AT, __end
         .msg
         
-        ; $31:  "lobst"?
-        .byte   LO, _B, ST, __end
+        ; $31:  "lobst"(?)
+        .byte   LO, "B", ST, __end
         .msg
         
-        ; $32:
+        ; $32:  <random-name>
         .byte   FN_RANDOM_NAME, __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $33:  "beset"
-        .byte   BE, _S, ET, __end
+        .byte   BE, "S", ET, __end
         .msg_id "BESET"
         
         ; $34:  "plagued"
-        .byte   _P, LA, _G, _U, ED, __end
+        .byte   "P", LA, "GU", ED, __end
         .msg
         
         ; $35:  "ravaged"
-        .byte   RA, _V, _A, _G, ED, __end
+        .byte   RA, "VAG", ED, __end
         .msg
         
         ; $36:  "cursed"
-        .byte   _C, _U, _R, _S, ED, __end
+        .byte   "CURS", ED, __end
         .msg
         
         ; $37:  "scourged"
-        .byte   _S, _C, OU, _R, _G, ED, __end
+        .byte   "SC", OU, "RG", ED, __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $38:
-        .byte   .scramble($71), __, _C, _I, _V, IL, __, _W, AR, __end
+        .byte   _71, __, "CIV", IL, __, "W", AR, __end
         .msg_id "38"
         
         ; $39:
         .byte   KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __
-        .byte   .scramble($5f), __, .scramble($60), _S
+        .byte   _5F, __, _60, _S
         .byte   __end
         .msg
         
         ; $3A:  "a ", <"killer" / "deadly" / "evil" / "lethal" / "vicious">,
         ;       " disease"
-        .byte   _A, __, KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __
-        .byte   DI, SE, _A, SE, __end
+        .byte   "A", __, KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __
+        .byte   DI, SE, "A", SE, __end
         .msg
         
         ; $3B:
-        .byte   .scramble($71), __, _E, AR, TH, QU, _A, _K, ES, __end
+        .byte   _71, __, "E", AR, TH, QU, "AK", ES, __end
         .msg
         
         ; $3C:
-        .byte   .scramble($71), __, SO, LA, _R, __
-        .byte   _A, _C, TI, _V, IT, _Y, __end
+        .byte   _71, __, SO, LA, "R", __
+        .byte   "AC", TI, "V", IT, _Y, __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $3D:
         .byte   ITS__
         .byte   ANCIENT_FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR_GREAT_VAST_PINK
-        .byte   __, .scramble($5e), __end
+        .byte   __, RANDOM_GEOGRAPHY, __end
         .msg_id "3D"
         
         ; $3E:
-        .byte   THE__, FN_11, __, .scramble($5f), __, .scramble($60), __end
+        .byte   THE__, FN_TARGET_SYSTEM, __, .scramble($5f), __, _60, __end
         .msg
         
-        ; $3F:  "it's inhabitant's ", <"ancient" / "exceptional" / "eccentric" /
+        ; $3F:  "its inhabitant's ", <"ancient" / "exceptional" / "eccentric" /
         ;       "ingrained" / <"funny" / "weird" / "unusual" / "strange" /
         ;       "peculiar"> ...
-        .byte   ITS__, INHABITANT, _S, APOS, __
+        .byte   ITS__, INHABITANT, "S'", __
         .byte   ANCIENT_EXCEPTIONAL_ECCENTRIC_INGRAINED_ETC, __
         .byte   .scramble($63), __end
         .msg
@@ -987,82 +1013,83 @@ txt_docked:                                                             ;$0E00
         
         ;-----------------------------------------------------------------------
         ; $42:  "juice"
-        .byte   _J, _U, _I, CE, __end
+        .byte   "JUI", CE, __end
         .msg_id "JUICE"
         
         ; $43:  "brandy"
-        .byte   _B, RA, _N, _D, _Y, __end
+        .byte   "B", RA, "NDY", __end
         .msg
         
         ; $44:  "water"
-        .byte   _W, AT, ER, __end
+        .byte   "W", AT, ER, __end
         .msg
         
         ; $45:  "brew"
-        .byte   _B, RE, _W, __end
+        .byte   "B", RE, "W", __end
         .msg
         
         ; $46:  "gargle blasters"
-        .byte   _G, AR, _G, LE, __, _B, LA, ST, ER, _S, __end
+        .byte   "G", AR, "G", LE, __, "B", LA, ST, ER, "S", __end
         .msg
         
         ;-----------------------------------------------------------------------
-        ; $47:
+        ; $47:  <random-name>
         .byte   FN_RANDOM_NAME, __end
         .msg_id "47"
         
-        ; $48:
-        .byte   FN_11, __, .scramble($60), __end
+        ; $48:  ?
+        .byte   FN_TARGET_SYSTEM, __, _60, __end
         .msg
         
-        ; $49:
-        .byte   FN_11, __, FN_RANDOM_NAME, __end
+        ; $49:  ?
+        .byte   FN_TARGET_SYSTEM, __, FN_RANDOM_NAME, __end
         .msg
         
         ; $4A:
-        .byte   FN_11, __, KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __end
+        .byte   FN_TARGET_SYSTEM, __, KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __end
         .msg
         
-        ; $4B:
+        ; $4B:  "killer" / "deadly" / "evil" / "lethal" / "vicious",
+        ;       <random-name>
         .byte   KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __, FN_RANDOM_NAME, __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $4C:  "fabulous"
-        .byte   _F, AB, _U, LO, US, __end
+        .byte   "F", AB, "U", LO, US, __end
         .msg_id "FABULOUS"
         
         ; $4D:  "exotic"
-        .byte   _E, _X, _O, TI, _C, __end
+        .byte   "EXO", TI, "C", __end
         .msg
         
         ; $4E:  "hoopy"
-        .byte   _H, _O, _O, _P, _Y, __end
+        .byte   "HOOPY", __end
         .msg
         
         ; $4F:  "unusual"
-        .byte   _U, NU, _S, _U, AL, __end
+        .byte   "U", NU, "SU", AL, __end
         .msg
         
         ; $50:  "exciting"
-        .byte   _E, _X, _C, IT, IN, _G, __end
+        .byte   "EXC", IT, IN, "G", __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $51:  "cuisine"
-        .byte   _C, _U, _I, _S, IN, _E, __end
+        .byte   "CUIS", IN, "E", __end
         .msg_id "CUISINE"
         
         ; $52:  "night life"
-        .byte   _N, _I, _G, _H, _T, __, _L, _I, _F, _E, __end
+        .byte   "NIGHT", __, "LIFE", __end
         .msg
         
         ; $53:  "casinos"
-        .byte   _C, _A, _S, _I, NO, _S, __end
+        .byte   "CASI", NO, "S", __end
         .msg
         
         ; $54:  "sit coms"
-        .byte   _S, IT, __, _C, _O, _M, _S, __end
+        .byte   "S", IT, __, "COMS", __end
         .msg
         
         ; $55:
@@ -1092,48 +1119,47 @@ txt_docked:                                                             ;$0E00
         
         ;-----------------------------------------------------------------------
         ; $5B:  "son of a bitch"
-        .byte   _S, ON, __, _O, _F, __A__, _B, IT, _C, _H, __end
-        .msg_id "SON_OF_A_BITCH"
+        .byte   "S", ON, __, "OF", __A__, "B", IT, "CH", __end
+        .msg_id "INSULTS"
         
         ; $5C:  "scoundrel"
-        .byte   _S, _C, OU, _N, _D, RE, _L, __end
+        .byte   "SC", OU, "ND", RE, "L", __end
         .msg
 
         ; $5D:  "blackguard"
-        .byte   _B, LA, _C, _K, _G, _U, AR, _D, __end
+        .byte   "B", LA, "CKGU", AR, "D", __end
         .msg
 
         ; $5E:  "rogue"
-        .byte   _R, _O, _G, _U, _E, __end
+        .byte   "ROGUE", __end
         .msg
         
         ; $5F:  "whoreson beetle headed flap ear'd knave"
-        .byte   _W, _H, OR, ES, ON, __, BE, ET, LE, __
-        .byte   _H, _E, _A, _D, ED__, _F, LA, _P, __, _E, AR, APOS, _D, __
-        .byte   _K, _N, _A, VE, __end
+        .byte   "WH", OR, ES, ON, __, BE, ET, LE, __, "HEAD", ED__
+        .byte   "F", LA, "P", __, "E", AR, "'D", __, "KNA", VE, __end
         .msg
 
         ;-----------------------------------------------------------------------
         ; $60:  "unremarkable"
         ; NOTE: the "n" is included so that "A" becomes "An" for this entry,
         ;       and remains as "A" for the other four
-        .byte   _N, __, _U, _N, RE, MA, _R, _K, AB, LE, __end
+        .byte   _N, __, "UN", RE, MA, "RK", AB, LE, __end
         .msg_id "UNREMARKABLE"
 
         ; $61:  " boring"
-        .byte   __, _B, OR, IN, _G, __end
+        .byte   __, "B", OR, IN, "G", __end
         .msg
         
         ; $62:  " dull"
-        .byte   __, _D, _U, _L, _L, __end
+        .byte   __, "DULL", __end
         .msg
         
         ; $63:  " tedious"
-        .byte   __, _T, _E, DI, _O, US, __end
+        .byte   __, "TE", DI, "O", US, __end
         .msg
         
         ; $64:  " revolting"
-        .byte   __, RE, _V, _O, _L, _T, IN, _G, __end
+        .byte   __, RE, "VOLT", IN, "G", __end
         .msg
         
         ;-----------------------------------------------------------------------
@@ -1147,79 +1173,79 @@ txt_docked:                                                             ;$0E00
         .msg
 
         ; $67:  "place"
-        .byte   _P, LA, CE, __end
+        .byte   "P", LA, CE, __end
         .msg
         
         ; $68:  "little planet"
-        .byte   _L, IT, _T, LE, __, PLANET, __end
+        .byte   "L", IT, "T", LE, __, PLANET, __end
         .msg
         
         ; $69:  "dump"
-        .byte   _D, _U, _M, _P, __end
+        .byte   "DUMP", __end
         .msg
         
         ; hints on finding the prototype ship:
         ;-----------------------------------------------------------------------
         ; $6A:
-        .byte   _I, __, _H, _E, AR, __A__, FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR
-        .byte   __, LO, _O, _K, ING__, SHIP, __, _A, _P, _P, _E, AR, ED__
-        .byte   AT, __ERRIUS, __end
+        .byte   "I", __, "HE", AR, __A__, FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR
+        .byte   __, LO, "OK", ING__, SHIP, __, "APPE", AR, ED__, AT, __ERRIUS
+        .byte   __end
         .msg_id "PROTO_HINTS"
 
         ; $6B:
-        .byte   _Y, _E, _A, _H, COMMA, __, _I, __, _H, _E, AR, __A__
+        .byte   "YEAH,", __, "I", __, "HE", AR, __A__
         .byte   FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR, __, SHIP, __
-        .byte   LE, _F, _T, __ERRIUS, __A__, __, _W, _H, _I, LE, __
-        .byte   _B, _A, _C, _K, __end
+        .byte   LE, "FT", __ERRIUS, __A__, __, "WHI", LE, __
+        .byte   "BACK", __end
         .msg
         
         ; $6C:
-        .byte   _G, ET, __, YOU, _R, __, _I, _R, ON, __, _A, _S, _S, __
-        .byte   _O, _V, ER, __, _T, _O, __ERRIUS, __end
+        .byte   "G", ET, __, YOU, _R, __, "IR", ON, __, "ASS", __
+        .byte   "OV", ER, __, "TO", __ERRIUS, __end
         .msg
         
         ; $6D:
-        .byte   SO, _M, _E, __, RANDOM_INSULT, __NEW__, SHIP, __
-        .byte   _W, _A, _S, __, SE, EN, __, AT, __ERRIUS, __end
+        .byte   SO, "ME", __, RANDOM_INSULT, __NEW__, SHIP, __
+        .byte   "WAS", __, SE, EN, __, AT, __ERRIUS, __end
         .msg
         
         ; $6E:
-        .byte   _T, _R, _Y, __ERRIUS, __end
+        .byte   "TRY", __ERRIUS, __end
         .msg
         
         ; Trumble™ descriptions?
         ;-----------------------------------------------------------------------
         ; $6F:  " cuddly"
-        .byte   __, _C, _U, _D, _D, _L, _Y, __end
+        .byte   __, "CUDDLY", __end
         .msg_id "CUDDLY"
         
         ; $70:  " cute"
-        .byte   __, _C, _U, _T, _E, __end
+        .byte   __, "CUTE", __end
         .msg
         
         ; $71:  " furry"
-        .byte   __, _F, _U, _R, _R, _Y, __end
+        .byte   __, "FURRY", __end
         .msg
         
         ; $72:  " friendly"
-        .byte   __, _F, _R, _I, EN, _D, _L, _Y, __end
+        .byte   __, "FRI", EN, "DLY", __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $73:
-        .byte   _W, _A, _S, _P, __end
+        .byte   "WASP", __end
         .msg_id "WASP"
         
         ; $74:
-        .byte   _M, _O, TH, __end
+        .byte   "MO", TH, __end
         .msg
         
         ; $75:
-        .byte   _G, _R, _U, _B, __end
+        .byte   "GRUB", __end
         .msg
         
         ; $76:
-        .byte   AN, _T, __end
+        .byte   AN, "T", __end
         .msg
         
         ; $77:
@@ -1228,32 +1254,32 @@ txt_docked:                                                             ;$0E00
         
         ;-----------------------------------------------------------------------
         ; $78:
-        .byte   _P, _O, ET, __end
+        .byte   "PO", ET, __end
         .msg_id "POET"
         
         ; $79:
-        .byte   AR, _T, _S, __, _G, RA, _D, _U, AT, _E, __end
+        .byte   AR, "TS", __, "G", RA, "DU", AT, "E", __end
         .msg
         
         ; $7A:
-        .byte   _Y, _A, _K, __end
+        .byte   "YAK", __end
         .msg
         
         ; $7B:
-        .byte   _S, _N, _A, IL, __end
+        .byte   "SNA", IL, __end
         .msg
         
         ; $7C:
-        .byte   _S, _L, _U, _G, __end
+        .byte   "SLUG", __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $7D:
-        .byte   _T, _R, _O, _P, _I, _C, AL, __end
+        .byte   "TROPIC", AL, __end
         .msg_id "TROPICAL"
         
         ; $7E:
-        .byte   _D, EN, SE, __end
+        .byte   "D", EN, SE, __end
         .msg
         
         ; $7F:
@@ -1261,7 +1287,7 @@ txt_docked:                                                             ;$0E00
         .msg
         
         ; $80:
-        .byte   _I, _M, _P, EN, ET, RA, _B, LE, __end
+        .byte   "IMP", EN, ET, RA, "B", LE, __end
         .msg
         
         ; message indices $81..$D6 are expandable via tokens $81..$D6
@@ -1270,54 +1296,54 @@ txt_docked:                                                             ;$0E00
         ;       messages, then the code needs to update CMP checks
         ; 
         ; $81:  "exuberant"
-        .byte   _E, _X, _U, BE, RA, _N, _T, __end
+        .byte   "EXU", BE, RA, "NT", __end
         .msg
         .tkn
         
         ;-----------------------------------------------------------------------
         ; $82:  "funny"
-        .byte   _F, _U, _N, _N, _Y, __end
+        .byte   "FUNNY", __end
         .msg_id "FUNNY"
         .tkn
         
         ; $83:  "weird"
-        .byte   _W, _E, _I, _R, _D, __end
+        .byte   "WEIRD", __end
         .msg
         .tkn
         
         ; $84:  "unusual"
-        .byte   _U, NU, _S, _U, AL, __end
+        .byte   "U", NU, "SU", AL, __end
         .msg
         .tkn
         
         ; $85:  "strange"
-        .byte   ST, RA, _N, GE, __end
+        .byte   ST, RA, "N", GE, __end
         .msg
         .tkn
         
         ; $86:  "peculiar"
-        .byte   _P, _E, _C, _U, _L, _I, AR, __end
+        .byte   "PECULI", AR, __end
         .msg
         .tkn
         
         ;-----------------------------------------------------------------------
         ; $87:  "frequent"
-        .byte   _F, RE, QU, EN, _T, __end
+        .byte   "F", RE, QU, EN, "T", __end
         .msg
         .tkn
         
         ; $88:  "occasional"
-        .byte   _O, _C, _C, _A, _S, _I, ON, AL, __end
+        .byte   "OCCASI", ON, AL, __end
         .msg
         .tkn
         
         ; $89:  "unpredictable"
-        .byte   _U, _N, _P, RE, DI, _C, _T, AB, LE, __end
+        .byte   "UNP", RE, DI, "CT", AB, LE, __end
         .msg
         .tkn
         
         ; $8A:  "dreadful"
-        .byte   _D, RE, _A, _D, _F, _U, _L, __end
+        .byte   "D", RE, "ADFUL", __end
         .msg
         .tkn
         
@@ -1330,55 +1356,55 @@ txt_docked:                                                             ;$0E00
         ; $8C:
         .byte   VERY_MILDLY_MOST_REASONABLY, __
         .byte   FABLED_NOTABLE_WELLKNOWN_FAMOUS_NOTED, __
-        .byte   _F, OR, __, .scramble($65), __end
+        .byte   "F", OR, __, _65, __end
         .msg_id "8C"
         .tkn_id "_8C"
         
         ; $8D:
-        .byte   _8C, __AND__, .scramble($65), __end
+        .byte   _8C, __AND__, _65, __end
         .msg
         .tkn
         
         ; $8E:
-        .byte   BESET_PLAGUED_RAVAGED_CURSED_SCOURGED, __, _B, _Y, __
-        .byte   .scramble($67), __end
+        .byte   BESET_PLAGUED_RAVAGED_CURSED_SCOURGED, __, "BY", __
+        .byte   _67, __end
         .msg
         .tkn_id "_8E"
         
         ; $8F:
-        .byte   _8C, __, _B, _U, _T, __, _8E, __end
+        .byte   _8C, __, "BUT", __, _8E, __end
         .msg_id "8F"
         .tkn
         
         ; $90:
-        .byte   __, _A, UNREMARKABLE_BORING_DULL_TEDIOUS_REVOLTING, __
+        .byte   __, "A", UNREMARKABLE_BORING_DULL_TEDIOUS_REVOLTING, __
         .byte   PLANET_WORLD_PLACE_LITTLEPLANET_DUMP, __end
         .msg
         .tkn
         
         ;-----------------------------------------------------------------------
         ; $91:
-        .byte   _P, _L, AN, ET, __end
+        .byte   "PL", AN, ET, __end
         .msg
         .tkn_id "PLANET"
 
         ; $92:
-        .byte   _W, OR, _L, _D, __end
+        .byte   "W", OR, "LD", __end
         .msg
         .tkn_id "WORLD"
 
         ; $93:  "the "
-        .byte   TH, _E, __, __end
+        .byte   TH, "E", __, __end
         .msg
         .tkn_id "THE__"
 
         ; $94:  "this "
-        .byte   TH, _I, _S, __, __end
+        .byte   TH, "IS", __, __end
         .msg
         .tkn_id "THIS__"
 
         ; $95:  "load new Commander"
-        .byte   LO, _A, _D, __NEW__, COMMANDER, __end
+        .byte   LO, "AD", __NEW__, COMMANDER, __end
         .msg
         .tkn_id "LOAD_NEW_COMMANDER"
 
@@ -1388,22 +1414,22 @@ txt_docked:                                                             ;$0E00
         .tkn
 
         ; $97:  "drive"
-        .byte   _D, _R, _I, VE, __end
+        .byte   "DRI", VE, __end
         .msg
         .tkn
 
         ; $98:  " catalogue"
-        .byte   __, _C, AT, _A, LO, _G, _U, _E, __end
+        .byte   __, "C", AT, "A", LO, "GUE", __end
         .msg
         .tkn
         
         ; $99:  -"ian" (suffix)
-        .byte   _I, AN, __end
+        .byte   "I", AN, __end
         .msg_id "IAN"
         .tkn
 
         ; $9A:  "Commander"
-        .byte   FN_CAPNEXT, _C, _O, _M, _M, AN, _D, ER, __end
+        .byte   FN_CAPNEXT, "COMM", AN, "D", ER, __end
         .msg
         .tkn_id "COMMANDER"
 
@@ -1414,69 +1440,70 @@ txt_docked:                                                             ;$0E00
         .tkn
 
         ; $9C:  "mountain"
-        .byte   _M, OU, _N, _T, _A, IN, __end
+        .byte   "M", OU, "NTA", IN, __end
         .msg
         .tkn_id "MOUNTAIN"
 
         ; $9D:  "edible"
-        .byte   ED, _I, _B, LE, __end
+        .byte   ED, "IB", LE, __end
         .msg
         .tkn
         
         ; $9E:  "tree"
-        .byte   _T, RE, _E, __end
+        .byte   "T", RE, "E", __end
         .msg
         .tkn_id "TREE"
 
         ; $9F:  "spotted"
-        .byte   _S, _P, _O, _T, _T, ED, __end
+        .byte   "SPOTT", ED, __end
         .msg
         .tkn
         
         ;-----------------------------------------------------------------------
-        ; $A0:
-        .byte   .scramble($78), __end
+        ; $A0:  "shrew", "beast", "bison", "snake", "wolf"
+        .byte   SHREW_BEAST_BISON_SNAKE_WOLF, __end
         .msg_id "A0"
         .tkn
 
-        ; $A1:
-        .byte   .scramble($79), __end
+        ; $A1:  "leopard", "cat", "monkey", "goat", "fish"
+        .byte   LEOPARD_CAT_MONKEY_GOAT_FISH, __end
         .msg
         .tkn
         
-        ; $A2:
-        .byte   .scramble($61), _O, _I, _D, __end
+        ; $A2:  "walking treeoid", "craboid", "lobstoid",
+        ;       <random-name>-"oid"
+        .byte   WALKINGTREE_CRAB_BAT_LOBST_RANDOMNAME, "OID", __end
         .msg
         .tkn
         
-        ; $A3:
+        ; $A3:  "poet", "arts graduate", "yak", "snail", "slug"
         .byte   POET_ARTSGRADUATE_YAK_SNAIL_SLUG, __end
         .msg
         .tkn
         
-        ; $A4:
+        ; $A4:  "wasp", "moth", "grub", "ant", <random-name>
         .byte   RANDOM_PEST, __end
         .msg
         .tkn
         
         ;-----------------------------------------------------------------------
         ; $A5:
-        .byte   AN, _C, _I, EN, _T, __end
+        .byte   AN, "CI", EN, "T", __end
         .msg_id "ANCIENT"
         .tkn_id "ANCIENT"
         
         ; $A6:
-        .byte   _E, _X, CE, _P, TI, ON, AL, __end
+        .byte   "EX", CE, "P", TI, ON, AL, __end
         .msg
         .tkn
         
         ; $A7:
-        .byte   _E, _C, CE, _N, _T, _R, _I, _C, __end
+        .byte   "EC", CE, "NTRIC", __end
         .msg
         .tkn
         
         ; $A8:
-        .byte   IN, _G, RA, IN, ED, __end
+        .byte   IN, "G", RA, IN, ED, __end
         .msg
         .tkn
         
@@ -1487,17 +1514,17 @@ txt_docked:                                                             ;$0E00
         
         ;-----------------------------------------------------------------------
         ; $AA:  "killer"
-        .byte   _K, IL, _L, ER, __end
+        .byte   "K", IL, "L", ER, __end
         .msg_id "KILLER"
         .tkn
 
         ; $AB:  "deadly"
-        .byte   _D, _E, _A, _D, _L, _Y, __end
+        .byte   "DEADLY", __end
         .msg
         .tkn_id "DEADLY"
 
         ; $AC:  "evil"
-        .byte   _E, _V, IL, __end
+        .byte   "EV", IL, __end
         .msg
         .tkn
         
@@ -1507,13 +1534,13 @@ txt_docked:                                                             ;$0E00
         .tkn
         
         ; $AE:  "vicious"
-        .byte   _V, _I, _C, _I, _O, US, __end
+        .byte   "VICIO", US, __end
         .msg
         .tkn
         
         ;-----------------------------------------------------------------------
         ; $AF:  "its "
-        .byte   IT, _S, __, __end
+        .byte   IT, "S", __, __end
         .msg
         .tkn_id "ITS__"
 
@@ -1523,69 +1550,69 @@ txt_docked:                                                             ;$0E00
         .tkn_id "_B0"
 
         ; $B1:
-        .byte   DOT, FN_NEWLINE, FN_BUFFER_OFF, __end
+        .byte   ".", FN_NEWLINE, FN_BUFFER_OFF, __end
         .msg
         .tkn_id "_B1"
 
         ; $B2:
-        .byte   __, AN, _D, __, __end
+        .byte   __, AN, "D", __, __end
         .msg
         .tkn_id "__AND__"
 
         ; $B3:
-        .byte   _Y, OU, __end
+        .byte   "Y", OU, __end
         .msg
         .tkn_id "YOU"
 
         ;-----------------------------------------------------------------------
         ; $B4:  "parking meters"
-        .byte   _P, AR, _K, ING__, _M, ET, ER, _S, __end
+        .byte   "P", AR, "K", ING__, "M", ET, ER, "S", __end
         .msg_id "PARKING_METERS"
         .tkn
 
         ; $B5:  "dust clouds"
-        .byte   _D, US, _T, __, _C, LO, _U, _D, _S, __end
+        .byte   "D", US, "T", __, "C", LO, "UDS", __end
         .msg
         .tkn
         
         ; $B6:  "ice bergs"
-        .byte   _I, CE, __, BE, _R, _G, _S, __end
+        .byte   "I", CE, __, BE, "RGS", __end
         .msg
         .tkn
         
         ; $B7:  "rock formations"
-        .byte   _R, _O, _C, _K, __, _F, OR, MA, TI, ON, _S, __end
+        .byte   "ROCK", __, "F", OR, MA, TI, ON, "S", __end
         .msg
         .tkn
         
         ; $B8:  "volcanoes"
-        .byte   _V, _O, _L, _C, _A, NO, ES, __end
+        .byte   "VOLCA", NO, ES, __end
         .msg
         .tkn
         
         ;-----------------------------------------------------------------------
         ; $B9:  "plant"
-        .byte   _P, _L, AN, _T, __end
+        .byte   "PL", AN, "T", __end
         .msg_id "PLANT"
         .tkn_id "PLANT"
 
         ; $BA:  "tulip"
-        .byte   _T, _U, _L, _I, _P, __end
+        .byte   "TULIP", __end
         .msg
         .tkn
         
         ; $BB:  "banana"
-        .byte   _B, AN, AN, _A, __end
+        .byte   "B", AN, AN, "A", __end
         .msg
         .tkn
         
         ; $BC:  "corn"
-        .byte   _C, OR, _N, __end
+        .byte   "C", OR, "N", __end
         .msg
         .tkn
         
         ; $BD:  <random-name>, "weed"
-        .byte   FN_RANDOM_NAME, _W, _E, ED, __end
+        .byte   FN_RANDOM_NAME, "WE", ED, __end
         .msg
         .tkn
         
@@ -1596,17 +1623,17 @@ txt_docked:                                                             ;$0E00
         .tkn
 
         ; $BF:
-        .byte   FN_11, __, FN_RANDOM_NAME, __end
+        .byte   FN_TARGET_SYSTEM, __, FN_RANDOM_NAME, __end
         .msg
         .tkn_id "_BF"
         
         ; $C0:
-        .byte   FN_11, __, KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __end
+        .byte   FN_TARGET_SYSTEM, __, KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __end
         .msg
         .tkn
         
         ; $C1:  "inhabitant"
-        .byte   IN, _H, _A, BI, _T, AN, _T, __end
+        .byte   IN, "HA", BI, "T", AN, "T", __end
         .msg
         .tkn_id "INHABITANT"
         
@@ -1616,7 +1643,7 @@ txt_docked:                                                             ;$0E00
         .tkn
         
         ; $C3:  "ing "
-        .byte   IN, _G, __, __end
+        .byte   IN, "G", __, __end
         .msg
         .tkn_id "ING__"
 
@@ -1625,119 +1652,114 @@ txt_docked:                                                             ;$0E00
         .msg
         .tkn_id "ED__"
 
-        ; $C5:
-        .byte   __, _D, DOT, _B, RA, BE, _N, __
-        .byte  .scramble($26), __, _I, DOT, BE, _L, _L, __end
+        ; $C5:  " d.braben & i.bell"
+        .byte   __, "D.B", RA, BE, "N", __, "&", __, "I.", BE, "LL", __end
         .msg
         .tkn_id "__DBRABEN_AND_IBELL"
 
         ; $C6:  " little trumble"
-        .byte   __, _L, IT, _T, LE, __, _T, _R, _U, _M, _B, LE, __end
+        .byte   __, "L", IT, "T", LE, __, "TRUMB", LE, __end
         .msg_id "LITTLE_TRUMBLE"
         .tkn
 
         ; $C7:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN, FN_1D
-        .byte   FN_BUFFER_ON, FN_CAPNEXT, _G, _O, _O, _D, FN_0D, __, _D, _A, _Y, __
-        .byte   COMMANDER, __, FN_04, COMMA, __, AL, LO, _W, __, _M, _E
-        .byte   __TO__, IN, _T, _R, _O, _D, _U, CE, __, _M, _Y, SE, _L, _F
-        .byte   DOT, __, FN_CAPNEXT, _I, __, _A, _M, FN_02, __, THE__
-        .byte   _M, ER, _C, _H, AN, _T, __, _P, _R, IN, CE, __, _O, _F, __
-        .byte   TH, _R, _U, _N, FN_0D, __AND__, FN_CAPNEXT, _I, __, _F, IN, _D
-        .byte   __, _M, _Y, SE, _L, _F, __, _F, OR, CE, _D, __TO__, SE, _L, _L
-        .byte   __, _M, _Y, __, _M, _O, ST, __, _T, RE, _A, _S, _U, _R, ED
-        .byte   __, _P, _O, _S, _S, ES, _S, _I, ON, NEW_SENTENCE
+        .byte   FN_BUFFER_ON, FN_CAPNEXT, "GOOD", FN_0D, __, "DAY", __
+        .byte   COMMANDER, __, FN_04, ",", __, AL, LO, "W", __, "ME", __TO__
+        .byte   IN, "TRODU", CE, __, "MY", SE, "LF.", __, FN_CAPNEXT, "I", __
+        .byte   "AM", FN_02, __, THE__, "M", ER, "CH", AN, "T", __
+        .byte   "PR", IN, CE, __, "OF", __, TH, "RUN", FN_0D, __AND__
+        .byte   FN_CAPNEXT, "I", __, "F", IN, "D", __, "MY", SE, "LF", __
+        .byte   "F", OR, CE, "D", __TO__, SE, "LL", __, "MY", __, "MO", ST, __
+        .byte   "T", RE, "ASUR", ED, __, "POSS", ES, "SI", ON, NEW_SENTENCE
 
-        .byte   _I, __, _A, _M, __, _O, _F, _F, ER, ING__, _Y, OU, COMMA, __
-        .byte   _F, OR, __, THE__, _P, _A, _L, _T, _R, _Y, __, _S, _U, _M, __
-        .byte   _O, _F, __, _J, _U, ST, __, _5, _0, _0, _0
-        .byte   FN_CAPNEXT, _C, FN_CAPNEXT, _R, __, THE__, RA, RE, ST, __
-        .byte   TH, ING__, __, IN, __, THE__, FN_02, _K, NO, _W, _N, __
-        .byte   _U, _N, _I, VE, _R, SE, NEW_SENTENCE
+        .byte   "I", __, "AM", __, "OFF", ER, ING__, "Y", OU, ",", __, "F", OR
+        .byte   __, THE__, "PALTRY", __, "SUM", __, "OF", __, "JU", ST, __
+        .byte   "5000", FN_CAPNEXT, "C", FN_CAPNEXT, "R", __, THE__, RA, RE, ST
+        .byte   __, TH, ING__, __, IN, __, THE__, FN_02, "K", NO, "WN", __
+        .byte   "UNI", VE, "R", SE, NEW_SENTENCE
         
-        .byte   FN_0D, _W, IL, _L, __, _Y, OU, __, _T, _A, _K, _E, __, IT
-        .byte   FN_01, LPAREN, _Y, FSLASH, _N, RPAREN, QMARK, FN_NEWLINE
-        .byte   FN_BUFFER_OFF, FN_01, FN_08
+        .byte   FN_0D, "W", IL, "L", __, "Y", OU, __, "TAKE", __, IT
+        .byte   FN_01, "(Y/N)?", FN_NEWLINE, FN_BUFFER_OFF, FN_01, FN_08
         .byte   __end
         .msg_id "MISSION_TRUMBLES"
         .tkn
 
-        ; $C8:  " name?"
-        .byte   __, _N, _A, _M, _E, QMARK, __
+        ; $C8:  " name? "
+        .byte   __, "NAME?", __
         .byte   __end
         .msg
         .tkn_id "__NAME_QMARK__"
 
         ; $C9:  " to "
-        .byte   __, _T, _O, __, __end
+        .byte   __, "TO", __, __end
         .msg
         .tkn_id "__TO__"
 
         ; $CA:  " is "
-        .byte   __, _I, _S, __, __end
+        .byte   __, "IS", __, __end
         .msg
         .tkn_id "__IS__"
 
         ; $CB:  "was last seen at "
-        .byte   _W, _A, _S, __, LA, ST, __, SE, EN, __, AT, __, FN_CAPNEXT
-        .byte   __end
+        .byte   "WAS", __, LA, ST, __, SE, EN, __, AT, __
+        .byte   FN_CAPNEXT, __end
         .msg
         .tkn_id "WAS_LAST_SEEN_AT__"
 
         ; $CC:  new sentence -- fullstop, new line, captialise next letter
-        .byte   DOT, FN_NEWLINE, __, FN_CAPNEXT
+        .byte   ".", FN_NEWLINE, __, FN_CAPNEXT
         .byte   __end
         .msg
         .tkn_id "NEW_SENTENCE"
 
         ; $CD:  "docked"
-        .byte   _D, _O, _C, _K, ED, __end
+        .byte   "DOCK", ED, __end
         .msg_id "DOCKED"
         .tkn
 
         ; $CE:
-        .byte   FN_01, LPAREN, _Y, FSLASH, _N, RPAREN, QMARK, __end
+        .byte   FN_01, "(Y/N)?", __end
         .msg
         .tkn
 
         ; $CF:  "ship"
-        .byte   _S, _H, _I, _P, __end
+        .byte   "SHIP", __end
         .msg
         .tkn_id "SHIP"
 
         ; $D0:  " a "
-        .byte   __, _A, __, __end
+        .byte   __, "A", __, __end
         .msg
         .tkn_id "__A__"
 
         ; $D1:
-        .byte   __, ER, _R, _I, US, __end
+        .byte   __, ER, "RI", US, __end
         .msg
         .tkn_id "__ERRIUS"
 
-        ; $D2:
-        .byte   __, _N, _E, _W, __, __end
+        ; $D2:  " new "
+        .byte   __, "NEW", __, __end
         .msg
         .tkn_id "__NEW__"
 
         ; $D3:
-        .byte   FN_02, __, _H, ER, __, MA, _J, ES, _T, _Y, APOS, _S, __
-        .byte   _S, _P, _A, CE, __, _N, _A, _V, _Y, FN_0D
-        .byte   __end
+        .byte   FN_02, __, "H", ER, __, MA, "J", ES, "TY'S", __
+        .byte   "SPA", CE, __, "NAVY", FN_0D, __end
         .msg
         .tkn_id "HER_MAJESTYS_SPACE_NAVY"
 
         ; $D4:
         .byte   _B1, FN_08, FN_01, __, __
-        .byte   _M, ES, _S, _A, GE, __, EN, _D, _S
+        .byte   "M", ES, "SA", GE, __, EN, "DS"
         .byte   __end
         .msg
         .tkn_id "_D4"
 
         ; $D5:
-        .byte   __, COMMANDER, __, FN_04, COMMA, __, _I, __, FN_0D, _A, _M
-        .byte   FN_02, __, _C, _A, _P, _T, _A, IN, __, FN_THEIR_NAME, __
-        .byte   FN_0D, _O, _F, HER_MAJESTYS_SPACE_NAVY, __end
+        .byte   __, COMMANDER, __, FN_04, ",", __, "I", __, FN_0D, "AM"
+        .byte   FN_02, __, "CAPTA", IN, __, FN_THEIR_NAME, __
+        .byte   FN_0D, "OF", HER_MAJESTYS_SPACE_NAVY, __end
         .msg
         .tkn_id "__COMMANDER_I_AM_CAPTAIN_OF_HER_MAJESTYS_SPACE_NAVY"
 
@@ -1748,30 +1770,31 @@ txt_docked:                                                             ;$0E00
 
         ;-----------------------------------------------------------------------
         ; $D7:
-        .byte   FN_BUFFER_OFF, __, _U, _N, _K, NO, _W, _N, __, PLANET, __end
+        .byte   FN_BUFFER_OFF, __, "UNK", NO, "WN", __, PLANET, __end
         .msg_id "D7"
         
         ; $D8:
-        .byte   FN_CLEAR_SCREEN, FN_08, FN_17, FN_01, __, IN, _C, _O, _M
-        .byte   ING__, _M, ES, _S, _A, GE, __end
+        .byte   FN_CLEAR_SCREEN, FN_08, FN_17, FN_01, __
+        .byte   IN, "COM", ING__, "M", ES, "SA", GE, __end
         .msg_id "INCOMING_MESSAGE"
         
         ; the names of NPCs; selected by galaxy number
         ;----------------------------------------------------------------------
         ; $D9:  "curruthers"
-        .byte   _C, _U, _R, _R, _U, TH, ER, _S, __end
+        .byte   "CURRU", TH, ER, "S", __end
         .msg_id "CURRUTHERS"
         
         ; $DA:  "fosdyke smythe"
-        .byte   _F, _O, _S, _D, _Y, _K, _E, __, _S, _M, _Y, TH, _E, __end
+        .byte   "FOSDYKE", __, "SMY", TH, "E", __end
         .msg
         
         ; $DB:  "fortesque"
-        .byte   _F, OR, _T, ES, QU, _E, __end
+        .byte   "F", OR, "T", ES, QU, "E", __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $DC:
+        ;       NOTE: "WAS_LAST_SEEN_AT__" ends with `FN_CAPNEXT`
         .byte   WAS_LAST_SEEN_AT__, RE, ES, DI, CE, __end
         .msg
         
@@ -1779,156 +1802,147 @@ txt_docked:                                                             ;$0E00
         ;       which adds the galaxy number to index $DC; it was probably
         ;       intended to chase the prototype ship across multiple galaxies,
         ;       but this idea appears to have been scrapped
-        .byte   _I, _S, __, BE, _L, _I, _E, _V, ED, __TO__, _H, _A, VE, __
-        .byte   _J, _U, _M, _P, ED, __TO__, THIS__, _G, AL, _A, _X, _Y, __end
+        .byte   "IS", __, BE, "LIEV", ED, __TO__, "HA", VE, __, "JUMP", ED
+        .byte   __TO__, THIS__, "G", AL, "AXY", __end
         .msg_id "IS_BELIEVED_TO_HAVE_JUMPED_TO_THIS_GALAXY"
         
         ;-----------------------------------------------------------------------
         ; $DE:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
         .byte   FN_1D, FN_BUFFER_ON, FN_02
-        .byte   _G, _O, _O, _D, __, _D, _A, _Y, __, COMMANDER, __
+        .byte   "GOOD", __, "DAY", __, COMMANDER, __
         .byte   FN_04, NEW_SENTENCE
 
-        .byte   _I, FN_0D, __, _A, _M, __, FN_CAPNEXT, _A, _G, EN, _T, __
-        .byte   FN_CAPNEXT, _B, LA, _K, _E, __, _O, _F, __, FN_CAPNEXT
-        .byte   _N, _A, _V, AL, __, FN_CAPNEXT
-        .byte   IN, _T, _E, _L, LE, _G, EN, CE, NEW_SENTENCE
+        .byte   "I", FN_0D, __, "AM", __, FN_CAPNEXT, "AG", EN, "T", __
+        .byte   FN_CAPNEXT, "B", LA, "KE", __, "OF", __, FN_CAPNEXT
+        .byte   "NAV", AL, __, FN_CAPNEXT, IN, "TEL", LE, "G", EN, CE
+        .byte   NEW_SENTENCE
         
-        .byte   _A, _S, __, YOU, __, _K, NO, _W, COMMA, __, THE__
-        .byte   FN_CAPNEXT, _N, _A, _V, _Y, __, _H, _A, VE, __, BE, EN, __
-        .byte   _K, _E, _E, _P, ING__, THE__, FN_CAPNEXT
-        .byte   TH, AR, _G, _O, _I, _D, _S, __, _O, _F, _F, __, YOU, _R, __
-        .byte   _A, _S, _S, __, OU, _T, __, IN, __, _D, _E, _E, _P
-        .byte   __, _S, _P, _A, CE, __, _F, OR, __, MA, _N, _Y, __
-        .byte   _Y, _E, AR, _S, __, NO, _W, DOT, __, FN_CAPNEXT
-        .byte   _W, _E, _L, _L, __, THE__, _S, IT, _U, _A, TI, ON, __
-        .byte   _H, _A, _S, __, _C, _H, AN, _G, ED, NEW_SENTENCE
+        .byte   "AS", __, YOU, __, "K", NO, "W,", __, THE__, FN_CAPNEXT
+        .byte   "NAVY", __, "HA", VE, __, BE, EN, __, "KEEP", ING__, THE__
+        .byte   FN_CAPNEXT, TH, AR, "GOIDS", __, "OFF", __, YOU, "R", __
+        .byte   "ASS", __, OU, "T", __, IN, __, "DEEP", __, "SPA", CE, __
+        .byte   "F", OR, __, MA, "NY", __, "YE", AR, "S", __, NO, "W.", __
+        .byte   FN_CAPNEXT, "WELL", __, THE__, "S", IT, "UA", TI, ON, __
+        .byte   "HAS", __, "CH", AN, "G", ED, NEW_SENTENCE
 
-        .byte   OU, _R, __, _B, _O, _Y, _S, __, AR, _E, __, RE, _A, _D, _Y
-        .byte   __, _F, OR, __A__, _P, _U, _S, _H, __, _R, _I, _G, _H, _T, __TO__
-        .byte   THE__, _H, _O, _M, _E, __, _S, _Y, _S, _T, _E, _M, __, _O, _F
-        .byte   __, TH, _O, SE, __, _M, _U, _R, _D, ER, ER, _S
+        .byte   OU, "R", __, "BOYS", __, AR, "E", __, RE, "ADY", __, "F", OR
+        .byte   __A__, "PUSH", __, "RIGHT", __TO__, THE__, "HOME", __
+        .byte   "SYSTEM", __, _O, _F, __, TH, "O", SE, __, "MURD", ER, ER, "S"
         .byte   NEW_SENTENCE
 
         .byte   FN_WAIT_FOR_KEY, FN_CLEAR_SCREEN, FN_1D
-        .byte   _I, FN_0D, __, _H, _A, VE, __, _O, _B, _T, _A, IN, ED__
-        .byte   THE__, _D, _E, _F, EN, CE, __, _P, LA, _N, _S, __, _F, OR
-        .byte   __, TH, _E, _I, _R, __, FN_CAPNEXT, _H, _I, VE, __
-        .byte   FN_CAPNEXT, _W, OR, _L, _D, _S, NEW_SENTENCE
-
-        .byte   THE__, BE, ET, LE, _S, __, _K, NO, _W, __
-        .byte   _W, _E, APOS, VE, __, _G, _O, _T, __, SO, _M, _E, TH, ING__
-        .byte   _B, _U, _T, __, NO, _T, __, _W, _H, AT, NEW_SENTENCE
-
-        .byte   _I, _F, __, FN_CAPNEXT, _I, __, _T, RA, _N, _S, _M, IT, __
-        .byte   THE__, _P, LA, _N, _S, __TO__, OU, _R, __, _B, _A, SE, __, ON
-        .byte   __, FN_CAPNEXT, BI, RE, RA, __, TH, _E, _Y, APOS, _L, _L
-        .byte   __, IN, _T, ER, CE, _P, _T, __, THE__
-        .byte   _T, _R, AN, _S, _M, _I, _S, _S, _I, ON, DOT, __
-        .byte   FN_CAPNEXT, _I, __, _N, _E, ED, __A__, SHIP, __TO__, MA, _K, _E
-        .byte   __, THE__, _R, _U, _N, NEW_SENTENCE
-
-        .byte   YOU, APOS, RE, __, _E, LE, _C, _T, ED, NEW_SENTENCE
-        
-        .byte   THE__, _P, LA, _N, _S, __, _A, RE, __
-        .byte   _U, _N, _I, _P, _U, _L, SE, __, _C, _O, _D, ED__
-        .byte   _W, _I, TH, IN, __, THIS__
-        .byte   _T, _R, AN, _S, _M, _I, _S, _S, _I, ON
+        .byte   "I", FN_0D, __, "HA", VE, __, "OBTA", IN, ED__, THE__
+        .byte   "DEF", EN, CE, __, "P", LA, "NS", __, "F", OR, __, TH, "EIR"
+        .byte   __, FN_CAPNEXT, "HI", VE, __, FN_CAPNEXT, "W", OR, "LDS"
         .byte   NEW_SENTENCE
 
-        .byte   FN_08, YOU, __, _W, IL, _L, __, BE, __, _P, _A, _I, _D
+        .byte   THE__, BE, ET, LE, "S", __, "K", NO, "W", __, "WE'", VE, __
+        .byte   "GOT", __, SO, "ME", TH, ING__, "BUT", __, NO, "T", __
+        .byte   "WH", AT, NEW_SENTENCE
+
+        .byte   "IF", __, FN_CAPNEXT, "I", __, "T", RA, "NSM", IT, __, THE__
+        .byte   "P", LA, "NS", __TO__, OU, "R", __, "BA", SE, __, ON, __
+        .byte   FN_CAPNEXT, BI, RE, RA, __, TH, "EY'LL", __
+        .byte   IN, "T", ER, CE, "PT", __, THE__, "TR", AN, "SMISSI", ON, "."
+        .byte   __, FN_CAPNEXT, "I", __, "NE", ED, __A__, SHIP, __TO__
+        .byte   MA, "KE", __, THE__, "RUN", NEW_SENTENCE
+
+        .byte   YOU, "'", RE, __, "E", LE, "CT", ED, NEW_SENTENCE
+        
+        .byte   THE__, "P", LA, "NS", __, "A", RE, __, "UNIPUL", SE, __
+        .byte   "COD", ED__, "WI", TH, IN, __, THIS__, "TR", AN, "SMISSI", ON
+        .byte   NEW_SENTENCE
+
+        .byte   FN_08, YOU, __, "W", IL, "L", __, BE, __, "PAID"
         .byte   NEW_SENTENCE
         
-        .byte   __, __, __, __, FN_CAPNEXT, _G, _O, _O, _D
-        .byte   __, _L, _U, _C, _K, __, COMMANDER, _D4
-        .byte   FN_WAIT_FOR_KEY, __end
+        .byte   __, __, __, __, FN_CAPNEXT, "GOOD", __, "LUCK", __, COMMANDER
+        .byte   _D4, FN_WAIT_FOR_KEY, __end
         .msg
         
         ; $DF:  
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
         .byte   FN_1D, FN_08, FN_BUFFER_ON, FN_0D, FN_CAPNEXT
-        .byte   _W, _E, _L, _L, __, _D, ON, _E, __, COMMANDER, NEW_SENTENCE
+        .byte   "WELL", __, "D", ON, "E", __, COMMANDER, NEW_SENTENCE
         
-        .byte   YOU, __, _H, _A, VE, __, SE, _R, _V, ED__, _U, _S, __
-        .byte   _W, _E, _L, _L, __AND__, _W, _E, __, _S, _H, AL, _L, __
-        .byte   RE, _M, _E, _M, _B, ER, NEW_SENTENCE
-
-        .byte   _W, _E, __, _D, _I, _D, __, NO, _T, __, _E, _X, _P, _E, _C, _T
-        .byte   __, THE__, FN_CAPNEXT, TH, AR, _G, _O, _I, _D, _S, __TO__
-        .byte   _F, IN, _D, __, OU, _T, __, _A, _B, OU, _T, __, YOU
+        .byte   YOU, __, "HA", VE, __, SE, "RV", ED__, "US", __, "WELL"
+        .byte   __AND__, "WE", __, "SH", AL, "L", __, RE, "MEMB", ER
         .byte   NEW_SENTENCE
 
-        .byte   _F, OR, __, THE__, _M, _O, _M, EN, _T, __, _P, LE, _A, SE
-        .byte   __, _A, _C, CE, _P, _T, __, THIS__, FN_CAPNEXT
-        .byte   _N, _A, _V, _Y, __
+        .byte   "WE", __, "DID", __, NO, "T", __, "EXPECT", __, THE__
+        .byte   FN_CAPNEXT, TH, AR, "GOIDS", __TO__, "F", IN, "D", __
+        .byte   OU, "T", __, "AB", OU, "T", __, YOU, NEW_SENTENCE
+
+        .byte   "F", OR, __, THE__, "MOM", EN, "T", __, "P", LE, "A", SE
+        .byte   __, "AC", CE, "PT", __, THIS__, FN_CAPNEXT, "NAVY", __
         ;       TODO: import correct flight token
         .byte   FN_FLIGHT_ON, $25, FN_FLIGHT_OFF, __
-        .byte   _A, _S, __, _P, _A, _Y, _M, EN, _T, _D4
+        .byte   "AS", __, "PAYM", EN, "T", _D4
         .byte   FN_WAIT_FOR_KEY, __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $E0:  "are you sure?"
-        .byte   _A, RE, __, YOU, __, _S, _U, RE, QMARK, __end
+        .byte   "A", RE, __, YOU, __, "SU", RE, "?", __end
         .msg_id "ARE_YOU_SURE"
         
         ;-----------------------------------------------------------------------
         ; $E1:  "shrew"
-        .byte   _S, _H, RE, _W, __end
+        .byte   "SH", RE, "W", __end
         .msg_id "SHREW"
         
         ; $E2:  "beast"
-        .byte   BE, _A, ST, __end
+        .byte   BE, "A", ST, __end
         .msg
         
         ; $E3:  "bison"
-        .byte   _B, _I, _S, ON, __end
+        .byte   "BIS", ON, __end
         .msg
         
         ; $E4:  "snake"
-        .byte   _S, _N, _A, _K, _E, __end
+        .byte   "SNAKE", __end
         .msg
         
         ; $E5:  "wolf"
-        .byte   _W, _O, _L, _F, __end
+        .byte   "WOLF", __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $E6:  "leopard"
-        .byte   LE, _O, _P, AR, _D, __end
+        .byte   LE, "OP", AR, "D", __end
         .msg_id "LEOPARD"
         
         ; $E7:  "cat"
-        .byte   _C, AT, __end
+        .byte   "C", AT, __end
         .msg
         
         ; $E8:  "monkey"
-        .byte   _M, ON, _K, _E, _Y, __end
+        .byte   "M", ON, "KEY", __end
         .msg
         
         ; $E9:  "goat"
-        .byte   _G, _O, AT, __end
+        .byte   "GO", AT, __end
         .msg
         
         ; $EA:  "fish"
-        .byte   _F, _I, _S, _H, __end
+        .byte   "FISH", __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $EB:  
-        .byte   .scramble($6a), __, RANDOM_DRINK
+        .byte   _6A, __, RANDOM_DRINK
         .byte   __end
         .msg_id "EB"
         
         ; $EC:
-        .byte   FN_11, __, .scramble($78), __
+        .byte   FN_TARGET_SYSTEM, __, SHREW_BEAST_BISON_SNAKE_WOLF, __
         .byte   RANDOM_FOOD, __end
         .msg_id "EC"
         
         ; $ED:
         .byte   ITS__, FABULOUS_EXOTIC_HOOPY_UNUSUAL_EXCITING, __
-        .byte   .scramble($79), __, RANDOM_FOOD, __end
+        .byte   LEOPARD_CAT_MONKEY_GOAT_FISH, __, RANDOM_FOOD, __end
         .msg
         
         ; $EE:
@@ -1936,78 +1950,79 @@ txt_docked:                                                             ;$0E00
         .msg
         
         ; $EF:
-        .byte   .scramble($6a), __, RANDOM_DRINK
+        .byte   _6A, __, RANDOM_DRINK
         .byte   __end
         .msg
         
         ;-----------------------------------------------------------------------
         ; $F0:  "meat"
-        .byte   _M, _E, AT, __end
+        .byte   "ME", AT, __end
         .msg_id "MEAT"
         
         ; $F1:  "cutlet"
-        .byte   _C, _U, _T, _L, ET, __end
+        .byte   "CUTL", ET, __end
         .msg
         
         ; $F2:  "steak"
-        .byte   ST, _E, _A, _K, __end
+        .byte   ST, "EAK", __end
         .msg
         
         ; $F3:  "burgers"
-        .byte   _B, _U, _R, _G, ER, _S, __end
+        .byte   "BURG", ER, "S", __end
         .msg
         
         ; $F4:  "soup"
-        .byte   SO, _U, _P, __end
+        .byte   SO, "UP", __end
         .msg
         
         ; sport prefixes: (e.g. Brockian Ultra Cricket)
         ;-----------------------------------------------------------------------
         ; $F5:  "ice"
-        .byte   _I, CE, __end
+        .byte   "I", CE, __end
         .msg_id "ICE"
         
         ; $F6:  "mud"
-        .byte   _M, _U, _D, __end
+        .byte   "MUD", __end
         .msg
         
         ; $F7:  "zero-G"
-        .byte   _Z, ER, _O, HYPHEN, FN_CAPNEXT, _G, __end
+        .byte   "Z", ER, "O-", FN_CAPNEXT, "G", __end
         .msg
         
         ; $F8:  "vacuum"
-        .byte   _V, _A, _C, _U, _U, _M, __end
+        .byte   "VACUUM", __end
         .msg
         
-        ; $F9:
-        .byte   FN_11, __, _U, _L, _T, RA, __end
+        ; $F9:  <target-system>-"ian ultra"
+        ;       e.g. Brokian ultra cricket
+        .byte   FN_TARGET_SYSTEM, __, "ULT", RA, __end
         .msg
         
         ; sports:
         ;-----------------------------------------------------------------------
         ; $FA:  "hockey"
-        .byte   _H, _O, _C, _K, _E, _Y, __end
+        .byte   "HOCKEY", __end
         .msg_id "HOCKEY"
         
         ; $FB:  "cricket"
-        .byte   _C, _R, _I, _C, _K, ET, __end
+        .byte   "CRICK", ET, __end
         .msg
         
         ; $FC:  "karate"
-        .byte   _K, AR, AT, _E, __end
+        .byte   "K", AR, AT, "E", __end
         .msg
         
         ; $FD:  "polo"
-        .byte   _P, _O, LO, __end
+        .byte   "PO", LO, __end
         .msg
         
         ; $FE:  "tennis"
-        .byte   _T, EN, _N, _I, _S, __end
+        .byte   "T", EN, "NIS", __end
         .msg
         
         ;-----------------------------------------------------------------------
-        ; $FF:  <"disk" / "tape"> " error"
-        .byte   FN_NEWLINE, FN_MEDIA_CURRENT, __, ER, _R, OR
+        ; $FF:  "disk" / "tape", " error"
+        .byte   FN_NEWLINE, FN_MEDIA_CURRENT, __, ER, "R", OR
         .msg_id "ERROR"
 
 ;-------------------------------------------------------------------------------
@@ -2035,112 +2050,101 @@ _1a5c:                                                                  ;$1A5C
         .byte   __end
         
         ; 1.
-        .byte   THE__, _C, _O, LO, _N, _I, ST, _S, __, _H, _E, RE, __
-        .byte   _H, _A, VE, __, _V, _I, _O, _L, AT, ED, FN_02, __
-        .byte   IN, _T, ER, _G, AL, _A, _C, TI, _C, __, _C, LO, _N, ING__
-        .byte   _P, _R, _O, _T, _O, _C, _O, _L, FN_0D, __AND__
-        .byte   _S, _H, OU, _L, _D, __, BE, __, _A, _V, _O, _I, _D, ED
+        .byte   THE__, "CO", LO, "NI", ST, "S", __, "HE", RE, __, "HA", VE, __
+        .byte   "VIOL", AT, ED, FN_02, __, IN, "T", ER, "G", AL, "AC", TI, "C"
+        .byte   __, "C", LO, "N", ING__, "PROTOCOL", FN_0D, __AND__
+        .byte   "SH", OU, "LD", __, BE, __, "AVOID", ED
         .byte   __end
         
         ; 2.
-        ; TODO: "constrictor" should be capitalised
-        .byte   THE__, _C, ON, ST, _R, _I, _C, _T, OR, __, WAS_LAST_SEEN_AT__
-        .byte   RE, ES, DI, CE, COMMA, __, COMMANDER
+        ; TODO: "Constrictor" should be capitalised
+        .byte   THE__, "C", ON, ST, "RICT", OR, __, WAS_LAST_SEEN_AT__
+        ;       NOTE: "WAS_LAST_SEEN_AT__" ends with `FN_CAPNEXT`
+        .byte   RE, ES, DI, CE, ",", __, COMMANDER
         .byte   __end
 
         ; 3.
-        .byte   _A, __, FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR, __
-        .byte   LO, _O, _K, ING__, SHIP, __, LE, _F, _T, __, _H, _E, RE
-        .byte   __A__, _W, _H, _I, LE, __, _B, _A, _C, _K, DOT, __
-        .byte   _L, _O, _O, _K, ED__, _B, OU, _N, _D, __, _F, OR, __
-        ; TODO: "arexe" should be capitalised
-        .byte   AR, _E, XE, __end
+        .byte   "A", __, FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR, __
+        .byte   LO, "OK", ING__, SHIP, __, LE, "FT", __, "HE", RE
+        .byte   __A__, "WHI", LE, __, "BACK.", __, "LOOK", ED__
+        .byte   "B", OU, "ND", __, _F, OR, __
+        ; TODO: "Arexe" should be capitalised
+        .byte   AR, "E", XE, __end
         
         ; 4.
-        .byte   _Y, _E, _P, COMMA, __A__, FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR
-        .byte   __NEW__, SHIP, __, _H, _A, _D, __A__, _G, AL, _A, _C, TI, _C, __
-        .byte   _H, _Y, _P, ER, _D, _R, _I, VE, __, _F, IT, _T, ED__
-        .byte   _H, _E, RE, DOT, __, US, ED__, IT, __, _T, _O, _O, __end
+        .byte   "YEP,", __A__, FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR, __NEW__
+        .byte   SHIP, __, "HAD", __A__, "G", AL, "AC", TI, "C", __
+        .byte   "HYP", ER, "DRI", VE, __, "F", IT, "T", ED__, "HE", RE, "."
+        .byte   __, US, ED__, IT, __, "TOO", __end
         
         ; 5.
         .byte   THIS__, __, FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR, __, SHIP, __
-        .byte    _D, _E, _H, _Y, _P, ED__, _H, _E, RE, __, _F, _R, _O, _M, __
-        .byte   NO, _W, _H, _E, RE, COMMA, __, _S, _U, _N, __
-        .byte   _S, _K, _I, _M, _M, ED, __AND__, _J, _U, _M, _P, ED, DOT, __
-        .byte   _I, __, _H, _E, AR, __, IT, __, _W, EN, _T, __TO__
-        .byte   IN, BI, BE, __end
+        .byte   "DEHYP", ED__, "HE", RE, __, "FROM", __, NO, "WHE", RE, ",", __
+        .byte   "SUN", __, "SKIMM", ED, __AND__, "JUMP", ED, ".", __, "I", __
+        .byte   "HE", AR, __, IT, __, "W", EN, "T", __TO__, IN, BI, BE, __end
         
         ; 6.
-        .byte   RANDOM_INSULT, __, SHIP, __, _W, EN, _T, __, _F, OR, __
-        .byte   _M, _E, __, AT, __, _A, US, AR, DOT, __, _M, _Y, __
-        .byte   LA, _S, ER, _S, __, _D, _I, _D, _N, APOS, _T, __
-        .byte   _E, _V, EN, __, _S, _C, RA, _T, _C, _H, __, THE__
-        .byte   RANDOM_INSULT, __end
+        .byte   RANDOM_INSULT, __, SHIP, __, "W", EN, "T", __, "F", OR, __
+        .byte   "ME", __, AT, __, "A", US, AR, ".", __, "MY", __
+        .byte   LA, "S", ER, "S", __, "DIDN'T", __, "EV", EN, __
+        .byte   "SC", RA, "TCH", __, THE__, RANDOM_INSULT, __end
         
         ; 7.
-        .byte   _O, _H, __, _D, _E, AR, __, _M, _E, __, _Y, ES, DOT
-        .byte   __A__, _F, _R, _I, _G, _H, _T, _F, _U, _L, __
-        .byte   _R, _O, _G, _U, _E, __, _W, _I, TH, __, _W, _H, AT, __
-        .byte   _I, __, BE, _L, _I, _E, VE, __, YOU, __
-        .byte   _P, _E, _O, _P, LE, __, _C, AL, _L, __A__, LE, _A, _D, __
-        .byte   _P, _O, ST, ER, _I, OR, __, _S, _H, _O, _T, __, _U, _P, __
-        .byte   LO, _T, _S, __, _O, _F, __, TH, _O, SE, __
-        .byte   BE, _A, ST, _L, _Y, __, _P, _I, RA, _T, ES, __AND__
-        ; TODO: "usleri" should be capitalised
-        .byte   _W, EN, _T, __TO__, US, LE, _R, _I
-        .byte   __end
+        .byte   "OH", __, "DE", AR, __, "ME", __, "Y", ES, ".", __A__
+        .byte   "FRIGHTFUL", __, "ROGUE", __, "WI", TH, __, "WH", AT, __
+        .byte   "I", __, BE, "LIE", VE, __, YOU, __, "PEOP", LE, __
+        .byte   "C", AL, "L", __A__, LE, "AD", __, "PO", ST, ER, "I", OR, __
+        .byte   "SHOT", __, "UP", __, LO, "TS", __, "OF", __, TH, "O", SE, __
+        .byte   BE, "A", ST, "LY", __, "PI", RA, "T", ES, __AND__, "W", EN, "T"
+        ; TODO: "Usleri" should be capitalised
+        .byte   __TO__, US, LE, "RI", __end
         
         ; 8.
-        .byte   YOU, __, _C, AN, __, _T, _A, _C, _K, LE, __, THE__
+        .byte   YOU, __, "C", AN, __, "TACK", LE, __, THE__
         .byte   KILLER_DEADLY_EVIL_LETHAL_VICIOUS, __, RANDOM_INSULT, __
-        .byte   _I, _F, __, YOU, __, _L, _I, _K, _E, DOT, __
-        ; TODO: "orarra" should be capitalised
-        .byte   _H, _E, APOS, _S, __, AT, __, OR, AR, RA, __end
+        .byte   "IF", __, YOU, __, "LIKE.", __, "HE'S", __, AT, __
+        ; TODO: "Orarra" should be capitalised
+        .byte   OR, AR, RA, __end
         
-        ; 9.    still waiting on OP...
+        ; 9.    still waiting for OP...
         .byte   FN_01
-        .byte   _C, _O, _M, ING__, SO, ON, COLON, __
-        .byte   _E, _L, IT, _E, __, _I, _I, __end
+        .byte   "COM", ING__, SO, ON, ":", __, "EL", IT, "E", __, "II", __end
         
-        .byte   .scramble($74), __end      ; 10.
-        .byte   .scramble($74), __end      ; 11.
-        .byte   .scramble($74), __end      ; 12.
-        .byte   .scramble($74), __end      ; 13.
-        .byte   .scramble($74), __end      ; 14.
-        .byte   .scramble($74), __end      ; 15.
-        .byte   .scramble($74), __end      ; 16.
-        .byte   .scramble($74), __end      ; 17.
-        .byte   .scramble($74), __end      ; 18.
-        .byte   .scramble($74), __end      ; 19.
-        .byte   .scramble($74), __end      ; 20.
-        .byte   .scramble($74), __end      ; 21.
-        .byte   .scramble($74), __end      ; 22.
+        ; prototype mission hints:
+        .byte   _74, __end      ; 10.
+        .byte   _74, __end      ; 11.
+        .byte   _74, __end      ; 12.
+        .byte   _74, __end      ; 13.
+        .byte   _74, __end      ; 14.
+        .byte   _74, __end      ; 15.
+        .byte   _74, __end      ; 16.
+        .byte   _74, __end      ; 17.
+        .byte   _74, __end      ; 18.
+        .byte   _74, __end      ; 19.
+        .byte   _74, __end      ; 20.
+        .byte   _74, __end      ; 21.
+        .byte   _74, __end      ; 22.
         
         ; 23.
-        .byte   _B, _O, _Y, __, _A, RE, __, YOU, __, IN, __, THE__
-        .byte   _W, _R, ON, _G, __, _G, AL, _A, _X, _Y, XMARK, __end
+        .byte   "BOY", __, "A", RE, __, YOU, __, IN, __, THE__
+        .byte   "WR", ON, "G", __, "G", AL, "AXY!", __end
         
         ; 24.
-        .byte   TH, ER, _E, APOS, _S, __A__, RE, AL, __, RANDOM_INSULT
-        .byte   __, _P, _I, RA, _T, _E, __, OU, _T, __, TH, ER, _E, __end
+        .byte   TH, ER, "E'S", __A__, RE, AL, __, RANDOM_INSULT, __
+        .byte   "PI", RA, "TE", __, OU, "T", __, TH, ER, "E", __end
         
         ; 25.
-        .byte   THE__, INHABITANT, _S, __, _O, _F, __
-        .byte   .scramble($6d), __, _A, RE, __, SO, __
-        .byte   _A, MA, _Z, IN, _G, _L, _Y, __
-        .byte   _P, _R, _I, _M, _I, TI, VE, __
-        .byte   TH, AT, __, TH, _E, _Y, __, ST
-        .byte   IL, _L, __, TH, IN, _K, __, FN_CAPNEXT
-        .byte   .scramble($2a),.scramble($2a), .scramble($2a), .scramble($2a)
-        .byte   .scramble($2a), __, .scramble($2a), .scramble($2a)
-        .byte   .scramble($2a), .scramble($2a), .scramble($2a), .scramble($2a)
-        .byte   __IS__, __, .scramble($33), _D
+        .byte   THE__, INHABITANT, "S", __, "OF", __, _6D, __
+        .byte   "A", RE, __, SO, __, "A", MA, "Z", IN, "GLY", __
+        .byte   "PRIMI", TI, VE, __, TH, AT, __, TH, "EY", __, ST, IL, "L", __
+        .byte   TH, IN, "K", __, FN_CAPNEXT
+        ;       ???
+        .byte   "*****", __, "******", __IS__, __, "3D"
         .byte   __end
         
         ; 26.   unused
-        .byte   FN_01, _W, _E, _L, _C, _O, _M, _E, __, _T, _O, __
-        .byte   _T, _H, _E, __, _S, _E, _V, _E, _N, _T, _E, _E, _N, _T, _H, __
-        .byte   _G, _A, _L, _A, _X, _Y, XMARK, __end
+        .byte   FN_01, "WELCOME", __, "TO", __, "THE", __, "SEVENTEENTH", __
+        .byte   "GALAXY!", __end
         
         ; 27.   TODO: this does not look like text
         ;       -- some other kind of lookup table?

@@ -6187,8 +6187,8 @@ _88ac:                                                                  ;$88AC
         jsr _845c               ; update missile blocks on HUD
 
         ; "press space or fire commander"
-.import MSG_DOCKED_07:direct
-        lda # MSG_DOCKED_07
+.import MSG_DOCKED_PRESS_SPACE_OR_FIRE_COMMANDER:direct
+        lda # MSG_DOCKED_PRESS_SPACE_OR_FIRE_COMMANDER
         ldx # $14
         ldy # $30
         jsr _8920
@@ -6560,8 +6560,7 @@ _8ab4:                                                                  ;$8AB4
 ;===============================================================================
 ; insert from "text/code_docked_fns.asm"
 ;
-.tkn_docked_fn_mediaCurrent                                             ;$8AB5
-.tkn_docked_fn_mediaOther                                               ;$8ABE
+.tkn_docked_fn_media                                                    ;$8AB5
 
 ;===============================================================================
 ; erase $0452...$048C
@@ -7405,7 +7404,7 @@ _9042:                                                                  ;$9042
         sta ZP_B9
         jsr set_cursor_col
 
-        jsr tkn_docked_bufferOff
+        jsr text_buffer_off
         lda VAR_04E6
 _905d:                                                                  ;$905D
         jsr print_flight_token

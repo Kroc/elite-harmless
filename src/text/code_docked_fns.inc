@@ -9,19 +9,18 @@
 
 .macro  .tkn_docked_fn01_02
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 tkn_docked_fn01:                                                        ;$246A
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_fn01
 
         lda # %00000000
 
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit
 
 tkn_docked_fn02:                                                        ;$246D
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_fn02
 
         lda # %00100000
@@ -37,11 +36,11 @@ tkn_docked_fn02:                                                        ;$246D
 
 .macro  .tkn_docked_flightTokens
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 use_flight_tokens:                                                      ;$2496
-;-------------------------------------------------------------------------------
+;===============================================================================
 ; begin printing flight-tokens in docked strings!
 ;
+;-------------------------------------------------------------------------------
 .export use_flight_tokens
         
         ; reset capitalisation?
@@ -56,9 +55,10 @@ use_flight_tokens:                                                      ;$2496
        .bit
 
 use_docked_tokens:                                                      ;$249D
-;-------------------------------------------------------------------------------
+;===============================================================================
 ; stop flight-token printing in docked strings:
 ;
+;-------------------------------------------------------------------------------
 .export use_docked_tokens
 
         ; disable the flag that causes docked tokens to be
@@ -73,9 +73,8 @@ use_docked_tokens:                                                      ;$249D
 
 .macro  .tkn_docked_fn08
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 tkn_docked_fn08:                                                        ;$2478
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_fn08
 
         lda # 6
@@ -91,13 +90,13 @@ tkn_docked_fn08:                                                        ;$2478
 
 .macro  .tkn_docked_clearScreen
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 tkn_docked_clearScreen:                                                 ;$2483
-;-------------------------------------------------------------------------------
+;===============================================================================
 ; move the cursor to the left and switch to an empty menu page:
 ; the game uses this for various interstitial screens such as
 ; "INCOMING MESSAGE"
 ;
+;-------------------------------------------------------------------------------
 .export tkn_docked_clearScreen
 
         lda # 1                 ;=page::empty
@@ -109,9 +108,8 @@ tkn_docked_clearScreen:                                                 ;$2483
 
 .macro  .tkn_docked_fn0D
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 tkn_docked_fn0D:                                                        ;$248B
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_fn0D
         
         ; enable the change-case flag?
@@ -129,7 +127,7 @@ tkn_docked_fn0D:                                                        ;$248B
 
 .macro  .tkn_docked_textBuffer
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-tkn_docked_bufferOn:                                                    ;$24A3
+text_buffer_on:                                                         ;$24A3
 ;===============================================================================
 ; enable the text-buffer:
 ;
@@ -137,7 +135,7 @@ tkn_docked_bufferOn:                                                    ;$24A3
 ; until it is released. this can be used to full-justify the text or inspect
 ; the characters in the buffer before they go to screen
 ;-------------------------------------------------------------------------------
-.export tkn_docked_bufferOn
+.export text_buffer_on
 
         ; use a high-bit for the 'on' value
         lda # %10000000
@@ -145,12 +143,12 @@ tkn_docked_bufferOn:                                                    ;$24A3
         ;  instruction, a very handy way of skipping without branching)
        .bit
 
-tkn_docked_bufferOff:                                                   ;$24A6
+text_buffer_off:                                                        ;$24A6
 ;===============================================================================
 ; disable the text-buffer:
 ;
 ;-------------------------------------------------------------------------------
-.export tkn_docked_bufferOff
+.export text_buffer_off
         
         lda # %00000000         ; 'off' value
         sta txt_buffer_flag     ; set the text-buffer flag
@@ -164,11 +162,10 @@ tkn_docked_bufferOff:                                                   ;$24A6
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .tkn_docked_fns_theirName_protoGalaxy
+.macro  .tkn_docked_fn_theirName
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 tkn_docked_theirName:                                                   ;$2372
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_theirName
 
         ; print a name from the docked token list:
@@ -177,8 +174,13 @@ tkn_docked_theirName:                                                   ;$2372
         lda # MSG_DOCKED_CURRUTHERS
         bne _2378               ; (always branches)
 
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro
+
+.macro  .tkn_docked_fn_protoGalaxy
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 tkn_docked_protoGalaxy:                                                 ;$2376
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_protoGalaxy
 
         ; when receiving the mission for tracking down the prototype ship,
@@ -198,15 +200,17 @@ _2378:  clc                                                             ;$2378
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .tkn_docked_fn11
+.macro  .tkn_docked_provenance
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-tkn_docked_fn11:                                                        ;$24B0
-;-------------------------------------------------------------------------------
-; print an ending to a name, e.g. "ian" for "Lavian"?
+target_system_provenance:                                                       ;$24B0
+;===============================================================================
+; print the name of the target system, with the -"ian" suffix:
+; if the system's last letter is a vowel it is removed, e.g. "Lavian"
 ;
-.export tkn_docked_fn11
+;-------------------------------------------------------------------------------
+.export target_system_provenance
 
+        ; remove any current capitalisation?
         lda ZP_34
         and # %10111111
         sta ZP_34
@@ -216,11 +220,11 @@ tkn_docked_fn11:                                                        ;$24B0
         lda # $03
         jsr print_flight_token
         
-        ldx txt_buffer_index
-        lda VAR_0647, x
-        jsr is_vowel
-        bcc :+
-        dec txt_buffer_index
+        ldx txt_buffer_index    ; read the last character...
+        lda VAR_0647, x         ; ...in the text-buffer
+        jsr is_vowel            ; is it a vowel?
+        bcc :+                  ; if no, add the -"ian" suffix
+        dec txt_buffer_index    ; if yes, remove the vowel!
 
         ; import the token for the -"ian" suffix (not Ian Bell!)
 .import MSG_DOCKED_IAN:direct
@@ -230,13 +234,14 @@ tkn_docked_fn11:                                                        ;$24B0
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .tkn_docked_randomName
+.macro  .print_random_name
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+print_random_name:                                                      ;$24CE
+;===============================================================================
 ; prints a randomised name:
 ;
-tkn_docked_randomName:                                                  ;$24CE
 ;-------------------------------------------------------------------------------
-.export tkn_docked_randomName
+.export print_random_name
 
         ; automatically capitalise the next letter, whatever it is
         jsr tkn_docked_capitalizeNext
@@ -270,11 +275,10 @@ tkn_docked_randomName:                                                  ;$24CE
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .tkn_docked_capitalizeNext ;(docked token $13)
+.macro  .tkn_docked_capitalizeNext
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 tkn_docked_capitalizeNext:                                              ;$24ED
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_capitalizeNext
         
         ; set ASCII upper-case (for next character)
@@ -288,9 +292,8 @@ tkn_docked_capitalizeNext:                                              ;$24ED
 
 .macro  .tkn_docked_fn16_17_1D
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 tkn_docked_fn16:                                                        ;$3E41
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_fn16
         
         jsr _3e65
@@ -310,7 +313,7 @@ _3e46:                                                                  ;$3E46
         jsr _9a86
 
 tkn_docked_fn17:                                                        ;$3E57  
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_fn17
 
         lda # 10
@@ -319,7 +322,7 @@ tkn_docked_fn17:                                                        ;$3E57
        .bit
 
 tkn_docked_fn1D:                                                        ;$3E5A
-;-------------------------------------------------------------------------------
+;===============================================================================
 .export tkn_docked_fn1D
 
         lda # 6
@@ -337,9 +340,10 @@ tkn_docked_fn1D:                                                        ;$3E5A
 
 .macro  .tkn_docked_waitForAnyKey
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+tkn_docked_waitForAnyKey:                                               ;$3E7C
+;===============================================================================
 ; press any key!
 ;
-tkn_docked_waitForAnyKey:                                               ;$3E7C
 ;-------------------------------------------------------------------------------
 .export tkn_docked_waitForAnyKey
         
@@ -360,9 +364,10 @@ tkn_docked_waitForAnyKey:                                               ;$3E7C
 
 .macro  .tkn_docked_incoming_message
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+tkn_docked_incoming_message:                                            ;$3E37
+;===============================================================================
 ; print "INCOMING MESSAGE" on screen and wait a bit
 ;
-tkn_docked_incoming_message:                                            ;$3E37
 ;-------------------------------------------------------------------------------
 .export tkn_docked_incoming_message
 
@@ -380,11 +385,12 @@ tkn_docked_incoming_message:                                            ;$3E37
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .tkn_docked_fn_mediaCurrent
+.macro  .tkn_docked_fn_media
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+tkn_docked_fn_mediaCurrent:                                             ;$8AB5
+;===============================================================================
 ; print the currently selected load/save media: "disk" or "tape"
 ;
-tkn_docked_fn_mediaCurrent:                                             ;$8AB5
 ;-------------------------------------------------------------------------------
 .export tkn_docked_fn_mediaCurrent
 .import MSG_DOCKED_TAPE:direct
@@ -394,15 +400,12 @@ tkn_docked_fn_mediaCurrent:                                             ;$8AB5
         adc opt_device          ; $FF = disk,   $00 = tape
         jmp print_docked_str    ; $02 = "DISK", $03 = "TAPE"
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
 
-.macro  .tkn_docked_fn_mediaOther
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+tkn_docked_fn_mediaOther:                                               ;$8ABE
+;===============================================================================
 ; print the opposite of the currently selected load/save media,
 ; "disk" or "tape"
 ;
-tkn_docked_fn_mediaOther:                                               ;$8ABE
 ;-------------------------------------------------------------------------------
 .export tkn_docked_fn_mediaOther
 .import MSG_DOCKED_MEDIAS:direct

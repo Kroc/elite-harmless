@@ -5,7 +5,8 @@
 
 ; insert these docked token functions from "code_docked_fns.asm"
 ;
-.tkn_docked_fns_theirName_protoGalaxy                                   ;$2372
+.tkn_docked_fn_theirName                                                ;$2372
+.tkn_docked_fn_protoGalaxy                                              ;$2376
 
 _237e:                                                                  ;$237E
 ;===============================================================================
@@ -292,8 +293,8 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
 .tkn_docked_fn0D                                                        ;$248B
 .tkn_docked_flightTokens                                                ;$2496
 .tkn_docked_textBuffer                                                  ;$24A3
-.tkn_docked_fn11                                                        ;$24B0
-.tkn_docked_randomName                                                  ;$24CE
+.tkn_docked_provenance                                                  ;$24B0
+.print_random_name                                                      ;$24CE
 .tkn_docked_capitalizeNext                                              ;$24ED
 
 is_vowel:                                                               ;$24F3
