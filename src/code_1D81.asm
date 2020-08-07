@@ -569,8 +569,8 @@ _2014:                                                                  ;$2014
         beq _201b
         ldy # $0a
 
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit
 _201b:                                                                  ;$201B
         ldy # $0b

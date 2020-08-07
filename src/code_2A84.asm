@@ -751,11 +751,10 @@ _2c7a:                                                                  ;$2C7A
 _2c7c:                                                                  ;$2C7C
         rts 
 
-;===============================================================================
 
 _2c7d:                                                                  ;$2C7D
+;===============================================================================
 .import MSG_DOCKED_DOCKED:direct
-
         lda # MSG_DOCKED_DOCKED
         jsr print_docked_str
 
@@ -998,16 +997,15 @@ _2d8d:                                                                  ;$2D8D
 _2dc4:                                                                  ;$2DC4
         rts 
 
-;===============================================================================
-;
-;       X = offset from `ZP_POLYOBJECT` to the desired matrix row;
-;           that is, a `MATRIX_ROW_*` constant
-;
-;       Y = offset from `ZP_POLYOBJECT` to the desired matrix row;
-;           that is, a `MATRIX_ROW_*` constant
-;
-_2dc5:                                                                  ;$2DC5
 
+_2dc5:                                                                  ;$2DC5
+;===============================================================================
+; in:   X       offset from `ZP_POLYOBJECT` to the desired matrix row;
+;               that is, a `MATRIX_ROW_*` constant
+;
+;       Y       offset from `ZP_POLYOBJECT` to the desired matrix row;
+;               that is, a `MATRIX_ROW_*` constant
+;-------------------------------------------------------------------------------
 COL0    = $00           ; column 0 of the matrix row
 COL0_LO = $00
 COL0_HI = $01
@@ -1020,7 +1018,6 @@ COL2_HI = $05
 
         ; ROW X
         ;-----------------------------------------------------------------------
-
         lda ZP_POLYOBJ + COL0_HI, x
         and # %01111111         ; extract HI byte without sign
         lsr                     ; divide by 2
@@ -1037,7 +1034,6 @@ COL2_HI = $05
 
         ; ROW Y
         ;-----------------------------------------------------------------------
-
         lda ZP_POLYOBJ + COL0_LO, y
         sta ZP_VAR_P
         
@@ -1634,10 +1630,11 @@ _2fee:                                                                  ;$2FEE
         jmp paint_char
 
 
+_2ff3:                                                                  ;$2FF3
 ;===============================================================================
 ; BBC code says this is "update displayed dials"
 ;
-_2ff3:                                                                  ;$2FF3
+;-------------------------------------------------------------------------------
         ; location of the speed bar on the HUD
         ; TODO: this should be defined in the file with the HUD graphics
         dial_speed_addr = ELITE_BITMAP_ADDR + .bmppos( 18, 30 )
@@ -1779,8 +1776,8 @@ _30bb:                                                                  ;$30BB
 
         txa 
 
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit 
 :       lda # .color_nybble(GREEN, GREEN)                               ;$30C8
         
@@ -2017,10 +2014,13 @@ _31be:                                                                  ;$31BE
         sta PLAYER_FUEL
         jmp _2101
 
-;===============================================================================
-
 _31c6:                                                                  ;$31C6
-        lda # $0e
+;===============================================================================
+; chart search function?
+;
+;-------------------------------------------------------------------------------
+.import MSG_DOCKED_PLANET_NAME_QMARK:direct
+        lda # MSG_DOCKED_PLANET_NAME_QMARK
         jsr print_docked_str
 
         jsr _6f82
@@ -2052,7 +2052,8 @@ _31f1:                                                                  ;$31F1
         ldy # $06
         jsr _a858
 
-        lda # $d7
+.import MSG_DOCKED_UNKNOWN_PLANET:direct
+        lda # MSG_DOCKED_UNKNOWN_PLANET
         jmp print_docked_str
 
         ;-----------------------------------------------------------------------
@@ -3419,9 +3420,9 @@ _3a3f:                                                                  ;$3A3F
 ;
 .include        "math/math_multiply_signed.asm"                         ;$3A48
 
-;===============================================================================
 
 _3ab2:                                                                  ;$3AB2
+;===============================================================================
         ldx ZP_POLYOBJ_XPOS_LO, y
         stx ZP_VAR_Q
         lda ZP_VAR_X
@@ -3441,9 +3442,9 @@ _3ab2:                                                                  ;$3AB2
 ;
 .include        "math/math_multiply+add.asm"                            ;$3ACE 
 
-;===============================================================================
 
 _3b0d:                                                                  ;$3B0D
+;===============================================================================
         stx ZP_VAR_Q
         eor # %10000000
         jsr multiply_and_add
@@ -3924,7 +3925,9 @@ _3d3d:                                                                  ;$3D3D
         tya 
         jsr _237e
 
-        lda # $b1
+        ; print ".", newline, buffer-off
+.import MSG_DOCKED_B1:direct
+        lda # MSG_DOCKED_B1
         bne _3d7a
 _3d6c:                                                                  ;$3D6C
         dey 
@@ -3938,7 +3941,8 @@ _3d6f:                                                                  ;$3D6F
         dex 
         bpl :-
 
-        lda # $05
+.import MSG_DOCKED_05:direct
+        lda # MSG_DOCKED_05
 _3d7a:  jmp print_docked_str                                            ;$3D7A
 
 
@@ -3967,7 +3971,9 @@ mission_blueprints_ceerdi:                                              ;$3D8D
         ora # %00001010
         sta MISSION_FLAGS
 
-        lda # $de
+        ; print mission text
+.import MSG_DOCKED_DE:direct
+        lda # MSG_DOCKED_DE
         bne _3d87               ; (always branches)
 
 mission_blueprints_birera:                                              ;$3D9B
@@ -3982,7 +3988,9 @@ mission_blueprints_birera:                                              ;$3D9B
 
         inc PLAYER_KILLS
         
-        lda # $df
+        ; print mission text
+.import MSG_DOCKED_DF:direct
+        lda # MSG_DOCKED_DF
         bne _3d87               ; (always branches)
 
 _3daf:                                                                  ;$3DAF
@@ -3994,7 +4002,8 @@ _3daf:                                                                  ;$3DAF
         ldy # $c3
         jsr _7481
         
-        lda # $0f
+.import MSG_DOCKED_CONGRATULATIONS:direct
+        lda # MSG_DOCKED_CONGRATULATIONS
 _3dbe:                                                                  ;$3DBE
         bne _3d87               ; (always branches)
 
@@ -4084,7 +4093,10 @@ _3e24:                                                                  ;$3E24
         jmp _3e11
 _3e31:                                                                  ;$3E31
         inc ZP_POLYOBJ_ZPOS_MI
-        lda # $0a
+
+        ; print mission text
+.import MSG_DOCKED_0A:direct
+        lda # MSG_DOCKED_0A
         bne _3dbe               ; always branches
 
 ;===============================================================================

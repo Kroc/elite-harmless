@@ -753,7 +753,7 @@ txt_docked:                                                             ;$0E00
         
         ; $05:
         .byte   _B0, _6D, __IS__, _6E, _B1, __end
-        .msg
+        .msg_id "05"
         
         ; $06:
         .byte   __, __, LOAD_NEW_COMMANDER, __
@@ -768,7 +768,7 @@ txt_docked:                                                             ;$0E00
         
         ; $08:
         .byte   COMMANDER, "'S", __NAME_QMARK__, __end
-        .msg
+        .msg_id "COMMANDERS_NAME_QMARK"
         
         ; $09:
         .byte   FN_NEWLINE, FN_CAPS_ON
@@ -819,7 +819,7 @@ txt_docked:                                                             ;$0E00
         .byte   _B1, FN_CAPS_OFF, FN_08
         .byte   "GOOD", __, "LUCK,", __, COMMANDER
         .byte   _D4, FN_16, __end
-        .msg
+        .msg_id "0A"
         
         ; $0B:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
@@ -845,11 +845,11 @@ txt_docked:                                                             ;$0E00
         
         ; $0D:  "by D.Braben & I.Bell"
         .byte   "BY", __DBRABEN_AND_IBELL, __end
-        .msg
+        .msg_id "BY_DBRABEN_AND_IBELL"
 
         ; $0E:
         .byte   FN_15, PLANET, __NAME_QMARK__, FN_1A, __end
-        .msg
+        .msg_id "PLANET_NAME_QMARK"
 
         ; $0F:
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN, FN_17, FN_BUFFER_ON
@@ -863,7 +863,7 @@ txt_docked:                                                             ;$0E00
         .byte   AN, "D", __, MA, "Y", BE, __, SO, ON, ER, __, TH, AN, __
         .byte   YOU, __, TH, IN, "K..", _D4
         .byte   FN_WAIT_FOR_KEY, __end
-        .msg
+        .msg_id "CONGRATULATIONS"
 
         ;-----------------------------------------------------------------------
         ; $10:  "fabled"
@@ -1648,7 +1648,7 @@ txt_docked:                                                             ;$0E00
 
         ; $B1:
         .byte   ".", FN_NEWLINE, FN_BUFFER_OFF, __end
-        .msg
+        .msg_id "B1"
         .tkn_id "_B1"
 
         ; $B2:  " and "
@@ -1819,9 +1819,9 @@ txt_docked:                                                             ;$0E00
         .msg_id "DOCKED"
         .tkn
 
-        ; $CE:
+        ; $CE:  "(Y/N)?"
         .byte   FN_CAPS_ON, "(Y/N)?", __end
-        .msg
+        .msg_id "YES_OR_NO"
         .tkn
 
         ; $CF:  "ship"
@@ -1870,9 +1870,9 @@ txt_docked:                                                             ;$0E00
         .tkn
 
         ;-----------------------------------------------------------------------
-        ; $D7:
+        ; $D7:  "unknown planet"
         .byte   FN_BUFFER_OFF, __, "UNK", NO, "WN", __, PLANET, __end
-        .msg_id "D7"
+        .msg_id "UNKNOWN_PLANET"
         
         ; $D8:
         .byte   FN_CLEAR_SCREEN, FN_08, FN_17, FN_CAPS_ON, __
@@ -1894,7 +1894,7 @@ txt_docked:                                                             ;$0E00
         .msg
         
         ;-----------------------------------------------------------------------
-        ; $DC:
+        ; $DC:  "was last seen at Reesdice"
         ;       NOTE: "WAS_LAST_SEEN_AT__" ends with `FN_CAPNEXT`
         .byte   WAS_LAST_SEEN_AT__, RE, ES, DI, CE, __end
         .msg
@@ -1960,7 +1960,7 @@ txt_docked:                                                             ;$0E00
         
         .byte   __, __, __, __, FN_CAPNEXT, "GOOD", __, "LUCK", __, COMMANDER
         .byte   _D4, FN_WAIT_FOR_KEY, __end
-        .msg
+        .msg_id "DE"
         
         ; $DF:  
         .byte   FN_INCOMING_MESSAGE, FN_CLEAR_SCREEN
@@ -1981,7 +1981,7 @@ txt_docked:                                                             ;$0E00
         .byte   FN_FLIGHT_ON, $25, FN_FLIGHT_OFF, __
         .byte   "AS", __, "PAYM", EN, "T", _D4
         .byte   FN_WAIT_FOR_KEY, __end
-        .msg
+        .msg_id "DF"
         
         ;-----------------------------------------------------------------------
         ; $E0:  "are you sure?"
@@ -2249,7 +2249,7 @@ _1a5c:                                                                  ;$1A5C
         
         ; 27.   TODO: this does not look like text
         ;       -- some other kind of lookup table?
-        .byte   .scramble($6d), FN_THEIR_NAME, FN_CAPNEXT
+        .byte   _6D, FN_THEIR_NAME, FN_CAPNEXT
         .byte   FN_16, FN_BUFFER_OFF, FN_BUFFER_OFF, $31, RANDOM_ENVIRONMENT, $31, $3a, FN_16
         .byte   FN_CAPNEXT, FN_14, $23, $30, $3a, FN_YOUR_NAME, FN_TARGET_SYSTEM
         .byte   FN_16, FN_BUFFER_OFF, FN_BUFFER_OFF, $31, $35, RANDOM_ENVIRONMENT, $31, $3a, FN_1D

@@ -975,7 +975,8 @@ _6e5d:                                                                  ;$6E5d
         lda # TXT_SELL
         jsr print_flight_token
 
-        lda # $ce
+.import MSG_DOCKED_YES_OR_NO:direct
+        lda # MSG_DOCKED_YES_OR_NO
         jsr print_docked_str
 
         jsr _6dc9
@@ -1088,7 +1089,9 @@ _6f37:                                                                  ;$6F37
 _6f3a:                                                                  ;$6F3a
         jsr print_flight_token
 
-        lda # $ce               ; TODO: what is this?
+        ; print "(Y/N)?"
+.import MSG_DOCKED_YES_OR_NO:direct
+        lda # MSG_DOCKED_YES_OR_NO
         jsr print_docked_str
 
         jsr _8fea
@@ -5776,6 +5779,7 @@ _8882:                                                                  ;$8882
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ldx # $0b
+        ; print "load new commander (Y/N)?"
 .import MSG_DOCKED_06:direct
         lda # MSG_DOCKED_06
         ldy # $d2
@@ -5937,7 +5941,9 @@ _8920:                                                                  ;$8920
         lda _1d08
         beq :+
 
-        lda # $0d
+        ; print "by d.braben & i.bell"
+.import MSG_DOCKED_BY_DBRABEN_AND_IBELL:direct
+        lda # MSG_DOCKED_BY_DBRABEN_AND_IBELL
         jsr print_docked_str
 
         ; NOTE: `_87b8` appears in the unused debug handler
@@ -6089,7 +6095,8 @@ _8a3a:                                                                  ;$8A3A
         lda # $07
         sta _8ab2
 
-        lda # $08
+.import MSG_DOCKED_COMMANDERS_NAME_QMARK:direct
+        lda # MSG_DOCKED_COMMANDERS_NAME_QMARK
         jsr print_docked_str
 
         jsr tkn_docked_fn1A
@@ -6410,7 +6417,9 @@ _8bc0:                                                                  ;$8BC0
         ;///////////////////////////////////////////////////////////////////////
         ;bug / unused code? (`jmp` instead of `jsr` above)
         ;
-        lda # $02
+        ; print "disk"
+.import MSG_DOCKED_MEDIAS:direct
+        lda # MSG_DOCKED_MEDIAS
         jsr print_docked_str
 
         jsr wait_for_input
