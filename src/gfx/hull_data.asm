@@ -51,38 +51,38 @@ hull_kill_hi:                                                           ;$D084
 ; NOTE: THE ORDER OF THESE INCLUDES DETERMINES THEIR INDICES,
 ;       AND THE ORDER OF THE DATA IN THE TABLES!
 ;
-.include        "gfx/hulls/hull_missile.asm"            ; missile
-.include        "gfx/hulls/hull_coreolis.asm"           ; station (coreolis)
-.include        "gfx/hulls/hull_escape.asm"             ; escape pod
-.include        "gfx/hulls/hull_plate.asm"              ; plate / alloy
-.include        "gfx/hulls/hull_cargo.asm"              ; cargo cannister
-.include        "gfx/hulls/hull_boulder.asm"            ; boulder
-.include        "gfx/hulls/hull_asteroid.asm"           ; asteroid
-.include        "gfx/hulls/hull_splinter.asm"           ; splinter
-.include        "gfx/hulls/hull_shuttle.asm"            ; shuttle
-.include        "gfx/hulls/hull_transporter.asm"        ; transporter
-.include        "gfx/hulls/hull_cobra-mkiii.asm"        ; cobra mk.III, trader
-.include        "gfx/hulls/hull_python_trader.asm"      ; python, trader
-.include        "gfx/hulls/hull_boa.asm"                ; boa
-.include        "gfx/hulls/hull_anaconda.asm"           ; anaconda
-.include        "gfx/hulls/hull_hermit.asm"             ; asteroid, hermit
-.include        "gfx/hulls/hull_viper.asm"              ; viper
-.include        "gfx/hulls/hull_sidewinder.asm"         ; sidewinder
-.include        "gfx/hulls/hull_mamba.asm"              ; mamba
-.include        "gfx/hulls/hull_krait.asm"              ; krait
-.include        "gfx/hulls/hull_adder.asm"              ; adder
-.include        "gfx/hulls/hull_gecko.asm"              ; gecko
-.include        "gfx/hulls/hull_cobra-mki.asm"          ; cobra mk.I
-.include        "gfx/hulls/hull_worm.asm"               ; worm
-.include        "gfx/hulls/hull_cobra-mkiii_pirate.asm" ; cobra mk.III, pirate
-.include        "gfx/hulls/hull_asp-mkii.asm"           ; asp mk.II
-.include        "gfx/hulls/hull_python_pirate.asm"      ; python, pirate
-.include        "gfx/hulls/hull_fer-de-lance.asm"       ; fer-de-lance
-.include        "gfx/hulls/hull_moray.asm"              ; moray
-.include        "gfx/hulls/hull_thargoid.asm"           ; thargoid
-.include        "gfx/hulls/hull_thargon.asm"            ; thargon
-.include        "gfx/hulls/hull_constrictor.asm"        ; constrictor
-.include        "gfx/hulls/hull_cougar.asm"             ; cougar (stealth ship)
-.include        "gfx/hulls/hull_dodo.asm"               ; station (dodo)
+.include "gfx/hulls/hull_missile.asm"           ; $01: missile
+.include "gfx/hulls/hull_coreolis.asm"          ; $02: station (coreolis)
+.include "gfx/hulls/hull_escape.asm"            ; $03: escape pod
+.include "gfx/hulls/hull_plate.asm"             ; $04: plate / alloy
+.include "gfx/hulls/hull_cargo.asm"             ; $05: cargo cannister
+.include "gfx/hulls/hull_boulder.asm"           ; $06: boulder
+.include "gfx/hulls/hull_asteroid.asm"          ; $07: asteroid
+.include "gfx/hulls/hull_splinter.asm"          ; $08: splinter
+.include "gfx/hulls/hull_shuttle.asm"           ; $09: shuttle
+.include "gfx/hulls/hull_transporter.asm"       ; $0A: transporter
+.include "gfx/hulls/hull_cobra-mkiii.asm"       ; $0B: cobra mk.III, trader
+.include "gfx/hulls/hull_python_trader.asm"     ; $0C: python, trader
+.include "gfx/hulls/hull_boa.asm"               ; $0D: boa
+.include "gfx/hulls/hull_anaconda.asm"          ; $0E: anaconda
+.include "gfx/hulls/hull_hermit.asm"            ; $0F: asteroid, hermit
+.include "gfx/hulls/hull_viper.asm"             ; $10: viper
+.include "gfx/hulls/hull_sidewinder.asm"        ; $11: sidewinder
+.include "gfx/hulls/hull_mamba.asm"             ; $12: mamba
+.include "gfx/hulls/hull_krait.asm"             ; $13: krait
+.include "gfx/hulls/hull_adder.asm"             ; $14: adder
+.include "gfx/hulls/hull_gecko.asm"             ; $15: gecko
+.include "gfx/hulls/hull_cobra-mki.asm"         ; $16: cobra mk.I
+.include "gfx/hulls/hull_worm.asm"              ; $17: worm
+.include "gfx/hulls/hull_cobra-mkiii_pirate.asm"; $18: cobra mk.III, pirate
+.include "gfx/hulls/hull_asp-mkii.asm"          ; $19: asp mk.II
+.include "gfx/hulls/hull_python_pirate.asm"     ; $1A: python, pirate
+.include "gfx/hulls/hull_fer-de-lance.asm"      ; $1B: fer-de-lance
+.include "gfx/hulls/hull_moray.asm"             ; $1C: moray
+.include "gfx/hulls/hull_thargoid.asm"          ; $1D: thargoid
+.include "gfx/hulls/hull_thargon.asm"           ; $1E: thargon
+.include "gfx/hulls/hull_constrictor.asm"       ; $1F: constrictor
+.include "gfx/hulls/hull_cougar.asm"            ; $20: cougar (stealth ship)
+.include "gfx/hulls/hull_dodo.asm"              ; $21: station (dodo)
 
                                                                         ;$EF90

@@ -296,7 +296,7 @@ hide_all_ships:                                                         ;$B341
        .bze @rts                ; no more ships once we hit a $00 marker
         bmi :+                  ; skip over planets/suns
 
-        jsr get_polyobj         ; get address of entity storage
+        jsr get_polyobj_addr    ; get address of entity storage
 
         ; make the entitiy invisible to the radar!
 

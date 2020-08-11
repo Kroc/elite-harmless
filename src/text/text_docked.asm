@@ -122,9 +122,9 @@ tkn_docked_functions:                                                   ;$250C
 ; token symbol:                 function:                               scrmbld:
 ;-------------------------------------------------------------------------------
 ; $01   ?
-.tkn_fn "CAPS_ON",              tkn_docked_fn01                         ;=$56
+.tkn_fn "CAPS_ON",              print_caps_on                           ;=$56
 ; $02   ?
-.tkn_fn "CAPS_OFF",             tkn_docked_fn02                         ;=$55
+.tkn_fn "CAPS_OFF",             print_caps_off                          ;=$55
 ; $03   print the name of the target system. note that this works
 ;       by printing this token number ($03) as a flight-token
 .tkn_fn "TARGET_SYSTEM",        print_flight_token                      ;=$54

@@ -217,14 +217,14 @@ hide_all_ships:
 ;===============================================================================
 ; appears to make all entities invisible to the radar scanner?
 ;
+;-------------------------------------------------------------------------------
         ; search through the poly objects in-play
         ldx # $00
-
 @next:  lda SHIP_SLOTS, x       ; what type of entitiy is here?
        .bze @rts                ; no more ships once we hit a $00 marker
         bmi :+                  ; skip over planets/suns
 
-        jsr get_polyobj         ; get address of entity storage
+        jsr get_polyobj_addr    ; get address of entity storage
 
         ; make the entitiy invisible to the radar!
 

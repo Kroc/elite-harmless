@@ -5,7 +5,7 @@
 ; $17: worm
 ;-------------------------------------------------------------------------------
 hull_index           .set hull_index + 1
-hull_worm_index        := hull_index
+hull_worm_index        := hull_index                                    ;=$17
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point

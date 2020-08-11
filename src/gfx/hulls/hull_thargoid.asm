@@ -5,7 +5,7 @@
 ; $1D: thargoid
 ;-------------------------------------------------------------------------------
 hull_index           .set hull_index + 1
-hull_thargoid_index    := hull_index
+hull_thargoid_index    := hull_index                                    ;=$1D
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point

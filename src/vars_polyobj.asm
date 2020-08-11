@@ -12,7 +12,7 @@
 ; http://wiki.alioth.net/index.php/Classic_Elite_entity_states
 ;
 .struct PolyObject                                                      ;offset
-        
+        ;=======================================================================
         ; NOTE: these are not addresses, but they are 24-bit
         xpos            .faraddr                                        ;+$00
         ypos            .faraddr                                        ;+$03
@@ -92,7 +92,7 @@
         trader          = %00000001     ; is a peaceful trader
 .endenum
 
-; this is a segement as we need to assign a place in RAM for it
+; this is a segment as we need to assign a place in RAM for it
 ; (based on everything else in RAM), but it's not written to disk;
 ; this variable space is only used at run-time
 ;
@@ -100,12 +100,12 @@
 ; in the original game, this is $F900
 ;
 .segment        "POLYOBJS"
-
+;===============================================================================
 POLYOBJECTS:                                                            ;$F900
 
-; there is a limit of 11 objects at the same time in the game.
-; with 11 objects this occupies 407 bytes. this could be expanded
-; to 13 objects (for 481 bytes of 37 bytes each) and remain page-aligned
+; TODO: there is a limit of 11 objects at the same time in the game;
+;       with 11 objects this occupies 407 bytes. this could be expanded
+;       to 13 objects (for 481 bytes of 37 bytes each) and remain page-aligned
 
 POLYOBJ_00:      .tag    PolyObject                                     ;$F900
 POLYOBJ_01:      .tag    PolyObject                                     ;$F925
@@ -118,3 +118,5 @@ POLYOBJ_07:      .tag    PolyObject                                     ;$FA03
 POLYOBJ_08:      .tag    PolyObject                                     ;$FA28
 POLYOBJ_09:      .tag    PolyObject                                     ;$FA4D
 POLYOBJ_10:      .tag    PolyObject                                     ;$FA72
+
+POLYOBJ_COUNT   = 11

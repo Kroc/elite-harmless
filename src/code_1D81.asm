@@ -597,7 +597,7 @@ _202f:                                                                  ;$202F
 
 _2039:                                                                  ;$2039
         sta ZP_A5               ; put ship type aside
-        jsr get_polyobj
+        jsr get_polyobj_addr
 
         ; copy the given PolyObject to the zero page:
         ; ($09..$2D)
@@ -924,7 +924,9 @@ _2230:                                                                  ;$2230
         and # %00011111
         bne _2283
 
-        lda VAR_045F
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_coreolis_index)
         bne _2277
 
         tay 
@@ -1040,7 +1042,9 @@ _22c2:                                                                  ;$22C2
         lda # $1e
         sta PLAYER_TEMP_CABIN
 
-        lda VAR_045F
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_coreolis_index)
         bne _231c
 
         ldy # .sizeof(PolyObject)

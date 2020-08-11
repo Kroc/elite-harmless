@@ -352,8 +352,9 @@ _2998:                                                                  ;$2998
         sta ZP_72
         jsr _a013
         bcs _2988
-        lda VAR_06F4
-        beq _29d2
+
+        lda LINE_FLIP           ; was the line co-ords flipped?
+        beq :+                  ; no, skip ahead
         
         lda ZP_VAR_X1
         ldy ZP_VAR_X2
@@ -363,10 +364,10 @@ _2998:                                                                  ;$2998
         ldy ZP_VAR_Y2
         sta ZP_VAR_Y2
         sty ZP_VAR_Y1
-_29d2:                                                                  ;$29D2
-        ldy ZP_7E                       ; current line-buffer cursor (1-based)
-        lda line_points_y-1, y          ; check current Y-coord
-        cmp # $ff                       ; is it the terminator?
+
+:       ldy ZP_7E               ; current line-buffer cursor (1-based)  ;$29D2
+        lda line_points_y-1, y  ; check current Y-coord
+        cmp # $ff               ; is it the terminator?
         bne _29e6
 
         ; add X1/Y1 to line-buffer
@@ -2189,8 +2190,12 @@ _32ad:                                                                  ;$32AD
         and # behaviour::angry
         bne _32da
         
-        lda VAR_0467
+        ; is this ship a transporter?
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_transporter_index)
         bne _3298
+
         jsr get_random_number
         cmp # $fd
         bcc _3298
@@ -2202,9 +2207,15 @@ _32da:                                                                  ;$32DA
         jsr get_random_number
         cmp # $f0
         bcc _3298
-        lda VAR_046D
+
+        ; how many police ships are present?
+        ;
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_viper_index)
         cmp # $04
         bcs _3328
+
         ldx # $10
 _32ea:                                                                  ;$32EA
         lda # $f1
@@ -2246,7 +2257,11 @@ _3319:                                                                  ;$3319
         cpx # $1e
         bne _3329
 
-        lda VAR_047A
+        ; are any thargoids present?
+        ;
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_thargoid_index)
         bne _3329
         
         lsr ZP_POLYOBJ_ATTACK
@@ -2295,7 +2310,9 @@ _3357:                                                                  ;$3357
         lsr 
         bcc _3365
         
-        lda VAR_045F
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_coreolis_index)
         beq _3365
 
         lda ZP_POLYOBJ_ATTACK
@@ -2536,7 +2553,10 @@ _34bc:                                                                  ;$34BC
         sta ZP_B0
         lda # $1d
         sta ZP_AB
-        lda VAR_045F
+
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_coreolis_index)
         bne _34cf
 _34cc:                                                                  ;$34CC
         jmp _3351
@@ -2855,7 +2875,7 @@ _36a6:                                                                  ;$36A6
         bcc _3701
         
         ldx ZP_MISSILE_TARGET
-        jsr get_polyobj
+        jsr get_polyobj_addr
 
         lda SHIP_SLOTS, x
         jsr _36c5
@@ -4130,7 +4150,7 @@ _3e65:                                                                  ;$3E65
 .tkn_docked_waitForAnyKey                                               ;$3E7C
 
 
-get_polyobj:                                                            ;$3E87
+get_polyobj_addr:                                                       ;$3E87
 ;===============================================================================
 ; a total of 11 3D-objects ("poly-objects") can be 'in-play' at a time,
 ; each object has a block of runtime storage to keep track of its current
@@ -4144,9 +4164,10 @@ get_polyobj:                                                            ;$3E87
 ; out:  $59/A   returns address
 ;
 ;-------------------------------------------------------------------------------
-        txa 
+        txa                     ; take poly-object index,
         asl                     ; multiply by 2 (for 2-byte table-lookup)
-        tay 
+        tay                     ; move to Y for indexing...
+
         lda polyobj_addrs_lo, y
         sta ZP_POLYOBJ_ADDR_LO
         lda polyobj_addrs_hi, y

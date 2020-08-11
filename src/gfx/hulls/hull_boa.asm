@@ -5,7 +5,7 @@
 ; $0D: boa
 ;-------------------------------------------------------------------------------
 hull_index           .set hull_index + 1
-hull_boa_index         := hull_index
+hull_boa_index         := hull_index                                    ;=$0D
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point

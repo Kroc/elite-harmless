@@ -5,7 +5,7 @@
 ; $0C: python (trader)
 ;-------------------------------------------------------------------------------
 hull_index           .set hull_index + 1
-hull_da4b_index        := hull_index
+hull_da4b_index        := hull_index                                    ;=$0C
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point

@@ -31,17 +31,47 @@ SHIP_SLOT8              = $045a
 SHIP_SLOT9              = $045b
 SHIP_SLOT10             = $045c
 
-VAR_045D                = $045d ;? (indexed by X)
-
-VAR_045F                = $045f ;?
-
-VAR_0467                = $0467 ;?
-
-VAR_046D                = $046d ;?
-
-VAR_047A                = $047a ;?
-
-VAR_047C                = $047c ;?
+; this is an array to count the number of each type of ship in play.
+; as it is indexed by the ship-type, the order is determined by the
+; order of hulls in "hull_data.asm". for the original, unmodified Elite,
+; the resepective addresses and ship-types are listed below:
+; (do NOT take this order as given for elite-harmless)
+;
+SHIP_TYPES              = $045d ; number of ships of type X, indexed
+                        ; $045D = unused
+                        ; $045E = $01: missile
+                        ; $045F = $02: station (coreolis)
+                        ; $0460 = $03: escape pod
+                        ; $0461 = $04: plate / alloy
+                        ; $0462 = $05: cargo cannister
+                        ; $0463 = $06: boulder
+                        ; $0464 = $07: asteroid
+                        ; $0465 = $08: splinter
+                        ; $0466 = $09: shuttle
+                        ; $0467 = $0A: transporter
+                        ; $0468 = $0B: cobra mk.III, trader
+                        ; $0469 = $0C: python, trader
+                        ; $046A = $0D: boa
+                        ; $046B = $0E: anaconda
+                        ; $046C = $0F: asteroid, hermit
+                        ; $046D = $10: viper
+                        ; $046E = $11: sidewinder
+                        ; $046F = $12: mamba
+                        ; $0470 = $13: krait
+                        ; $0471 = $14: adder
+                        ; $0472 = $15: gecko
+                        ; $0473 = $16: cobra mk.I
+                        ; $0474 = $17: worm
+                        ; $0475 = $18: cobra mk.III, pirate
+                        ; $0476 = $19: asp mk.II
+                        ; $0477 = $1A: python, pirate
+                        ; $0478 = $1B: fer-de-lance
+                        ; $0479 = $1C: moray
+                        ; $047A = $1D: thargoid
+                        ; $047B = $1E: thargon
+                        ; $047C = $1F: constrictor
+                        ; $047D = $20: cougar (stealth ship)
+                        ; $047E = $21: station (dodo)
 
 NUM_ASTEROIDS           = $047f ; number of asteroids present
 
@@ -312,7 +342,7 @@ DUST_Z                  = $06d6 ;..$06E1: Z-positions of dust-particles
 ;-------------------------------------------------------------------------------
 ; circles are converted into a list of half-widths for each scan-line, i.e.
 ; for each scanline in the viewport, this array provides a radius for that
-; scanline where the centre point of the sun is already known
+; scanline where the centre point of the circle is already known
 ;
 ; the planets in the local chart are also drawn using this system,
 ; so up to 200 scan-lines are accounted for despite the viewport
@@ -329,6 +359,6 @@ VAR_06E3                = $06e3 ;? (indexed by Y)
 VAR_06F0                = $06f0 ;?
 VAR_06F1                = $06f1 ;?
 VAR_06F3                = $06f3 ;?
-VAR_06F4                = $06f4 ;?
+LINE_FLIP               = $06f4 ; flag for when line's start/end were swapped
 
 VAR_06FB                = $06fb ; title screen poly-object z-distance?

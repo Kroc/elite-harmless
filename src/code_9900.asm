@@ -1191,7 +1191,7 @@ _9fd9:                                                                  ;$9FD9
 ;
 _a013:                                                                  ;$A013
         lda # $00
-        sta VAR_06F4
+        sta LINE_FLIP
         lda ZP_70               ; "X2 HI"
 
 ; "CLIP2 arrives here from LL79 to do swop and clip"
@@ -1371,7 +1371,7 @@ _a110:                                                                  ;$A110
         stx ZP_72
         sta ZP_VAR_Y2
         jsr _a19f
-        dec VAR_06F4
+        dec LINE_FLIP
 _a136:                                                                  ;$A136
         pla 
         tay 
@@ -2399,7 +2399,7 @@ set_page:                                                               ;$A72F
 
 _set_page:                                                              ;$A731
         ;-----------------------------------------------------------------------
-        jsr tkn_docked_fn02     ; reset text case-shifting?
+        jsr print_caps_off      ; reset text case-shifting?
 
         lda # $00
         sta ZP_7E               ; "arc counter"?
@@ -2461,8 +2461,9 @@ _a75d:                                                                  ;$A75D
         stx ZP_34
 
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         rts 
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 ;===============================================================================
 
@@ -2616,19 +2617,20 @@ _a839:                                                                  ;$A839
         jsr _a858
 
         ; wait until the next frame:
-        ; SPEED: could just call `wait_for_frame` instead
+        ; TODO: could just call `wait_for_frame` instead
         ldy # 1
         jsr wait_frames
 
         ldy # $87
         bne _a858               ; awlays branches
 
-;===============================================================================
-;       A = X1
-;       X = Y1
-;       Y = ?
-;
+
 _a850:                                                                  ;$A850
+;===============================================================================
+; in:   A       X1
+;       X       Y1
+;       Y       ?
+;-------------------------------------------------------------------------------
         bit _a821               ; an unused skip? = `and [ZP_A8, x]`
         
         sta ZP_VAR_X1
@@ -2636,10 +2638,11 @@ _a850:                                                                  ;$A850
         ; this causes the `clv` below to become a `branch on overflow clear`
         ; to $A811 -- the address is defined by the opcode of `clv` ($B8)
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         .byte   $50
-.else
+.else   ;///////////////////////////////////////////////////////////////////////
         .byte   $a5             ; lda ZP
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _a858:                                                                  ;$A858
 ;       Y = $00-$0F?
@@ -2750,7 +2753,7 @@ _a8bd:                                                                  ;$A8BD
 
 _b09d:                                                                  ;$B09D
 ;===============================================================================
-; plot a multi-color pixel
+; plot a multi-color pixel:
 ;
 ; in:   VAR_04EB        Y position, in view-port pixels (0-255). adjusted
 ;                       automatically to nearest multi-color pixel (0-127)
@@ -3200,10 +3203,11 @@ _b210:  ; restore registers before returning                            ;$B210
 ; flight screen and menu screens. clears or redraws the HUD accordingly
 ;
 .ifdef  OPTION_ORIGINAL
-.include        "orig/clear_screen.asm"                                 ;$B21A
-.else
-.include        "gfx/clear_screen.asm"
-.endif
+        ;///////////////////////////////////////////////////////////////////////
+        .include        "orig/clear_screen.asm"                         ;$B21A
+.else   ;///////////////////////////////////////////////////////////////////////
+        .include        "gfx/clear_screen.asm"
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 
 tkn_docked_fn15:                                                        ;$B3D4
@@ -3259,10 +3263,12 @@ tkn_docked_fn15:                                                        ;$B3D4
 _b40f:                                                                  ;$B40F
         rts 
 
+
+_b410:                                                                  ;$B410
 ;===============================================================================
 ; draw scanner stalk?
 ;
-_b410:                                                                  ;$B410
+;-------------------------------------------------------------------------------
         lda ZP_SCREEN           ; are we in the cockpit-view?
        .bnz _b40f               ; no? exit now (RTS above us)
 

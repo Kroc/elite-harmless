@@ -7,20 +7,27 @@
 ; first 32 "docked" string tokens. these are stored as macros in this file
 ; because their physical location in the original code is all over the place
 
-.macro  .tkn_docked_fn01_02
+.macro  .tkn_docked_caps
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-tkn_docked_fn01:                                                        ;$246A
+print_caps_on:                                                          ;$246A
 ;===============================================================================
-.export tkn_docked_fn01
+; capitalise all letters when printing:
+;
+;-------------------------------------------------------------------------------
+.export print_caps_on
 
+        ; note: all text in the docked text database is in upper-case,
+        ;       so this routine actually works by nullifying the
+        ;       automatic lower-case conversion!
+        ;
         lda # %00000000
         ; (this causes the next instruction to become a meaningless `bit`
         ;  instruction, a very handy way of skipping without branching)
        .bit
 
-tkn_docked_fn02:                                                        ;$246D
+print_caps_off:                                                         ;$246D
 ;===============================================================================
-.export tkn_docked_fn02
+.export print_caps_off
 
         lda # %00100000
         sta txt_lcase_mask

@@ -1944,8 +1944,11 @@ _73b3:                                                                  ;$73B3
         sty IS_WITCHSPACE
 _73c1:                                                                  ;$73C1
         jsr _739b
+        ; how many thargoids are present?
         lda # $03
-        cmp VAR_047A
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        cmp .loword(SHIP_TYPES+hull_thargoid_index)
         bcs _73c1
         sta DUST_COUNT          ; number of dust particles
 
@@ -2996,7 +2999,7 @@ _7b1c:                                                                  ;$7B1C
         bmi _7b41
         sta ZP_A5
 
-        jsr get_polyobj
+        jsr get_polyobj_addr
 
         ldy # PolyObject::visibility
 _7b2a:                                                                  ;$7B2A
@@ -3070,7 +3073,9 @@ _7b6d:                                                                  ;$7B6D
 _7b6f:                                                                  ;$7B6F
         jsr _b09d                       ; draw multi-color pixel?
 
-        lda VAR_045F
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_coreolis_index)
         bne _7ba8
 
         jsr _8c7b
@@ -3248,71 +3253,82 @@ _7c61:                                                                  ;$7C61
         lda #> CIRCLE_BUFFER
         sta ZP_TEMP_ADDR2_HI
 
-        lda # $02
+        ; select 'station' ship-type
+        lda # hull_coreolis_index
 
 _7c6b:                                                                  ;$7C6B
+;===============================================================================
         sta ZP_VAR_T            ; put aside ship-type
-        ldx # $00
 
+        ; find an empty slot to add the ship:
+        ;-----------------------------------------------------------------------
+        ldx # $00
 :       lda SHIP_SLOTS, x       ; is this ship-slot occupied?           ;$7C6F
-       .bze _7c7b               ; no, this slot is free
+       .bze @new                ; no, this slot is free
         inx                     ; continue to the next slot
-        cpx # 10                ; maximum number of poly-objects (11)
+        cpx # POLYOBJ_COUNT-1   ; maximum number of poly-objects
         bcc :-                  ; keep looping if slots remain
 
-_7c79:  ; return carry-clear for error                                  ;$7C79
-        clc 
-_7c7a:                                                                  ;$7C7A
-        rts 
+@err:   clc                     ; return carry-clear for error          ;$7C79
+@rts:   rts                                                             ;$7C7A
 
-_7c7b:                                                                  ;$7C7B
-        jsr get_polyobj
+        ;-----------------------------------------------------------------------
+        ; retrieve the poly-object storage address for the given slot
+        ; (address returned in ZP_POLYOBJ_ADDR)
+@new:   jsr get_polyobj_addr                                            ;$7C7B
 
-        lda ZP_VAR_T            ; ship type
-        bmi _7cd4               ; high-bit means planet/sun?
+        lda ZP_VAR_T            ; retrieve ship type again
+        bmi _7cd4               ; handle planet or sun!
 
-        asl 
-        tay 
+        asl                     ; double ship type for table lookup
+        tay                     ; transfer to Y for indexing...
+        
+        ; look up the hull data structure for the type of ship
         lda hull_pointers - 1, y
-        beq _7c79
+        beq @err
         sta ZP_HULL_ADDR_HI
         lda hull_pointers - 2, y
         sta ZP_HULL_ADDR_LO
 
-        cpy # $04               ; is space station (coreolis)?
+        ; is space station?
+        ; TODO: why does the space-station not use the line heap?
+        cpy # hull_coreolis_index*2
         beq _7cc4
 
-        ldy # Hull::_05         ;=$05: max.lines
-        lda [ZP_HULL_ADDR], y
-        sta ZP_TEMP_VAR
+        ; allocate the max. number of lines needed to draw the ship
+        ;
+        ldy # Hull::_05         ; hull max.lines
+        lda [ZP_HULL_ADDR], y   ; read from the hull data
+        sta ZP_TEMP_VAR         ; put aside
 
-        lda SHIP_LINES_LO
+        lda SHIP_LINES_LO       ; ship heap-pointer address, lo byte
         sec 
         sbc ZP_TEMP_VAR
         sta ZP_TEMP_ADDR2_LO
 
         lda SHIP_LINES_HI
-        sbc # $00
+        sbc # 0                 ; (ripple the carry)
         sta ZP_TEMP_ADDR2_HI
 
         lda ZP_TEMP_ADDR2_LO
         sbc ZP_POLYOBJ_ADDR_LO
         tay 
-
         lda ZP_TEMP_ADDR2_HI
         sbc ZP_POLYOBJ_ADDR_HI
-        bcc _7c7a
-        bne _7cba
+        bcc @rts                ; overflow? cannot allocate the ship!
+        bne :+
 
-        cpy # $25
-        bcc _7c7a
-_7cba:                                                                  ;$7CBA
-        lda ZP_TEMP_ADDR2_LO
+        cpy # $25               ;=.sizeof(PolyObject)?
+        bcc @rts
+
+        ; move the heap pointer backwards to its new position
+:       lda ZP_TEMP_ADDR2_LO                                            ;$7CBA
         sta SHIP_LINES_LO
         lda ZP_TEMP_ADDR2_HI
         sta SHIP_LINES_HI
+
 _7cc4:                                                                  ;$7CC4
-        ldy # Hull::energy      ;=$0E: energy
+        ldy # Hull::energy
         lda [ZP_HULL_ADDR], y
         sta ZP_POLYOBJ_ENERGY
 
@@ -3324,34 +3340,37 @@ _7cc4:                                                                  ;$7CC4
         lda ZP_VAR_T
 _7cd4:                                                                  ;$7CD4
         sta SHIP_SLOTS, x
+        
         tax 
         bmi _7cec               ; is sun/planet?
-
-        cpx # $0f
+        cpx # hull_dd35_index
         beq _7ce6
-        cpx # $03
-        bcc _7ce9
-        cpx # $0b
-        bcs _7ce9
-_7ce6:                                                                  ;$7CE6
-        inc NUM_ASTEROIDS
-_7ce9:                                                                  ;$7CE9
-        inc VAR_045D, x
+        cpx # hull_escape_index
+       .blt _7ce9
+        cpx # hull_cobramk3_index
+       .bge _7ce9
 
-_7cec:  ; sun or planet                                                 ;$7CEC
-        ldy ZP_VAR_T
+_7ce6:  inc NUM_ASTEROIDS                                               ;$7CE6
+
+        ; increment the ship-count for this type of ship
+_7ce9:  inc SHIP_TYPES, x                                               ;$7CE9
+
+        ; update behaviour?
+_7cec:  ldy ZP_VAR_T            ; ship type                             ;$7CEC
         lda hull_type - 1, y
         and # (behaviour::remove | behaviour::docking)^$FF    ;=%01101111
         ora ZP_POLYOBJ_BEHAVIOUR
         sta ZP_POLYOBJ_BEHAVIOUR
 
-        ldy # $24               ; `PolyObject::behaviour`?
-_7cf9:                                                                  ;$7CF9
-        lda ZP_POLYOBJ_XPOS_LO, y       ; what has this to do with behaviour???
+        ; copy the ship from the working-space in the zero-page
+        ; to its position in the poly-object array
+        ldy # .sizeof(PolyObject)-1
+:       lda ZP_POLYOBJ_XPOS_LO, y                                       ;$7CF9
         sta [ZP_POLYOBJ_ADDR], y
         dey 
-        bpl _7cf9
-        sec 
+        bpl :-
+
+        sec                     ; return success? 
         rts 
 
 ;-------------------------------------------------------------------------------
@@ -4185,14 +4204,17 @@ _80c0:                                                                  ;$80C0
         beq _80e6
 
         sta ZP_VAR_Y2
+
         lda line_points_x, y
         sta ZP_VAR_X2
         ; TODO: do validation of line direction here so as to allow
         ;       removal of validation in the line routine
         jsr draw_line
+        
         iny 
-        lda VAR_06F4
+        lda LINE_FLIP
         bne _80c0
+        
         lda ZP_VAR_X2
         sta ZP_VAR_X
         lda ZP_VAR_Y2
@@ -4640,7 +4662,9 @@ _82a4:                                                                  ;$82A4
         jsr clear_zp_polyobj
         jsr clear_circle_buffer
         sta SHIP_SLOT1
-        sta VAR_045F
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        sta .loword(SHIP_TYPES+hull_coreolis_index)
         jsr _b10e
         lda # $06
         sta ZP_POLYOBJ_YPOS_HI
@@ -4733,7 +4757,7 @@ _831d:                                                                  ;$831D
 _8329:                                                                  ;$8329
         dec NUM_ASTEROIDS
 _832c:                                                                  ;$832C
-        dec VAR_045D, x
+        dec SHIP_TYPES, x
 
         ldx ZP_AD
 
@@ -4909,8 +4933,11 @@ _83ed:                                                                  ;$83ED
         lda # $8F               ;?
         sta ZP_VIEWH
 
-        lda VAR_045F
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_coreolis_index)
         beq _8430
+
         jsr _b10e
 _8430:                                                                  ;$8430
         lda ZP_67
@@ -5120,8 +5147,12 @@ _8501:                                                                  ;$8501
         bvs _84c3
         ora # %01101111
         sta ZP_POLYOBJ_ROLL
-        lda VAR_045F
+
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_coreolis_index)
         bne _8562
+        
         txa 
         bcs _8548
         and # %00011111
@@ -5146,7 +5177,9 @@ _8559:                                                                  ;$8559
 _855f:                                                                  ;$855F
         jsr _7c6b
 _8562:                                                                  ;$8562
-        lda VAR_045F
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_coreolis_index)
         beq _856a
 _8567:                                                                  ;$8567
         jmp _8627
@@ -5154,8 +5187,14 @@ _8567:                                                                  ;$8567
 _856a:                                                                  ;$856A
         jsr illegal_cargo
         asl 
-        ldx VAR_046D
+
+        ; are any police ships present?
+        ;
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        ldx .loword(SHIP_TYPES+hull_viper_index)
         beq _8576
+        
         ora PLAYER_LEGAL
 _8576:                                                                  ;$8576
         sta ZP_VAR_T
@@ -5167,8 +5206,13 @@ _8576:                                                                  ;$8576
         lda # $10
         jsr _7c6b
 _8588:                                                                  ;$8588
-        lda VAR_046D
+        ; are any police ships present?
+        ;
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        lda .loword(SHIP_TYPES+hull_viper_index)
         bne _8567
+
         dec VAR_048A
         bpl _8567
         inc VAR_048A
@@ -5212,7 +5256,11 @@ _85bb:                                                                  ;$85BB
         lsr 
         bcc _85e0
 
-        ora VAR_047C
+        ; is the constrictor present?
+        ;
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        ora .loword(SHIP_TYPES+hull_constrictor_index)
         beq _85f0
 _85e0:                                                                  ;$85E0
         lda # behaviour::angry
@@ -6640,7 +6688,9 @@ do_quickjump:                                                           ;$8E29
         ;
         ldx NUM_ASTEROIDS       ; there are asteroids?
         lda SHIP_SLOT2, x
-        ora VAR_045F            ;?
+        ; NOTE: `.loword` is needed here to force a 16-bit
+        ;       parameter size and silence an assembler warning
+        ora .loword(SHIP_TYPES+hull_coreolis_index)
         ora IS_WITCHSPACE       ; we are in witchspace
        .bnz @nojump             ; -- cannot quick-jump
 

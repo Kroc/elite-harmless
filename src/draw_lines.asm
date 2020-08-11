@@ -166,8 +166,8 @@ draw_line:                                                              ;$AB91
         ;
         lda # $80                       ; = 128/256 (1/2, or "0.5")
         sta ZP_BF                       ; this will be the incremental counter
-        asl                             ; this just sets A to 0
-        sta VAR_06F4                    ;?
+        asl                             ; push bit 7 off, so A = 0
+        sta LINE_FLIP                   ; clear the line flip flag
 
         ; get width of the line:
         lda ZP_VAR_X2                   ; take line-starting X pos
@@ -218,12 +218,12 @@ draw_line_horz:                                                         ;$ABBB
 ; if calling into this point externally,
 ; the parameters would look like this:
 ;
-;       ZP_VAR_X1 = x-pos start of line in viewport pixels
-;       ZP_VAR_X2 = x-pos end of line in viewport pixels
-;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
-;       ZP_VAR_Y2 = y-pos end of line in viewport pixels
-;       ZP_REG_W  = width of line, i.e. ABS(X2-X1)
-;       ZP_REG_H  = height of line, i.e. ABS(Y2-Y1)
+; in:   ZP_VAR_X1       x-pos start of line in viewport pixels
+;       ZP_VAR_X2       x-pos end of line in viewport pixels
+;       ZP_VAR_Y1       y-pos start of line in viewport pixels
+;       ZP_VAR_Y2       y-pos end of line in viewport pixels
+;       ZP_REG_W        width of line, i.e. ABS(X2-X1)
+;       ZP_REG_H        height of line, i.e. ABS(Y2-Y1)
 ;
 ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
 ;-------------------------------------------------------------------------------
@@ -233,9 +233,10 @@ draw_line_horz:                                                         ;$ABBB
                                         ; note that the use of `ldx` means that
                                         ; X = horizontal start point (pixels)
         
-        ; line is the wrong way around,
-        ; flip the line's direction
-        dec VAR_06F4                    ;? 
+        ;-----------------------------------------------------------------------
+        ; line is the wrong way around!
+        ; flip the line's direction:
+        dec LINE_FLIP                   ; set the line flip flag (=$FF)
 
         lda ZP_VAR_X2                   ; flip beginning and end points;
         sta ZP_VAR_X1                   ; line-drawing will proceed
@@ -246,6 +247,7 @@ draw_line_horz:                                                         ;$ABBB
         sta ZP_VAR_Y1                   ; the lower Y-coordinate
         sty ZP_VAR_Y2                   ; Y = vertical start point (pixels)
 
+        ;-----------------------------------------------------------------------
         ; given a horizontal line that can only adjust one pixel vertically
         ; at a time, we must get the 'step' value that tells us how often
         ; the horizontal line takes a step vertically
@@ -348,7 +350,7 @@ draw_line_horzup:                                                       ;$AC19
         and # %00000111                 ; mod 8 (0...7)
         tax                             ; X = char cell pixel column no.
 
-        bit VAR_06F4
+        bit LINE_FLIP
         bmi @_ac49
 
         ; each pixel column has its own routine for drawing for speed purposes,
@@ -789,7 +791,7 @@ draw_line_horzdn:                                                       ;$AD8B
         lda ZP_VAR_X
         and # %00000111
         tax 
-        bit VAR_06F4
+        bit LINE_FLIP
         bmi _adc9
 
         lda _ab71, x
@@ -1208,8 +1210,10 @@ draw_line_vert:                                                         ;$AF08
         cpy ZP_VAR_Y2                   ; is line top-down, or bottom up?
        .bge :+                          ; if line is bottom-up, skip ahead
 
-        ; the line is top-down; we need to flip it
-        dec VAR_06F4                    ;?
+        ;-----------------------------------------------------------------------
+        ; line is the wrong way around!
+        ; flip the line's direction:
+        dec LINE_FLIP                   ; set the line flip flag (=$FF)
         
         lda ZP_VAR_X2
         sta ZP_VAR_X1
@@ -1220,6 +1224,7 @@ draw_line_vert:                                                         ;$AF08
         sty ZP_VAR_Y2
         tay 
 
+        ;-----------------------------------------------------------------------
         ; work out the bitmap address to begin line drawing
         ;
 :       txa                             ; retrieve starting X-position  ;$AF22
@@ -1298,7 +1303,7 @@ draw_line_vert:                                                         ;$AF08
         bcc _vertlt                     ; handle bottom-up, left-to-right line
 
         clc 
-        lda VAR_06F4
+        lda LINE_FLIP
         beq _vertrt_pixel_next
         
         dex 
@@ -1356,13 +1361,13 @@ _vertrt_pixel_next:                                                     ;$AF8E
 
 _vertlt:                                                                ;$AFBE
         ;=======================================================================
-        lda VAR_06F4
+        lda LINE_FLIP
         beq _vertlt_pixel_next
         dex 
 
 _vertlt_pixel:                                                          ;$AFC4
         ;-----------------------------------------------------------------------
-        lda ZP_BE                       ; get the current pixel mas
+        lda ZP_BE                       ; get the current pixel mask
         eor [ZP_TEMP_ADDR1], y          ; mask against the existing
         sta [ZP_TEMP_ADDR1], y          ; write back the new pixels
 
@@ -1418,10 +1423,11 @@ draw_straight_line:                                                     ;$AFFA
 ;===============================================================================
 ; draw a straight, horizontal line:
 ;
-;       ZP_VAR_Y  = Y-position
-;       ZP_VAR_X1 = starting X-position, in viewport pixels (0-255)
-;       ZP_VAR_X2 = ending X-position, in viewport pixels (0-255)
-;       preserves Y
+; in:   ZP_VAR_Y        Y-position
+;       ZP_VAR_X1       starting X-position, in viewport pixels (0-255)
+;       ZP_VAR_X2       ending X-position, in viewport pixels (0-255)
+;
+; out:  Y               (preserved)
 ;
 ; this is reasonably fast as it marches 8-pixels
 ; at a time in the middle of the line
@@ -1555,6 +1561,7 @@ draw_straight_line:                                                     ;$AFFA
         ldy ZP_9E                       ; restore Y
         rts                             ; line has been drawn!
 
+;-------------------------------------------------------------------------------
 ; unused / unreferenced?
 ; duplicate of $2900 / $2907 -- 
 ; likely intended for `draw_straight_line` above

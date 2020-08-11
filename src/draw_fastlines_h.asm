@@ -214,7 +214,7 @@ draw_line_horz:
         
         ; line is the wrong way around,
         ; flip the line's direction
-;        dec VAR_06F4           ;?
+;        dec LINE_FLIP           ;?
 
         lda ZP_VAR_X2           ; flip beginning and end points;
         sta ZP_VAR_X1           ; line-drawing will proceed

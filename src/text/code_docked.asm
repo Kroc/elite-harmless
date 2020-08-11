@@ -285,7 +285,7 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
 ;===============================================================================
 ; insert these docked token functions from "code_docked_fns.asm"
 ;
-.tkn_docked_fn01_02                                                     ;$246A
+.tkn_docked_caps                                                        ;$246A
 .tkn_docked_fn08                                                        ;$2478
 .tkn_docked_clearScreen                                                 ;$2483
 .tkn_docked_fn0D                                                        ;$248B

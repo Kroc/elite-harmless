@@ -150,9 +150,8 @@ init:
         lda # YELLOW
         sta VIC_SPRITE_EXTRA2
 
-        ; set all sprites to single-colour
-        ; (the Trumbles™ are actually multi-colour,
-        ;  so this must be changed at some point)
+        ; set all sprites to single-colour. (the explosion & Trumbles™ are
+        ; actually multi-colour, so this must get changed at some point)
         lda # %00000000
         sta VIC_SPRITE_MULTICOLOR
 
@@ -173,12 +172,13 @@ init:
         stx VIC_SPRITE0_X
         sty VIC_SPRITE0_Y
         
-        ; setup (but don't display) the Trumbles™
+        ; place the explosion sprite nowhere in particular
         lda # 18
         ldy # 12
         sta VIC_SPRITE1_X
         sty VIC_SPRITE1_Y
 
+        ; setup (but don't display) the Trumbles™
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         asl                     ; double x-position (=36)
@@ -190,6 +190,7 @@ init:
         asl                     ; double x-position (=144)
         sta VIC_SPRITE4_X
         sty VIC_SPRITE4_Y
+        
         lda # 14
         sta VIC_SPRITE5_X
         sty VIC_SPRITE5_Y
