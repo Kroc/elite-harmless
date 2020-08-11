@@ -57,8 +57,7 @@
     "spellright.documentTypes": [
         "markdown",
         "latex",
-        "plaintext",
-        "cc65"
+        "plaintext"
     ],
     "spellright.parserByClass": {
         "cc65": {

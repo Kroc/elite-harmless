@@ -333,9 +333,8 @@ ZP_PITCH_SIGN           = $94   ; pitch rotation sign (see $64 for magnitude)
 ZP_95                   = $95   ;? x6
 
 PLAYER_SPEED            = $96
-
-ZP_97                   = $97   ;? x5
-ZP_98                   = $98   ;? x4
+ZP_SPEED_LO             = $97   ; (player speed * 256) / 4, lo-byte
+ZP_SPEED_HI             = $98   ; (player speed * 256) / 4, hi-byte
 
 ZP_VAR_U                = $99   ; a common variable named "U"
 ZP_VAR_Q                = $9a   ; a common variable named "Q"

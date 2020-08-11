@@ -492,16 +492,16 @@ _hline_exit4:
 _hline_exit4_norestore:     
         rts                     ; line has been drawn!
 
+
+draw_straight_line:
 ;===============================================================================
 ; draw a straight, horizontal line:
 ;
-;       ZP_VAR_Y  = Y-position
-;       ZP_VAR_X1 = starting X-position, in viewport pixels (0-255)
-;       ZP_VAR_X2 = ending X-position, in viewport pixels (0-255)
-;       preserves Y
-;
-draw_straight_line:
-        
+; in:   ZP_VAR_Y        Y-position
+;       ZP_VAR_X1       starting X-position, in viewport pixels (0-255)
+;       ZP_VAR_X2       ending X-position, in viewport pixels (0-255)
+; out:  Y               (preserved)
+;-------------------------------------------------------------------------------        
         ; swap X1, X2 if neccessary
         lax ZP_VAR_X1
         cpx ZP_VAR_X2

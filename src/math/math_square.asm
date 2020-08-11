@@ -101,10 +101,8 @@ _399b:                                                                  ;$399B
 
 _399f:                                                                  ;$399F
         ; NOTE: this routine must preserve Y
-        
-        ; subtract 1 because carry will add one already
-        dex 
-        stx ZP_VAR_T
+        dex                     ; subtract 1 because carry will add one already 
+        stx ZP_VAR_T            ; this is the amount to add for each carry
 
         lda # $00
         tax 

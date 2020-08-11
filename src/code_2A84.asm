@@ -68,10 +68,10 @@ _28d0:  ; this looks like masks for multi-colour pixels?                ;$28D0
         .byte   %00000011       ;=$03
         .byte   %11000000       ;=$C0
 
-;===============================================================================
 
 _28d5:                                                                  ;$28D5
-        ; loads A & F with $0F!
+;===============================================================================
+        ; loads A & X with $0F!
         lda # $0f
         tax 
         rts 
@@ -79,7 +79,7 @@ _28d5:                                                                  ;$28D5
 
 print_flight_token_and_divider:                                         ;$28D9
 ;===============================================================================
-; print a flight token and then draw a line across the screen
+; print a flight token and then draw a line across the screen:
 ; i.e. screen titles
 ;
 ; in:   A       flight-token, already descrambled
@@ -145,7 +145,7 @@ _28f3:                                                                  ;$28F3
 ; for `draw_straight_line`: 
 ;
 ;       Y = Y-pos of line, in viewport px (0-144)
-;
+;-------------------------------------------------------------------------------
         jsr clip_circle_line
 
         ; set parameter for drawing line
@@ -158,9 +158,8 @@ _28f3:                                                                  ;$28F3
         jmp draw_straight_line
 
 
-;===============================================================================
-
 _2900:                                                                  ;$2900
+;===============================================================================
         .byte   %10000000       ;=$80
         .byte   %11000000       ;=$C0
         .byte   %11100000       ;=$E0
@@ -178,12 +177,14 @@ _2907:                                                                  ;$2907
         .byte   %00000011       ;=$03
         .byte   %00000001       ;=$01
 
+
 _290f:                                                                  ;$209F
 ;===============================================================================
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         txa 
         sta DUST_Y_LO, y
+
 
 draw_particle:                                                          ;$2918
 ;===============================================================================
@@ -227,9 +228,9 @@ draw_particle:                                                          ;$2918
 
         ; put aside the positive-only Y value
 :       sta ZP_VAR_T                                                    ;$2934
-
         ; get the viewport half-height again
         lda # (ELITE_VIEWPORT_HEIGHT / 2) + 1
+        ; calculate "Y-distance from the centre of the screen"
         sbc ZP_VAR_T
 
         ; fall through to the routine that does
@@ -250,7 +251,7 @@ paint_particle:                                                         ;$293A
         tay                     ; get a copy of our Y-coordinate
         
         ; get a bitmap address for a char row:
-        
+        ;
         ; reduce the X-position to a multiple of 8,
         ; i.e. a character column
         txa 
@@ -261,7 +262,7 @@ paint_particle:                                                         ;$293A
         adc row_to_bitmap_lo, y
         sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
-        adc # $00
+        adc # 0
         sta ZP_TEMP_ADDR1_HI
 
         ; get the row within the character cell
@@ -274,8 +275,8 @@ paint_particle:                                                         ;$293A
         and # %00000111         ; modulo 8 (0-7)
         tax 
         
-        ; the Z-check makes effectively the same paint operation for Z>=144
-        ; and Z>=80, this seems to be a remnant from a different implementation
+        ; the Z-check makes effectively the same paint operation for Z>=144 and
+        ; Z>=80, this seems to be a remnant from a different implementation.
         ; we could instead use this to grow dust in more detail, using
         ; a single-pixel bitmask for far, far away dust particles
         ;
@@ -287,33 +288,32 @@ paint_particle:                                                         ;$293A
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         lda _28c8, x            ; get mask for desired pixel-position
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
+        eor [ZP_TEMP_ADDR1], y  ; mask against the existing pixels
+        sta [ZP_TEMP_ADDR1], y  ; paint the pixel to the bitmap
         
         lda ZP_VAR_Z            ; again get the dust Z-distance
         cmp # 80                ; is the dust-particle >= 80 Z-distance?
-       .bge @restore
+       .bge @done
         
         dey                     ; move up a pixel-row 
         bpl :+                  ; didn't go off the top of the char?
         
-        ldy # $01               ; use row 1 instead of chnaging chars
+        ldy # $01               ; use row 1 instead of changing chars
 
-:       ; draw pixels for very distant dust:                            ;$296D
-
-        lda _28c8, x            ; get mask for desired pixel-position
+        ; draw pixels for very distant dust:
+        ;
+:       lda _28c8, x            ; get mask for desired pixel-position   ;$296D
         eor [ZP_TEMP_ADDR1], y  ; mask the background
         sta [ZP_TEMP_ADDR1], y  ; merge the pixel with the background
 
-@restore:                                                               ;$2974
-        ldy ZP_TEMP_VAR         ; restore Y
-_2976:                                                                  ;$2976
-        rts 
+@done:  ldy ZP_TEMP_VAR         ; restore Y                             ;$2974
+_2976:  rts                                                             ;$2976
 
+
+_2977:                                                                  ;$2977
 ;===============================================================================
 ; BBC code: "BLINE"; ball-line for circle
-;
-_2977:                                                                  ;$2977
+;-------------------------------------------------------------------------------
         txa 
         adc ZP_VAR_K4_LO
         sta ZP_8B
@@ -410,6 +410,7 @@ _29fa:                                                                  ;$29FA
 
         rts 
 
+
 dust_swap_xy:                                                           ;$2A12
 ;===============================================================================
         ldy DUST_COUNT          ; get number of dust particles
@@ -432,57 +433,82 @@ dust_swap_xy:                                                           ;$2A12
         rts 
 
 
-_animate_dust:                                                          ;$2A32
+move_dust:                                                              ;$2A32
 ;===============================================================================
-; animate dust particles based on COCKPIT_VIEW
+; move dust particles based on COCKPIT_VIEW:
+;
+; TODO: this process is horribly complex and slow,
+;       optimisation here might help a lot
 ;-------------------------------------------------------------------------------
-        ldx COCKPIT_VIEW
-        beq _animate_dust_front ; COCKPIT_VIEW == front
+        ldx COCKPIT_VIEW        ; current cockpit view direction
+        beq move_dust_front     ; COCKPIT_VIEW == front
         dex 
         bne :+                  ; animate left/right?
-        jmp _animate_dust_rear
+        jmp move_dust_rear
 :       jmp _37e9                                                       ;$2A3D
 
-_animate_dust_front:                                                    ;$2A40
-
+move_dust_front:                                                        ;$2A40
+        ;-----------------------------------------------------------------------
         ldy DUST_COUNT          ; number of dust particles
-_2a43:                                                                  ;$2A43
-        jsr _3b30               ; calculate PLAYER_SPEED / DUST_Z_HI, y -> {P.R}
-        lda ZP_VAR_R            ; unneccessary, A is R after _3b30
-        lsr ZP_VAR_P
-        ror 
-        lsr ZP_VAR_P
-        ror                     ; {P.A} = (PLAYER_SPEED / DUST_Z_HI) / 4
-        ora # %00000001         ; cheap way of asserting != 0 ?
+
+        ; calculate PLAYER_SPEED / DUST_Z_HI, y -> {P.R}
+@loop:  jsr get_dust_speed                                              ;$2A43
+
+        ; divide result by 4:
+        ;
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        lda ZP_VAR_R            ; unneccessary, A is R after `get_dust_speed`
+.endif  ;///////////////////////////////////////////////////////////////////////
+        lsr ZP_VAR_P            ; divide high byte by 2
+        ror                     ; ripple to low-byte
+        lsr ZP_VAR_P            ; divide high byte by 2, again
+        ror                     ; ripple to low-byte
+        ora # %00000001         ; must never be completely zero!
         sta ZP_VAR_Q            ; so Q is SPEED/DZ/4 if P is 0..sure?
+
+        ; subtract the fractional speed
         lda DUST_Z_LO, y
-        sbc ZP_97               ; ZP_97 is probably still (PLAYER_SPEED&3)<<6
+        sbc ZP_SPEED_LO         ; is probably still (PLAYER_SPEED&3)<<6
         sta DUST_Z_LO, y
+        
         lda DUST_Z_HI, y
-        sta ZP_VAR_Z
-        sbc ZP_98
+        sta ZP_VAR_Z            ; backup old dust-z value
+        sbc ZP_SPEED_HI
         sta DUST_Z_HI, y
+
+        ; move Y:
+        ;-----------------------------------------------------------------------
+        ; NOTE: this call is in the `math_square` routine, and reads
+        ;       the dust Y-position for the particle index in Y
         jsr _3992
         sta ZP_VAR_YY_HI
-        lda ZP_VAR_P1
+        
+        lda ZP_VAR_P
         adc DUST_Y_LO, y
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
+
         lda ZP_VAR_Y
         adc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
+        
+        ; move X:
+        ;-----------------------------------------------------------------------
         lda DUST_X_HI, y
         sta ZP_VAR_X
         jsr _3997
         sta ZP_VAR_XX_HI
-        lda ZP_VAR_P1
+        
+        lda ZP_VAR_P
         adc DUST_X_LO, y
         sta ZP_VAR_XX_LO
+        
         lda ZP_VAR_X
         adc ZP_VAR_XX_HI
         sta ZP_VAR_XX_HI
-        eor ZP_6A               ; move count?
+        eor ZP_6A               ; inverted roll sign?
         jsr _393c
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
@@ -494,13 +520,14 @@ _2a43:                                                                  ;$2A43
         stx ZP_VAR_XX_LO
         ldx ZP_PITCH_MAGNITUDE
         lda ZP_VAR_YY_HI
-        eor ZP_95
+        eor ZP_95               ; pitch sign?
         jsr _393e               ; multiply_small_number:A.P = A*X (X<32)
         sta ZP_VAR_Q
         jsr _3a4c
-        asl ZP_VAR_P1
+        asl ZP_VAR_P
         rol 
         sta ZP_VAR_T
+
         lda # $00
         ror 
         ora ZP_VAR_T
@@ -513,7 +540,7 @@ _2a43:                                                                  ;$2A43
         lda ZP_VAR_YY_HI
         sta ZP_VAR_S
         lda # $00
-        sta ZP_VAR_P1
+        sta ZP_VAR_P
         lda ZP_BETA
         eor # %10000000
         jsr _290f
@@ -522,30 +549,27 @@ _2a43:                                                                  ;$2A43
         sta DUST_X_HI, y
         and # %01111111
         cmp # $78
-        bcs _2b0a
+        bcs @2b0a
         lda ZP_VAR_YY_HI
         sta DUST_Y_HI, y
         sta ZP_VAR_Y
         and # %01111111
         cmp # $78
-        bcs _2b0a
+        bcs @2b0a
         lda DUST_Z_HI, y
         cmp # $10
-        bcc _2b0a
+        bcc @2b0a
         sta ZP_VAR_Z
-_2b00:                                                                  ;$2B00
-        jsr draw_particle
-        dey 
-        beq _2b09
-        jmp _2a43
 
-_2b09:                                                                  ;$2B09
-        rts 
+@draw:  jsr draw_particle       ; paint the dust particle to screen     ;$2B00
+        dey                     ; one more particle done 
+        beq @rts                ; if none left, exit
+        jmp @loop               ; process next dust particle
+
+@rts:   rts                                                             ;$2B09
 
         ;-----------------------------------------------------------------------
-
-_2b0a:                                                                  ;$2B0A
-        jsr get_random_number
+@2b0a:  jsr get_random_number                                           ;$2B0A
         ora # %00000100
         sta ZP_VAR_Y
         sta DUST_Y_HI, y
@@ -561,14 +585,14 @@ _2b0a:                                                                  ;$2B0A
         sta ZP_VAR_Z
         
         lda ZP_VAR_Y
-        jmp _2b00
+        jmp @draw
 
 
-_animate_dust_rear:                                                     ;$2B2D
+move_dust_rear:                                                         ;$2B2D
 ;===============================================================================
         ldy DUST_COUNT          ; number of dust particles
 _2b30:                                                                  ;$2B30
-        jsr _3b30
+        jsr get_dust_speed
         lda ZP_VAR_R
         lsr ZP_VAR_P1
         ror 
@@ -586,23 +610,30 @@ _2b30:                                                                  ;$2B30
         lda ZP_VAR_X
         sbc ZP_VAR_XX_HI
         sta ZP_VAR_XX_HI
+        ; NOTE: this call is in the `math_square` routine, and reads
+        ;       the dust Y-position for the particle index in Y
         jsr _3992
         sta ZP_VAR_YY_HI
+
         lda DUST_Y_LO, y
         sbc ZP_VAR_P1
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
+        
         lda ZP_VAR_Y
         sbc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
+        
         lda DUST_Z_LO, y
-        adc ZP_97
+        adc ZP_SPEED_LO
         sta DUST_Z_LO, y
+        
         lda DUST_Z_HI, y
         sta ZP_VAR_Z
-        adc ZP_98
+        adc ZP_SPEED_HI
         sta DUST_Z_HI, y
+        
         lda ZP_VAR_XX_HI
         eor ZP_ROLL_SIGN        ; roll sign?
         jsr _393c
@@ -614,11 +645,13 @@ _2b30:                                                                  ;$2B30
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         stx ZP_VAR_XX_LO
+        
         lda ZP_VAR_YY_HI
         eor ZP_95
         ldx ZP_PITCH_MAGNITUDE
         jsr _393e
         sta ZP_VAR_Q
+        
         lda ZP_VAR_XX_HI
         sta ZP_VAR_S
         eor # %10000000
@@ -626,6 +659,7 @@ _2b30:                                                                  ;$2B30
         asl ZP_VAR_P1
         rol 
         sta ZP_VAR_T
+        
         lda # $00
         ror 
         ora ZP_VAR_T
@@ -633,26 +667,34 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_XX_HI
         txa 
         sta DUST_X_LO, y
+        
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
+        
         lda ZP_VAR_YY_HI
         sta ZP_VAR_S
+        
         lda # $00
         sta ZP_VAR_P1
+        
         lda ZP_BETA
         jsr _290f
+        
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X
         sta DUST_X_HI, y
+        
         lda ZP_VAR_YY_HI
         sta DUST_Y_HI, y
         sta ZP_VAR_Y
         and # %01111111
         cmp # $6e
         bcs _2bf7
+        
         lda DUST_Z_HI, y
         cmp # $a0
         bcs _2bf7
+        
         sta ZP_VAR_Z
 _2bed:                                                                  ;$2BED
         jsr draw_particle
@@ -715,13 +757,14 @@ _2c43:                                                                  ;$2C43
         and # %01111111
         rts 
 
+
+_2c4e:                                                                  ;$2C4E
 ;===============================================================================
 ; examine a poly-object's X/Y/Z position?
 ;
-;       A = a starting value to merge with
-;       Y = a multiple of 37 bytes for each poly-object
-;
-_2c4e:                                                                  ;$2C4E
+; in:   A       a starting value to merge with
+;       Y       a multiple of 37 bytes for each poly-object
+;-------------------------------------------------------------------------------
         lda # $00
 _2c50:                                                                  ;$2C50
         ora POLYOBJECTS + PolyObject::xpos + 2, y
@@ -730,6 +773,7 @@ _2c50:                                                                  ;$2C50
         and # %01111111         ; strip sign
 
         rts 
+
 
 _2c5c:                                                                  ;$2C5C
 ;===============================================================================
@@ -755,6 +799,7 @@ _2c7c:                                                                  ;$2C7C
 
 _2c7d:                                                                  ;$2C7D
 ;===============================================================================
+        ; print "docked"
 .import MSG_DOCKED_DOCKED:direct
         lda # MSG_DOCKED_DOCKED
         jsr print_docked_str
@@ -781,7 +826,7 @@ _2c88:                                                                  ;$2C88
 
 status_screen:                                                          ;$2C9B
 ;===============================================================================
-; display status page
+; display status page:
 ;
 ;-------------------------------------------------------------------------------
         lda # page::status
@@ -1764,10 +1809,11 @@ _3068:                                                                  ;$3068
         
         jmp _7b6f
 
+
+_30bb:                                                                  ;$30BB
 ;===============================================================================
 ; decide to flash a dial?
-;
-_30bb:                                                                  ;$30BB
+;-------------------------------------------------------------------------------
         ldx # .color_nybble(LTRED, LTRED)
 
         lda ZP_A3               ; move counter?
@@ -1897,10 +1943,11 @@ _next_row:                                                              ;$3122
         
         rts 
 
+
+_3130:                                                                  ;$3130
 ;===============================================================================
 ; ".DIL2 -> roll/pitch indicator takes X.A"
-;
-_3130:                                                                  ;$3130
+;-------------------------------------------------------------------------------
         ldy # $01               ; counter Y = 1
         sta ZP_VAR_Q
 @_3134:                                                                 ;$3134
@@ -2014,6 +2061,7 @@ _31be:                                                                  ;$31BE
         sta PLAYER_FUEL
         jmp _2101
 
+
 _31c6:                                                                  ;$31C6
 ;===============================================================================
 ; chart search function?
@@ -2068,9 +2116,9 @@ _3208:                                                                  ;$3208
         jsr text_buffer_off
         jmp _877e
 
-;===============================================================================
 
 _321e:                                                                  ;$321E
+;===============================================================================
         lda ZP_POLYOBJ_XPOS_LO  ;=$09
         ora ZP_POLYOBJ_YPOS_LO  ;=$0C
         ora ZP_POLYOBJ_ZPOS_LO  ;=$0F
@@ -2171,9 +2219,9 @@ _32a7:                                                                  ;$32A7
 _32aa:                                                                  ;$32AA
         jmp _b0f4
 
-;===============================================================================
 
 _32ad:                                                                  ;$32AD
+;===============================================================================
         lda #< VAR_0403
         sta ZP_B0
         lda #> VAR_0403
@@ -2361,7 +2409,7 @@ _339a:                                                                  ;$339A
         ora # %01101000
         sta ZP_POLYOBJ_ROLL
 _33a8:                                                                  ;$33A8
-        ldy # Hull::energy      ;=$0E: energy
+        ldy # Hull::energy
         lda [ZP_HULL_ADDR], y
         lsr 
         cmp ZP_POLYOBJ_ENERGY
@@ -2545,9 +2593,9 @@ _34ac:                                                                  ;$34AC
 _34b9:                                                                  ;$24B9
         jmp _3452
 
-;===============================================================================
 
 _34bc:                                                                  ;$34BC
+;===============================================================================
         lda # $06
         sta ZP_B1
         lsr 
@@ -2666,9 +2714,9 @@ _3571:                                                                  ;$3571
 _357a:                                                                  ;$357A
         rts 
 
-;===============================================================================
 
 _357b:                                                                  ;$357B
+;===============================================================================
         lda #< POLYOBJ_01       ;=$F925
         sta ZP_TEMP_ADDR3_LO
         lda #> POLYOBJ_01       ;=$F925
@@ -2706,9 +2754,9 @@ _358f:                                                                  ;$358F
         sta ZP_POLYOBJ01_XPOS_pt1, x
         rts 
 
-;===============================================================================
 
 _35b3:                                                                  ;$35B3
+;===============================================================================
         ldx POLYOBJ_01 + PolyObject::xpos + 0, y                        ;=$F925
         stx ZP_VAR_Q
         lda ZP_VAR_X
@@ -2724,9 +2772,9 @@ _35b3:                                                                  ;$35B3
         lda ZP_VAR_X2
         jmp multiply_and_add
 
-;===============================================================================
 
 _35d5:                                                                  ;$35D5
+;===============================================================================
         lda ZP_VAR_X
         eor # %10000000
         sta ZP_VAR_X
@@ -2738,9 +2786,9 @@ _35d5:                                                                  ;$35D5
         sta ZP_VAR_X2
         rts 
 
-;===============================================================================
 
 _35e8:                                                                  ;$35E8
+;===============================================================================
         jsr _35eb
 _35eb:                                                                  ;$35EB
         lda POLYOBJ_01 + PolyObject::m0x0 + 1                           ;=$F92F
@@ -2790,6 +2838,7 @@ _3617:                                                                  ;$3617
         eor # %10000000
         sta ZP_POLYOBJ01_XPOS_pt3, x
         jmp _3616
+
 
 _363f:                                                                  ;$363F
 ;===============================================================================
@@ -2875,6 +2924,7 @@ _3695:                                                                  ;$3695
         txa 
         jmp spawn_ship
 
+
 _36a6:                                                                  ;$36A6
 ;===============================================================================
         ; spawn a missile
@@ -2896,13 +2946,14 @@ _36a6:                                                                  ;$36A6
         ldy # $04
         jmp _a858
 
+
+_36c5:                                                                  ;$36C5
 ;===============================================================================
 ; target / fire missile?
-;
-_36c5:                                                                  ;$36C5
+;-------------------------------------------------------------------------------
         ; firing misisle at space station?
         ; (not a good idea)
-        cmp # hull_coreolis_index       ;$02
+        cmp # hull_coreolis_index
         ; make the space-station hostile?
         beq _36f8
 
@@ -2951,9 +3002,9 @@ _3701:                                                                  ;$3701
         lda # $c9
         jmp _900d
 
-;===============================================================================
 
 _3706:                                                                  ;$3706
+;===============================================================================
         ; TODO: this is probably the ID for an escape-pod,
         ;       given the logic below
         ldx # hull_escape_index
@@ -3048,9 +3099,9 @@ _377b:                                                                  ;$377B
         tax 
         rts 
 
-;===============================================================================
 
 _378c:                                                                  ;$378C
+;===============================================================================
         asl 
         sta ZP_VAR_R
         lda # $00
@@ -3064,9 +3115,9 @@ _3795:                                                                  ;$3795
         
         rts 
 
-;===============================================================================
 
 _379e:                                                                  ;$397E
+;===============================================================================
         ldy # $04
         jsr _a858
         lda # $08
@@ -3104,9 +3155,9 @@ _37c2:                                                                  ;$37C2
         bne _37c2
         rts 
 
-;===============================================================================
 
 _37ce:                                                                  ;$37CE
+;===============================================================================
         lda ZP_AD
         and # %00000111
         clc 
@@ -3124,9 +3175,11 @@ _37d7:                                                                  ;$37D7
 _37e8:                                                                  ;$37E8
         rts 
 
-;===============================================================================
 
 _37e9:                                                                  ;$37E9
+;===============================================================================
+; move dust left / right?
+;-------------------------------------------------------------------------------
         lda # $00
         cpx # $02
         ror 
@@ -3134,6 +3187,7 @@ _37e9:                                                                  ;$37E9
         eor # %10000000
         sta ZP_B1
         jsr _38a3
+        
         ldy DUST_COUNT          ; number of dust particles
 _37fa:                                                                  ;$37FA
         lda DUST_Z_HI, y
@@ -3141,18 +3195,22 @@ _37fa:                                                                  ;$37FA
         lsr 
         lsr 
         lsr 
-        jsr _3b33
+        jsr divide_by_player_speed
+
         lda ZP_VAR_P1
         sta ZP_BA
         eor ZP_B1
         sta ZP_VAR_S
+        
         lda DUST_X_LO, y
         sta ZP_VAR_P1
+        
         lda DUST_X_HI, y
         sta ZP_VAR_X
         jsr multiplied_now_add
         sta ZP_VAR_S
         stx ZP_VAR_R
+        
         lda DUST_Y_HI, y
         sta ZP_VAR_Y
         eor ZP_PITCH_SIGN
@@ -3161,16 +3219,20 @@ _37fa:                                                                  ;$37FA
         jsr multiplied_now_add
         stx ZP_VAR_XX_LO
         sta ZP_VAR_XX_HI
+        
         ldx DUST_Y_LO, y
         stx ZP_VAR_R
+        
         ldx ZP_VAR_Y
         stx ZP_VAR_S
+        
         ldx ZP_PITCH_MAGNITUDE
         eor ZP_95
         jsr _393e
         jsr multiplied_now_add
         stx ZP_VAR_YY_LO
         sta ZP_VAR_YY_HI
+        
         ldx ZP_ROLL_MAGNITUDE
         eor ZP_ROLL_SIGN
         jsr _393e
@@ -3306,66 +3368,83 @@ _391d:                                                                  ;$391D
         sta ZP_VALUE_pt4
         rts 
 
-;===============================================================================
 
 _3934:                                                                  ;$3934
+;===============================================================================
+        ; copy XX to R.S
         ldx ZP_VAR_XX_LO
         stx ZP_VAR_R
         ldx ZP_VAR_XX_HI
         stx ZP_VAR_S
+
 _393c:                                                                  ;$393C
+;===============================================================================
+; TODO: is this is a multiply routine?
+;
+; in:   A       ?
+;-------------------------------------------------------------------------------
         ldx ZP_ROLL_MAGNITUDE
+
 _393e:                                                                  ;$393E
-        stx ZP_VAR_P1
+;===============================================================================
+; TODO: is this is a multiply routine?
+;
+; in:   A       ?
+;       X       ?
+;-------------------------------------------------------------------------------
+        stx ZP_VAR_P
         tax 
-        and # %10000000
-        sta ZP_VAR_T
+        and # %10000000         ; extract the sign-bit
+        sta ZP_VAR_T            ; put aside (to add back later)
+
         txa 
-        and # %01111111
-        beq _3981
-        tax 
-        dex 
-        stx ZP_TEMP_VAR
+        and # %01111111         ; extract the magnitude
+        beq @zero               ; are we multiplying by zero? (=0)
+
+        tax                     ; multiplicand
+        dex                     ; subtract 1 (carry will compensate for this)
+        stx ZP_TEMP_VAR         ; store this as our starting multiplicand
+        
         lda # $00
-        lsr ZP_VAR_P1
-        bcc _3956
+        lsr ZP_VAR_P
+        bcc :+
         adc ZP_TEMP_VAR
-_3956:                                                                  ;$3956
-        ror 
-        ror ZP_VAR_P1
-        bcc _395d
+
+:       ror                                                             ;$3956 
+        ror ZP_VAR_P
+        bcc :+
         adc ZP_TEMP_VAR
-_395d:                                                                  ;$395D
-        ror 
-        ror ZP_VAR_P1
-        bcc _3964
+
+:       ror                                                             ;$395D
+        ror ZP_VAR_P
+        bcc :+
         adc ZP_TEMP_VAR
-_3964:                                                                  ;$3964
-        ror 
-        ror ZP_VAR_P1
-        bcc _396b
+
+:       ror                                                             ;$3964
+        ror ZP_VAR_P
+        bcc :+
         adc ZP_TEMP_VAR
-_396b:                                                                  ;$396B
-        ror 
-        ror ZP_VAR_P1
-        bcc _3972
+
+:       ror                                                             ;$396B
+        ror ZP_VAR_P
+        bcc :+
         adc ZP_TEMP_VAR
-_3972:                                                                  ;$3972
-        ror 
-        ror ZP_VAR_P1
+
+:       ror                                                             ;$3972
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
+        ror ZP_VAR_P
         lsr 
-        ror ZP_VAR_P1
-        ora ZP_VAR_T
+        ror ZP_VAR_P
+        ora ZP_VAR_T            ; restore the sign
+        
         rts 
 
+        ; if multiplying by zero, return zero!
         ;-----------------------------------------------------------------------
-
-_3981:                                                                  ;$3981
-        sta ZP_VAR_P2
+@zero:  sta ZP_VAR_P2           ;?                                      ;$3981
         sta ZP_VAR_P1
         rts 
 
@@ -3374,10 +3453,11 @@ _3981:                                                                  ;$3981
 ;
 .include        "math/math_square.asm"                                  ;$3986
 
+
+_39e0:                                                                  ;$39E0
 ;===============================================================================
 ; calculate ZP_VALUE_pt1 * abs(sin(A))
-;
-_39e0:                                                                  ;$39E0
+;-------------------------------------------------------------------------------
         and # %00011111
         tax                     ; X = A%31, with 0..31 equiv. 0..pi
         lda table_sin, x
@@ -3426,9 +3506,9 @@ _3a20:                                                                  ;$3A20
         ldx ZP_VAR_P            ; restore X
         rts 
 
-;===============================================================================
 
 _3a25:                                                                  ;$3A25
+;===============================================================================
         stx ZP_VAR_Q
 _3a27:                                                                  ;$3A27
         eor # %11111111
@@ -3509,131 +3589,28 @@ _3b27:                                                                  ;$3B27
         ora ZP_VAR_T
         rts 
 
+
+get_dust_speed:                                                         ;$3B30
 ;===============================================================================
-
-_3b30:                                                                  ;$3B30
+; calculate dust speed:
+;
+; in:   Y       dust particle index
+;-------------------------------------------------------------------------------
         lda DUST_Z_HI, y
-_3b33:                                                                  ;$3B33
-        sta ZP_VAR_Q
 
+divide_by_player_speed:                                                 ;$3B33
+;===============================================================================
+; divide the number, given in A, by the player's speed:
+;-------------------------------------------------------------------------------
+        sta ZP_VAR_Q
         lda PLAYER_SPEED
 
-
-divide_unsigned:                                                        ;$3B37
 ;===============================================================================
-; unsigned integer division
-;
-; params:
-;       A =
-;       Q =
-;
-; returns:
-;       A/Q*256 as 16-bit value in P.R  (A is the same as R on exit)
-;-------------------------------------------------------------------------------
-        ; This calculates A / Q by repeatedly shifting A (16bit) left
-        ; and subtracting from the hi-byte whenever possible.
-_3b37:                                                                  ;$3B37
-        asl 
-        sta ZP_VAR_P
-        
-        lda # $00
-        rol 
-        cmp ZP_VAR_Q
-        bcc _3b43
-        
-        sbc ZP_VAR_Q
-_3b43:                                                                  ;$3B43
-        rol ZP_VAR_P            ; 1
-        rol 
-        cmp ZP_VAR_Q
-        bcc _3b4c
-        sbc ZP_VAR_Q
-_3b4c:                                                                  ;$3B4C
-        rol ZP_VAR_P            ; 2
-        rol 
-        cmp ZP_VAR_Q
-        bcc _3b55
-        sbc ZP_VAR_Q
-_3b55:                                                                  ;$3B55
-        rol ZP_VAR_P            ; 4
-        rol 
-        cmp ZP_VAR_Q
-        bcc _3b5e
-        sbc ZP_VAR_Q
-_3b5e:                                                                  ;$3B5E
-        rol ZP_VAR_P            ; 8
-        rol 
-        cmp ZP_VAR_Q
-        bcc _3b67
-        sbc ZP_VAR_Q
-_3b67:                                                                  ;$3B67
-        rol ZP_VAR_P            ; 16
-        rol 
-        cmp ZP_VAR_Q
-        bcc _3b70
-        sbc ZP_VAR_Q
-_3b70:                                                                  ;$3B70
-        rol ZP_VAR_P            ; 32
-        rol 
-        cmp ZP_VAR_Q
-        bcc _3b79
-        sbc ZP_VAR_Q
-_3b79:                                                                  ;$3B79
-        rol ZP_VAR_P            ; 64
-        rol 
-        cmp ZP_VAR_Q
-        bcc _3b82
-        sbc ZP_VAR_Q
-_3b82:                                                                  ;$3B82
-        rol ZP_VAR_P            ; 128
-        
-        ; end of P = A/Q
+.include        "math/math_divide.asm"                                  ;$3B37
 
-        ldx # $00               ; unneccessary, cancelled out by the tax below
-        sta ZP_B6               ; A and ZP_B6 are now both the remainder of A/Q
-        tax 
-        beq _3ba6               ; no remainder: finish
-
-        ; calculate (remainder/Q)*256 via the log-tables
-        lda table_logdiv, x
-        ldx ZP_VAR_Q
-        sec 
-        sbc table_logdiv, x
-        bmi _3bae
-        ldx ZP_B6
-        lda table_log, x
-        ldx ZP_VAR_Q
-        sbc table_log, x
-        bcs _3ba9               ; carry is set: log(remainder) < log(Q)
-        tax 
-        lda _9500, x
-_3ba6:                                                                  ;$3BA6
-        sta ZP_VAR_R
-        rts 
-        
-        ;-----------------------------------------------------------------------
-
-_3ba9:                                                                  ;$3BA9
-        lda # $ff
-        sta ZP_VAR_R
-        rts 
-
-        ;-----------------------------------------------------------------------
-
-_3bae:                                                                  ;$3ABE
-        ldx ZP_B6
-        lda table_log, x
-        ldx ZP_VAR_Q
-        sbc table_log, x
-        bcs _3ba9
-        tax 
-        lda _9600, x
-        sta ZP_VAR_R
-        rts 
-
-;===============================================================================
 
 _3bc1:                                                                  ;$3BC1
+;===============================================================================
         sta ZP_VAR_P3
         lda ZP_POLYOBJ_ZPOS_LO
         ora # %00000001
@@ -3712,9 +3689,9 @@ _3c2d:                                                                  ;$3C2D
         sta ZP_VALUE_pt4
         rts 
 
-;===============================================================================
 
 _3c40:                                                                  ;$3C40
+;===============================================================================
         lda ZP_VAR_R
         sta ZP_VALUE_pt1
         lda ZP_VAR_T
@@ -3735,13 +3712,12 @@ _3c4d:                                                                  ;$3C4D
         sta ZP_VALUE_pt4
         rts 
 
+
+_3c58:                                                                  ;$3C58
 ;===============================================================================
 ; BBC code says "centre ship indicators"
 ; roll/pitch dampening? -- slowly reduces X to 1
-;
-;       X :  
-;
-_3c58:                                                                  ;$3C58
+;-------------------------------------------------------------------------------
         lda DOCKCOM_STATE       ; is docking computer enabled?
        .bnz :+                  ; yes, skip over the following
 
@@ -3762,9 +3738,9 @@ _3c58:                                                                  ;$3C58
 
 @rts:   rts                                                             ;$3C68 
 
-;===============================================================================
 
 _3c6f:                                                                  ;$3C6F
+;===============================================================================
         sta ZP_VAR_T
         txa 
         clc 
@@ -3851,6 +3827,7 @@ _3cce:                                                                  ;$3CCE
         lda _0ae0, x
 _3cda:                                                                  ;$3CDA
         rts 
+
 
 shoot_lasers:                                                           ;$3CDB
 ;===============================================================================
@@ -4182,9 +4159,8 @@ get_polyobj_addr:                                                       ;$3E87
 ; given an index for a poly-object 0-10, this routine will
 ; return an address for the poly-object's variable storage
 ;
-; in:   X       index
-;
-; out:  $59/A   returns address
+; in:   X               index
+; out:  ZP_POLYOBJ_ADDR address
 ;
 ;-------------------------------------------------------------------------------
         txa                     ; take poly-object index,
@@ -4227,11 +4203,10 @@ wait_frames:                                                            ;$3EA1
         rts 
 
 
+_3ea8:                                                                  ;$3EA8
 ;===============================================================================
 ; colour of different type of laser cross-hairs?
-;
-_3ea8:                                                                  ;$3EA8
+;-------------------------------------------------------------------------------
         .byte   YELLOW, YELLOW, LTGREEN, PURPLE
 
-
-;$3EAC
+                                                                        ;$3EAC

@@ -159,6 +159,7 @@ _1d81:                                                                  ;$1D81
 ; in non-original builds
 ;
 debug_for_brk:                                                          ;$1E14
+;===============================================================================
         ; set a routine to capture use of the `brk` instruction.
         ; not actually used, but present, in original Elite
         ;
@@ -311,7 +312,7 @@ _1ec1:                                                                  ;$1EC1
 ;===============================================================================
 ; main cockpit-view game-play loop perhaps?
 ; (handles many key presses)
-;
+;-------------------------------------------------------------------------------
         lda POLYOBJ_00          ;=$F900?
         sta ZP_GOATSOUP_pt1     ;? randomize?
 
@@ -525,15 +526,18 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 :       lda # $00                                                       ;$1FD5
-        sta ZP_7B
-        sta ZP_97
+        sta ZP_7B               ; laser-power per pulse?
+        sta ZP_SPEED_LO         ; dust-speed low-byte?
 
-        lda PLAYER_SPEED
-        lsr 
-        ror ZP_97
-        lsr 
-        ror ZP_97
-        sta ZP_98               ; ZP_98.ZP_97 = PLAYER_SPEED*64
+        ; divide player speed by 4; used as part of moving dust
+        ; TODO: should this be cached and only re-calced on speed change?
+        ;
+        lda PLAYER_SPEED        ; current player speed
+        lsr                     ; divide speed by 2
+        ror ZP_SPEED_LO         ; ripple down to the result, lo-byte
+        lsr                     ; divide speed by 2, again
+        ror ZP_SPEED_LO         ; ripple down to the result, lo-byte
+        sta ZP_SPEED_HI         ; store result hi-byte
 
         lda VAR_0487
         bne _202d
@@ -821,9 +825,9 @@ _2170:                                                                  ;$2170
         and # %00000011
         jsr _2359
 _2192:                                                                  ;$2192
-        ldy # $04
+        ldy # hull_plate_index
         jsr _234c
-        ldy # $05
+        ldy # hull_cargo_index
         jsr _234c
 
         ldx ZP_A5
@@ -1024,9 +1028,8 @@ _2292:                                                                  ;$2292
 _22b2:                                                                  ;$22B2
         jmp _87d0
 
-        ;-----------------------------------------------------------------------
-
 _22b5:                                                                  ;$22B5
+        ;-----------------------------------------------------------------------
         cmp # $0f
         bne _22c2
 
@@ -1034,8 +1037,10 @@ _22b5:                                                                  ;$22B5
        .bze _231c
 
         lda # $7b
-        bne _2319
+        bne _2319               ; (always branches)
+
 _22c2:                                                                  ;$22C2
+        ;-----------------------------------------------------------------------
         cmp # $14
         bne _231c
 
@@ -1057,11 +1062,14 @@ _22c2:                                                                  ;$22C2
         adc # $1e
         sta CABIN_HEAT
         bcs _22b2
-        cmp # $e0
+
+        cmp # $e0               ; high temperature?
         bcc _231c
-        cmp # $f0
+        cmp # $f0               ; critical temperature?
         bcc _2303
 
+.ifndef OPTION_NOTRUMBLES
+        ;///////////////////////////////////////////////////////////////////////
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn the I/O area on to manage the sprites
@@ -1073,6 +1081,8 @@ _22c2:                                                                  ;$22C2
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+        ; kill the Trumbles™ from over-heating?
+        ; remove their sprites on screen
         lda VIC_SPRITE_ENABLE
         and # %00000011
         sta VIC_SPRITE_ENABLE
@@ -1088,8 +1098,6 @@ _22c2:                                                                  ;$22C2
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-.ifndef OPTION_NOTRUMBLES
-        ;///////////////////////////////////////////////////////////////////////
         ; halve the number of Trumbles™
         lsr PLAYER_TRUMBLES_HI  ; divide the top 8-bits by two, with carry out
         ror PLAYER_TRUMBLES_LO  ; divide bottom 8-bits by two, with carry in
@@ -1099,14 +1107,13 @@ _2303:                                                                  ;$2303
         lda VAR_04C2
         beq _231c
 
-        lda ZP_98
+        lda ZP_SPEED_HI
         lsr 
         adc PLAYER_FUEL
         cmp # $46
-        bcc _2314
-        lda # $46
-_2314:                                                                  ;$2314
-        sta PLAYER_FUEL
+        bcc :+
+        lda # $46                                                                  
+:       sta PLAYER_FUEL                                                 ;$2314
 
         lda # $a0
 _2319:                                                                  ;$2319
@@ -1137,13 +1144,15 @@ _2345:                                                                  ;$2345
         lda ZP_SCREEN           ; are we in the cockpit-view?
        .bnz _2366               ; (no? skip over)
 
-        jmp _animate_dust
+        jmp move_dust
 
-;===============================================================================
 
 _234c:                                                                  ;$234C
-        jsr get_random_number
-        bpl _2366
+;===============================================================================
+; in:   Y       ship-type
+;-------------------------------------------------------------------------------
+        jsr get_random_number   ; choose random number,
+        bpl _2366               ; 50/50
 
         tya 
         tax 
@@ -1153,14 +1162,15 @@ _234c:                                                                  ;$234C
 _2359:                                                                  ;$2359
         sta ZP_AA
         beq _2366
-_235d:                                                                  ;$235D
-        lda # $00
+
+:       lda # $00                                                       ;$235D
         jsr _370a               ; NOTE: spawns ship-type in X
         
         dec ZP_AA
-        bne _235d
-_2366:                                                                  ;$2366
-        rts 
+        bne :-
+
+_2366:  rts                                                             ;$2366
+
 
 _2367:                                                                  ;$2367
 ;===============================================================================

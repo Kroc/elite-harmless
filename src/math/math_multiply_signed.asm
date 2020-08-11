@@ -39,7 +39,7 @@ multiply_signed:                                                        ;$3A54
         ldx # %01111111
         axs # 0                 ; X = $7F & A (-0)
 .else   ;///////////////////////////////////////////////////////////////////////
-        tax
+        tax 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; compare signs for working out what the final sign will be. XOR'ing
@@ -67,9 +67,9 @@ multiply_signed:                                                        ;$3A54
 
 .ifndef USE_ILLEGAL_OPS
         ;///////////////////////////////////////////////////////////////////////
-        txa
+        txa 
         and # %01111111
-        tax
+        tax 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         sec 
@@ -249,22 +249,24 @@ sm4:    sbc square2_hi, x
 
         rts 
 
-        ; multiplying by zero will return zero. note that this is why that
-        ; carry was not added to the result lo-byte right away --
-        ; `A` will be 0 so we can now zero out `P` and return a 16-bit zero
+        ; multiplying by zero will return zero. note that this is why
+        ; that carry was not added to the result lo-byte right away --
+        ; A will be 0 so we can now zero out P and return a 16-bit zero
         ;-----------------------------------------------------------------------
-@zero:  sta ZP_VAR_P            ; `A` = 0 so also return `P` = 0        ;$3AA5
-        rts                     ; `A.P` will be $0000
+@zero:  sta ZP_VAR_P            ; A = 0 so also return P = 0            ;$3AA5
+        rts                     ; A.P will be $0000
 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+
 multiply_signed_into_RS:                                                ;$3AA8
-        ;-----------------------------------------------------------------------
-        ; does a multiply as above (`multiply_signed`) and stores the result
-        ; in "`R.S`" (`ZP_VAR_R` & `ZP_VAR_S`)
-        ;
+;===============================================================================
+; does a multiply as above (`multiply_signed`) and stores
+; the result in R.S (`ZP_VAR_R` & `ZP_VAR_S`)
+;-------------------------------------------------------------------------------
         jsr multiply_signed
         sta ZP_VAR_S
         lda ZP_VAR_P
         sta ZP_VAR_R
+
         rts 
