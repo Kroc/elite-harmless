@@ -1948,23 +1948,22 @@ _3130:                                                                  ;$3130
 
         rts 
 
-;===============================================================================
-; eject escape pod
-;
 eject_escapepod:                                                        ;$316E
-
+;===============================================================================
+; eject escape pod:
+;
+;-------------------------------------------------------------------------------
         jsr _83df
 
-        ldx # $0b
+        ldx # hull_cobramk3_index
         stx ZP_A5
+        jsr _3680               ; NOTE: spawns ship-type in X
+        bcs :+
         
-        jsr _3680
-        bcs _317f
-        
-        ldx # $18
-        jsr _3680
-_317f:                                                                  ;$317F
-        lda # $08
+        ldx # hull_mk3_pirate_index
+        jsr _3680               ; NOTE: spawns ship-type in X
+
+:       lda # $08                                                       ;$317F
         sta ZP_POLYOBJ_VERTX_LO
         
         lda # %11000010
@@ -2216,7 +2215,8 @@ _32da:                                                                  ;$32DA
         cmp # $04
         bcs _3328
 
-        ldx # $10
+        ; spawn a police viper ship
+        ldx # hull_viper_index
 _32ea:                                                                  ;$32EA
         lda # $f1
         jmp _370a
@@ -2385,7 +2385,7 @@ _33a8:                                                                  ;$33A8
         
         lda # %00000000
         sta ZP_POLYOBJ_ATTACK
-        jmp _3706
+        jmp _3706               ; spawns escape pod?
 
         ;-----------------------------------------------------------------------
 
@@ -2407,7 +2407,8 @@ _33d6:                                                                  ;$33D6
         cmp # $1d
         bne _33fa
 
-        ldx # %00011110
+        ; spawn a thargon!
+        ldx # hull_thargon_index
         lda ZP_POLYOBJ_ATTACK
         jmp _370a
 
@@ -2839,10 +2840,13 @@ _367e:                                                                  ;$367E
         clc 
         rts 
 
-;===============================================================================
 
 _3680:                                                                  ;$3680
+;===============================================================================
+; in:   X       ship-type to spawn
+;-------------------------------------------------------------------------------
         jsr clear_zp_polyobj
+        
         lda # $1c
         sta ZP_POLYOBJ_YPOS_LO
         lsr 
@@ -2856,6 +2860,9 @@ _3680:                                                                  ;$3680
         sta ZP_POLYOBJ_ATTACK
 
 _3695:                                                                  ;$3695
+;===============================================================================
+; in:   X       ship-type to spawn
+;-------------------------------------------------------------------------------
         lda # $60
         sta ZP_POLYOBJ_M0x2_HI
         ora # %10000000
@@ -2866,12 +2873,13 @@ _3695:                                                                  ;$3695
         sta ZP_POLYOBJ_VERTX_LO
         
         txa 
-        jmp _7c6b
+        jmp spawn_ship
 
 _36a6:                                                                  ;$36A6
 ;===============================================================================
-        ldx # $01
-        jsr _3680
+        ; spawn a missile
+        ldx # hull_missile_index
+        jsr _3680               ; NOTE: spawns ship-type in X
         bcc _3701
         
         ldx ZP_MISSILE_TARGET
@@ -2946,12 +2954,16 @@ _3701:                                                                  ;$3701
 ;===============================================================================
 
 _3706:                                                                  ;$3706
-        ldx # $03
+        ; TODO: this is probably the ID for an escape-pod,
+        ;       given the logic below
+        ldx # hull_escape_index
 _3708:                                                                  ;$3708
         lda # $fe
 _370a:                                                                  ;$370A
+        ; preserve A & X?
         sta ZP_TEMP_VAR
        .phx                     ; push X to stack (via A)
+
         lda ZP_HULL_ADDR_LO
         pha 
         lda ZP_HULL_ADDR_HI
@@ -2960,17 +2972,21 @@ _370a:                                                                  ;$370A
         pha 
         lda ZP_POLYOBJ_ADDR_HI
         pha 
-        ldy # $24
-_371c:                                                                  ;$371C
-        lda ZP_POLYOBJ_XPOS_LO, y
-        sta $0100, y            ; the stack!?
+
+        ; temporarily back the current poly object to the bottom
+        ; of the stack, and copy in the new poly object
+        ldy # .sizeof(PolyObject)-1
+:       lda ZP_POLYOBJ, y                                               ;$371C
+        sta $0100, y
         lda [ZP_POLYOBJ_ADDR], y
-        sta ZP_POLYOBJ_XPOS_LO, y
+        sta ZP_POLYOBJ, y
         dey 
-        bpl _371c
+        bpl :-
+
         lda ZP_A5
         cmp # $02
         bne _374d
+
        .phx                     ; push X to stack (via A)
         lda # $20
         sta ZP_POLYOBJ_VERTX_LO
@@ -2983,31 +2999,37 @@ _371c:                                                                  ;$371C
         ldx # $06
         lda ZP_POLYOBJ_M0x2_HI
         jsr _378c
-        pla 
-        tax 
+       .plx                     ; pull X from stack (via A)
+
 _374d:                                                                  ;$374D
         lda ZP_TEMP_VAR
         sta ZP_POLYOBJ_ATTACK
         lsr ZP_POLYOBJ_ROLL
         asl ZP_POLYOBJ_ROLL
+
         txa 
-        cmp # $09
-        bcs _3770
-        cmp # $04
-        bcc _3770
+        cmp # hull_shuttle_index
+       .bge @spawn
+       ; missile, station or escape pod?
+       ; WARN: this assumes that these are the first three IDs
+        cmp # hull_escape_index + 1
+       .blt @spawn
+        
         pha 
         jsr get_random_number
         asl 
         sta ZP_POLYOBJ_PITCH
+
         txa 
         and # %00001111
         sta ZP_POLYOBJ_VERTX_LO
         lda # $ff
         ror 
         sta ZP_POLYOBJ_ROLL
+        
         pla 
-_3770:                                                                  ;$3770
-        jsr _7c6b
+@spawn: jsr spawn_ship                                                  ;$3770
+        
         pla 
         sta ZP_POLYOBJ_ADDR_HI
         pla 
@@ -4072,9 +4094,10 @@ _3dff:                                                                  ;$3DFF
         jsr tkn_docked_incoming_message
         jsr clear_zp_polyobj
         
-        lda # $1f
+        ; spawn the constrictor stealth-ship!
+        lda # hull_constrictor_index
         sta ZP_A5
-        jsr _7c6b
+        jsr spawn_ship
 
         lda # 1                 ;=page::empty
         jsr set_cursor_col

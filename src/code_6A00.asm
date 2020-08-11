@@ -1916,22 +1916,27 @@ _7388:                                                                  ;$7388
         bcc _7365
         rts 
 
-;===============================================================================
 
 _739b:                                                                  ;$739B
+;===============================================================================
+; spawn in a thargoid?
+;-------------------------------------------------------------------------------
         jsr _848d
-        lda # %11111111         ; why max-out? (is this a space-station?)
+
+        lda # %11111111
         sta ZP_POLYOBJ_ATTACK
 
-        lda # $1d
-        jsr _7c6b
+        ; spawn a thargoid!
+        lda # hull_thargoid_index
+        jsr spawn_ship
 
-        lda # $1e
-        jmp _7c6b
+        ; and one thargon to go with it!
+        lda # hull_thargon_index
+        jmp spawn_ship
 
-;===============================================================================
 
 _73ac:                                                                  ;$73AC
+;===============================================================================
         lsr PLAYER_COMPETITION
         sec 
         rol PLAYER_COMPETITION
@@ -2918,9 +2923,9 @@ _7a8c:                                                                  ;$7A8C
         sta ZP_POLYOBJ_PITCH
 
         lda PSYSTEM_TECHLEVEL
-        and # %00000010
-        ora # %10000000
-        jmp _7c6b
+        and # %00000010         ; select tech levels 2, 4, 6, 8...
+        ora # %10000000         ; add high-bit (type of station?)
+        jmp spawn_ship
 
 ;===============================================================================
 
@@ -2968,8 +2973,8 @@ _7ac2:                                                                  ;$7AC2
         sta ZP_POLYOBJ_ROLL
         sta ZP_POLYOBJ_PITCH
 
-        lda # $81
-        jsr _7c6b
+        lda # $81               ; TODO?
+        jsr spawn_ship
 _7af3:                                                                  ;$7AF3
         lda ZP_SCREEN           ; are we in the cockpit-view?
        .bnz _7b1a               ; no? skip ahead
@@ -3256,8 +3261,10 @@ _7c61:                                                                  ;$7C61
         ; select 'station' ship-type
         lda # hull_coreolis_index
 
-_7c6b:                                                                  ;$7C6B
+spawn_ship:                                                             ;$7C6B
 ;===============================================================================
+; in:   A       ship-type ID
+;-------------------------------------------------------------------------------
         sta ZP_VAR_T            ; put aside ship-type
 
         ; find an empty slot to add the ship:
@@ -3343,6 +3350,7 @@ _7cd4:                                                                  ;$7CD4
         
         tax 
         bmi _7cec               ; is sun/planet?
+
         cpx # hull_dd35_index
         beq _7ce6
         cpx # hull_escape_index
@@ -4661,15 +4669,19 @@ _829a:                                                                  ;$829A
 _82a4:                                                                  ;$82A4
         jsr clear_zp_polyobj
         jsr clear_circle_buffer
+        
         sta SHIP_SLOT1
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
         sta .loword(SHIP_TYPES+hull_coreolis_index)
+        
         jsr _b10e
+        
         lda # $06
         sta ZP_POLYOBJ_YPOS_HI
-        lda # $81
-        jmp _7c6b
+
+        lda # $81               ; TODO: ?
+        jmp spawn_ship
 
 ;===============================================================================
 
@@ -5090,11 +5102,11 @@ _84c3:                                                                  ;$84C3
         ldx # behaviour::docking
         stx ZP_POLYOBJ_BEHAVIOUR
 _84e2:                                                                  ;$84E2
-        and # %00000010
-        adc # $0b
+        and # %00000010         ; = 0 or 2?
+        adc # $0b               ; = $0B or $0D?
         cmp # $0f
         beq _84ed
-        jsr _7c6b
+        jsr spawn_ship
 
 ; main loop?
 ;
@@ -5173,9 +5185,9 @@ _854c:                                                                  ;$854C
 _8559:                                                                  ;$8559
         cmp # $0a
         and # %00000001
-        adc # $05
+        adc # $05               ; cargo cannister or boulder?
 _855f:                                                                  ;$855F
-        jsr _7c6b
+        jsr spawn_ship
 _8562:                                                                  ;$8562
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
@@ -5202,15 +5214,17 @@ _8576:                                                                  ;$8576
         cmp # $88
         beq _85f8
         cmp ZP_VAR_T
-        bcs _8588
-        lda # $10
-        jsr _7c6b
-_8588:                                                                  ;$8588
+        bcs :+
+
+        ; spawn a police viper ship
+        lda # hull_viper_index
+        jsr spawn_ship
+
         ; are any police ships present?
         ;
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_viper_index)
+:       lda .loword(SHIP_TYPES+hull_viper_index)                        ;$8588
         bne _8567
 
         dec VAR_048A
@@ -5272,16 +5286,18 @@ _85e0:                                                                  ;$85E0
         ora # attack::active | attack::target   ;=%11000000
         sta ZP_POLYOBJ_ATTACK
         tya 
-        ; this causes the next instruction to become a meaningless `bit`
-        ; instruction, a very handy way of skipping without branching
+        ; (this causes the next instruction to become a meaningless `bit`
+        ;  instruction, a very handy way of skipping without branching)
        .bit
-_85f0:                                                                  ;$85F0
-        lda # $1f
+
+_85f0:  ; spawn the constrictor stealth-ship!                           ;$85F0
+        lda # hull_constrictor_index
 _85f2:                                                                  ;$85F2
-        jsr _7c6b
+        jsr spawn_ship
         jmp _8627
 
 _85f8:                                                                  ;$85F8
+        ;-----------------------------------------------------------------------
         lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
         and # %00111110
         bne _85a5
@@ -5304,11 +5320,13 @@ _860b:                                                                  ;$860B
 _8612:                                                                  ;$8612
         jsr get_random_number
         sta ZP_VAR_T
+
         jsr get_random_number
         and ZP_VAR_T
         and # %00000111
         adc # $11
-        jsr _7c6b
+        jsr spawn_ship
+
         dec ZP_A2
         bpl _8612
 
@@ -5737,13 +5755,18 @@ _87fd:                                                                  ;$87FD
         ror 
         and # %10000111
         sta ZP_POLYOBJ_PITCH
-        ldx # $05
-        lda VIC_SPRITE3_Y
-        beq _8835
-        bcc _8835
-        dex 
-_8835:                                                                  ;$8835
-        jsr _3695
+
+        ; spawn a cargo-cannister or plate-alloy:
+        ; WARN: this assumes the plate/alloy ID
+        ;       comes before the cargo-cannister
+        ldx # hull_cargo_index
+        lda VIC_SPRITE3_Y       ;?
+        beq :+
+        bcc :+
+        dex                     ; change from cargo-cannister to plate/alloy
+
+:       jsr _3695               ; NOTE: spawns ship-type in X           ;$8835
+        
         jsr get_random_number
         and # %10000000
         ldy # $1f
@@ -5826,7 +5849,8 @@ _8882:                                                                  ;$8882
         jsr _91fe
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ldx # $0b
+        ldx # hull_cobramk3_index
+
         ; print "load new commander (Y/N)?"
 .import MSG_DOCKED_06:direct
         lda # MSG_DOCKED_06
@@ -5852,7 +5876,7 @@ _88ac:                                                                  ;$88AC
         ; "press space or fire commander"
 .import MSG_DOCKED_PRESS_SPACE_OR_FIRE_COMMANDER:direct
         lda # MSG_DOCKED_PRESS_SPACE_OR_FIRE_COMMANDER
-        ldx # $14
+        ldx # hull_adder_index
         ldy # $30
         jsr _8920
 
@@ -5918,16 +5942,16 @@ _8912:                                                                  ;$8912
         bne _88fd
         rts 
 
-;===============================================================================
-; draw the title screen?
-;
-;       A = a docked-string token to print
-;       X = ? e.g. $0B          ; ship-type?
-;       Y = ? e.g. $D2
-;
-_8920:                                                                  ;$8920
-        sty VAR_06FB            ; z-distance?
 
+_8920:                                                                  ;$8920
+;===============================================================================
+; draw the title screen:
+;
+; in:   A       a docked-string token to print
+;       X       which ship model to display
+;       Y       ? e.g. $D2
+;-------------------------------------------------------------------------------
+        sty VAR_06FB            ; z-distance?
         pha                     ; keep A parameter
         stx ZP_A5
 
@@ -5964,16 +5988,17 @@ _8920:                                                                  ;$8920
         stx ZP_POLYOBJ_PITCH
         inx 
         stx ZP_34
+        
         lda ZP_A5
-        jsr _7c6b
+        jsr spawn_ship
 
         ; print "--- E L I T E ---"
-
 .ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # 6
-.else
+.else   ;///////////////////////////////////////////////////////////////////////
         lda # 2
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
         jsr set_cursor_col
 
 .import TXT_ELITE:direct

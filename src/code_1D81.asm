@@ -1155,7 +1155,8 @@ _2359:                                                                  ;$2359
         beq _2366
 _235d:                                                                  ;$235D
         lda # $00
-        jsr _370a
+        jsr _370a               ; NOTE: spawns ship-type in X
+        
         dec ZP_AA
         bne _235d
 _2366:                                                                  ;$2366
