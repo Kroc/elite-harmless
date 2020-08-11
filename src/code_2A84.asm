@@ -414,14 +414,14 @@ dust_swap_xy:                                                           ;$2A12
 ;===============================================================================
         ldy DUST_COUNT          ; get number of dust particles
 
-:       ldx DUST_Y, y           ; get dust-particle Y-position          ;$2A15
-        lda DUST_X, y           ; get dust-particle X-position
+:       ldx DUST_Y_HI, y        ; get dust-particle Y-position          ;$2A15
+        lda DUST_X_HI, y        ; get dust-particle X-position
         sta ZP_VAR_Y            ; (put aside X-position)
-        sta DUST_Y, y           ; save the Y-value to the X-position
+        sta DUST_Y_HI, y        ; save the Y-value to the X-position
         txa                     ; move the Y-position into A
         sta ZP_VAR_X            ; (put aside Y-value)
-        sta DUST_X, y           ; write the X-value to the Y-position
-        lda DUST_Z, y           ; get dust z-position
+        sta DUST_X_HI, y        ; write the X-value to the Y-position
+        lda DUST_Z_HI, y        ; get dust z-position
         sta ZP_VAR_Z            ; (put aside Z-position)
         
         jsr draw_particle
@@ -447,21 +447,21 @@ _animate_dust_front:                                                    ;$2A40
 
         ldy DUST_COUNT          ; number of dust particles
 _2a43:                                                                  ;$2A43
-        jsr _3b30               ; calculate PLAYER_SPEED / DUST_Z, y -> {P.R}
+        jsr _3b30               ; calculate PLAYER_SPEED / DUST_Z_HI, y -> {P.R}
         lda ZP_VAR_R            ; unneccessary, A is R after _3b30
         lsr ZP_VAR_P
         ror 
         lsr ZP_VAR_P
-        ror                     ; {P.A} = (PLAYER_SPEED / DUST_Z) / 4
+        ror                     ; {P.A} = (PLAYER_SPEED / DUST_Z_HI) / 4
         ora # %00000001         ; cheap way of asserting != 0 ?
         sta ZP_VAR_Q            ; so Q is SPEED/DZ/4 if P is 0..sure?
-        lda VAR_06E3, y
+        lda DUST_Z_LO, y
         sbc ZP_97               ; ZP_97 is probably still (PLAYER_SPEED&3)<<6
-        sta VAR_06E3, y
-        lda DUST_Z, y
+        sta DUST_Z_LO, y
+        lda DUST_Z_HI, y
         sta ZP_VAR_Z
         sbc ZP_98
-        sta DUST_Z, y
+        sta DUST_Z_HI, y
         jsr _3992
         sta ZP_VAR_YY_HI
         lda ZP_VAR_P1
@@ -472,7 +472,7 @@ _2a43:                                                                  ;$2A43
         adc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
-        lda DUST_X, y
+        lda DUST_X_HI, y
         sta ZP_VAR_X
         jsr _3997
         sta ZP_VAR_XX_HI
@@ -519,17 +519,17 @@ _2a43:                                                                  ;$2A43
         jsr _290f
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X
-        sta DUST_X, y
+        sta DUST_X_HI, y
         and # %01111111
         cmp # $78
         bcs _2b0a
         lda ZP_VAR_YY_HI
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
         sta ZP_VAR_Y
         and # %01111111
         cmp # $78
         bcs _2b0a
-        lda DUST_Z, y
+        lda DUST_Z_HI, y
         cmp # $10
         bcc _2b0a
         sta ZP_VAR_Z
@@ -548,16 +548,16 @@ _2b0a:                                                                  ;$2B0A
         jsr get_random_number
         ora # %00000100
         sta ZP_VAR_Y
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
 
         jsr get_random_number
         ora # %00001000
         sta ZP_VAR_X
-        sta DUST_X, y
+        sta DUST_X_HI, y
         
         jsr get_random_number
         ora # %10010000
-        sta DUST_Z, y
+        sta DUST_Z_HI, y
         sta ZP_VAR_Z
         
         lda ZP_VAR_Y
@@ -576,7 +576,7 @@ _2b30:                                                                  ;$2B30
         ror 
         ora # %00000001
         sta ZP_VAR_Q
-        lda DUST_X, y
+        lda DUST_X_HI, y
         sta ZP_VAR_X
         jsr _3997
         sta ZP_VAR_XX_HI
@@ -596,13 +596,13 @@ _2b30:                                                                  ;$2B30
         sbc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
-        lda VAR_06E3, y
+        lda DUST_Z_LO, y
         adc ZP_97
-        sta VAR_06E3, y
-        lda DUST_Z, y
+        sta DUST_Z_LO, y
+        lda DUST_Z_HI, y
         sta ZP_VAR_Z
         adc ZP_98
-        sta DUST_Z, y
+        sta DUST_Z_HI, y
         lda ZP_VAR_XX_HI
         eor ZP_ROLL_SIGN        ; roll sign?
         jsr _393c
@@ -643,14 +643,14 @@ _2b30:                                                                  ;$2B30
         jsr _290f
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X
-        sta DUST_X, y
+        sta DUST_X_HI, y
         lda ZP_VAR_YY_HI
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
         sta ZP_VAR_Y
         and # %01111111
         cmp # $6e
         bcs _2bf7
-        lda DUST_Z, y
+        lda DUST_Z_HI, y
         cmp # $a0
         bcs _2bf7
         sta ZP_VAR_Z
@@ -669,7 +669,7 @@ _2bf7:                                                                  ;$2BF7
         jsr get_random_number
         and # %01111111
         adc # $0a
-        sta DUST_Z, y
+        sta DUST_Z_HI, y
         sta ZP_VAR_Z
         lsr 
         bcs _2c1a
@@ -677,10 +677,10 @@ _2bf7:                                                                  ;$2BF7
         lda # $fc
         ror 
         sta ZP_VAR_X
-        sta DUST_X, y
+        sta DUST_X_HI, y
         jsr get_random_number
         sta ZP_VAR_Y
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
         jmp _2bed
 
         ;-----------------------------------------------------------------------
@@ -688,12 +688,12 @@ _2bf7:                                                                  ;$2BF7
 _2c1a:                                                                  ;$2C1A
         jsr get_random_number
         sta ZP_VAR_X
-        sta DUST_X, y
+        sta DUST_X_HI, y
         lsr 
         lda # $e6
         ror 
         sta ZP_VAR_Y
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
         bne _2bed
 _2c2d:                                                                  ;$2C2D
         lda ZP_POLYOBJ_XPOS_LO, y
@@ -1750,10 +1750,10 @@ _3068:                                                                  ;$3068
         ldx # $0b               ; "threshold to change colour"
         stx ZP_TEMP_VAR
 
-        lda PLAYER_TEMP_CABIN
+        lda CABIN_HEAT
         jsr hud_drawbar_128
         
-        lda PLAYER_TEMP_LASER
+        lda LASER_HEAT
         jsr hud_drawbar_128
 
         lda # $f0               ; "threshold to change colour"
@@ -3136,7 +3136,7 @@ _37e9:                                                                  ;$37E9
         jsr _38a3
         ldy DUST_COUNT          ; number of dust particles
 _37fa:                                                                  ;$37FA
-        lda DUST_Z, y
+        lda DUST_Z_HI, y
         sta ZP_VAR_Z
         lsr 
         lsr 
@@ -3148,12 +3148,12 @@ _37fa:                                                                  ;$37FA
         sta ZP_VAR_S
         lda DUST_X_LO, y
         sta ZP_VAR_P1
-        lda DUST_X, y
+        lda DUST_X_HI, y
         sta ZP_VAR_X
         jsr multiplied_now_add
         sta ZP_VAR_S
         stx ZP_VAR_R
-        lda DUST_Y, y
+        lda DUST_Y_HI, y
         sta ZP_VAR_Y
         eor ZP_PITCH_SIGN
         ldx ZP_PITCH_MAGNITUDE
@@ -3196,7 +3196,7 @@ _37fa:                                                                  ;$37FA
         lda ZP_ALPHA
         jsr _290f
         lda ZP_VAR_XX_HI
-        sta DUST_X, y
+        sta DUST_X_HI, y
         sta ZP_VAR_X
         and # %01111111
         eor # %01111111
@@ -3204,7 +3204,7 @@ _37fa:                                                                  ;$37FA
         bcc _38be
         beq _38be
         lda ZP_VAR_YY_HI
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
         sta ZP_VAR_Y
         and # %01111111
 _3895:                                                                  ;$3895
@@ -3239,25 +3239,25 @@ _38a3:                                                                  ;$38A3
 _38be:                                                                  ;$38BE
         jsr get_random_number
         sta ZP_VAR_Y
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
         lda # $73
         ora ZP_B0
         sta ZP_VAR_X
-        sta DUST_X, y
+        sta DUST_X_HI, y
         bne _38e2
 _38d1:                                                                  ;$38D1
         jsr get_random_number
         sta ZP_VAR_X
-        sta DUST_X, y
+        sta DUST_X_HI, y
         lda # $6e
         ora ZP_6A               ; move count?
         sta ZP_VAR_Y
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
 _38e2:                                                                  ;$38E2
         jsr get_random_number
         ora # %00001000
         sta ZP_VAR_Z
-        sta DUST_Z, y
+        sta DUST_Z_HI, y
         bne _389a
 _38ee:                                                                  ;$38EE
         sta ZP_VALUE_pt1
@@ -3512,7 +3512,7 @@ _3b27:                                                                  ;$3B27
 ;===============================================================================
 
 _3b30:                                                                  ;$3B30
-        lda DUST_Z, y
+        lda DUST_Z_HI, y
 _3b33:                                                                  ;$3B33
         sta ZP_VAR_Q
 
@@ -3874,9 +3874,9 @@ shoot_lasers:                                                           ;$3CDB
         
         ; increase laser temperature!
         ;
-        lda PLAYER_TEMP_LASER
+        lda LASER_HEAT
         adc # $08
-        sta PLAYER_TEMP_LASER
+        sta LASER_HEAT
         jsr _7b64                       ; handle laser temperature limits?
 
 _3cfa:                                                                  ;$3CFA

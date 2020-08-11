@@ -16,7 +16,7 @@ _1d81:                                                                  ;$1D81
         ; -- the cabin temperature is not reset; oversight / bug?
         lda # $00
         sta PLAYER_SPEED        ; bring player's ship to a full stop
-        sta PLAYER_TEMP_LASER   ; complete laser cooldown
+        sta LASER_HEAT          ; complete laser cooldown
         sta ZP_66               ; reset hyperspace countdown
 
         ; set shields to maximum,
@@ -541,7 +541,7 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
         lda joy_fire
         beq _202d
 
-        lda PLAYER_TEMP_LASER
+        lda LASER_HEAT
         cmp # $f2
         bcs _202d
 
@@ -1040,7 +1040,7 @@ _22c2:                                                                  ;$22C2
         bne _231c
 
         lda # $1e
-        sta PLAYER_TEMP_CABIN
+        sta CABIN_HEAT
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
@@ -1055,7 +1055,7 @@ _22c2:                                                                  ;$22C2
 
         eor # %11111111
         adc # $1e
-        sta PLAYER_TEMP_CABIN
+        sta CABIN_HEAT
         bcs _22b2
         cmp # $e0
         bcc _231c

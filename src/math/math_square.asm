@@ -40,7 +40,7 @@ math_square:                                                            ;$3988
 
 _3992:  ;?
         tax 
-        lda DUST_Y, y
+        lda DUST_Y_HI, y
         sta ZP_VAR_Y
 _3997:  ;?
         and # %01111111
@@ -87,7 +87,7 @@ _398d:  clc                                                             ;$398D
         ;-----------------------------------------------------------------------
 
 _3992:                                                                  ;$3992
-        lda DUST_Y, y           ; get Y-position of dust particle index Y
+        lda DUST_Y_HI, y        ; get Y-position of dust particle index Y
         sta ZP_VAR_Y            ; keep original value before multiplication
 
 _3997:                                                                  ;$3997

@@ -81,15 +81,15 @@ VAR_0481                = $0481 ;?
 
 IS_WITCHSPACE           = $0482 ; has misjump occurred?
 
-VAR_0484                = $0484 ;?
+VAR_0484                = $0484 ; ECM is on?
 
 COCKPIT_VIEW            = $0486 ; (front, rear, left, right)
 
-VAR_0487                = $0487 ;?
+VAR_0487                = $0487 ; something to do with lasers / cool-down?
 
 VAR_048A                = $048a ;?
-VAR_048B                = $048b ;?
-VAR_048C                = $048c ;?
+VAR_048B                = $048b ; a delay counter?
+VAR_048C                = $048c ; message ID for item destroyed?
 
 ;-------------------------------------------------------------------------------
 
@@ -277,8 +277,8 @@ PLAYER_ENERGY           = $04e9
 VAR_04EA                = $04ea ;?
 VAR_04EB                = $04eb ;?
 
-PLAYER_TEMP_LASER       = $0488 ; laser temperature
-PLAYER_TEMP_CABIN       = $0483 ; cabin temperature
+LASER_HEAT              = $0488 ; laser temperature
+CABIN_HEAT              = $0483 ; cabin temperature
 
 SHIP_LINES_LO           = $04f2 ; ship lines pointer lo-byte
 SHIP_LINES_HI           = $04f3 ; ship lines pointer hi-byte
@@ -325,7 +325,6 @@ PSYSTEM_POS_Y           = $049b
 VAR_049C                = $049c ;? (indexed by X)
 
 ;-------------------------------------------------------------------------------
-
 ; NOTE: there are up-to 13 dust-particles at a time
 ; DUST_COUNT is only ever set to $0C (in `_83ed`) or $03 (in `_73c1`)
 ; TODO: define the arrays below based on this
@@ -333,11 +332,12 @@ VAR_049C                = $049c ;? (indexed by X)
 DUST_MAX                = 13
 
 DUST_COUNT              = $050b ; number of dust particles
-DUST_X                  = $06a2 ;..$06AE: X-positions of dust-particles
-DUST_X_LO               = $06af ;..$06BB: fractional X-position
-DUST_Y                  = $06bc ;..$06C8: Y-positions of dust-particles
-DUST_Y_LO               = $06c9 ;..$06D5: fractional Y-position
-DUST_Z                  = $06d6 ;..$06E1: Z-positions of dust-particles
+DUST_X_HI               = $06a2 ;..$06AE: X-positions of dust-particles
+DUST_X_LO               = $06af ;..$06BB: fractional X-positions
+DUST_Y_HI               = $06bc ;..$06C8: Y-positions of dust-particles
+DUST_Y_LO               = $06c9 ;..$06D5: fractional Y-positions
+DUST_Z_HI               = $06d6 ;..$06E2: Z-positions of dust-particles
+DUST_Z_LO               = $06e3 ;..$06EF: fractional Z-positions
 
 ;-------------------------------------------------------------------------------
 ; circles are converted into a list of half-widths for each scan-line, i.e.
@@ -354,11 +354,10 @@ CIRCLE_BUFFER           = $0580
 
 TXT_BUFFER              = $0648 ; printing text-buffer
 
-VAR_06E3                = $06e3 ;? (indexed by Y)
-
 VAR_06F0                = $06f0 ;?
 VAR_06F1                = $06f1 ;?
 VAR_06F3                = $06f3 ;?
+
 LINE_FLIP               = $06f4 ; flag for when line's start/end were swapped
 
 VAR_06FB                = $06fb ; title screen poly-object z-distance?

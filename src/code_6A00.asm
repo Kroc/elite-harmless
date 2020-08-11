@@ -2984,13 +2984,13 @@ _7afa:                                                                  ;$7AFA
         ; initialize all DUST completely random
         jsr get_random_number
         ora # %00001000         ; but Z is >= 16
-        sta DUST_Z, y
+        sta DUST_Z_HI, y
         sta ZP_VAR_Z
         jsr get_random_number
-        sta DUST_X, y
+        sta DUST_X_HI, y
         sta ZP_VAR_X
         jsr get_random_number
-        sta DUST_Y, y
+        sta DUST_Y_HI, y
         sta ZP_VAR_Y
         jsr draw_particle
         dey 
@@ -5339,9 +5339,9 @@ _8627:                                                                  ;$8627
 
         ; cool down lasers:
         ;
-        ldx PLAYER_TEMP_LASER   ; get current laser temperature
+        ldx LASER_HEAT          ; get current laser temperature
         beq :+                  ; skip if > 0
-        dec PLAYER_TEMP_LASER   ; reduce laser temperature
+        dec LASER_HEAT          ; reduce laser temperature
 
 :       ldx VAR_0487                                                    ;$8632
         beq @_863e
@@ -5398,7 +5398,7 @@ _8627:                                                                  ;$8627
 
         sta ZP_VAR_T            ; put aside the Trumble™ hi-byte
                                 ; this will be the 'odds' (n/256)
-        lda PLAYER_TEMP_CABIN   ; get current cabin temperature
+        lda CABIN_HEAT          ; get current cabin temperature
         cmp # 224               ; is it >= 224?
         bcs :+                  ; yes, skip the next instruction
                                 ; (reduces Trumble™ growth in hot conditions)
@@ -5415,7 +5415,7 @@ _8627:                                                                  ;$8627
         tax 
 
         lda # $80
-        ldy PLAYER_TEMP_CABIN   ; get current cabin temperature
+        ldy CABIN_HEAT          ; get current cabin temperature
         cpy # 224               ; is it >= 224?
         bcc :+                  ; if not, skip over
 
@@ -7081,13 +7081,13 @@ _901a:  sta ZP_CURSOR_ROW                                               ;$901A
         sta VAR_04E6
         lda # $c0
         sta txt_buffer_flag
+        
         lda VAR_048C
-        lsr 
+        lsr                     ; note that this might set the carry
         lda # $00
-        bcc _9042
+        bcc :+
         lda # $0a
-_9042:                                                                  ;$9042
-        sta txt_buffer_index
+:       sta txt_buffer_index                                            ;$9042
 
         lda VAR_04E6
         jsr print_flight_token
