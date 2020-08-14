@@ -197,9 +197,8 @@ _6a68:                                                                  ;$6A68
         ;-----------------------------------------------------------------------
         ; print "DISTANCE:"
         ;
-.import TXT_DISTANCE:direct
-
-:       lda # TXT_DISTANCE                                              ;$6A73
+.import TXT_FLIGHT_DISTANCE:direct
+:       lda # TXT_FLIGHT_DISTANCE                                       ;$6A73
         jsr print_flight_token_with_colon
 
         ; print the distance as a fixed-point decimal, e.g. "6.4"
@@ -210,8 +209,8 @@ _6a68:                                                                  ;$6A68
 
         ; print "LIGHT YEARS"
         ;
-.import TXT_LIGHT_YEARS:direct
-        lda # TXT_LIGHT_YEARS
+.import TXT_FLIGHT_LIGHT_YEARS:direct
+        lda # TXT_FLIGHT_LIGHT_YEARS
 
 _6a84:                                                                  ;$6A84
         ;-----------------------------------------------------------------------
@@ -231,8 +230,8 @@ _6a93:                                                                  ;$6A93
         ;=======================================================================
         ; print "MAINLY"
         ;
-.import TXT_MAINLY:direct
-        lda # TXT_MAINLY
+.import TXT_FLIGHT_MAINLY:direct
+        lda # TXT_FLIGHT_MAINLY
         jsr print_flight_token
         jmp _6ad3
 
@@ -258,16 +257,16 @@ planet_screen:                                                          ;$6AA1
         jsr set_cursor_col
 
         ; print "DATA ON " ...
-.import TXT_DATA_ON:direct
-        lda # TXT_DATA_ON
+.import TXT_FLIGHT_DATA_ON:direct
+        lda # TXT_FLIGHT_DATA_ON
         jsr print_flight_token_and_divider
 
         jsr _6a87
         jsr _6a68
 
         ; print "ECONOMY:"
-.import TXT_ECONOMY:direct
-        lda # TXT_ECONOMY
+.import TXT_FLIGHT_ECONOMY:direct
+        lda # TXT_FLIGHT_ECONOMY
         jsr print_flight_token_with_colon
 
         ; is this a "MAINLY" economy?
@@ -286,38 +285,36 @@ planet_screen:                                                          ;$6AA1
 _6ace:                                                                  ;$6ACE
         ; "RICH" / "AVERAGE" / "POOR"
         ;
-.import TXT_WEALTH:direct
-        adc # TXT_WEALTH
+.import TXT_FLIGHT_WEALTH:direct
+        adc # TXT_FLIGHT_WEALTH
         jsr print_flight_token
 _6ad3:                                                                  ;$6AD3
         lda TSYSTEM_ECONOMY
         lsr 
         lsr 
 
-.import TXT_INDUSTRIAL:direct
-
         ; "INDUSTRIAL" / "AGRICULTURAL"
-
+.import TXT_FLIGHT_INDUSTRIAL:direct
         clc 
-        adc # TXT_INDUSTRIAL
+        adc # TXT_FLIGHT_INDUSTRIAL
         jsr _6a84
 
-.import TXT_GOVERNMENT:direct
-        lda # TXT_GOVERNMENT
+.import TXT_FLIGHT_GOVERNMENT:direct
+        lda # TXT_FLIGHT_GOVERNMENT
         jsr print_flight_token_with_colon
 
-.import TXT_ANARCHY:direct
+.import TXT_FLIGHT_ANARCHY:direct
 
         ; "ANARCHY" / "FEUDAL" / "MULTI-GOVERNMENT" / "DICTATORSHIP" /
         ; "COMMUNIST" / "CONFEDORACY" / "DEMOCRACY" / "CORPORATE STATE"
 
         lda TSYSTEM_GOVERNMENT
         clc 
-        adc # TXT_ANARCHY
+        adc # TXT_FLIGHT_ANARCHY
         jsr _6a84
 
-.import TXT_TECH_LEVEL:direct
-        lda # TXT_TECH_LEVEL
+.import TXT_FLIGHT_TECH_LEVEL:direct
+        lda # TXT_FLIGHT_TECH_LEVEL
         jsr print_flight_token_with_colon
 
         ldx TSYSTEM_TECHLEVEL
@@ -326,16 +323,16 @@ _6ad3:                                                                  ;$6AD3
         jsr print_tiny_value
         jsr _6a87
 
-.import TXT_POPULATION:direct
-        lda # TXT_POPULATION
+.import TXT_FLIGHT_POPULATION:direct
+        lda # TXT_FLIGHT_POPULATION
         jsr print_flight_token_with_colon
 
         sec 
         ldx TSYSTEM_POPULATION
         jsr print_tiny_value
 
-.import TXT_BILLION:direct
-        lda # TXT_BILLION
+.import TXT_FLIGHT_BILLION:direct
+        lda # TXT_FLIGHT_BILLION
         jsr _6a84
 
 .import TXT_LPAREN:direct
@@ -345,8 +342,8 @@ _6ad3:                                                                  ;$6AD3
         lda ZP_SEED_W2_LO
         bmi :+
 
-.import TXT_HUMAN_COLONIAL:direct
-        lda # TXT_HUMAN_COLONIAL
+.import TXT_FLIGHT_HUMAN_COLONIAL:direct
+        lda # TXT_FLIGHT_HUMAN_COLONIAL
         jsr print_flight_token
 
         jmp _6b5a
@@ -359,11 +356,11 @@ _6ad3:                                                                  ;$6AD3
         cmp # $03
         bcs :+
 
-.import TXT_LARGE:direct
+.import TXT_FLIGHT_LARGE:direct
 
         ; "LARGE" / "FIERCE" / "SMALL" / ?
 
-        adc # TXT_LARGE
+        adc # TXT_FLIGHT_LARGE
         jsr print_flight_token_and_space
 :       pla                                                             ;$6B2E
         lsr 
@@ -372,11 +369,11 @@ _6ad3:                                                                  ;$6AD3
         cmp # $06
         bcs _6b3b
 
-.import TXT_COLORS:direct
+.import TXT_FLIGHT_COLORS:direct
 
         ; "GREEN" / "RED" / "YELLOW" / "BLUE" / "BLACK" / ?
 
-        adc # TXT_COLORS
+        adc # TXT_FLIGHT_COLORS
         jsr print_flight_token_and_space
 _6b3b:                                                                  ;$6B3B
         lda ZP_SEED_W1_HI
@@ -386,12 +383,12 @@ _6b3b:                                                                  ;$6B3B
         cmp # $06
         bcs _6b4c
 
-.import TXT_ADJECTIVES:direct
+.import TXT_FLIGHT_ADJECTIVES:direct
 
         ; "HARMLESS" / "SLIMY" / "BUG-EYED" / "HORNED" /
         ; "BONY" / "FAT" / "FURRY"
 
-        adc # TXT_ADJECTIVES+1  ; +1, because of borrow?
+        adc # TXT_FLIGHT_ADJECTIVES+1   ; +1, because of borrow?
         jsr print_flight_token_and_space
 _6b4c:                                                                  ;$6B4C
         lda ZP_SEED_W2_HI
@@ -400,12 +397,12 @@ _6b4c:                                                                  ;$6B4C
         adc ZP_8E
         and # %00000111
 
-.import TXT_SPECIES:direct
+.import TXT_FLIGHT_SPECIES:direct
 
         ; "RODENT" / "FROG" / "LIZARD" / "LOBSTER" / "BIRD" / "HUMANOID" /
         ; "FELINE" / "INSECT"
 
-        adc # TXT_SPECIES
+        adc # TXT_FLIGHT_SPECIES
         jsr print_flight_token
 _6b5a:                                                                  ;$6B5A
         ; append "s)"
@@ -416,8 +413,8 @@ _6b5a:                                                                  ;$6B5A
         lda # TXT_RPAREN
         jsr _6a84
 
-.import TXT_GROSS_PRODUCTIVITY:direct
-        lda # TXT_GROSS_PRODUCTIVITY
+.import TXT_FLIGHT_GROSS_PRODUCTIVITY:direct
+        lda # TXT_FLIGHT_GROSS_PRODUCTIVITY
         jsr print_flight_token_with_colon
 
         ldx TSYSTEM_PRODUCTIVITY_LO
@@ -431,12 +428,12 @@ _6b5a:                                                                  ;$6B5A
         lda # TXT_M
         jsr print_flight_token
 
-.import TXT_CR:direct
-        lda # TXT_CR
+.import TXT_FLIGHT_CR:direct
+        lda # TXT_FLIGHT_CR
         jsr _6a84
 
-.import TXT_AVERAGE_RADIUS:direct
-        lda # TXT_AVERAGE_RADIUS
+.import TXT_FLIGHT_AVERAGE_RADIUS:direct
+        lda # TXT_FLIGHT_AVERAGE_RADIUS
         jsr print_flight_token_with_colon
 
         ; extract the avergae planet radius from the seed
@@ -561,8 +558,8 @@ galactic_chart:                                                         ;$6C1C
 
         jsr _70a0
 
-.import TXT_GALACTIC_CHART:direct
-        lda # TXT_GALACTIC_CHART
+.import TXT_FLIGHT_GALACTIC_CHART:direct
+        lda # TXT_FLIGHT_GALACTIC_CHART
         jsr print_flight_token
 
         jsr _28e0               ; cursor down 23 times!!!
@@ -766,18 +763,18 @@ _6d34:                                                                  ;$6D34
 _6d3e:                                                                  ;$6D3E
         jsr tkn_docked_fn15
 
-.import TXT_QUANTITY_OF:direct
-        lda # TXT_QUANTITY_OF
+.import TXT_FLIGHT_QUANTITY_OF:direct
+        lda # TXT_FLIGHT_QUANTITY_OF
         jsr print_flight_token
 
         ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
         ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
-.import TXT_FOOD:direct
+.import TXT_FLIGHT_FOOD:direct
 
         lda VAR_04EF            ; item index?
         clc 
-        adc # TXT_FOOD
+        adc # TXT_FLIGHT_FOOD
         jsr print_flight_token
 
 .import TXT_SLASH:direct
@@ -902,8 +899,8 @@ _6e26:                                                                  ;$6E26
 _6e30:                                                                  ;$6E30
         jsr print_newline
 
-.import TXT_QUANTITY:direct
-        lda # TXT_QUANTITY
+.import TXT_FLIGHT_QUANTITY:direct
+        lda # TXT_FLIGHT_QUANTITY
         jsr _723c
 
         jsr _7627
@@ -922,12 +919,12 @@ sell_cargo:                                                             ;$6E41
         lda # 10
         jsr set_cursor_col
 
-.import TXT_SELL:direct
-        lda # TXT_SELL
+.import TXT_FLIGHT_SELL:direct
+        lda # TXT_FLIGHT_SELL
         jsr print_flight_token
 
-.import TXT_CARGO:direct
-        lda # TXT_CARGO
+.import TXT_FLIGHT_CARGO:direct
+        lda # TXT_FLIGHT_CARGO
         jsr print_flight_token_and_divider
 
         jsr print_newline
@@ -955,8 +952,8 @@ _6e5d:                                                                  ;$6E5d
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
         ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
 
-.import TXT_FOOD:direct
-        adc # TXT_FOOD
+.import TXT_FLIGHT_FOOD:direct
+        adc # TXT_FLIGHT_FOOD
         jsr print_flight_token
 
         lda # 14
@@ -973,8 +970,8 @@ _6e5d:                                                                  ;$6E5d
         cmp # $04
         bne _6eca
 
-.import TXT_SELL:direct
-        lda # TXT_SELL
+.import TXT_FLIGHT_SELL:direct
+        lda # TXT_FLIGHT_SELL
         jsr print_flight_token
 
 .import MSG_DOCKED_YES_OR_NO:direct
@@ -1068,8 +1065,8 @@ inventory_screen:                                                       ;$6F16
         lda # 11
         jsr set_cursor_col
 
-.import TXT_INVENTORY:direct
-        lda # TXT_INVENTORY
+.import TXT_FLIGHT_INVENTORY:direct
+        lda # TXT_FLIGHT_INVENTORY
         jsr _6a84
 
         jsr draw_title_divider
@@ -1078,8 +1075,8 @@ inventory_screen:                                                       ;$6F16
         cmp # $1a
         bcc _6f37
 
-.import TXT_LARGE_CARGO_BAY:direct
-        lda # TXT_LARGE_CARGO_BAY
+.import TXT_FLIGHT_LARGE_CARGO_BAY:direct
+        lda # TXT_FLIGHT_LARGE_CARGO_BAY
         jsr print_flight_token
 _6f37:                                                                  ;$6F37
         jmp _6e58
@@ -1221,8 +1218,8 @@ local_chart:                                                            ;$6FDB
         lda # 7
         jsr set_cursor_col
 
-.import TXT_SHORT_RANGE_CHART:direct
-        lda # TXT_SHORT_RANGE_CHART
+.import TXT_FLIGHT_SHORT_RANGE_CHART:direct
+        lda # TXT_FLIGHT_SHORT_RANGE_CHART
         jsr print_flight_token_and_divider
 
         jsr _6cda
@@ -1586,8 +1583,8 @@ _7181:                                                                  ;$7181
         lda # %00000000
         sta ZP_34
 
-.import TXT_HYPERSPACE:direct
-        lda # TXT_HYPERSPACE
+.import TXT_FLIGHT_HYPERSPACE:direct
+        lda # TXT_FLIGHT_HYPERSPACE
         jsr print_flight_token
 
         lda TSYSTEM_DISTANCE_HI
@@ -1686,8 +1683,8 @@ print_num16:                                                            ;$7235
         jmp print_medium_value
 
 _723a:                                                                  ;$723A
-.import TXT_RANGE:direct
-        lda # TXT_RANGE
+.import TXT_FLIGHT_RANGE:direct
+        lda # TXT_FLIGHT_RANGE
 
 _723c:                                                                  ;$723C
         jsr print_flight_token
@@ -1717,10 +1714,10 @@ _7246:                                                                  ;$7246
         ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
         ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
-.import TXT_FOOD:direct
+.import TXT_FLIGHT_FOOD:direct
 
         pla 
-        adc # TXT_FOOD
+        adc # TXT_FLIGHT_FOOD
         jsr print_flight_token
 
         lda # 14
@@ -1811,8 +1808,8 @@ market_screen:                                                          ;$72E4
         lda # 5
         jsr set_cursor_col
 
-.import TXT_MARKET_PRICES:direct
-        lda # TXT_MARKET_PRICES
+.import TXT_FLIGHT_MARKET_PRICES:direct
+        lda # TXT_FLIGHT_MARKET_PRICES
         jsr print_flight_token_and_divider
 
         lda # 3
@@ -2127,12 +2124,12 @@ equipment_screen:                                                       ;$74BB
         lda # 12
         jsr set_cursor_col
 
-.import TXT_EQUIP:direct
-        lda # TXT_EQUIP
+.import TXT_FLIGHT_EQUIP:direct
+        lda # TXT_FLIGHT_EQUIP
         jsr print_flight_token_and_space
 
-.import TXT_SHIP:direct
-        lda # TXT_SHIP
+.import TXT_FLIGHT_SHIP:direct
+        lda # TXT_FLIGHT_SHIP
         jsr print_flight_token_and_divider
 
         lda # $80
@@ -2182,8 +2179,8 @@ _74f5:                                                                  ;$74F5
         bcc _74f5
         jsr tkn_docked_fn15
 
-.import TXT_ITEM:direct
-        lda # TXT_ITEM
+.import TXT_FLIGHT_ITEM:direct
+        lda # TXT_FLIGHT_ITEM
         jsr _723c
 
         jsr _6dc9
@@ -2217,8 +2214,8 @@ _7549:                                                                  ;$7549
         jsr _845c               ; update missile blocks on HUD
         lda # $01
 _755f:                                                                  ;$755F
-.import TXT_LARGE_CARGO_BAY:direct
-        ldy # TXT_LARGE_CARGO_BAY
+.import TXT_FLIGHT_LARGE_CARGO_BAY:direct
+        ldy # TXT_FLIGHT_LARGE_CARGO_BAY
 
         cmp # $02
         bne _756f
@@ -2248,8 +2245,8 @@ _758a:                                                                  ;$758A
         lda # $8f
         jsr _76a1
 _7596:                                                                  ;$7596
-.import TXT_FUEL_SCOOPS:direct
-        ldy # TXT_FUEL_SCOOPS
+.import TXT_FLIGHT_FUEL_SCOOPS:direct
+        ldy # TXT_FLIGHT_FUEL_SCOOPS
         cmp # $06
         bne _75bc
         ldx VAR_04C2
@@ -2261,8 +2258,8 @@ _75a1:                                                                  ;$75A1
         lda ZP_VALUE_pt1        ; (being used as a temp value)
         jsr print_flight_token_and_space
 
-.import TXT_PRESENT:direct
-        lda # TXT_PRESENT       ;?
+.import TXT_FLIGHT_PRESENT:direct
+        lda # TXT_FLIGHT_PRESENT
         jsr print_flight_token
 _75b3:                                                                  ;$75B3
         jsr _7627
@@ -2332,8 +2329,8 @@ _761f:                                                                  ;$761F
         jsr print_space
 
         ; print "CASH:"
-.import TXT_CASH_:direct
-        lda # TXT_CASH_
+.import TXT_FLIGHT_CASH_:direct
+        lda # TXT_FLIGHT_CASH_
         jsr print_flight_token_and_space
 _7627:                                                                  ;$7627
         jsr _a80f
@@ -2348,8 +2345,8 @@ _762f:                                                                  ;$762F
         jsr _745a
         bcs _764b
 
-.import TXT_CASH:direct
-        lda # TXT_CASH
+.import TXT_FLIGHT_CASH:direct
+        lda # TXT_FLIGHT_CASH
         jsr _723c
 
         jmp _75b3
@@ -2403,8 +2400,8 @@ _765e:                                                                  ;$765E
         bcc _765e
         jsr tkn_docked_fn15
 _767e:                                                                  ;$767E
-.import TXT_VIEW:direct
-        lda # TXT_VIEW
+.import TXT_FLIGHT_VIEW:direct
+        lda # TXT_FLIGHT_VIEW
         jsr _723c
 
         jsr _8fea
@@ -6027,8 +6024,8 @@ _8920:                                                                  ;$8920
 .endif  ;///////////////////////////////////////////////////////////////////////
         jsr set_cursor_col
 
-.import TXT_ELITE:direct
-        lda # TXT_ELITE
+.import TXT_FLIGHT_ELITE:direct
+        lda # TXT_FLIGHT_ELITE
         jsr print_flight_token_and_newline
 
         lda # $0a
@@ -7137,8 +7134,8 @@ _905d:                                                                  ;$905D
         lsr VAR_048C
         bcc _9001
 
-.import TXT_DESTROYED:direct
-        lda # TXT_DESTROYED
+.import TXT_FLIGHT_DESTROYED:direct
+        lda # TXT_FLIGHT_DESTROYED
         jmp print_flight_token
 
 

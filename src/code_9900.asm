@@ -2439,16 +2439,16 @@ _a75d:                                                                  ;$A75D
         lda # 11
         jsr set_cursor_col
 
-.import TXT_DIRECTIONS:direct
+.import TXT_FLIGHT_DIRECTIONS:direct
         lda COCKPIT_VIEW
-        ora # TXT_DIRECTIONS    ;=$60
+        ora # TXT_FLIGHT_DIRECTIONS
         ; TODO: can we just use `jsr print_flight_token_and_space`?
         jsr print_flight_token
         jsr print_space
 
-.import TXT_VIEW:direct
+.import TXT_FLIGHT_VIEW:direct
 
-        lda # TXT_VIEW
+        lda # TXT_FLIGHT_VIEW
         jsr print_flight_token
 
 :       ldx # 1                                                         ;$A77B

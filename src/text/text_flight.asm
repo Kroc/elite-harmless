@@ -177,7 +177,7 @@ _word_index     .set 0
         ;;.out .sprintf(": $%0.2x: TXT%s", _value, word_id)
         .ident(word_id) = _value
 
-.export .ident(.concat("TXT", word_id)) = .scramble( _value )
+.export .ident(.concat("TXT_FLIGHT", word_id)) = .scramble( _value )
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -426,6 +426,8 @@ _0849:  ;$CF: 47.                                                       ;$0849
         .define_word \
                 "_EQUIP"        ; $CF^35 = $EC
         
+        ; cargo types:
+        ;-----------------------------------------------------------------------
 _084e:  ;$D0: 48.                                                       ;$084E
         .byte   _F, _O, _O, _D, __end
         .define_word \

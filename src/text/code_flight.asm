@@ -45,8 +45,8 @@ print_fuel_and_cash:                                                    ;$774A
 ;-------------------------------------------------------------------------------
 
         ; print "FUEL:"
-.import TXT_FUEL:direct
-        lda # TXT_FUEL
+.import TXT_FLIGHT_FUEL:direct
+        lda # TXT_FLIGHT_FUEL
         jsr print_flight_token_with_colon
 
         ; print the player's fuel quantity
@@ -55,12 +55,13 @@ print_fuel_and_cash:                                                    ;$774A
         jsr print_tiny_value
 
         ; print "LIGHT YEARS"
-.import TXT_LIGHT_YEARS:direct
-        lda # TXT_LIGHT_YEARS
+.import TXT_FLIGHT_LIGHT_YEARS:direct
+        lda # TXT_FLIGHT_LIGHT_YEARS
         jsr print_flight_token_and_newline
 
-.import TXT_CASH_:direct
-        lda # TXT_CASH_                 ; "CASH:" (colon in the string)
+        ; TODO: just use `print_flight_token_and_colon`, no?
+.import TXT_FLIGHT_CASH_:direct
+        lda # TXT_FLIGHT_CASH_  ; "CASH:" (colon in the string)
         bne print_flight_token
 
         ; print cash value?
@@ -80,8 +81,8 @@ _775f:                                                                  ;$775F
         jsr print_large_value   ; convert value to string
 
         ; print "CR" ("credits") after the cash value
-.import TXT_CR:direct
-        lda # TXT_CR
+.import TXT_FLIGHT_CR:direct
+        lda # TXT_FLIGHT_CR
         ;
         ; fall-through below to print "CR" and new-line
         ;

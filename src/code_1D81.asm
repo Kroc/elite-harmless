@@ -742,20 +742,25 @@ process_ship:                                                           ;$202F
         and ZP_POLYOBJ_YPOS_HI  ; TODO: near sun(?)
         bpl _2122
 
-        cpx # HULL_CARGO
+        cpx # HULL_CARGO        ; is this a cargo cannister?
         beq _20c0
 
+        ; read scoop data from the hull
         ldy # Hull::scoop_debris
         lda [ZP_HULL_ADDR], y
-        lsr 
-        lsr 
-        lsr 
-        lsr 
-        beq _2122
+        lsr                     ; down shift the top-nybble
+        lsr                     ; into the bottom nybble
+        lsr                     ; (cargo-data is held in the top-nybble,
+        lsr                     ;  debris-data in the low-nybble)
+        beq _2122               ; if zero, cannot be scooped?
 
-        adc # $01
-        bne _20c5
-_20c0:                                                                  ;$20C0
+        ; TODO: this would imply that the `scoop_debris`-data in the hulls
+        ;       would need to be generated from HULL_* constants
+        ;
+        adc # $01               ; select type of cargo(?)
+        bne _20c5               ; (as determined by the hull data)
+
+_20c0:  ; choose a random qty of cargo?                                 ;$20C0
         jsr get_random_number
         and # %00000111
 _20c5:                                                                  ;$20C5
@@ -767,9 +772,12 @@ _20c5:                                                                  ;$20C5
         adc VAR_CARGO, y
         sta VAR_CARGO, y
         tya 
-        adc # $d0
+        ; print the name of the cargo
+.import TXT_FLIGHT_FOOD:direct
+        adc # TXT_FLIGHT_FOOD
         jsr _900d
 
+        ; mark cannister for removal?
         asl ZP_POLYOBJ_BEHAVIOUR
         sec 
         ror ZP_POLYOBJ_BEHAVIOUR
@@ -777,7 +785,6 @@ _20e0:                                                                  ;$20E0
         jmp _2131
 
         ;-----------------------------------------------------------------------
-
 _20e3:                                                                  ;$20E3
         lda polyobj_01 + PolyObject::behaviour                         ;=$F949
         and # behaviour::angry
