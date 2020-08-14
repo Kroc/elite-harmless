@@ -2196,9 +2196,9 @@ _328a:                                                                  ;$328A
 _3290:                                                                  ;$3290
         jsr _a7a6               ; kill ship?
 _3293:                                                                  ;$3293
-        asl ZP_POLYOBJ_VISIBILITY
+        asl ZP_POLYOBJ_STATE
         sec 
-        ror ZP_POLYOBJ_VISIBILITY
+        ror ZP_POLYOBJ_STATE
 _3298:                                                                  ;$3298
         rts 
 
@@ -2438,8 +2438,8 @@ _33a8:                                                                  ;$33A8
         ;-----------------------------------------------------------------------
 
 _33d6:                                                                  ;$33D6
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::missiles
+        lda ZP_POLYOBJ_STATE
+        and # state::missiles
         beq _33fd
         sta ZP_VAR_T
 
@@ -2450,7 +2450,7 @@ _33d6:                                                                  ;$33D6
         
         lda ZP_67
         bne _33fd
-        dec ZP_POLYOBJ_VISIBILITY       ; reduce number of missiles?
+        dec ZP_POLYOBJ_STATE    ; reduce number of missiles?
         lda ZP_A5
         cmp # $1d
         bne _33fa
@@ -2481,9 +2481,9 @@ _33fd:                                                                  ;$33FD
         and # %11111000
         beq _3434
         
-        lda ZP_POLYOBJ_VISIBILITY
-        ora # visibility::firing
-        sta ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_STATE
+        ora # state::firing
+        sta ZP_POLYOBJ_STATE
         cpx # $a3
         bcc _3434
 
@@ -2849,8 +2849,8 @@ _363f:                                                                  ;$363F
         lda ZP_A5
         bmi _367d
         
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::display
+        lda ZP_POLYOBJ_STATE
+        and # state::display
         ora ZP_POLYOBJ_XPOS_MI
         ora ZP_POLYOBJ_YPOS_MI
         bne _367d

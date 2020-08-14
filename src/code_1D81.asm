@@ -394,6 +394,10 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         ora ZP_PITCH_SIGN
         sta ZP_BETA             ; put aside for the matrix math
 
+        ; TODO: this section processes a number of key presses;
+        ;       could we skip this when no keys are pressed by
+        ;       marking a 'no keys' flag?
+
         ; accelerate?
         ;-----------------------------------------------------------------------
         lda key_accelerate      ; is accelerate being held?
@@ -622,21 +626,24 @@ process_ship:                                                           ;$202F
         ;
 ;;.ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        ldy # .sizeof(PolyObject)-1
-:       lda [ZP_POLYOBJ_ADDR], y                                        ;$2040
-        sta ZP_POLYOBJ, y
-        dey 
-        bpl :-
+        ;                                 bytes cycles
+        ldy # .sizeof(PolyObject)-1     ; 2     2
+:       lda [ZP_POLYOBJ_ADDR], y        ; 2     5=5                     ;$2040
+        sta ZP_POLYOBJ, y               ; 2     5=10
+        dey                             ; 1     2=12
+        bpl :-                          ; 2     3=15
+        ;                               ; 9     15*37 (-1+2) = 556 cycles
 ;;.else   ;/////////////////////////////////////////////////////////////////////
 ;;        ; TODO: this won't fit into this segment in the non-hiram config
-;;        ldy # 0
+;;        ldy # 0                       ; 2     2
 ;;        .repeat $23, I
-;;                lda [ZP_POLYOBJ_ADDR], y
-;;                sta ZP_POLYOBJ + I
-;;                iny
-;;        .endrepeat
-;;        lda [ZP_POLYOBJ_ADDR], y
-;;        sta ZP_POLYOBJ + $24
+;;        lda [ZP_POLYOBJ_ADDR], y      ; 2     5=5
+;;        sta ZP_POLYOBJ + I            ; 2     3=8
+;;        iny                           ; 1     2=10
+;;        .endrepeat                    ; 5*36  10*36 (+2) = 362 cycles
+;;        lda [ZP_POLYOBJ_ADDR], y      ; 2     5=367
+;;        sta ZP_POLYOBJ + $24          ; 2     3=370
+;;                                      ;=186 bytes
 ;;.endif  ;/////////////////////////////////////////////////////////////////////
 
         ; TODO: if we use LDX instead, we can preserve the ship-type through
@@ -673,13 +680,13 @@ process_ship:                                                           ;$202F
 
         ; make ship disappear?
         ;
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::display
+        lda ZP_POLYOBJ_STATE
+        and # state::display
         bne @move
 
-        asl ZP_POLYOBJ_VISIBILITY
+        asl ZP_POLYOBJ_STATE
         sec 
-        ror ZP_POLYOBJ_VISIBILITY
+        ror ZP_POLYOBJ_STATE
 
         ldx ZP_A5               ; retrieve ship-type
         jsr _a7a6               ; kill ship?
@@ -696,8 +703,8 @@ process_ship:                                                           ;$202F
         dey 
         bpl :-
 
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::exploding | visibility::display
+        lda ZP_POLYOBJ_STATE
+        and # state::exploding | state::display
         jsr _87b1
         bne _20e0
 
@@ -788,10 +795,10 @@ _2107:                                                                  ;$2107
 _2110:                                                                  ;$2110
         jsr _a813
 
-        ; set top-bit of visibility state?
-        asl ZP_POLYOBJ_VISIBILITY
+        ; set top-bit of ship state?
+        asl ZP_POLYOBJ_STATE
         sec 
-        ror ZP_POLYOBJ_VISIBILITY
+        ror ZP_POLYOBJ_STATE
         bne _2131
 _211a:                                                                  ;$211A
         lda # $01
@@ -799,9 +806,9 @@ _211a:                                                                  ;$211A
         lda # $05
         bne _212b
 _2122:                                                                  ;$2122
-        asl ZP_POLYOBJ_VISIBILITY
+        asl ZP_POLYOBJ_STATE
         sec 
-        ror ZP_POLYOBJ_VISIBILITY
+        ror ZP_POLYOBJ_STATE
         lda ZP_POLYOBJ_ENERGY
         sec 
         ror 
@@ -848,9 +855,9 @@ _2170:                                                                  ;$2170
         sbc ZP_7B
         bcs _21a1
 
-        asl ZP_POLYOBJ_VISIBILITY
+        asl ZP_POLYOBJ_STATE
         sec 
-        ror ZP_POLYOBJ_VISIBILITY
+        ror ZP_POLYOBJ_STATE
 
         lda ZP_A5
         cmp # $07
@@ -885,10 +892,10 @@ _21ab:                                                                  ;$21AB
         lda ZP_POLYOBJ_BEHAVIOUR
         bmi _21e2
 
-        lda ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_STATE
         bpl _21e5               ; bit 7 set?
 
-        and # visibility::display
+        and # state::display
         beq _21e5
 
         lda ZP_POLYOBJ_BEHAVIOUR
@@ -921,8 +928,8 @@ _21e5:                                                                  ;$21E5
         jsr _87a4
         bcc _21e2
 _21ee:                                                                  ;$21EE
-        ldy # PolyObject::visibility
-        lda ZP_POLYOBJ_VISIBILITY
+        ldy # PolyObject::state
+        lda ZP_POLYOBJ_STATE
         sta [ZP_POLYOBJ_ADDR], y
 
         ldx ZP_9D

@@ -300,9 +300,9 @@ hide_all_ships:                                                         ;$B341
 
         ; make the entitiy invisible to the radar!
 
-        ldy # PolyObject::visibility
+        ldy # PolyObject::state
         lda [ZP_POLYOBJ_ADDR], y
-        and # visibility::scanner ^$FF  ;=%11101111
+        and # state::scanner ^$FF  ;=%11101111
         sta [ZP_POLYOBJ_ADDR], y
 
 :       inx                                                             ;$B355

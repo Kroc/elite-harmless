@@ -41,8 +41,8 @@
         roll            .byte                                           ;+$1D
         pitch           .byte                                           ;+$1E
         
-        ; visibility state, see enum below
-        visibility      .byte                                           ;+$1F
+        ; misc. state & missile count, see enum below
+        state           .byte                                           ;+$1F
         ; attack state, see enum below
         attack          .byte                                           ;+$20
 
@@ -54,9 +54,9 @@
         behaviour       .byte                                           ;+$24
 .endstruct
 
-; visibilty state and missile count
+; ship state and missile count
 ;-------------------------------------------------------------------------------
-.enum   visibility
+.enum   state
         exploding       = %10000000     ; is exploding!
         firing          = %01000000     ; is firing at player!
         display         = %00100000     ; display nodes (not distant dot)

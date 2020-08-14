@@ -2557,16 +2557,16 @@ _785f:                                                                  ;$785F
 ;===============================================================================
 ; unused / unreferenced?
 ;
-        lda ZP_POLYOBJ_VISIBILITY
-        ora # visibility::exploding | visibility::display
-        sta ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_STATE
+        ora # state::exploding | state::display
+        sta ZP_POLYOBJ_STATE
         rts 
 
 
 _7866:                                                                  ;$7866
 ;===============================================================================
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::firing
+        lda ZP_POLYOBJ_STATE
+        and # state::firing
         beq _786f
         jsr _78d6
 _786f:                                                                  ;$786F
@@ -2608,10 +2608,10 @@ _78a1:                                                                  ;$78A1
 _78aa:                                                                  ;$78AA
         dey 
         sta [ZP_TEMP_ADDR2], y
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::firing ^$FF   ;=%10111111
-        sta ZP_POLYOBJ_VISIBILITY
-        and # visibility::redraw
+        lda ZP_POLYOBJ_STATE
+        and # state::firing ^$FF        ;=%10111111
+        sta ZP_POLYOBJ_STATE
+        and # state::redraw
         beq _784e
 
         ldy # $02
@@ -2623,9 +2623,9 @@ _78bc:                                                                  ;$78BC
         dey 
         cpy # $06
         bne _78bc
-        lda ZP_POLYOBJ_VISIBILITY
-        ora # visibility::firing
-        sta ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_STATE
+        ora # state::firing
+        sta ZP_POLYOBJ_STATE
         ldy VAR_050D
         cpy # $12
         bne _78d6
@@ -3023,7 +3023,7 @@ _7b1c:                                                                  ;$7B1C
 
         jsr get_polyobj_addr
 
-        ldy # PolyObject::visibility
+        ldy # PolyObject::state
 _7b2a:                                                                  ;$7B2A
         lda [ZP_POLYOBJ_ADDR], y
         sta ZP_POLYOBJ_XPOS_LO, y
@@ -3033,10 +3033,10 @@ _7b2a:                                                                  ;$7B2A
         jsr _b410
         ldx ZP_9D
 
-        ldy # PolyObject::visibility
+        ldy # PolyObject::state
         lda [ZP_POLYOBJ_ADDR], y
-        and # visibility::exploding | visibility::display \
-            | visibility::missiles      ;=%10100111
+        and # state::exploding | state::display \
+            | state::missiles   ;=%10100111
         sta [ZP_POLYOBJ_ADDR], y
 _7b41:                                                                  ;$7B41
         inx 
@@ -3363,8 +3363,8 @@ _7cc4:                                                                  ;$7CC4
 
         ldy # Hull::laser_missiles
         lda [ZP_HULL_ADDR], y
-        and # visibility::missiles
-        sta ZP_POLYOBJ_VISIBILITY
+        and # state::missiles
+        sta ZP_POLYOBJ_STATE
 
         lda ZP_VAR_T
 _7cd4:                                                                  ;$7CD4
@@ -5108,7 +5108,7 @@ _84c3:                                                                  ;$84C3
         lsr 
         sta ZP_POLYOBJ_ATTACK
         sta ZP_POLYOBJ_ROLL
-        rol ZP_POLYOBJ_VISIBILITY       ;?
+        rol ZP_POLYOBJ_STATE
         and # %00011111
         ora # %00010000
         sta ZP_POLYOBJ_VERTX_LO

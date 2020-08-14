@@ -66,9 +66,9 @@ _9932:                                                                  ;$9932
         adc # $01               ; "1 pixel up"
         jsr _9964               ; "Ship is point, could end if nono-2"
 
-        lda # visibility::redraw
-        ora ZP_POLYOBJ_VISIBILITY
-        sta ZP_POLYOBJ_VISIBILITY
+        lda # state::redraw
+        ora ZP_POLYOBJ_STATE
+        sta ZP_POLYOBJ_STATE
 
         lda # $08               ; "skip first two edges on heap"
         jmp _a174
@@ -79,9 +79,9 @@ _995b:                                                                  ;$995B
 
 ; ".nono ; clear bit3 nothing to erase in next round, no draw."
 _995d:                                                                  ;$995D
-        lda # visibility::redraw ^$FF   ;=%11110111
-        and ZP_POLYOBJ_VISIBILITY
-        sta ZP_POLYOBJ_VISIBILITY
+        lda # state::redraw ^$FF        ;=%11110111
+        and ZP_POLYOBJ_STATE
+        sta ZP_POLYOBJ_STATE
         rts 
 
 _9964:                                                                  ;$9964
@@ -274,14 +274,14 @@ _9a86:                                                                  ;$9A86
         lda ZP_POLYOBJ_BEHAVIOUR
         bmi _9ad8
 
-        lda # visibility::display
-        bit ZP_POLYOBJ_VISIBILITY
+        lda # state::display
+        bit ZP_POLYOBJ_STATE
         bne _9ac5
         bpl _9ac5
 
-        ora ZP_POLYOBJ_VISIBILITY
-        and # (visibility::exploding | visibility::firing)^$FF  ;=%00111111
-        sta ZP_POLYOBJ_VISIBILITY
+        ora ZP_POLYOBJ_STATE
+        and # (state::exploding | state::firing)^$FF    ;=%00111111
+        sta ZP_POLYOBJ_STATE
         lda # $00
         ldy # $1c
         sta [ZP_POLYOBJ_ADDR], y
@@ -314,22 +314,22 @@ _9ac5:                                                                  ;$9AC5
 
 ; ".LL14 ; Test to remove object"
 _9ac9:                                                                  ;$9AC9
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::display
+        lda ZP_POLYOBJ_STATE
+        and # state::display
         beq _9ad8
 
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::redraw ^$FF   ;=%11110111
-        sta ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_STATE
+        and # state::redraw ^$FF        ;=%11110111
+        sta ZP_POLYOBJ_STATE
         jmp _7866
 
 ; ".EE51 ; if bit3 set draw lines in XX19 heap"
 _9ad8:                                                                  ;$9AD8
-        lda # visibility::redraw
-        bit ZP_POLYOBJ_VISIBILITY
+        lda # state::redraw
+        bit ZP_POLYOBJ_STATE
         beq _9ae5
-        eor ZP_POLYOBJ_VISIBILITY
-        sta ZP_POLYOBJ_VISIBILITY
+        eor ZP_POLYOBJ_STATE
+        sta ZP_POLYOBJ_STATE
         jmp _a178
 
 _9ae5:                                                                  ;$9AE5
@@ -384,8 +384,8 @@ _9b29:                                                                  ;$9B29
         cmp ZP_POLYOBJ_ZPOS_MI
         bcs _9b3a
 
-        lda # visibility::display
-        and ZP_POLYOBJ_VISIBILITY
+        lda # state::display
+        and ZP_POLYOBJ_STATE
         bne _9b3a               ; "hop over to Draw wireframe or exploding"
 
         jmp _9932
@@ -431,8 +431,8 @@ _9b66:                                                                  ;$9B66
         sta ZP_VAR_K4_HI
 
         ldy # Hull::face_count          ;=$0C: face count
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::display
+        lda ZP_POLYOBJ_STATE
+        and # state::display
         beq _9b8b
         lda [ZP_HULL_ADDR], y
         lsr 
@@ -1029,27 +1029,27 @@ _9f06:                                                                  ;$9F06
 
 ; ".LL72 ; XX3 node heap already Loaded with all 16bit xy screen"
 _9f1b:                                                                  ;$9F1B
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::display
+        lda ZP_POLYOBJ_STATE
+        and # state::display
         beq _9f2a
 
-        lda ZP_POLYOBJ_VISIBILITY
-        ora # visibility::redraw
-        sta ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_STATE
+        ora # state::redraw
+        sta ZP_POLYOBJ_STATE
         jmp _7866
 
 ; ".EE31 ; no explosion"
 _9f2a:                                                                  ;$9F2A
-        lda # visibility::redraw
-        bit ZP_POLYOBJ_VISIBILITY
+        lda # state::redraw
+        bit ZP_POLYOBJ_STATE
         beq _9f35
         jsr _a178
-        lda # visibility::redraw
+        lda # state::redraw
 
 ; ".LL74 ; do New lines"
 _9f35:                                                                  ;$9F35
-        ora ZP_POLYOBJ_VISIBILITY
-        sta ZP_POLYOBJ_VISIBILITY
+        ora ZP_POLYOBJ_STATE
+        sta ZP_POLYOBJ_STATE
 
         ldy # Hull::edge_count  ;=$09: edge count
         lda [ZP_HULL_ADDR], y
@@ -1059,11 +1059,11 @@ _9f35:                                                                  ;$9F35
         sty ZP_VAR_U
         sty ZP_9F
         inc ZP_VAR_U
-        bit ZP_POLYOBJ_VISIBILITY
+        bit ZP_POLYOBJ_STATE
         bvc _9f9f
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::firing ^$FF
-        sta ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_STATE
+        and # state::firing ^$FF
+        sta ZP_POLYOBJ_STATE
 
         ldy # Hull::_06         ;=$06: gun vertex
         lda [ZP_HULL_ADDR], y
@@ -1669,8 +1669,8 @@ _a2a0:                                                                  ;$A2A0
 ;-------------------------------------------------------------------------------
         ; is the ship exploding? must be 'near'
         ; (i.e. not a distant dot), and in exploding state
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::exploding | visibility::display
+        lda ZP_POLYOBJ_STATE
+        and # state::exploding | state::display
        .bnz _a2cb
 
         ; handle explosion?
@@ -1947,19 +1947,19 @@ _a3bf:                                                                  ;$A3BF
         ldy # $19
         jsr _2dc5
 
-:       lda ZP_POLYOBJ_VISIBILITY                                       ;$A434
-        and # visibility::exploding | visibility::display
+:       lda ZP_POLYOBJ_STATE                                            ;$A434
+        and # state::exploding | state::display
         bne :+
-        lda ZP_POLYOBJ_VISIBILITY
-        ora # visibility::scanner
-        sta ZP_POLYOBJ_VISIBILITY
+        lda ZP_POLYOBJ_STATE
+        ora # state::scanner
+        sta ZP_POLYOBJ_STATE
         jmp _b410
 
         ;-----------------------------------------------------------------------
 
-:       lda ZP_POLYOBJ_VISIBILITY                                       ;$A443
-        and # visibility::scanner ^$FF
-        sta ZP_POLYOBJ_VISIBILITY
+:       lda ZP_POLYOBJ_STATE                                            ;$A443
+        and # state::scanner ^$FF
+        sta ZP_POLYOBJ_STATE
         rts 
 
 ;===============================================================================
@@ -3275,8 +3275,8 @@ _b410:                                                                  ;$B410
        .bnz _b40f               ; no? exit now (RTS above us)
 
         ; is the object visible?
-        lda ZP_POLYOBJ_VISIBILITY
-        and # visibility::scanner
+        lda ZP_POLYOBJ_STATE
+        and # state::scanner
         beq _b40f               ; no? exit now (RTS above us)
 
         ldx ZP_A5               ;?

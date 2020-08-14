@@ -308,9 +308,9 @@ _3e46:                                                                  ;$3E46
         jsr _3e65
         beq _3e46
         
-        ; this might be a temporary variable and not the visibility state
+        ; this might be a temporary variable and not the ship state
         lda # %00000000
-        sta ZP_POLYOBJ_VISIBILITY
+        sta ZP_POLYOBJ_STATE
         
         ; switch to page "1"(?)
         lda # $01
