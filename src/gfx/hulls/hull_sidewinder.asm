@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $11: sidewinder
+; sidewinder
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_sidewinder_index  := hull_index                                    ;=$11
+hull_index              .set hull_index + 1
+HULL_SIDEWINDER         := hull_index                                   ;=$11
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_sidewinder_kill    = 85    ;= 0.33
+HULL_SIDEWINDER_KILL    = 85    ;= 0.33
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_sidewinder_kill    = 85    ;= 0.33
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_sidewinder_kill                                  ;$D073
+        .byte   < HULL_SIDEWINDER_KILL                                  ;$D073
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_sidewinder_kill                                  ;$D094
+        .byte   > HULL_SIDEWINDER_KILL                                  ;$D094
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $04: plate / alloys
+; plate / alloys
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_plate_index       := hull_index                                    ;=$04
+hull_index              .set hull_index + 1
+HULL_PLATE              := hull_index                                   ;=$04
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_plate_kill         = 10    ;= 0.039
+HULL_PLATE_KILL         = 10    ;= 0.039
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_plate_kill         = 10    ;= 0.039
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_plate_kill                                       ;$D066
+        .byte   < HULL_PLATE_KILL                                       ;$D066
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_plate_kill                                       ;$D087
+        .byte   > HULL_PLATE_KILL                                       ;$D087
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

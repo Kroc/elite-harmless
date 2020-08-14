@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $0E: anaconda
+; anaconda
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_anaconda_index    := hull_index                                    ;=$0E
+hull_index              .set hull_index + 1
+HULL_ANACONDA           := hull_index                                   ;=$0E
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_anaconda_kill      = 256   ;= 1.00
+HULL_ANACONDA_KILL      = 256   ;= 1.00
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_anaconda_kill      = 256   ;= 1.00
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_anaconda_kill                                    ;$D070
+        .byte   < HULL_ANACONDA_KILL                                    ;$D070
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_anaconda_kill                                    ;$D091
+        .byte   > HULL_ANACONDA_KILL                                    ;$D091
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

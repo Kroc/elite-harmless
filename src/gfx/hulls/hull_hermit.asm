@@ -2,18 +2,18 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $0F: hermit
+; rock hermit
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_dd35_index        := hull_index                                    ;=$0F
+hull_index              .set hull_index + 1
+HULL_HERMIT             := hull_index                                   ;=$0F
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_hermit_kill        = 85    ;= 0.33
+HULL_HERMIT_KILL        = 85    ;= 0.33
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
-        .addr   _dd35                                                   ;$D01C/D
+        .addr   hull_hermit                                             ;$D01C/D
 
 .segment        "HULL_TYPE"                                             ;$D042..
 ;===============================================================================
@@ -21,15 +21,15 @@ hull_hermit_kill        = 85    ;= 0.33
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_hermit_kill                                      ;$D071
+        .byte   < HULL_HERMIT_KILL                                      ;$D071
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_hermit_kill                                      ;$D092
+        .byte   > HULL_HERMIT_KILL                                      ;$D092
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================
-.proc   _dd35                                                           ;$DD35
+.proc   hull_hermit                                                     ;$DD35
         ;-----------------------------------------------------------------------
         .byte                            $07, $00, $19                  ;$DD35
         .byte   $4a, $9e, $45, $00, $32, $36, $15, $00

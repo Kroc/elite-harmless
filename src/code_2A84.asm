@@ -2002,12 +2002,12 @@ eject_escapepod:                                                        ;$316E
 ;-------------------------------------------------------------------------------
         jsr _83df
 
-        ldx # hull_cobramk3_index
+        ldx # HULL_COBRAMK3
         stx ZP_A5
         jsr _3680               ; NOTE: spawns ship-type in X
         bcs :+
         
-        ldx # hull_mk3_pirate_index
+        ldx # HULL_MK3_PIRATE
         jsr _3680               ; NOTE: spawns ship-type in X
 
 :       lda # $08                                                       ;$317F
@@ -2240,7 +2240,7 @@ _32ad:                                                                  ;$32AD
         ; is this ship a transporter?
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_transporter_index)
+        lda .loword( SHIP_TYPES + HULL_TRANSPORTER )
         bne _3298
 
         jsr get_random_number
@@ -2259,12 +2259,12 @@ _32da:                                                                  ;$32DA
         ;
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_viper_index)
+        lda .loword( SHIP_TYPES + HULL_VIPER )
         cmp # $04
         bcs _3328
 
         ; spawn a police viper ship
-        ldx # hull_viper_index
+        ldx # HULL_VIPER
 _32ea:                                                                  ;$32EA
         lda # $f1
         jmp _370a
@@ -2309,7 +2309,7 @@ _3319:                                                                  ;$3319
         ;
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_thargoid_index)
+        lda .loword( SHIP_TYPES + HULL_THARGOID )
         bne _3329
         
         lsr ZP_POLYOBJ_ATTACK
@@ -2360,7 +2360,7 @@ _3357:                                                                  ;$3357
         
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_coreolis_index)
+        lda .loword( SHIP_TYPES + HULL_COREOLIS )
         beq _3365
 
         lda ZP_POLYOBJ_ATTACK
@@ -2456,7 +2456,7 @@ _33d6:                                                                  ;$33D6
         bne _33fa
 
         ; spawn a thargon!
-        ldx # hull_thargon_index
+        ldx # HULL_THARGON
         lda ZP_POLYOBJ_ATTACK
         jmp _370a
 
@@ -2605,7 +2605,7 @@ _34bc:                                                                  ;$34BC
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_coreolis_index)
+        lda .loword( SHIP_TYPES + HULL_COREOLIS )
         bne _34cf
 _34cc:                                                                  ;$34CC
         jmp _3351
@@ -2928,7 +2928,7 @@ _3695:                                                                  ;$3695
 _36a6:                                                                  ;$36A6
 ;===============================================================================
         ; spawn a missile
-        ldx # hull_missile_index
+        ldx # HULL_MISSILE
         jsr _3680               ; NOTE: spawns ship-type in X
         bcc _3701
         
@@ -2951,9 +2951,9 @@ _36c5:                                                                  ;$36C5
 ;===============================================================================
 ; target / fire missile?
 ;-------------------------------------------------------------------------------
-        ; firing misisle at space station?
+        ; firing missile at space station?
         ; (not a good idea)
-        cmp # hull_coreolis_index
+        cmp # HULL_COREOLIS
         ; make the space-station hostile?
         beq _36f8
 
@@ -3007,7 +3007,7 @@ _3706:                                                                  ;$3706
 ;===============================================================================
         ; TODO: this is probably the ID for an escape-pod,
         ;       given the logic below
-        ldx # hull_escape_index
+        ldx # HULL_ESCAPE
 _3708:                                                                  ;$3708
         lda # $fe
 _370a:                                                                  ;$370A
@@ -3059,11 +3059,11 @@ _374d:                                                                  ;$374D
         asl ZP_POLYOBJ_ROLL
 
         txa 
-        cmp # hull_shuttle_index
+        cmp # HULL_SHUTTLE
        .bge @spawn
        ; missile, station or escape pod?
        ; WARN: this assumes that these are the first three IDs
-        cmp # hull_escape_index + 1
+        cmp # HULL_ESCAPE + 1
        .blt @spawn
         
         pha 
@@ -4074,8 +4074,8 @@ _3dff:                                                                  ;$3DFF
         jsr tkn_docked_incoming_message
         jsr clear_zp_polyobj
         
-        ; spawn the constrictor stealth-ship!
-        lda # hull_constrictor_index
+        ; spawn the constrictor!
+        lda # HULL_CONSTRICTOR
         sta ZP_A5
         jsr spawn_ship
 

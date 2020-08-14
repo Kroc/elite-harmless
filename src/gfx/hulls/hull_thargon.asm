@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $1E: thargon
+; thargon
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_thargon_index     := hull_index                                    ;=$1E
+hull_index              .set hull_index + 1
+HULL_THARGON            := hull_index                                   ;=$1E
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_thargon_kill       = 33    ;= 0.128
+HULL_THARGON_KILL       = 33    ;= 0.128
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_thargon_kill       = 33    ;= 0.128
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_thargon_kill                                     ;$D080
+        .byte   < HULL_THARGON_KILL                                     ;$D080
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_thargon_kill                                     ;$D0A1
+        .byte   > HULL_THARGON_KILL                                     ;$D0A1
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

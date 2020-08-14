@@ -2,18 +2,18 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $0C: python (trader)
+; python (trader)
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_da4b_index        := hull_index                                    ;=$0C
+hull_index              .set hull_index + 1
+HULL_PYTHON_TRADER      := hull_index                                   ;=$0C
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_python_kill        = 170   ;= 0.66
+HULL_PYTHON_TRADER_KILL = 170   ;= 0.66
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
-        .addr   _da4b                                                   ;$D016/7
+        .addr   hull_python_trader                                      ;$D016/7
 
 .segment        "HULL_TYPE"                                             ;$D042..
 ;===============================================================================
@@ -21,15 +21,15 @@ hull_python_kill        = 170   ;= 0.66
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_python_kill                                      ;$D06E
+        .byte   < HULL_PYTHON_TRADER_KILL                               ;$D06E
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_python_kill                                      ;$D08F
+        .byte   > HULL_PYTHON_TRADER_KILL                               ;$D08F
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================
-.proc   _da4b                                                           ;$DA4B
+.proc   hull_python_trader                                              ;$DA4B
         ;-----------------------------------------------------------------------
         .byte                  $05, $00, $19, $56, $be                  ;$DA4B
         .byte   $59, $00, $2a, $42, $1a, $00, $00, $34                  ;$DA50

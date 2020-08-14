@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $01: missile
+; missile
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_missile_index     := hull_index                                    ;=$01
+hull_index              .set hull_index + 1
+HULL_MISSILE            := hull_index                                   ;=$01
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_missile_kill       = 149   ;= 0.58
+HULL_MISSILE_KILL       = 149   ;= 0.58
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;=============================================================================== 
@@ -21,11 +21,11 @@ hull_missile_kill       = 149   ;= 0.58
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_missile_kill                                     ;$D063
+        .byte   < HULL_MISSILE_KILL                                     ;$D063
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_missile_kill                                     ;$D084
+        .byte   > HULL_MISSILE_KILL                                     ;$D084
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

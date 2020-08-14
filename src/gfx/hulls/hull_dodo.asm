@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $21: space station (dodo)
+; space station (dodo)
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_dodo_index        := hull_index                                    ;=$21
+hull_index              .set hull_index + 1
+HULL_DODO               := hull_index                                   ;=$21
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_dodo_kill          = 0     ;= 0.00
+HULL_DODO_KILL          = 0     ;= 0.00
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -26,11 +26,11 @@ hull_pointer_dodo:
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_dodo_kill                                        ;$D083
+        .byte   < HULL_DODO_KILL                                        ;$D083
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_dodo_kill                                        ;$D0A4
+        .byte   > HULL_DODO_KILL                                        ;$D0A4
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

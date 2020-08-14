@@ -1929,11 +1929,11 @@ _739b:                                                                  ;$739B
         sta ZP_POLYOBJ_ATTACK
 
         ; spawn a thargoid!
-        lda # hull_thargoid_index
+        lda # HULL_THARGOID
         jsr spawn_ship
 
         ; and one thargon to go with it!
-        lda # hull_thargon_index
+        lda # HULL_THARGON
         jmp spawn_ship
 
 
@@ -1955,7 +1955,7 @@ _73c1:                                                                  ;$73C1
         lda # $03
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        cmp .loword(SHIP_TYPES+hull_thargoid_index)
+        cmp .loword( SHIP_TYPES + HULL_THARGOID )
         bcs _73c1
         sta DUST_COUNT          ; number of dust particles
 
@@ -3097,7 +3097,7 @@ _7b6f:                                                                  ;$7B6F
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_coreolis_index)
+        lda .loword( SHIP_TYPES + HULL_COREOLIS )
         bne _7ba8
 
         jsr _8c7b
@@ -3276,7 +3276,7 @@ _7c61:                                                                  ;$7C61
         sta ZP_TEMP_ADDR2_HI
 
         ; select 'station' ship-type
-        lda # hull_coreolis_index
+        lda # HULL_COREOLIS
 
 spawn_ship:                                                             ;$7C6B
 ;===============================================================================
@@ -3316,7 +3316,7 @@ spawn_ship:                                                             ;$7C6B
 
         ; is space station?
         ; TODO: why does the space-station not use the line heap?
-        cpy # hull_coreolis_index*2
+        cpy # HULL_COREOLIS *2
         beq _7cc4
 
         ; allocate the max. number of lines needed to draw the ship
@@ -3373,11 +3373,11 @@ _7cd4:                                                                  ;$7CD4
         tax 
         bmi _7cec               ; is sun/planet?
 
-        cpx # hull_dd35_index
+        cpx # HULL_HERMIT
         beq _7ce6
-        cpx # hull_escape_index
+        cpx # HULL_ESCAPE
        .blt _7ce9
-        cpx # hull_cobramk3_index
+        cpx # HULL_COBRAMK3
        .bge _7ce9
 
 _7ce6:  inc NUM_ASTEROIDS                                               ;$7CE6
@@ -4705,7 +4705,7 @@ _82a4:                                                                  ;$82A4
         sta SHIP_SLOT1
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        sta .loword(SHIP_TYPES+hull_coreolis_index)
+        sta .loword( SHIP_TYPES + HULL_COREOLIS )
         
         jsr _b10e
         
@@ -4725,8 +4725,7 @@ _82be:                                                                  ;$82BE
         ; NOTE: sets line-heap address to P2.P1
        .bze _828f               ; nothing in that slot?
 
-        ; is it a missile?
-        cmp # hull_missile_index
+        cmp # HULL_MISSILE      ; is it a missile?
         bne _82be               ; no -- check next ship slot
 
         ; missile?
@@ -4777,15 +4776,15 @@ _8305:                                                                  ;$8305
         ldx SHIP_SLOTS, y
 
         ; is space station?
-        cpx # hull_coreolis_index
+        cpx # HULL_COREOLIS
         beq _82a4
 
-        ; is Constrictor?
-        cpx # hull_constrictor_index
+        ; is constrictor?
+        cpx # HULL_CONSTRICTOR
         bne _831d
 
-        ; the Constrictor has been destroyed!
-        ; set the Constrictor mission complete
+        ; the constrictor has been destroyed!
+        ; set the constrictor mission complete
         lda MISSION_FLAGS
         ora # missions::constrictor_complete
         sta MISSION_FLAGS
@@ -4980,7 +4979,7 @@ _83ed:                                                                  ;$83ED
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_coreolis_index)
+        lda .loword( SHIP_TYPES + HULL_COREOLIS )
         beq _8430
 
         jsr _b10e
@@ -5184,7 +5183,7 @@ _8501:                                                                  ;$8501
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_coreolis_index)
+        lda .loword( SHIP_TYPES + HULL_COREOLIS )
         bne _8562
         
         txa 
@@ -5213,7 +5212,7 @@ _855f:                                                                  ;$855F
 _8562:                                                                  ;$8562
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_coreolis_index)
+        lda .loword( SHIP_TYPES + HULL_COREOLIS )
         beq _856a
 _8567:                                                                  ;$8567
         jmp _8627
@@ -5226,7 +5225,7 @@ _856a:                                                                  ;$856A
         ;
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        ldx .loword(SHIP_TYPES+hull_viper_index)
+        ldx .loword( SHIP_TYPES + HULL_VIPER )
         beq _8576
         
         ora PLAYER_LEGAL
@@ -5239,14 +5238,14 @@ _8576:                                                                  ;$8576
         bcs :+
 
         ; spawn a police viper ship
-        lda # hull_viper_index
+        lda # HULL_VIPER
         jsr spawn_ship
 
         ; are any police ships present?
         ;
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-:       lda .loword(SHIP_TYPES+hull_viper_index)                        ;$8588
+:       lda .loword( SHIP_TYPES + HULL_VIPER )                          ;$8588
         bne _8567
 
         dec VAR_048A
@@ -5283,7 +5282,7 @@ _85bb:                                                                  ;$85BB
 
         ; perhaps this bit-pattern has an alternative meaning?
         lda # attack::active | attack::target \
-            | attack::aggr5 | attack::aggr4 | attack::aggr3 \
+            | attack::aggr5  | attack::aggr4 | attack::aggr3 \
             | attack::ecm
         sta ZP_POLYOBJ_ATTACK   ;=%11111001
 
@@ -5296,7 +5295,7 @@ _85bb:                                                                  ;$85BB
         ;
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        ora .loword(SHIP_TYPES+hull_constrictor_index)
+        ora .loword( SHIP_TYPES + HULL_CONSTRICTOR )
         beq _85f0
 _85e0:                                                                  ;$85E0
         lda # behaviour::angry
@@ -5312,8 +5311,8 @@ _85e0:                                                                  ;$85E0
         ;  instruction, a very handy way of skipping without branching)
        .bit
 
-_85f0:  ; spawn the constrictor stealth-ship!                           ;$85F0
-        lda # hull_constrictor_index
+_85f0:  ; spawn the constrictor!                                        ;$85F0
+        lda # HULL_CONSTRICTOR
 _85f2:                                                                  ;$85F2
         jsr spawn_ship
         jmp _8627
@@ -5329,7 +5328,7 @@ _85f8:                                                                  ;$85F8
 
         ; perhaps this bit-pattern has an alternative meaning?
         lda # attack::target \
-            | attack::aggr5 | attack::aggr4 | attack::aggr3 \
+            | attack::aggr5  | attack::aggr4 | attack::aggr3 \
             | attack::ecm
         sta ZP_POLYOBJ_ATTACK   ;=%01111001
 
@@ -5783,7 +5782,7 @@ _87fd:                                                                  ;$87FD
         ; spawn a cargo-cannister or plate-alloy:
         ; WARN: this assumes the plate/alloy ID
         ;       comes before the cargo-cannister
-        ldx # hull_cargo_index
+        ldx # HULL_CARGO
         lda VIC_SPRITE3_Y       ;?
         beq :+
         bcc :+
@@ -5872,7 +5871,7 @@ _8882:                                                                  ;$8882
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; which ship model to show on the title screen
-        ldx # hull_cobramk3_index
+        ldx # HULL_COBRAMK3
 
         ; print "load new commander (Y/N)?"
 .import MSG_DOCKED_06:direct
@@ -5899,7 +5898,7 @@ _88ac:                                                                  ;$88AC
         ; "press space or fire commander"
 .import MSG_DOCKED_PRESS_SPACE_OR_FIRE_COMMANDER:direct
         lda # MSG_DOCKED_PRESS_SPACE_OR_FIRE_COMMANDER
-        ldx # hull_adder_index
+        ldx # HULL_ADDER
         ldy # $30
         jsr _8920
 
@@ -6742,7 +6741,7 @@ do_quickjump:                                                           ;$8E29
         lda SHIP_SLOT2, x
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        ora .loword(SHIP_TYPES+hull_coreolis_index)
+        ora .loword( SHIP_TYPES + HULL_COREOLIS )
         ora IS_WITCHSPACE       ; we are in witchspace
        .bnz @nojump             ; -- cannot quick-jump
 

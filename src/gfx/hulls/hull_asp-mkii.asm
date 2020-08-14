@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $19: asp mk-II
+; asp mk-II
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_aspmk2_index      := hull_index                                    ;=$19
+hull_index              .set hull_index + 1
+HULL_ASPMK2             := hull_index                                   ;=$19
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_aspmk2_kill        = 277   ;= 1.08
+HULL_ASPMK2_KILL        = 277   ;= 1.08
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_aspmk2_kill        = 277   ;= 1.08
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_aspmk2_kill                                      ;$D07B
+        .byte   < HULL_ASPMK2_KILL                                      ;$D07B
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_aspmk2_kill                                      ;$D09C
+        .byte   > HULL_ASPMK2_KILL                                      ;$D09C
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

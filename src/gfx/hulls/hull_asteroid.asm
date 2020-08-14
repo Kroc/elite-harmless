@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $07: asteroid
+; asteroid
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_asteroid_index    := hull_index                                    ;=$07
+hull_index              .set hull_index + 1
+HULL_ASTEROID           := hull_index                                   ;=$07
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_asteroid_kill      = 8     ;= 0.03
+HULL_ASTEROID_KILL      = 8     ;= 0.03
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_asteroid_kill      = 8     ;= 0.03
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_asteroid_kill                                    ;$D069
+        .byte   < HULL_ASTEROID_KILL                                    ;$D069
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_asteroid_kill                                    ;$D08A
+        .byte   > HULL_ASTEROID_KILL                                    ;$D08A
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

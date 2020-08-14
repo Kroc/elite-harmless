@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $14: adder
+; adder
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_adder_index       := hull_index                                    ;=$14
+hull_index              .set hull_index + 1
+HULL_ADDER              := hull_index                                   ;=$14
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_adder_kill         = 90    ;= 0.35
+HULL_ADDER_KILL         = 90    ;= 0.35
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_adder_kill         = 90    ;= 0.35
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_adder_kill                                       ;$D076
+        .byte   < HULL_ADDER_KILL                                       ;$D076
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_adder_kill                                       ;$D097
+        .byte   > HULL_ADDER_KILL                                       ;$D097
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

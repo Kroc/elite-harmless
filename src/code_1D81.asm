@@ -659,16 +659,16 @@ process_ship:                                                           ;$202F
         bpl @move               ; inactive, skip over
 
         ; space station? -- cannot be destroyed by e-bomb
-        cpy # hull_coreolis_index *2
+        cpy # HULL_COREOLIS *2
         beq @move
 
         ; thargoid? -- also cannot be e-bombed
-        cpy # hull_thargoid_index *2
+        cpy # HULL_THARGOID *2
         beq @move
 
         ; constrictor, cougar & dodo-station? -- also cannot be e-bombed
         ; WARN: this assumes any ID of constrictor or above are valid!
-        cpy # hull_constrictor_index *2
+        cpy # HULL_CONSTRICTOR *2
         bcs @move
 
         ; make ship disappear?
@@ -863,9 +863,9 @@ _2170:                                                                  ;$2170
         and # %00000011
         jsr _2359
 _2192:                                                                  ;$2192
-        ldy # hull_plate_index
+        ldy # HULL_PLATE
         jsr _234c
-        ldy # hull_cargo_index
+        ldy # HULL_CARGO
         jsr _234c
 
         ldx ZP_A5
@@ -968,7 +968,7 @@ _2230:                                                                  ;$2230
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_coreolis_index)
+        lda .loword( SHIP_TYPES + HULL_COREOLIS )
         bne _2277
 
         tay 
@@ -1087,7 +1087,7 @@ _22c2:                                                                  ;$22C2
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword(SHIP_TYPES+hull_coreolis_index)
+        lda .loword( SHIP_TYPES + HULL_COREOLIS )
         bne _231c
 
         ldy # .sizeof(PolyObject)

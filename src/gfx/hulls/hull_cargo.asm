@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $05: cargo cannister
+; cargo cannister
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_cargo_index       := hull_index                                    ;=$05
+hull_index              .set hull_index + 1
+HULL_CARGO              := hull_index                                   ;=$05
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_cargo_kill         = 10    ;= 0.039
+HULL_CARGO_KILL         = 10    ;= 0.039
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_cargo_kill         = 10    ;= 0.039
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_cargo_kill                                       ;$D067
+        .byte   < HULL_CARGO_KILL                                       ;$D067
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_cargo_kill                                       ;$D088
+        .byte   > HULL_CARGO_KILL                                       ;$D088
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $12: mamba
+; mamba
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_mamba_index       := hull_index                                    ;=$12
+hull_index              .set hull_index + 1
+HULL_MAMBA              := hull_index                                   ;=$12
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_mamba_kill         = 128   ;= 0.50
+HULL_MAMBA_KILL         = 128   ;= 0.50
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_mamba_kill         = 128   ;= 0.50
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_mamba_kill                                       ;$D074
+        .byte   < HULL_MAMBA_KILL                                       ;$D074
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_mamba_kill                                       ;$D095
+        .byte   > HULL_MAMBA_KILL                                       ;$D095
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

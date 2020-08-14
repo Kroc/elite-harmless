@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $1F: constrictor
+; constrictor
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_constrictor_index := hull_index                                    ;=$1F
+hull_index              .set hull_index + 1
+HULL_CONSTRICTOR        := hull_index                                   ;=$1F
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_constrictor_kill   = 1365  ;= 5.33!
+HULL_CONSTRICTOR_KILL   = 1365  ;= 5.33!
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_constrictor_kill   = 1365  ;= 5.33!
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_constrictor_kill                                 ;$D081
+        .byte   < HULL_CONSTRICTOR_KILL                                 ;$D081
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_constrictor_kill                                 ;$D0A2
+        .byte   > HULL_CONSTRICTOR_KILL                                 ;$D0A2
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

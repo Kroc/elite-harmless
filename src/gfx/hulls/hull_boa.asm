@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $0D: boa
+; boa
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_boa_index         := hull_index                                    ;=$0D
+hull_index              .set hull_index + 1
+HULL_BOA                := hull_index                                   ;=$0D
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_boa_kill           = 213   ;= 0.83
+HULL_BOA_KILL           = 213   ;= 0.83
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_boa_kill           = 213   ;= 0.83
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_boa_kill                                         ;$D06F
+        .byte   < HULL_BOA_KILL                                         ;$D06F
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_boa_kill                                         ;$D090
+        .byte   > HULL_BOA_KILL                                         ;$D090
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

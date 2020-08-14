@@ -1691,10 +1691,8 @@ _a2b1:                                                                  ;$A2B1
 _a2b8:  lda ZP_POLYOBJ_ATTACK   ; check current A.I. state              ;$A2B8
         bpl _a2cb               ; is bit 7 ("active") set?
 
-        ;is this a missile?
-        cpx # hull_missile_index
-        ; missiles always run A.I. every frame
-        beq :+
+        cpx # HULL_MISSILE      ; is this a missile?
+        beq :+                  ; missiles always run A.I. every frame
 
         ; should we run an A.I. check? when the A.I. is not "active",
         ; it runs at a much lower rate. these instructions here
@@ -2482,7 +2480,7 @@ _a786:                                                                  ;$A786
 ;===============================================================================
 
 _a795:                                                                  ;$A795
-        ldx # hull_missile_index
+        ldx # HULL_MISSILE
         jsr _3708               ; NOTE: spawns ship-type in X
         bcc _a785
         

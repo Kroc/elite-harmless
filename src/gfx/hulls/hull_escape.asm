@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $03: escape capsule
+; escape capsule
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_escape_index      := hull_index                                    ;=$03
+hull_index              .set hull_index + 1
+HULL_ESCAPE             := hull_index                                   ;=$03
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_escape_kill        = 16    ;= 0.06
+HULL_ESCAPE_KILL        = 16    ;= 0.06
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_escape_kill        = 16    ;= 0.06
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_escape_kill                                      ;$D065
+        .byte   < HULL_ESCAPE_KILL                                      ;$D065
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_escape_kill                                      ;$D086
+        .byte   > HULL_ESCAPE_KILL                                      ;$D086
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

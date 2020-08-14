@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $15: gecko
+; gecko
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_gecko_index       := hull_index                                    ;=$15
+hull_index              .set hull_index + 1
+HULL_GECKO              := hull_index                                   ;=$15
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_gecko_kill         = 85    ;= 0.33
+HULL_GECKO_KILL         = 85    ;= 0.33
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_gecko_kill         = 85    ;= 0.33
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_gecko_kill                                       ;$D077
+        .byte   < HULL_GECKO_KILL                                       ;$D077
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_gecko_kill                                       ;$D098
+        .byte   > HULL_GECKO_KILL                                       ;$D098
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================

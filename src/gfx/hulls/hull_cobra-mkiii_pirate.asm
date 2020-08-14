@@ -2,14 +2,14 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; $18: combra mk-III (pirate)
+; combra mk-III (pirate)
 ;-------------------------------------------------------------------------------
-hull_index           .set hull_index + 1
-hull_mk3_pirate_index  := hull_index                                    ;=$18
+hull_index              .set hull_index + 1
+HULL_MK3_PIRATE         := hull_index                                   ;=$18
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-hull_mk3_pirate_kill    = 298   ;= 1.16
+HULL_MK3_PIRATE_KILL    = 298   ;= 1.16
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
@@ -21,11 +21,11 @@ hull_mk3_pirate_kill    = 298   ;= 1.16
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < hull_mk3_pirate_kill                                  ;$D07A
+        .byte   < HULL_MK3_PIRATE_KILL                                  ;$D07A
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > hull_mk3_pirate_kill                                  ;$D09B
+        .byte   > HULL_MK3_PIRATE_KILL                                  ;$D09B
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================
