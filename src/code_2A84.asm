@@ -15,17 +15,17 @@ polyobj_addrs:                                                          ;$28A4
 polyobj_addrs_lo := polyobj_addrs
 polyobj_addrs_hi := polyobj_addrs + 1
 
-        .word   POLYOBJ_00
-        .word   POLYOBJ_01
-        .word   POLYOBJ_02
-        .word   POLYOBJ_03
-        .word   POLYOBJ_04
-        .word   POLYOBJ_05
-        .word   POLYOBJ_06
-        .word   POLYOBJ_07
-        .word   POLYOBJ_08
-        .word   POLYOBJ_09
-        .word   POLYOBJ_10
+        .word   polyobj_00
+        .word   polyobj_01
+        .word   polyobj_02
+        .word   polyobj_03
+        .word   polyobj_04
+        .word   polyobj_05
+        .word   polyobj_06
+        .word   polyobj_07
+        .word   polyobj_08
+        .word   polyobj_09
+        .word   polyobj_10
         
 ;===============================================================================
 
@@ -767,9 +767,9 @@ _2c4e:                                                                  ;$2C4E
 ;-------------------------------------------------------------------------------
         lda # $00
 _2c50:                                                                  ;$2C50
-        ora POLYOBJECTS + PolyObject::xpos + 2, y
-        ora POLYOBJECTS + PolyObject::ypos + 2, y
-        ora POLYOBJECTS + PolyObject::zpos + 2, y
+        ora polyobjects + PolyObject::xpos + 2, y
+        ora polyobjects + PolyObject::ypos + 2, y
+        ora polyobjects + PolyObject::zpos + 2, y
         and # %01111111         ; strip sign
 
         rts 
@@ -777,17 +777,17 @@ _2c50:                                                                  ;$2C50
 
 _2c5c:                                                                  ;$2C5C
 ;===============================================================================
-        lda POLYOBJ_00 + PolyObject::xpos + 1, y                        ;=$F901
+        lda polyobj_00 + PolyObject::xpos + 1, y                        ;=$F901
         jsr math_square
         sta ZP_VAR_R
 
-        lda POLYOBJ_00 + PolyObject::ypos + 1, y                        ;=$F904
+        lda polyobj_00 + PolyObject::ypos + 1, y                        ;=$F904
         jsr math_square
         adc ZP_VAR_R
         bcs _2c7a
         sta ZP_VAR_R
         
-        lda POLYOBJ_00 + PolyObject::zpos + 1, y                        ;=$F907
+        lda polyobj_00 + PolyObject::zpos + 1, y                        ;=$F907
         jsr math_square
         adc ZP_VAR_R
         bcc _2c7c
@@ -2194,7 +2194,7 @@ _328a:                                                                  ;$328A
         lsr 
         tax 
 _3290:                                                                  ;$3290
-        jsr _a7a6
+        jsr _a7a6               ; kill ship?
 _3293:                                                                  ;$3293
         asl ZP_POLYOBJ_VISIBILITY
         sec 
@@ -2717,9 +2717,9 @@ _357a:                                                                  ;$357A
 
 _357b:                                                                  ;$357B
 ;===============================================================================
-        lda #< POLYOBJ_01       ;=$F925
+        lda #< polyobj_01       ;=$F925
         sta ZP_TEMP_ADDR3_LO
-        lda #> POLYOBJ_01       ;=$F925
+        lda #> polyobj_01       ;=$F925
 _3581:  sta ZP_TEMP_ADDR3_HI                                            ;$3581
 
         ldy # $02
@@ -2757,17 +2757,17 @@ _358f:                                                                  ;$358F
 
 _35b3:                                                                  ;$35B3
 ;===============================================================================
-        ldx POLYOBJ_01 + PolyObject::xpos + 0, y                        ;=$F925
+        ldx polyobj_01 + PolyObject::xpos + 0, y                        ;=$F925
         stx ZP_VAR_Q
         lda ZP_VAR_X
         jsr multiply_signed_into_RS
-        ldx POLYOBJ_01 + PolyObject::xpos + 2, y                        ;=$F927
+        ldx polyobj_01 + PolyObject::xpos + 2, y                        ;=$F927
         stx ZP_VAR_Q
         lda ZP_VAR_Y
         jsr multiply_and_add
         sta ZP_VAR_S
         stx ZP_VAR_R
-        ldx POLYOBJ_01 + PolyObject::ypos + 1, y                        ;=$F929
+        ldx polyobj_01 + PolyObject::ypos + 1, y                        ;=$F929
         stx ZP_VAR_Q
         lda ZP_VAR_X2
         jmp multiply_and_add
@@ -2791,13 +2791,13 @@ _35e8:                                                                  ;$35E8
 ;===============================================================================
         jsr _35eb
 _35eb:                                                                  ;$35EB
-        lda POLYOBJ_01 + PolyObject::m0x0 + 1                           ;=$F92F
+        lda polyobj_01 + PolyObject::m0x0 + 1                           ;=$F92F
         ldx # $00
         jsr _3600
-        lda POLYOBJ_01 + PolyObject::m0x1 + 1                           ;=$F931
+        lda polyobj_01 + PolyObject::m0x1 + 1                           ;=$F931
         ldx # $03
         jsr _3600
-        lda POLYOBJ_01 + PolyObject::m0x2 + 1                           ;=$F933
+        lda polyobj_01 + PolyObject::m0x2 + 1                           ;=$F933
         ldx # $06
 _3600:                                                                  ;$3600
         asl 
@@ -2938,7 +2938,7 @@ _36a6:                                                                  ;$36A6
         lda SHIP_SLOTS, x
         jsr _36c5
 
-        ldy # $b7
+        ldy # $b7               ; a tile colour?
         jsr _7d0c
         
         dec PLAYER_MISSILES
@@ -2993,9 +2993,9 @@ _36f7:                                                                  ;$36F7
 
 _36f8:                                                                  ;$36F8
         ; make hostile?
-        lda POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
+        lda polyobj_01 + PolyObject::behaviour                         ;=$F949
         ora # behaviour::angry
-        sta POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
+        sta polyobj_01 + PolyObject::behaviour                         ;=$F949
         rts 
 
 _3701:                                                                  ;$3701
@@ -3024,7 +3024,7 @@ _370a:                                                                  ;$370A
         lda ZP_POLYOBJ_ADDR_HI
         pha 
 
-        ; temporarily back the current poly object to the bottom
+        ; temporarily backup the current poly object to the bottom
         ; of the stack, and copy in the new poly object
         ldy # .sizeof(PolyObject)-1
 :       lda ZP_POLYOBJ, y                                               ;$371C
@@ -3717,24 +3717,27 @@ _3c58:                                                                  ;$3C58
 ;===============================================================================
 ; BBC code says "centre ship indicators"
 ; roll/pitch dampening? -- slowly reduces X to 1
+;
+; in:   X       value to dampen
 ;-------------------------------------------------------------------------------
         lda DOCKCOM_STATE       ; is docking computer enabled?
        .bnz :+                  ; yes, skip over the following
 
-        lda _1d06               ; is this the dampening flag?
-        bne @rts                ; do not dampen
+        lda _1d06               ; check dampening toggle
+        bne @rts                ; dampening off? exit
 
-:       txa                                                             ;$3C62 
-        bpl :+                  ; >= 0?
+        ;-----------------------------------------------------------------------
+:       txa                     ; test bits                             ;$3C62 
+        bpl :+                  ; positive?
 
         dex                     ; decrease negative number towards zero
         bmi @rts                ; if still negative, finish
 
 :       inx                     ; increase counter                      ;$3C68 
-       .bnz @rts                ; do nothing 255/256 times
+       .bnz @rts                ; if still positive, finish
         
-        dex 
-       .bze :-
+        dex                     
+       .bze :-                  ; if zero, make 1?
 
 @rts:   rts                                                             ;$3C68 
 
@@ -4160,8 +4163,10 @@ get_polyobj_addr:                                                       ;$3E87
 ; return an address for the poly-object's variable storage
 ;
 ; in:   X               index
-; out:  ZP_POLYOBJ_ADDR address
 ;
+; out:  ZP_POLYOBJ_ADDR address
+;       X               (preserved)
+;       A, Y            (clobbered)
 ;-------------------------------------------------------------------------------
         txa                     ; take poly-object index,
         asl                     ; multiply by 2 (for 2-byte table-lookup)

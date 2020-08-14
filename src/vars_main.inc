@@ -282,6 +282,7 @@ CABIN_HEAT              = $0483 ; cabin temperature
 
 SHIP_LINES_LO           = $04f2 ; ship lines pointer lo-byte
 SHIP_LINES_HI           = $04f3 ; ship lines pointer hi-byte
+
 VAR_04F4                = $04f4 ;? (indexed by X)
 VAR_04FA                = $04fa ;? (indexed by X)
 

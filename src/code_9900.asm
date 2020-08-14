@@ -2491,10 +2491,11 @@ _a795:                                                                  ;$A795
         ldy # $04
         jmp _a858
 
+
 _a7a6:                                                                  ;$A7A6
 ;===============================================================================
 ; kill a PolyObject?
-;
+;-------------------------------------------------------------------------------
         lda VAR_04CB
         clc 
         adc hull_kill_lo - 1, x
@@ -2632,22 +2633,21 @@ _a850:                                                                  ;$A850
 ;       X       Y1
 ;       Y       ?
 ;-------------------------------------------------------------------------------
-        bit _a821               ; an unused skip? = `and [ZP_A8, x]`
+        ; WARN: sets overflow flag because _a821 is an RTS (opcode $60)!
+        bit _a821
         
         sta ZP_VAR_X1
         stx ZP_VAR_Y1
-        ; this causes the `clv` below to become a `branch on overflow clear`
-        ; to $A811 -- the address is defined by the opcode of `clv` ($B8)
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
+
+        ; (this causes the `clv` below to become a `branch on overflow clear`.
+        ;  the address, made up of the next 2 bytes, is not important because
+        ;  the overflow bit is set above)
         .byte   $50
-.else   ;///////////////////////////////////////////////////////////////////////
-        .byte   $a5             ; lda ZP
-.endif  ;///////////////////////////////////////////////////////////////////////
 
 _a858:                                                                  ;$A858
+;===============================================================================
 ;       Y = $00-$0F?
-
+;-------------------------------------------------------------------------------
         clv 
 
         ; do nothing if an option is set?
@@ -2872,9 +2872,9 @@ _b0fd:                                                                  ;$B0FD
 
         rts 
 
-;===============================================================================
 
 _b10e:                                                                  ;$B10E
+;===============================================================================
         lda ELITE_MAINSCR_ADDR + .scrpos( 23, 28 )      ;=$67B4
         eor # %11100000
         sta ELITE_MAINSCR_ADDR + .scrpos( 23, 28 )      ;=$67B4
@@ -2886,27 +2886,30 @@ _b10e:                                                                  ;$B10E
         rts 
 
 
-_b11f:                                                                  ;$B11F
+update_missile_indicator:                                               ;$B11F
 ;===============================================================================
-; "draw missile block"
+; update a selected missile indicator on the HUD:
 ;
+; in:   X       missile number, 1-4
+;       Y       a colour nybble pair for the missile block
+; out:  Y       =$00
 ;-------------------------------------------------------------------------------
-        dex 
+        dex                     ; switch to zero-based for our purposes
         txa 
         inx 
         eor # %00000011
         sty ZP_TEMP_ADDR1_LO
         tay 
         lda ZP_TEMP_ADDR1_LO
+        ; set colour of missile block on screen
         sta ELITE_MAINSCR_ADDR + .scrpos( 24, 6 ), y                    ;=$67C6
+        
         ldy # $00
-
         rts 
 
-;===============================================================================
 
-; unused / unreferenced?
-;$b12f:
+; unused / unreferenced?                                                ;$B12F
+;===============================================================================
         ; probably data rather than code?
         jsr $ffff               ;irq
         cmp # $80

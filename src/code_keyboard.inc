@@ -234,14 +234,13 @@ key_del:        .byte   '1'     ;=$40 - DELETE                          ;$8D4C
 .macro  .get_input
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 get_input:                                                              ;$8D53
-;
+;===============================================================================
 ; read joystick & keyboard input:
-; returns:
 ;
-;       A = index of key pressed
-;       X = copy of above
-;       Y is preserved
-;
+; out:  A       index of key pressed
+;       X       copy of above
+;       Y       (preserved)
+;-------------------------------------------------------------------------------
        .phy                     ; preserve Y
 
 .ifdef  OPTION_ORIGINAL
@@ -440,11 +439,10 @@ get_input:                                                              ;$8D53
 
 .macro  .clear_keyboard
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-;
-; clear the keyboard state table
-;
 clear_keyboard:                                                         ;$8C6D
-
+;===============================================================================
+; clear the keyboard state table:
+;-------------------------------------------------------------------------------
         ldx # 64                ; number of keys on keyboard to scan
         lda # $00
         sta ZP_7D               ; set currently pressed key to nothing

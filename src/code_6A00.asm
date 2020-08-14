@@ -579,7 +579,8 @@ galactic_chart:                                                         ;$6C1C
         ldx # $00
 _6c40:                                                                  ;$6C40
         ;-----------------------------------------------------------------------
-        stx ZP_9D               ; current star index?
+        stx ZP_9D               ; backup current star index?
+
         ldx ZP_SEED_W1_HI
         ldy ZP_SEED_W2_LO
         tya 
@@ -595,6 +596,7 @@ _6c40:                                                                  ;$6C40
         jsr paint_particle
 
         jsr randomize
+        
         ldx ZP_9D               ; retrieve star index
         inx                     ; move to next star
        .bnz _6c40               ; more stars to draw?
@@ -660,11 +662,11 @@ _6c6d:                                                                  ;$6C6D
         jmp draw_line
 
 
+_6cc3:                                                                  ;$6CC3
 ;===============================================================================
 ; BBC: ".TT126 ; default Circle with a cross-hair"
 ; TODO: calculate position from constants
-;
-_6cc3:                                                                  ;$6CC3
+;-------------------------------------------------------------------------------
         lda # 104               ; cross-hair X-position
         sta ZP_8E
         lda # 90                ; cross-hair Y-position
@@ -1412,21 +1414,22 @@ local_chart:                                                            ;$6FDB
 
         rts 
 
+
+_70a0:                                                                  ;$70A0
 ;===============================================================================
 ; to do with the seed
-;
-_70a0:                                                                  ;$70A0
+;-------------------------------------------------------------------------------
         ldx # 5                 ; seed is 6 bytes
-_70a2:                                                                  ;$70A2
-        lda VAR_049C, x
+:       lda VAR_049C, x                                                 ;$70A2
         sta ZP_SEED, x          ; store at $7F...$84
         dex 
-        bpl _70a2
+        bpl :-
+
         rts 
 
-;===============================================================================
 
 _70ab:                                                                  ;$70AB
+;===============================================================================
         jsr _70a0
         ldy # $7f
         sty ZP_VAR_T
@@ -1520,9 +1523,9 @@ _7135:                                                                  ;$7135
         sta TSYSTEM_DISTANCE_LO
         jmp _6ba9
 
-;===============================================================================
 
 _714f:                                                                  ;$714F
+;===============================================================================
         jsr tkn_docked_fn15
 
         lda # 15
@@ -1670,15 +1673,15 @@ _7224:                                                                  ;$7224
 
 
 print_int16:                                                            ;$7234
-        ;=======================================================================
-        ; print 16-bit value in X/Y, without decimal point
-        ;
+;===============================================================================
+; print 16-bit value in X/Y, without decimal point
+;-------------------------------------------------------------------------------
         clc 
 
 print_num16:                                                            ;$7235
-        ;=======================================================================
-        ; print 16-bit value in X/Y -- decimal point included if carry set
-        ;
+;===============================================================================
+; print 16-bit value in X/Y -- decimal point included if carry set
+;-------------------------------------------------------------------------------
         lda # $05               ; max. no. digits -- is this 5 or 6?
         jmp print_medium_value
 
@@ -1693,9 +1696,9 @@ _723c:                                                                  ;$723C
         lda # TXT_QMARK
         jmp print_flight_token
 
-;===============================================================================
 
 _7244:                                                                  ;$7244
+;===============================================================================
         pla 
         rts 
 
@@ -1791,9 +1794,9 @@ _72d6:                                                                  ;$72D6
         lda # $67               ;="G"
         jmp print_char
 
-;===============================================================================
 
 _72db:                                                                  ;$72DB
+;===============================================================================
         lda # 17
         jsr set_cursor_col
 
@@ -1833,9 +1836,9 @@ _7305:                                                                  ;$7305
         bcc _7305
         rts 
 
-;===============================================================================
 
 _731a:                                                                  ;$731A
+;===============================================================================
         lda ZP_8F
         and # %00011111
         ldy PSYSTEM_ECONOMY
@@ -1843,14 +1846,13 @@ _731a:                                                                  ;$731A
         clc 
         lda # $00
         sta VAR_MARKET_ALIENS
-_7329:                                                                  ;$7329
-        dey 
-        bmi _7331
-        adc ZP_90
-        jmp _7329
 
-_7331:                                                                  ;$7331
-        sta ZP_91
+:       dey                                                             ;$7329
+        bmi :+
+        adc ZP_90
+        jmp :-
+
+:       sta ZP_91                                                       ;$7331
         rts 
 
 ;===============================================================================
@@ -1967,13 +1969,12 @@ _73c1:                                                                  ;$73C1
 
         rts 
 
-;===============================================================================
-; enter / escape from Witchspace? escape pod?
-;
+
 _73dc:                                                                  ;$73DC
         rts 
 
 _73dd:                                                                  ;$73DD
+;===============================================================================
         lda PLAYER_FUEL
         sec 
         sbc TSYSTEM_DISTANCE_LO
@@ -2087,24 +2088,29 @@ _7481:                                                                  ;$7481
 _74a1:                                                                  ;$74A1
         rts 
 
-;===============================================================================
 
 _74a2:                                                                  ;$74A2
+;===============================================================================
         jsr _399b
+
 _74a5:                                                                  ;$74A5
+;===============================================================================
         asl ZP_VAR_P1
         rol 
         asl ZP_VAR_P1
         rol 
         tay 
         ldx ZP_VAR_P1
+
         rts 
 
-;===============================================================================
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         .byte   $52, $2e, $44, $2e, $43, $4f ,$44, $45  ;="R.D.CODE"    ;$74AF
         .byte   $0d                                     ;=\n
+.endif  ;///////////////////////////////////////////////////////////////////////
 
-;-------------------------------------------------------------------------------
 
 _74b8:   jmp _88e7                                                      ;$74B8
 
@@ -2262,9 +2268,9 @@ _75b3:                                                                  ;$75B3
         jsr _7627
         jmp _88e7
 
-;===============================================================================
 
 _75b9:                                                                  ;$75B9
+;===============================================================================
         dec VAR_04C2
 _75bc:                                                                  ;$75BC
         iny 
@@ -2335,9 +2341,9 @@ _7627:                                                                  ;$7627
         ldy # 50
         jmp wait_frames
 
-;===============================================================================
 
 _762f:                                                                  ;$762F
+;===============================================================================
         jsr _7642
         jsr _745a
         bcs _764b
@@ -2348,9 +2354,9 @@ _762f:                                                                  ;$762F
 
         jmp _75b3
 
-;===============================================================================
 
 _763f:                                                                  ;$763F
+;===============================================================================
         sec 
         sbc # $01
 _7642:                                                                  ;$7642
@@ -2362,9 +2368,9 @@ _7642:                                                                  ;$7642
 _764b:                                                                  ;$764B
         rts 
 
-;===============================================================================
 
 _764c:                                                                  ;$764C
+;===============================================================================
         lda PSYSTEM_TECHLEVEL
         cmp # $08
         bcc _7658
@@ -2413,17 +2419,17 @@ _7693:                                                                  ;$7693
         tax 
         rts 
 
-;===============================================================================
 
 _7695:                                                                  ;$7695
+;===============================================================================
         jsr _6f82
         jsr _70ab
         jsr _6f82
         jmp tkn_docked_fn15
 
-;===============================================================================
 
 _76a1:                                                                  ;$76A1
+;===============================================================================
         sta ZP_TEMP_VAR
         lda PLAYER_LASERS, x
         beq _76c7
@@ -2556,9 +2562,9 @@ _785f:                                                                  ;$785F
         sta ZP_POLYOBJ_VISIBILITY
         rts 
 
-;===============================================================================
 
 _7866:                                                                  ;$7866
+;===============================================================================
         lda ZP_POLYOBJ_VISIBILITY
         and # visibility::firing
         beq _786f
@@ -2623,7 +2629,13 @@ _78bc:                                                                  ;$78BC
         ldy VAR_050D
         cpy # $12
         bne _78d6
-        jmp _795a
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        jmp _795a               ; in the original, this is a double-jump
+.else   ;///////////////////////////////////////////////////////////////////////
+        jmp _79a9
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _78d6:                                                                  ;$78D6
         ldy # $00
@@ -2702,18 +2714,22 @@ _7948:                                                                  ;$7948
         pla 
         sta ZP_GOATSOUP_pt2
 
-        lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
+        lda polyobj_00 + PolyObject::zpos                               ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
 
-;===============================================================================
 
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
 _795a:                                                                  ;$795A
-        jmp _79a9
-
 ;===============================================================================
+        jmp _79a9
+;///////////////////////////////////////////////////////////////////////////////
+.endif
+
 
 _795d:                                                                  ;$795D
+;===============================================================================
         clc 
         lda ZP_GOATSOUP_pt1
         rol 
@@ -2728,9 +2744,9 @@ _795d:                                                                  ;$795D
         stx ZP_GOATSOUP_pt4
         jmp _7948
 
-;===============================================================================
 
 _7974:                                                                  ;$7974
+;===============================================================================
         sta ZP_VAR_S            ; retain A
         clc 
         lda ZP_GOATSOUP_pt1
@@ -2763,10 +2779,11 @@ _7998:                                                                  ;$7998
         sbc # $00               ; sub 1 on underflow?
         rts 
 
-;===============================================================================
 
 _79a7:                                                                  ;$79A7
+;===============================================================================
         .byte   $00, $02
+
 
 _79a9:                                                                  ;$79A9
 ;===============================================================================
@@ -2905,7 +2922,7 @@ _7a78:                                                                  ;$7A78
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
+        lda polyobj_00 + PolyObject::zpos                               ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
 
@@ -2913,9 +2930,9 @@ _7a86:                                                                  ;$7A86
         jsr _84ae
         jmp _7a6c
 
-;===============================================================================
 
 _7a8c:                                                                  ;$7A8C
+;===============================================================================
         jsr _845c               ; update missile blocks on HUD
 
         lda # $7f
@@ -3054,9 +3071,9 @@ _7b5e:  rts                                                             ;$75BE
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
-;===============================================================================
 
 _7b5f:                                                                  ;$7B5F
+;===============================================================================
         dex 
         rts 
 
@@ -3073,9 +3090,9 @@ _7b6d:                                                                  ;$7B6D
         plp 
         rts 
 
-;===============================================================================
 
 _7b6f:                                                                  ;$7B6F
+;===============================================================================
         jsr _b09d                       ; draw multi-color pixel?
 
         ; NOTE: `.loword` is needed here to force a 16-bit
@@ -3087,9 +3104,9 @@ _7b6f:                                                                  ;$7B6F
 
         jmp _7bab
 
-;===============================================================================
 
 _7b7d:                                                                  ;$7B7D
+;===============================================================================
         asl 
         tax 
         lda # $00
@@ -3115,22 +3132,22 @@ _7b93:                                                                  ;$7B93
 
 
 _7b9b:                                                                  ;$7B9B
-        ;=======================================================================
-        ; copy the X/Y/Z-position of `POLYOBJ_01` to the zero page
-        ;
+;===============================================================================
+; copy the X/Y/Z-position of `POLYOBJ_01` to the zero page
+;-------------------------------------------------------------------------------
         ldx # (.sizeof(PolyObject::xpos) + .sizeof(PolyObject::ypos) \
             + .sizeof(PolyObject::zpos) - 1)
 
-:       lda POLYOBJ_01, x       ;=$F925..                               ;$7B9D
+:       lda polyobj_01, x       ;=$F925..                               ;$7B9D
         sta ZP_POLYOBJ01, x     ;=$35..
         dex 
         bpl :-
 
         jmp _8c8a
 
-;===============================================================================
 
 _7ba8:                                                                  ;$7BA8
+;===============================================================================
         jsr _7b9b
 _7bab:                                                                  ;$7BAB
         lda ZP_VAR_X
@@ -3161,9 +3178,9 @@ _7bcc:                                                                  ;$7BCC
         sta _1d01                       ; set the colour-mask
         jmp _b09d                       ; draw multi-color pixel?
 
-;===============================================================================
 
 _7bd2:                                                                  ;$7BD2
+;===============================================================================
         sta ZP_VAR_T
         ldx # $00
         ldy # $08
@@ -3204,12 +3221,12 @@ _7c0b:                                                                  ;$7C0B
         jsr _a813
         jmp _906a
 
-;===============================================================================
 
 _7c11:                                                                  ;$7C11
-        lda POLYOBJ_00 + PolyObject::xpos + 1, x        ;=$F901
+;===============================================================================
+        lda polyobj_00 + PolyObject::xpos + 1, x        ;=$F901
         sta ZP_POLYOBJ01_XPOS_pt1, x
-        lda POLYOBJ_00 + PolyObject::xpos + 2, x        ;=$F902
+        lda polyobj_00 + PolyObject::xpos + 2, x        ;=$F902
         tay 
         and # %01111111
         sta ZP_POLYOBJ01_XPOS_pt2, x
@@ -3218,9 +3235,9 @@ _7c11:                                                                  ;$7C11
         sta ZP_POLYOBJ01_XPOS_pt3, x
         rts
 
-;===============================================================================
 
 _7c24:                                                                  ;$7C24
+;===============================================================================
         jsr _b10e
         ldx # attack::active | attack::ecm      ;=%10000001
         stx ZP_POLYOBJ_ATTACK
@@ -3291,10 +3308,10 @@ spawn_ship:                                                             ;$7C6B
         tay                     ; transfer to Y for indexing...
         
         ; look up the hull data structure for the type of ship
-        lda hull_pointers - 1, y
+        lda hull_pointers-1, y
         beq @err
         sta ZP_HULL_ADDR_HI
-        lda hull_pointers - 2, y
+        lda hull_pointers-2, y
         sta ZP_HULL_ADDR_LO
 
         ; is space station?
@@ -3303,24 +3320,29 @@ spawn_ship:                                                             ;$7C6B
         beq _7cc4
 
         ; allocate the max. number of lines needed to draw the ship
-        ;
+        ;-----------------------------------------------------------------------
         ldy # Hull::_05         ; hull max.lines
         lda [ZP_HULL_ADDR], y   ; read from the hull data
         sta ZP_TEMP_VAR         ; put aside
 
-        lda SHIP_LINES_LO       ; ship heap-pointer address, lo byte
+        lda SHIP_LINES_LO       ; heap-pointer address, lo byte
         sec 
-        sbc ZP_TEMP_VAR
+        sbc ZP_TEMP_VAR         ; subtract the bytes for the max. lines
         sta ZP_TEMP_ADDR2_LO
-
-        lda SHIP_LINES_HI
+        lda SHIP_LINES_HI       ; heap-pointer address, lo byte
         sbc # 0                 ; (ripple the carry)
         sta ZP_TEMP_ADDR2_HI
 
-        lda ZP_TEMP_ADDR2_LO
+        ; TODO: this assumes that the poly object structure selected is always
+        ;       the highest numbered one, such that the heap could come as far
+        ;       down as the end of the poly object structure -- this would not
+        ;       be true if we were using a free slot between other used slots!
+        ; 
+        lda ZP_TEMP_ADDR2_LO    ; bottom of the heap, lo-byte
         sbc ZP_POLYOBJ_ADDR_LO
         tay 
-        lda ZP_TEMP_ADDR2_HI
+
+        lda ZP_TEMP_ADDR2_HI    ; bottom of the heap, hi-byte
         sbc ZP_POLYOBJ_ADDR_HI
         bcc @rts                ; overflow? cannot allocate the ship!
         bne :+
@@ -3391,14 +3413,20 @@ _7d03:                                                                  ;$7D03
         inx 
         rts 
 
-;===============================================================================
 
 _7d0c:                                                                  ;$7D0C
-        ldx # $ff
+;===============================================================================
+        ldx # $ff               ; clear missile target
+
 _7d0e:                                                                  ;$7D0E
-        stx ZP_MISSILE_TARGET
-        ldx PLAYER_MISSILES
-        jsr _b11f
+;===============================================================================
+; in:   X       missile target. is this a slot number?
+;       Y       a pair of colour nybbles, as used on the bitmap screen,
+;               to colour the missile block on the HUD
+;-------------------------------------------------------------------------------
+        stx ZP_MISSILE_TARGET   ; set missile target
+        ldx PLAYER_MISSILES     ; get the number of missiles
+        jsr update_missile_indicator
 
         sty PLAYER_MISSILE_ARMED
 
@@ -3446,9 +3474,8 @@ _7d56:                                                                  ;$7D56
         rts 
 
 
-;===============================================================================
-
 _7d57:                                                                  ;$7D57
+;===============================================================================
         lda ZP_A5
         lsr 
         bcs _7d5f
@@ -3457,9 +3484,9 @@ _7d57:                                                                  ;$7D57
 _7d5f:                                                                  ;$7D5F
         jmp wipe_sun
 
-;===============================================================================
 
 _7d62:                                                                  ;$7D62
+;===============================================================================
         lda ZP_POLYOBJ_ZPOS_HI
         cmp # $30
         bcs _7d57
@@ -3700,14 +3727,16 @@ _7f06:                                                                  ;$7F06
 _7f12:                                                                  ;$7F12
         rts 
 
-;===============================================================================
 
 _7f13:                                                                  ;$7F13
+;===============================================================================
         jmp wipe_sun
 
-; invert X value:
-;
+
 _7f16:                                                                  ;$7F16
+;===============================================================================
+; invert X value:
+;-------------------------------------------------------------------------------
         txa 
         eor # %11111111
         clc 
@@ -3996,10 +4025,10 @@ _7f67:                                                                  ;$7F67
         ;-----------------------------------------------------------------------
         jsr get_random_number   ; randomise the fringe each frame
         and ZP_AA               ; limit to the fringe-size chosen earlier
-        clc                     ; add the fringe to
-        adc ZP_VAR_Q            ; the scanline's half-width
+        clc                     ; add the fringe to...
+        adc ZP_VAR_Q            ; ...the scanline's half-width
         bcc :+                  ; if adding the fringe takes it over 256,
-        lda # $ff               ; clip it to 256 
+        lda # $ff               ; clip it to 256
 
         ;-----------------------------------------------------------------------
         ; check the circle buffer for a scanline from the previous frame:
@@ -4622,7 +4651,7 @@ disable_sprites:                                                        ;$8273
         ; fall-through to the routine below
 
 set_memory_layout:                                                      ;$827F
-        ;=======================================================================
+;===============================================================================
         sei                     ; disable interrupts
 
         ; remember the requested memory layout state
@@ -4647,8 +4676,11 @@ current_memory_layout:                                                  ;$828E
 
 _828f:                                                                  ;$828F
 ;===============================================================================
-; transfer the address in P1/P2 to the ship lines pointer
+; change the line-heap address:
+;
+; in:   P2.P1   address
 ;-------------------------------------------------------------------------------
+        ; transfer the address in P1/P2 to the ship lines pointer
         lda ZP_VAR_P1
         sta SHIP_LINES_LO
         lda ZP_VAR_P2
@@ -4662,7 +4694,7 @@ _829a:                                                                  ;$829A
         ldx ZP_9D
         jsr _82f3
         ldx ZP_9D
-        jmp _202f
+        jmp process_ship
 
 
 _82a4:                                                                  ;$82A4
@@ -4690,6 +4722,7 @@ _82bc:                                                                  ;$82BC
 _82be:                                                                  ;$82BE
         inx                     ; move to the next slot
         lda SHIP_SLOTS, x
+        ; NOTE: sets line-heap address to P2.P1
        .bze _828f               ; nothing in that slot?
 
         ; is it a missile?
@@ -4848,8 +4881,8 @@ _8399:                                                                  ;$8399
         ldy ZP_VAR_T
 _83aa:                                                                  ;$83AA
         dey 
-        lda [$77], y
-        sta [$2e], y
+        lda [ZP_VALUE], y
+        sta [ZP_VAR_P], y
         tya 
         bne _83aa
         beq _8343
@@ -4959,30 +4992,15 @@ _8437:                                                                  ;$8437
         jsr _7b1a
         jsr _8ac7               ; clear ship slots and other vars
 
-        ; TODO: this appears to be a line-buffer.
-        ;       this address appears to be an upper-bound?
-        ; TODO: use a segment when we know the full bounds of the buffer
-        ;
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        lda #< $ffc0            ;?
+        lda #< ELITE_HEAP_TOP
         sta SHIP_LINES_LO
-        lda #> $ffc0            ;?
+        lda #> ELITE_HEAP_TOP
         sta SHIP_LINES_HI
-.else   ;///////////////////////////////////////////////////////////////////////
-        ; for elite-harmless, the bitmap screen ends at $FF40 and therefore
-        ; the line-buffer must be placed higher than in the original game
-        ; (~$FF20..$FFC0), without affecting the hardware vectors at
-        ; $FFFA-$FFFF which would crash the machine if overwritten
-        lda #< $fff8
-        sta SHIP_LINES_LO
-        lda #> $fff8
-        sta SHIP_LINES_HI
-.endif  ;///////////////////////////////////////////////////////////////////////
+
 
 clear_zp_polyobj:                                                       ;$8447
 ;===============================================================================
-; clear the zero-page PolyObject storage
+; clear the zero-page PolyObject storage:
 ;-------------------------------------------------------------------------------
         ldy # .sizeof(PolyObject)-1
         lda # $00
@@ -4999,6 +5017,7 @@ clear_zp_polyobj:                                                       ;$8447
 
         rts 
 
+
 _845c:                                                                  ;$845C
 ;===============================================================================
 ; update missile blocks on HUD?
@@ -5009,16 +5028,16 @@ _845c:                                                                  ;$845C
 :       cpx PLAYER_MISSILES     ; player missile count                  ;$845E
         beq @_846c              ; colour remaining missiles
 
-        ldy # $b7
-        jsr _b11f
+        ldy # .color_nybble( DKGREY, YELLOW )
+        jsr update_missile_indicator
         dex 
         bne :-
 
         rts 
 
 @_846c:                                                                 ;$846C
-        ldy # $57
-        jsr _b11f
+        ldy # .color_nybble( GREEN, YELLOW )
+        jsr update_missile_indicator
         dex 
         bne @_846c
 
@@ -5301,7 +5320,7 @@ _85f2:                                                                  ;$85F2
 
 _85f8:                                                                  ;$85F8
         ;-----------------------------------------------------------------------
-        lda POLYOBJ_00 + PolyObject::zpos                               ;=$F906
+        lda polyobj_00 + PolyObject::zpos                               ;=$F906
         and # %00111110
         bne _85a5
 
@@ -6729,7 +6748,7 @@ do_quickjump:                                                           ;$8E29
 
         ; check player's Z-position
         ;
-        ldy POLYOBJ_00 + PolyObject::zpos + 2                           ;=$F908
+        ldy polyobj_00 + PolyObject::zpos + 2                           ;=$F908
         bmi :+
 
         ; note that A is zero due to the
@@ -6739,7 +6758,7 @@ do_quickjump:                                                           ;$8E29
         cmp # $02               ; minimum distance? ($020000?)
         bcc @nojump
 
-:       ldy POLYOBJ_01 + PolyObject::zpos + 2                           ;$8E44
+:       ldy polyobj_01 + PolyObject::zpos + 2                           ;$8E44
         bmi :+
         ; check the sun's position?
         ldy # .sizeof(PolyObject)
@@ -6754,13 +6773,13 @@ do_quickjump:                                                           ;$8E29
 
         ; push the player forward
         ;
-        lda POLYOBJ_00 + PolyObject::zpos + 2
+        lda polyobj_00 + PolyObject::zpos + 2
         jsr multiplied_now_add
-        sta POLYOBJ_00 + PolyObject::zpos + 2
+        sta polyobj_00 + PolyObject::zpos + 2
 
-        lda POLYOBJ_01 + PolyObject::zpos + 2
+        lda polyobj_01 + PolyObject::zpos + 2
         jsr multiplied_now_add
-        sta POLYOBJ_01 + PolyObject::zpos + 2
+        sta polyobj_01 + PolyObject::zpos + 2
 
         lda # $01
         sta ZP_SCREEN

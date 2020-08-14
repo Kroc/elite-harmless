@@ -313,7 +313,7 @@ _1ec1:                                                                  ;$1EC1
 ; main cockpit-view game-play loop perhaps?
 ; (handles many key presses)
 ;-------------------------------------------------------------------------------
-        lda POLYOBJ_00          ;=$F900?
+        lda polyobj_00          ;=$F900?
         sta ZP_GOATSOUP_pt1     ;? randomize?
 
 .ifndef OPTION_NOTRUMBLES
@@ -329,43 +329,42 @@ _1ec1:                                                                  ;$1EC1
 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-_1ece:                                                                  ;$1ECE
+_1ece:  ; process roll amount:                                          ;$1ECE
         ;-----------------------------------------------------------------------
-        ldx VAR_048D
-        jsr _3c58
-        jsr _3c58
+        ldx VAR_048D            ; current roll amount
+        jsr _3c58               ; damping?
+        jsr _3c58               ; damping?
+        txa                     ; transfer roll amount back to A
 
-        txa 
         eor # %10000000         ; flip the sign bit
-        tay                     ; put aside
-        and # %10000000         ; strip down to just the sign bit
+        tay                     ; (put aside)
+        and # %10000000         ; extract just the sign bit
         sta ZP_ROLL_SIGN        ; store as our "direction of roll"
+        stx VAR_048D            ; save new roll amount
+        eor # %10000000         ; flip the sign bit
+        sta ZP_6A               ; keep inverse roll direction
 
-        stx VAR_048D            ; X-dampen?
-        eor # %10000000
-        sta ZP_6A               ; inverse roll direction
+        tya                     ; retrieve our roll amount, with flipped sign
+        bpl :+                  ; if positive, skip over
 
-        tya 
-        bpl :+
-
-        ; negate
+        ; negate the number properly (2's compliment)
         eor # %11111111
         clc 
         adc # $01
 
-:       lsr                                                             ;$1EEE
-        lsr 
+:       lsr                     ; divide by 2,                           ;$1EEE
+        lsr                     ; divide by 4
         cmp # $08
-        bcs :+
+       .bge :+
         lsr 
 
 :       sta ZP_ROLL_MAGNITUDE                                           ;$1EF5
         ora ZP_ROLL_SIGN        ; add sign
         sta ZP_ALPHA            ; put aside for use in the matrix math
 
+        ; process pitch amount:
         ;-----------------------------------------------------------------------
-
-        ldx VAR_048E
+        ldx VAR_048E            ; current pitch?
         jsr _3c58
 
         txa 
@@ -377,22 +376,21 @@ _1ece:                                                                  ;$1ECE
         eor # %10000000
         sta ZP_PITCH_SIGN
         tya 
-        bpl _1f15
+        bpl :+
         eor # %11111111
-_1f15:                                                                  ;$1F15
-        adc # $04
+:       adc # $04                                                       ;$1F15
         lsr 
         lsr 
         lsr 
         lsr 
         cmp # $03
-        bcs _1f20
+        bcs :+
         lsr 
-_1f20:                                                                  ;$1F20
+
         ; get the player ship's pitch;
         ; stored as separate sign & magnitude
         ;
-        sta ZP_PITCH_MAGNITUDE
+:       sta ZP_PITCH_MAGNITUDE                                          ;$1F20
         ora ZP_PITCH_SIGN
         sta ZP_BETA             ; put aside for the matrix math
 
@@ -414,7 +412,7 @@ _1f20:                                                                  ;$1F20
 
         dec PLAYER_SPEED        ; reduce player's speed
        .bnz :+                  ; still above zero?
-        inc PLAYER_SPEED        ; if zero, set to 1?
+        inc PLAYER_SPEED        ; if zero, set to 1
 
         ; disarm missile?
         ;-----------------------------------------------------------------------
@@ -422,10 +420,10 @@ _1f20:                                                                  ;$1F20
         and PLAYER_MISSILES     ; does the player have any missiles?
        .bze :+                  ; no? skip ahead
 
-        ldy # $57
-        jsr _7d0c
+        ldy # $57               ; green?
+        jsr _7d0c               ; unarm missile
         ldy # $06
-        jsr _a858
+        jsr _a858               ; play sound?
 
         lda # $00               ; set loaded missile as disarmed ($00)
         sta PLAYER_MISSILE_ARMED
@@ -436,40 +434,47 @@ _1f20:                                                                  ;$1F20
         ; target missile?
         ;-----------------------------------------------------------------------
         lda key_missile_target  ; target missile key pressed?
-       .bze :+
+       .bze :+                  ; no, continue...
 
         ldx PLAYER_MISSILES     ; does the player have any missiles?
-       .bze :+
+       .bze :+                  ; if missiles are zero, skip
+                                ; TODO: add a beep here?
 
-        ; set missile armed flag on
+        ; set missile armed flag
         ; (A = $FF from `key_missile_target`)
         sta PLAYER_MISSILE_ARMED
-
-        ldy # $87
-        jsr _b11f
+        ; update the colour of the HUD missile indicator
+        ldy # .color_nybble( ORANGE, YELLOW )
+        jsr update_missile_indicator
 
         ; fire missile?
         ;-----------------------------------------------------------------------
 :       lda key_missile_fire    ; fire missile key held?                ;$1F6B
        .bze :+                  ; no, skip ahead
 
-        lda ZP_MISSILE_TARGET
-        bmi _1fc2
-        jsr _36a6
+        lda ZP_MISSILE_TARGET   ; check the missile target...
+        ; if no target, skip ahead. this skips over the rest
+        ; of the key-press checks and is likely an oversight
+        bmi :++++++                                                     ;=$1FC2
+        
+        jsr _36a6               ; do fire missile?
 
         ; energy bomb?
         ;-----------------------------------------------------------------------
 :       lda key_bomb            ; energy bomb key held?                 ;$1F77
-       .bze :+
+       .bze :+                  ; no, skip ahead
 
+        ; TODO: does this also enable it by setting bit 7?
         asl PLAYER_EBOMB        ; does player have an energy bomb?
         beq :+                  ; no? keep going
 
+        ; create a 'screen glitch' effect by changing the hi-res portion
+        ; of the screen to multi-colour when the bomb goes off(?)
         ldy # vic_screen_ctl2::unused | vic_screen_ctl2::multicolor
         sty interrupt_screenmode1
 
-        ldy # $0d
-        jsr _a858               ; handle e-bomb?
+        ldy # $0d               ; e-bomb sound?
+        jsr _a858               ; play sound?
 
         ; turn docking computer off?
         ;-----------------------------------------------------------------------
@@ -479,7 +484,7 @@ _1f20:                                                                  ;$1F20
         lda # $00               ; $00 = OFF
         sta DOCKCOM_STATE       ; turn docking computer off
 
-        jsr _923b
+        jsr _923b               ; ?
 
         ; activate escape pod?
         ;-----------------------------------------------------------------------
@@ -488,9 +493,10 @@ _1f20:                                                                  ;$1F20
        .bze :+                  ; no? keep moving
 
         lda IS_WITCHSPACE       ; is the player stuck in witchspace?
-       .bnz :+                  ; yes...
+       .bnz :+                  ; yes? cannot eject in witchspace!
+                                ; TODO: play sound / display warning?
 
-        jmp eject_escapepod     ; no: eject escpae pod
+        jmp eject_escapepod     ; eject the escpae pod!
 
         ; quick-jump?
         ;-----------------------------------------------------------------------
@@ -503,29 +509,32 @@ _1f20:                                                                  ;$1F20
         ;-----------------------------------------------------------------------
 :       lda key_ecm             ; E.C.M. key pressed?                   ;$1FB0
         and PLAYER_ECM          ; does the player have an E.C.M.?
-        beq _1fc2
+        beq :+
 
-        lda ZP_67
-        bne _1fc2
+        lda ZP_67               ; ECM counter?
+        bne :+                  ; skip if ECM already active
 
-        dec VAR_0481
-        jsr _b0f4
+        dec VAR_0481            ; mark ECM as on
+        jsr _b0f4               ; handle ECM effects...
 
-_1fc2:  ; turn docking computer on?                                     ;$1FC2
+        ; turn docking computer on?
         ;-----------------------------------------------------------------------
-        lda key_docking_on      ; key for docking computers pressed?
+:       lda key_docking_on      ; key for docking computer pressed?     ;$1FC2
         and PLAYER_DOCKCOM      ; does the player have a docking computer?
-       .bze :+                  ; no, skip
-        eor joy_down            ; stops ship climbing, but why?
-       .bze :+
-        sta DOCKCOM_STATE       ; turn docking computer on (A = $FF)
+       .bze @laser              ; no, skip
 
+        eor joy_down            ; TODO: combine with down key state???
+       .bze @laser
+
+        sta DOCKCOM_STATE       ; turn docking computer on (A = $FF)
 .ifndef OPTION_NOSOUND
         ;///////////////////////////////////////////////////////////////////////
-        jsr _9204               ; handle docking computer music?
+        jsr _9204               ; enable docking computer?
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-:       lda # $00                                                       ;$1FD5
+        ; handle lasers:
+        ;-----------------------------------------------------------------------
+@laser: lda # $00                                                       ;$1FD5
         sta ZP_7B               ; laser-power per pulse?
         sta ZP_SPEED_LO         ; dust-speed low-byte?
 
@@ -539,119 +548,148 @@ _1fc2:  ; turn docking computer on?                                     ;$1FC2
         ror ZP_SPEED_LO         ; ripple down to the result, lo-byte
         sta ZP_SPEED_HI         ; store result hi-byte
 
-        lda VAR_0487
-        bne _202d
+        ; check if the laser is over-heated
+        lda VAR_0487            ; laser cool-off counter?
+        bne @ships              ; skip ahead if laser is cooling down
 
-        lda joy_fire
-        beq _202d
+        lda joy_fire            ; is fire-key pressed?
+        beq @ships              ; no? skip ahead
 
-        lda LASER_HEAT
-        cmp # $f2
-        bcs _202d
+        lda LASER_HEAT          ; check current laser heat
+        cmp # $f2               ; laser temp >= 242?
+        bcs @ships              ; don't fire if too hot
 
         ; is there a laser mounted on this direction?
-        ldx COCKPIT_VIEW
-        lda PLAYER_LASERS, x
-        beq _202d
+        ; TODO: shouldn't we check for this first??
+        ;
+        ldx COCKPIT_VIEW        ; current facing direction
+        lda PLAYER_LASERS, x    ; get type of laser mounted here
+        beq @ships              ; if zero, no laser, skip ahead
 
-        pha 
+        pha                     ; put aside laser type
         and # %01111111
-        sta ZP_7B
-        sta VAR_0484
+        sta ZP_7B               ;?
+        sta VAR_0484            ;?
 
         ldy # $00
         pla 
         pha 
-        bmi _2014
+        bmi :++
         cmp # $32
-        bne _2012
+        bne :+                  ; (BNE to another BNE! should be `bne @201d`)
         ldy # $0c
-_2012:                                                                  ;$2012
-        bne _201d
-_2014:                                                                  ;$2014
-        cmp # $97
-        beq _201b
-        ldy # $0a
+:       bne @201d                                                       ;$2012
+:       cmp # $97                                                       ;$2014
+        beq @201b
 
+        ldy # $0a               ; laser sound #1?
         ; (this causes the next instruction to become a meaningless `bit`
         ;  instruction, a very handy way of skipping without branching)
        .bit
-_201b:                                                                  ;$201B
-        ldy # $0b
-_201d:                                                                  ;$201D
-        jsr _a858
-        jsr shoot_lasers
-        pla 
-        bpl _2028
-        lda # $00
-_2028:                                                                  ;$2028
-        and # %11111010
-        sta VAR_0487
-_202d:                                                                  ;$202D
-        ldx # $00
-_202f:                                                                  ;$202F
-        stx ZP_9D
+@201b:  ldy # $0b               ; laser sound #2?                       ;$201B
+@201d:  jsr _a858               ; play sound?                           ;$201D
+        jsr shoot_lasers        ; pew-pew!
+        
+        pla                     ; retrieve laser type?
+        bpl :+
+        lda # $00               ; instant cool-down?
+:       and # %11111010                                                 ;$2028
+        sta VAR_0487            ; update cool-down state?
 
-        lda SHIP_SLOTS, x
-        bne _2039
-
-        jmp _21fa
-
+        ; process ships?
         ;-----------------------------------------------------------------------
+@ships: ldx # $00               ; begin with ship-slot 0                ;$202D
 
-_2039:                                                                  ;$2039
-        sta ZP_A5               ; put ship type aside
-        jsr get_polyobj_addr
 
-        ; copy the given PolyObject to the zero page:
-        ; ($09..$2D)
+process_ship:                                                           ;$202F
+;===============================================================================
+; in:   X       ship-slot index
+;-------------------------------------------------------------------------------
+        stx ZP_9D               ; set ship-slot to inspect
+        lda SHIP_SLOTS, x       ; is that a ship in your slot?
+        bne :+                  ; if so, process it
+        jmp _21fa               ; no more ships to process,
+                                ; you're just happy to see me
+
+:       sta ZP_A5               ; put ship type aside                   ;$2039
+        jsr get_polyobj_addr    ; look up the ship's personal data
+
+        ; copy the given PolyObject to
+        ; the working space in zero page
         ;
-        ldy # .sizeof(PolyObject) - 1
+        ; TODO: we may be able to delay this copy until later in the logic
+        ;       i.e. we might not need the ZP polyObject until the ship moves
+        ;
+;;.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ldy # .sizeof(PolyObject)-1
 :       lda [ZP_POLYOBJ_ADDR], y                                        ;$2040
         sta ZP_POLYOBJ, y
         dey 
         bpl :-
+;;.else   ;/////////////////////////////////////////////////////////////////////
+;;        ; TODO: this won't fit into this segment in the non-hiram config
+;;        ldy # 0
+;;        .repeat $23, I
+;;                lda [ZP_POLYOBJ_ADDR], y
+;;                sta ZP_POLYOBJ + I
+;;                iny
+;;        .endrepeat
+;;        lda [ZP_POLYOBJ_ADDR], y
+;;        sta ZP_POLYOBJ + $24
+;;.endif  ;/////////////////////////////////////////////////////////////////////
 
+        ; TODO: if we use LDX instead, we can preserve the ship-type through
+        ;       this logic and do away with a number of additional LDA's
+        ;
         lda ZP_A5               ; get ship type back
-        bmi @skip               ; if sun / planet, skip over
+        bmi @move               ; if sun / planet, skip over
 
-        asl 
-        tay 
-        lda hull_pointers - 2, y
+        asl                     ; multiply by 2 for table lookup
+        tay                     ; use as an index
+        lda hull_pointers-2, y  ; look up the hull data, lo-byte
         sta ZP_HULL_ADDR_LO
-        lda hull_pointers - 1, y
+        lda hull_pointers-1, y  ; look up the hull data, hi-byte
         sta ZP_HULL_ADDR_HI
 
-        lda PLAYER_EBOMB        ; player has energy bomb?
-        bpl @skip
+        ; e-bomb explodes ship:
+        ;-----------------------------------------------------------------------
+        ; is the e-bomb active? (bit 7 set)
+        lda PLAYER_EBOMB        ; check e-bomb state
+        bpl @move               ; inactive, skip over
 
-        ; space station?
+        ; space station? -- cannot be destroyed by e-bomb
         cpy # hull_coreolis_index *2
-        beq @skip
+        beq @move
 
-        ; thargoid?
+        ; thargoid? -- also cannot be e-bombed
         cpy # hull_thargoid_index *2
-        beq @skip
+        beq @move
 
-        ; constrictor?
+        ; constrictor, cougar & dodo-station? -- also cannot be e-bombed
+        ; WARN: this assumes any ID of constrictor or above are valid!
         cpy # hull_constrictor_index *2
-        bcs @skip
+        bcs @move
 
+        ; make ship disappear?
+        ;
         lda ZP_POLYOBJ_VISIBILITY
         and # visibility::display
-        bne @skip
+        bne @move
 
         asl ZP_POLYOBJ_VISIBILITY
         sec 
         ror ZP_POLYOBJ_VISIBILITY
 
-        ldx ZP_A5
-        jsr _a7a6
+        ldx ZP_A5               ; retrieve ship-type
+        jsr _a7a6               ; kill ship?
 
-@skip:  jsr _a2a0                                                       ;$2079
+        ; move the ship forward:
+        ;-----------------------------------------------------------------------
+@move:  jsr _a2a0               ; move ship?                            ;$2079
 
         ; copy the zero-page PolyObject back to its storage
-
+        ; TODO: unroll this in hiram config
         ldy # .sizeof(PolyObject) - 1
 :       lda ZP_POLYOBJ, y                                               ;$207E
         sta [ZP_POLYOBJ_ADDR], y
@@ -718,7 +756,7 @@ _20e0:                                                                  ;$20E0
         ;-----------------------------------------------------------------------
 
 _20e3:                                                                  ;$20E3
-        lda POLYOBJ_01 + PolyObject::behaviour                         ;=$F949
+        lda polyobj_01 + PolyObject::behaviour                         ;=$F949
         and # behaviour::angry
         bne _2107
 
@@ -831,7 +869,7 @@ _2192:                                                                  ;$2192
         jsr _234c
 
         ldx ZP_A5
-        jsr _a7a6
+        jsr _a7a6               ; kill ship?
 _21a1:                                                                  ;$21A1
         sta ZP_POLYOBJ_ENERGY
 _21a3:                                                                  ;$21A3
@@ -889,7 +927,7 @@ _21ee:                                                                  ;$21EE
 
         ldx ZP_9D
         inx 
-        jmp _202f
+        jmp process_ship
 
         ;-----------------------------------------------------------------------
 
@@ -967,7 +1005,7 @@ _2230:                                                                  ;$2230
         ldx # PolyObject::vertexData + .sizeof(PolyObject::vertexData) - 1
 
         ;?
-:       lda POLYOBJ_00, x       ;=$F900                                 ;$2248
+:       lda polyobj_00, x       ;=$F900                                 ;$2248
         sta ZP_POLYOBJ, x       ;=$09
         dex 
         bpl :-
@@ -1159,9 +1197,13 @@ _234c:                                                                  ;$234C
         ldy # Hull::scoop_debris
         and [ZP_HULL_ADDR], y
         and # %00001111
+
 _2359:                                                                  ;$2359
+;===============================================================================
+; in:   A       ?
+;-------------------------------------------------------------------------------
         sta ZP_AA
-        beq _2366
+        beq _2366               ; zero-flag will not be set by STA!
 
 :       lda # $00                                                       ;$235D
         jsr _370a               ; NOTE: spawns ship-type in X

@@ -67,6 +67,7 @@ ELITE_SPRITES_INDEX     = <((ELITE_SPRITES_ADDR - ELITE_VIC_ADDR) / 64)
 
 .import ELITE_ZP_SHADOW
 .import ELITE_DISK_BUFFER
+.import ELITE_HEAP_TOP
 
 ;===============================================================================
 ; some core, structual values used throughout Elite, often tied directly

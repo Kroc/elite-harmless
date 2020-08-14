@@ -1224,6 +1224,8 @@ txt_docked:                                                             ;$0E00
         .msg
         
         ; $5F:  "whoreson beetle headed flap ear'd knave"
+        ;       https://en.wiktionary.org/wiki/whoreson
+        ;       https://www.sparknotes.com/nofear/shakespeare/shrew/page_160/
         .byte   "WH", OR, ES, ON, __, BE, ET, LE, __, "HEAD", ED__
         .byte   "F", LA, "P", __, "E", AR, "'D", __, "KNA", VE, __end
         .msg

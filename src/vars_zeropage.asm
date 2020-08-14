@@ -329,8 +329,7 @@ ZP_92                   = $92   ;? x6
 ZP_93                   = $93   ;? x4
 
 ZP_PITCH_SIGN           = $94   ; pitch rotation sign (see $64 for magnitude)
-
-ZP_95                   = $95   ;? x6
+ZP_95                   = $95   ; inverted pitch sign
 
 PLAYER_SPEED            = $96
 ZP_SPEED_LO             = $97   ; (player speed * 256) / 4, lo-byte
@@ -341,8 +340,9 @@ ZP_VAR_Q                = $9a   ; a common variable named "Q"
 ZP_VAR_R                = $9b   ; a common variable named "R"
 ZP_VAR_S                = $9c   ; a common variable named "S"
 
-ZP_9D                   = $9d   ;? x11
-ZP_9E                   = $9e   ;? x12
+ZP_9D                   = $9d   ; temp backup of X
+ZP_9E                   = $9e   ; tmep backup of Y
+
 ZP_9F                   = $9f   ; edge index
 
 ; which screen the game is on, e.g. cockpit-view, galactic chart &c.

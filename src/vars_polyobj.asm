@@ -100,23 +100,19 @@
 ; in the original game, this is $F900
 ;
 .segment        "POLYOBJS"
+
+polyobjects:                                                            ;$F900
 ;===============================================================================
-POLYOBJECTS:                                                            ;$F900
-
-; TODO: there is a limit of 11 objects at the same time in the game;
-;       with 11 objects this occupies 407 bytes. this could be expanded
-;       to 13 objects (for 481 bytes of 37 bytes each) and remain page-aligned
-
-POLYOBJ_00:      .tag    PolyObject                                     ;$F900
-POLYOBJ_01:      .tag    PolyObject                                     ;$F925
-POLYOBJ_02:      .tag    PolyObject                                     ;$F94A
-POLYOBJ_03:      .tag    PolyObject                                     ;$F96F
-POLYOBJ_04:      .tag    PolyObject                                     ;$F994
-POLYOBJ_05:      .tag    PolyObject                                     ;$F9B9
-POLYOBJ_06:      .tag    PolyObject                                     ;$F9DE
-POLYOBJ_07:      .tag    PolyObject                                     ;$FA03
-POLYOBJ_08:      .tag    PolyObject                                     ;$FA28
-POLYOBJ_09:      .tag    PolyObject                                     ;$FA4D
-POLYOBJ_10:      .tag    PolyObject                                     ;$FA72
+polyobj_00:      .tag    PolyObject                                     ;$F900
+polyobj_01:      .tag    PolyObject                                     ;$F925
+polyobj_02:      .tag    PolyObject                                     ;$F94A
+polyobj_03:      .tag    PolyObject                                     ;$F96F
+polyobj_04:      .tag    PolyObject                                     ;$F994
+polyobj_05:      .tag    PolyObject                                     ;$F9B9
+polyobj_06:      .tag    PolyObject                                     ;$F9DE
+polyobj_07:      .tag    PolyObject                                     ;$FA03
+polyobj_08:      .tag    PolyObject                                     ;$FA28
+polyobj_09:      .tag    PolyObject                                     ;$FA4D
+polyobj_10:      .tag    PolyObject                                     ;$FA72
 
 POLYOBJ_COUNT   = 11
