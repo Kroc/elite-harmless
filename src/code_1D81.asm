@@ -643,11 +643,11 @@ process_ship:                                                           ;$202F
 ;;        .endrepeat                    ; 5*36  10*36 (+2) = 362 cycles
 ;;        lda [ZP_POLYOBJ_ADDR], y      ; 2     5=367
 ;;        sta ZP_POLYOBJ + $24          ; 2     3=370
-;;                                      ;=186 bytes
+;;                                      ;=186 bytes!
 ;;.endif  ;/////////////////////////////////////////////////////////////////////
 
         ; TODO: if we use LDX instead, we can preserve the ship-type through
-        ;       this logic and do away with a number of additional LDA's
+        ;       this logic and do away with a number of additional LDA's?
         ;
         lda ZP_A5               ; get ship type back
         bmi @move               ; if sun / planet, skip over
@@ -680,15 +680,17 @@ process_ship:                                                           ;$202F
 
         ; make ship disappear?
         ;
-        lda ZP_POLYOBJ_STATE
-        and # state::display
-        bne @move
+        lda ZP_POLYOBJ_STATE    ; get the ship's state
+        and # state::debris
+       .bnz @move
 
-        asl ZP_POLYOBJ_STATE
-        sec 
-        ror ZP_POLYOBJ_STATE
+        ; set bit 7 to indicate the ship is exploding
+        ;
+        asl ZP_POLYOBJ_STATE    ; push bit 7 off
+        sec                     ; set carry and...
+        ror ZP_POLYOBJ_STATE    ; ...shift the carry into bit 7
 
-        ldx ZP_A5               ; retrieve ship-type
+        ldx ZP_A5               ; retrieve ship-type again?
         jsr _a7a6               ; kill ship?
 
         ; move the ship forward:
@@ -703,31 +705,44 @@ process_ship:                                                           ;$202F
         dey 
         bpl :-
 
+        ; if the ship is exploding, or at a medium distance
+        ; then skip the next bit
         lda ZP_POLYOBJ_STATE
-        and # state::exploding | state::display
-        jsr _87b1
-        bne _20e0
+        and # state::exploding | state::debris
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        jsr _87b1               ; combine check with medium distance
+.else   ;///////////////////////////////////////////////////////////////////////
+        ora ZP_POLYOBJ_XPOS_MI  ; there's really no need for a JSR for this
+        ora ZP_POLYOBJ_YPOS_MI
+        ora ZP_POLYOBJ_ZPOS_MI
+.endif  ;///////////////////////////////////////////////////////////////////////
+        bne _20e0               
 
+        ; check the near distance
         lda ZP_POLYOBJ_XPOS_LO
         ora ZP_POLYOBJ_YPOS_LO
         ora ZP_POLYOBJ_ZPOS_LO
-        bmi _20e0
+        bmi _20e0               ; TODO: too far, or is this about direction?
 
-        ldx ZP_A5
-        bmi _20e0
+        ldx ZP_A5               ; sun or planet?
+        bmi _20e0               ; yes, skip
 
-        cpx # $02
-        beq _20e3
+        cpx # HULL_COREOLIS     ; space station?
+        beq _20e3               ; yes, skip
 
         and # %11000000
         bne _20e0
 
-        cpx # $01
-        beq _20e0
-        lda VAR_04C2
-        and ZP_POLYOBJ_YPOS_HI  ;=$0E
+        cpx # HULL_MISSILE      ; is it a missile?
+        beq _20e0               ; yes, skip
+
+        ;-----------------------------------------------------------------------
+        lda VAR_04C2            ; have fuel scoop?
+        and ZP_POLYOBJ_YPOS_HI  ; TODO: near sun(?)
         bpl _2122
-        cpx # $05
+
+        cpx # HULL_CARGO
         beq _20c0
 
         ldy # Hull::scoop_debris
@@ -737,6 +752,7 @@ process_ship:                                                           ;$202F
         lsr 
         lsr 
         beq _2122
+
         adc # $01
         bne _20c5
 _20c0:                                                                  ;$20C0
@@ -895,7 +911,7 @@ _21ab:                                                                  ;$21AB
         lda ZP_POLYOBJ_STATE
         bpl _21e5               ; bit 7 set?
 
-        and # state::display
+        and # state::debris
         beq _21e5
 
         lda ZP_POLYOBJ_BEHAVIOUR

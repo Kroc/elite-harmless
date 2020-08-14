@@ -2850,7 +2850,7 @@ _363f:                                                                  ;$363F
         bmi _367d
         
         lda ZP_POLYOBJ_STATE
-        and # state::display
+        and # state::debris
         ora ZP_POLYOBJ_XPOS_MI
         ora ZP_POLYOBJ_YPOS_MI
         bne _367d

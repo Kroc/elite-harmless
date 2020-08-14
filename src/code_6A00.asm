@@ -2558,7 +2558,7 @@ _785f:                                                                  ;$785F
 ; unused / unreferenced?
 ;
         lda ZP_POLYOBJ_STATE
-        ora # state::exploding | state::display
+        ora # state::exploding | state::debris
         sta ZP_POLYOBJ_STATE
         rts 
 
@@ -3035,8 +3035,7 @@ _7b2a:                                                                  ;$7B2A
 
         ldy # PolyObject::state
         lda [ZP_POLYOBJ_ADDR], y
-        and # state::exploding | state::display \
-            | state::missiles   ;=%10100111
+        and # state::exploding | state::debris | state::missiles
         sta [ZP_POLYOBJ_ADDR], y
 _7b41:                                                                  ;$7B41
         inx 
@@ -3049,10 +3048,11 @@ _7b44:                                                                  ;$7B44
         stx line_points_y       ; mark line-buffer-Y as 'empty'
 
 clear_circle_buffer:                                                    ;$7B4F
-        ;-----------------------------------------------------------------------
-        ; clear the circle buffer:
-        ;
-        ldy # 199               ; length of the circle buffer (199 scanlines)
+;===============================================================================
+; clear the circle buffer:
+;-------------------------------------------------------------------------------
+        ; length of the circle buffer (199 scanlines)
+        ldy # 199
         lda # 0                 ; erase...
 
 :       sta CIRCLE_BUFFER, y    ; set to 0                              ;$7B53
@@ -3066,8 +3066,9 @@ clear_circle_buffer:                                                    ;$7B4F
 
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
-        ; dummied-out code
-_7b5e:  rts                                                             ;$75BE
+original_7b5e:                                                          ;$75BE
+;===============================================================================
+        rts                     ; dummied-out code
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
@@ -5671,6 +5672,7 @@ _87a6:                                                                  ;$87A6
 _87b0:                                                                  ;$87B0
         rts 
 
+
 _87b1:                                                                  ;$87B1
 ;===============================================================================
         ora ZP_POLYOBJ_XPOS_MI
@@ -5678,6 +5680,7 @@ _87b1:                                                                  ;$87B1
         ora ZP_POLYOBJ_ZPOS_MI
 
         rts 
+
 
 _87b8:                                                                  ;$87B8
 ;===============================================================================
@@ -5728,7 +5731,7 @@ _87d0:                                                                  ;$87D0
         ldx # $18
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr _7b5e               ; dead code, just an rts
+        jsr original_7b5e       ; dead code, just an rts
 .endif  ;///////////////////////////////////////////////////////////////////////
         jsr set_page
 
@@ -5810,7 +5813,7 @@ _8851:                                                                  ;$8851
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr _7b5e               ; dead code, just an rts
+        jsr original_7b5e       ; dead code, just an rts
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         jmp _8882

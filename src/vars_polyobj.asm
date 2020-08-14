@@ -59,7 +59,7 @@
 .enum   state
         exploding       = %10000000     ; is exploding!
         firing          = %01000000     ; is firing at player!
-        display         = %00100000     ; display nodes (not distant dot)
+        debris          = %00100000     ; display debris(?)
         scanner         = %00010000     ; visible on scanner
         redraw          = %00001000     ; needs a redraw
         missiles        = %00000111     ; no. of missiles (or thargons)

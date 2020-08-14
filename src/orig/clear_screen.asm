@@ -178,11 +178,11 @@ drawViewportBordersV:                                                   ;$B2B2
         ldx # $00
 
 drawViewportBorderH:                                                    ;$B2D5
-        ;-----------------------------------------------------------------------
-        ; draw a horizontal viewport border:
-        ;
-        ; in:    X       pixel row (i.e. 0 or 199)
-        ;
+;===============================================================================
+; draw a horizontal viewport border:
+;
+; in:    X       pixel row (i.e. 0 or 199)
+;-------------------------------------------------------------------------------
         stx ZP_VAR_Y            ; first pixel row
         ldx # $00
         stx ZP_VAR_X1           ; X1 = 0
@@ -190,15 +190,16 @@ drawViewportBorderH:                                                    ;$B2D5
         stx ZP_VAR_X2           ; X2 = 255
         jmp draw_straight_line
 
+
 drawViewportBorderV:                                                    ;$B2E1
-        ;-----------------------------------------------------------------------
-        ; draw a vertical viewport border:
-        ;
-        ; in:   A       pixel pattern to draw line, e.g. %00010000
-        ;       X       length of line, in rows
-        ;       Y       hi-byte of bitmap address to use as starting position
-        ;               (lo-byte must already be set in ZP_TEMP_ADDR1_LO)
-        ;
+;===============================================================================
+; draw a vertical viewport border:
+;
+; in:   A       pixel pattern to draw line, e.g. %00010000
+;       X       length of line, in rows
+;       Y       hi-byte of bitmap address to use as starting position
+;               (lo-byte must already be set in ZP_TEMP_ADDR1_LO)
+;-------------------------------------------------------------------------------
         sta ZP_BE               ; put aside the pixel pattern to draw
         sty ZP_TEMP_ADDR1_HI    ; set the starting bitmap address, hi-byte
 

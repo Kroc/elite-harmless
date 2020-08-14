@@ -274,7 +274,7 @@ _9a86:                                                                  ;$9A86
         lda ZP_POLYOBJ_BEHAVIOUR
         bmi _9ad8
 
-        lda # state::display
+        lda # state::debris
         bit ZP_POLYOBJ_STATE
         bne _9ac5
         bpl _9ac5
@@ -315,7 +315,7 @@ _9ac5:                                                                  ;$9AC5
 ; ".LL14 ; Test to remove object"
 _9ac9:                                                                  ;$9AC9
         lda ZP_POLYOBJ_STATE
-        and # state::display
+        and # state::debris
         beq _9ad8
 
         lda ZP_POLYOBJ_STATE
@@ -384,7 +384,7 @@ _9b29:                                                                  ;$9B29
         cmp ZP_POLYOBJ_ZPOS_MI
         bcs _9b3a
 
-        lda # state::display
+        lda # state::debris
         and ZP_POLYOBJ_STATE
         bne _9b3a               ; "hop over to Draw wireframe or exploding"
 
@@ -432,7 +432,7 @@ _9b66:                                                                  ;$9B66
 
         ldy # Hull::face_count          ;=$0C: face count
         lda ZP_POLYOBJ_STATE
-        and # state::display
+        and # state::debris
         beq _9b8b
         lda [ZP_HULL_ADDR], y
         lsr 
@@ -1030,7 +1030,7 @@ _9f06:                                                                  ;$9F06
 ; ".LL72 ; XX3 node heap already Loaded with all 16bit xy screen"
 _9f1b:                                                                  ;$9F1B
         lda ZP_POLYOBJ_STATE
-        and # state::display
+        and # state::debris
         beq _9f2a
 
         lda ZP_POLYOBJ_STATE
@@ -1670,7 +1670,7 @@ _a2a0:                                                                  ;$A2A0
         ; is the ship exploding? must be 'near'
         ; (i.e. not a distant dot), and in exploding state
         lda ZP_POLYOBJ_STATE
-        and # state::exploding | state::display
+        and # state::exploding | state::debris
        .bnz _a2cb
 
         ; handle explosion?
@@ -1948,8 +1948,9 @@ _a3bf:                                                                  ;$A3BF
         jsr _2dc5
 
 :       lda ZP_POLYOBJ_STATE                                            ;$A434
-        and # state::exploding | state::display
+        and # state::exploding | state::debris
         bne :+
+
         lda ZP_POLYOBJ_STATE
         ora # state::scanner
         sta ZP_POLYOBJ_STATE
@@ -1968,9 +1969,9 @@ _a3bf:                                                                  ;$A3BF
 .move_polyobj_x                                                         ;$A44A
 .rotate_polyobj_axis                                                    ;$A4A1
 
-;===============================================================================
 
 _a508:                                                                  ;$A508
+;===============================================================================
         tay 
         eor ZP_POLYOBJ_XPOS_HI, x
         bmi _a51c
@@ -2011,9 +2012,9 @@ _a52f:                                                                  ;$A52F
         tya 
         rts 
 
-;===============================================================================
 
 _a53d:                                                                  ;$A53D
+;===============================================================================
         lda ZP_ALPHA
         eor # %10000000
         sta ZP_VAR_Q
@@ -2133,11 +2134,11 @@ _a5db:                                                                  ;$A5DB
         sta ZP_POLYOBJ_XPOS_HI
         jmp _a3bf
 
-;===============================================================================
-
-; what calls in to this, where?
 
 _a604:                                                                  ;$A604
+;===============================================================================
+; what calls in to this, where?
+;-------------------------------------------------------------------------------
         sec 
         ldy # $00
         sty ZP_TEMP_ADDR3_LO
@@ -2160,10 +2161,9 @@ _a60e:                                                                  ;$A60E
 
         rts 
 
-;===============================================================================
 
 _a626:                                                                  ;$A626
-
+;===============================================================================
         ldx COCKPIT_VIEW
         beq _a65e
         dex 

@@ -312,8 +312,7 @@ _3e46:                                                                  ;$3E46
         lda # %00000000
         sta ZP_POLYOBJ_STATE
         
-        ; switch to page "1"(?)
-        lda # $01
+        lda # page::empty
         jsr set_page
 
         jsr _9a86
