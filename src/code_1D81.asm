@@ -705,7 +705,7 @@ process_ship:                                                           ;$202F
         dey 
         bpl :-
 
-        ; if the ship is exploding, or at a medium distance
+        ; if the ship is exploding, or at a medium distance(?)
         ; then skip the next bit
         lda ZP_POLYOBJ_STATE
         and # state::exploding | state::debris
@@ -742,7 +742,7 @@ process_ship:                                                           ;$202F
         and ZP_POLYOBJ_YPOS_HI  ; TODO: near sun(?)
         bpl _2122
 
-        cpx # HULL_CARGO        ; is this a cargo cannister?
+        cpx # HULL_CANNISTER    ; is this a cargo cannister?
         beq _20c0
 
         ; read scoop data from the hull
@@ -895,7 +895,7 @@ _2170:                                                                  ;$2170
 _2192:                                                                  ;$2192
         ldy # HULL_PLATE
         jsr _234c
-        ldy # HULL_CARGO
+        ldy # HULL_CANNISTER
         jsr _234c
 
         ldx ZP_A5

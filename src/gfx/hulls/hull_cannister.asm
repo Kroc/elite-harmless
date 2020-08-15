@@ -5,15 +5,15 @@
 ; cargo cannister
 ;-------------------------------------------------------------------------------
 hull_index              .set hull_index + 1
-HULL_CARGO              := hull_index                                   ;=$05
+HULL_CANNISTER          := hull_index                                   ;=$05
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
-HULL_CARGO_KILL         = 10    ;= 0.039
+HULL_CANNISTER_KILL     = 10    ;= 0.039
 
 .segment        "HULL_TABLE"                                            ;$D000..
 ;===============================================================================
-        .addr   hull_cargo                                              ;$D008/9
+        .addr   hull_cannister                                          ;$D008/9
 
 .segment        "HULL_TYPE"                                             ;$D042..
 ;===============================================================================
@@ -21,15 +21,15 @@ HULL_CARGO_KILL         = 10    ;= 0.039
 
 .segment        "HULL_KILL_LO"                                          ;$D063..
 ;===============================================================================
-        .byte   < HULL_CARGO_KILL                                       ;$D067
+        .byte   < HULL_CANNISTER_KILL                                   ;$D067
 
 .segment        "HULL_KILL_HI"                                          ;$D084..
 ;===============================================================================
-        .byte   > HULL_CARGO_KILL                                       ;$D088
+        .byte   > HULL_CANNISTER_KILL                                   ;$D088
 
 .segment        "HULL_DATA"                                             ;$D0A5..
 ;===============================================================================
-.proc   hull_cargo                                                      ;$D353
+.proc   hull_cannister                                                  ;$D353
         ;-----------------------------------------------------------------------
         .byte                  $00, $90, $01, $50, $8c
         .byte   $35, $00, $12, $3c, $0f, $00, $00, $1c

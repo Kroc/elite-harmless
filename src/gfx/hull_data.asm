@@ -55,7 +55,7 @@ hull_kill_hi:                                                           ;$D084
 .include "gfx/hulls/hull_coreolis.asm"          ; $02: station (coreolis)
 .include "gfx/hulls/hull_escape.asm"            ; $03: escape pod
 .include "gfx/hulls/hull_plate.asm"             ; $04: plate / alloy
-.include "gfx/hulls/hull_cargo.asm"             ; $05: cargo cannister
+.include "gfx/hulls/hull_cannister.asm"         ; $05: cargo cannister
 .include "gfx/hulls/hull_boulder.asm"           ; $06: boulder
 .include "gfx/hulls/hull_asteroid.asm"          ; $07: asteroid
 .include "gfx/hulls/hull_splinter.asm"          ; $08: splinter

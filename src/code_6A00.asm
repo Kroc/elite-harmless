@@ -5782,7 +5782,7 @@ _87fd:                                                                  ;$87FD
         ; spawn a cargo-cannister or plate-alloy:
         ; WARN: this assumes the plate/alloy ID
         ;       comes before the cargo-cannister
-        ldx # HULL_CARGO
+        ldx # HULL_CANNISTER
         lda VIC_SPRITE3_Y       ;?
         beq :+
         bcc :+
