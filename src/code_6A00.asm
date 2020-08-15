@@ -2842,7 +2842,7 @@ _79ed:                                                                  ;$79ED
         lda ZP_POLYOBJ01_YPOS_pt1
         clc 
         adc VAR_050E
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda ZP_POLYOBJ01_XPOS_pt3
         adc # $00
         bmi _7a36
@@ -2862,7 +2862,7 @@ _79ed:                                                                  ;$79ED
         and # %11111101
         ora _79a7, x
         sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
-        ldx ZP_TEMP_ADDR1_LO
+        ldx ZP_TEMP_ADDR_LO
         sty VIC_SPRITE1_Y
         stx VIC_SPRITE1_X
         lda VIC_SPRITE_ENABLE
@@ -4734,12 +4734,12 @@ _82be:                                                                  ;$82BE
 
         ; get the PolyObject address from that index
         lda polyobj_addrs_lo, y
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda polyobj_addrs_hi, y
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         ldy # PolyObject::attack
-        lda [ZP_TEMP_ADDR1], y
+        lda [ZP_TEMP_ADDR], y
         bpl _82be               ; if +ve, check next ship slot
 
         and # %01111111         ; remove the sign
@@ -4750,12 +4750,12 @@ _82be:                                                                  ;$82BE
         sbc # $01               ; adjust for two's compliment
         asl                     ; multiply by 2
         ora # %10000000         ; add the sign on again
-        sta [ZP_TEMP_ADDR1], y  ; update the roll value
+        sta [ZP_TEMP_ADDR], y   ; update the roll value
         bne _82be               ; if not zero, check next ship slot
 
 _82ed:                                                                  ;$82ED
         lda # PolyObject::xpos  ;=$00
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
         beq _82be               ; if zero, check the next ship slot
 
 _82f3:                                                                  ;$82F3
@@ -4827,12 +4827,12 @@ _834f:                                                                  ;$834F
         asl 
         tay 
         lda hull_pointers - 2, y
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda hull_pointers - 1, y
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         ldy # $05
-        lda [ZP_TEMP_ADDR1], y
+        lda [ZP_TEMP_ADDR], y
         sta ZP_VAR_T
         lda ZP_VAR_P1
         sec 
@@ -4845,35 +4845,35 @@ _834f:                                                                  ;$834F
         asl 
         tay 
         lda polyobj_addrs_lo, y
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda polyobj_addrs_hi, y
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         ldy # $24
-        lda [ZP_TEMP_ADDR1], y
+        lda [ZP_TEMP_ADDR], y
         sta [ZP_POLYOBJ_ADDR], y
         dey 
-        lda [ZP_TEMP_ADDR1], y
+        lda [ZP_TEMP_ADDR], y
         sta [ZP_POLYOBJ_ADDR], y
         dey 
-        lda [ZP_TEMP_ADDR1], y
+        lda [ZP_TEMP_ADDR], y
         sta ZP_VALUE_pt2
         lda ZP_VAR_P2
         sta [ZP_POLYOBJ_ADDR], y
         dey 
-        lda [ZP_TEMP_ADDR1], y
+        lda [ZP_TEMP_ADDR], y
         sta ZP_VALUE_pt1
         lda ZP_VAR_P1
         sta [ZP_POLYOBJ_ADDR], y
         dey 
 _8399:                                                                  ;$8399
-        lda [ZP_TEMP_ADDR1], y
+        lda [ZP_TEMP_ADDR], y
         sta [ZP_POLYOBJ_ADDR], y
         dey 
         bpl _8399
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         sta ZP_POLYOBJ_ADDR_LO
-        lda ZP_TEMP_ADDR1_HI
+        lda ZP_TEMP_ADDR_HI
         sta ZP_POLYOBJ_ADDR_HI
         ldy ZP_VAR_T
 _83aa:                                                                  ;$83AA
@@ -6099,7 +6099,7 @@ _8920:                                                                  ;$8920
         lda # $00
         sta ZP_POLYOBJ_XPOS_LO
         sta ZP_POLYOBJ_YPOS_LO
-        jsr _9a86
+        jsr draw_ship
         jsr get_input
 
         dec ZP_A3               ; move counter?
@@ -6303,11 +6303,11 @@ _8ac7:                                                                  ;$8AC7
 
 _8ad9:                                                                  ;$8AD9
         ldy # $00
-        sty ZP_TEMP_ADDR1_LO
+        sty ZP_TEMP_ADDR_LO
         lda # $00
-        stx ZP_TEMP_ADDR1_HI
+        stx ZP_TEMP_ADDR_HI
 
-:       sta [ZP_TEMP_ADDR1], y                                          ;$8AE1
+:       sta [ZP_TEMP_ADDR], y                                          ;$8AE1
         iny 
         bne :-
         rts 

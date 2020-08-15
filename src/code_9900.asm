@@ -257,13 +257,14 @@ _9a30:                                                                  ;$9A30
         tax 
         cmp # $11
         bcc _9a30
+
         rts 
 
 _9a83:                                                                  ;$9A83
-        jmp _7d62
+        jmp _7d62               ; draw sun or planet?
 
 
-_9a86:                                                                  ;$9A86
+draw_ship:                                                              ;$9A86
 ;===============================================================================
 ; draw a ship?
 ;-------------------------------------------------------------------------------
@@ -273,24 +274,26 @@ _9a86:                                                                  ;$9A86
         lda # $1f
         sta ZP_AD
 
-        ; remove ship? (has to be erased from screen by redrawing over it)
+        ; is the ship being removed?
+        ; (has to be erased from screen by redrawing over it)
         lda ZP_POLYOBJ_BEHAVIOUR
         bmi _9ad8
 
         ; is it exploded?
         lda # state::debris
         bit ZP_POLYOBJ_STATE
-        bne _9ac5
-        bpl _9ac5               ; bit 7 clear, ship has not yet been removed?
+        bne @9ac5
+        bpl @9ac5               ; bit 7 clear, ship has not yet been removed?
 
         ora ZP_POLYOBJ_STATE
         and # (state::exploding | state::firing)^$FF    ;=%00111111
         sta ZP_POLYOBJ_STATE
 
+        ; halt acceleration + pitch
         lda # $00
-        ldy # $1c               ; TODO: vertex pointer, hi-byte?
+        ldy # PolyObject::acceleration
         sta [ZP_POLYOBJ_ADDR], y
-        ldy # $1e               ; TODO: pitch?
+        ldy # PolyObject::pitch
         sta [ZP_POLYOBJ_ADDR], y
         jsr _9ad8
 
@@ -304,16 +307,16 @@ _9a86:                                                                  ;$9A86
         ldy # $02                       ;?
         sta [ZP_POLYOBJ_HEAP], y
 
-; ".EE55 ; counter Y, 4 rnd bytes to edge heap"
-_9abb:                                                                  ;$9ABB
-        iny 
+        ; BBC: ".EE55 ; counter Y, 4 rnd bytes to edge heap"
+        ;
+:       iny                                                             ;$9ABB
         jsr get_random_number
         sta [ZP_POLYOBJ_HEAP], y
         cpy # $06
-        bne _9abb
+        bne :-
 
-_9ac5:                                                                  ;$9AC5
         ; ".EE28 ; bit5 set do explosion, or bit7 clear, dont kill"
+@9ac5:                                                                  ;$9AC5
         lda ZP_POLYOBJ_ZPOS_HI
         ; ".EE49 ; In view?"
         bpl _9ae6
@@ -329,28 +332,31 @@ _9ac9:                                                                  ;$9AC9
         sta ZP_POLYOBJ_STATE
         jmp _7866
 
-; ".EE51 ; if bit3 set draw lines in XX19 heap"
 _9ad8:                                                                  ;$9AD8
+        ;-----------------------------------------------------------------------
+        ; BBC: ".EE51 ; if bit3 set draw lines in XX19 heap"
+        ;
         lda # state::redraw
         bit ZP_POLYOBJ_STATE
-        beq _9ae5
+        beq :+
         eor ZP_POLYOBJ_STATE
         sta ZP_POLYOBJ_STATE
         jmp _a178
 
-_9ae5:                                                                  ;$9AE5
-        rts 
+:       rts                                                             ;$9AE5
 
 ; ".LL10 ; object in front of you"
 _9ae6:                                                                  ;$9AE6
         lda ZP_POLYOBJ_ZPOS_MI
         cmp # $c0
         bcs _9ac9
+
         lda ZP_POLYOBJ_XPOS_LO
         cmp ZP_POLYOBJ_ZPOS_LO
         lda ZP_POLYOBJ_XPOS_MI
         sbc ZP_POLYOBJ_ZPOS_MI
         bcs _9ac9
+        
         lda ZP_POLYOBJ_YPOS_LO
         cmp ZP_POLYOBJ_ZPOS_LO
         lda ZP_POLYOBJ_YPOS_MI
@@ -2149,7 +2155,7 @@ _a604:                                                                  ;$A604
         ldy # $00
         sty ZP_TEMP_ADDR3_LO
         ldx # $10
-        lda [ZP_TEMP_ADDR1], y
+        lda [ZP_TEMP_ADDR], y
         txa 
 _a60e:                                                                  ;$A60E
         stx ZP_TEMP_ADDR3_HI
@@ -2789,14 +2795,14 @@ _b0b5:                                                                  ;$B0B5
         ; get bitmap address from X & Y co-ords
         ;
         ldy ZP_VAR_Y
-        lda ZP_VAR_X                    ; X-position, in pixels
-        and # %11111000                 ; clip X to a char-cell
+        lda ZP_VAR_X            ; X-position, in pixels
+        and # %11111000         ; clip X to a char-cell
         clc 
-        adc row_to_bitmap_lo, y         ; add X to the bitmap address by row
-        sta ZP_TEMP_ADDR1_LO
+        adc row_to_bitmap_lo, y ; add X to the bitmap address by row
+        sta ZP_TEMP_ADDR_LO
         lda row_to_bitmap_hi, y
         adc # $00
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         ; let Y be the row within the char-cell (0-7)
         tya 
@@ -2837,35 +2843,37 @@ _b0b5:                                                                  ;$B0B5
         ;       %00001100 AND %10101010 = %----10-- (screen RAM lower-nybble)
         ;       %00000011 AND %11111111 = %------11 (colour RAM)
         ;
-        and ZP_32                       ; set colour, i.e. %11, %10, %01, %00
-        eor [ZP_TEMP_ADDR1], y          ; mask new pixel against existing ones
-        sta [ZP_TEMP_ADDR1], y          ; update the screen
+        and ZP_32               ; set colour, i.e. %11, %10, %01, %00
+        eor [ZP_TEMP_ADDR], y   ; mask new pixel against existing ones
+        sta [ZP_TEMP_ADDR], y   ; update the screen
 
-        lda _ab49, x                    ; look ahead to the next pixel
+        lda _ab49, x            ; look ahead to the next pixel
         bpl @_b0ed
 
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         clc 
         adc # $08
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         bcc :+
-        inc ZP_TEMP_ADDR1_HI
+        inc ZP_TEMP_ADDR_HI
 :       lda _ab49, x                                                    ;$B0EA
 
 @_b0ed:                                                                 ;$B0ED
-        and ZP_32                       ; apply the colour-mask to the pixel
-        eor [ZP_TEMP_ADDR1], y          ; mask new pixel against existing ones
-        sta [ZP_TEMP_ADDR1], y          ; update the screen
+        and ZP_32               ; apply the colour-mask to the pixel
+        eor [ZP_TEMP_ADDR], y   ; mask new pixel against existing ones
+        sta [ZP_TEMP_ADDR], y   ; update the screen
         rts 
 
-;===============================================================================
 
 _b0f4:                                                                  ;$B0F4
+;===============================================================================
         lda # $20
         sta ZP_67
         ldy # $09
         jsr _a858
+
 _b0fd:                                                                  ;$B0FD
+;===============================================================================
         lda ELITE_MAINSCR_ADDR + .scrpos( 23, 11 )      ;=$67A3
         eor # %11100000
         sta ELITE_MAINSCR_ADDR + .scrpos( 23, 11 )      ;=$67A3
@@ -2902,9 +2910,9 @@ update_missile_indicator:                                               ;$B11F
         txa 
         inx 
         eor # %00000011
-        sty ZP_TEMP_ADDR1_LO
+        sty ZP_TEMP_ADDR_LO
         tay 
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         ; set colour of missile block on screen
         sta ELITE_MAINSCR_ADDR + .scrpos( 24, 6 ), y                    ;=$67C6
         
@@ -2973,9 +2981,9 @@ chrout:                                                                 ;$B155
 ;-------------------------------------------------------------------------------
         ; re-define the use of some zero-page variables for this routine
         ZP_CHROUT_CHARADDR      := ZP_VAR_P2
-        ZP_CHROUT_DRAWADDR      := ZP_TEMP_ADDR1
-        ZP_CHROUT_DRAWADDR_LO   := ZP_TEMP_ADDR1_LO
-        ZP_CHROUT_DRAWADDR_HI   := ZP_TEMP_ADDR1_HI
+        ZP_CHROUT_DRAWADDR      := ZP_TEMP_ADDR
+        ZP_CHROUT_DRAWADDR_LO   := ZP_TEMP_ADDR_LO
+        ZP_CHROUT_DRAWADDR_HI   := ZP_TEMP_ADDR_HI
 
         cmp # $7b               ; is code greater than or equal to $7B?
         bcs :+                  ; if yes, skip it
@@ -3166,10 +3174,10 @@ _b189:                                                                  ;$B189
         beq _b210
 
 :       inc ZP_CURSOR_COL                                               ;$B1ED
-        ; this is `sta ZP_TEMP_ADDR1_HI` if you jump in after the `bit`
+        ; this is `sta ZP_TEMP_ADDR_HI` if you jump in after the `bit`
         ; instruction, but it doesn't look like this actually occurs
        .bit
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         ; paint the character (8-bytes) to the screen
         ; SPEED: this could be unrolled
@@ -3242,9 +3250,9 @@ tkn_docked_fn15:                                                        ;$B3D4
         @txt_bmp_addr = ELITE_BITMAP_ADDR + .bmppos( 21, 4 )
 
         lda #> @txt_bmp_addr     ;=$5A60
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
         lda #< @txt_bmp_addr     ;=$5A60
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
 
         ldx # $03
 
@@ -3252,19 +3260,19 @@ tkn_docked_fn15:                                                        ;$B3D4
         lda # $00
         tay 
 
-:       sta [ZP_TEMP_ADDR1], y                                          ;$B3FA
+:       sta [ZP_TEMP_ADDR], y                                           ;$B3FA
         dey 
         bne :-
 
         ; add 320 to the bitmap address
         ; (move to the next pixel row)
         clc 
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         adc #< 320
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         adc #> 320
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
         dex 
         bne @_b3f7
 
@@ -3328,7 +3336,7 @@ _b410:                                                                  ;$B410
         sec 
 :       adc # $53               ;=83                                    ;$B448
         eor # %11111111
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
 
         lda ZP_POLYOBJ_YPOS_MI
         lsr 
@@ -3337,7 +3345,7 @@ _b410:                                                                  ;$B410
         bmi :+
         eor # %11111111
         sec 
-:       adc ZP_TEMP_ADDR1_LO                                            ;$B459
+:       adc ZP_TEMP_ADDR_LO                                             ;$B459
         cmp # $92
         bcs :+
         lda # $92
@@ -3347,7 +3355,7 @@ _b410:                                                                  ;$B410
 :       sta ZP_VAR_Y                                                    ;$B467
 
         sec 
-        sbc ZP_TEMP_ADDR1_LO
+        sbc ZP_TEMP_ADDR_LO
         php 
         pha 
         jsr _b0b0                       ; draw two multi-color pixels?
@@ -3363,17 +3371,17 @@ _b47f:                                                                  ;$B47F
         dey 
         bpl _b491
         ldy # $07
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         sec 
         sbc # $40
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         sbc # $01
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 _b491:                                                                  ;$B491
         lda ZP_VAR_X
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         dex 
         bne _b47f
 _b49a:                                                                  ;$B49A
@@ -3386,27 +3394,27 @@ _b49b:                                                                  ;$B49B
         cpy # $08
         bne _b4ae
         ldy # $00
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         adc #< (320-1)
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         adc #> (320-1)
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 _b4ae:                                                                  ;$B4AE
         iny 
         cpy # $08
         bne _b4c1
         ldy # $00
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         adc #< (320-1)
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         adc #> (320-1)
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 _b4c1:                                                                  ;$B4C1
         lda ZP_VAR_X
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
         inx 
         bne _b4ae
 

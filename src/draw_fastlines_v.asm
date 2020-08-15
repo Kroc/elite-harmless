@@ -10,7 +10,7 @@
         lda # 7                 ; __20
         sbc ZP_VLINE_YEND
         tay 
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         ora ZP_VLINE_YEND
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -20,10 +20,10 @@
 ; carry is and stays set
 ;
         sbc #< 320
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         sbc #> 320 
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
@@ -35,11 +35,11 @@
         lsr ZP_VLINE_BIT
         bcc @nx_sc
         ror ZP_VLINE_BIT
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         adc # 8
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         bcc @nx_sc
-        inc ZP_TEMP_ADDR1_HI
+        inc ZP_TEMP_ADDR_HI
 @nx_sc: sec 
 @nx_end:
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -53,11 +53,11 @@
         asl ZP_VLINE_BIT
         bcc @nx_sc
         rol ZP_VLINE_BIT
-        lda ZP_TEMP_ADDR1_LO                                            ;3
+        lda ZP_TEMP_ADDR_LO                                             ;3
         sbc # 7                                                         ;2
-        sta ZP_TEMP_ADDR1_LO                                            ;3
+        sta ZP_TEMP_ADDR_LO                                             ;3
         bcs @nx_end                                                     ;3/2
-        dec ZP_TEMP_ADDR1_HI                                            ;5
+        dec ZP_TEMP_ADDR_HI                                             ;5
 @nx_sc: sec
 @nx_end:
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -125,7 +125,7 @@ _vline_draw_set_slope:
         lda ZP_VAR_X1
         sax _vline_begin_bit+1
         and # %11111000         ; start xblock * 8
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
 
         lda ZP_VAR_Y2
         sax ZP_VLINE_YEND
@@ -160,11 +160,11 @@ _vline_yblock_end:
         clc 
         lda row_to_bitmap_lo, y
 _vline_zeroblocks_cont:
-        adc ZP_TEMP_ADDR1_LO    ; at the moment, x%8
-        sta ZP_TEMP_ADDR1_LO
+        adc ZP_TEMP_ADDR_LO     ; at the moment, x%8
+        sta ZP_TEMP_ADDR_LO
         lda row_to_bitmap_hi, y
         adc # 0
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
 _vline_begin_bit:
         ldx # 0
@@ -197,8 +197,8 @@ _vline_left_loop_nexty:
         ; blit pixel in BE
 _vline_left_loop:
         lda ZP_VLINE_BIT
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
 
         ; step counter:
         txa                 ; 2
@@ -208,7 +208,7 @@ _vline_left_slope:          ; AXS ignores carry for input, but sets it on out
 
         dey 
         bpl _vline_left_loop
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         ldy # 7
         dec ZP_LINE_BLOCKS
         beq _vline_left_lastblock
@@ -228,8 +228,8 @@ _vline_right_loop_nexty:
         ; blit pixel in BE
 _vline_right_loop:
         lda ZP_VLINE_BIT
-        eor [ZP_TEMP_ADDR1], y
-        sta [ZP_TEMP_ADDR1], y
+        eor [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR], y
 
         ; step counter:
         txa                 ; 2
@@ -239,7 +239,7 @@ _vline_right_slope:         ; AXS ignores carry for input, but sets it on out
 
         dey 
         bpl _vline_right_loop
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         ldy # 7 
         dec ZP_LINE_BLOCKS
         beq _vline_right_lastblock

@@ -315,7 +315,7 @@ _3e46:                                                                  ;$3E46
         lda # page::empty
         jsr set_page
 
-        jsr _9a86
+        jsr draw_ship           ; TODO: unusual here?
 
 tkn_docked_fn17:                                                        ;$3E57  
 ;===============================================================================

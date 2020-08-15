@@ -13,9 +13,9 @@ clear_screen:                                                           ;$B21A
         ; set starting position in top-left of the centred
         ; 32-char (256px) viewport Elite uses
         lda #< (ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ))
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda #> (ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ))
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         ldx # 24                        ; colour 24 rows
 
@@ -23,17 +23,17 @@ clear_screen:                                                           ;$B21A
         ldy # ELITE_VIEWPORT_COLS-1     ; 32 columns (0-31)
 
         ; colour one row
-:       sta [ZP_TEMP_ADDR1], y                                          ;$B228
+:       sta [ZP_TEMP_ADDR], y                                           ;$B228
         dey
         bpl :-
 
         ; move to the next row
-        lda ZP_TEMP_ADDR1_LO    ; get the row lo-address
+        lda ZP_TEMP_ADDR_LO     ; get the row lo-address
         clc
         adc # 40                ; add 40 chars (one screen row)
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         bcc :+                  ; remains under 255?
-        inc ZP_TEMP_ADDR1_HI    ; if not, increase the hi-address
+        inc ZP_TEMP_ADDR_HI     ; if not, increase the hi-address
 
 :       dex                     ; decrement remaining row count         ;$B238
         bne @row
@@ -58,7 +58,7 @@ clear_screen:                                                           ;$B21A
         ; erase the non-whole-page remainder
         ldy #< (ELITE_BITMAP_ADDR + erase_bytes_pages + erase_bytes_remain - 1)
         jsr erase_page_from
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
 
         ; set cursor position to row/col 2 on Elite's screen
         lda # 1
@@ -149,13 +149,13 @@ drawViewportBordersV:                                                   ;$B2B2
         stx ZP_C0
 
         ; the bitmap address for the start of
-        ; the line must be set in ZP_TEMP_ADDR1
+        ; the line must be set in ZP_TEMP_ADDR
         ;
         ; the viewport begins at the 4th column,
         ; so the border is drawn down the 3rd column
         ;
         ldy # 3 * 8             ; 3rd char in bitmap cells
-        sty ZP_TEMP_ADDR1_LO    ; set as the bitmap address lo-byte
+        sty ZP_TEMP_ADDR_LO     ; set as the bitmap address lo-byte
 
         ; this is the hi-byte of the bitmap address
         ; which is passed into the routine
@@ -165,7 +165,7 @@ drawViewportBordersV:                                                   ;$B2B2
         jsr drawViewportBorderV
 
         ldy #< (ELITE_BITMAP_ADDR + .bmppos( 0, 36 ))   ;=$4120
-        sty ZP_TEMP_ADDR1_LO
+        sty ZP_TEMP_ADDR_LO
 
         ldy #> (ELITE_BITMAP_ADDR + .bmppos( 0, 36 ))   ;=$4120
         lda # %11000000
@@ -198,28 +198,28 @@ drawViewportBorderV:                                                    ;$B2E1
 ; in:   A       pixel pattern to draw line, e.g. %00010000
 ;       X       length of line, in rows
 ;       Y       hi-byte of bitmap address to use as starting position
-;               (lo-byte must already be set in ZP_TEMP_ADDR1_LO)
+;               (lo-byte must already be set in ZP_TEMP_ADDR_LO)
 ;-------------------------------------------------------------------------------
         sta ZP_BE               ; put aside the pixel pattern to draw
-        sty ZP_TEMP_ADDR1_HI    ; set the starting bitmap address, hi-byte
+        sty ZP_TEMP_ADDR_HI     ; set the starting bitmap address, hi-byte
 
 @loop:                                                                  ;$B2E5
         ldy # 7                 ; 8 pixel rows per cell
 :       lda ZP_BE               ; retrieve pixel pattern to draw        ;$B2E7
-        eor [ZP_TEMP_ADDR1], y  ; mask out the existing pixels
-        sta [ZP_TEMP_ADDR1], y  ; apply the new pixels
+        eor [ZP_TEMP_ADDR], y   ; mask out the existing pixels
+        sta [ZP_TEMP_ADDR], y   ; apply the new pixels
         dey                     ; one less pixel row
         bpl :-                  ; any remain?
 
         ; add 320 to the bitmap address
         ; to move to the next row:
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         clc
         adc #< 320
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         adc #> 320
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         dex                     ; one less screen row
         bne @loop               ; any more?
@@ -264,9 +264,9 @@ _b301:                                                                  ;$B301
         hud_bmp = ELITE_BITMAP_ADDR + .bmppos( ELITE_HUD_TOP_ROW, 0 )   ;=$5680
 
         lda #< hud_bmp
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda #> hud_bmp
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
         jsr block_copy
 
         ldy # $c0               ; remainder bytes?
@@ -332,25 +332,25 @@ fill_sides:                                                             ;$B359
 
 @fill:  ;                                                               ;$B364
         ; put the given address in the zero-page
-        stx ZP_TEMP_ADDR1_LO
-        sty ZP_TEMP_ADDR1_HI
+        stx ZP_TEMP_ADDR_LO
+        sty ZP_TEMP_ADDR_HI
         ldx # 18                ; 17 rows
 @row:                                                                   ;$B36A
         ldy # (3 * 8) - 1       ; 3 chars, 24 bytes, 0-23
 
 :       lda # %11111111         ; set all bitmap bits                   ;$B36C
-        sta [ZP_TEMP_ADDR1], y  ; write to the bitmap
+        sta [ZP_TEMP_ADDR], y   ; write to the bitmap
         dey                     ; move to next byte
         bpl :-                  ; keep going until $00->$FF
 
         ; move to the next bitmap char-row
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         clc
         adc #< 320
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         adc #> 320
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         dex                     ; row complete
         bne @row                ; more rows to do? (exits at $00)
@@ -367,13 +367,13 @@ _b384:                                                                  ;$B384
         clc
 
 @loop:  lda row_to_bitmap_lo, x                                         ;$B389
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda row_to_bitmap_hi, x
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         tya
 
-:       sta [ZP_TEMP_ADDR1], y                                          ;$B394
+:       sta [ZP_TEMP_ADDR], y                                          ;$B394
         dey
         bne :-
 
@@ -396,7 +396,7 @@ erase_page:                                                             ;$B3A7
         ;       X = page-number, i.e. hi-address
         ;
         ldy # $00
-        sty ZP_TEMP_ADDR1_LO
+        sty ZP_TEMP_ADDR_LO
 
 erase_page_from:                                                        ;$B3AB
         ;=======================================================================
@@ -407,9 +407,9 @@ erase_page_from:                                                        ;$B3AB
         ;       Y = offset
         ;
         lda # $00
-        stx ZP_TEMP_ADDR1_HI
+        stx ZP_TEMP_ADDR_HI
 
-:       sta [ZP_TEMP_ADDR1], y                                          ;$B3AF
+:       sta [ZP_TEMP_ADDR], y                                           ;$B3AF
         dey
         bne :-
 
@@ -418,7 +418,7 @@ erase_page_from:                                                        ;$B3AB
 erase_page_to_end:                                                      ;$B3B5
         ;=======================================================================
         lda # $00
-:       sta [ZP_TEMP_ADDR1], y                                          ;$B3B7
+:       sta [ZP_TEMP_ADDR], y                                           ;$B3B7
         iny
         bne :-
 
@@ -438,7 +438,7 @@ block_copy:                                                             ;$B3C3
         ; by copying over a clean copy of the HUD in RAM.
         ;
         ; [ZP_TEMP_ADDR3] = from address
-        ; [ZP_TEMP_ADDR1] = to address
+        ; [ZP_TEMP_ADDR] = to address
         ;               X = number of pages to copy
         ;
         ; the copy method is replaced with a faster alternative
@@ -450,13 +450,13 @@ block_copy:                                                             ;$B3C3
 block_copy_from:                                                        ;$B3C5
         ;-----------------------------------------------------------------------
         lda [ZP_TEMP_ADDR3], y  ; read from
-        sta [ZP_TEMP_ADDR1], y  ; write to
+        sta [ZP_TEMP_ADDR], y   ; write to
         dey                     ; roll the byte-counter
        .bnz block_copy_from     ; keep going until it looped
 
         ; move to the next page
         inc ZP_TEMP_ADDR3_HI
-        inc ZP_TEMP_ADDR1_HI
+        inc ZP_TEMP_ADDR_HI
         dex                     ; one less page to copy
        .bnz block_copy_from     ; still pages to do?
 

@@ -260,10 +260,10 @@ paint_particle:                                                         ;$293A
         ; add this to the bitmap address for the given row
         clc 
         adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda row_to_bitmap_hi, y
         adc # 0
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         ; get the row within the character cell
         tya 
@@ -288,8 +288,8 @@ paint_particle:                                                         ;$293A
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         lda _28c8, x            ; get mask for desired pixel-position
-        eor [ZP_TEMP_ADDR1], y  ; mask against the existing pixels
-        sta [ZP_TEMP_ADDR1], y  ; paint the pixel to the bitmap
+        eor [ZP_TEMP_ADDR], y   ; mask against the existing pixels
+        sta [ZP_TEMP_ADDR], y   ; paint the pixel to the bitmap
         
         lda ZP_VAR_Z            ; again get the dust Z-distance
         cmp # 80                ; is the dust-particle >= 80 Z-distance?
@@ -303,8 +303,8 @@ paint_particle:                                                         ;$293A
         ; draw pixels for very distant dust:
         ;
 :       lda _28c8, x            ; get mask for desired pixel-position   ;$296D
-        eor [ZP_TEMP_ADDR1], y  ; mask the background
-        sta [ZP_TEMP_ADDR1], y  ; merge the pixel with the background
+        eor [ZP_TEMP_ADDR], y   ; mask the background
+        sta [ZP_TEMP_ADDR], y   ; merge the pixel with the background
 
 @done:  ldy ZP_TEMP_VAR         ; restore Y                             ;$2974
 _2976:  rts                                                             ;$2976
@@ -1457,7 +1457,7 @@ print_char:                                                             ;$2F24
 
         ; put X parameter aside,
         ; we need the X register for now
-        stx ZP_TEMP_ADDR1_LO
+        stx ZP_TEMP_ADDR_LO
 
         ; don't automatically upper-case letters?
         ; the upper-case mask is ANDed with the character, so a value
@@ -1483,7 +1483,7 @@ print_char:                                                             ;$2F24
 :       stx txt_ucase_flag                                              ;$24F0
 
         ; get back the original X value
-        ldx ZP_TEMP_ADDR1_LO
+        ldx ZP_TEMP_ADDR_LO
 
         ; check 'use buffer' flag
         bit txt_buffer_flag     ; check if bit 7 is set
@@ -1504,7 +1504,7 @@ print_char:                                                             ;$2F24
 :       ldx txt_buffer_index                                            ;$2F56
         sta TXT_BUFFER, x       ; add the character to the buffer
         
-        ldx ZP_TEMP_ADDR1_LO
+        ldx ZP_TEMP_ADDR_LO
         inc txt_buffer_index
 
         clc 
@@ -1549,15 +1549,15 @@ print_char:                                                             ;$2F24
         ; shifting it right once will ensure that the 'minus' check below will
         ; always fail, so $08 will be 'reset' to %01000000 for this routine
         ;
-        lsr ZP_TEMP_ADDR1_HI
+        lsr ZP_TEMP_ADDR_HI
 
 @justify_line:                                                          ;$2F72
         ;-----------------------------------------------------------------------
-        lda ZP_TEMP_ADDR1_HI    ; check the space-counter
+        lda ZP_TEMP_ADDR_HI     ; check the space-counter
         bmi :+                  
 
         lda # %01000000         ; reset space-counter
-        sta ZP_TEMP_ADDR1_HI    ; to its starting position
+        sta ZP_TEMP_ADDR_HI     ; to its starting position
 
         ; begin at the end of the line and walk backwards through it:
 :       ldy # 29                                                        ;$2F7A
@@ -1579,13 +1579,13 @@ print_char:                                                             ;$2F24
         bne @find_spc           ; not a space, keep going
         
         ; space found:
-        asl ZP_TEMP_ADDR1_HI    ; move the space-counter along
+        asl ZP_TEMP_ADDR_HI     ; move the space-counter along
         bmi @find_spc           ; if it's hit the end, we ignore this space
                                 ; and look for the next one
         
         ; remember the current position,
         ; i.e. where the space is
-        sty ZP_TEMP_ADDR1_LO
+        sty ZP_TEMP_ADDR_LO
 
         ; insert another space, pushing everything forward
         ; (increase the spacing between two words)
@@ -1593,7 +1593,7 @@ print_char:                                                             ;$2F24
 :       lda TXT_BUFFER, y                                               ;$2F98
         sta TXT_BUFFER+1, y
         dey 
-        cpy ZP_TEMP_ADDR1_LO
+        cpy ZP_TEMP_ADDR_LO
        .bge :-
 
         ; given the space we added, increase the text-buffer length by 1
@@ -1686,9 +1686,9 @@ _2ff3:                                                                  ;$2FF3
         dial_speed_addr = ELITE_BITMAP_ADDR + .bmppos( 18, 30 )
 
         lda #< dial_speed_addr
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda #> dial_speed_addr
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
         
         jsr _30bb               ; flashing?
         stx ZP_VALUE_pt2
@@ -1773,9 +1773,9 @@ _3068:                                                                  ;$3068
         dial_fore_addr = ELITE_BITMAP_ADDR + .bmppos( 18, 6 )
         
         lda #< dial_fore_addr
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda #> dial_fore_addr
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
         lda # .color_nybble(LTRED, LTRED)
         sta ZP_VALUE_pt1
         sta ZP_VALUE_pt2
@@ -1894,16 +1894,16 @@ _30e5:                                                                  ;$30E5
         lda ZP_VAR_R            ; mask
 _30f1:                                                                  ;$30F1
         and ZP_32
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
         tya 
         clc 
         adc # $06
         bcc :+
-        inc ZP_TEMP_ADDR1_HI
+        inc ZP_TEMP_ADDR_HI
 
 :       tay                                                             ;$3103
         dex 
@@ -1932,14 +1932,14 @@ _next_row:                                                              ;$3122
         ; move to the next row in the bitmap:
         ; -- i.e. add 320-px to the bitmap pointer
         ;
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         clc 
         adc #< 320
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
 
-        lda ZP_TEMP_ADDR1_HI
+        lda ZP_TEMP_ADDR_HI
         adc #> 320
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
         
         rts 
 
@@ -1970,13 +1970,13 @@ _3130:                                                                  ;$3130
         lda # $00
 @_314d:                                                                 ;$314D
         ; fill four pixel rows?
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
         iny 
-        sta [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR], y
         tya 
 
         ; move to the next cell?
@@ -1986,12 +1986,12 @@ _3130:                                                                  ;$3130
         cpy # $1e
         bcc @_3134
 
-        lda ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR_LO
         adc # $3f
-        sta ZP_TEMP_ADDR1_LO
-        lda ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR_HI
         adc # $01
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         rts 
 
@@ -2019,7 +2019,7 @@ eject_escapepod:                                                        ;$316E
         sta ZP_POLYOBJ_ATTACK
 _318a:                                                                  ;$318A
         jsr _a2a0
-        jsr _9a86
+        jsr draw_ship
 
         dec ZP_POLYOBJ_ATTACK
         bne _318a
@@ -2296,7 +2296,7 @@ _32ef:                                                                  ;$32EF
         ;-----------------------------------------------------------------------
 
 _330f:                                                                  ;$330F
-        ldy # Hull::energy      ;=$0E: energy
+        ldy # Hull::energy
         lda ZP_POLYOBJ_ENERGY
         cmp [ZP_HULL_ADDR], y
         bcs _3319
@@ -4090,7 +4090,7 @@ _3e01:                                                                  ;$3E01
         ldx # $7f
         stx ZP_POLYOBJ_ROLL
         stx ZP_POLYOBJ_PITCH
-        jsr _9a86
+        jsr draw_ship
         jsr _a2a0
         dec ZP_A3               ; move counter?
         bne _3e01
@@ -4110,7 +4110,7 @@ _3e11:                                                                  ;$3E11
         ldx # $50
 _3e24:                                                                  ;$3E24
         stx ZP_POLYOBJ_YPOS_LO
-        jsr _9a86
+        jsr draw_ship
         jsr _a2a0
         dec ZP_A3               ; move counter?
         jmp _3e11
@@ -4141,7 +4141,7 @@ _3e65:                                                                  ;$3E65
         lda # $02
         sta ZP_POLYOBJ_ZPOS_MI
         
-        jsr _9a86
+        jsr draw_ship
         jsr _a2a0
         
         jmp get_input

@@ -935,7 +935,7 @@ _21a3:                                                                  ;$21A3
         lda ZP_A5
         jsr _36c5               ; make hostile?
 _21a8:                                                                  ;$21A8
-        jsr _9a86               ; draw ship!
+        jsr draw_ship
 
 _21ab:                                                                  ;$21AB
         ldy # PolyObject::energy

@@ -248,13 +248,13 @@ _b384:
         clc
 
 @loop:  lda row_to_bitmap_lo, x
-        sta ZP_TEMP_ADDR1_LO
+        sta ZP_TEMP_ADDR_LO
         lda row_to_bitmap_hi, x
-        sta ZP_TEMP_ADDR1_HI
+        sta ZP_TEMP_ADDR_HI
 
         tya
 
-:       sta [ZP_TEMP_ADDR1], y
+:       sta [ZP_TEMP_ADDR], y
         dey
         bne :-
 
@@ -277,7 +277,7 @@ erase_page:
         ;       X = page-number, i.e. hi-address
         ;
         ldy # $00
-        sty ZP_TEMP_ADDR1_LO
+        sty ZP_TEMP_ADDR_LO
 
 erase_page_from:
         ;=======================================================================
@@ -288,9 +288,9 @@ erase_page_from:
         ;       Y = offset
         ;
         lda # $00
-        stx ZP_TEMP_ADDR1_HI
+        stx ZP_TEMP_ADDR_HI
 
-:       sta [ZP_TEMP_ADDR1], y
+:       sta [ZP_TEMP_ADDR], y
         dey
         bne :-
 
@@ -299,7 +299,7 @@ erase_page_from:
 erase_page_to_end:
         ;=======================================================================
         lda # $00
-:       sta [ZP_TEMP_ADDR1], y
+:       sta [ZP_TEMP_ADDR], y
         iny
         bne :-
 
