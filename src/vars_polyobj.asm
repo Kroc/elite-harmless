@@ -35,8 +35,8 @@
         m2x1            .word                                           ;+$17
         m2x2            .word                                           ;+$19
 
-        ; a pointer to already processed vertex data
-        vertexData      .addr                                           ;+$1B
+        speed           .byte                                           ;+$1B
+        acceleration    .byte                                           ;+$1C
 
         roll            .byte                                           ;+$1D
         pitch           .byte                                           ;+$1E
@@ -46,8 +46,9 @@
         ; attack state, see enum below
         attack          .byte                                           ;+$20
 
-        speed           .byte                                           ;+$21
-        acceleration    .byte                                           ;+$22
+        ; a pointer to already processed vertex data
+        vertexData      .addr                                           ;+$21
+        
         energy          .byte                                           ;+$23
 
         ; behaviour state, see enum below

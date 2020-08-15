@@ -1056,15 +1056,13 @@ _2230:                                                                  ;$2230
         ; $20-$21:      m2x1            .word
         ; $22-$23:      m2x2            .word
         ;
-        ; a pointer to already processed vertex data
+        ; $24:          speed           .byte
+        ; $25:          acceleration    .byte
         ;
-        ; $24-$25:      vertexData      .addr
-
         ; number of bytes to copy:
-        ; (up to, and including, the `vertexData` property)
-        ldx # PolyObject::vertexData + .sizeof(PolyObject::vertexData) - 1
+        ; (up to, and including, the `acceleration` property)
+        ldx # PolyObject::acceleration + .sizeof(PolyObject::acceleration)-1
 
-        ;?
 :       lda polyobj_00, x       ;=$F900                                 ;$2248
         sta ZP_POLYOBJ, x       ;=$09
         dex 

@@ -89,18 +89,18 @@ _9964:                                                                  ;$9964
 ; ".Shpt ; ship is point at screen center"
 ;
 ;-------------------------------------------------------------------------------
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         iny 
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         lda ZP_POLYOBJ01_XPOS_pt1
         dey 
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         adc # $03
         bcs _995b
         dey 
         dey 
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         rts 
 
 ;===============================================================================
@@ -296,19 +296,19 @@ _9a86:                                                                  ;$9A86
 
         ldy # $01
         lda # $12
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
 
         ldy # Hull::_07                  ;=$07: "explosion count"?
         lda [ZP_HULL_ADDR], y
 
         ldy # $02                       ;?
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
 
 ; ".EE55 ; counter Y, 4 rnd bytes to edge heap"
 _9abb:                                                                  ;$9ABB
         iny 
         jsr get_random_number
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         cpy # $06
         bne _9abb
 
@@ -1100,16 +1100,16 @@ _9f82:                                                                  ;$9F82
         bcs _9f9f
         ldy ZP_VAR_U
         lda ZP_VAR_X
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         lda ZP_VAR_Y
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         lda ZP_VAR_X2
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         lda ZP_VAR_Y2
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         sty ZP_VAR_U
 
@@ -1396,7 +1396,7 @@ _a13f:                                                                  ;$A13F
 ;===============================================================================
 ; BBC code says "Shove visible edge onto XX19 ship lines heap counter U"
 ;
-; in:   ZP_TEMP_ADDR2   address of heap
+; in:   ZP_POLYOBJ_HEAP address of heap
 ;       ZP_VAR_U        heap-index
 ;       ZP_VAR_X1       line-coord X1
 ;       ZP_VAR_X2       line-coord X2
@@ -1413,16 +1413,16 @@ _a13f:                                                                  ;$A13F
         ; one after the other, onto the heap
         ; 
         lda ZP_VAR_X1
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         lda ZP_VAR_Y1
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         lda ZP_VAR_X2
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         lda ZP_VAR_Y2
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         iny 
         sty ZP_VAR_U            ; update new index position
 
@@ -1451,10 +1451,10 @@ _a172:                                                                  ;$A172
         lda ZP_VAR_U            ; heap index?
 _a174:                                                                  ;$A174
         ldy # $00
-        sta [ZP_TEMP_ADDR2], y  ; store size of heap?
+        sta [ZP_POLYOBJ_HEAP], y
 _a178:                                                                  ;$A178
         ldy # $00
-        lda [ZP_TEMP_ADDR2], y  ; get size of heap?
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_AE               ; set this as number of points?
         cmp # 4                 ; 1-point only?
         bcc @rts                ; exit, not enough points for a line!
@@ -1464,16 +1464,16 @@ _a178:                                                                  ;$A178
 @draw:  ; draw a line from the line-heap:                               ;$A183
         ;-----------------------------------------------------------------------
         ; read line start and end co-ords from the heap
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_VAR_X1
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_VAR_Y1
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_VAR_X2
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_VAR_Y2
 
         ; TODO: do validation of line direction here so as to allow
@@ -1715,7 +1715,7 @@ _a2b8:  lda ZP_POLYOBJ_ATTACK   ; check current A.I. state              ;$A2B8
 _a2cb:                                                                  ;$A2CB
         jsr _b410
 
-        lda ZP_POLYOBJ_VERTX_LO
+        lda ZP_POLYOBJ_SPEED
         asl                     ; x2
         asl                     ; x4 (i.e. each vertex is 4 bytes)
         sta ZP_VAR_Q
@@ -1744,19 +1744,19 @@ _a2cb:                                                                  ;$A2CB
         lda ZP_POLYOBJ_M0x2_HI
         ldx # $06
         jsr .move_polyobj_x_small
-        lda ZP_POLYOBJ_VERTX_LO
+        lda ZP_POLYOBJ_SPEED
         clc 
-        adc ZP_POLYOBJ_VERTX_HI
+        adc ZP_POLYOBJ_ACCEL
         bpl :+
         lda # $00
 :       ldy # Hull::speed       ;=$0F                                   ;$A30D
         cmp [ZP_HULL_ADDR], y
         bcc :+
         lda [ZP_HULL_ADDR], y
-:       sta ZP_POLYOBJ_VERTX_LO                                         ;$A315
+:       sta ZP_POLYOBJ_SPEED                                            ;$A315
 
         lda # $00
-        sta ZP_POLYOBJ_VERTX_HI
+        sta ZP_POLYOBJ_ACCEL
 
         ldx ZP_ROLL_MAGNITUDE
 

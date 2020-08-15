@@ -2011,7 +2011,7 @@ eject_escapepod:                                                        ;$316E
         jsr _3680               ; NOTE: spawns ship-type in X
 
 :       lda # $08                                                       ;$317F
-        sta ZP_POLYOBJ_VERTX_LO
+        sta ZP_POLYOBJ_SPEED
         
         lda # %11000010
         sta ZP_POLYOBJ_PITCH
@@ -2314,7 +2314,7 @@ _3319:                                                                  ;$3319
         
         lsr ZP_POLYOBJ_ATTACK
         asl ZP_POLYOBJ_ATTACK
-        lsr ZP_POLYOBJ_VERTX_LO
+        lsr ZP_POLYOBJ_SPEED
 _3328:                                                                  ;$3328
         rts 
 
@@ -2490,7 +2490,7 @@ _33fd:                                                                  ;$33FD
         lda [ZP_HULL_ADDR], y
         lsr 
         jsr _7bd2
-        dec ZP_POLYOBJ_VERTX_HI
+        dec ZP_POLYOBJ_ACCEL
         lda ZP_67
         bne _3499
         ldy # $01
@@ -2558,8 +2558,8 @@ _348d:                                                                  ;$348D
         bmi _349a
         cmp ZP_AB
         bcc _349a
-        lda #> $0300            ; processed vertex data is stored at $0300+
-        sta ZP_POLYOBJ_VERTX_HI
+        lda #> $0300            ; TODO: ???
+        sta ZP_POLYOBJ_ACCEL
 _3499:                                                                  ;$3499
         rts 
 
@@ -2577,7 +2577,7 @@ _349a:                                                                  ;$349A
         
         asl 
 _34a9:                                                                  ;$34A9
-        sta ZP_POLYOBJ_VERTX_HI
+        sta ZP_POLYOBJ_ACCEL
 _34ab:                                                                  ;$34AB
         rts 
 
@@ -2642,9 +2642,9 @@ _3504:                                                                  ;$3504
         jsr _34ac
 _350a:                                                                  ;$350A
         ldx # $00
-        stx ZP_POLYOBJ_VERTX_HI
+        stx ZP_POLYOBJ_ACCEL
         inx 
-        stx ZP_POLYOBJ_VERTX_LO
+        stx ZP_POLYOBJ_SPEED
 
         rts 
 
@@ -2661,7 +2661,7 @@ _3512:                                                                  ;$3512
         ;-----------------------------------------------------------------------
 
 _3524:                                                                  ;$3524
-        inc ZP_POLYOBJ_VERTX_HI
+        inc ZP_POLYOBJ_ACCEL
         lda # $7f
         sta ZP_POLYOBJ_ROLL
         bne _3571
@@ -2919,7 +2919,7 @@ _3695:                                                                  ;$3695
 
         lda PLAYER_SPEED
         rol 
-        sta ZP_POLYOBJ_VERTX_LO
+        sta ZP_POLYOBJ_SPEED
         
         txa 
         jmp spawn_ship
@@ -3040,7 +3040,7 @@ _370a:                                                                  ;$370A
 
        .phx                     ; push X to stack (via A)
         lda # $20
-        sta ZP_POLYOBJ_VERTX_LO
+        sta ZP_POLYOBJ_SPEED
         ldx # $00
         lda ZP_POLYOBJ_M0x0_HI
         jsr _378c
@@ -3073,7 +3073,7 @@ _374d:                                                                  ;$374D
 
         txa 
         and # %00001111
-        sta ZP_POLYOBJ_VERTX_LO
+        sta ZP_POLYOBJ_SPEED
         lda # $ff
         ror 
         sta ZP_POLYOBJ_ROLL

@@ -2584,11 +2584,11 @@ _787d:                                                                  ;$787D
 _7885:                                                                  ;$7885
         sta ZP_VAR_Q
         ldy # $01
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta VAR_050D
         adc # $04
         bcs _785f
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         jsr divide_unsigned
         lda ZP_VAR_P1
         cmp # $1c
@@ -2604,7 +2604,7 @@ _78a1:                                                                  ;$78A1
         rol 
 _78aa:                                                                  ;$78AA
         dey 
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         lda ZP_POLYOBJ_STATE
         and # state::firing ^$FF        ;=%10111111
         sta ZP_POLYOBJ_STATE
@@ -2612,11 +2612,11 @@ _78aa:                                                                  ;$78AA
         beq _784e
 
         ldy # $02
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         tay 
 _78bc:                                                                  ;$78BC
         lda ZP_F9, y            ;???
-        sta [ZP_TEMP_ADDR2], y
+        sta [ZP_POLYOBJ_HEAP], y
         dey 
         cpy # $06
         bne _78bc
@@ -2636,10 +2636,10 @@ _78bc:                                                                  ;$78BC
 
 _78d6:                                                                  ;$78D6
         ldy # $00
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_VAR_Q
         iny
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         bpl _78e3
         eor # %11111111
 _78e3:                                                                  ;$78E3
@@ -2650,7 +2650,7 @@ _78e3:                                                                  ;$78E3
         ora # %00000001
         sta ZP_VAR_U
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_A8
         lda ZP_GOATSOUP_pt2     ;?
         pha 
@@ -2659,7 +2659,7 @@ _78f5:                                                                  ;$78F5
         ldx # $03
 _78f7:                                                                  ;$78F7
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _78f7
@@ -2667,7 +2667,7 @@ _78f7:                                                                  ;$78F7
         ldy # $02
 _7903:                                                                  ;$7903
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         eor ZP_AA
         sta $ffff, y                    ;!?
         cpy # $06
@@ -2811,10 +2811,10 @@ _79c0:                                                                  ;$79C0
         stx VAR_050E
         sty VAR_050F
         ldy # $00
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_VAR_Q
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         bpl _79d9
         eor # %11111111
 _79d9:                                                                  ;$79D9
@@ -2825,7 +2825,7 @@ _79d9:                                                                  ;$79D9
         ora # %00000001
         sta ZP_VAR_U
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_A8
         lda ZP_GOATSOUP_pt2
         pha 
@@ -2834,7 +2834,7 @@ _79eb:                                                                  ;$79EB
         ldx # $03
 _79ed:                                                                  ;$79ED
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _79ed
@@ -2872,7 +2872,7 @@ _7a36:                                                                  ;$7A36
         ldy # $02
 _7a38:                                                                  ;$7A38
         iny 
-        lda [ZP_TEMP_ADDR2], y
+        lda [ZP_POLYOBJ_HEAP], y
         eor ZP_AA
         sta $ffff, y            ;!?
         cpy # $06
@@ -3269,9 +3269,9 @@ _7c24:                                                                  ;$7C24
 _7c61:                                                                  ;$7C61
         ; scanlines for sun?
         lda #< CIRCLE_BUFFER
-        sta ZP_TEMP_ADDR2_LO
+        sta ZP_POLYOBJ_HEAP_LO
         lda #> CIRCLE_BUFFER
-        sta ZP_TEMP_ADDR2_HI
+        sta ZP_POLYOBJ_HEAP_HI
 
         ; select 'station' ship-type
         lda # HULL_COREOLIS
@@ -3326,21 +3326,21 @@ spawn_ship:                                                             ;$7C6B
         lda SHIP_LINES_LO       ; heap-pointer address, lo byte
         sec 
         sbc ZP_TEMP_VAR         ; subtract the bytes for the max. lines
-        sta ZP_TEMP_ADDR2_LO
+        sta ZP_POLYOBJ_HEAP_LO
         lda SHIP_LINES_HI       ; heap-pointer address, lo byte
         sbc # 0                 ; (ripple the carry)
-        sta ZP_TEMP_ADDR2_HI
+        sta ZP_POLYOBJ_HEAP_HI
 
         ; TODO: this assumes that the poly object structure selected is always
         ;       the highest numbered one, such that the heap could come as far
         ;       down as the end of the poly object structure -- this would not
         ;       be true if we were using a free slot between other used slots!
         ; 
-        lda ZP_TEMP_ADDR2_LO    ; bottom of the heap, lo-byte
+        lda ZP_POLYOBJ_HEAP_LO  ; bottom of the heap, lo-byte
         sbc ZP_POLYOBJ_ADDR_LO
         tay 
 
-        lda ZP_TEMP_ADDR2_HI    ; bottom of the heap, hi-byte
+        lda ZP_POLYOBJ_HEAP_HI  ; bottom of the heap, hi-byte
         sbc ZP_POLYOBJ_ADDR_HI
         bcc @rts                ; overflow? cannot allocate the ship!
         bne :+
@@ -3349,9 +3349,9 @@ spawn_ship:                                                             ;$7C6B
         bcc @rts
 
         ; move the heap pointer backwards to its new position
-:       lda ZP_TEMP_ADDR2_LO                                            ;$7CBA
+:       lda ZP_POLYOBJ_HEAP_LO                                            ;$7CBA
         sta SHIP_LINES_LO
-        lda ZP_TEMP_ADDR2_HI
+        lda ZP_POLYOBJ_HEAP_HI
         sta SHIP_LINES_HI
 
 _7cc4:                                                                  ;$7CC4
@@ -4806,7 +4806,7 @@ _832c:                                                                  ;$832C
         ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
 
-        ldy # PolyObject::speed ;=$21
+        ldy # PolyObject::vertexData
         clc 
         adc [ZP_POLYOBJ_ADDR], y
         sta ZP_VAR_P1
@@ -5108,7 +5108,7 @@ _84c3:                                                                  ;$84C3
         rol ZP_POLYOBJ_STATE
         and # %00011111
         ora # %00010000
-        sta ZP_POLYOBJ_VERTX_LO
+        sta ZP_POLYOBJ_SPEED
 
         jsr get_random_number
         bmi _84e2
@@ -5187,7 +5187,7 @@ _8501:                                                                  ;$8501
         bcs _8548
         and # %00011111
         ora # %00010000
-        sta ZP_POLYOBJ_VERTX_LO
+        sta ZP_POLYOBJ_SPEED
         bcc _854c
 _8548:                                                                  ;$8548
         ora # %01111111
@@ -5321,7 +5321,7 @@ _85f8:                                                                  ;$85F8
         bne _85a5
 
         lda # $12
-        sta ZP_POLYOBJ_VERTX_LO
+        sta ZP_POLYOBJ_SPEED
 
         ; perhaps this bit-pattern has an alternative meaning?
         lda # attack::target \
@@ -6911,9 +6911,9 @@ _8ee3:                                                                  ;$8EE3
         sta ZP_A5
 
         lda PLAYER_SPEED
-        sta ZP_POLYOBJ_VERTX_LO
+        sta ZP_POLYOBJ_SPEED
         jsr _34bc
-        lda ZP_POLYOBJ_VERTX_LO
+        lda ZP_POLYOBJ_SPEED
 _8f01:                                                                  ;$8F01
         cmp # $16
         bcc :+
@@ -6923,7 +6923,7 @@ _8f01:                                                                  ;$8F01
 
         lda # $ff
         ldx # $09
-        ldy ZP_POLYOBJ_VERTX_HI
+        ldy ZP_POLYOBJ_ACCEL
         beq _8f18
         bmi _8f15
 

@@ -94,9 +94,8 @@ ZP_POLYOBJ_M2x2         = $22
 ZP_POLYOBJ_M2x2_LO      = $22
 ZP_POLYOBJ_M2x2_HI      = $23
 
-ZP_POLYOBJ_VERTX        = $24   ; an address where vertex data is cached
-ZP_POLYOBJ_VERTX_LO     = $24
-ZP_POLYOBJ_VERTX_HI     = $25
+ZP_POLYOBJ_SPEED        = $24
+ZP_POLYOBJ_ACCEL        = $25
 
 ZP_POLYOBJ_ROLL         = $26
 ZP_POLYOBJ_PITCH        = $27
@@ -105,17 +104,12 @@ ZP_POLYOBJ_STATE        = $28
 
 ZP_POLYOBJ_ATTACK       = $29
 
-ZP_POLYOBJ_SPEED        = $2a
-ZP_POLYOBJ_ACCEL        = $2b
+ZP_POLYOBJ_HEAP         = $2a
+ZP_POLYOBJ_HEAP_LO      = $2a
+ZP_POLYOBJ_HEAP_HI      = $2b
+
 ZP_POLYOBJ_ENERGY       = $2c
-
 ZP_POLYOBJ_BEHAVIOUR    = $2d
-
-;-------------------------------------------------------------------------------
-
-ZP_TEMP_ADDR2           = $2a   ; another temporary address
-ZP_TEMP_ADDR2_LO        = $2a
-ZP_TEMP_ADDR2_HI        = $2b
 
 ;-------------------------------------------------------------------------------
 
