@@ -3412,11 +3412,11 @@ _7d03:                                                                  ;$7D03
         rts 
 
 
-_7d0c:                                                                  ;$7D0C
+untarget_missile:                                                       ;$7D0C
 ;===============================================================================
         ldx # $ff               ; clear missile target
 
-_7d0e:                                                                  ;$7D0E
+target_missile:                                                         ;$7D0E
 ;===============================================================================
 ; in:   X       missile target. is this a slot number?
 ;       Y       a pair of colour nybbles, as used on the bitmap screen,
@@ -4764,8 +4764,8 @@ _82f3:                                                                  ;$82F3
         cmp ZP_AD
         bne _8305
 
-        ldy # $57
-        jsr _7d0c
+        ldy # .color_nybble( GREEN, YELLOW )
+        jsr untarget_missile
 
         lda # $c8
         jsr _900d
@@ -4926,9 +4926,8 @@ _83ca:                                                                  ;$83CA
         bpl :-
 
 _83df:                                                                  ;$83DF
-;-------------------------------------------------------------------------------
-        ; clears SID registers?
-        jsr _923b
+;===============================================================================
+        jsr stop_sound          ; stop all sound playing
 
         lda PLAYER_EBOMB
         bpl _83ed
@@ -7436,8 +7435,10 @@ _9231:                                                                  ;$9231
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
-_923b:                                                                  ;$923B
-        ;-----------------------------------------------------------------------
+stop_sound:                                                             ;$923B
+;===============================================================================
+; stop SID chip?
+;-------------------------------------------------------------------------------
         bit _1d13               ; user option?
         bmi _91fd               ; `rts`
 
@@ -7464,25 +7465,22 @@ _9245:                                                                  ;$9245
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ; set flag to signal music is not currently playing
-        lda # $00
+        lda # $00               ; clear 'music playing' flag
         sta flag_music_playing
 
-        ; clear the SID registers
-        ; ($D400...$D418)
+        ; clear the SID registers ($D400...$D418)
         ldx # (SID_VOLUME_CTRL - SID_REGISTERS)
         ; interrupts must be disabled whilst we clear the SID registers as
         ; the interrupt routine ("code_interrupts.asm") writes to the SID
         ; if music is currently playing
         sei 
 
-:       sta SID_REGISTERS, x                                            ;$925A
-        dex 
-        bpl :-
+:       sta SID_REGISTERS, x    ; clear a SID register                  ;$925A
+        dex                     ; move to the next
+        bpl :-                  ; keep going?
 
-        ; set volume to maximum
-        lda # 15
-        sta SID_VOLUME_CTRL
+        lda # 15                ; set SID volume
+        sta SID_VOLUME_CTRL     ; (TODO: is 15 considered min or max?)
 
 .ifndef OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////

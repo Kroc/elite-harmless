@@ -2057,9 +2057,9 @@ _318a:                                                                  ;$318A
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _31be:                                                                  ;$31BE
-        lda # $46
+        lda # $46               ; default fuel qty
         sta PLAYER_FUEL
-        jmp _2101
+        jmp dock_ok             ; docking successful
 
 
 _31c6:                                                                  ;$31C6
@@ -2938,8 +2938,8 @@ _36a6:                                                                  ;$36A6
         lda SHIP_SLOTS, x
         jsr _36c5
 
-        ldy # $b7               ; a tile colour?
-        jsr _7d0c
+        ldy # .color_nybble( DKGREY, YELLOW )
+        jsr untarget_missile
         
         dec PLAYER_MISSILES
         

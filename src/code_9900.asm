@@ -259,35 +259,41 @@ _9a30:                                                                  ;$9A30
         bcc _9a30
         rts 
 
-;===============================================================================
-
 _9a83:                                                                  ;$9A83
         jmp _7d62
 
+
 _9a86:                                                                  ;$9A86
-        lda ZP_A5
-        bmi _9a83
+;===============================================================================
+; draw a ship?
+;-------------------------------------------------------------------------------
+        lda ZP_A5               ; ship type
+        bmi _9a83               ; sun or planet?
         
         lda # $1f
         sta ZP_AD
 
+        ; remove ship? (has to be erased from screen by redrawing over it)
         lda ZP_POLYOBJ_BEHAVIOUR
         bmi _9ad8
 
+        ; is it exploded?
         lda # state::debris
         bit ZP_POLYOBJ_STATE
         bne _9ac5
-        bpl _9ac5
+        bpl _9ac5               ; bit 7 clear, ship has not yet been removed?
 
         ora ZP_POLYOBJ_STATE
         and # (state::exploding | state::firing)^$FF    ;=%00111111
         sta ZP_POLYOBJ_STATE
+
         lda # $00
-        ldy # $1c
+        ldy # $1c               ; TODO: vertex pointer, hi-byte?
         sta [ZP_POLYOBJ_ADDR], y
-        ldy # $1e
+        ldy # $1e               ; TODO: pitch?
         sta [ZP_POLYOBJ_ADDR], y
         jsr _9ad8
+
         ldy # $01
         lda # $12
         sta [ZP_TEMP_ADDR2], y
@@ -1707,7 +1713,7 @@ _a2b8:  lda ZP_POLYOBJ_ATTACK   ; check current A.I. state              ;$A2B8
 :       jsr _32ad                                                       ;$A2C8
 
 _a2cb:                                                                  ;$A2CB
-        jsr _b410               ; draw stalk on scanner?
+        jsr _b410
 
         lda ZP_POLYOBJ_VERTX_LO
         asl                     ; x2

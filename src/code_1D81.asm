@@ -8,7 +8,8 @@
 ; I think this is when the player has docked,
 ; it checks for potential mission offers
 ;
-_1d81:                                                                  ;$1D81
+docked:                                                                 ;$1D81
+;===============================================================================
         jsr _83df
         jsr _379e
 
@@ -424,8 +425,9 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         and PLAYER_MISSILES     ; does the player have any missiles?
        .bze :+                  ; no? skip ahead
 
-        ldy # $57               ; green?
-        jsr _7d0c               ; unarm missile
+        ldy # .color_nybble( GREEN, YELLOW )
+        jsr untarget_missile
+
         ldy # $06
         jsr _a858               ; play sound?
 
@@ -488,7 +490,7 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         lda # $00               ; $00 = OFF
         sta DOCKCOM_STATE       ; turn docking computer off
 
-        jsr _923b               ; ?
+        jsr stop_sound          ; stop all sound playing
 
         ; activate escape pod?
         ;-----------------------------------------------------------------------
@@ -717,34 +719,35 @@ process_ship:                                                           ;$202F
         ora ZP_POLYOBJ_YPOS_MI
         ora ZP_POLYOBJ_ZPOS_MI
 .endif  ;///////////////////////////////////////////////////////////////////////
-        bne _20e0               
+        bne @20e0               
 
-        ; check the near distance
+        ; check the near distance(?)
         lda ZP_POLYOBJ_XPOS_LO
         ora ZP_POLYOBJ_YPOS_LO
         ora ZP_POLYOBJ_ZPOS_LO
-        bmi _20e0               ; TODO: too far, or is this about direction?
+        bmi @20e0               ; TODO: too far, or is this about direction?
 
         ldx ZP_A5               ; sun or planet?
-        bmi _20e0               ; yes, skip
+        bmi @20e0               ; yes, skip
 
         cpx # HULL_COREOLIS     ; space station?
-        beq _20e3               ; yes, skip
+        beq @20e3               ; yes, handle space-station behaviour
 
         and # %11000000
-        bne _20e0
+        bne @20e0
 
         cpx # HULL_MISSILE      ; is it a missile?
-        beq _20e0               ; yes, skip
+        beq @20e0               ; yes, skip
 
-        ;-----------------------------------------------------------------------
         lda VAR_04C2            ; have fuel scoop?
         and ZP_POLYOBJ_YPOS_HI  ; TODO: near sun(?)
         bpl _2122
 
         cpx # HULL_CANNISTER    ; is this a cargo cannister?
-        beq _20c0
+        beq @20c0
 
+        ; not a cargo cannister:
+        ;
         ; read scoop data from the hull
         ldy # Hull::scoop_debris
         lda [ZP_HULL_ADDR], y
@@ -758,92 +761,112 @@ process_ship:                                                           ;$202F
         ;       would need to be generated from HULL_* constants
         ;
         adc # $01               ; select type of cargo(?)
-        bne _20c5               ; (as determined by the hull data)
+        bne @20c5               ; (always branches)
 
-_20c0:  ; choose a random qty of cargo?                                 ;$20C0
-        jsr get_random_number
-        and # %00000111
-_20c5:                                                                  ;$20C5
-        jsr _6a00               ; count cargo?
-        ldy # $4e
-        bcs _2110
+        ; scooped cargo:
+        ;-----------------------------------------------------------------------
+@20c0:  jsr get_random_number   ; choose a random type of cargo         ;$20C0
+        and # %00000111         ; limit to 0-7
 
-        ldy VAR_04EF            ; item index?
-        adc VAR_CARGO, y
+@20c5:  jsr _6a00               ; count cargo?                          ;$20C5
+        ldy # $4e               ; TODO: ?
+        bcs _2110               ; cargo full
+
+        ldy VAR_04EF            ; type of cargo
+        adc VAR_CARGO, y        ; add to cargo
         sta VAR_CARGO, y
-        tya 
-        ; print the name of the cargo
+        tya
+
+        ; print the name of the cargo 
 .import TXT_FLIGHT_FOOD:direct
         adc # TXT_FLIGHT_FOOD
         jsr _900d
 
-        ; mark cannister for removal?
+        ; mark cannister for removal:
+        ; (set bit 7)
         asl ZP_POLYOBJ_BEHAVIOUR
         sec 
         ror ZP_POLYOBJ_BEHAVIOUR
-_20e0:                                                                  ;$20E0
-        jmp _2131
 
+@20e0:  jmp _2131                                                       ;$20E0
+
+        ; space-station:
         ;-----------------------------------------------------------------------
-_20e3:                                                                  ;$20E3
-        lda polyobj_01 + PolyObject::behaviour                         ;=$F949
-        and # behaviour::angry
-        bne _2107
+        ; is the station hostile?
+@20e3:  lda polyobj_01 + PolyObject::behaviour                          ;$20E3
+        and # behaviour::angry  ; check the angry flag
+        bne dock_fail
 
-        lda ZP_POLYOBJ_M0x2_HI
+        ; are we docking?
+        ;
+        lda ZP_POLYOBJ_M0x2_HI  ; check rotation of station?
         cmp # $d6
-        bcc _2107
-        jsr _8c7b
+        bcc dock_fail
+
+        jsr _8c7b               ; distance from planet?
         lda ZP_VAR_X2
         cmp # $59
-        bcc _2107
-        lda ZP_POLYOBJ_M1x0_HI
-        and # %01111111
+        bcc dock_fail
+
+        lda ZP_POLYOBJ_M1x0_HI  ; rotation of slot?
+        and # %01111111         ; (remove sign)
         cmp # $50
-        bcc _2107
-_2101:                                                                  ;$2101
-        jsr _923b
-        jmp _1d81
+        bcc dock_fail
 
+dock_ok:                                                                ;$2101
         ;-----------------------------------------------------------------------
-
-_2107:                                                                  ;$2107
-        lda PLAYER_SPEED
-        cmp # $05
-        bcc _211a
-        jmp _87d0
-
+        ; docking successful!
+        ; NOTE: escape capsule jumps here to return you to the station
+        ;
+        jsr stop_sound          ; stop all sound playing
+        jmp docked              ; handle docked screen
+        
+dock_fail:                                                              ;$2107
         ;-----------------------------------------------------------------------
+        ; docking fail!
+        ;
+        lda PLAYER_SPEED        ; check approach speed
+        cmp # $05               ; going slow?
+        bcc _211a               ; slow; take damage
+        jmp _87d0               ; fast; explode
 
 _2110:                                                                  ;$2110
+        ;-----------------------------------------------------------------------
         jsr _a813
 
-        ; set top-bit of ship state?
+        ; set top-bit of ship state? (is exploding)
         asl ZP_POLYOBJ_STATE
         sec 
         ror ZP_POLYOBJ_STATE
-        bne _2131
-_211a:                                                                  ;$211A
-        lda # $01
+        bne _2131               ; (always branhces)
+
+_211a:  ; player takes damage:                                          ;$211A
+        ;-----------------------------------------------------------------------
+        lda # $01               ; slow down
         sta PLAYER_SPEED
-        lda # $05
-        bne _212b
+        lda # $05               ; take '5' damage
+        bne _212b               ; (always branches)
+
 _2122:                                                                  ;$2122
+        ;-----------------------------------------------------------------------
+        ; set state bit 7 (is exploding)
         asl ZP_POLYOBJ_STATE
         sec 
         ror ZP_POLYOBJ_STATE
+        
         lda ZP_POLYOBJ_ENERGY
         sec 
         ror 
 _212b:                                                                  ;$212B
-        jsr _7bd2
-        jsr _a813
+        jsr _7bd2               ; take damage?
+        jsr _a813               ; sound?
 _2131:                                                                  ;$2131
+        ; should the ship be removed?
         lda ZP_POLYOBJ_BEHAVIOUR
-        bpl _2138
+        bpl :+
         jsr _b410
-_2138:                                                                  ;$2138
-        lda ZP_SCREEN           ; are we in the cockpit-view?
+
+:       lda ZP_SCREEN           ; are we in the cockpit-view?           ;$2138
        .bnz _21ab               ; no? skip ahead
 
         jsr _a626
@@ -851,45 +874,51 @@ _2138:                                                                  ;$2138
         bcc _21a8
 
         lda PLAYER_MISSILE_ARMED
-        beq _2153
+        beq :+
 
-        jsr _a80f
-        ldx ZP_9D
-        ldy # $27
-        jsr _7d0e
-_2153:                                                                  ;$2153
-        lda ZP_7B
-        beq _21a8
+        jsr _a80f               ; beep?
+        ldx ZP_9D               ; missile target?
+        ldy # .color_nybble( RED, YELLOW )
+        jsr target_missile
+
+:       lda ZP_7B               ; laser power?                          ;$2153
+        beq _21a8               ; no laser, skip onwards
+
         ldx # $0f
         jsr _a7e9
-        lda ZP_A5
-        cmp # $02
+
+        lda ZP_A5               ; things we've shot with laser?
+        cmp # HULL_COREOLIS
         beq _21a3
-        cmp # $1f
+        cmp # HULL_CONSTRICTOR
         bcc _2170
-        lda ZP_7B
+
+        lda ZP_7B               ; laser strength?
         cmp # $17
         bne _21a3
         lsr ZP_7B
         lsr ZP_7B
 _2170:                                                                  ;$2170
-        lda ZP_POLYOBJ_ENERGY
+        lda ZP_POLYOBJ_ENERGY   ; ship's energy-level
         sec 
         sbc ZP_7B
         bcs _21a1
 
+        ; explode the ship
         asl ZP_POLYOBJ_STATE
         sec 
         ror ZP_POLYOBJ_STATE
 
         lda ZP_A5
-        cmp # $07
+        cmp # HULL_ASTEROID
         bne _2192
-        lda ZP_7B
+
+        lda ZP_7B               ; mining laser?
         cmp # $32
         bne _2192
+
         jsr get_random_number
-        ldx # $08
+        ldx # HULL_SPLINTER     ; spawn a rock splinter
         and # %00000011
         jsr _2359
 _2192:                                                                  ;$2192
@@ -904,9 +933,10 @@ _21a1:                                                                  ;$21A1
         sta ZP_POLYOBJ_ENERGY
 _21a3:                                                                  ;$21A3
         lda ZP_A5
-        jsr _36c5
+        jsr _36c5               ; make hostile?
 _21a8:                                                                  ;$21A8
-        jsr _9a86
+        jsr _9a86               ; draw ship!
+
 _21ab:                                                                  ;$21AB
         ldy # PolyObject::energy
         lda ZP_POLYOBJ_ENERGY
