@@ -1673,35 +1673,33 @@ _a29d:                                                                  ;$A29D
 
 _a2a0:                                                                  ;$A2A0
 ;===============================================================================
-; process object? checks if A.I. needs running and appears to rotate and move
+; do_ship_ai? checks if A.I. needs running and appears to rotate and move
 ; the objcet
 ;
 ; in:   X       ship type (i.e. a `hull_pointers` index)
 ;
 ;-------------------------------------------------------------------------------
-        ; is the ship exploding? must be 'near'
-        ; (i.e. not a distant dot), and in exploding state
-        lda ZP_POLYOBJ_STATE
+        ; is the ship exploding?
+        lda ZP_POLYOBJ_STATE    ; check the ship's state flags
         and # state::exploding | state::debris
-       .bnz _a2cb
+       .bnz @a2cb
 
         ; handle explosion?
-
         lda ZP_A3               ; move counter?
         eor ZP_9D
         and # %00001111
-        bne _a2b1
+        bne :+
         jsr _9105
-_a2b1:                                                                  ;$A2B1
-        ldx ZP_A5
-        bpl _a2b8
+
+:       ldx ZP_A5                                                       ;$A2B1
+        bpl :+
         jmp _a53d
 
         ;-----------------------------------------------------------------------
         ; is the A.I. active?
         ;
-_a2b8:  lda ZP_POLYOBJ_ATTACK   ; check current A.I. state              ;$A2B8
-        bpl _a2cb               ; is bit 7 ("active") set?
+:       lda ZP_POLYOBJ_ATTACK   ; check current A.I. state              ;$A2B8
+        bpl @a2cb               ; is bit 7 ("active") set?
 
         cpx # HULL_MISSILE      ; is this a missile?
         beq :+                  ; missiles always run A.I. every frame
@@ -1713,17 +1711,17 @@ _a2b8:  lda ZP_POLYOBJ_ATTACK   ; check current A.I. state              ;$A2B8
         lda ZP_A3               ; move counter?
         eor ZP_9D
         and # %00000111         ; modulo 8
-        bne _a2cb
+        bne @a2cb               ; skip every 7 out of 8 frames
 
         ; handle A.I.
 :       jsr _32ad                                                       ;$A2C8
 
-_a2cb:                                                                  ;$A2CB
+@a2cb:                                                                  ;$A2CB
         jsr _b410
 
         lda ZP_POLYOBJ_SPEED
-        asl                     ; x2
-        asl                     ; x4 (i.e. each vertex is 4 bytes)
+        asl 
+        asl 
         sta ZP_VAR_Q
 
         lda ZP_POLYOBJ_M0x0_HI
@@ -1873,7 +1871,7 @@ _a3bf:                                                                  ;$A3BF
         rts 
 
         ;-----------------------------------------------------------------------
-        ; apply the roll & pitch rotation to the poly-object's compound matrix.
+        ; apply the roll & pitch rotation to the poly-object's compound matrix:
         ; this creates a single matrix that can apply both roll & pitch to the
         ; verticies in one operation, i.e. we do not have to calculate roll &
         ; pitch separately for each vertex point in the shape
@@ -2177,9 +2175,10 @@ _a60e:                                                                  ;$A60E
 _a626:                                                                  ;$A626
 ;===============================================================================
         ldx COCKPIT_VIEW
-        beq _a65e
+        beq @rts
         dex 
-        bne _a65f
+        bne @a65f
+
         ; adjust for rear view: invert sign of X,Z. Up stays up, so Y is ok.
         lda ZP_POLYOBJ_XPOS_HI
         eor # %10000000
@@ -2205,15 +2204,16 @@ _a626:                                                                  ;$A626
         lda ZP_POLYOBJ_M2x2_HI
         eor # %10000000
         sta ZP_POLYOBJ_M2x2_HI
-_a65e:                                                                  ;$A65E
+
         ; adjust for front view: this is the default view, all is ok.
-        rts 
+@rts:   rts                                                             ;$A65E
 
+
+@a65f:                                                                  ;$A65F
         ;-----------------------------------------------------------------------
-
-_a65f:                                                                  ;$A65F
         ; adjust for side view: swap Z and X, invert according to B0
         ; B0 is set when view is RIGHT (see)
+        ;
         lda # $00
         cpx # $02               ; X is COCKPIT_VIEW-1, so this checks for RIGHT
         ror 
@@ -2236,12 +2236,12 @@ _a65f:                                                                  ;$A65F
         sta ZP_POLYOBJ_XPOS_HI
         stx ZP_POLYOBJ_ZPOS_HI
         ldy # $09
-        jsr _a693
+        jsr :+
         ldy # $0f
-        jsr _a693
+        jsr :+
         ldy # $15
-_a693:                                                                  ;$A693
-        lda ZP_POLYOBJ_XPOS_LO, y
+
+:       lda ZP_POLYOBJ_XPOS_LO, y                                       ;$A693
         ldx ZP_POLYOBJ_YPOS_MI, y
         sta ZP_POLYOBJ_YPOS_MI, y
         stx ZP_POLYOBJ_XPOS_LO, y
@@ -2252,8 +2252,8 @@ _a693:                                                                  ;$A693
         eor ZP_B1
         sta ZP_POLYOBJ_XPOS_MI, y
         stx ZP_POLYOBJ_YPOS_HI, y
-_a6ad:                                                                  ;$A6AD
-        rts 
+
+_a6ad:  rts                                                             ;$A6AD
 
 
 _a6ae:                                                                  ;$A6AE
@@ -2435,7 +2435,7 @@ _set_page:                                                              ;$A731
         jsr clear_screen
 
         ; display hyperspace countdown in the menu screens?
-
+        ;
         ldx ZP_66               ; hyperspace countdown (outer)?
         beq _a75d
 
@@ -2506,19 +2506,19 @@ _a7a6:                                                                  ;$A7A6
 ;===============================================================================
 ; kill a PolyObject?
 ;-------------------------------------------------------------------------------
-        lda VAR_04CB
+        lda PLAYER_KILLS_FRAC
         clc 
-        adc hull_kill_lo - 1, x
-        sta VAR_04CB
+        adc hull_kill_lo-1, x
+        sta PLAYER_KILLS_FRAC
 
         ; add fractional kill value?
-        lda VAR_04E0
-        adc hull_kill_hi - 1, x
-        sta VAR_04E0
+        lda PLAYER_KILLS_LO
+        adc hull_kill_hi-1, x
+        sta PLAYER_KILLS_LO
 
         bcc _a7c3               ; < 1.0
 
-        inc PLAYER_KILLS        ; +1
+        inc PLAYER_KILLS_HI     ; +1
 
         lda # $65
         jsr _900d

@@ -884,11 +884,11 @@ _2cc7:                                                                  ;$2CC7
         lda # TXT_FLIGHT_RATING
         jsr print_flight_token_and_space
 
-        lda PLAYER_KILLS        ; number of kills
+        lda PLAYER_KILLS_HI     ; number of kills
        .bnz _2c88               ; >0, skip ahead
         
         tax 
-        lda VAR_04E0
+        lda PLAYER_KILLS_LO
         lsr 
         lsr 
 _2cea:                                                                  ;$2CEA
@@ -917,7 +917,7 @@ _2cee:                                                                  ;$2CEE
         jsr print_flight_token_and_newline_and_indent
 
 _2d04:                                                                  ;$2D04
-        lda VAR_04C2
+        lda PLAYER_SCOOP
         beq _2d0e
 .import TXT_FLIGHT_FUEL_SCOOPS:direct
         lda # TXT_FLIGHT_FUEL_SCOOPS
@@ -2018,7 +2018,7 @@ eject_escapepod:                                                        ;$316E
         lsr 
         sta ZP_POLYOBJ_ATTACK
 _318a:                                                                  ;$318A
-        jsr _a2a0
+        jsr _a2a0               ; move ship?
         jsr draw_ship
 
         dec ZP_POLYOBJ_ATTACK
@@ -4008,7 +4008,7 @@ mission_blueprints_birera:                                              ;$3D9B
         lda # 2
         sta VAR_04C4            ; energy charge rate?
 
-        inc PLAYER_KILLS
+        inc PLAYER_KILLS_HI
         
         ; print mission text
 .import MSG_DOCKED_DF:direct
@@ -4091,7 +4091,7 @@ _3e01:                                                                  ;$3E01
         stx ZP_POLYOBJ_ROLL
         stx ZP_POLYOBJ_PITCH
         jsr draw_ship
-        jsr _a2a0
+        jsr _a2a0               ; move ship?
         dec ZP_A3               ; move counter?
         bne _3e01
 _3e11:                                                                  ;$3E11
@@ -4111,7 +4111,7 @@ _3e11:                                                                  ;$3E11
 _3e24:                                                                  ;$3E24
         stx ZP_POLYOBJ_YPOS_LO
         jsr draw_ship
-        jsr _a2a0
+        jsr _a2a0               ; move ship?
         dec ZP_A3               ; move counter?
         jmp _3e11
 _3e31:                                                                  ;$3E31
@@ -4142,7 +4142,7 @@ _3e65:                                                                  ;$3E65
         sta ZP_POLYOBJ_ZPOS_MI
         
         jsr draw_ship
-        jsr _a2a0
+        jsr _a2a0               ; move ship?
         
         jmp get_input
 

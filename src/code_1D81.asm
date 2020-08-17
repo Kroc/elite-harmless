@@ -46,7 +46,7 @@ docked:                                                                 ;$1D81
         and # missions::constrictor
        .bnz :+                  ; mission is underway/complete, ignore it
 
-        lda PLAYER_KILLS
+        lda PLAYER_KILLS_HI
         beq @skip               ; ignore mission if kills less than 256
 
         ; is the player in the first galaxy?
@@ -86,7 +86,7 @@ docked:                                                                 ;$1D81
         bne :+
 
         ; has the player at least 1280 kills? (halfway to Deadly)
-        lda PLAYER_KILLS
+        lda PLAYER_KILLS_HI
         cmp #> 1280
        .blt @skip               ; no; skip ahead if not enough
 
@@ -739,7 +739,7 @@ process_ship:                                                           ;$202F
         cpx # HULL_MISSILE      ; is it a missile?
         beq @20e0               ; yes, skip
 
-        lda VAR_04C2            ; have fuel scoop?
+        lda PLAYER_SCOOP        ; have fuel scoop?
         and ZP_POLYOBJ_YPOS_HI  ; TODO: near sun(?)
         bpl _2122
 
@@ -1200,7 +1200,7 @@ _22c2:                                                                  ;$22C2
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _2303:                                                                  ;$2303
-        lda VAR_04C2
+        lda PLAYER_SCOOP
         beq _231c
 
         lda ZP_SPEED_HI

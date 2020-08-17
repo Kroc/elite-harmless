@@ -127,7 +127,8 @@ PLAYER_TRUMBLES_HI      = $04ca
 TRUMBLES_ONSCREEN       = $0510 ; number of Trumbles™ on-screen; up to 6
 
 ; the amount each Trumble™ moves X / Y
-
+; (these are interleaved)
+;
 TRUMBLES_MOVE_X         = $0511
 TRUMBLES_MOVE_Y         = $0512
 
@@ -223,16 +224,16 @@ VAR_CARGO_PLATINUM      = $04be ; platinum
 VAR_CARGO_GEMS          = $04bf ; gem-stones
 VAR_CARGO_ALIENS        = $04c0 ; alien items
 
-PLAYER_ECM              = $04c1 ; player has an E.C.M.?
+;-------------------------------------------------------------------------------
 
-VAR_04C2                = $04c2 ;?
-
+PLAYER_ECM              = $04c1 ; flag, player has an E.C.M.
+PLAYER_SCOOP            = $04c2 ; flag, player has a fuel scoop
 PLAYER_EBOMB            = $04c3 ; player has energy bomb?
 PLAYER_DOCKCOM          = $04c5 ; player has a docking computer?
 PLAYER_GDRIVE           = $04c6 ; player has a galactic hyper-drive?
 PLAYER_ESCAPEPOD        = $04c7 ; player has an escape pod?
 
-VAR_04CB                = $04cb ;?
+PLAYER_KILLS_FRAC       = $04cb ; kill total, fractional part
 
 PLAYER_MISSILES         = $04cc ; number of missiles the player has
 PLAYER_MISSILE_ARMED    = $0485 ; armed state of missile
@@ -261,10 +262,12 @@ VAR_MARKET_PLATINUM     = $04dc ; quantity of platinum on sale
 VAR_MARKET_GEMS         = $04dd ; quantity of gem-stones on sale
 VAR_MARKET_ALIENS       = $04de ; quantity of alien items on sale
 
-VAR_04DF                = $04df ;?
+VAR_MARKET_RANDOM       = $04df ; the random variance added to market prices
 
-VAR_04E0                = $04e0 ; number of kills (lo byte?)
-PLAYER_KILLS            = $04e1 ; number of kills (hi byte?)
+;-------------------------------------------------------------------------------
+
+PLAYER_KILLS_LO         = $04e0 ; number of kills (lo byte?)
+PLAYER_KILLS_HI         = $04e1 ; number of kills (hi byte?)
 
 VAR_04E2                = $04e2 ;?
 
@@ -283,8 +286,8 @@ CABIN_HEAT              = $0483 ; cabin temperature
 SHIP_LINES_LO           = $04f2 ; ship lines pointer lo-byte
 SHIP_LINES_HI           = $04f3 ; ship lines pointer hi-byte
 
-VAR_04F4                = $04f4 ;? (indexed by X)
-VAR_04FA                = $04fa ;? (indexed by X)
+VAR_04F4                = $04f4 ; temp copy of seed? (indexed by X)
+VAR_04FA                = $04fa ; temp copy of seed? (indexed by X)
 
 ;-------------------------------------------------------------------------------
 
@@ -304,18 +307,16 @@ TSYSTEM_POS             = $0509
 TSYSTEM_POS_X           = $0509
 TSYSTEM_POS_Y           = $050a
 
-VAR_050C                = $050c ;?
+VAR_050C                = $050c ; char colour?
 VAR_050D                = $050d ;?
 VAR_050E                = $050e ;?
 VAR_050F                = $050f ;?
 
-; present system:
-PSYSTEM_ECONOMY         = $04ee
+PSYSTEM_ECONOMY         = $04ee ; present system economy size
 
-VAR_04EC                = $04ec
-VAR_04ED                = $04ed
-
-VAR_04EF                = $04ef
+VAR_04EC                = $04ec ; used with market prices
+VAR_04ED                = $04ed ; quantity of item
+VAR_04EF                = $04ef ; type of item
 
 PSYSTEM_GOVERNMENT      = $04f0
 PSYSTEM_TECHLEVEL       = $04f1
@@ -323,7 +324,7 @@ PSYSTEM_POS             = $049a
 PSYSTEM_POS_X           = $049a
 PSYSTEM_POS_Y           = $049b
 
-VAR_049C                = $049c ;? (indexed by X)
+VAR_049C                = $049c ; another seed copy (indexed by X)
 
 ;-------------------------------------------------------------------------------
 ; NOTE: there are up-to 13 dust-particles at a time

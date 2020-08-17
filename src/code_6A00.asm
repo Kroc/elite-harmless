@@ -1726,7 +1726,7 @@ _7246:                                                                  ;$7246
         ldx ZP_8E
         lda _90a6, x
         sta ZP_8F
-        lda VAR_04DF
+        lda VAR_MARKET_RANDOM
         and _90a8, x
         clc 
         adc _90a5, x
@@ -1877,7 +1877,7 @@ _7337:                                                                  ;$7337
         sta PSYSTEM_GOVERNMENT
 
         jsr get_random_number
-        sta VAR_04DF
+        sta VAR_MARKET_RANDOM
 
         ldx # $00
         stx ZP_AD
@@ -1886,7 +1886,7 @@ _7365:                                                                  ;$7365
         sta ZP_8F
         jsr _731a
         lda _90a8, x
-        and VAR_04DF
+        and VAR_MARKET_RANDOM
         clc 
         adc _90a7, x
         ldy ZP_8F
@@ -2249,7 +2249,7 @@ _7596:                                                                  ;$7596
         ldy # TXT_FLIGHT_FUEL_SCOOPS
         cmp # $06
         bne _75bc
-        ldx VAR_04C2
+        ldx PLAYER_SCOOP
         beq _75b9
 _75a1:                                                                  ;$75A1
         sty ZP_VALUE_pt1        ; (being used as a temp value)
@@ -2268,7 +2268,7 @@ _75b3:                                                                  ;$75B3
 
 _75b9:                                                                  ;$75B9
 ;===============================================================================
-        dec VAR_04C2
+        dec PLAYER_SCOOP
 _75bc:                                                                  ;$75BC
         iny 
         cmp # $07
@@ -4787,7 +4787,7 @@ _8305:                                                                  ;$8305
         ora # missions::constrictor_complete
         sta MISSION_FLAGS
 
-        inc PLAYER_KILLS
+        inc PLAYER_KILLS_HI
 
 _831d:                                                                  ;$831D
         cpx # $0f               ; is asteroid?
@@ -6089,7 +6089,7 @@ _8920:                                                                  ;$8920
         cmp # $01
         beq :+
         dec ZP_POLYOBJ_ZPOS_MI
-:       jsr _a2a0                                                       ;$89C6
+:       jsr _a2a0               ; move ship?                            ;$89C6
 
         ldx VAR_06FB            ; title screen poly-object z-distance?
         stx ZP_POLYOBJ_ZPOS_LO
@@ -6394,7 +6394,7 @@ _8ae7:                                                                  ;$8AE7
         eor PLAYER_CASH_pt3     ;?
         sta ZP_VALUE_pt2
         eor # %01011010
-        eor PLAYER_KILLS
+        eor PLAYER_KILLS_HI
         sta ZP_VALUE_pt4
         clc 
         jsr print_large_value
