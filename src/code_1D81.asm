@@ -718,9 +718,9 @@ process_ship:                                                           ;$202F
         ;///////////////////////////////////////////////////////////////////////
         jsr _87b1               ; combine check with medium distance
 .else   ;///////////////////////////////////////////////////////////////////////
-        ora ZP_POLYOBJ_XPOS_MI  ; there's really no need for a JSR for this
-        ora ZP_POLYOBJ_YPOS_MI
-        ora ZP_POLYOBJ_ZPOS_MI
+        ora ZP_POLYOBJ_XPOS_HI  ; there's really no need for a JSR for this
+        ora ZP_POLYOBJ_YPOS_HI
+        ora ZP_POLYOBJ_ZPOS_HI
 .endif  ;///////////////////////////////////////////////////////////////////////
         bne @20e0               
 
@@ -743,7 +743,7 @@ process_ship:                                                           ;$202F
         beq @20e0               ; yes, skip
 
         lda PLAYER_SCOOP        ; have fuel scoop?
-        and ZP_POLYOBJ_YPOS_HI  ; TODO: near sun(?)
+        and ZP_POLYOBJ_YPOS_SIGN; TODO: near sun(?)
         bpl _2122
 
         cpx # HULL_CANNISTER    ; is this a cargo cannister?

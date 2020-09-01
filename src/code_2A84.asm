@@ -741,19 +741,19 @@ _2c2d:                                                                  ;$2C2D
         lda ZP_POLYOBJ_XPOS_LO, y
         asl 
         sta ZP_VALUE_pt2
-        lda ZP_POLYOBJ_XPOS_MI, y
+        lda ZP_POLYOBJ_XPOS_HI, y
         rol 
         sta ZP_VALUE_pt3
         lda # $00
         ror 
         sta ZP_VALUE_pt4
         jsr _2d69
-        sta ZP_POLYOBJ_XPOS_HI, x
+        sta ZP_POLYOBJ_XPOS_SIGN, x
 _2c43:                                                                  ;$2C43
         ldy ZP_VALUE_pt2
         sty ZP_POLYOBJ_XPOS_LO, x
         ldy ZP_VALUE_pt3
-        sty ZP_POLYOBJ_XPOS_MI, x
+        sty ZP_POLYOBJ_XPOS_HI, x
         and # %01111111
         rts 
 
@@ -993,17 +993,17 @@ _2d69:                                                                  ;$2D69
         sta ZP_VAR_S
         and # %10000000
         sta ZP_VAR_T
-        eor ZP_POLYOBJ_XPOS_HI, x
+        eor ZP_POLYOBJ_XPOS_SIGN, x
         bmi _2d8d
         lda ZP_VALUE_pt2
         clc 
         adc ZP_POLYOBJ_XPOS_LO, x
         sta ZP_VALUE_pt2
         lda ZP_VALUE_pt3
-        adc ZP_POLYOBJ_XPOS_MI, x
+        adc ZP_POLYOBJ_XPOS_HI, x
         sta ZP_VALUE_pt3
         lda ZP_VALUE_pt4
-        adc ZP_POLYOBJ_XPOS_HI, x
+        adc ZP_POLYOBJ_XPOS_SIGN, x
         and # %01111111
         ora ZP_VAR_T
         sta ZP_VALUE_pt4
@@ -1019,10 +1019,10 @@ _2d8d:                                                                  ;$2D8D
         sec 
         sbc ZP_VALUE_pt2
         sta ZP_VALUE_pt2
-        lda ZP_POLYOBJ_XPOS_MI, x
+        lda ZP_POLYOBJ_XPOS_HI, x
         sbc ZP_VALUE_pt3
         sta ZP_VALUE_pt3
-        lda ZP_POLYOBJ_XPOS_HI, x
+        lda ZP_POLYOBJ_XPOS_SIGN, x
         and # %01111111
         sbc ZP_VAR_S
         ora # %10000000
@@ -2070,12 +2070,12 @@ _31d5:                                                                  ;$31D5
         jsr _76e9
 
         ldx txt_buffer_index
-        lda ZP_POLYOBJ_YPOS_HI, x       ;=$0E?
+        lda ZP_POLYOBJ_YPOS_SIGN, x
         cmp # $0d
         bne _31f1
 _31e4:                                                                  ;$31E4
         dex 
-        lda ZP_POLYOBJ_YPOS_HI, x       ;=$0E?
+        lda ZP_POLYOBJ_YPOS_SIGN, x
         ora # %00100000
         cmp TXT_BUFFER, x
         beq _31e4
@@ -2495,11 +2495,11 @@ _33fd:                                                                  ;$33FD
         ;-----------------------------------------------------------------------
 
 _3434:                                                                  ;$3434
-        lda ZP_POLYOBJ_ZPOS_MI  ;=$10
+        lda ZP_POLYOBJ_ZPOS_HI  ;=$10
         cmp # $03
         bcs _3442
-        lda ZP_POLYOBJ_XPOS_MI  ;=$0A
-        ora ZP_POLYOBJ_YPOS_MI  ;=$0D
+        lda ZP_POLYOBJ_XPOS_HI  ;=$0A
+        ora ZP_POLYOBJ_YPOS_HI  ;=$0D
         and # %11111110
         beq _3454
 _3442:                                                                  ;$3442
@@ -2837,7 +2837,7 @@ _3617:                                                                  ;$3617
 _363f:                                                                  ;$363F
 ;===============================================================================
         clc 
-        lda ZP_POLYOBJ_ZPOS_HI
+        lda ZP_POLYOBJ_ZPOS_SIGN
         bne _367d
 
         lda ZP_A5
@@ -2845,8 +2845,8 @@ _363f:                                                                  ;$363F
         
         lda ZP_POLYOBJ_STATE
         and # state::debris
-        ora ZP_POLYOBJ_XPOS_MI
-        ora ZP_POLYOBJ_YPOS_MI
+        ora ZP_POLYOBJ_XPOS_HI
+        ora ZP_POLYOBJ_YPOS_HI
         bne _367d
         
         lda ZP_POLYOBJ_XPOS_LO
@@ -2895,7 +2895,7 @@ _3680:                                                                  ;$3680
         lsr 
         sta ZP_POLYOBJ_ZPOS_LO
         lda # $80
-        sta ZP_POLYOBJ_YPOS_HI
+        sta ZP_POLYOBJ_YPOS_SIGN
         
         lda ZP_MISSILE_TARGET
         asl 
@@ -3544,13 +3544,13 @@ _3ab2:                                                                  ;$3AB2
         stx ZP_VAR_Q
         lda ZP_VAR_X
         jsr multiply_signed_into_RS
-        ldx ZP_POLYOBJ_XPOS_HI, y
+        ldx ZP_POLYOBJ_XPOS_SIGN, y
         stx ZP_VAR_Q
         lda ZP_VAR_Y
         jsr multiply_and_add
         sta ZP_VAR_S
         stx ZP_VAR_R
-        ldx ZP_POLYOBJ_YPOS_MI, y
+        ldx ZP_POLYOBJ_YPOS_HI, y
         stx ZP_VAR_Q
         lda ZP_VAR_X2
 
@@ -3610,9 +3610,9 @@ _3bc1:                                                                  ;$3BC1
         lda ZP_POLYOBJ_ZPOS_LO
         ora # %00000001
         sta ZP_VAR_Q
-        lda ZP_POLYOBJ_ZPOS_MI
-        sta ZP_VAR_R
         lda ZP_POLYOBJ_ZPOS_HI
+        sta ZP_VAR_R
+        lda ZP_POLYOBJ_ZPOS_SIGN
         sta ZP_VAR_S
         lda ZP_VAR_P1
         ora # %00000001
@@ -4076,7 +4076,7 @@ _3dff:                                                                  ;$3DFF
 
         lda # 1                 ;=page::empty
         jsr set_cursor_col
-        sta ZP_POLYOBJ_ZPOS_MI
+        sta ZP_POLYOBJ_ZPOS_HI
         jsr set_page            ; switch to an empty menu page
 
         lda # $40
@@ -4110,7 +4110,7 @@ _3e24:                                                                  ;$3E24
         dec ZP_A3               ; move counter?
         jmp _3e11
 _3e31:                                                                  ;$3E31
-        inc ZP_POLYOBJ_ZPOS_MI
+        inc ZP_POLYOBJ_ZPOS_HI
 
         ; print mission text
 .import MSG_DOCKED_0A:direct
@@ -4134,7 +4134,7 @@ _3e65:                                                                  ;$3E65
         sta ZP_POLYOBJ_ZPOS_LO
         
         lda # $02
-        sta ZP_POLYOBJ_ZPOS_MI
+        sta ZP_POLYOBJ_ZPOS_HI
         
         jsr draw_ship
         jsr _a2a0               ; move ship?

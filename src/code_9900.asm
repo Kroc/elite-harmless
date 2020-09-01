@@ -317,7 +317,7 @@ draw_ship:                                                              ;$9A86
 
         ; ".EE28 ; bit5 set do explosion, or bit7 clear, dont kill"
 @9ac5:                                                                  ;$9AC5
-        lda ZP_POLYOBJ_ZPOS_HI
+        lda ZP_POLYOBJ_ZPOS_SIGN
         ; ".EE49 ; In view?"
         bpl _9ae6
 
@@ -347,20 +347,20 @@ _9ad8:                                                                  ;$9AD8
 
 ; ".LL10 ; object in front of you"
 _9ae6:                                                                  ;$9AE6
-        lda ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_ZPOS_HI
         cmp # $c0
         bcs _9ac9
 
         lda ZP_POLYOBJ_XPOS_LO
         cmp ZP_POLYOBJ_ZPOS_LO
-        lda ZP_POLYOBJ_XPOS_MI
-        sbc ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_XPOS_HI
+        sbc ZP_POLYOBJ_ZPOS_HI
         bcs _9ac9
         
         lda ZP_POLYOBJ_YPOS_LO
         cmp ZP_POLYOBJ_ZPOS_LO
-        lda ZP_POLYOBJ_YPOS_MI
-        sbc ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_YPOS_HI
+        sbc ZP_POLYOBJ_ZPOS_HI
         bcs _9ac9
 
         ldy # Hull::_06                 ;=$06: "gun vertex"?
@@ -372,7 +372,7 @@ _9ae6:                                                                  ;$9AE6
         sta $0101, x
         lda ZP_POLYOBJ_ZPOS_LO
         sta ZP_VAR_T
-        lda ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_ZPOS_HI
         lsr 
         ror ZP_VAR_T
         lsr 
@@ -393,7 +393,7 @@ _9ae6:                                                                  ;$9AE6
 _9b29:                                                                  ;$9B29
         ldy # Hull::lod_distance
         lda [ZP_HULL_ADDR], y
-        cmp ZP_POLYOBJ_ZPOS_MI
+        cmp ZP_POLYOBJ_ZPOS_HI
         bcs _9b3a
 
         lda # state::debris
@@ -774,7 +774,7 @@ _9d91:                                                                  ;$9D91
         asl 
         sta ZP_70
         jsr _9a2c
-        lda ZP_POLYOBJ_XPOS_HI
+        lda ZP_POLYOBJ_XPOS_SIGN
         sta ZP_VAR_X2
         eor ZP_72
         bmi _9db6
@@ -782,7 +782,7 @@ _9d91:                                                                  ;$9D91
         lda ZP_71
         adc ZP_POLYOBJ_XPOS_LO
         sta ZP_VAR_X
-        lda ZP_POLYOBJ_XPOS_MI
+        lda ZP_POLYOBJ_XPOS_HI
         adc # $00
         sta ZP_VAR_Y
 _9db3:                                                                  ;$9DB3
@@ -794,7 +794,7 @@ _9db6:                                                                  ;$9DB6
         sec 
         sbc ZP_71
         sta ZP_VAR_X
-        lda ZP_POLYOBJ_XPOS_MI
+        lda ZP_POLYOBJ_XPOS_HI
         sbc # $00
         sta ZP_VAR_Y
         bcs _9dd9
@@ -812,7 +812,7 @@ _9dd3:                                                                  ;$9DD3
 
 ; ".LL53 ; Both x signs arrive here, Onto y"
 _9dd9:                                                                  ;$9DD9
-        lda ZP_POLYOBJ_YPOS_HI
+        lda ZP_POLYOBJ_YPOS_SIGN
         sta ZP_70
         eor ZP_74
         bmi _9df1
@@ -820,7 +820,7 @@ _9dd9:                                                                  ;$9DD9
         lda ZP_73
         adc ZP_POLYOBJ_YPOS_LO
         sta ZP_VAR_Y2
-        lda ZP_POLYOBJ_YPOS_MI
+        lda ZP_POLYOBJ_YPOS_HI
         adc # $00
         sta ZP_6F
 _9dee:                                                                  ;$9DEE
@@ -834,7 +834,7 @@ _9df1:                                                                  ;$9DF1
         sec 
         sbc ZP_73
         sta ZP_VAR_Y2
-        lda ZP_POLYOBJ_YPOS_MI
+        lda ZP_POLYOBJ_YPOS_HI
         sbc # $00
         sta ZP_6F
         bcs _9e16
@@ -858,7 +858,7 @@ _9e16:                                                                  ;$9E16
         clc 
         adc ZP_POLYOBJ_ZPOS_LO
         sta ZP_VAR_T
-        lda ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_ZPOS_HI
         adc # $00
         sta ZP_VAR_U
 _9e27:                                                                  ;$9E27
@@ -921,7 +921,7 @@ _9e64:                                                                  ;$9E64
         sbc ZP_75               ; "rotated z node lo"
         sta ZP_VAR_T
 
-        lda ZP_POLYOBJ_ZPOS_MI  ; "z hi"
+        lda ZP_POLYOBJ_ZPOS_HI  ; "z hi"
         sbc # $00
         sta ZP_VAR_U
         bcc _9e7b               ; "underflow, make node close"
@@ -1098,7 +1098,7 @@ _9f35:                                                                  ;$9F35
         sta ZP_72
         lda ZP_POLYOBJ_ZPOS_LO
         sta ZP_71
-        lda ZP_POLYOBJ_XPOS_HI
+        lda ZP_POLYOBJ_XPOS_SIGN
         bpl _9f82
         dec ZP_6F
 _9f82:                                                                  ;$9F82
@@ -1767,12 +1767,12 @@ _a2a0:                                                                  ;$A2A0
         eor # %11111111
         sta ZP_VAR_P1
 
-        lda ZP_POLYOBJ_XPOS_MI
+        lda ZP_POLYOBJ_XPOS_HI
         jsr _3a25
         sta ZP_VAR_P3
 
         lda ZP_6A               ; move count?
-        eor ZP_POLYOBJ_XPOS_HI
+        eor ZP_POLYOBJ_XPOS_SIGN
         ldx # $03
         jsr _a508
         sta ZP_B5
@@ -1792,7 +1792,7 @@ _a2a0:                                                                  ;$A2A0
         eor ZP_PITCH_SIGN
         ldx # $06
         jsr _a508
-        sta ZP_POLYOBJ_ZPOS_HI
+        sta ZP_POLYOBJ_ZPOS_SIGN
 
         lda ZP_VAR_P2
         sta ZP_POLYOBJ_ZPOS_LO
@@ -1800,15 +1800,15 @@ _a2a0:                                                                  ;$A2A0
         sta ZP_VAR_P1
 
         lda ZP_VAR_P3
-        sta ZP_POLYOBJ_ZPOS_MI
+        sta ZP_POLYOBJ_ZPOS_HI
 
         jsr _3a27
         sta ZP_VAR_P3
 
         lda ZP_B5
-        sta ZP_POLYOBJ_YPOS_HI
+        sta ZP_POLYOBJ_YPOS_SIGN
         eor ZP_PITCH_SIGN
-        eor ZP_POLYOBJ_ZPOS_HI
+        eor ZP_POLYOBJ_ZPOS_SIGN
         bpl :+
 
         lda ZP_VAR_P2
@@ -1817,7 +1817,7 @@ _a2a0:                                                                  ;$A2A0
 
         lda ZP_VAR_P3
         adc ZP_B4
-        sta ZP_POLYOBJ_YPOS_MI
+        sta ZP_POLYOBJ_YPOS_HI
 
         jmp _a39d
 
@@ -1826,32 +1826,32 @@ _a2a0:                                                                  ;$A2A0
         sta ZP_POLYOBJ_YPOS_LO
         lda ZP_B4
         sbc ZP_VAR_P3
-        sta ZP_POLYOBJ_YPOS_MI
+        sta ZP_POLYOBJ_YPOS_HI
         bcs _a39d
         lda # $01
         sbc ZP_POLYOBJ_YPOS_LO
         sta ZP_POLYOBJ_YPOS_LO
         lda # $00
-        sbc ZP_POLYOBJ_YPOS_MI
-        sta ZP_POLYOBJ_YPOS_MI
-        lda ZP_POLYOBJ_YPOS_HI
-        eor # %10000000
+        sbc ZP_POLYOBJ_YPOS_HI
         sta ZP_POLYOBJ_YPOS_HI
+        lda ZP_POLYOBJ_YPOS_SIGN
+        eor # %10000000
+        sta ZP_POLYOBJ_YPOS_SIGN
 _a39d:                                                                  ;$A39D
         ldx ZP_ROLL_MAGNITUDE
         lda ZP_POLYOBJ_YPOS_LO
         eor # %11111111
         sta ZP_VAR_P1
-        lda ZP_POLYOBJ_YPOS_MI
+        lda ZP_POLYOBJ_YPOS_HI
         jsr _3a25
         sta ZP_VAR_P3
         lda ZP_ROLL_SIGN
-        eor ZP_POLYOBJ_YPOS_HI
+        eor ZP_POLYOBJ_YPOS_SIGN
         ldx # $00
         jsr _a508
-        sta ZP_POLYOBJ_XPOS_HI
+        sta ZP_POLYOBJ_XPOS_SIGN
         lda ZP_VAR_P3
-        sta ZP_POLYOBJ_XPOS_MI
+        sta ZP_POLYOBJ_XPOS_HI
         lda ZP_VAR_P2
         sta ZP_POLYOBJ_XPOS_LO
 _a3bf:                                                                  ;$A3BF
@@ -1983,14 +1983,14 @@ _a3bf:                                                                  ;$A3BF
 _a508:                                                                  ;$A508
 ;===============================================================================
         tay 
-        eor ZP_POLYOBJ_XPOS_HI, x
+        eor ZP_POLYOBJ_XPOS_SIGN, x
         bmi _a51c
         lda ZP_VAR_P2
         clc 
         adc ZP_POLYOBJ_XPOS_LO, x
         sta ZP_VAR_P2
         lda ZP_VAR_P3
-        adc ZP_POLYOBJ_XPOS_MI, x
+        adc ZP_POLYOBJ_XPOS_HI, x
         sta ZP_VAR_P3
         tya 
         rts 
@@ -2002,7 +2002,7 @@ _a51c:                                                                  ;$A51C
         sec 
         sbc ZP_VAR_P2
         sta ZP_VAR_P2
-        lda ZP_POLYOBJ_XPOS_MI, x
+        lda ZP_POLYOBJ_XPOS_HI, x
         sbc ZP_VAR_P3
         sta ZP_VAR_P3
         bcc _a52f
@@ -2032,10 +2032,10 @@ _a53d:                                                                  ;$A53D
         lda ZP_POLYOBJ_XPOS_LO
         sta ZP_VAR_P1
 
-        lda ZP_POLYOBJ_XPOS_MI
+        lda ZP_POLYOBJ_XPOS_HI
         sta ZP_VAR_P2
 
-        lda ZP_POLYOBJ_XPOS_HI
+        lda ZP_POLYOBJ_XPOS_SIGN
         jsr _38f8
 
         ldx # $03
@@ -2066,10 +2066,10 @@ _a53d:                                                                  ;$A53D
 
         lda ZP_VALUE_pt3
         sta ZP_VAR_P2
-        sta ZP_POLYOBJ_ZPOS_MI
+        sta ZP_POLYOBJ_ZPOS_HI
 
         lda ZP_VALUE_pt4
-        sta ZP_POLYOBJ_ZPOS_HI
+        sta ZP_POLYOBJ_ZPOS_SIGN
         eor # %10000000
         jsr _38f8
 
@@ -2089,7 +2089,7 @@ _a53d:                                                                  ;$A53D
 
         lda ZP_VALUE_pt3
         adc ZP_B4
-        sta ZP_POLYOBJ_YPOS_MI
+        sta ZP_POLYOBJ_YPOS_HI
 
         lda ZP_VALUE_pt4
         adc ZP_B5
@@ -2105,7 +2105,7 @@ _a5a8:                                                                  ;$A5A8
         sta ZP_POLYOBJ_YPOS_LO
         lda ZP_VALUE_pt3
         sbc ZP_B4
-        sta ZP_POLYOBJ_YPOS_MI
+        sta ZP_POLYOBJ_YPOS_HI
         lda ZP_B5
         and # %01111111
         sta ZP_VAR_P1
@@ -2118,30 +2118,30 @@ _a5a8:                                                                  ;$A5A8
         sbc ZP_POLYOBJ_YPOS_LO
         sta ZP_POLYOBJ_YPOS_LO
         lda # $00
-        sbc ZP_POLYOBJ_YPOS_MI
-        sta ZP_POLYOBJ_YPOS_MI
+        sbc ZP_POLYOBJ_YPOS_HI
+        sta ZP_POLYOBJ_YPOS_HI
         lda # $00
         sbc ZP_VAR_P1
         ora # %10000000
 _a5db:                                                                  ;$A5DB
         eor ZP_VAR_T
-        sta ZP_POLYOBJ_YPOS_HI
+        sta ZP_POLYOBJ_YPOS_SIGN
         lda ZP_ALPHA
         sta ZP_VAR_Q
         lda ZP_POLYOBJ_YPOS_LO
         sta ZP_VAR_P1
-        lda ZP_POLYOBJ_YPOS_MI
-        sta ZP_VAR_P2
         lda ZP_POLYOBJ_YPOS_HI
+        sta ZP_VAR_P2
+        lda ZP_POLYOBJ_YPOS_SIGN
         jsr _38f8
         ldx # $00
         jsr _2d69
         lda ZP_VALUE_pt2
         sta ZP_POLYOBJ_XPOS_LO
         lda ZP_VALUE_pt3
-        sta ZP_POLYOBJ_XPOS_MI
-        lda ZP_VALUE_pt4
         sta ZP_POLYOBJ_XPOS_HI
+        lda ZP_VALUE_pt4
+        sta ZP_POLYOBJ_XPOS_SIGN
         jmp _a3bf
 
 
@@ -2182,12 +2182,12 @@ _a626:                                                                  ;$A626
         ; adjust for rear view: invert sign of X,Z
         ; up stays up, so Y is ok
         ;
-        lda ZP_POLYOBJ_XPOS_HI
+        lda ZP_POLYOBJ_XPOS_SIGN
         eor # %10000000
-        sta ZP_POLYOBJ_XPOS_HI
-        lda ZP_POLYOBJ_ZPOS_HI
+        sta ZP_POLYOBJ_XPOS_SIGN
+        lda ZP_POLYOBJ_ZPOS_SIGN
         eor # %10000000
-        sta ZP_POLYOBJ_ZPOS_HI
+        sta ZP_POLYOBJ_ZPOS_SIGN
         lda ZP_POLYOBJ_M0x0_HI
         eor # %10000000
         sta ZP_POLYOBJ_M0x0_HI
@@ -2226,17 +2226,17 @@ _a626:                                                                  ;$A626
         ldx ZP_POLYOBJ_ZPOS_LO
         sta ZP_POLYOBJ_ZPOS_LO
         stx ZP_POLYOBJ_XPOS_LO
-        lda ZP_POLYOBJ_XPOS_MI
-        ldx ZP_POLYOBJ_ZPOS_MI
-        sta ZP_POLYOBJ_ZPOS_MI
-        stx ZP_POLYOBJ_XPOS_MI
         lda ZP_POLYOBJ_XPOS_HI
+        ldx ZP_POLYOBJ_ZPOS_HI
+        sta ZP_POLYOBJ_ZPOS_HI
+        stx ZP_POLYOBJ_XPOS_HI
+        lda ZP_POLYOBJ_XPOS_SIGN
         eor ZP_B0               ; invert X-sign when looking LEFT
         tax 
-        lda ZP_POLYOBJ_ZPOS_HI
+        lda ZP_POLYOBJ_ZPOS_SIGN
         eor ZP_B1               ; invert X-sign when looking RIGHT
-        sta ZP_POLYOBJ_XPOS_HI
-        stx ZP_POLYOBJ_ZPOS_HI
+        sta ZP_POLYOBJ_XPOS_SIGN
+        stx ZP_POLYOBJ_ZPOS_SIGN
 
         ; swap X & Z in the 3x3 matrix?
         ;-----------------------------------------------------------------------
@@ -2532,7 +2532,7 @@ _a7a6:                                                                  ;$A7A6
         lda # $65
         jsr _900d
 _a7c3:                                                                  ;$A7C3
-        lda ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_ZPOS_HI
         ldx # $0b
         cmp # $10
         bcs _a7db
@@ -2560,7 +2560,7 @@ _a7db:                                                                  ;$A7DB
 ;===============================================================================
 
 _a7e9:                                                                  ;$A7E9
-        lda ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_ZPOS_HI
         ldx # $0b
         cmp # $08
         bcs :+
@@ -3320,22 +3320,22 @@ _b410:                                                                  ;$B410
         ; within range? (scanner shows 16-bits of 24-bit range?)
         ; object X/Y/Z position is 24-bits, so this is the
         ; 2nd byte, what would be the hi-byte in a word
-        lda ZP_POLYOBJ_XPOS_MI
-        ora ZP_POLYOBJ_YPOS_MI
-        ora ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_XPOS_HI
+        ora ZP_POLYOBJ_YPOS_HI
+        ora ZP_POLYOBJ_ZPOS_HI
         ; the maximum value of a 24-bit number is $FF_FFFF,
         ; or +/- 8388607 signed, or 16'777'215 unsigned
         ;
         and # %11000000         ; modulo 16'384? (1024 divisions of 24-bits)
         bne _b40f
 
-        lda ZP_POLYOBJ_XPOS_MI
+        lda ZP_POLYOBJ_XPOS_HI
         clc 
 
         ; if the middle-byte is within range,
         ; we still need to check the hi-byte
         ;
-        ldx ZP_POLYOBJ_XPOS_HI
+        ldx ZP_POLYOBJ_XPOS_SIGN
         bpl :+                  ; if positive, skip over the invert
 
         eor # %11111111         ; flip the bits...
@@ -3344,11 +3344,11 @@ _b410:                                                                  ;$B410
 :       adc # $7b               ;=123 (centre X on scanner?)            ;$B438
         sta ZP_VAR_X
 
-        lda ZP_POLYOBJ_ZPOS_MI
+        lda ZP_POLYOBJ_ZPOS_HI
         lsr 
         lsr 
         clc 
-        ldx ZP_POLYOBJ_ZPOS_HI
+        ldx ZP_POLYOBJ_ZPOS_SIGN
         bpl :+
         eor # %11111111
         sec 
@@ -3356,10 +3356,10 @@ _b410:                                                                  ;$B410
         eor # %11111111
         sta ZP_TEMP_ADDR_LO
 
-        lda ZP_POLYOBJ_YPOS_MI
+        lda ZP_POLYOBJ_YPOS_HI
         lsr 
         clc 
-        ldx ZP_POLYOBJ_YPOS_HI
+        ldx ZP_POLYOBJ_YPOS_SIGN
         bmi :+
         eor # %11111111
         sec 

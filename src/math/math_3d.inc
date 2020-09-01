@@ -53,7 +53,7 @@ move_polyobj_x:                                                         ;$A44C
         ; -ve(1) + +ve(0) = -ve(1)
         ; -ve(1) + -ve(1) = +ve(0)
         ;
-        eor ZP_POLYOBJ_XPOS_HI, x
+        eor ZP_POLYOBJ_XPOS_SIGN, x
         ; if the result will be negative, skip ahead
         bmi :+
            
@@ -62,14 +62,14 @@ move_polyobj_x:                                                         ;$A44C
         adc ZP_POLYOBJ_XPOS_LO, x       ; if low-byte overflows, carry is set
         sta ZP_POLYOBJ_XPOS_LO, x
         lda ZP_VAR_S
-        adc ZP_POLYOBJ_XPOS_MI, x       ; if middle-byte overflows, carry set
-        sta ZP_POLYOBJ_XPOS_MI, x
-        lda ZP_POLYOBJ_XPOS_HI, x
+        adc ZP_POLYOBJ_XPOS_HI, x       ; if middle-byte overflows, carry set
+        sta ZP_POLYOBJ_XPOS_HI, x
+        lda ZP_POLYOBJ_XPOS_SIGN, x
         adc # $00                       ; add carry to high-byte if it's set
             
         ; restore the sign taken at the beginning
         ora ZP_VAR_T
-        sta ZP_POLYOBJ_XPOS_HI, x
+        sta ZP_POLYOBJ_XPOS_SIGN, x
 
         rts 
 
@@ -79,17 +79,17 @@ move_polyobj_x:                                                         ;$A44C
         sec 
         sbc ZP_VAR_R                    ; subtract lo-byte `R`
         sta ZP_POLYOBJ_XPOS_LO, x
-        lda ZP_POLYOBJ_XPOS_MI, x
-        sbc ZP_VAR_S                    ; subtract hi-byte `S`
-        sta ZP_POLYOBJ_XPOS_MI, x
         lda ZP_POLYOBJ_XPOS_HI, x
+        sbc ZP_VAR_S                    ; subtract hi-byte `S`
+        sta ZP_POLYOBJ_XPOS_HI, x
+        lda ZP_POLYOBJ_XPOS_SIGN, x
         and # %01111111                 ; mask sign before applying carry
         sbc # $00                       ; subtract carry if set
         ora # %10000000                 ; un-mask sign
 
         ; restore sign from beginning
         eor ZP_VAR_T
-        sta ZP_POLYOBJ_XPOS_HI, x
+        sta ZP_POLYOBJ_XPOS_SIGN, x
 
         ; has the subtraction caused the X-position to go from positive
         ; to negative? e.g. 100 + -150 = -50
@@ -102,13 +102,13 @@ move_polyobj_x:                                                         ;$A44C
         sbc ZP_POLYOBJ_XPOS_LO, x       ; subtract the low-byte
         sta ZP_POLYOBJ_XPOS_LO, x
         lda # $00                       ; zero in the middle byte,
-        sbc ZP_POLYOBJ_XPOS_MI, x       ; and subtract the middle-byte
-        sta ZP_POLYOBJ_XPOS_MI, x
+        sbc ZP_POLYOBJ_XPOS_HI, x       ; and subtract the middle-byte
+        sta ZP_POLYOBJ_XPOS_HI, x
         lda # $00                       ; zero in the high-byte,
-        sbc ZP_POLYOBJ_XPOS_HI, x       ; and subract the high-byte
+        sbc ZP_POLYOBJ_XPOS_SIGN, x     ; and subract the high-byte
         and # %01111111                 ; remove old sign
         ora ZP_VAR_T                    ; set the sign
-        sta ZP_POLYOBJ_XPOS_HI, x
+        sta ZP_POLYOBJ_XPOS_SIGN, x
 
 :       rts                                                             ;$A4A0
 
