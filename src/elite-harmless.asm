@@ -24,7 +24,7 @@
 ;
 .include        "vars_polyobj.asm"
 
-.include        "vars_main.inc"
+.include        "vars_main.asm"
 
 .include        "gfx/gfx_font.asm"
 

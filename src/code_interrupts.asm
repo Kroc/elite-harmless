@@ -210,39 +210,40 @@ interrupt:                                                              ;$A8FA
 .ifndef OPTION_NOSOUND
         ;///////////////////////////////////////////////////////////////////////
         bit flag_music_playing  ; is music currently playing?
-        bpl do_sfx              ; no, skip ahead to SFX
+        bpl @play_sfx           ; no, skip ahead to SFX
 
         jsr _b4d2               ; handle music?
-.endif  ;///////////////////////////////////////////////////////////////////////
 
         bit opt_sfx             ; sound effects enabled?
-        bmi do_sfx              ; yes, do SFX
+        bmi @play_sfx           ; yes, do SFX
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; end the interrupt, but Y & X have been
         ; used so must be restored first
         jmp interrupt_end_YXA
 
-do_sfx:                                                                 ;$A956
+@play_sfx:                                                              ;$A956
         ;=======================================================================
         ldy # 2                 ; begin with `_aa15`?
 _a958:                                                                  ;$A958
         lda _aa13, y
        .bze _a8e8               ; if zero... exit?
-        bmi _a969
+        bmi :+
 
         ldx _aa2f, y
         lda _aa1d, y
         beq _a9ae
         bne _a990
-_a969:                                                                  ;$A969
-        lda _aa2f, y
-        sta _a973+1             ; low-byte, i.e. $d4xx
+
+:       lda _aa2f, y                                                    ;$A969
+        sta @reg+1              ; modify low-byte, i.e. $d4xx
+
         lda # $00
         ldx # $06
-_a973:                                                                  ;$A973
-        sta SID_VOICE1, x
+@reg:   sta SID_VOICE1, x                                               ;$A973
         dex
-        bpl _a973
+        bpl @reg
+
         ldx _aa2f, y
         lda _aa23, y
         sta SID_VOICE1_CTRL, x
@@ -250,10 +251,11 @@ _a973:                                                                  ;$A973
         sta SID_VOICE1_ATKDCY, x
         lda _aa29, y
         sta SID_VOICE1_SUSREL, x
+
         lda # $00
 _a990:                                                                  ;$A990
         clc
-        cld
+        cld                     ;??
         adc _aa20, y
         sta _aa20, y
         pha
@@ -366,7 +368,8 @@ _aa2c:                                                                  ;$AA2C
         .byte   $00, $00, $00
 _aa2f:                                                                  ;$AA2F
         .byte   $00, $07, $0e
-_aa32:                                                                  ;$AA32
+
+_aa32:  ; table of SFX?                                                 ;$AA32
         .byte   $72, $70, $74, $77, $73, $68, $60, $f0
         .byte   $30, $fe, $72, $72, $92, $e1, $51, $02
 _aa42:                                                                  ;$AA42

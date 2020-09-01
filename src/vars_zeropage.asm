@@ -50,9 +50,19 @@ ZP_POLYOBJ_ZPOS_HI      = $11
 
 ; some math routines take parameters that are offsets
 ; from the start of the poly-object to the desired matrix row 
-MATRIX_ROW_0  = (ZP_POLYOBJ_M0x0 - ZP_POLYOBJ)  ;+$09
-MATRIX_ROW_1  = (ZP_POLYOBJ_M1x0 - ZP_POLYOBJ)  ;+$0f
-MATRIX_ROW_2  = (ZP_POLYOBJ_M2x0 - ZP_POLYOBJ)  ;+$15
+MATRIX_ROW0             = (ZP_POLYOBJ_M0x0 - ZP_POLYOBJ)                ;=$09
+MATRIX_ROW1             = (ZP_POLYOBJ_M1x0 - ZP_POLYOBJ)                ;=$0f
+MATRIX_ROW2             = (ZP_POLYOBJ_M2x0 - ZP_POLYOBJ)                ;=$15
+
+MATRIX_COL0             = $00   ; column 0 of a matrix row
+MATRIX_COL0_LO          = $00
+MATRIX_COL0_HI          = $01
+MATRIX_COL1             = $02   ; column 1 of a matrix row
+MATRIX_COL1_LO          = $02
+MATRIX_COL1_HI          = $03
+MATRIX_COL2             = $04   ; column 2 of a matrix row
+MATRIX_COL2_LO          = $04
+MATRIX_COL2_HI          = $05
 
 ; [ M0x0, M0x1, M0x2 ]
 ; [ M1x0, M1x1, M1x2 ]

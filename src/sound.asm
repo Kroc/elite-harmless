@@ -12,13 +12,13 @@ ZP_SOUND_START          = $c4
 ZP_SOUND_START_LO       = $c4
 ZP_SOUND_START_HI       = $c5
 
-;                       = $c6   ;?
-;                       = $c7   ;?
-;                       = $c8   ;?
-;                       = $c9   ;?
-;                       = $ca   ;?
-;                       = $cb   ;?
-;                       = $cc   ;?
+ZP_C6                   = $c6   ;?
+ZP_C7                   = $c7   ;?
+ZP_C8                   = $c8   ;?
+ZP_C9                   = $c9   ;?
+ZP_CA                   = $ca   ;?
+ZP_CB                   = $cb   ;?
+ZP_CC                   = $cc   ;?
 
 ZP_SOUND_TOKEN          = $d1
 
@@ -43,13 +43,13 @@ sound_play_addr_hi:                                                     ;$B4D1
 _b4d2:                                                                  ;$B4D2
 ;===============================================================================
         ldy # $00
-        cpy $c6
-       .bze _b4dd
+        cpy ZP_C6
+       .bze sound_read_token
         
-        dec $c6
+        dec ZP_C6
         jmp _b6e2
 
-_b4dd:                                                                  ;$B4DD
+sound_read_token:                                                       ;$B4DD
         ;-----------------------------------------------------------------------
         ; data bytes can contain 1 or 2 tokens (a nybble each)
         ;
@@ -82,43 +82,41 @@ _b4dd:                                                                  ;$B4DD
         ; function and jump to it
         ;
         lda _b70f-1, x          ; load token function address, lo
-        sta _b502+1             ; modify the `jmp` below, lo
+        sta @jmp+1              ; modify the `jmp` below, lo
         lda _b71e-1, x          ; load token function address, hi
-        sta _b502+2             ; modify the `jmp` below, hi
+        sta @jmp+2              ; modify the `jmp` below, hi
 
-_b502:  jmp _b4dd                                                       ;$B502
+@jmp:   jmp sound_read_token                                            ;$B502
 
 _b505:                                                                  ;$B505
 ;===============================================================================
         jsr get_voice1_freq
         jsr set_voice1_ctrl
 
-        jmp _b4dd
-
+        jmp sound_read_token
 
 _b50e:                                                                  ;$B50E
 ;===============================================================================
         jsr get_voice2_freq
         jsr set_voice2_ctrl
 
-        jmp _b4dd
+        jmp sound_read_token
 
 _b517:                                                                  ;$B517
 ;===============================================================================
         jsr get_voice3_freq
         jsr set_voice3_ctrl
         
-        jmp _b4dd
-
-;===============================================================================
+        jmp sound_read_token
 
 _b520:                                                                  ;$B520
+;===============================================================================
         jsr get_voice1_freq
         jsr get_voice2_freq
         jsr set_voice1_ctrl
         jsr set_voice2_ctrl
         
-        jmp _b4dd
+        jmp sound_read_token
 
 _b52f:                                                                  ;$B52F
 ;===============================================================================
@@ -129,13 +127,13 @@ _b52f:                                                                  ;$B52F
         jsr set_voice2_ctrl
         jsr set_voice3_ctrl
         
-        jmp _b4dd
+        jmp sound_read_token
 
 _b544:                                                                  ;$B544
 ;===============================================================================
         inc _b4cb
         
-        jmp _b4dd
+        jmp sound_read_token
 
 _b54a:                                                                  ;$B54A
 ;===============================================================================
@@ -143,7 +141,7 @@ _b54a:                                                                  ;$B54A
 ; token `%1000`. e.g.
 ;
 ;       0000_0101 -> 0000_1011 -> 0001_0110 -> 0010_1100 -> 0101_1000
-;
+;-------------------------------------------------------------------------------
         lda ZP_SOUND_TOKEN
         sec                     ; set carry
         rol                     ; insert carry into bit 0
@@ -154,7 +152,7 @@ _b54a:                                                                  ;$B54A
 _b553:                                                                  ;$B653
         ;-----------------------------------------------------------------------
         lda _b4cf
-        sta $c6
+        sta ZP_C6
 
         jmp _b4d2
 
@@ -173,14 +171,12 @@ token_adsr:                                                             ;$B55B
         jsr next_byte
         sta SID_VOICE3_SUSREL
         
-        jmp _b4dd
+        jmp sound_read_token
 
 token_loop:                                                             ;$B582
 ;===============================================================================
-        ; clear current token(s);
-        ; another will be read automatically
-        lda # %00000000
-        sta ZP_SOUND_TOKEN
+        lda # %00000000         ; clear current token(s);
+        sta ZP_SOUND_TOKEN      ; another will be read automatically
 
         ; loop the sound
         lda ZP_SOUND_START_LO
@@ -188,7 +184,7 @@ token_loop:                                                             ;$B582
         lda ZP_SOUND_START_HI
         sta ZP_SOUND_ADDR_HI
         
-        jmp _b4dd
+        jmp sound_read_token
 
 token_pulse:                                                            ;$B591
 ;===============================================================================
@@ -205,7 +201,7 @@ token_pulse:                                                            ;$B591
         jsr next_byte
         sta SID_VOICE3_PULSE_HI
 
-        jmp _b4dd
+        jmp sound_read_token
 
 token_lxxp:                                                             ;$B5B8
 ;===============================================================================
@@ -216,7 +212,7 @@ _b5bb:                                                                  ;$B5BB
         jsr next_byte
         sta _b4cf
         
-        jmp _b4dd
+        jmp sound_read_token
 
 token_control:                                                          ;$B5C4
 ;===============================================================================
@@ -227,7 +223,7 @@ token_control:                                                          ;$B5C4
         jsr next_byte
         sta voice3_ctrl
 
-        jmp _b4dd
+        jmp sound_read_token
 
 token_volume_filter:                                                    ;$B5D9
 ;===============================================================================
@@ -238,7 +234,7 @@ token_volume_filter:                                                    ;$B5D9
         jsr next_byte
         sta SID_FILTER_FREQ_HI
 
-        jmp _b4dd
+        jmp sound_read_token
 
 set_voice1_ctrl:                                                        ;$B5EE
 ;===============================================================================
@@ -286,21 +282,21 @@ get_voice2_freq:                                                        ;$B622
 ;===============================================================================
         jsr next_byte
         sta SID_VOICE2_FREQ_HI
-        sta $c9
-        sta $cb
+        sta ZP_C9
+        sta ZP_CB
         
         jsr next_byte
         sta SID_VOICE2_FREQ_LO
-        sta $ca
-        sta $cc
+        sta ZP_CA
+        sta ZP_CC
         
         clc 
         cld 
         lda # $20
-        adc $cc
-        sta $cc
+        adc ZP_CC
+        sta ZP_CC
         bcc :+
-        inc $cb
+        inc ZP_CB
 
 :       rts                                                             ;$B642
 
@@ -332,9 +328,9 @@ sound_stop:                                                             ;$B664
         ; another will be read automatically
         lda # %00000000
         sta ZP_SOUND_TOKEN
-        sta $c6
-        sta $c7
-        sta $c8
+        sta ZP_C6
+        sta ZP_C7
+        sta ZP_C8
 
         ; clear the SID registers
         ; (working down from $D418 to $D400)
@@ -362,15 +358,15 @@ sound_stop:                                                             ;$B664
 ;$b68a:
 ;===============================================================================
         lda # $00
-        sta $c7
+        sta ZP_C7
         
         lda #< _b6ae
         sta _b6f0+1
         
-        lda $cb
+        lda ZP_CB
         sta SID_VOICE2_FREQ_HI
 _b698:                                                                  ;$B698
-        lda $cc
+        lda ZP_CC
         sta SID_VOICE2_FREQ_LO
         
         jmp _b6f2
@@ -378,15 +374,15 @@ _b698:                                                                  ;$B698
 _b6a0:                                                                  ;$B6A0
 ;===============================================================================
         lda # $00
-        sta $c7
+        sta ZP_C7
 
         lda #< _b698
         sta _b6f0+1
         
-        lda $c9
+        lda ZP_C9
         sta SID_VOICE2_FREQ_HI
 _b6ae:                                                                  ;$B6AE
-        lda $ca
+        lda ZP_CA
         sta SID_VOICE2_FREQ_LO
 
         jmp _b6f2
@@ -395,7 +391,7 @@ _b6ae:                                                                  ;$B6AE
 
 ;$b6b6:
         lda # $00
-        sta $c8
+        sta ZP_C8
 
         lda #< _b6e2
         sta _b6e8+1
@@ -411,7 +407,7 @@ _b6ae:                                                                  ;$B6AE
 
 _b6cc:                                                                  ;$B6CC
         lda # $00
-        sta $c8
+        sta ZP_C8
 
         lda #< _b6cc
         sta _b6e8+1
@@ -425,18 +421,18 @@ _b6cc:                                                                  ;$B6CC
 
 _b6e2:                                                                  ;$B6E2
 ;===============================================================================
-        inc $c8
+        inc ZP_C8
         lda # 5
-        cmp $c8
+        cmp ZP_C8
 _b6e8:                                                                  ;$B6E8
         beq _b6cc
-        inc $c7
+        inc ZP_C7
         lda # $04
-        cmp $c7
+        cmp ZP_C7
 _b6f0:                                                                  ;$B6F0
         beq _b6a0
 _b6f2:                                                                  ;$B6F2
-        ldx $c6
+        ldx ZP_C6
         cpx # $00
        .bnz :+
 
@@ -455,8 +451,6 @@ _b6f2:                                                                  ;$B6F2
         stx SID_VOICE3_CTRL
 
 :       rts                                                             ;$B70D
-
-;-------------------------------------------------------------------------------
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -501,14 +495,14 @@ B54A_B52F       = B54A | (B52F << 4)    ;=$5F
 ADSR_PLSE       = ADSR | (PLSE << 4)    ;=$A7
 CTRL_VOLF       = CTRL | (VOLF << 4)    ;=$ED
 
-_b70f:  .lobytes _addrs                                                 ;$B70F        
+_b70f:  .lobytes _addrs                                                 ;$B70F
 _b71e:  .hibytes _addrs                                                 ;$B71E
 
-;===============================================================================
 
 .segment        "DATA_SOUND"
-
+;===============================================================================
 _b72d:                                                                  ;$B72D
+
         .byte   ADSR_PLSE
         .byte   $26, $26, $48, $29, $29, $aa
         .byte   $00, $06, $00, $05, $00, $06

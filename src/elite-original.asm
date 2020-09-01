@@ -21,7 +21,7 @@
 ;
 .include        "vars_polyobj.asm"                                      ;$F900
 
-.include        "vars_main.inc"                                         ;$0400
+.include        "vars_main.asm"                                         ;$0400
 .include        "gfx/gfx_font.asm"                                      ;$0B00
 .include        "vars_flags.asm"                                        ;$1D00
 

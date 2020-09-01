@@ -1677,7 +1677,6 @@ _a2a0:                                                                  ;$A2A0
 ; the objcet
 ;
 ; in:   X       ship type (i.e. a `hull_pointers` index)
-;
 ;-------------------------------------------------------------------------------
         ; is the ship exploding?
         lda ZP_POLYOBJ_STATE    ; check the ship's state flags
@@ -1719,10 +1718,10 @@ _a2a0:                                                                  ;$A2A0
 @a2cb:                                                                  ;$A2CB
         jsr _b410
 
-        lda ZP_POLYOBJ_SPEED
-        asl 
-        asl 
-        sta ZP_VAR_Q
+        lda ZP_POLYOBJ_SPEED    ; scale up the object's speed
+        asl                     ; x2
+        asl                     ; x4
+        sta ZP_VAR_Q            ; put aside for some later math
 
         lda ZP_POLYOBJ_M0x0_HI
         and # %01111111         ; remove sign
@@ -1753,7 +1752,7 @@ _a2a0:                                                                  ;$A2A0
         adc ZP_POLYOBJ_ACCEL
         bpl :+
         lda # $00
-:       ldy # Hull::speed       ;=$0F                                   ;$A30D
+:       ldy # Hull::speed                                               ;$A30D
         cmp [ZP_HULL_ADDR], y
         bcc :+
         lda [ZP_HULL_ADDR], y
@@ -1846,7 +1845,7 @@ _a39d:                                                                  ;$A39D
         lda ZP_POLYOBJ_YPOS_MI
         jsr _3a25
         sta ZP_VAR_P3
-        lda ZP_ROLL_SIGN        ; roll sign?
+        lda ZP_ROLL_SIGN
         eor ZP_POLYOBJ_YPOS_HI
         ldx # $00
         jsr _a508
@@ -1876,11 +1875,11 @@ _a3bf:                                                                  ;$A3BF
         ; verticies in one operation, i.e. we do not have to calculate roll &
         ; pitch separately for each vertex point in the shape
         ;
-:       ldy # MATRIX_ROW_0                                              ;$A3D3
+:       ldy # MATRIX_ROW0                                               ;$A3D3
         jsr rotate_polyobj_axis
-        ldy # MATRIX_ROW_1
+        ldy # MATRIX_ROW1
         jsr rotate_polyobj_axis
-        ldy # MATRIX_ROW_2
+        ldy # MATRIX_ROW2
         jsr rotate_polyobj_axis
 
         ; slowly dampen pitch rate toward zero:
@@ -1972,6 +1971,7 @@ _a3bf:                                                                  ;$A3BF
         and # state::scanner ^$FF
         sta ZP_POLYOBJ_STATE
         rts 
+
 
 ;===============================================================================
 ; insert these routines from "math_3d.inc"
@@ -2179,7 +2179,9 @@ _a626:                                                                  ;$A626
         dex 
         bne @a65f
 
-        ; adjust for rear view: invert sign of X,Z. Up stays up, so Y is ok.
+        ; adjust for rear view: invert sign of X,Z
+        ; up stays up, so Y is ok
+        ;
         lda ZP_POLYOBJ_XPOS_HI
         eor # %10000000
         sta ZP_POLYOBJ_XPOS_HI
@@ -2235,23 +2237,26 @@ _a626:                                                                  ;$A626
         eor ZP_B1               ; invert X-sign when looking RIGHT
         sta ZP_POLYOBJ_XPOS_HI
         stx ZP_POLYOBJ_ZPOS_HI
-        ldy # $09
-        jsr :+
-        ldy # $0f
-        jsr :+
-        ldy # $15
 
-:       lda ZP_POLYOBJ_XPOS_LO, y                                       ;$A693
-        ldx ZP_POLYOBJ_YPOS_MI, y
-        sta ZP_POLYOBJ_YPOS_MI, y
-        stx ZP_POLYOBJ_XPOS_LO, y
-        lda ZP_POLYOBJ_XPOS_MI, y
+        ; swap X & Z in the 3x3 matrix?
+        ;-----------------------------------------------------------------------
+        ldy # MATRIX_ROW0
+        jsr :+
+        ldy # MATRIX_ROW1
+        jsr :+
+        ldy # MATRIX_ROW2
+
+:       lda ZP_POLYOBJ + MATRIX_COL0_LO, y                              ;$A693
+        ldx ZP_POLYOBJ + MATRIX_COL2_LO, y
+        sta ZP_POLYOBJ + MATRIX_COL2_LO, y
+        stx ZP_POLYOBJ + MATRIX_COL0_LO, y
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         eor ZP_B0
         tax 
-        lda ZP_POLYOBJ_YPOS_HI, y
+        lda ZP_POLYOBJ + MATRIX_COL2_HI, y
         eor ZP_B1
-        sta ZP_POLYOBJ_XPOS_MI, y
-        stx ZP_POLYOBJ_YPOS_HI, y
+        sta ZP_POLYOBJ + MATRIX_COL0_HI, y
+        stx ZP_POLYOBJ + MATRIX_COL2_HI, y
 
 _a6ad:  rts                                                             ;$A6AD
 
@@ -2454,12 +2459,15 @@ _a75d:                                                                  ;$A75D
 .import TXT_FLIGHT_DIRECTIONS:direct
         lda COCKPIT_VIEW
         ora # TXT_FLIGHT_DIRECTIONS
-        ; TODO: can we just use `jsr print_flight_token_and_space`?
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         jsr print_flight_token
         jsr print_space
+.else   ;///////////////////////////////////////////////////////////////////////
+        jsr print_flight_token_and_space
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 .import TXT_FLIGHT_VIEW:direct
-
         lda # TXT_FLIGHT_VIEW
         jsr print_flight_token
 
@@ -2489,17 +2497,18 @@ _a786:                                                                  ;$A786
         ldy # $09
         jmp _a822
 
-;===============================================================================
 
 _a795:                                                                  ;$A795
+;===============================================================================
         ldx # HULL_MISSILE
         jsr _3708               ; NOTE: spawns ship-type in X
         bcc _a785
         
         lda # $78
         jsr _900d
+
         ldy # $04
-        jmp _a858
+        jmp play_sfx
 
 
 _a7a6:                                                                  ;$A7A6
@@ -2554,19 +2563,19 @@ _a7e9:                                                                  ;$A7E9
         lda ZP_POLYOBJ_ZPOS_MI
         ldx # $0b
         cmp # $08
-        bcs _a801
+        bcs :+
         inx 
         cmp # $04
-        bcs _a801
+        bcs :+
         inx 
         cmp # $03
-        bcs _a801
+        bcs :+
         inx 
         cmp # $02
-        bcs _a801
+        bcs :+
         inx 
-_a801:                                                                  ;$A801
-        txa 
+
+:       txa                                                             ;$A801
         asl 
         asl 
         asl 
@@ -2577,15 +2586,15 @@ _a801:                                                                  ;$A801
         jmp _a850
 
 
-_a80f:                                                                  ;$A80F
+play_sfx_05:                                                            ;$A80F
 ;===============================================================================
         ldy # $05
-        bne _a858               ; always branches
+        bne play_sfx            ; (always branches)
 
-_a813:                                                                  ;$A813
+play_sfx_03:                                                            ;$A813
 ;===============================================================================
         ldy # $03
-        bne _a858               ; always branches
+        bne play_sfx            ; (always branches)
 
 _a817:                                                                  ;$A817
 ;===============================================================================
@@ -2598,43 +2607,45 @@ _a817:                                                                  ;$A817
 _a821:                                                                  ;$A821
         rts 
 
-;===============================================================================
 
 _a822:                                                                  ;$A822
+;===============================================================================
         ldx # $03
         iny 
         sty ZP_VAR_X2
-_a827:                                                                  ;$A827
-        dex 
+
+:       dex                                                             ;$A827
         bmi _a821
         lda _aa13, x
         and # %00111111
         cmp ZP_VAR_X2
-        bne _a827
+        bne :-
+
         lda # $01
         sta _aa16, x
+
         rts 
 
 
 _a839:                                                                  ;$A839
 ;===============================================================================
 ; called only by `_3795`
-;
+;-------------------------------------------------------------------------------
         ldy # $07
         lda # $f5
         ldx # $f0
         jsr _a850
 
         ldy # $04
-        jsr _a858
+        jsr play_sfx
 
         ; wait until the next frame:
         ; TODO: could just call `wait_for_frame` instead
         ldy # 1
         jsr wait_frames
 
-        ldy # $87
-        bne _a858               ; awlays branches
+        ldy # $87               ; high-bit set
+        bne play_sfx            ; (awlays branches)
 
 
 _a850:                                                                  ;$A850
@@ -2654,16 +2665,22 @@ _a850:                                                                  ;$A850
         ;  the overflow bit is set above)
         .byte   $50
 
-_a858:                                                                  ;$A858
+play_sfx:                                                               ;$A858
 ;===============================================================================
-;       Y = $00-$0F?
+; play a sound effect?
+;
+; the actual SID twiddling happens during interrupt,
+; so this routine sets up the necessary variables
+;
+; in:   Y       SFX index
 ;-------------------------------------------------------------------------------
-        clv 
+        clv                     ;?
 
-        ; do nothing if an option is set?
+        ; do nothing if an option is set? (sound off?)
         lda _1d05
-        bne _a821               ; `rts`
+        bne _a821               ; ->RTS
 
+        ;-----------------------------------------------------------------------
         ldx # $02
         iny                     ; use Y 1-based
         sty ZP_VAR_X2
@@ -2685,12 +2702,12 @@ _a858:                                                                  ;$A858
         cmp _aa1a
         bcc :+
         inx 
-        lda _aa1a
 
+        lda _aa1a
 :       cmp _aa1b                                                       ;$A884
         bcc @_a88b
-        ldx # $02
 
+        ldx # $02
 @_a88b:                                                                  ;$A88B
         tya 
         and # %01111111
@@ -2869,8 +2886,9 @@ _b0f4:                                                                  ;$B0F4
 ;===============================================================================
         lda # $20
         sta ZP_67
+
         ldy # $09
-        jsr _a858
+        jsr play_sfx
 
 _b0fd:                                                                  ;$B0FD
 ;===============================================================================
@@ -3000,7 +3018,7 @@ chrout:                                                                 ;$B155
         rts 
 
 _b168:                                                                  ;$B168
-        jsr _a80f               ; BEEP?
+        jsr play_sfx_05         ; BEEP?
         jmp _b210               ; restore state and exit
 
         ;-----------------------------------------------------------------------

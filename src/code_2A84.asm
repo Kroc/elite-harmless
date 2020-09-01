@@ -1052,42 +1052,32 @@ _2dc5:                                                                  ;$2DC5
 ;       Y       offset from `ZP_POLYOBJECT` to the desired matrix row;
 ;               that is, a `MATRIX_ROW_*` constant
 ;-------------------------------------------------------------------------------
-COL0    = $00           ; column 0 of the matrix row
-COL0_LO = $00
-COL0_HI = $01
-COL1    = $02           ; column 1 of the matrix row
-COL1_LO = $02
-COL1_HI = $03
-COL2    = $04           ; column 2 of the matrix row
-COL2_LO = $04
-COL2_HI = $05
-
         ; ROW X
         ;-----------------------------------------------------------------------
-        lda ZP_POLYOBJ + COL0_HI, x
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         and # %01111111         ; extract HI byte without sign
         lsr                     ; divide by 2
         sta ZP_VAR_T
 
-        lda ZP_POLYOBJ + COL0_LO, x
+        lda ZP_POLYOBJ + MATRIX_COL0_LO, x
         sec 
         sbc ZP_VAR_T
         sta ZP_VAR_R
         
-        lda ZP_POLYOBJ + COL0_HI, x
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         sbc # $00
         sta ZP_VAR_S
 
         ; ROW Y
         ;-----------------------------------------------------------------------
-        lda ZP_POLYOBJ + COL0_LO, y
+        lda ZP_POLYOBJ + MATRIX_COL0_LO, y
         sta ZP_VAR_P
         
-        lda ZP_POLYOBJ + COL0_HI, y
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         and # %10000000         ; extract sign
         sta ZP_VAR_T            ; put sign aside
         
-        lda ZP_POLYOBJ + COL0_HI, y
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         and # %01111111         ; extract magnitude
         lsr                     ; divide by 2
         ror ZP_VAR_P
@@ -1105,23 +1095,23 @@ COL2_HI = $05
         sta ZP_VALUE_pt2
         stx ZP_VALUE_pt1
         ldx ZP_VAR_Q
-        lda ZP_POLYOBJ + COL0_HI, y
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         and # %01111111
         lsr 
         sta ZP_VAR_T
-        lda ZP_POLYOBJ + COL0_LO, y
+        lda ZP_POLYOBJ + MATRIX_COL0_LO, y
         sec 
         sbc ZP_VAR_T
         sta ZP_VAR_R
-        lda ZP_POLYOBJ + COL0_HI, y
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         sbc # $00
         sta ZP_VAR_S
-        lda ZP_POLYOBJ + COL0_LO, x
+        lda ZP_POLYOBJ + MATRIX_COL0_LO, x
         sta ZP_VAR_P
-        lda ZP_POLYOBJ + COL0_HI, x
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         and # %10000000
         sta ZP_VAR_T
-        lda ZP_POLYOBJ + COL0_HI, x
+        lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         and # %01111111
         lsr 
         ror ZP_VAR_P
@@ -1136,13 +1126,13 @@ COL2_HI = $05
         eor ZP_B1
         stx ZP_VAR_Q
         jsr multiplied_now_add
-        sta ZP_POLYOBJ + COL0_HI, y
-        stx ZP_POLYOBJ + COL0_LO, y
+        sta ZP_POLYOBJ + MATRIX_COL0_HI, y
+        stx ZP_POLYOBJ + MATRIX_COL0_LO, y
         ldx ZP_VAR_Q
         lda ZP_VALUE_pt1
-        sta ZP_POLYOBJ + COL0_LO, x
+        sta ZP_POLYOBJ + MATRIX_COL0_LO, x
         lda ZP_VALUE_pt2
-        sta ZP_POLYOBJ + COL0_HI, x
+        sta ZP_POLYOBJ + MATRIX_COL0_HI, x
 
         rts 
 
@@ -2097,8 +2087,9 @@ _31f1:                                                                  ;$31F1
         bne _31d5
         jsr _70ab
         jsr _6f82
+
         ldy # $06
-        jsr _a858
+        jsr play_sfx
 
 .import MSG_DOCKED_UNKNOWN_PLANET:direct
         lda # MSG_DOCKED_UNKNOWN_PLANET
@@ -2139,7 +2130,8 @@ _322f:                                                                  ;$322F
 
 _3239:                                                                  ;$3239
         jsr _3293
-        jsr _a813
+        jsr play_sfx_03
+        
         lda # $fa
         jmp _7bd2
 
@@ -2493,10 +2485,12 @@ _33fd:                                                                  ;$33FD
         dec ZP_POLYOBJ_ACCEL
         lda ZP_67
         bne _3499
+        
         ldy # $01
-        jsr _a858
+        jsr play_sfx
+
         ldy # $0f
-        jmp _a858
+        jmp play_sfx
 
         ;-----------------------------------------------------------------------
 
@@ -2944,7 +2938,7 @@ _36a6:                                                                  ;$36A6
         dec PLAYER_MISSILES
         
         ldy # $04
-        jmp _a858
+        jmp play_sfx
 
 
 _36c5:                                                                  ;$36C5
@@ -3119,7 +3113,8 @@ _3795:                                                                  ;$3795
 _379e:                                                                  ;$397E
 ;===============================================================================
         ldy # $04
-        jsr _a858
+        jsr play_sfx
+        
         lda # $08
 _37a5:                                                                  ;$37A5
         sta ZP_AC

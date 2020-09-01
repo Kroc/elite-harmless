@@ -123,20 +123,6 @@ _ab89:  .hibytes _ab81_addrs                                            ;$AB89
 
 draw_line:                                                              ;$AB91
 ;===============================================================================
-;
-; in:   ZP_VAR_X1       horizontal "beginning" of line in viewport, in pixels
-;       ZP_VAR_X2       horizontal "end" of line in viewport, in pixels
-;       ZP_VAR_Y1       vertical "beginning" of line in viewport, in pixels
-;       ZP_VAR_Y2       vertical "end" of line in viewport, in pixels
-;       Y               (preserved)
-;
-;       note that the "beginning" and "end" of the line is not necessarily
-;       left-to-right, top-to-bottom; the routine flips these as necessary
-;
-;       also, the X/Y values are viewport-coordinates (0..255),
-;       not screen-coordinates (0..320); the routine does the
-;       centring of the viewport automatically
-;
 ; lines are drawn using a form of Bresenham's Line Algorithm;
 ; <https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm>
 ;
@@ -154,6 +140,18 @@ draw_line:                                                              ;$AB91
 ;       the line-flipping checks here should really be done when building
 ;       the list of lines to draw, rather than every time a line is drawn
 ;
+; in:   ZP_VAR_X1       horizontal "beginning" of line in viewport, in pixels
+;       ZP_VAR_X2       horizontal "end" of line in viewport, in pixels
+;       ZP_VAR_Y1       vertical "beginning" of line in viewport, in pixels
+;       ZP_VAR_Y2       vertical "end" of line in viewport, in pixels
+;       Y               (preserved)
+;
+;       note that the "beginning" and "end" of the line is not necessarily
+;       left-to-right, top-to-bottom; the routine flips these as necessary
+;
+;       also, the X/Y values are viewport-coordinates (0..255),
+;       not screen-coordinates (0..320); the routine does the
+;       centring of the viewport automatically
 ;-------------------------------------------------------------------------------
         sty ZP_9E                       ; preserve Y
 
@@ -316,20 +314,20 @@ draw_line_horz:                                                         ;$ABBB
         jmp draw_line_horzdn
 
 draw_line_horzup:                                                       ;$AC19
-;=======================================================================
+;===============================================================================
 ; draws a horizontally sloped line from the bottom up
 ;
 ; if calling into this point externally,
 ; the parameters would look like this:
 ;
-;       ZP_VAR_X1 = x-pos start of line in viewport pixels
-;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
-;               Y = copy of above
-;        ZP_REG_W = width of line
-;        ZP_REG_H = height of line
+; in:   ZP_VAR_X1       x-pos start of line in viewport pixels
+;       ZP_VAR_Y1       y-pos start of line in viewport pixels
+;       Y               copy of above
+;       ZP_REG_W        width of line
+;       ZP_REG_H        height of line
 ;
 ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
-;-------------------------------------------------------------------------------       
+;-------------------------------------------------------------------------------
         ; get the address within the bitmap where we will be drawing,
         ; stored into `ZP_TEMP_ADDR`
         ;
@@ -1434,21 +1432,24 @@ draw_straight_line:                                                     ;$AFFA
 ;-------------------------------------------------------------------------------
         sty ZP_9E               ; preserve Y
 
-        ldx ZP_VAR_X1
-        cpx ZP_VAR_X2
-       .bze :-
-        bcc :+
+        ; does the line start/end need to be flipped?
+        ;
+        ldx ZP_VAR_X1           ; starting position
+        cpx ZP_VAR_X2           ; 'subtract' the ending position
+       .bze :-                  ; start=end, 0-wide line!
+        bcc :+                  ; skip over if line is normal
 
+        ; flip the line start/end!
         lda ZP_VAR_X2
         sta ZP_VAR_X1
         stx ZP_VAR_X2
         tax 
 
 :       dec ZP_VAR_X2                                                   ;$B00B
-        lda ZP_VAR_Y
+        lda ZP_VAR_Y            ; line Y-position
         tay 
 
-        ; get bitmap address
+        ; get bitmap address:
         and # %00000111
         sta ZP_TEMP_ADDR_LO
         lda row_to_bitmap_hi, y

@@ -266,8 +266,8 @@ VAR_MARKET_RANDOM       = $04df ; the random variance added to market prices
 
 ;-------------------------------------------------------------------------------
 
-PLAYER_KILLS_LO         = $04e0 ; number of kills (lo byte?)
-PLAYER_KILLS_HI         = $04e1 ; number of kills (hi byte?)
+PLAYER_KILLS_LO         = $04e0 ; number of kills, lo-byte
+PLAYER_KILLS_HI         = $04e1 ; number of kills, hi-byte
 
 VAR_04E2                = $04e2 ;?
 

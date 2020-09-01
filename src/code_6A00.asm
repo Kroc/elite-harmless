@@ -2333,7 +2333,7 @@ _761f:                                                                  ;$761F
         lda # TXT_FLIGHT_CASH_
         jsr print_flight_token_and_space
 _7627:                                                                  ;$7627
-        jsr _a80f
+        jsr play_sfx_05
 
         ldy # 50
         jmp wait_frames
@@ -3216,7 +3216,7 @@ _7c08:                                                                  ;$7C08
         jmp _87d0
 
 _7c0b:                                                                  ;$7C0B
-        jsr _a813
+        jsr play_sfx_03
         jmp _906a
 
 
@@ -4935,14 +4935,13 @@ _83df:                                                                  ;$83DF
         jsr _2367
         sta PLAYER_EBOMB
 _83ed:                                                                  ;$83ED
-        lda # $0c
+        lda # DUST_MAX-1
         sta DUST_COUNT          ; number of dust particles
 
         ; clear line-buffer?
         ldx # $ff
         stx line_points_x
         stx line_points_y
-
         stx ZP_MISSILE_TARGET   ; no missile target
 
         lda # $80
@@ -5074,7 +5073,9 @@ _848d:                                                                  ;$848D
         rol                     ; increase aggression level?
         ora # attack::active | attack::target   ;=%11000000
         sta ZP_POLYOBJ_ATTACK
+
 _84ae:                                                                  ;$84AE
+;===============================================================================
         clc 
 
 get_random_number:                                                      ;$84AF
@@ -5720,7 +5721,7 @@ debug_brk:                                                              ;$87B9
 
 _87d0:                                                                  ;$87D0
 ;===============================================================================
-        jsr _a813
+        jsr play_sfx_03
         jsr _83df
         asl PLAYER_SPEED        ;?
         asl PLAYER_SPEED        ;?
@@ -6790,8 +6791,8 @@ do_quickjump:                                                           ;$8E29
 
 @nojump:                                                                ;$8E7C
         ;-----------------------------------------------------------------------
-        ldy # $06
-        jmp _a858               ; "sound low beep"?
+        ldy # $06               ; "sound low beep"?
+        jmp play_sfx
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////

@@ -180,9 +180,12 @@ debug_for_brk:                                                          ;$1E14
 ; Trumble™ A.I. data?
 ;
 trumble_steps:                                                          ;$1E21
+        ;-----------------------------------------------------------------------
         ; movement steps; "0, 1, -1, 0"
         .byte   $00, $01, $ff, $00
+
 _1e25:                                                                  ;$1E25
+        ;-----------------------------------------------------------------------
         .byte   $00, $00, $ff, $00
 
 ; masks for sprite MSBs?
@@ -248,51 +251,51 @@ _1e35:
         sta TRUMBLES_MOVE_Y, y  ; set the Trumble™'s Y direction
 
 @move:                                                                  ;$1E6A
+        ;-----------------------------------------------------------------------
         lda _1e29, y
         and VIC_SPRITES_X
         sta VIC_SPRITES_X
 
-        ; move the Trumble™ sprite vertically
-        lda VIC_SPRITE2_Y, y
-        clc 
-        adc TRUMBLES_MOVE_Y, y
-        sta VIC_SPRITE2_Y, y
+        ; move the Trumble™ sprite vertically:
+        lda VIC_SPRITE2_Y, y    ; current hardware sprite Y-position
+        clc                     ; math!
+        adc TRUMBLES_MOVE_Y, y  ; add the Trumble™'s Y direction
+        sta VIC_SPRITE2_Y, y    ; update the hardware sprite
 
-        ; move the Trumble™ sprite horizontally
+        ; move the Trumble™ sprite horizontally:
         clc 
-        lda VIC_SPRITE2_X, y
-        adc TRUMBLES_MOVE_X, y
-        sta ZP_VAR_T
+        lda VIC_SPRITE2_X, y    ; current hardware sprite X-position (0-255)
+        adc TRUMBLES_MOVE_X, y  ; add the Trumble™'s X direction
+        sta ZP_VAR_T            ; put aside whilst we handle the MSB (256-319) 
 
         lda VAR_0531, y
         adc VAR_0521, y
         bpl :+
 
         lda # $48               ;=72 / %01001000
-        sta ZP_VAR_T
+        sta ZP_VAR_T            ; '328'?
 
         lda # $01
 :       and # %00000001                                                 ;$1E94
-        beq _1ea4
+        beq :+
 
         lda ZP_VAR_T
         cmp # $50               ;=80 / %10000000
         lda # $01
-        bcc _1ea4
+        bcc :+
 
         lda # $00
         sta ZP_VAR_T
-_1ea4:                                                                  ;$1EA4
-        sta VAR_0531, y
-        beq _1eb3
+
+:       sta VAR_0531, y                                                 ;$1EA4
+        beq :+
 
         ; MSBs?
         lda _1e29+1, y
-        ora VIC_SPRITES_X
+        ora VIC_SPRITES_X       ; combine with current hardware sprite MSBs
         sei                     ; disable interrupts whilst repositioning
-        sta VIC_SPRITES_X
-_1eb3:                                                                  ;$1EB3
-        lda ZP_VAR_T
+        sta VIC_SPRITES_X       ; update the 8 hardware sprite MSBs
+:       lda ZP_VAR_T                                                    ;$1EB3
         sta VIC_SPRITE2_X, y
         cli                     ; re-enable interrupts
 
@@ -429,7 +432,7 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         jsr untarget_missile
 
         ldy # $06
-        jsr _a858               ; play sound?
+        jsr play_sfx
 
         lda # $00               ; set loaded missile as disarmed ($00)
         sta PLAYER_MISSILE_ARMED
@@ -480,7 +483,7 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         sty interrupt_screenmode1
 
         ldy # $0d               ; e-bomb sound?
-        jsr _a858               ; play sound?
+        jsr play_sfx
 
         ; turn docking computer off?
         ;-----------------------------------------------------------------------
@@ -593,7 +596,7 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         ;  instruction, a very handy way of skipping without branching)
        .bit
 @201b:  ldy # $0b               ; laser sound #2?                       ;$201B
-@201d:  jsr _a858               ; play sound?                           ;$201D
+@201d:  jsr play_sfx                                                    ;$201D
         jsr shoot_lasers        ; pew-pew!
         
         pla                     ; retrieve laser type?
@@ -795,7 +798,7 @@ process_ship:                                                           ;$202F
         ; is the station hostile?
 @20e3:  lda polyobj_01 + PolyObject::behaviour                          ;$20E3
         and # behaviour::angry  ; check the angry flag
-        bne dock_fail
+       .bnz dock_fail           ; cannot dock!
 
         ; are we docking?
         ;
@@ -832,7 +835,7 @@ dock_fail:                                                              ;$2107
 
 _2110:                                                                  ;$2110
         ;-----------------------------------------------------------------------
-        jsr _a813
+        jsr play_sfx_03
 
         ; set top-bit of ship state? (is exploding)
         asl ZP_POLYOBJ_STATE
@@ -859,7 +862,7 @@ _2122:                                                                  ;$2122
         ror 
 _212b:                                                                  ;$212B
         jsr _7bd2               ; take damage?
-        jsr _a813               ; sound?
+        jsr play_sfx_03         ; sound?
 _2131:                                                                  ;$2131
         ; should the ship be removed?
         lda ZP_POLYOBJ_BEHAVIOUR
@@ -876,7 +879,7 @@ _2131:                                                                  ;$2131
         lda PLAYER_MISSILE_ARMED
         beq :+
 
-        jsr _a80f               ; beep?
+        jsr play_sfx_05         ; beep?
         ldx ZP_9D               ; missile target?
         ldy # .color_nybble( RED, YELLOW )
         jsr target_missile
@@ -905,9 +908,9 @@ _2170:                                                                  ;$2170
         bcs _21a1
 
         ; explode the ship
-        asl ZP_POLYOBJ_STATE
-        sec 
-        ror ZP_POLYOBJ_STATE
+        asl ZP_POLYOBJ_STATE    ; remove bit 7
+        sec                     ; take a 1 from the bit bucket
+        ror ZP_POLYOBJ_STATE    ; shift it into bit 7
 
         lda ZP_A5
         cmp # HULL_ASTEROID
@@ -981,6 +984,8 @@ _21e5:                                                                  ;$21E5
         jsr _87a4
         bcc _21e2
 _21ee:                                                                  ;$21EE
+        ; update the poly-object's stored state
+        ; with the current working state
         ldy # PolyObject::state
         lda ZP_POLYOBJ_STATE
         sta [ZP_POLYOBJ_ADDR], y
@@ -994,7 +999,7 @@ _21ee:                                                                  ;$21EE
 _21fa:                                                                  ;$21FA
         lda PLAYER_EBOMB        ; player has energy bomb?
         bpl _2207
-        asl PLAYER_EBOMB        ; player has energy bomb?
+        asl PLAYER_EBOMB
         bmi _2207
         jsr _2367
 _2207:                                                                  ;$2207
@@ -1200,8 +1205,8 @@ _22c2:                                                                  ;$22C2
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _2303:                                                                  ;$2303
-        lda PLAYER_SCOOP
-        beq _231c
+        lda PLAYER_SCOOP        ; does the player have a fuel-scoop?
+       .bze _231c               ; skip over if not
 
         lda ZP_SPEED_HI
         lsr 
