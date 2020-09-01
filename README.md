@@ -58,6 +58,12 @@ This work was made possible by various resources available on the web, for which
 
 * Andy McFadden's [Apple \]\[ Elite disassembly](https://6502disassembly.com/a2-elite)
 
+* [Mark Moxon's][markmoxon] _heavily_ documented [BBC disassembly][bbc-moxon], based off of [Kieran Connell's conversion][kieranasm] of the original source to BeebASM
+
+[markmoxon]: https://www.markmoxon.com/
+[bbc-moxon]: https://github.com/markmoxon/elite-beebasm
+[kieranasm]: https://github.com/kieranhj/elite-beebasm
+
 * [Elite's crazy tokenised string routine][crazy] by Matt Godbolt
 
 [crazy]:  https://xania.org/201406/elites-crazy-string-format
