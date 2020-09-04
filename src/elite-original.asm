@@ -45,5 +45,6 @@
 .segment        "CODE_9900"
 ;-------------------------------------------------------------------------------
 .include        "code_9900.asm"                                         ;$9900
-.include        "sound.asm"                                             ;$B4CB
+.include        "sound/code_sound.asm"                                  ;$B4CB
+.include        "sound/data_sound.asm"                                  ;$B72D
 .include        "gfx/hull_data.asm"                                     ;$D000
