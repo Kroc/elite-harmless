@@ -837,8 +837,8 @@ status_screen:                                                          ;$2C9B
         jsr set_cursor_col
         
         ; "COMMANDER ... PRESENT SYSTEM ... HYPERSPACE SYSTEM ... CONDITION"
-.import TXT_FLIGHT_STATUS_TITLE:direct
-        lda # TXT_FLIGHT_STATUS_TITLE
+.import TKN_FLIGHT_STATUS_TITLE:direct
+        lda # TKN_FLIGHT_STATUS_TITLE
         jsr print_flight_token_and_divider
         
         lda # $0f
@@ -850,8 +850,8 @@ status_screen:                                                          ;$2C9B
         ; NOTE: the list of colour name strings begins
         ;       with "GREEN", "RED" & "YELLOW"
         ;
-.import TXT_FLIGHT_COLORS:direct
-        lda # TXT_FLIGHT_COLORS ; flight token: $E6, "GREEN"
+.import TKN_FLIGHT_COLORS:direct
+        lda # TKN_FLIGHT_COLORS ; flight token: $E6, "GREEN"
         ldy NUM_ASTEROIDS
         ldx SHIP_SLOT2, y
         beq :+                  ; print "GREEN"
@@ -865,12 +865,12 @@ _2cc7:                                                                  ;$2CC7
         ; print legal status:
         ;-----------------------------------------------------------------------
         ; print "LEGAL STATUS:"
-.import TXT_FLIGHT_LEGAL_STATUS:direct
-        lda # TXT_FLIGHT_LEGAL_STATUS
+.import TKN_FLIGHT_LEGAL_STATUS:direct
+        lda # TKN_FLIGHT_LEGAL_STATUS
         jsr print_flight_token_and_space
 
-.import TXT_FLIGHT_LEGAL_STATE:direct
-        lda # TXT_FLIGHT_LEGAL_STATE
+.import TKN_FLIGHT_LEGAL_STATE:direct
+        lda # TKN_FLIGHT_LEGAL_STATE
         ldy PLAYER_LEGAL        ; get player's legal status
        .bze :+                  ; print "CLEAN"
         cpy # $32               ; +1 if legal state is >= $32 (TODO: why $32?)
@@ -880,8 +880,8 @@ _2cc7:                                                                  ;$2CC7
         ; print player rating:
         ;-----------------------------------------------------------------------
         ; print "RATING:"
-.import TXT_FLIGHT_RATING:direct
-        lda # TXT_FLIGHT_RATING
+.import TKN_FLIGHT_RATING:direct
+        lda # TKN_FLIGHT_RATING
         jsr print_flight_token_and_space
 
         lda PLAYER_KILLS_HI     ; number of kills
@@ -905,28 +905,28 @@ _2cee:                                                                  ;$2CEE
         jsr print_flight_token_and_newline
 
         ; print "EQUIPMENT:"
-.import TXT_FLIGHT_EQUIPMENT:direct
-        lda # TXT_FLIGHT_EQUIPMENT
+.import TKN_FLIGHT_EQUIPMENT:direct
+        lda # TKN_FLIGHT_EQUIPMENT
         jsr print_flight_token_and_newline_and_indent
         lda PLAYER_ESCAPEPOD
         beq _2d04
 
         ; print "ESCAPE POD"
-.import TXT_FLIGHT_ESCAPE_POD:direct
-        lda # TXT_FLIGHT_ESCAPE_POD
+.import TKN_FLIGHT_ESCAPE_POD:direct
+        lda # TKN_FLIGHT_ESCAPE_POD
         jsr print_flight_token_and_newline_and_indent
 
 _2d04:                                                                  ;$2D04
         lda PLAYER_SCOOP
         beq _2d0e
-.import TXT_FLIGHT_FUEL_SCOOPS:direct
-        lda # TXT_FLIGHT_FUEL_SCOOPS
+.import TKN_FLIGHT_FUEL_SCOOPS:direct
+        lda # TKN_FLIGHT_FUEL_SCOOPS
         jsr print_flight_token_and_newline_and_indent
 _2d0e:                                                                  ;$2D0E
         lda PLAYER_ECM
         beq _2d18
-.import TXT_FLIGHT_ECM_SYSTEM:direct
-        lda # TXT_FLIGHT_ECM_SYSTEM
+.import TKN_FLIGHT_ECM_SYSTEM:direct
+        lda # TKN_FLIGHT_ECM_SYSTEM
         jsr print_flight_token_and_newline_and_indent
 _2d18:                                                                  ;$2D18
         lda # $71               ;="ENERGY BOMB"
@@ -946,12 +946,12 @@ _2d2f:                                                                  ;$2D2F
         stx ZP_AA
         
         ; print "FRONT" / "REAR" / "LEFT" / "RIGHT"
-.import TXT_FLIGHT_DIRECTIONS:direct
+.import TKN_FLIGHT_DIRECTIONS:direct
         ldy PLAYER_LASERS, x
         beq _2d59
         txa 
         clc 
-        adc # TXT_FLIGHT_DIRECTIONS
+        adc # TKN_FLIGHT_DIRECTIONS
         jsr print_flight_token_and_space
 
         lda # $67
@@ -968,8 +968,8 @@ _2d50:                                                                  ;$2D50
         cpy # $32
         bne _2d56
 
-.import TXT_FLIGHT_MINING_LASER:direct
-        lda # TXT_FLIGHT_MINING_LASER
+.import TKN_FLIGHT_MINING_LASER:direct
+        lda # TKN_FLIGHT_MINING_LASER
 _2d56:                                                                  ;$2D56
         jsr print_flight_token_and_newline_and_indent
 _2d59:                                                                  ;$2D59
@@ -1392,7 +1392,7 @@ txt_lcase_mask:                                                         ;$2F18
 txt_ucase_flag:                                                         ;$2F19
         .byte   %11111111
 
-txt_flight_flag:                                                        ;$2F1A
+TKN_FLIGHT_flag:                                                        ;$2F1A
         ; when printing docked strings ("text_docked.asm"), this flag causes
         ; the docked tokens to be printed as flight tokens ("text_flight.asm")
         ; instead! only function tokens ($00-$20, unscrambled) are exempt, so

@@ -2458,9 +2458,9 @@ _a75d:                                                                  ;$A75D
         lda # 11
         jsr set_cursor_col
 
-.import TXT_FLIGHT_DIRECTIONS:direct
+.import TKN_FLIGHT_DIRECTIONS:direct
         lda COCKPIT_VIEW
-        ora # TXT_FLIGHT_DIRECTIONS
+        ora # TKN_FLIGHT_DIRECTIONS
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr print_flight_token
@@ -2469,8 +2469,8 @@ _a75d:                                                                  ;$A75D
         jsr print_flight_token_and_space
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-.import TXT_FLIGHT_VIEW:direct
-        lda # TXT_FLIGHT_VIEW
+.import TKN_FLIGHT_VIEW:direct
+        lda # TKN_FLIGHT_VIEW
         jsr print_flight_token
 
 :       ldx # 1                                                         ;$A77B
@@ -2506,7 +2506,9 @@ _a795:                                                                  ;$A795
         jsr _3708               ; NOTE: spawns ship-type in X
         bcc _a785
         
-        lda # $78
+.import TKN_FLIGHT_INCOMING_MISSILE:direct
+        lda # TKN_FLIGHT_INCOMING_MISSILE
+        ; print an on-screen message
         jsr _900d
 
 .ifdef  FEATURE_AUDIO
@@ -2518,41 +2520,51 @@ _a795:                                                                  ;$A795
 
 _a7a6:                                                                  ;$A7A6
 ;===============================================================================
-; kill a PolyObject?
+; handles paperwork related to killing a ship;
+; adding kill points, showing messages, &c.
+;
 ;-------------------------------------------------------------------------------
         lda PLAYER_KILLS_FRAC
         clc 
         adc hull_kill_lo-1, x
         sta PLAYER_KILLS_FRAC
 
-        ; add fractional kill value?
         lda PLAYER_KILLS_LO
         adc hull_kill_hi-1, x
         sta PLAYER_KILLS_LO
-
-        bcc _a7c3               ; < 1.0
-
+        bcc :+                  ; < 1.0
         inc PLAYER_KILLS_HI     ; +1
 
-        lda # $65
+        ; every 256 [whole] kills, print "right on commander!"
+        ;
+.import TKN_FLIGHT_RIGHT_ON_COMMANDER:direct
+        lda # TKN_FLIGHT_RIGHT_ON_COMMANDER
+        ; show an on-screen message
         jsr _900d
-_a7c3:                                                                  ;$A7C3
-        lda ZP_POLYOBJ_ZPOS_HI
-        ldx # $0b
-        cmp # $10
-        bcs _a7db
-        inx 
-        cmp # $08
-        bcs _a7db
-        inx 
-        cmp # $06
-        bcs _a7db
-        inx 
-        cmp # $03
-        bcs _a7db
-        inx 
-_a7db:                                                                  ;$A7DB
-        txa 
+
+        ;-----------------------------------------------------------------------
+        ; select explosion volume based on distance!
+        ;
+        ; note that the C64's SID chip uses volume levels 0 to 15,
+        ; with 15 being the maximum
+        ;
+:       lda ZP_POLYOBJ_ZPOS_HI  ; distance from player...               ;$A7C3
+        ldx # 11                ; volume 11
+        cmp # $10               ; >=$1000?
+        bcs :+
+        inx ; 12                ; volume 12
+        cmp # $08               ; >=$8000?
+        bcs :+
+        inx ; 13                ; volume 13
+        cmp # $06               ; >=$6000?
+        bcs :+
+        inx ; 14                ; volume 14
+        cmp # $03               ; >=$3000?
+        bcs :+
+        inx ; 15                ; volume 15
+
+        ; adapt value for SID register
+:       txa                                                             ;$A7DB
         asl 
         asl 
         asl 
@@ -2562,9 +2574,9 @@ _a7db:                                                                  ;$A7DB
         ldx # $51
         jmp _a850
 
-;===============================================================================
 
 _a7e9:                                                                  ;$A7E9
+;===============================================================================
         lda ZP_POLYOBJ_ZPOS_HI
         ldx # $0b
         cmp # $08
@@ -2589,6 +2601,7 @@ _a7e9:                                                                  ;$A7E9
         ldy # $02
         ldx # $d0
         jmp _a850
+
 
 .ifdef  FEATURE_AUDIO
 ;///////////////////////////////////////////////////////////////////////////////

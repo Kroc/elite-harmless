@@ -2253,9 +2253,10 @@ _1a5c:                                                                  ;$1A5C
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .byte   FN_CAPS_ON, "WELCOME", __, "TO", __, "THE", __
-        .byte   "SEVENTEENTH", __, "GALAXY!", __end
+        .byte   "SEVENTEENTH", __, "GALAXY!"
 .endif  ;///////////////////////////////////////////////////////////////////////
-        
+        .byte   __end
+
         ; 27.   TODO: this does not look like text
         ;       -- some other kind of lookup table?
         .byte   _6D, FN_THEIR_NAME, FN_CAPNEXT

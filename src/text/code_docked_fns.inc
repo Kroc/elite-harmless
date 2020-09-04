@@ -70,7 +70,7 @@ use_docked_tokens:                                                      ;$249D
         ; disable the flag that causes docked tokens to be
         ; interpretted as flight tokens instead
         lda # %00000000
-        sta txt_flight_flag
+        sta TKN_FLIGHT_flag
 
         rts 
 

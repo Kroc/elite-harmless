@@ -96,7 +96,7 @@ txt_pairs:                                                              ;$254E
                 .define idstr   str
         .endif
 
-.export .ident(.concat( "txt_flight_", idstr )) = index_flight
+.export .ident(.concat( "tkn_flight_", idstr )) = index_flight
         index_flight    .set    index_flight + 1
 
         ; the madness continues because the docked tokens run out
@@ -115,12 +115,12 @@ txt_pairs:                                                              ;$254E
 ; now continue the table, where the flight pairs
 ; begin and the docked pairs overlap:
 ;
-txt_flight_pairs:                                                       ;$2566
+TKN_FLIGHT_pairs:                                                       ;$2566
 ;-------------------------------------------------------------------------------
 ; flight (and docked) text compression character pairs:
 ;
-.export txt_flight_pair1 := txt_flight_pairs+0
-.export txt_flight_pair2 := txt_flight_pairs+1
+.export TKN_FLIGHT_pair1 := TKN_FLIGHT_pairs+0
+.export TKN_FLIGHT_pair2 := TKN_FLIGHT_pairs+1
 
         .shared_pair    "al"    ;=$80 (flight), $E4 (docked)
         .shared_pair    "le"    ;=$81 (flight), $E5 (docked)

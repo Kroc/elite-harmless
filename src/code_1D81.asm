@@ -652,8 +652,8 @@ main_keys:
         ; play laser sound (based on laser-type):
         ;
         ldy # $00               ; (no sound?)
-        pla
-        pha                     ; (redo flags?)
+        pla                     ; retrieve laser power
+        pha                     ; 
         bmi :++                 ; beam laser
         cmp # $32
         bne :+                  ; (BNE to another BNE! should be `bne @201d`)
@@ -694,7 +694,7 @@ process_ship:                                                           ;$202F
                                 ; you're just happy to see me
 
 :       sta ZP_SHIP_TYPE        ; put ship type aside                   ;$2039
-        jsr get_polyobj_addr    ; look up the ship's personal data
+        jsr get_polyobj_addr    ; look up the ship's instance data
 
         ; copy the given PolyObject to
         ; the working space in zero page
@@ -738,8 +738,10 @@ process_ship:                                                           ;$202F
         lda ZP_SHIP_TYPE        ; get ship type back
         bmi @move               ; if sun / planet, skip over
 
-        asl                     ; multiply by 2 for table lookup
-        tay                     ; use as an index
+        ; lookup the ship's hull data:
+        ;
+        asl                     ; multiply ship type by 2,
+        tay                     ; for use as a table lookup
         lda hull_pointers-2, y  ; look up the hull data, lo-byte
         sta ZP_HULL_ADDR_LO
         lda hull_pointers-1, y  ; look up the hull data, hi-byte
@@ -767,11 +769,15 @@ process_ship:                                                           ;$202F
         ; make ship disappear?
         ;
         lda ZP_POLYOBJ_STATE    ; get the ship's state
-        and # state::debris
-       .bnz @move
+        and # state::debris     ; check for exploding (is debris)
+       .bnz @move               ; skip if already exploding
 
         ; set bit 7 to indicate the ship is exploding
+        ; (this assumes bit 7 is the exploding bit)
         ;
+.if     (state::exploding <> %10000000)
+        .fatal  "`process_ship` assumes that `state::exploding` is bit 7"
+.endif
         asl ZP_POLYOBJ_STATE    ; push bit 7 off
         sec                     ; set carry and...
         ror ZP_POLYOBJ_STATE    ; ...shift the carry into bit 7
@@ -862,8 +868,8 @@ process_ship:                                                           ;$202F
         tya
 
         ; print the name of the cargo 
-.import TXT_FLIGHT_FOOD:direct
-        adc # TXT_FLIGHT_FOOD
+.import TKN_FLIGHT_FOOD:direct
+        adc # TKN_FLIGHT_FOOD
         jsr _900d
 
         ; mark cannister for removal:

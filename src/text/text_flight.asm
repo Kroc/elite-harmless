@@ -14,76 +14,76 @@
 
 ; this is the 'key' used to scramble / unscramble the text token symbols
 ; https://xania.org/201406/elites-crazy-string-format
-.export TXT_FLIGHT_XOR := $23
+.export TKN_FLIGHT_XOR := $23
 
 ; all flight tokens on disk are scrambled in this way:
-.define .scramble(value) value ^ TXT_FLIGHT_XOR
+.define .scramble(value) value ^ TKN_FLIGHT_XOR
 
 
-.import txt_flight_al:direct            ;=$80:
-_AL     = .scramble( txt_flight_al )    ;^23=$A3
-.import txt_flight_le:direct            ;=$81:
-_LE     = .scramble( txt_flight_le )    ;^$23=$A2
-.import txt_flight_xe:direct            ;=$82:
-_XE     = .scramble( txt_flight_xe )    ;^$23=$A1
-.import txt_flight_ge:direct            ;=$83:
-_GE     = .scramble( txt_flight_ge )    ;^$23=$A0
-.import txt_flight_za:direct            ;=$84:
-_ZA     = .scramble( txt_flight_za )    ;^$23=$A7
-.import txt_flight_ce:direct            ;=$85:
-_CE     = .scramble( txt_flight_ce )    ;^$23=$A6
-.import txt_flight_bi:direct            ;=$86:
-_BI     = .scramble( txt_flight_bi )    ;^$23=$A5
-.import txt_flight_so:direct            ;=$87:
-_SO     = .scramble( txt_flight_so )    ;^$23=$A4
-.import txt_flight_us:direct            ;=$88:
-_US     = .scramble( txt_flight_us )    ;^$23=$AB
-.import txt_flight_es:direct            ;=$89:
-_ES     = .scramble( txt_flight_es )    ;^$23=$AA
-.import txt_flight_ar:direct            ;=$8A:
-_AR     = .scramble( txt_flight_ar )    ;^$23=$A9
-.import txt_flight_ma:direct            ;=$8B:
-_MA     = .scramble( txt_flight_ma )    ;^$23=$A8
-.import txt_flight_in:direct            ;=$8C:
-_IN     = .scramble( txt_flight_in )    ;^$23=$AF
-.import txt_flight_di:direct            ;=$8D:
-_DI     = .scramble( txt_flight_di )    ;^$23=$AE
-.import txt_flight_re:direct            ;=$8E:
-_RE     = .scramble( txt_flight_re )    ;^$23=$AD
-.import txt_flight_a_:direct            ;=$8F:
-_A_     = .scramble( txt_flight_a_ )    ;=$23=$AC
-.import txt_flight_er:direct            ;=$90:
-_ER     = .scramble( txt_flight_er )    ;^$23=$B3
-.import txt_flight_at:direct            ;=$91:
-_AT     = .scramble( txt_flight_at )    ;^$23=$B2
-.import txt_flight_en:direct            ;=$92:
-_EN     = .scramble( txt_flight_en )    ;^$23=$B1
-.import txt_flight_be:direct            ;=$93:
-_BE     = .scramble( txt_flight_be )    ;^$23=$B0
-.import txt_flight_ra:direct            ;=$94:
-_RA     = .scramble( txt_flight_ra )    ;^$23=$B7
-.import txt_flight_la:direct            ;=$95:
-_LA     = .scramble( txt_flight_la )    ;^$23=$B6
-.import txt_flight_ve:direct            ;=$96:
-_VE     = .scramble( txt_flight_ve )    ;^$23=$B5
-.import txt_flight_ti:direct            ;=$97:
-_TI     = .scramble( txt_flight_ti )    ;^$23=$B4
-.import txt_flight_ed:direct            ;=$98:
-_ED     = .scramble( txt_flight_ed )    ;^$23=$BB
-.import txt_flight_or:direct            ;=$99:
-_OR     = .scramble( txt_flight_or )    ;^$23=$BA
-.import txt_flight_qu:direct            ;=$9A:
-_QU     = .scramble( txt_flight_qu )    ;^$23=$B9
-.import txt_flight_an:direct            ;=$9B:
-_AN     = .scramble( txt_flight_an )    ;^$23=$B8
-.import txt_flight_te:direct            ;=$9C:
-_TE     = .scramble( txt_flight_te )    ;^$23=$BF
-.import txt_flight_is:direct            ;=$9D:
-_IS     = .scramble( txt_flight_is )    ;^$23=$BE
-.import txt_flight_ri:direct            ;=$9E:
-_RI     = .scramble( txt_flight_ri )    ;^$23=$BD
-.import txt_flight_on:direct            ;=$9F:
-_ON     = .scramble( txt_flight_on )    ;^$23=$BC
+.import tkn_flight_al:direct            ;=$80:
+_AL     = .scramble( tkn_flight_al )    ;^23=$A3
+.import tkn_flight_le:direct            ;=$81:
+_LE     = .scramble( tkn_flight_le )    ;^$23=$A2
+.import tkn_flight_xe:direct            ;=$82:
+_XE     = .scramble( tkn_flight_xe )    ;^$23=$A1
+.import tkn_flight_ge:direct            ;=$83:
+_GE     = .scramble( tkn_flight_ge )    ;^$23=$A0
+.import tkn_flight_za:direct            ;=$84:
+_ZA     = .scramble( tkn_flight_za )    ;^$23=$A7
+.import tkn_flight_ce:direct            ;=$85:
+_CE     = .scramble( tkn_flight_ce )    ;^$23=$A6
+.import tkn_flight_bi:direct            ;=$86:
+_BI     = .scramble( tkn_flight_bi )    ;^$23=$A5
+.import tkn_flight_so:direct            ;=$87:
+_SO     = .scramble( tkn_flight_so )    ;^$23=$A4
+.import tkn_flight_us:direct            ;=$88:
+_US     = .scramble( tkn_flight_us )    ;^$23=$AB
+.import tkn_flight_es:direct            ;=$89:
+_ES     = .scramble( tkn_flight_es )    ;^$23=$AA
+.import tkn_flight_ar:direct            ;=$8A:
+_AR     = .scramble( tkn_flight_ar )    ;^$23=$A9
+.import tkn_flight_ma:direct            ;=$8B:
+_MA     = .scramble( tkn_flight_ma )    ;^$23=$A8
+.import tkn_flight_in:direct            ;=$8C:
+_IN     = .scramble( tkn_flight_in )    ;^$23=$AF
+.import tkn_flight_di:direct            ;=$8D:
+_DI     = .scramble( tkn_flight_di )    ;^$23=$AE
+.import tkn_flight_re:direct            ;=$8E:
+_RE     = .scramble( tkn_flight_re )    ;^$23=$AD
+.import tkn_flight_a_:direct            ;=$8F:
+_A_     = .scramble( tkn_flight_a_ )    ;=$23=$AC
+.import tkn_flight_er:direct            ;=$90:
+_ER     = .scramble( tkn_flight_er )    ;^$23=$B3
+.import tkn_flight_at:direct            ;=$91:
+_AT     = .scramble( tkn_flight_at )    ;^$23=$B2
+.import tkn_flight_en:direct            ;=$92:
+_EN     = .scramble( tkn_flight_en )    ;^$23=$B1
+.import tkn_flight_be:direct            ;=$93:
+_BE     = .scramble( tkn_flight_be )    ;^$23=$B0
+.import tkn_flight_ra:direct            ;=$94:
+_RA     = .scramble( tkn_flight_ra )    ;^$23=$B7
+.import tkn_flight_la:direct            ;=$95:
+_LA     = .scramble( tkn_flight_la )    ;^$23=$B6
+.import tkn_flight_ve:direct            ;=$96:
+_VE     = .scramble( tkn_flight_ve )    ;^$23=$B5
+.import tkn_flight_ti:direct            ;=$97:
+_TI     = .scramble( tkn_flight_ti )    ;^$23=$B4
+.import tkn_flight_ed:direct            ;=$98:
+_ED     = .scramble( tkn_flight_ed )    ;^$23=$BB
+.import tkn_flight_or:direct            ;=$99:
+_OR     = .scramble( tkn_flight_or )    ;^$23=$BA
+.import tkn_flight_qu:direct            ;=$9A:
+_QU     = .scramble( tkn_flight_qu )    ;^$23=$B9
+.import tkn_flight_an:direct            ;=$9B:
+_AN     = .scramble( tkn_flight_an )    ;^$23=$B8
+.import tkn_flight_te:direct            ;=$9C:
+_TE     = .scramble( tkn_flight_te )    ;^$23=$BF
+.import tkn_flight_is:direct            ;=$9D:
+_IS     = .scramble( tkn_flight_is )    ;^$23=$BE
+.import tkn_flight_ri:direct            ;=$9E:
+_RI     = .scramble( tkn_flight_ri )    ;^$23=$BD
+.import tkn_flight_on:direct            ;=$9F:
+_ON     = .scramble( tkn_flight_on )    ;^$23=$BC
 
 .macro  .define_letter  id, index
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -96,7 +96,7 @@ _ON     = .scramble( txt_flight_on )    ;^$23=$BC
         ; define the public version used in code,
         ; (unscrambled)
         ;
-.export .ident( .concat( "TXT", id )) = index
+.export .ident( .concat( "TKN_FLIGHT", id )) = index
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -177,7 +177,7 @@ _word_index     .set 0
         ;;.out .sprintf(": $%0.2x: TXT%s", _value, word_id)
         .ident(word_id) = _value
 
-.export .ident(.concat("TXT_FLIGHT", word_id)) = .scramble( _value )
+.export .ident(.concat("TKN_FLIGHT", word_id)) = .scramble( _value )
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -674,7 +674,7 @@ _0980:  ;$64: 100.                                                      ;$0980
         
 _0986:  ;$65: 101.                                                      ;$0986
         .byte   _RIGHT, _ON_, _COMMANDER, $02, __end
-        .skip_word              ; $65^35 = $46
+        .define_word    "_RIGHT_ON_COMMANDER"                           ;=$46
 
 _098b:  ;$66: 102.                                                      ;$098B
         .byte   _E, _X, _T, _RA, __, __end
@@ -766,7 +766,7 @@ _09fa:  ;$77: 119.                                                      ;$09FA
 
 _09fe:  ;$78: 120.                                                      ;$09FE
         .byte   _IN, _COM, _IN, _G, __, _MISSILE, __end
-        .skip_word              ; $78^35 = $5B
+        .define_word    "_INCOMING_MISSILE"                             ;=$5B
 
 _0a05:  ;$79: 121.                                                      ;$0A05
         .byte   _EN, _ER, _G, _Y, __, __end

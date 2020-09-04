@@ -45,8 +45,8 @@ print_fuel_and_cash:                                                    ;$774A
 ;-------------------------------------------------------------------------------
 
         ; print "FUEL:"
-.import TXT_FLIGHT_FUEL:direct
-        lda # TXT_FLIGHT_FUEL
+.import TKN_FLIGHT_FUEL:direct
+        lda # TKN_FLIGHT_FUEL
         jsr print_flight_token_with_colon
 
         ; print the player's fuel quantity
@@ -55,13 +55,13 @@ print_fuel_and_cash:                                                    ;$774A
         jsr print_tiny_value
 
         ; print "LIGHT YEARS"
-.import TXT_FLIGHT_LIGHT_YEARS:direct
-        lda # TXT_FLIGHT_LIGHT_YEARS
+.import TKN_FLIGHT_LIGHT_YEARS:direct
+        lda # TKN_FLIGHT_LIGHT_YEARS
         jsr print_flight_token_and_newline
 
         ; TODO: just use `print_flight_token_and_colon`, no?
-.import TXT_FLIGHT_CASH_:direct
-        lda # TXT_FLIGHT_CASH_  ; "CASH:" (colon in the string)
+.import TKN_FLIGHT_CASH_:direct
+        lda # TKN_FLIGHT_CASH_  ; "CASH:" (colon in the string)
         bne print_flight_token
 
         ; print cash value?
@@ -81,8 +81,8 @@ _775f:                                                                  ;$775F
         jsr print_large_value   ; convert value to string
 
         ; print "CR" ("credits") after the cash value
-.import TXT_FLIGHT_CR:direct
-        lda # TXT_FLIGHT_CR
+.import TKN_FLIGHT_CR:direct
+        lda # TKN_FLIGHT_CR
         ;
         ; fall-through below to print "CR" and new-line
         ;
@@ -316,9 +316,9 @@ _print_str:                                                             ;$77F9
         and # %01111111         ; clear token flag, leave message index
         asl                     ; double it for a lookup-table offset,
         tay                     ; this would have cleared bit 7 anyway!
-        lda txt_flight_pair1, y ; read the first character,
+        lda TKN_FLIGHT_pair1, y ; read the first character,
         jsr print_flight_token  ; print it
-        lda txt_flight_pair2, y ; read second character
+        lda TKN_FLIGHT_pair2, y ; read second character
         cmp # $3f               ; no second character? (print nothing)
         beq _784e               ; yes, skip
         jmp print_flight_token  ; print second character (and return)
@@ -376,10 +376,10 @@ print_flight_token_string:                                              ;$7834
 
         ; get the 'key' used for de-scrambling the text
         ; (see "text_flight.asm")
-.import TXT_FLIGHT_XOR:direct
+.import TKN_FLIGHT_XOR:direct
 
         lda [ZP_TEMP_ADDR3], y  ; read a token
-        eor # TXT_FLIGHT_XOR    ; 'descramble' token
+        eor # TKN_FLIGHT_XOR    ; 'descramble' token
         jsr print_flight_token  ; process it
 
         ; restore the previous page

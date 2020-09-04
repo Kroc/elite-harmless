@@ -121,7 +121,7 @@ print_docked_token:                                                     ;$23CF
         cmp # ' '               ; tokens less than $20 (space)
        .blt _format_code        ; are format codes
 
-        bit txt_flight_flag     ; if flight string mode is off,
+        bit TKN_FLIGHT_flag     ; if flight string mode is off,
         bpl :+                  ; skip the next bit
 
         ; print a flight token instead of a docked token:
