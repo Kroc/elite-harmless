@@ -4,23 +4,23 @@
 ;===============================================================================
 .linecont+
 
-ZP_SOUND_ADDR           = $c2
-ZP_SOUND_ADDR_LO        = $c2
-ZP_SOUND_ADDR_HI        = $c3
+ZP_SOUND_ADDR           := $c2
+ZP_SOUND_ADDR_LO        := $c2
+ZP_SOUND_ADDR_HI        := $c3
 
-ZP_SOUND_START          = $c4
-ZP_SOUND_START_LO       = $c4
-ZP_SOUND_START_HI       = $c5
+ZP_SOUND_START          := $c4
+ZP_SOUND_START_LO       := $c4
+ZP_SOUND_START_HI       := $c5
 
-ZP_C6                   = $c6   ;?
-ZP_C7                   = $c7   ;?
-ZP_C8                   = $c8   ;?
-ZP_C9                   = $c9   ;?
-ZP_CA                   = $ca   ;?
-ZP_CB                   = $cb   ;?
-ZP_CC                   = $cc   ;?
+ZP_C6                   := $c6  ;?
+ZP_C7                   := $c7  ;?
+ZP_C8                   := $c8  ;?
+ZP_C9                   := $c9  ;?
+ZP_CA                   := $ca  ;?
+ZP_CB                   := $cb  ;?
+ZP_CC                   := $cc  ;?
 
-ZP_SOUND_TOKEN          = $d1
+ZP_SOUND_TOKEN          := $d1
 
 .segment        "CODE_SOUND"
 

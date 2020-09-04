@@ -39,7 +39,7 @@
 ; we can caluclate this value from the bitmap address given by the linker
 ; 
 ELITE_VIC_BANK          = .vic_bank_from_bitmap( ELITE_BITMAP_ADDR )
-ELITE_VIC_ADDR          = ELITE_VIC_BANK * $4000
+ELITE_VIC_ADDR          := ELITE_VIC_BANK * $4000
 
 ; the VIC-II uses a 1 KB block of RAM for the text-screen (40x25 = 1'000 bytes)
 ; or, in the case of high-resolution bitmap mode, colour-cell information where
@@ -55,13 +55,13 @@ ELITE_VIC_ADDR          = ELITE_VIC_BANK * $4000
 .import ELITE_MAINSCR_ADDR
 
 
-ELITE_VIC_LAYOUT_MAINSCR := \
+ELITE_VIC_LAYOUT_MAINSCR = \
      <( (((ELITE_MAINSCR_ADDR .mod $4000) / $0400) << 4) \
       |  ((ELITE_BITMAP_ADDR .mod $4000) >> 10) \
       | vic_layout::unused \
       )
 
-ELITE_VIC_LAYOUT_MENUSCR := \
+ELITE_VIC_LAYOUT_MENUSCR = \
      <( (((ELITE_MENUSCR_ADDR .mod $4000) / $0400) << 4) \
       |  ((ELITE_BITMAP_ADDR .mod $4000) >> 10) \
       | vic_layout::unused \

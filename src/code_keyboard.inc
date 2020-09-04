@@ -81,36 +81,36 @@
 ; map semantic names to the desired key-state memory locations.
 ; this lets you very easily remap controls for compile time
 ;
-joy_up                  = key_s
-joy_down                = key_x
-joy_left                = key_comma
-joy_right               = key_dot
-joy_fire                = key_a
-key_accelerate          = key_spc 
-key_decelerate          = key_slash
-key_missile_target      = key_t
-key_missile_disarm      = key_u
-key_missile_fire        = key_m
-key_bomb                = key_c64
-key_ecm                 = key_e
-key_escape_pod          = key_back
-key_docking_on          = key_c
-key_docking_off         = key_p
-key_jump                = key_j         ; quick-jump
-key_hyperspace          = key_h         ; hyperspace jump
-key_buy_cargo           = key_1         ; buy cargo screen
-key_sell_cargo          = key_2         ; sell cargo screen
-key_buy_equipment       = key_3         ; buy equipment screen
-key_chart_galactic      = key_4         ; galactic chart
-key_chart_local         = key_5         ; local (short-range) chart
-key_planet              = key_6         ; planetary information
-key_market              = key_7         ; market prices screen
-key_status              = key_8         ; status screen
-key_inventory           = key_9         ; inventory screen
-key_view_front          = key_f1
-key_view_rear           = key_f3
-key_view_left           = key_f5
-key_view_right          = key_f7
+joy_up                  := key_s
+joy_down                := key_x
+joy_left                := key_comma
+joy_right               := key_dot
+joy_fire                := key_a
+key_accelerate          := key_spc 
+key_decelerate          := key_slash
+key_missile_target      := key_t
+key_missile_disarm      := key_u
+key_missile_fire        := key_m
+key_bomb                := key_c64
+key_ecm                 := key_e
+key_escape_pod          := key_back
+key_docking_on          := key_c
+key_docking_off         := key_p
+key_jump                := key_j        ; quick-jump
+key_hyperspace          := key_h        ; hyperspace jump
+key_buy_cargo           := key_1        ; buy cargo screen
+key_sell_cargo          := key_2        ; sell cargo screen
+key_buy_equipment       := key_3        ; buy equipment screen
+key_chart_galactic      := key_4        ; galactic chart
+key_chart_local         := key_5        ; local (short-range) chart
+key_planet              := key_6        ; planetary information
+key_market              := key_7        ; market prices screen
+key_status              := key_8        ; status screen
+key_inventory           := key_9        ; inventory screen
+key_view_front          := key_f1
+key_view_rear           := key_f3
+key_view_left           := key_f5
+key_view_right          := key_f7
 
 ; an array of key states to indicate which keys are pressed; the byte values
 ; written out here are meaningless, this array is cleared with $00 when in use
