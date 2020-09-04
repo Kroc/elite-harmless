@@ -2518,7 +2518,7 @@ _a795:                                                                  ;$A795
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-_a7a6:                                                                  ;$A7A6
+ship_killed:                                                            ;$A7A6
 ;===============================================================================
 ; handles paperwork related to killing a ship;
 ; adding kill points, showing messages, &c.
@@ -2542,6 +2542,7 @@ _a7a6:                                                                  ;$A7A6
         ; show an on-screen message
         jsr _900d
 
+; TODO: include this only with FEATURE_AUDIO
         ;-----------------------------------------------------------------------
         ; select explosion volume based on distance!
         ;
@@ -2563,34 +2564,37 @@ _a7a6:                                                                  ;$A7A6
         bcs :+
         inx ; 15                ; volume 15
 
-        ; adapt value for SID register
 :       txa                                                             ;$A7DB
         asl 
         asl 
         asl 
         asl 
-        ora # %00000011
-        ldy # $03
-        ldx # $51
+        ora # %00000011         ;?
+        ldy # $03               ;?
+        ldx # $51               ;?
         jmp _a850
 
 
 _a7e9:                                                                  ;$A7E9
 ;===============================================================================
-        lda ZP_POLYOBJ_ZPOS_HI
-        ldx # $0b
+; TODO: this first bit is a duplicate of the same above,
+;       so we could turn it into a JSR
+;
+;-------------------------------------------------------------------------------
+        lda ZP_POLYOBJ_ZPOS_HI  ; distance from player...
+        ldx # 11
         cmp # $08
         bcs :+
-        inx 
+        inx ; 12
         cmp # $04
         bcs :+
-        inx 
+        inx ; 13
         cmp # $03
         bcs :+
-        inx 
+        inx ; 14
         cmp # $02
         bcs :+
-        inx 
+        inx ; 15
 
 :       txa                                                             ;$A801
         asl 

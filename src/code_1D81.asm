@@ -206,7 +206,7 @@ _1e35:
         cmp TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
        .blt :+
 
-        jmp roll_pitch
+        jmp main_roll_pitch
 
         ; take the counter 0-7 and multiply by 2
         ; for use in a table of 16-bit values later
@@ -310,32 +310,30 @@ _1e35:
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        jmp roll_pitch
+        jmp main_roll_pitch
 
 
 _1ec1:                                                                  ;$1EC1
 ;===============================================================================
-; main cockpit-view game-play loop perhaps?
-; (handles many key presses)
-;-------------------------------------------------------------------------------
         ; seed the random-number-generator:
         lda polyobj_00          ; TODO: why this byte?
         sta ZP_GOATSOUP_pt1
 
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
-
         ; are there any Trumbles™ on-screen?
         lda TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
-       .bze roll_pitch          ; =0; don't process Trumbles™
+       .bze :+                  ; =0; don't process Trumbles™
 
         ; process Trumbles™
         ; (move them about, breed them)
         jmp _1e35
-
 .endif  ;///////////////////////////////////////////////////////////////////////
+:
 
-roll_pitch:                                                             ;$1ECE
+main_roll_pitch:                                                        ;$1ECE
+        ;=======================================================================
+        ; [1]:  compute roll & pitch
         ;-----------------------------------------------------------------------
         ; take the roll amount and prepare it for use in the 3D math:
         ;
@@ -424,6 +422,8 @@ roll_pitch:                                                             ;$1ECE
         ;       marking a 'no keys' flag?
 main_keys:
         ;=======================================================================
+        ; [2]:  handle key presses
+        ;-----------------------------------------------------------------------
         ; accelerate?
         ;-----------------------------------------------------------------------
         lda key_accelerate      ; is accelerate being held?
@@ -582,10 +582,13 @@ main_keys:
         ;///////////////////////////////////////////////////////////////////////
         jsr _9204               ; play docking computer music
 .endif  ;///////////////////////////////////////////////////////////////////////
+:
 
-        ; handle lasers:
+main_lasers:                                                            ;$1FD5
+        ;=======================================================================
+        ; [3]:  shoot lasers!
         ;-----------------------------------------------------------------------
-:       lda # $00                                                       ;$1FD5
+        lda # $00                                                       
         sta ZP_LASER            ; clear laser-power for current view
         sta ZP_SPEED_LO
 
@@ -678,15 +681,14 @@ main_keys:
 :       and # %11111010         ; set pulse-wait based on power-level   ;$2028
         sta LASER_COUNTER
 
-        ; process ships?
+        ;=======================================================================
+        ; [4]:  process ship instances
         ;-----------------------------------------------------------------------
 @ships: ldx # $00               ; begin with ship-slot 0                ;$202D
 
 
 process_ship:                                                           ;$202F
-;===============================================================================
-; in:   X       ship-slot index
-;-------------------------------------------------------------------------------
+        ;-----------------------------------------------------------------------
         stx ZP_PRESERVE_X       ; set aside ship slot for later
         lda SHIP_SLOTS, x       ; is that a ship in your slot?
         bne :+                  ; if so, process it
@@ -747,9 +749,11 @@ process_ship:                                                           ;$202F
         lda hull_pointers-1, y  ; look up the hull data, hi-byte
         sta ZP_HULL_ADDR_HI
 
-        ; e-bomb explodes ship:
+        ;=======================================================================
+        ; [5]:  handle e-bomb explosion
         ;-----------------------------------------------------------------------
         ; is the e-bomb active? (bit 7 set)
+        ;
         lda PLAYER_EBOMB        ; check e-bomb state
         bpl @move               ; inactive, skip over
 
@@ -783,75 +787,99 @@ process_ship:                                                           ;$202F
         ror ZP_POLYOBJ_STATE    ; ...shift the carry into bit 7
 
         ldx ZP_SHIP_TYPE        ; retrieve ship-type again
-        jsr _a7a6               ; kill ship?
+        jsr ship_killed         ; kill ship?
 
-        ; move the ship forward:
+        ;=======================================================================
+        ; [6]:  move ship forward
         ;-----------------------------------------------------------------------
 @move:  jsr _a2a0               ; move ship?                            ;$2079
 
         ; copy the zero-page PolyObject back to its storage
-        ; TODO: unroll this in hiram config
-        ldy # .sizeof(PolyObject) - 1
-:       lda ZP_POLYOBJ, y                                               ;$207E
-        sta [ZP_POLYOBJ_ADDR], y
-        dey 
-        bpl :-
+        ;
+        ;                                 bytes cycles
+        ldy # .sizeof(PolyObject)-1     ;  2     2
+        ;-------------------------------;---------------------------------------
+:       lda ZP_POLYOBJ, y               ; +2=4   4=4                    ;$207E
+        sta [ZP_POLYOBJ_ADDR], y        ; +2=6  +6=10
+        dey                             ; +1=7  +2=12
+        bpl :-                          ; +2=9  +3=15 (+2 for !bpl)
+        ;-------------------------------;---------------------------------------
+        ;                         loop: ;       *37=554
+        ;                        total: ;    9  556
 
-        ; if the ship is exploding, or at a medium distance(?)
-        ; then skip the next bit
+        ;=======================================================================
+        ; [7]:  collision checks
+        ;-----------------------------------------------------------------------
+        ; is the ship exploding?
+        ;
         lda ZP_POLYOBJ_STATE
         and # state::exploding | state::debris
+
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr _87b1               ; combine check with medium distance
+        jsr _87b1               ; combine check with distance
 .else   ;///////////////////////////////////////////////////////////////////////
         ora ZP_POLYOBJ_XPOS_HI  ; there's really no need for a JSR for this
         ora ZP_POLYOBJ_YPOS_HI
         ora ZP_POLYOBJ_ZPOS_HI
 .endif  ;///////////////////////////////////////////////////////////////////////
-        bne @20e0               
 
-        ; check the near distance(?)
+        ; if the ship is exploding / exploded or far away then skip
+       .bnz @20e0               
+
+        ; check the near distance
         lda ZP_POLYOBJ_XPOS_LO
         ora ZP_POLYOBJ_YPOS_LO
         ora ZP_POLYOBJ_ZPOS_LO
-        bmi @20e0               ; TODO: too far, or is this about direction?
+        ; if the high-bit is set on the lo-byte of any axis
+        ; then the ship is still far enough away, skip ahead
+        bmi @20e0
 
+        ; collision!
+        ;-----------------------------------------------------------------------
         ldx ZP_SHIP_TYPE        ; sun or planet?
-        bmi @20e0               ; yes, skip
+        bmi @20e0               ; yes, deal with crashing into planet/star!
 
         cpx # HULL_COREOLIS     ; space station?
         beq @20e3               ; yes, handle space-station behaviour
 
-        and # %11000000
+        and # %11000000         ; is distance within 64?
         bne @20e0
 
         cpx # HULL_MISSILE      ; is it a missile?
         beq @20e0               ; yes, skip
 
-        lda PLAYER_SCOOP        ; have fuel scoop?
-        and ZP_POLYOBJ_YPOS_SIGN; TODO: near sun(?)
-        bpl _2122
-
-        cpx # HULL_CANNISTER    ; is this a cargo cannister?
-        beq @20c0
-
-        ; not a cargo cannister:
+        ; can we scoop this object?
         ;
+        ; get fuel scoop status ($00 = none, $80 = present)
+        lda PLAYER_SCOOP
+        ; is the object below the player? i.e. if its Y-position is negative.
+        ; we've already established that it's near enough to us
+        and ZP_POLYOBJ_YPOS_SIGN
+        bpl _2122               ; if not scoopable, skip
+
+        ; attempt to scoop object
+        ;
+        cpx # HULL_CANNISTER    ; is this a cargo cannister?
+        beq @20c0               ; yes, pick it up
+
         ; read scoop data from the hull
+        ;
         ldy # Hull::scoop_debris
         lda [ZP_HULL_ADDR], y
         lsr                     ; down shift the top-nybble
         lsr                     ; into the bottom nybble
         lsr                     ; (cargo-data is held in the top-nybble,
         lsr                     ;  debris-data in the low-nybble)
-        beq _2122               ; if zero, cannot be scooped?
-
-        ; TODO: this would imply that the `scoop_debris`-data in the hulls
-        ;       would need to be generated from HULL_* constants
+       .bze _2122               ; if zero, cannot be scooped?
+        
+        ; the scoop-data in a hull definition provides which cargo type it
+        ; gives when scooped, already decremented by 1 to account for the
+        ; below non-zero check. a side-effect of this is that it's not
+        ; possible for a hull definition to drop food or textiles(?)
         ;
-        adc # $01               ; select type of cargo(?)
-        bne @20c5               ; (always branches)
+        adc # $01               ; add 1 to cargo type
+       .bnz @20c5               ; (always branches)
 
         ; scooped cargo:
         ;-----------------------------------------------------------------------
@@ -1029,7 +1057,7 @@ _2192:                                                                  ;$2192
         jsr _234c
 
         ldx ZP_SHIP_TYPE
-        jsr _a7a6               ; kill ship?
+        jsr ship_killed
 _21a1:                                                                  ;$21A1
         sta ZP_POLYOBJ_ENERGY
 _21a3:                                                                  ;$21A3

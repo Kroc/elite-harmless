@@ -2198,7 +2198,7 @@ _328a:                                                                  ;$328A
         lsr 
         tax 
 _3290:                                                                  ;$3290
-        jsr _a7a6               ; kill ship?
+        jsr ship_killed
 _3293:                                                                  ;$3293
         asl ZP_POLYOBJ_STATE
         sec 

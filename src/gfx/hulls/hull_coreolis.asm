@@ -44,7 +44,7 @@ hull_pointer_station:                                                   ;$D002
 
         .proc   header
 
-        .byte   $00             ; "scoop / debris"
+        .scoop_debris   0, $0   ; "scoop / debris"
         .word   $6400           ; "missile lock area"?
         .byte   < edges_offset  ; "edges data offset lo"
         .byte   < faces_offset  ; "faces data offset lo"

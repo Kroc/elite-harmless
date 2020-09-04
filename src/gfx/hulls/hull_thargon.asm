@@ -31,7 +31,10 @@ HULL_THARGON_KILL       = 33    ;= 0.128
 ;===============================================================================
 .proc   hull_thargon                                                    ;$EBBD
         ;-----------------------------------------------------------------------
-        .byte                            $f0, $40, $06                  ;$EBBD
+        ; scooping a thargon gets you valuable "alien items"
+        .scoop_debris   Cargo::aliens, $0                               ;$EBBD
+        
+        .byte                                 $40, $06                  ;$EBBE
         .byte   $e6, $50, $45, $00, $12, $3c, $0f, $32                  ;$EBC0
         .byte   $00, $1c, $14, $14, $1e, $e7, $00, $02
         .byte   $10, $09, $00, $28, $9f, $01, $55, $09                  ;$EBD0

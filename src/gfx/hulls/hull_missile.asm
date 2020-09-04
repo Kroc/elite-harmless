@@ -33,7 +33,7 @@ HULL_MISSILE_KILL       = 149   ;= 0.58
         ;-----------------------------------------------------------------------
         .proc   header
 
-        .byte   $00             ; "scoop / debris"
+        .scoop_debris   0, $0   ; "scoop / debris"
         .word   $0640           ; "missile lock area"?
         .byte   < edges_offset  ; "edges data offset lo"
         .byte   < faces_offset  ; "faces data offset lo"
