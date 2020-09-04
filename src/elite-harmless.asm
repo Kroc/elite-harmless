@@ -13,7 +13,7 @@
 .include        "text/code_docked_fns.inc"
 .include        "code_keyboard.inc"
 
-.include        "code_init.asm"                                         ;$0400
+.include        "code_init.asm"
 ; (must be below "code_init.asm" due to appending of code to `CODE_INIT` above)
 .include        "math/math_data.asm"
 

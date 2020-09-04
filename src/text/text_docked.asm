@@ -2250,8 +2250,11 @@ _1a5c:                                                                  ;$1A5C
         .byte   __end
         
         ; 26.   unused
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         .byte   FN_CAPS_ON, "WELCOME", __, "TO", __, "THE", __
         .byte   "SEVENTEENTH", __, "GALAXY!", __end
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         ; 27.   TODO: this does not look like text
         ;       -- some other kind of lookup table?

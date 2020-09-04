@@ -290,7 +290,7 @@ echo "  --------------------------------------"
 clean
 
 # enable undocumented opcodes and mathtables
-options="--cpu 6502X -Wa -DOPTION_MATHTABLES,-DFEATURE_AUDIO"
+options="--cpu 6502X -Wa -DFEATURE_AUDIO"
 
 echo -n "- assembling                        "
 
