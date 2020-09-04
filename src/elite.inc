@@ -4,6 +4,11 @@
 ;===============================================================================
 .linecont+
 
+.ifndef     OPTION_NOAUDIO
+            FEATURE_AUDIO     = 1
+.endif
+
+;===============================================================================
 ; this is the main include file for common definitions for Elite, that is,
 ; constants, macros and the like that do not immediately output bytes
 

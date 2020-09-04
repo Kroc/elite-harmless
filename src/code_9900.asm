@@ -2491,11 +2491,11 @@ _a785:                                                                  ;$A785
         rts 
 
 _a786:                                                                  ;$A786
-        lda # $00
-        sta ZP_67
-        sta VAR_0481
+        lda # $00               ; disable ECM:
+        sta ECM_COUNTER         ; zero-out ECM counter
+        sta ECM_STATE           ; mark our ECM as inactive
 
-        jsr _b0fd
+        jsr _b0fd               ; clear ECM indicator on HUD
         ldy # $09
         jmp _a822
 
@@ -2509,7 +2509,7 @@ _a795:                                                                  ;$A795
         lda # $78
         jsr _900d
 
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $04
         jmp play_sfx
@@ -2590,7 +2590,7 @@ _a7e9:                                                                  ;$A7E9
         ldx # $d0
         jmp _a850
 
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
 ;///////////////////////////////////////////////////////////////////////////////
 play_sfx_05:                                                            ;$A80F
 ;===============================================================================
@@ -2644,7 +2644,7 @@ _a839:                                                                  ;$A839
         ldx # $f0
         jsr _a850
 
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $04
         jsr play_sfx
@@ -2655,7 +2655,7 @@ _a839:                                                                  ;$A839
         ldy # 1
         jsr wait_frames
 
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $87               ; high-bit set
         bne play_sfx            ; (awlays branches)
@@ -2896,19 +2896,22 @@ _b0b5:                                                                  ;$B0B5
         rts 
 
 
-_b0f4:                                                                  ;$B0F4
+engage_ecm:                                                             ;$B0F4
 ;===============================================================================
-        lda # $20
-        sta ZP_67
+        lda # 32                ; set the ECM counter to 32
+        sta ECM_COUNTER
 
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
-        ldy # $09
+        ldy # $09               ; E.C.M. sound?
         jsr play_sfx
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 _b0fd:                                                                  ;$B0FD
 ;===============================================================================
+; light up the ECM indicator on the HUD?
+;
+;-------------------------------------------------------------------------------
         lda ELITE_MAINSCR_ADDR + .scrpos( 23, 11 )      ;=$67A3
         eor # %11100000
         sta ELITE_MAINSCR_ADDR + .scrpos( 23, 11 )      ;=$67A3

@@ -77,7 +77,7 @@ NUM_ASTEROIDS           = $047f ; number of asteroids present
 
 DOCKCOM_STATE           = $0480 ; docking computer state: $00 = OFF, $FF = ON
 
-VAR_0481                = $0481 ;?
+ECM_STATE               = $0481 ; if our ECM is enabled or not
 
 IS_WITCHSPACE           = $0482 ; has misjump occurred?
 CABIN_HEAT              = $0483 ; cabin temperature

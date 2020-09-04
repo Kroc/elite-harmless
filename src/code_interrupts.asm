@@ -207,7 +207,7 @@ interrupt:                                                              ;$A8FA
         ; one above
        .phy
 
-.ifndef OPTION_NOSOUND
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         bit flag_music_playing  ; is music currently playing?
         bpl @play_sfx           ; no, skip ahead to SFX

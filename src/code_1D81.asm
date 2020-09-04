@@ -450,11 +450,11 @@ main_keys:
         and PLAYER_MISSILES     ; does the player have any missiles?
        .bze :+                  ; no? skip ahead
 
-        ; disarm missile and change the colour of the missile-block on the HUD
+        ; untarget missile and change colour of the missile-block on the HUD
         ldy # .color_nybble( GREEN, HUD_COLOUR )
         jsr untarget_missile
 
-.ifndef OPTION_NOSOUND
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $06
         jsr play_sfx
@@ -473,12 +473,12 @@ main_keys:
 
         ldx PLAYER_MISSILES     ; does the player have any missiles?
        .bze :+                  ; if missiles are zero, skip
-                                ; TODO: add a beep here?
 
         ; set missile armed flag
         ; (A = $FF from `key_missile_target`)
         sta PLAYER_MISSILE_ARMED
-        ; update the colour of the HUD missile indicator
+        ; update the colour of the HUD missile indicator. note that X is
+        ; the missile number which chooses which missile block to colour
         ldy # .color_nybble( ORANGE, HUD_COLOUR )
         jsr update_missile_indicator
 
@@ -492,23 +492,26 @@ main_keys:
         ; remaining key-press checks and is likely an oversight
         bmi :++++++             ;(=$1FC2)
         
-        jsr _36a6               ; do fire missile?
+        jsr fire_missile
 
         ; energy bomb?
         ;-----------------------------------------------------------------------
 :       lda key_bomb            ; energy bomb key held?                 ;$1F77
        .bze :+                  ; no, skip ahead
 
-        ; TODO: does this also enable it by setting bit 7?
-        asl PLAYER_EBOMB        ; does player have an energy bomb?
-        beq :+                  ; no? keep going
+        ; enable the energy bomb; if present, it's value should be $FF,
+        ; so shifting left makes it %11111110. if the player does not
+        ; have a bomb (=$00), the value will remain zero
+        ;
+        asl PLAYER_EBOMB        ; activate the bomb
+        beq :+                  ; did that work? skip if no bomb present
 
         ; create a 'screen glitch' effect by changing the hi-res portion
         ; of the screen to multi-colour when the bomb goes off(?)
         ldy # vic_screen_ctl2::unused | vic_screen_ctl2::multicolor
         sty interrupt_screenmode1
 
-.ifndef OPTION_NOSOUND
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $0d               ; e-bomb sound?
         jsr play_sfx
@@ -547,32 +550,30 @@ main_keys:
         ;-----------------------------------------------------------------------
 :       lda key_ecm             ; E.C.M. key pressed?                   ;$1FB0
         and PLAYER_ECM          ; does the player have an E.C.M.?
-        beq :+
+       .bze :+                  ; no? skip ahead
 
-        lda ZP_67               ; ECM counter?
-        bne :+                  ; skip if ECM already active
+        lda ECM_COUNTER         ; is any ECM already active? (ours or enemy's!)
+       .bnz :+                  ; yes? skip
 
-        dec VAR_0481            ; mark ECM as on
-        jsr _b0f4               ; handle ECM effects...
+        dec ECM_STATE           ; underflow our ECM state from $00 to $FF
+        jsr engage_ecm          ; handle ECM effects...
 
         ; turn docking computer on?
         ;-----------------------------------------------------------------------
 :       lda key_docking_on      ; key for docking computer pressed?     ;$1FC2
         and PLAYER_DOCKCOM      ; does the player have a docking computer?
-       .bze @laser              ; no, skip
+       .bze :+                  ; no, skip
 
+;;      eor polyobj_01+PolyObject::attack
         eor joy_down            ; TODO: combine with down key state???
-       .bze @laser
+       .bze :+
 
         sta DOCKCOM_STATE       ; turn docking computer on (A = $FF)
-.ifndef OPTION_NOSOUND
-        ;///////////////////////////////////////////////////////////////////////
-        jsr _9204               ; enable docking computer?
-.endif  ;///////////////////////////////////////////////////////////////////////
+        jsr _9204               ; play docking computer music
 
         ; handle lasers:
         ;-----------------------------------------------------------------------
-@laser: lda # $00                                                       ;$1FD5
+:       lda # $00                                                       ;$1FD5
         sta ZP_7B               ; laser-power per pulse?
         sta ZP_SPEED_LO         ; dust-speed low-byte?
 
@@ -609,7 +610,7 @@ main_keys:
         sta ZP_7B               ;?
         sta VAR_0484            ;?
 
-.ifndef OPTION_NOSOUND
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $00
         pla
@@ -665,12 +666,15 @@ process_ship:                                                           ;$202F
 ;;.ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ;                                 bytes cycles
-        ldy # .sizeof(PolyObject)-1     ; 2     2
-:       lda [ZP_POLYOBJ_ADDR], y        ; 2     5=5                     ;$2040
-        sta ZP_POLYOBJ, y               ; 2     5=10
-        dey                             ; 1     2=12
-        bpl :-                          ; 2     3=15
-        ;                               ; 9     15*37 (-1+2) = 556 cycles
+        ldy # .sizeof(PolyObject)-1     ;  2     2
+        ;-------------------------------;---------------------------------------
+:       lda [ZP_POLYOBJ_ADDR], y        ; +2=4   5=5                    ;$2040
+        sta ZP_POLYOBJ, y               ; +2=6  +5=10
+        dey                             ; +1=7  +2=12
+        bpl :-                          ; +2=9  +3=15 (+2 for !bpl)
+        ;-------------------------------;---------------------------------------
+        ;                         loop: ;       *37=554
+        ;                        total: ;    9  556
 ;;.else   ;/////////////////////////////////////////////////////////////////////
 ;;        ; TODO: this won't fit into this segment in the non-hiram config
 ;;        ldy # 0                       ; 2     2
@@ -868,7 +872,7 @@ dock_fail:                                                              ;$2107
 
 _2110:                                                                  ;$2110
         ;-----------------------------------------------------------------------
-.ifndef OPTION_NOSOUND
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -898,7 +902,8 @@ _2122:                                                                  ;$2122
         ror 
 _212b:                                                                  ;$212B
         jsr _7bd2               ; take damage?
-.ifndef OPTION_NOSOUND
+
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -919,7 +924,7 @@ _2131:                                                                  ;$2131
         lda PLAYER_MISSILE_ARMED
         beq :+
 
-.ifndef OPTION_NOSOUND
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_05         ; beep?
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -1272,15 +1277,15 @@ _231c:                                                                  ;$231C
         lda # $00
         sta VAR_0484
 _2330:                                                                  ;$2330
-        lda VAR_0481
+        lda ECM_STATE           ; is our ECM enabled?
         beq _233a
 
         jsr _7b64
         beq _2342
 _233a:                                                                  ;$233A
-        lda ZP_67
+        lda ECM_COUNTER         ; is an ECM already active?
         beq _2345
-        dec ZP_67
+        dec ECM_COUNTER
         bne _2345
 _2342:                                                                  ;$2342
         jsr _a786

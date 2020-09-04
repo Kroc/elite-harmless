@@ -255,7 +255,7 @@ ZP_PITCH_MAGNITUDE      = $64   ; unsigned pitch rotation value,
 ZP_65                   = $65   ; hyperspace counter (inner)?
 ZP_66                   = $66   ; hyperspace counter (outer)?
 
-ZP_67                   = $67   ;? x9
+ECM_COUNTER             = $67   ; ECM counter
 
 ZP_ROLL_MAGNITUDE       = $68   ; unsigned roll rotation value
 ZP_ROLL_SIGN            = $69   ; roll rotation sign

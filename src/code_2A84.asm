@@ -2093,7 +2093,7 @@ _31f1:                                                                  ;$31F1
         jsr _70ab
         jsr _6f82
 
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $06
         jsr play_sfx
@@ -2138,7 +2138,8 @@ _322f:                                                                  ;$322F
 
 _3239:                                                                  ;$3239
         jsr _3293
-.ifndef OPTION_NOAUDIO
+
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -2149,7 +2150,7 @@ _3239:                                                                  ;$3239
         ;-----------------------------------------------------------------------
 
 _3244:                                                                  ;$3244
-        lda ZP_67
+        lda ECM_COUNTER         ; is an ECM already active?
         bne _321e
 
         lda ZP_POLYOBJ_ATTACK
@@ -2220,7 +2221,7 @@ _32a7:                                                                  ;$32A7
         jmp _336e
 
 _32aa:                                                                  ;$32AA
-        jmp _b0f4
+        jmp engage_ecm
 
 
 _32ad:                                                                  ;$32AD
@@ -2451,7 +2452,7 @@ _33d6:                                                                  ;$33D6
         cmp ZP_VAR_T
         bcs _33fd
         
-        lda ZP_67
+        lda ECM_COUNTER         ; is an ECM already active?
         bne _33fd
         dec ZP_POLYOBJ_STATE    ; reduce number of missiles?
         lda ZP_A5
@@ -2494,10 +2495,10 @@ _33fd:                                                                  ;$33FD
         lsr 
         jsr _7bd2
         dec ZP_POLYOBJ_ACCEL
-        lda ZP_67
+        lda ECM_COUNTER         ; is an ECM already active?
         bne _3499
         
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $01
         jsr play_sfx
@@ -2932,7 +2933,7 @@ _3695:                                                                  ;$3695
         jmp spawn_ship
 
 
-_36a6:                                                                  ;$36A6
+fire_missile:                                                           ;$36A6
 ;===============================================================================
         ; spawn a missile
         ldx # HULL_MISSILE
@@ -2950,7 +2951,7 @@ _36a6:                                                                  ;$36A6
         
         dec PLAYER_MISSILES
         
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $04
         jmp play_sfx
@@ -3128,7 +3129,7 @@ _3795:                                                                  ;$3795
 
 _379e:                                                                  ;$397E
 ;===============================================================================
-.ifndef OPTION_NOAUDIO
+.ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         ldy # $04
         jsr play_sfx
@@ -3972,7 +3973,7 @@ _3d6f:                                                                  ;$3D6F
         ; copy the last four bytes of the main seed to the "goat soup"
         ; seed, used for generating the planet descriptions
         ldx # $03
-:       lda ZP_SEED_W1_LO, x                                            ;3D71
+:       lda ZP_SEED_W1_LO, x                                            ;$3D71
         sta ZP_GOATSOUP, x
         dex 
         bpl :-

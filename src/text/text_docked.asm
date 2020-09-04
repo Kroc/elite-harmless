@@ -457,10 +457,14 @@ _3eac:                                                                  ;$3EAC
         ; $74:  "dump"
         .byte   MSG_PLANET_SYNONYMS
 
-; $71 = messages $8F...$93:
+; $71 = messages $87...$8B:
 .tkn_id "_71"                                                           ;=$26
-        ; "<x> but <y>"?
-        .byte   MSG_8F
+        ; $87:  "frequent"
+        ; $88:  "occasional"
+        ; $89:  "unpredictable"
+        ; $8A:  "dreadful"
+        ; $8B:  "deadly"
+        .byte   MSG_FREQUENT
 
 ; $72 = messages $82...$86:
 .tkn_id "FUNNY_WEIRD_UNUSUAL_STRANGE_PECULIAR"                          ;=$25
@@ -1424,7 +1428,7 @@ txt_docked:                                                             ;$0E00
         ;-----------------------------------------------------------------------
         ; $87:  "frequent"
         .byte   "F", RE, QU, EN, "T", __end
-        .msg
+        .msg_id "FREQUENT"
         .tkn
         
         ; $88:  "occasional"
