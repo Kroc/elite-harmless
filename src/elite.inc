@@ -4,8 +4,14 @@
 ;===============================================================================
 .linecont+
 
-.ifndef     OPTION_NOAUDIO
-            FEATURE_AUDIO     = 1
+.ifdef      FEATURE_AUDIO
+;;      .out  "audio enabled"
+.endif
+.ifdef      OPTION_MATHTABLES
+;;      .out  "math-tables enabled"
+.endif
+.ifdef      OPTION_DYME_FASTLINE
+;;      .out  "fast-lines enabled"
 .endif
 
 ;===============================================================================

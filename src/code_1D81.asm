@@ -525,7 +525,10 @@ main_keys:
         lda # $00               ; $00 = OFF
         sta DOCKCOM_STATE       ; turn docking computer off
 
+.ifdef  FEATURE_AUDIO
+        ;///////////////////////////////////////////////////////////////////////
         jsr stop_sound          ; stop all sound playing
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; activate escape pod?
         ;-----------------------------------------------------------------------
@@ -564,12 +567,21 @@ main_keys:
         and PLAYER_DOCKCOM      ; does the player have a docking computer?
        .bze :+                  ; no, skip
 
-;;      eor polyobj_01+PolyObject::attack
-        eor joy_down            ; TODO: combine with down key state???
-       .bze :+
+        ; the X (down) & C (docking-computer) keys are next to each other --
+        ; don't accidentally enable the docking computer when pushing down!
+        ; (with thanks to Mark Moxon for this insight)
+        ;
+        ; TODO: how should this be handled if key layout is changed?
+        ;
+        eor joy_down            ; if down is pressed, flip the bits
+       .bze :+                  ; ignore mis-press
 
         sta DOCKCOM_STATE       ; turn docking computer on (A = $FF)
+
+.ifdef  FEATURE_AUDIO
+        ;///////////////////////////////////////////////////////////////////////
         jsr _9204               ; play docking computer music
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; handle lasers:
         ;-----------------------------------------------------------------------

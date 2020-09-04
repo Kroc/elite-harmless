@@ -74,7 +74,7 @@ echo "  ======================================"
 # assemble 'original' version of the code; the `OPTION_ORIGINAL` symbol
 # is used within the files to exlcude changed code from the original
 
-options="-DOPTION_ORIGINAL"
+options="-DOPTION_ORIGINAL -DFEATURE_AUDIO"
 
 # assemble the HUD bitmap into a Koala file we can pick bytes from.
 # we won't use a linker script for this as we don't need to include
@@ -290,7 +290,7 @@ echo "  --------------------------------------"
 clean
 
 # enable undocumented opcodes and mathtables
-options="--cpu 6502X -Wa -DOPTION_MATHTABLES"
+options="--cpu 6502X -Wa -DOPTION_MATHTABLES,-DFEATURE_AUDIO"
 
 echo -n "- assembling                        "
 
@@ -343,7 +343,7 @@ echo "* elite-harmless-hiram.d64"
 echo "  --------------------------------------"
 clean
 
-options="--cpu 6502X"
+options="--cpu 6502X -DOPTION_MATHTABLES,-DFEATURE_AUDIO"
 
 echo -n "- assembling                        "
 
@@ -392,7 +392,7 @@ echo "  --------------------------------------"
 clean
 
 # enable undocumented opcodes and the replacement line-drawing routines
-options="--cpu 6502X -Wa -DOPTION_DYME_FASTLINE,-DOPTION_NOSOUND"
+options="--cpu 6502X -Wa -DOPTION_MATHTABLES,-DOPTION_DYME_FASTLINE"
 
 echo -n "- assembling                        "
 

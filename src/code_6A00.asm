@@ -4748,7 +4748,7 @@ _82be:                                                                  ;$82BE
 
         ldy # PolyObject::attack
         lda [ZP_TEMP_ADDR], y
-        bpl _82be               ; if +ve, check next ship slot
+        bpl _82be               ; if bit 7 is unset, check next ship slot
 
         and # %01111111         ; remove the sign
         lsr                     ; divide by 2
