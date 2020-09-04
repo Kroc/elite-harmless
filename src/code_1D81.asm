@@ -687,7 +687,7 @@ process_ship:                                                           ;$202F
 ;===============================================================================
 ; in:   X       ship-slot index
 ;-------------------------------------------------------------------------------
-        stx ZP_9D               ; set ship-slot to inspect
+        stx ZP_PRESERVE_X       ; set aside ship slot for later
         lda SHIP_SLOTS, x       ; is that a ship in your slot?
         bne :+                  ; if so, process it
         jmp _21fa               ; no more ships to process,
@@ -701,6 +701,10 @@ process_ship:                                                           ;$202F
         ;
         ; TODO: we may be able to delay this copy until later in the logic
         ;       i.e. we might not need the ZP polyObject until the ship moves
+        ;
+        ; TODO: given the 1'100 cycles to copy the object back and forth,
+        ;       would it be faster to stick to indexing the object instead?
+        ;       i.e. `... [polyobj], x`
         ;
 ;;.ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -716,6 +720,7 @@ process_ship:                                                           ;$202F
         ;                        total: ;    9  556
 ;;.else   ;/////////////////////////////////////////////////////////////////////
 ;;        ; TODO: this won't fit into this segment in the non-hiram config
+;;        ;
 ;;        ldy # 0                       ; 2     2
 ;;        .repeat $23, I
 ;;        lda [ZP_POLYOBJ_ADDR], y      ; 2     5=5
@@ -967,7 +972,7 @@ _2131:                                                                  ;$2131
         ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_05         ; beep?
 .endif  ;///////////////////////////////////////////////////////////////////////
-        ldx ZP_9D               ; missile target?
+        ldx ZP_PRESERVE_X       ; missile target?
         ldy # .color_nybble( RED, HUD_COLOUR )
         jsr target_missile
 
@@ -1077,7 +1082,7 @@ _21ee:                                                                  ;$21EE
         lda ZP_POLYOBJ_STATE
         sta [ZP_POLYOBJ_ADDR], y
 
-        ldx ZP_9D
+        ldx ZP_PRESERVE_X
         inx 
         jmp process_ship
 

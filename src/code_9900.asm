@@ -1685,7 +1685,7 @@ _a2a0:                                                                  ;$A2A0
 
         ; handle explosion?
         lda ZP_A3               ; move counter?
-        eor ZP_9D
+        eor ZP_PRESERVE_X
         and # %00001111
         bne :+
         jsr _9105
@@ -1708,7 +1708,7 @@ _a2a0:                                                                  ;$A2A0
         ; gear-down the ratio
         ;
         lda ZP_A3               ; move counter?
-        eor ZP_9D
+        eor ZP_PRESERVE_X
         and # %00000111         ; modulo 8
         bne @a2cb               ; skip every 7 out of 8 frames
 

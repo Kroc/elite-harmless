@@ -576,7 +576,7 @@ galactic_chart:                                                         ;$6C1C
         ldx # $00
 _6c40:                                                                  ;$6C40
         ;-----------------------------------------------------------------------
-        stx ZP_9D               ; backup current star index?
+        stx ZP_PRESERVE_X       ; backup current star index?
 
         ldx ZP_SEED_W1_HI
         ldy ZP_SEED_W2_LO
@@ -594,7 +594,7 @@ _6c40:                                                                  ;$6C40
 
         jsr randomize
         
-        ldx ZP_9D               ; retrieve star index
+        ldx ZP_PRESERVE_X       ; retrieve star index
         inx                     ; move to next star
        .bnz _6c40               ; more stars to draw?
 
@@ -3031,9 +3031,9 @@ _7b2a:                                                                  ;$7B2A
         sta ZP_POLYOBJ_XPOS_LO, y
         dey 
         bpl _7b2a
-        stx ZP_9D
+        stx ZP_PRESERVE_X
         jsr _b410
-        ldx ZP_9D
+        ldx ZP_PRESERVE_X
 
         ldy # PolyObject::state
         lda [ZP_POLYOBJ_ADDR], y
@@ -4697,9 +4697,9 @@ _828f:                                                                  ;$828F
 
 _829a:                                                                  ;$829A
 ;===============================================================================
-        ldx ZP_9D
+        ldx ZP_PRESERVE_X
         jsr _82f3
-        ldx ZP_9D
+        ldx ZP_PRESERVE_X
         jmp process_ship
 
 

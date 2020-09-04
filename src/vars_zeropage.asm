@@ -284,7 +284,7 @@ ZP_75                   := $75  ;? x14
 ZP_76                   := $76  ;? x12
 
 ; a 4-byte big-endian number buffer for working with big integers:
-
+;
 ZP_VALUE                := $77
 ZP_VALUE_pt1            := $77
 ZP_VALUE_pt2            := $78
@@ -343,7 +343,7 @@ ZP_VAR_Q                := $9a  ; a common variable named "Q"
 ZP_VAR_R                := $9b  ; a common variable named "R"
 ZP_VAR_S                := $9c  ; a common variable named "S"
 
-ZP_9D                   := $9d  ; temp backup of X
+ZP_PRESERVE_X           := $9d  ; temp backup of X
 ZP_9E                   := $9e  ; tmep backup of Y
 
 ZP_9F                   := $9f  ; edge index
@@ -351,8 +351,7 @@ ZP_9F                   := $9f  ; edge index
 ; which screen the game is on, e.g. cockpit-view, galactic chart &c.
 ; not to be confused with the bitmap screen and colour screens
 ;
-; NOTE: for the cockpit view, fore/left/right/aft-view
-;       is a separate variable
+; NOTE: for the cockpit view, fore/aft/left/right is a separate variable
 ;
 ZP_SCREEN               := $a0
 
