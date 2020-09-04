@@ -81,11 +81,11 @@ ECM_STATE               :=$0481 ; if our ECM is enabled or not
 IS_WITCHSPACE           :=$0482 ; has misjump occurred?
 CABIN_HEAT              :=$0483 ; cabin temperature
 
-VAR_0484                :=$0484 ; ECM is on?
+LASER_POWER             :=$0484 ; power level for current laser (bit 7 = beam)
 
 COCKPIT_VIEW            :=$0486 ; (front, rear, left, right)
 
-VAR_0487                :=$0487 ; something to do with lasers / cool-down?
+LASER_COUNTER           :=$0487 ; used to space shots between laser pulses
 LASER_HEAT              :=$0488 ; laser temperature
 
 VAR_048A                :=$048a ;?

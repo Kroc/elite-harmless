@@ -291,7 +291,7 @@ ZP_VALUE_pt2            := $78
 ZP_VALUE_pt3            := $79
 ZP_VALUE_pt4            := $7a
 
-ZP_7B                   := $7b  ;? x8
+ZP_LASER                := $7b  ; laser power for current view (bit 7 = beam)
 ZP_MISSILE_TARGET       := $7c  ; missile target?
 ZP_7D                   := $7d  ;? x6
 ZP_7E                   := $7e  ;? x10
@@ -380,7 +380,7 @@ ZP_A3                   := $a3  ;? x18 "MOVE COUNTER"?
 
 ;                       := $a4  ;UNUSED?
 
-ZP_A5                   := $a5  ;? x31
+ZP_SHIP_TYPE            := $a5  ; temporary holding place for X-register
 
 ZP_ALPHA                := $a6  ; a rotation variable used in matrix math
 

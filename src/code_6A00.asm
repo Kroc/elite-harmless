@@ -3021,7 +3021,7 @@ _7b1c:                                                                  ;$7B1C
         lda SHIP_SLOTS, x
         beq _7b44
         bmi _7b41
-        sta ZP_A5
+        sta ZP_SHIP_TYPE
 
         jsr get_polyobj_addr
 
@@ -3482,7 +3482,7 @@ _7d56:                                                                  ;$7D56
 
 _7d57:                                                                  ;$7D57
 ;===============================================================================
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         lsr 
         bcs _7d5f
         jmp _80bb
@@ -3510,7 +3510,7 @@ _7d62:                                                                  ;$7D62
         lda # $f8
         sta ZP_VALUE_pt1
 _7d84:                                                                  ;$7D84
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         lsr 
         bcc _7d8c
 
@@ -3528,7 +3528,7 @@ _7d98:                                                                  ;$7D98
 _7d99:                                                                  ;$7D99
         lda _1d0f
         beq _7d98
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         cmp # $80
         bne _7de0
         lda ZP_VALUE_pt1
@@ -5370,12 +5370,16 @@ _8627:                                                                  ;$8627
         beq :+                  ; skip if > 0
         dec LASER_HEAT          ; reduce laser temperature
 
-:       ldx VAR_0487                                                    ;$8632
-        beq @_863e
-        dex 
-        beq :+
-        dex 
-:       stx VAR_0487                                                    ;$863B
+        ; the pulse laser cannot shoot continuously like the beam laser,
+        ; so this counter enforces a wait between each shot
+        ;
+:       ldx LASER_COUNTER       ; current pulse countdown               ;$8632
+        beq @_863e              ; if already zero, skip ahead
+
+        dex                     ; decrement the pulse countdown once
+        beq :+                  ; if zero, that's enough
+        dex                     ; decrement again...
+:       stx LASER_COUNTER       ; update the pulse counter              ;$863B
 
 @_863e:                                                                 ;$863E
         lda ZP_SCREEN           ; are we in the cockpit-view?
@@ -5789,7 +5793,7 @@ _87fd:                                                                  ;$87FD
         and # %10001111
         sta ZP_POLYOBJ_ROLL
         ldy # $40
-        sty VAR_0487
+        sty LASER_COUNTER
         sec 
         ror 
         and # %10000111
@@ -5820,7 +5824,7 @@ _87fd:                                                                  ;$87FD
         jsr disable_sprites
 _8851:                                                                  ;$8851
         jsr _1ec1
-        dec VAR_0487
+        dec LASER_COUNTER
         bne _8851
         ldx # $1f
 
@@ -5992,7 +5996,7 @@ _8920:                                                                  ;$8920
 ;-------------------------------------------------------------------------------
         sty VAR_06FB            ; z-distance?
         pha                     ; keep A parameter
-        stx ZP_A5               ; put aside ship-type
+        stx ZP_SHIP_TYPE        ; put aside ship-type
 
         lda # $ff
         sta _1d13
@@ -6028,7 +6032,7 @@ _8920:                                                                  ;$8920
         inx 
         stx ZP_34
         
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         jsr spawn_ship
 
         ; print "--- E L I T E ---"
@@ -6934,7 +6938,7 @@ _8ee3:                                                                  ;$8EE3
         sta ZP_POLYOBJ_M0x2_HI
         ora # %10000000
         sta ZP_POLYOBJ_M2x0_HI
-        sta ZP_A5
+        sta ZP_SHIP_TYPE
 
         lda ZP_PLAYER_SPEED
         sta ZP_POLYOBJ_SPEED

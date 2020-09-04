@@ -1998,7 +1998,7 @@ eject_escapepod:                                                        ;$316E
         jsr _83df
 
         ldx # HULL_COBRAMK3
-        stx ZP_A5
+        stx ZP_SHIP_TYPE
         jsr _3680               ; NOTE: spawns ship-type in X
         bcs :+
         
@@ -2382,7 +2382,7 @@ _336e:                                                                  ;$336E
         ldy # $0a
         jsr _3ab2
         sta ZP_AA
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         cmp # $01
         bne _3381
         jmp _344b
@@ -2425,9 +2425,11 @@ _33a8:                                                                  ;$33A8
         jsr get_random_number
         cmp # $e6
         bcc _33d6
-        ldx ZP_A5
+
+        ldx ZP_SHIP_TYPE
         lda hull_type - 1, x
         bpl _33d6
+
         lda ZP_POLYOBJ_BEHAVIOUR
         and # behaviour::remove    | behaviour::police \
             | behaviour::protected | behaviour::docking ;=%11110000
@@ -2455,7 +2457,8 @@ _33d6:                                                                  ;$33D6
         lda ECM_COUNTER         ; is an ECM already active?
         bne _33fd
         dec ZP_POLYOBJ_STATE    ; reduce number of missiles?
-        lda ZP_A5
+
+        lda ZP_SHIP_TYPE
         cmp # $1d
         bne _33fa
 
@@ -2579,7 +2582,7 @@ _349a:                                                                  ;$349A
         bcc _34ab
 
         lda # $ff
-        ldx ZP_A5
+        ldx ZP_SHIP_TYPE
         cpx # $01
         bne _34a9
         
@@ -2643,7 +2646,8 @@ _34cf:                                                                  ;$34CF
         lda ZP_VALUE_pt1
         cmp # $9d
         bcc _3504
-        lda ZP_A5
+
+        lda ZP_SHIP_TYPE
         bmi _352c
 _3504:                                                                  ;$3504
         jsr _35d5
@@ -2677,8 +2681,10 @@ _352c:                                                                  ;$352C
         ldx # $00
         stx ZP_B1
         stx ZP_POLYOBJ_PITCH
-        lda ZP_A5
+
+        lda ZP_SHIP_TYPE
         bpl _3556
+        
         eor ZP_VAR_X
         eor ZP_VAR_Y
         asl 
@@ -2854,7 +2860,7 @@ _363f:                                                                  ;$363F
         lda ZP_POLYOBJ_ZPOS_SIGN
         bne _367d
 
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         bmi _367d
         
         lda ZP_POLYOBJ_STATE
@@ -2989,7 +2995,7 @@ _36d4:                                                                  ;$36D4
         ldy # $1e
         sta [ZP_POLYOBJ_ADDR], y
 
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         cmp # $0b
         bcc _36f7
 
@@ -3045,7 +3051,7 @@ _370a:                                                                  ;$370A
         dey 
         bpl :-
 
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         cmp # $02
         bne _374d
 
@@ -4091,9 +4097,12 @@ _3dff:                                                                  ;$3DFF
         
         ; spawn the constrictor!
         lda # HULL_CONSTRICTOR
-        sta ZP_A5
+        sta ZP_SHIP_TYPE
         jsr spawn_ship
 
+.if     page::empty <> 1
+        .fatal  "optimisation requires that `page::empty` is 1 in `_3dff`"
+.endif
         lda # 1                 ;=page::empty
         jsr set_cursor_col
         sta ZP_POLYOBJ_ZPOS_HI

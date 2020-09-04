@@ -268,7 +268,7 @@ draw_ship:                                                              ;$9A86
 ;===============================================================================
 ; draw a ship?
 ;-------------------------------------------------------------------------------
-        lda ZP_A5               ; ship type
+        lda ZP_SHIP_TYPE        ; ship type
         bmi _9a83               ; sun or planet?
         
         lda # $1f
@@ -1690,7 +1690,7 @@ _a2a0:                                                                  ;$A2A0
         bne :+
         jsr _9105
 
-:       ldx ZP_A5                                                       ;$A2B1
+:       ldx ZP_SHIP_TYPE                                                ;$A2B1
         bpl :+
         jmp _a53d
 
@@ -1862,7 +1862,7 @@ _a3bf:                                                                  ;$A3BF
         ldx # $06
         jsr move_polyobj_x
 
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         and # %10000001
         cmp # $81
         bne :+
@@ -2431,7 +2431,7 @@ _set_page:                                                              ;$A731
         jsr clear_circle_buffer
 
         lda # $00
-        sta VAR_0484
+        sta LASER_POWER
         sta VAR_048B
         sta VAR_048C
 
@@ -3323,7 +3323,7 @@ tkn_docked_fn15:                                                        ;$B3D4
         bne @_b3f7
 
 _b40f:                                                                  ;$B40F
-        rts 
+:       rts 
 
 
 _b410:                                                                  ;$B410
@@ -3339,8 +3339,8 @@ _b410:                                                                  ;$B410
         and # state::scanner
         beq _b40f               ; no? exit now (RTS above us)
 
-        ldx ZP_A5               ;?
-        bmi _b40f               ; no? exit now (RTS above us)
+        ldx ZP_SHIP_TYPE        ; is it a sun or planet? (bit 7)
+        bmi :-                  ; no? exit now (RTS above us)
 
         lda _267e, x
         sta ZP_32

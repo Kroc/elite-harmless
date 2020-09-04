@@ -586,7 +586,7 @@ main_keys:
         ; handle lasers:
         ;-----------------------------------------------------------------------
 :       lda # $00                                                       ;$1FD5
-        sta ZP_7B               ; laser-power per pulse?
+        sta ZP_LASER            ; clear laser-power for current view
         sta ZP_SPEED_LO
 
         ; multiply player speed by 64:
@@ -606,7 +606,7 @@ main_keys:
         ; reducing the multiplication to 64
         ;       
         ;       %--------00111111       =$3F
-        ;               <--
+        ;               <--             *256
         ;       %0011111100000000       =$3F00
         ;          \\\\\\               /2
         ;           \\\\\\              /4
@@ -622,9 +622,11 @@ main_keys:
         ror ZP_SPEED_LO         ; ripple down to the result, lo-byte
         sta ZP_SPEED_HI         ; store result hi-byte
 
-        ; check if the laser is over-heated
-        lda VAR_0487            ; laser cool-off counter?
-        bne @ships              ; skip ahead if laser is cooling down
+        ; if the laser is a pulse laser, it can't be shot continuously.
+        ; this counter spaces out the shots and is updated every vsync
+        ;
+        lda LASER_COUNTER       ; is the laser between pulses?
+        bne @ships              ; skip ahead if laser is between pulses
 
         lda joy_fire            ; is fire-key pressed?
         beq @ships              ; no? skip ahead
@@ -641,21 +643,23 @@ main_keys:
         beq @ships              ; if zero, no laser, skip ahead
 
         pha                     ; put aside laser type
-        and # %01111111
-        sta ZP_7B               ;?
-        sta VAR_0484            ;?
+        and # laser::power      ; extract just the laser power-level
+        sta ZP_LASER            ; update laser-power for current view
+        sta LASER_POWER         ; update laser-power for current laser
 
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
-        ldy # $00
+        ; play laser sound (based on laser-type):
+        ;
+        ldy # $00               ; (no sound?)
         pla
         pha                     ; (redo flags?)
-        bmi :++
+        bmi :++                 ; beam laser
         cmp # $32
         bne :+                  ; (BNE to another BNE! should be `bne @201d`)
-        ldy # $0c
+        ldy # $0c               ; lase sound #3?
 :       bne @201d                                                       ;$2012
-:       cmp # $97                                                       ;$2014
+:       cmp # laser::beam | $17                                         ;$2014
         beq @201b
 
         ldy # $0a               ; laser sound #1?
@@ -668,11 +672,11 @@ main_keys:
 
         jsr shoot_lasers        ; pew-pew!
         
-        pla                     ; retrieve laser type?
-        bpl :+
-        lda # $00               ; instant cool-down?
-:       and # %11111010                                                 ;$2028
-        sta VAR_0487            ; update cool-down state?
+        pla                     ; retrieve laser type
+        bpl :+                  ; (skip over if not beam laser)
+        lda # $00               ; zero pulse-wait for beam-laser
+:       and # %11111010         ; set pulse-wait based on power-level   ;$2028
+        sta LASER_COUNTER
 
         ; process ships?
         ;-----------------------------------------------------------------------
@@ -689,7 +693,7 @@ process_ship:                                                           ;$202F
         jmp _21fa               ; no more ships to process,
                                 ; you're just happy to see me
 
-:       sta ZP_A5               ; put ship type aside                   ;$2039
+:       sta ZP_SHIP_TYPE        ; put ship type aside                   ;$2039
         jsr get_polyobj_addr    ; look up the ship's personal data
 
         ; copy the given PolyObject to
@@ -726,7 +730,7 @@ process_ship:                                                           ;$202F
         ; TODO: if we use LDX instead, we can preserve the ship-type through
         ;       this logic and do away with a number of additional LDA's?
         ;
-        lda ZP_A5               ; get ship type back
+        lda ZP_SHIP_TYPE        ; get ship type back
         bmi @move               ; if sun / planet, skip over
 
         asl                     ; multiply by 2 for table lookup
@@ -767,7 +771,7 @@ process_ship:                                                           ;$202F
         sec                     ; set carry and...
         ror ZP_POLYOBJ_STATE    ; ...shift the carry into bit 7
 
-        ldx ZP_A5               ; retrieve ship-type again?
+        ldx ZP_SHIP_TYPE        ; retrieve ship-type again
         jsr _a7a6               ; kill ship?
 
         ; move the ship forward:
@@ -802,7 +806,7 @@ process_ship:                                                           ;$202F
         ora ZP_POLYOBJ_ZPOS_LO
         bmi @20e0               ; TODO: too far, or is this about direction?
 
-        ldx ZP_A5               ; sun or planet?
+        ldx ZP_SHIP_TYPE        ; sun or planet?
         bmi @20e0               ; yes, skip
 
         cpx # HULL_COREOLIS     ; space station?
@@ -967,27 +971,27 @@ _2131:                                                                  ;$2131
         ldy # .color_nybble( RED, HUD_COLOUR )
         jsr target_missile
 
-:       lda ZP_7B               ; laser power?                          ;$2153
+:       lda ZP_LASER            ; is there a laser on the current view? ;$2153
         beq _21a8               ; no laser, skip onwards
 
         ldx # $0f
         jsr _a7e9
 
-        lda ZP_A5               ; things we've shot with laser?
+        lda ZP_SHIP_TYPE        ; things we've shot with laser?
         cmp # HULL_COREOLIS
         beq _21a3
         cmp # HULL_CONSTRICTOR
         bcc _2170
 
-        lda ZP_7B               ; laser strength?
+        lda ZP_LASER
         cmp # $17
         bne _21a3
-        lsr ZP_7B
-        lsr ZP_7B
+        lsr ZP_LASER
+        lsr ZP_LASER
 _2170:                                                                  ;$2170
         lda ZP_POLYOBJ_ENERGY   ; ship's energy-level
         sec 
-        sbc ZP_7B
+        sbc ZP_LASER
         bcs _21a1
 
         ; explode the ship
@@ -995,11 +999,11 @@ _2170:                                                                  ;$2170
         sec                     ; take a 1 from the bit bucket
         ror ZP_POLYOBJ_STATE    ; shift it into bit 7
 
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         cmp # HULL_ASTEROID
         bne _2192
 
-        lda ZP_7B               ; mining laser?
+        lda ZP_LASER            ; mining laser(?)
         cmp # $32
         bne _2192
 
@@ -1013,12 +1017,12 @@ _2192:                                                                  ;$2192
         ldy # HULL_CANNISTER
         jsr _234c
 
-        ldx ZP_A5
+        ldx ZP_SHIP_TYPE
         jsr _a7a6               ; kill ship?
 _21a1:                                                                  ;$21A1
         sta ZP_POLYOBJ_ENERGY
 _21a3:                                                                  ;$21A3
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         jsr _36c5               ; make hostile?
 _21a8:                                                                  ;$21A8
         jsr draw_ship
@@ -1062,7 +1066,7 @@ _21e2:                                                                  ;$21E2
         ;-----------------------------------------------------------------------
 
 _21e5:                                                                  ;$21E5
-        lda ZP_A5
+        lda ZP_SHIP_TYPE
         bmi _21ee
         jsr _87a4
         bcc _21e2
@@ -1303,14 +1307,17 @@ _2303:                                                                  ;$2303
 _2319:                                                                  ;$2319
         jsr _900d
 _231c:                                                                  ;$231C
-        lda VAR_0484
+        lda LASER_POWER
         beq _2330
-        lda VAR_0487
+
+        lda LASER_COUNTER
         cmp # $08
         bcs _2330
+        
         jsr _3cfa
+        
         lda # $00
-        sta VAR_0484
+        sta LASER_POWER
 _2330:                                                                  ;$2330
         lda ECM_STATE           ; is our ECM enabled?
         beq _233a
