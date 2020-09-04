@@ -451,7 +451,7 @@ move_dust_front:                                                        ;$2A40
         ;-----------------------------------------------------------------------
         ldy DUST_COUNT          ; number of dust particles
 
-        ; calculate PLAYER_SPEED / DUST_Z_HI, y -> {P.R}
+        ; calculate ZP_PLAYER_SPEED / DUST_Z_HI, y -> {P.R}
 @loop:  jsr get_dust_speed                                              ;$2A43
 
         ; divide result by 4:
@@ -469,7 +469,7 @@ move_dust_front:                                                        ;$2A40
 
         ; subtract the fractional speed
         lda DUST_Z_LO, y
-        sbc ZP_SPEED_LO         ; is probably still (PLAYER_SPEED&3)<<6
+        sbc ZP_SPEED_LO         ; is probably still (ZP_PLAYER_SPEED&3)<<6
         sta DUST_Z_LO, y
         
         lda DUST_Z_HI, y
@@ -1692,7 +1692,7 @@ _2ff3:                                                                  ;$2FF3
         lda # 14                ; threshold to change colour?
         sta ZP_TEMP_VAR
         
-        lda PLAYER_SPEED
+        lda ZP_PLAYER_SPEED
         jsr hud_drawbar_32
         
         ;-----------------------------------------------------------------------
@@ -2925,7 +2925,7 @@ _3695:                                                                  ;$3695
         ora # %10000000
         sta ZP_POLYOBJ_M2x0_HI
 
-        lda PLAYER_SPEED
+        lda ZP_PLAYER_SPEED
         rol 
         sta ZP_POLYOBJ_SPEED
         
@@ -3617,7 +3617,7 @@ divide_by_player_speed:                                                 ;$3B33
 ; divide the number, given in A, by the player's speed:
 ;-------------------------------------------------------------------------------
         sta ZP_VAR_Q
-        lda PLAYER_SPEED
+        lda ZP_PLAYER_SPEED
 
 ;===============================================================================
 .include        "math/math_divide.asm"                                  ;$3B37

@@ -16,7 +16,7 @@ docked:                                                                 ;$1D81
         ; now the player is docked, some variables can be reset
         ; -- the cabin temperature is not reset; oversight / bug?
         lda # $00
-        sta PLAYER_SPEED        ; bring player's ship to a full stop
+        sta ZP_PLAYER_SPEED     ; bring player's ship to a full stop
         sta LASER_HEAT          ; complete laser cooldown
         sta ZP_66               ; reset hyperspace countdown
 
@@ -429,20 +429,20 @@ main_keys:
         lda key_accelerate      ; is accelerate being held?
        .bze :+                  ; if not, continue
 
-        lda PLAYER_SPEED        ; current speed
+        lda ZP_PLAYER_SPEED     ; current speed
         cmp # 40                ; are we at maximum speed?
         bcs :+
 
-        inc PLAYER_SPEED        ; increase player's speed
+        inc ZP_PLAYER_SPEED     ; increase player's speed
 
 :       ; decelerate?                                                   ;$1F33
         ;-----------------------------------------------------------------------
         lda key_decelerate      ; is decelerate being held?
        .bze :+                  ; if not, continue
 
-        dec PLAYER_SPEED        ; reduce player's speed
+        dec ZP_PLAYER_SPEED     ; reduce player's speed
        .bnz :+                  ; still above zero?
-        inc PLAYER_SPEED        ; if zero, set to 1
+        inc ZP_PLAYER_SPEED     ; if zero, set to 1
 
 :       ; disarm missile?                                               ;$1F3E
         ;-----------------------------------------------------------------------
@@ -587,15 +587,38 @@ main_keys:
         ;-----------------------------------------------------------------------
 :       lda # $00                                                       ;$1FD5
         sta ZP_7B               ; laser-power per pulse?
-        sta ZP_SPEED_LO         ; dust-speed low-byte?
+        sta ZP_SPEED_LO
 
-        ; divide player speed by 4; used as part of moving dust
+        ; multiply player speed by 64:
+        ; this could be done with 6 left-shifts,
+        ;
+        ;       %--------00111111       =$3F
+        ;                  //////       x2
+        ;                 //////        x4
+        ;                //////         x8
+        ;               //////          x16
+        ;              //////           x32
+        ;             //////            x64
+        ;       %0000111111000000       =$0FC0
+        ;
+        ; but we can do this quicker by moving the lo-byte to the hi-byte
+        ; (equivalent to multiplying by 256) and shifting right twice,
+        ; reducing the multiplication to 64
+        ;       
+        ;       %--------00111111       =$3F
+        ;               <--
+        ;       %0011111100000000       =$3F00
+        ;          \\\\\\               /2
+        ;           \\\\\\              /4
+        ;       %0000111111000000       =$0FC0
+        ;
         ; TODO: should this be cached and only re-calced on speed change?
         ;
-        lda PLAYER_SPEED        ; current player speed
-        lsr                     ; divide speed by 2
+        lda ZP_PLAYER_SPEED     ; current player speed
+                                ; (this will be the high-byte)
+        lsr                     ; right-shift once
         ror ZP_SPEED_LO         ; ripple down to the result, lo-byte
-        lsr                     ; divide speed by 2, again
+        lsr                     ; right shift again again
         ror ZP_SPEED_LO         ; ripple down to the result, lo-byte
         sta ZP_SPEED_HI         ; store result hi-byte
 
@@ -877,7 +900,7 @@ dock_fail:                                                              ;$2107
         ;-----------------------------------------------------------------------
         ; docking fail!
         ;
-        lda PLAYER_SPEED        ; check approach speed
+        lda ZP_PLAYER_SPEED     ; check approach speed
         cmp # $05               ; going slow?
         bcc _211a               ; slow; take damage
         jmp _87d0               ; fast; explode
@@ -898,7 +921,7 @@ _2110:                                                                  ;$2110
 _211a:  ; player takes damage:                                          ;$211A
         ;-----------------------------------------------------------------------
         lda # $01               ; slow down
-        sta PLAYER_SPEED
+        sta ZP_PLAYER_SPEED
         lda # $05               ; take '5' damage
         bne _212b               ; (always branches)
 

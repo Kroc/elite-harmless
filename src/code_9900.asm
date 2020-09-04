@@ -1855,7 +1855,7 @@ _a39d:                                                                  ;$A39D
         lda ZP_VAR_P2
         sta ZP_POLYOBJ_XPOS_LO
 _a3bf:                                                                  ;$A3BF
-        lda PLAYER_SPEED
+        lda ZP_PLAYER_SPEED
         sta ZP_VAR_R
 
         lda # $80

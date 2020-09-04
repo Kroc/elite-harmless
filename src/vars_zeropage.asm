@@ -334,9 +334,9 @@ ZP_93                   := $93  ;? x4
 ZP_PITCH_SIGN           := $94  ; pitch sign
 ZP_INV_PITCH_SIGN       := $95  ; inverted pitch sign
 
-PLAYER_SPEED            := $96
-ZP_SPEED_LO             := $97  ; (player speed * 256) / 4, lo-byte
-ZP_SPEED_HI             := $98  ; (player speed * 256) / 4, hi-byte
+ZP_PLAYER_SPEED         := $96
+ZP_SPEED_LO             := $97  ; player speed * 64, lo-byte
+ZP_SPEED_HI             := $98  ; player speed * 64, hi-byte
 
 ZP_VAR_U                := $99  ; a common variable named "U"
 ZP_VAR_Q                := $9a  ; a common variable named "Q"

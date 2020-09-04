@@ -2020,7 +2020,7 @@ _741c:  ; launch ship from docking?                                     ;$741C
         inc ZP_POLYOBJ_ZPOS_HI
         jsr _7c24
         lda # $0c
-        sta PLAYER_SPEED
+        sta ZP_PLAYER_SPEED
         jsr illegal_cargo
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
@@ -4969,7 +4969,7 @@ _83ed:                                                                  ;$83ED
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         lda # $03
-        sta PLAYER_SPEED
+        sta ZP_PLAYER_SPEED
         sta ZP_ALPHA
         sta ZP_ROLL_MAGNITUDE
 
@@ -5739,8 +5739,8 @@ _87d0:                                                                  ;$87D0
         jsr play_sfx_03
 .endif  ;///////////////////////////////////////////////////////////////////////
         jsr _83df
-        asl PLAYER_SPEED        ;?
-        asl PLAYER_SPEED        ;?
+        asl ZP_PLAYER_SPEED
+        asl ZP_PLAYER_SPEED
         ldx # $18
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -5815,7 +5815,7 @@ _87fd:                                                                  ;$87FD
 
         jsr _8ed5               ; clears 56 key-states, not 64
 
-        sta PLAYER_SPEED
+        sta ZP_PLAYER_SPEED
         jsr _1ec1
         jsr disable_sprites
 _8851:                                                                  ;$8851
@@ -6076,7 +6076,7 @@ _8920:                                                                  ;$8920
 
 @_8994:                                                                 ;$8994
         ldy # $00
-        sty PLAYER_SPEED
+        sty ZP_PLAYER_SPEED
         sty _1d0c
 
         lda # 15
@@ -6936,7 +6936,7 @@ _8ee3:                                                                  ;$8EE3
         sta ZP_POLYOBJ_M2x0_HI
         sta ZP_A5
 
-        lda PLAYER_SPEED
+        lda ZP_PLAYER_SPEED
         sta ZP_POLYOBJ_SPEED
         jsr _34bc
         lda ZP_POLYOBJ_SPEED
@@ -6945,7 +6945,7 @@ _8f01:                                                                  ;$8F01
         bcc :+
 
         lda # $16
-:       sta PLAYER_SPEED                                                ;$8F07
+:       sta ZP_PLAYER_SPEED                                             ;$8F07
 
         lda # $ff
         ldx # $09
