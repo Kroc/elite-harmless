@@ -324,7 +324,7 @@ PSYSTEM_ECONOMY         :=$04ee ; present system economy size
 
 VAR_04EC                :=$04ec ; used with market prices
 VAR_04ED                :=$04ed ; quantity of item
-VAR_04EF                :=$04ef ; type of item
+CARGO_ITEM              :=$04ef ; type of item
 
 PSYSTEM_GOVERNMENT      :=$04f0
 PSYSTEM_TECHLEVEL       :=$04f1

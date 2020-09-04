@@ -861,7 +861,7 @@ process_ship:                                                           ;$202F
         ; attempt to scoop object
         ;
         cpx # HULL_CANNISTER    ; is this a cargo cannister?
-        beq @20c0               ; yes, pick it up
+        beq @can                ; yes, pick it up
 
         ; read scoop data from the hull
         ;
@@ -883,14 +883,20 @@ process_ship:                                                           ;$202F
 
         ; scooped cargo:
         ;-----------------------------------------------------------------------
-@20c0:  jsr get_random_number   ; choose a random type of cargo         ;$20C0
+@can:   jsr get_random_number   ; choose a random type of cargo         ;$20C0
         and # %00000111         ; limit to 0-7
 
 @20c5:  jsr _6a00               ; count cargo?                          ;$20C5
-        ldy # $4e               ; TODO: ?
+
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; this has no effect due to the LDY after; it was probably
+        ; the original offset for the cargo name strings
+        ldy # $4e
+.endif  ;///////////////////////////////////////////////////////////////////////
         bcs _2110               ; cargo full
 
-        ldy VAR_04EF            ; type of cargo
+        ldy CARGO_ITEM          ; type of cargo
         adc VAR_CARGO, y        ; add to cargo
         sta VAR_CARGO, y
         tya

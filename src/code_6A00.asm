@@ -25,9 +25,8 @@ _6a00:                                                                  ;$6A00
 ;
 ; out:  carry   unset = OK
 ;               set   = cargo overflow
-;
 ;-------------------------------------------------------------------------------
-        sta VAR_04EF            ; item index?
+        sta CARGO_ITEM          ; item index?
         lda # $01
 
 _6a05:                                                                  ;$6A05
@@ -40,7 +39,7 @@ _6a05:                                                                  ;$6A05
         ; are measured in Kg
         ;
         ldx # Cargo::minerals   ; minerals or below?
-        cpx VAR_04EF            ; item index?
+        cpx CARGO_ITEM          ; item index?
         bcc @kg                 ; skip ahead if precious materials
 
         ; count the number of tons of cargo:
@@ -79,7 +78,7 @@ _6a05:                                                                  ;$6A05
         ; carry unset = OK
         ; carry set   = overflow
         ;
-@kg:    ldy VAR_04EF                                                    ;$6A1B
+@kg:    ldy CARGO_ITEM                                                  ;$6A1B
         adc VAR_CARGO, y        ; number of Kg of selected item
         cmp # 200               ; maximum of 200 Kg
 
@@ -746,7 +745,7 @@ buy_screen:                                                             ;$6D16
         sta ZP_34
 
         lda # $00
-        sta VAR_04EF            ; item index?
+        sta CARGO_ITEM          ; item index?
 _6d27:                                                                  ;$6D27
         jsr _7246
         lda VAR_04ED
@@ -772,7 +771,7 @@ _6d3e:                                                                  ;$6D3E
         ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
 .import TKN_FLIGHT_FOOD:direct
 
-        lda VAR_04EF            ; item index?
+        lda CARGO_ITEM          ; item index?
         clc 
         adc # TKN_FLIGHT_FOOD
         jsr print_flight_token
@@ -807,7 +806,7 @@ _6d79:                                                                  ;$6D79
         jsr _745a
         ldy # $c5
         bcc _6d34
-        ldy VAR_04EF            ; item index?
+        ldy CARGO_ITEM          ; item index?
         lda ZP_VAR_R
         pha 
         clc 
@@ -821,15 +820,15 @@ _6d79:                                                                  ;$6D79
         beq _6da4
         jsr _761f
 _6da4:                                                                  ;$6DA4
-        lda VAR_04EF            ; item index?
+        lda CARGO_ITEM          ; item index?
         clc 
         adc # 5
         jsr set_cursor_row
         lda # 0
         jsr set_cursor_col
 
-        inc VAR_04EF            ; item index?
-        lda VAR_04EF            ; item index?
+        inc CARGO_ITEM          ; item index?
+        lda CARGO_ITEM          ; item index?
         cmp # $11
         bcs _6dbf
         jmp _6d27
@@ -904,7 +903,7 @@ _6e30:                                                                  ;$6E30
         jsr _723c
 
         jsr _7627
-        ldy VAR_04EF            ; item index?
+        ldy CARGO_ITEM          ; item index?
         jmp _6e5d
 
 
@@ -931,7 +930,7 @@ sell_cargo:                                                             ;$6E41
 _6e58:                                                                  ;$6E58
         ldy # $00
 _6e5a:                                                                  ;$6E5a
-        sty VAR_04EF            ; item index?
+        sty CARGO_ITEM          ; item index?
 _6e5d:                                                                  ;$6E5d
         ldx VAR_CARGO, y        ; cargo qty?
        .bze _6eca               ; none of that cargo
@@ -946,7 +945,7 @@ _6e5d:                                                                  ;$6E5d
         jsr _6a8a
 
         clc 
-        lda VAR_04EF            ; item index?
+        lda CARGO_ITEM          ; item index?
 
         ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
@@ -981,12 +980,12 @@ _6e5d:                                                                  ;$6E5d
         jsr _6dc9
         beq _6eca
         bcs _6e30
-        lda VAR_04EF            ; item index?
+        lda CARGO_ITEM          ; item index?
 
         ldx # $ff
         stx ZP_34
         jsr _7246
-        ldy VAR_04EF            ; item index?
+        ldy CARGO_ITEM          ; item index?
         lda VAR_CARGO, y
         sec 
         sbc ZP_VAR_R
@@ -1001,7 +1000,7 @@ _6e5d:                                                                  ;$6E5d
         lda # $00
         sta ZP_34
 _6eca:                                                                  ;$6ECA
-        ldy VAR_04EF            ; item index?
+        ldy CARGO_ITEM          ; item index?
         iny 
         cpy # $11
         bcc _6e5a
@@ -1821,14 +1820,14 @@ market_screen:                                                          ;$72E4
         jsr set_cursor_row
 
         lda # $00
-        sta VAR_04EF            ; item index?
+        sta CARGO_ITEM          ; item index?
 _7305:                                                                  ;$7305
         ldx # $80
         stx ZP_34
         jsr _7246
         jsr cursor_down
-        inc VAR_04EF            ; item index?
-        lda VAR_04EF            ; item index?
+        inc CARGO_ITEM          ; item index?
+        lda CARGO_ITEM          ; item index?
         cmp # $11
         bcc _7305
         rts 

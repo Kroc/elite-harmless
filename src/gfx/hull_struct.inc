@@ -12,8 +12,8 @@
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         ; the scoop-data in a hull definition provides which cargo type it
         ; gives when scooped, already decremented by 1 to account for the
-        ; below non-zero check. a side-effect of this is that it's not
-        ; possible for a hull definition to drop food or textiles(?)
+        ; non-zero check used when scooping. a side-effect of this is that
+        ; it's not possible for a hull definition to drop food or textiles(?)
 .if     (scoop = 0)
         ; when the scoop type is zero, it really means zero
         .byte   .nybl( $0, debris )
