@@ -103,7 +103,7 @@ clear_screen:                                                           ;$B21A
         jsr disable_sprites
 
         ldy # ELITE_VIEWPORT_COLS-1
-        lda # .color_nybble( YELLOW, BLACK )
+        lda # .color_nybble( HUD_COLOUR, BLACK )
 
 :       sta ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ), y                     ;$B289
         dey

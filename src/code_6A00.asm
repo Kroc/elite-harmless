@@ -2333,7 +2333,10 @@ _761f:                                                                  ;$761F
         lda # TXT_FLIGHT_CASH_
         jsr print_flight_token_and_space
 _7627:                                                                  ;$7627
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_05
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ldy # 50
         jmp wait_frames
@@ -2428,20 +2431,22 @@ _7695:                                                                  ;$7695
 _76a1:                                                                  ;$76A1
 ;===============================================================================
         sta ZP_TEMP_VAR
+        
         lda PLAYER_LASERS, x
-        beq _76c7
+        beq _76c7               ; no laser on this view, skip
+        
         ldy # $04
-        cmp # $0f
-        beq _76bc
+        cmp # $0f               ; laser-strength 15
+        beq :+
         ldy # $05
-        cmp # $8f
-        beq _76bc
+        cmp # laser::beam | $0f ; beam-laser strength 15
+        beq :+
         ldy # $0c
-        cmp # $97
-        beq _76bc
+        cmp # laser::beam + $17 ; beam-laser strength 23 (military laser?)
+        beq :+
+        
         ldy # $0d
-_76bc:                                                                  ;$76BC
-        stx ZP_VAR_Z
+:       stx ZP_VAR_Z                                                    ;$76BC
         tya 
         jsr _7642
         jsr _7481
@@ -3216,7 +3221,10 @@ _7c08:                                                                  ;$7C08
         jmp _87d0
 
 _7c0b:                                                                  ;$7C0B
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
+.endif  ;///////////////////////////////////////////////////////////////////////
         jmp _906a
 
 
@@ -4754,7 +4762,7 @@ _82be:                                                                  ;$82BE
         bne _82be               ; if not zero, check next ship slot
 
 _82ed:                                                                  ;$82ED
-        lda # PolyObject::xpos  ;=$00
+        lda # $00
         sta [ZP_TEMP_ADDR], y
         beq _82be               ; if zero, check the next ship slot
 
@@ -4764,7 +4772,7 @@ _82f3:                                                                  ;$82F3
         cmp ZP_AD
         bne _8305
 
-        ldy # .color_nybble( GREEN, YELLOW )
+        ldy # .color_nybble( GREEN, HUD_COLOUR )
         jsr untarget_missile
 
         lda # $c8
@@ -4945,15 +4953,15 @@ _83ed:                                                                  ;$83ED
         stx ZP_MISSILE_TARGET   ; no missile target
 
         lda # $80
-        sta VAR_048E            ; joystick Y?
+        sta JOY_PITCH
         sta ZP_ROLL_SIGN
         sta ZP_PITCH_SIGN
 
         asl                     ;=0
         sta ZP_BETA
         sta ZP_PITCH_MAGNITUDE
-        sta ZP_6A               ; move count?
-        sta ZP_95
+        sta ZP_INV_ROLL_SIGN
+        sta ZP_INV_PITCH_SIGN
         sta ZP_A3               ; move counter?
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
@@ -5023,7 +5031,7 @@ _845c:                                                                  ;$845C
 :       cpx PLAYER_MISSILES     ; player missile count                  ;$845E
         beq @_846c              ; colour remaining missiles
 
-        ldy # .color_nybble( DKGREY, YELLOW )
+        ldy # .color_nybble( DKGREY, HUD_COLOUR )
         jsr update_missile_indicator
         dex 
         bne :-
@@ -5031,7 +5039,7 @@ _845c:                                                                  ;$845C
         rts 
 
 @_846c:                                                                 ;$846C
-        ldy # .color_nybble( GREEN, YELLOW )
+        ldy # .color_nybble( GREEN, HUD_COLOUR )
         jsr update_missile_indicator
         dex 
         bne @_846c
@@ -5637,8 +5645,13 @@ _877e:                                                                  ;$877E
         lda # $80
         sta ZP_34
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # TXT_NEWLINE
         jsr print_char
+.else   ;///////////////////////////////////////////////////////////////////////
+        jsr print_crlf
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         jmp _6a68
 
@@ -5721,7 +5734,10 @@ debug_brk:                                                              ;$87B9
 
 _87d0:                                                                  ;$87D0
 ;===============================================================================
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
+.endif  ;///////////////////////////////////////////////////////////////////////
         jsr _83df
         asl PLAYER_SPEED        ;?
         asl PLAYER_SPEED        ;?
@@ -5736,8 +5752,8 @@ _87d0:                                                                  ;$87D0
         ;///////////////////////////////////////////////////////////////////////
         jsr drawViewportBorders
 .endif  ;///////////////////////////////////////////////////////////////////////
+        
         lda # $00
-
         sta ELITE_BITMAP_ADDR + 7 + .bmppos( 24, 35 )
         sta ELITE_BITMAP_ADDR + 0 + .bmppos(  0, 35 )
         jsr _7af7
@@ -6246,10 +6262,16 @@ _8a6a:                                                                  ;$8A6A
         lda # $10
         sta VAR_050C
 
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # TXT_NEWLINE
         jmp paint_char
+.else   ;///////////////////////////////////////////////////////////////////////
+        jmp paint_newline
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 @_8aa1:                                                                 ;$8AA1
+        ;-----------------------------------------------------------------------
         lda # $10
         sta VAR_050C
         sec 
@@ -6791,8 +6813,11 @@ do_quickjump:                                                           ;$8E29
 
 @nojump:                                                                ;$8E7C
         ;-----------------------------------------------------------------------
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $06               ; "sound low beep"?
         jmp play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -6944,13 +6969,15 @@ _8f24:                                                                  ;$8F24
         bpl _8f2f
 
         lda # $40
-        sta VAR_048D
+        sta JOY_ROLL
+
         lda # $00
 _8f2f:                                                                  ;$8F2F
         sta key_states, x
-        lda VAR_048D
+
+        lda JOY_ROLL
 _8f35:                                                                  ;$8F35
-        sta VAR_048D
+        sta JOY_ROLL
         lda # $80
         ldx # $29
         asl ZP_POLYOBJ_PITCH
@@ -6959,11 +6986,11 @@ _8f35:                                                                  ;$8F35
         ldx # $33
 _8f44:                                                                  ;$8F44
         sta key_states, x
-        lda VAR_048E
+        lda JOY_PITCH
 _8f4a:                                                                  ;$8F4A
-        sta VAR_048E
+        sta JOY_PITCH
 _8f4d:                                                                  ;$8F4D
-        ldx VAR_048D
+        ldx JOY_ROLL
         lda # $0e
         ldy joy_left
         beq _8f5a
@@ -6973,8 +7000,8 @@ _8f5a:                                                                  ;$8F5A
         beq _8f62
         jsr _3c7f
 _8f62:                                                                  ;$8F62
-        stx VAR_048D
-        ldx VAR_048E
+        stx JOY_ROLL
+        ldx JOY_PITCH
         ldy joy_down
         beq _8f70
         jsr _3c7f
@@ -6983,7 +7010,7 @@ _8f70:                                                                  ;$8F70
         beq _8f78
         jsr _3c6f
 _8f78:                                                                  ;$8F78
-        stx VAR_048E
+        stx JOY_PITCH
         lda _1d0c
         beq _8f9d
         lda DOCKCOM_STATE
@@ -6992,12 +7019,12 @@ _8f78:                                                                  ;$8F78
         lda joy_left
         ora joy_right
         bne _8f92
-        stx VAR_048D
+        stx JOY_ROLL
 _8f92:                                                                  ;$8F92
         lda joy_down
         ora joy_up
         bne _8f9d
-        stx VAR_048E
+        stx JOY_PITCH
 _8f9d:                                                                  ;$8F9D
         ldx ZP_7D
         stx VAR_0441

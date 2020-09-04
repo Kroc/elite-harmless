@@ -508,7 +508,7 @@ move_dust_front:                                                        ;$2A40
         lda ZP_VAR_X
         adc ZP_VAR_XX_HI
         sta ZP_VAR_XX_HI
-        eor ZP_6A               ; inverted roll sign?
+        eor ZP_INV_ROLL_SIGN
         jsr _393c
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
@@ -520,7 +520,7 @@ move_dust_front:                                                        ;$2A40
         stx ZP_VAR_XX_LO
         ldx ZP_PITCH_MAGNITUDE
         lda ZP_VAR_YY_HI
-        eor ZP_95               ; pitch sign?
+        eor ZP_INV_PITCH_SIGN
         jsr _393e               ; multiply_small_number:A.P = A*X (X<32)
         sta ZP_VAR_Q
         jsr _3a4c
@@ -635,19 +635,19 @@ _2b30:                                                                  ;$2B30
         sta DUST_Z_HI, y
         
         lda ZP_VAR_XX_HI
-        eor ZP_ROLL_SIGN        ; roll sign?
+        eor ZP_ROLL_SIGN
         jsr _393c
         jsr multiplied_now_add
         sta ZP_VAR_YY_HI
         stx ZP_VAR_YY_LO
-        eor ZP_6A               ; move count?
+        eor ZP_INV_ROLL_SIGN
         jsr _3934
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         stx ZP_VAR_XX_LO
         
         lda ZP_VAR_YY_HI
-        eor ZP_95
+        eor ZP_INV_PITCH_SIGN
         ldx ZP_PITCH_MAGNITUDE
         jsr _393e
         sta ZP_VAR_Q
@@ -957,11 +957,11 @@ _2d2f:                                                                  ;$2D2F
         lda # $67
         ldx ZP_AA
         ldy PLAYER_LASERS, x
-        cpy # $8f
+        cpy # laser::beam | $0f
         bne _2d4a
         lda # $68
 _2d4a:                                                                  ;$2D4A
-        cpy # $97
+        cpy # laser::beam | $17
         bne _2d50
         lda # $75
 _2d50:                                                                  ;$2D50
@@ -1602,8 +1602,13 @@ print_char:                                                             ;$2F24
         jsr _print_chars
 
         ; move to the next line
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # TXT_NEWLINE
         jsr paint_char
+.else   ;///////////////////////////////////////////////////////////////////////
+        jsr paint_newline
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         lda txt_buffer_index
         sbc # 30
@@ -1766,7 +1771,7 @@ _3068:                                                                  ;$3068
         sta ZP_TEMP_ADDR_LO
         lda #> dial_fore_addr
         sta ZP_TEMP_ADDR_HI
-        lda # .color_nybble(LTRED, LTRED)
+        lda # .color_nybble( LTRED, LTRED )
         sta ZP_VALUE_pt1
         sta ZP_VALUE_pt2
 
@@ -1816,7 +1821,7 @@ _30bb:                                                                  ;$30BB
         ; (this causes the next instruction to become a meaningless `bit`
         ;  instruction, a very handy way of skipping without branching)
        .bit 
-:       lda # .color_nybble(GREEN, GREEN)                               ;$30C8
+:       lda # .color_nybble( GREEN, GREEN )                             ;$30C8
         
         rts 
 
@@ -2088,8 +2093,11 @@ _31f1:                                                                  ;$31F1
         jsr _70ab
         jsr _6f82
 
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $06
         jsr play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 .import MSG_DOCKED_UNKNOWN_PLANET:direct
         lda # MSG_DOCKED_UNKNOWN_PLANET
@@ -2130,7 +2138,10 @@ _322f:                                                                  ;$322F
 
 _3239:                                                                  ;$3239
         jsr _3293
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         lda # $fa
         jmp _7bd2
@@ -2486,15 +2497,17 @@ _33fd:                                                                  ;$33FD
         lda ZP_67
         bne _3499
         
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $01
         jsr play_sfx
 
         ldy # $0f
         jmp play_sfx
-
-        ;-----------------------------------------------------------------------
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _3434:                                                                  ;$3434
+        ;-----------------------------------------------------------------------
         lda ZP_POLYOBJ_ZPOS_HI  ;=$10
         cmp # $03
         bcs _3442
@@ -2932,13 +2945,16 @@ _36a6:                                                                  ;$36A6
         lda SHIP_SLOTS, x
         jsr _36c5
 
-        ldy # .color_nybble( DKGREY, YELLOW )
+        ldy # .color_nybble( DKGREY, HUD_COLOUR )
         jsr untarget_missile
         
         dec PLAYER_MISSILES
         
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $04
         jmp play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 
 _36c5:                                                                  ;$36C5
@@ -3112,12 +3128,14 @@ _3795:                                                                  ;$3795
 
 _379e:                                                                  ;$397E
 ;===============================================================================
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $04
         jsr play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
         
         lda # $08
-_37a5:                                                                  ;$37A5
-        sta ZP_AC
+_37a5:  sta ZP_AC                                                       ;$37A5
 
         ; TODO: why does this change the screen,
         ;       but keep the ZP_SCREEN value?
@@ -3222,7 +3240,7 @@ _37fa:                                                                  ;$37FA
         stx ZP_VAR_S
         
         ldx ZP_PITCH_MAGNITUDE
-        eor ZP_95
+        eor ZP_INV_PITCH_SIGN
         jsr _393e
         jsr multiplied_now_add
         stx ZP_VAR_YY_LO
@@ -3283,12 +3301,12 @@ _38a3:                                                                  ;$38A3
         eor ZP_B0
         sta ZP_ROLL_SIGN        ; roll sign?
         eor # %10000000
-        sta ZP_6A               ; move count?
+        sta ZP_INV_ROLL_SIGN
         lda ZP_PITCH_SIGN
         eor ZP_B0
         sta ZP_PITCH_SIGN
         eor # %10000000
-        sta ZP_95
+        sta ZP_INV_PITCH_SIGN
         rts 
 
         ;-----------------------------------------------------------------------
@@ -3307,7 +3325,7 @@ _38d1:                                                                  ;$38D1
         sta ZP_VAR_X
         sta DUST_X_HI, y
         lda # $6e
-        ora ZP_6A               ; move count?
+        ora ZP_INV_ROLL_SIGN
         sta ZP_VAR_Y
         sta DUST_Y_HI, y
 _38e2:                                                                  ;$38E2
@@ -3708,12 +3726,13 @@ _3c4d:                                                                  ;$3C4D
         rts 
 
 
-_3c58:                                                                  ;$3C58
+dampen_toward_zero:                                                     ;$3C58
 ;===============================================================================
-; BBC code says "centre ship indicators"
-; roll/pitch dampening? -- slowly reduces X to 1
+; reduce a signed value toward zero by adding/subtracting 1 according to sign:
+; this is used to dampen the roll/pitch values 
 ;
 ; in:   X       value to dampen
+; out:  X       updated X value
 ;-------------------------------------------------------------------------------
         lda DOCKCOM_STATE       ; is docking computer enabled?
        .bnz :+                  ; yes, skip over the following

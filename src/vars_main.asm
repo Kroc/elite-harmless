@@ -80,12 +80,14 @@ DOCKCOM_STATE           = $0480 ; docking computer state: $00 = OFF, $FF = ON
 VAR_0481                = $0481 ;?
 
 IS_WITCHSPACE           = $0482 ; has misjump occurred?
+CABIN_HEAT              = $0483 ; cabin temperature
 
 VAR_0484                = $0484 ; ECM is on?
 
 COCKPIT_VIEW            = $0486 ; (front, rear, left, right)
 
 VAR_0487                = $0487 ; something to do with lasers / cool-down?
+LASER_HEAT              = $0488 ; laser temperature
 
 VAR_048A                = $048a ;?
 VAR_048B                = $048b ; a delay counter?
@@ -93,15 +95,14 @@ VAR_048C                = $048c ; message ID for item destroyed?
 
 ;-------------------------------------------------------------------------------
 
-VAR_048D                = $048d ;? x8   X-dampen?
-VAR_048E                = $048e ;?      Y-dampen?
+JOY_ROLL                = $048d ; roll amount coming from input
+JOY_PITCH               = $048e ; pitch amount coming from input
+
 VAR_048F                = $048f ;?
 VAR_0490                = $0490 ;? (indexed by X)
 VAR_0491                = $0491 ;?
 
 MISSION_FLAGS           = $0499
-
-VAR_04C4                = $04c4 ;?
 
 .enum   missions
         constrictor_begin       = %00000001
@@ -171,11 +172,19 @@ PLAYER_COMPETITION      = $04a7 ; status byte for competition requirements?
 
 PLAYER_GALAXY           = $04a8 ; current galaxy number
 
+
 PLAYER_LASERS           = $04a9 ; which laser is mounted to each view
-PLAYER_LASER_FRONT      = $04a9 ; front laser type
-PLAYER_LASER_2          = $04aa ;TODO: is this left, right, or rear?
-PLAYER_LASER_3          = $04ab ;TODO: is this left, right, or rear?
-PLAYER_LASER_4          = $04ac ;TODO: is this left, right, or rear?
+
+.enum   laser
+        none            = %00000000     ; value for no laser fitted
+        power           = %01111111     ; bits 0-6 contain power-level
+        beam            = %10000000     ; bit 7 sets continuous fire (beam)
+.endenum
+
+PLAYER_LASER_FRONT      = $04a9 ; front laser
+PLAYER_LASER_REAR       = $04aa ; rear (aft) laser
+PLAYER_LASER_LEFT       = $04ab ; left laser
+PLAYER_LASER_RIGHT      = $04ac ; right laser
 
 ;-------------------------------------------------------------------------------
 
@@ -229,6 +238,9 @@ VAR_CARGO_ALIENS        = $04c0 ; alien items
 PLAYER_ECM              = $04c1 ; flag, player has an E.C.M.
 PLAYER_SCOOP            = $04c2 ; flag, player has a fuel scoop
 PLAYER_EBOMB            = $04c3 ; player has energy bomb?
+
+VAR_04C4                = $04c4 ;?
+
 PLAYER_DOCKCOM          = $04c5 ; player has a docking computer?
 PLAYER_GDRIVE           = $04c6 ; player has a galactic hyper-drive?
 PLAYER_ESCAPEPOD        = $04c7 ; player has an escape pod?
@@ -262,7 +274,7 @@ VAR_MARKET_PLATINUM     = $04dc ; quantity of platinum on sale
 VAR_MARKET_GEMS         = $04dd ; quantity of gem-stones on sale
 VAR_MARKET_ALIENS       = $04de ; quantity of alien items on sale
 
-VAR_MARKET_RANDOM       = $04df ; the random variance added to market prices
+VAR_MARKET_RANDOM       = $04df ; random variance for market prices
 
 ;-------------------------------------------------------------------------------
 
@@ -279,9 +291,6 @@ PLAYER_ENERGY           = $04e9
 
 VAR_04EA                = $04ea ;?
 VAR_04EB                = $04eb ;?
-
-LASER_HEAT              = $0488 ; laser temperature
-CABIN_HEAT              = $0483 ; cabin temperature
 
 SHIP_LINES_LO           = $04f2 ; ship lines pointer lo-byte
 SHIP_LINES_HI           = $04f3 ; ship lines pointer hi-byte

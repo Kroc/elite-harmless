@@ -1771,7 +1771,7 @@ _a2a0:                                                                  ;$A2A0
         jsr _3a25
         sta ZP_VAR_P3
 
-        lda ZP_6A               ; move count?
+        lda ZP_INV_ROLL_SIGN
         eor ZP_POLYOBJ_XPOS_SIGN
         ldx # $03
         jsr _a508
@@ -2188,6 +2188,7 @@ _a626:                                                                  ;$A626
         lda ZP_POLYOBJ_ZPOS_SIGN
         eor # %10000000
         sta ZP_POLYOBJ_ZPOS_SIGN
+
         lda ZP_POLYOBJ_M0x0_HI
         eor # %10000000
         sta ZP_POLYOBJ_M0x0_HI
@@ -2272,6 +2273,7 @@ _a6ae:                                                                  ;$A6AE
 ;-------------------------------------------------------------------------------
         stx COCKPIT_VIEW
         jsr set_page
+
         jsr _a6d4
         jmp _7af3
 
@@ -2317,13 +2319,13 @@ _a6d4:                                                                  ;$A6D4
         ; for where this value is defined
         ldy # ELITE_SPRITES_INDEX
         
-        cmp # $0f               ; TODO: a type of laser?
+        cmp # $0f               ; laser power 15
         beq :+
         iny                     ; select next sprite index
-        cmp # $8f               ; TODO: a type of laser?
+        cmp # laser::beam | $0f ; beam laser, power 15
         beq :+
         iny                     ; select next sprite index
-        cmp # $97               ; TODO: a type of laser?
+        cmp # laser::beam | $17 ; beam laser, power 23
         beq :+
         iny                     ; select next sprite index
 
@@ -2507,8 +2509,11 @@ _a795:                                                                  ;$A795
         lda # $78
         jsr _900d
 
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $04
         jmp play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 
 _a7a6:                                                                  ;$A7A6
@@ -2585,7 +2590,8 @@ _a7e9:                                                                  ;$A7E9
         ldx # $d0
         jmp _a850
 
-
+.ifndef OPTION_NOAUDIO
+;///////////////////////////////////////////////////////////////////////////////
 play_sfx_05:                                                            ;$A80F
 ;===============================================================================
         ldy # $05
@@ -2595,6 +2601,8 @@ play_sfx_03:                                                            ;$A813
 ;===============================================================================
         ldy # $03
         bne play_sfx            ; (always branches)
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 _a817:                                                                  ;$A817
 ;===============================================================================
@@ -2636,16 +2644,22 @@ _a839:                                                                  ;$A839
         ldx # $f0
         jsr _a850
 
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $04
         jsr play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; wait until the next frame:
         ; TODO: could just call `wait_for_frame` instead
         ldy # 1
         jsr wait_frames
 
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $87               ; high-bit set
         bne play_sfx            ; (awlays branches)
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 
 _a850:                                                                  ;$A850
@@ -2887,8 +2901,11 @@ _b0f4:                                                                  ;$B0F4
         lda # $20
         sta ZP_67
 
+.ifndef OPTION_NOAUDIO
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $09
         jsr play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _b0fd:                                                                  ;$B0FD
 ;===============================================================================
@@ -3010,8 +3027,13 @@ chrout:                                                                 ;$B155
         bne paint_char          ; if it's not RETURN, process it
 
         ; handle the RETURN code
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         lda # TXT_NEWLINE
         jsr paint_char
+.else   ;///////////////////////////////////////////////////////////////////////
+        jsr paint_newline
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda # $0d
 :       clc                     ; clear carry flag before returning     ;$B166

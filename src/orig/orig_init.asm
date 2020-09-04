@@ -300,7 +300,7 @@ _76e8:  stx ZP_COPY_TO+1
         ; colour the borders yellow down the sides of the view-port:
 
         ; yellow fore / black back colour
-_7711:  lda # .color_nybble( YELLOW, BLACK )
+_7711:  lda # .color_nybble( HUD_COLOUR, BLACK )
         ldy # 36                ; set the colour on column 37
         sta [ZP_COPY_TO], y
         ldy # 3                 ; set the colour on column 4
@@ -344,7 +344,7 @@ _7711:  lda # .color_nybble( YELLOW, BLACK )
 
         ldx # $12               ; 18 rows
 
-_7745:  lda # .color_nybble( YELLOW, BLACK )
+_7745:  lda # .color_nybble( HUD_COLOUR, BLACK )
         ldy # 36
         sta [ZP_COPY_TO], y
         ldy # 3
@@ -373,7 +373,7 @@ _776c:
 
         ; set yellow colour across the bottom row of the menu-screen
         ; write $70 from $63e4 to $63c4
-        lda # .color_nybble( YELLOW, BLACK )
+        lda # .color_nybble( HUD_COLOUR, BLACK )
         ldy # $1f               ; we'll write 31 chars (colour-cells)
 :       sta ELITE_MENUSCR_ADDR + (24 * 40) + 4, y
         dey 
@@ -388,7 +388,7 @@ _776c:
         ldx #> $d800
         stx ZP_COPY_TO+1
 
-        ldx # .page_count(1024)
+        ldx # .page_count( 1024 )
 _7784:  sta [ZP_COPY_TO], y
         iny 
         bne _7784

@@ -100,7 +100,7 @@ docked:                                                                 ;$1D81
         bne :+
 
         ; is the player at Ceerdi?
-        ;SPEED: couldn't we use the planet index number
+        ; TODO: couldn't we use the planet index number
         ;       instead of checking co-ordinates?
 
         lda PSYSTEM_POS_X
@@ -117,7 +117,7 @@ docked:                                                                 ;$1D81
         bne @skip
 
         ; is the player at Birera?
-        ;SPEED: couldn't we use the planet index number
+        ; TODO: couldn't we use the planet index number
         ;       instead of checking co-ordinates?
 
         lda PSYSTEM_POS_X
@@ -206,7 +206,7 @@ _1e35:
         cmp TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
        .blt :+
 
-        jmp _1ece
+        jmp roll_pitch
 
         ; take the counter 0-7 and multiply by 2
         ; for use in a table of 16-bit values later
@@ -310,22 +310,24 @@ _1e35:
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        jmp _1ece
+        jmp roll_pitch
+
 
 _1ec1:                                                                  ;$1EC1
 ;===============================================================================
 ; main cockpit-view game-play loop perhaps?
 ; (handles many key presses)
 ;-------------------------------------------------------------------------------
-        lda polyobj_00          ;=$F900?
-        sta ZP_GOATSOUP_pt1     ;? randomize?
+        ; seed the random-number-generator:
+        lda polyobj_00          ; TODO: why this byte?
+        sta ZP_GOATSOUP_pt1
 
 .ifndef OPTION_NOTRUMBLES
         ;///////////////////////////////////////////////////////////////////////
 
         ; are there any Trumbles™ on-screen?
         lda TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
-       .bze _1ece               ; =0; don't process Trumbles™
+       .bze roll_pitch          ; =0; don't process Trumbles™
 
         ; process Trumbles™
         ; (move them about, breed them)
@@ -333,32 +335,50 @@ _1ec1:                                                                  ;$1EC1
 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-_1ece:  ; process roll amount:                                          ;$1ECE
+roll_pitch:                                                             ;$1ECE
         ;-----------------------------------------------------------------------
-        ldx VAR_048D            ; current roll amount
-        jsr _3c58               ; damping?
-        jsr _3c58               ; damping?
+        ; take the roll amount and prepare it for use in the 3D math:
+        ;
+        ldx JOY_ROLL            ; current roll amount (from joy/key input)
+        jsr dampen_toward_zero  ; apply damping?
+        jsr dampen_toward_zero  ; apply damping?
         txa                     ; transfer roll amount back to A
 
+        ; elite actually rotates the universe around the player(!),
+        ; therefore rolling to the right means rolling everything else
+        ; to the left which is why we do some sign flipping here whilst
+        ; preparing the angle. thanks goes to Mark Moxon's BBC disassembly
+        ; for this insight
+
+        ; get the absolute value and some additional values useful
+        ; for the math, including an inverted copy of the sign
+        ;
         eor # %10000000         ; flip the sign bit
         tay                     ; (put aside)
         and # %10000000         ; extract just the sign bit
         sta ZP_ROLL_SIGN        ; store as our "direction of roll"
-        stx VAR_048D            ; save new roll amount
+
+        ; (write back the updated original roll value, after dampening;
+        ;  this happens not to be related to the above few instructions)
+        stx JOY_ROLL
+        
         eor # %10000000         ; flip the sign bit
-        sta ZP_6A               ; keep inverse roll direction
+        sta ZP_INV_ROLL_SIGN    ; keep inverse roll direction
 
         tya                     ; retrieve our roll amount, with flipped sign
         bpl :+                  ; if positive, skip over
 
-        ; negate the number properly (2's compliment)
+        ; roll amount is negative, make it positive (absolute)
+        ; via a 2's complement (flip all bits and add 1)
         eor # %11111111
         clc 
         adc # $01
 
+        ; we now have the absolute roll amount
+        ;
 :       lsr                     ; divide by 2,                           ;$1EEE
         lsr                     ; divide by 4
-        cmp # $08
+        cmp # $08               ;?
        .bge :+
         lsr 
 
@@ -368,17 +388,21 @@ _1ece:  ; process roll amount:                                          ;$1ECE
 
         ; process pitch amount:
         ;-----------------------------------------------------------------------
-        ldx VAR_048E            ; current pitch?
-        jsr _3c58
+        ldx JOY_PITCH           ; current pitch amount (from joy/key input)
+        jsr dampen_toward_zero  ; apply damping (if enabled)
+        txa                     ; transfer pitch amount back to A
 
-        txa 
+        eor # %10000000         ; flip the sign-bit
+        tay                     ; put aside for later
+        and # %10000000         ; extract just the sign bit
+        
+        ; (write back the updated original pitch value, after dampening;
+        ;  this happens not to be related to the above few instructions)
+        stx JOY_PITCH
+        
+        sta ZP_INV_PITCH_SIGN
         eor # %10000000
-        tay 
-        and # %10000000
-        stx VAR_048E
-        sta ZP_95
-        eor # %10000000
-        sta ZP_PITCH_SIGN
+        sta ZP_PITCH_SIGN       ; store as our "direction of pitch"
         tya 
         bpl :+
         eor # %11111111
@@ -391,9 +415,6 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         bcs :+
         lsr 
 
-        ; get the player ship's pitch;
-        ; stored as separate sign & magnitude
-        ;
 :       sta ZP_PITCH_MAGNITUDE                                          ;$1F20
         ora ZP_PITCH_SIGN
         sta ZP_BETA             ; put aside for the matrix math
@@ -401,14 +422,15 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         ; TODO: this section processes a number of key presses;
         ;       could we skip this when no keys are pressed by
         ;       marking a 'no keys' flag?
-
+main_keys:
+        ;=======================================================================
         ; accelerate?
         ;-----------------------------------------------------------------------
         lda key_accelerate      ; is accelerate being held?
        .bze :+                  ; if not, continue
 
         lda PLAYER_SPEED        ; current speed
-        cmp # $28               ; are we at maximum speed?
+        cmp # 40                ; are we at maximum speed?
         bcs :+
 
         inc PLAYER_SPEED        ; increase player's speed
@@ -422,26 +444,30 @@ _1ece:  ; process roll amount:                                          ;$1ECE
        .bnz :+                  ; still above zero?
         inc PLAYER_SPEED        ; if zero, set to 1
 
-        ; disarm missile?
+:       ; disarm missile?                                               ;$1F3E
         ;-----------------------------------------------------------------------
-:       lda key_missile_disarm  ; is disarm missile key being pressed?  ;$1F3E
+        lda key_missile_disarm  ; is disarm missile key being pressed?
         and PLAYER_MISSILES     ; does the player have any missiles?
        .bze :+                  ; no? skip ahead
 
-        ldy # .color_nybble( GREEN, YELLOW )
+        ; disarm missile and change the colour of the missile-block on the HUD
+        ldy # .color_nybble( GREEN, HUD_COLOUR )
         jsr untarget_missile
 
+.ifndef OPTION_NOSOUND
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $06
         jsr play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda # $00               ; set loaded missile as disarmed ($00)
         sta PLAYER_MISSILE_ARMED
 
-:       lda ZP_MISSILE_TARGET                                           ;$1F55
-        bpl :+
-
         ; target missile?
         ;-----------------------------------------------------------------------
+:       lda ZP_MISSILE_TARGET   ; is there a missile target?            ;$1F55
+        bpl :+                  ; if yes, skip, cannot re-target
+
         lda key_missile_target  ; target missile key pressed?
        .bze :+                  ; no, continue...
 
@@ -453,7 +479,7 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         ; (A = $FF from `key_missile_target`)
         sta PLAYER_MISSILE_ARMED
         ; update the colour of the HUD missile indicator
-        ldy # .color_nybble( ORANGE, YELLOW )
+        ldy # .color_nybble( ORANGE, HUD_COLOUR )
         jsr update_missile_indicator
 
         ; fire missile?
@@ -462,9 +488,9 @@ _1ece:  ; process roll amount:                                          ;$1ECE
        .bze :+                  ; no, skip ahead
 
         lda ZP_MISSILE_TARGET   ; check the missile target...
-        ; if no target, skip ahead. this skips over the rest
-        ; of the key-press checks and is likely an oversight
-        bmi :++++++                                                     ;=$1FC2
+        ; if no target, skip ahead. this skips over most of the
+        ; remaining key-press checks and is likely an oversight
+        bmi :++++++             ;(=$1FC2)
         
         jsr _36a6               ; do fire missile?
 
@@ -482,8 +508,11 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         ldy # vic_screen_ctl2::unused | vic_screen_ctl2::multicolor
         sty interrupt_screenmode1
 
+.ifndef OPTION_NOSOUND
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $0d               ; e-bomb sound?
         jsr play_sfx
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; turn docking computer off?
         ;-----------------------------------------------------------------------
@@ -580,9 +609,11 @@ _1ece:  ; process roll amount:                                          ;$1ECE
         sta ZP_7B               ;?
         sta VAR_0484            ;?
 
+.ifndef OPTION_NOSOUND
+        ;///////////////////////////////////////////////////////////////////////
         ldy # $00
-        pla 
-        pha 
+        pla
+        pha                     ; (redo flags?)
         bmi :++
         cmp # $32
         bne :+                  ; (BNE to another BNE! should be `bne @201d`)
@@ -597,6 +628,8 @@ _1ece:  ; process roll amount:                                          ;$1ECE
        .bit
 @201b:  ldy # $0b               ; laser sound #2?                       ;$201B
 @201d:  jsr play_sfx                                                    ;$201D
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         jsr shoot_lasers        ; pew-pew!
         
         pla                     ; retrieve laser type?
@@ -835,7 +868,10 @@ dock_fail:                                                              ;$2107
 
 _2110:                                                                  ;$2110
         ;-----------------------------------------------------------------------
+.ifndef OPTION_NOSOUND
+        ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; set top-bit of ship state? (is exploding)
         asl ZP_POLYOBJ_STATE
@@ -862,7 +898,11 @@ _2122:                                                                  ;$2122
         ror 
 _212b:                                                                  ;$212B
         jsr _7bd2               ; take damage?
-        jsr play_sfx_03         ; sound?
+.ifndef OPTION_NOSOUND
+        ;///////////////////////////////////////////////////////////////////////
+        jsr play_sfx_03
+.endif  ;///////////////////////////////////////////////////////////////////////
+
 _2131:                                                                  ;$2131
         ; should the ship be removed?
         lda ZP_POLYOBJ_BEHAVIOUR
@@ -879,9 +919,12 @@ _2131:                                                                  ;$2131
         lda PLAYER_MISSILE_ARMED
         beq :+
 
+.ifndef OPTION_NOSOUND
+        ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_05         ; beep?
+.endif  ;///////////////////////////////////////////////////////////////////////
         ldx ZP_9D               ; missile target?
-        ldy # .color_nybble( RED, YELLOW )
+        ldy # .color_nybble( RED, HUD_COLOUR )
         jsr target_missile
 
 :       lda ZP_7B               ; laser power?                          ;$2153

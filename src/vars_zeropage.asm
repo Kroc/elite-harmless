@@ -259,8 +259,7 @@ ZP_67                   = $67   ;? x9
 
 ZP_ROLL_MAGNITUDE       = $68   ; unsigned roll rotation value
 ZP_ROLL_SIGN            = $69   ; roll rotation sign
-
-ZP_6A                   = $6a   ; "move count"?
+ZP_INV_ROLL_SIGN        = $6a   ; inverse roll rotation sign (for easier math)
 
 ;-------------------------------------------------------------------------------
 
@@ -332,8 +331,8 @@ ZP_91                   = $91   ;? x9
 ZP_92                   = $92   ;? x6
 ZP_93                   = $93   ;? x4
 
-ZP_PITCH_SIGN           = $94   ; pitch rotation sign (see $64 for magnitude)
-ZP_95                   = $95   ; inverted pitch sign
+ZP_PITCH_SIGN           = $94   ; pitch sign
+ZP_INV_PITCH_SIGN       = $95   ; inverted pitch sign
 
 PLAYER_SPEED            = $96
 ZP_SPEED_LO             = $97   ; (player speed * 256) / 4, lo-byte

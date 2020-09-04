@@ -4,6 +4,10 @@
 ;===============================================================================
 .linecont+
 
+; this defines the border colour used throughout the HUD.
+; we need to know this as portions of the HUD are redrawn during gameplay
+HUD_COLOUR              = YELLOW
+
 ; the game's default viewport/HUD data is stored in "gfx_koala_main.asm",
 ; and during the build process, this is assembled into a Koala Painter
 ; image file "build/bitmap_main.koa" -- the bytes that will go into the
@@ -421,13 +425,15 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 ; write out separate tables for lo-address / hi-address:
-
+;
 .segment        "TABLE_BITMAP_LO"
-
+;===============================================================================
 row_to_bitmap_lo:                                                       ;$9700
+;-------------------------------------------------------------------------------
         .lobytes _rowtobmp
 
 .segment        "TABLE_BITMAP_HI"
-
+;===============================================================================
 row_to_bitmap_hi:                                                       ;$9800
+;-------------------------------------------------------------------------------
         .hibytes _rowtobmp
