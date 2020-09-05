@@ -289,7 +289,6 @@ echo "* elite-harmless.d64"
 echo "  --------------------------------------"
 clean
 
-# enable undocumented opcodes and mathtables
 options="--cpu 6502X -Wa -DFEATURE_AUDIO"
 
 echo -n "- assembling                        "
@@ -392,7 +391,7 @@ echo "  --------------------------------------"
 clean
 
 # enable undocumented opcodes and the replacement line-drawing routines
-options="--cpu 6502X -Wa -DOPTION_MATHTABLES,-DOPTION_DYME_FASTLINE"
+options="--cpu 6502X -Wa -DOPTION_MATHTABLES,-DOPTION_DYME_FASTLINE,-DFEATURE_AUDIO"
 
 echo -n "- assembling                        "
 

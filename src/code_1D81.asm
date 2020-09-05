@@ -701,38 +701,48 @@ process_ship:                                                           ;$202F
         ; copy the given PolyObject to
         ; the working space in zero page
         ;
-        ; TODO: we may be able to delay this copy until later in the logic
-        ;       i.e. we might not need the ZP polyObject until the ship moves
-        ;
-        ; TODO: given the 1'100 cycles to copy the object back and forth,
+        ; TODO: given the ~1'100 cycles to copy the object back and forth,
         ;       would it be faster to stick to indexing the object instead?
         ;       i.e. `... [polyobj], x`
         ;
-;;.ifdef  OPTION_ORIGINAL
+        ; currently, we don't have a constant (at assemble-time) to know
+        ; if we're running in a high-RAM configuration as our loop-unroll
+        ; here is too large for the low-RAM layout...
+        ;
+.ifdef  OPTION_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
-        ;                                 bytes cycles
-        ldy # .sizeof(PolyObject)-1     ;  2     2
-        ;-------------------------------;---------------------------------------
-:       lda [ZP_POLYOBJ_ADDR], y        ; +2=4   5=5                    ;$2040
-        sta ZP_POLYOBJ, y               ; +2=6  +5=10
-        dey                             ; +1=7  +2=12
-        bpl :-                          ; +2=9  +3=15 (+2 for !bpl)
-        ;-------------------------------;---------------------------------------
-        ;                         loop: ;       *37=554
-        ;                        total: ;    9  556
-;;.else   ;/////////////////////////////////////////////////////////////////////
-;;        ; TODO: this won't fit into this segment in the non-hiram config
-;;        ;
-;;        ldy # 0                       ; 2     2
-;;        .repeat $23, I
-;;        lda [ZP_POLYOBJ_ADDR], y      ; 2     5=5
-;;        sta ZP_POLYOBJ + I            ; 2     3=8
-;;        iny                           ; 1     2=10
-;;        .endrepeat                    ; 5*36  10*36 (+2) = 362 cycles
-;;        lda [ZP_POLYOBJ_ADDR], y      ; 2     5=367
-;;        sta ZP_POLYOBJ + $24          ; 2     3=370
-;;                                      ;=186 bytes!
-;;.endif  ;/////////////////////////////////////////////////////////////////////
+        ; the amount of time spent copying the ship instances back and forth
+        ; between zero-page is quite significant. we can unroll the copy loop
+        ; to speed it up drastically, but it will take up a lot more RAM!
+        ;
+        ;                                       ; bytes/tally   cycles/tally
+        ;-----------------------------------------------------------------------
+        ldy # 0                                 ; +2    2       +2      2
+        .repeat .sizeof(PolyObject)-2, I
+                lda [ZP_POLYOBJ_ADDR], y        ; +2    .       +5      .
+                sta ZP_POLYOBJ + I              ; +2    .       +3      .
+                iny                             ; +1    .       +2      .
+        .endrepeat                      ; loop: ; =5*36 180     =10*36  360
+        ;
+        ; the last iteration does not need to
+        ; include the INY so is split out here
+        lda [ZP_POLYOBJ_ADDR], y                ; +2    .       +5      .
+        sta ZP_POLYOBJ + .sizeof(PolyObject)-1  ; +2    4       +3      8
+        ;---------------------------------------;-------------------------------
+        ;                                total: ;       186             370
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; this is the original copy routine
+        ;                                       ; bytes/tally   cycles/tally
+        ;---------------------------------------;-------------------------------
+        ldy # .sizeof(PolyObject)-1             ; +2    2       +2      2
+:       lda [ZP_POLYOBJ_ADDR], y                ; +2    .       +5      .      
+        sta ZP_POLYOBJ, y                       ; +2    .       +5      .      
+        dey                                     ; +1    .       +2      .      
+        bpl :-                                  ; +2    7       +3      -1     
+        ;                                 loop: ;               =15*37  554
+        ;---------------------------------------;-------------------------------
+        ;                                total: ;       9               556
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; TODO: if we use LDX instead, we can preserve the ship-type through
         ;       this logic and do away with a number of additional LDA's?
@@ -796,16 +806,37 @@ process_ship:                                                           ;$202F
 
         ; copy the zero-page PolyObject back to its storage
         ;
-        ;                                 bytes cycles
-        ldy # .sizeof(PolyObject)-1     ;  2     2
-        ;-------------------------------;---------------------------------------
-:       lda ZP_POLYOBJ, y               ; +2=4   4=4                    ;$207E
-        sta [ZP_POLYOBJ_ADDR], y        ; +2=6  +6=10
-        dey                             ; +1=7  +2=12
-        bpl :-                          ; +2=9  +3=15 (+2 for !bpl)
-        ;-------------------------------;---------------------------------------
-        ;                         loop: ;       *37=554
-        ;                        total: ;    9  556
+.ifdef  OPTION_MATHTABLES
+        ;///////////////////////////////////////////////////////////////////////
+        ; unrolled version:
+        ;                                       ; bytes/tally   cycles/tally
+        ;-----------------------------------------------------------------------
+        ldy # 0                                 ; +2    2       +2      2
+        .repeat .sizeof(PolyObject)-2, I
+                lda ZP_POLYOBJ + I              ; +2    .       +3      .
+                sta [ZP_POLYOBJ_ADDR], y        ; +2    .       +6      .
+                iny                             ; +1    .       +2      .
+        .endrepeat                      ; loop: ; =5*36 180     =11*36  396
+        ;
+        ; the last iteration does not need to
+        ; include the INY so is split out here
+        lda ZP_POLYOBJ + .sizeof(PolyObject)-1  ; +2    .       +3      .
+        sta [ZP_POLYOBJ_ADDR], y                ; +2    4       +6      9
+        ;---------------------------------------;-------------------------------
+        ;                                total: ;       186             405
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; this is the original copy routine
+        ;                                       ; bytes/tally   cycles/tally
+        ;---------------------------------------;-------------------------------
+        ldy # .sizeof(PolyObject)-1             ; +2    2       +2      2
+:       lda ZP_POLYOBJ, y                       ; +2    .       +4      .
+        sta [ZP_POLYOBJ_ADDR], y                ; +2    .       +6      .
+        dey                                     ; +1    .       +2      .      
+        bpl :-                                  ; +2    7       +3      -1     
+        ;                                 loop: ;               =15*37  554
+        ;---------------------------------------;-------------------------------
+        ;                                total: ;       9               556
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ;=======================================================================
         ; [7]:  collision checks
@@ -849,6 +880,9 @@ process_ship:                                                           ;$202F
         cpx # HULL_MISSILE      ; is it a missile?
         beq @20e0               ; yes, skip
 
+        ;=======================================================================
+        ; [8]:  scooping
+        ;-----------------------------------------------------------------------
         ; can we scoop this object?
         ;
         ; get fuel scoop status ($00 = none, $80 = present)
@@ -879,14 +913,16 @@ process_ship:                                                           ;$202F
         ; possible for a hull definition to drop food or textiles(?)
         ;
         adc # $01               ; add 1 to cargo type
-       .bnz @20c5               ; (always branches)
+       .bnz @add                ; (always branches)
 
         ; scooped cargo:
         ;-----------------------------------------------------------------------
 @can:   jsr get_random_number   ; choose a random type of cargo         ;$20C0
         and # %00000111         ; limit to 0-7
 
-@20c5:  jsr _6a00               ; count cargo?                          ;$20C5
+        ; test to see if you can hold 1 more of the given item
+        ; carry clear = yes, carry set = no. note that this returns A=1
+@add:   jsr check_cargo_capacity_add1                                   ;$20C5
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -896,15 +932,15 @@ process_ship:                                                           ;$202F
 .endif  ;///////////////////////////////////////////////////////////////////////
         bcs _2110               ; cargo full
 
-        ldy CARGO_ITEM          ; type of cargo
-        adc VAR_CARGO, y        ; add to cargo
-        sta VAR_CARGO, y
+        ldy CARGO_ITEM          ; retrieve type of cargo
+        adc VAR_CARGO, y        ; add 1 to current cargo count
+        sta VAR_CARGO, y        ; update your cargo holdings
         tya
 
         ; print the name of the cargo 
 .import TKN_FLIGHT_FOOD:direct
         adc # TKN_FLIGHT_FOOD
-        jsr _900d
+        jsr _900d               ; print a message on-screen
 
         ; mark cannister for removal:
         ; (set bit 7)
@@ -914,7 +950,8 @@ process_ship:                                                           ;$202F
 
 @20e0:  jmp _2131                                                       ;$20E0
 
-        ; space-station:
+        ;=======================================================================
+        ; [9]:  docking
         ;-----------------------------------------------------------------------
         ; is the station hostile?
 @20e3:  lda polyobj_01 + PolyObject::behaviour                          ;$20E3

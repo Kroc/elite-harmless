@@ -16,9 +16,9 @@
 ; NOTE: the segment that this code belongs to will be set by the including
 ;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
 
-_6a00:                                                                  ;$6A00
+check_cargo_capacity_add1:                                              ;$6A00
 ;===============================================================================
-; count your current cargo in-use capacity
+; check if 1 tonne of a given item will fit in your cargo:
 ;
 ; in:   A       index of cargo item;
 ;               see `Cargo` struct for order
@@ -29,20 +29,22 @@ _6a00:                                                                  ;$6A00
         sta CARGO_ITEM          ; item index?
         lda # $01
 
-_6a05:                                                                  ;$6A05
-;-------------------------------------------------------------------------------
-;       A = initial quantity count
+check_cargo_capacity:                                                   ;$6A05
+;===============================================================================
+; in:   A               initial quantity count
+;       CARGO_ITEM      set to the type of item to count
 ;
+;-------------------------------------------------------------------------------
         pha                     ; preserve A
 
         ; the precious materials (gold / platinum / gems / alien items)
         ; are measured in Kg
         ;
         ldx # Cargo::minerals   ; minerals or below?
-        cpx CARGO_ITEM          ; item index?
+        cpx CARGO_ITEM          ; check against the compare type
         bcc @kg                 ; skip ahead if precious materials
 
-        ; count the number of tons of cargo:
+        ; count the number of tonnes of cargo:
         ; for each cargo type, add its quantity to the Accumulator
 :       adc VAR_CARGO, x                                                ;$6A0D
         dex 
@@ -793,8 +795,10 @@ _6d3e:                                                                  ;$6D3E
         stx ZP_TEMP_VAR
         jsr _6dc9
         bcs _6d32
+        
         sta ZP_VAR_P1
-        jsr _6a05               ; count cargo
+        jsr check_cargo_capacity
+
         ldy # $ce
         lda ZP_VAR_R
         beq _6d79
