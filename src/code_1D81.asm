@@ -699,50 +699,16 @@ process_ship:                                                           ;$202F
         jsr get_polyobj_addr    ; look up the ship's instance data
 
         ; copy the given PolyObject to
-        ; the working space in zero page
+        ; the working space in zero page:
+        ;
+        ; see "vars_polyobj.asm" for the code in this macro as different
+        ; approaches are taken for optimisation depending on the build
         ;
         ; TODO: given the ~1'100 cycles to copy the object back and forth,
         ;       would it be faster to stick to indexing the object instead?
         ;       i.e. `... [polyobj], x`
         ;
-        ; currently, we don't have a constant (at assemble-time) to know
-        ; if we're running in a high-RAM configuration as our loop-unroll
-        ; here is too large for the low-RAM layout...
-        ;
-.ifdef  OPTION_MATHTABLES
-        ;///////////////////////////////////////////////////////////////////////
-        ; the amount of time spent copying the ship instances back and forth
-        ; between zero-page is quite significant. we can unroll the copy loop
-        ; to speed it up drastically, but it will take up a lot more RAM!
-        ;
-        ;                                       ; bytes/tally   cycles/tally
-        ;-----------------------------------------------------------------------
-        ldy # 0                                 ; +2    2       +2      2
-        .repeat .sizeof(PolyObject)-2, I
-                lda [ZP_POLYOBJ_ADDR], y        ; +2    .       +5      .
-                sta ZP_POLYOBJ + I              ; +2    .       +3      .
-                iny                             ; +1    .       +2      .
-        .endrepeat                      ; loop: ; =5*36 180     =10*36  360
-        ;
-        ; the last iteration does not need to
-        ; include the INY so is split out here
-        lda [ZP_POLYOBJ_ADDR], y                ; +2    .       +5      .
-        sta ZP_POLYOBJ + .sizeof(PolyObject)-1  ; +2    4       +3      8
-        ;---------------------------------------;-------------------------------
-        ;                                total: ;       186             370
-.else   ;///////////////////////////////////////////////////////////////////////
-        ; this is the original copy routine
-        ;                                       ; bytes/tally   cycles/tally
-        ;---------------------------------------;-------------------------------
-        ldy # .sizeof(PolyObject)-1             ; +2    2       +2      2
-:       lda [ZP_POLYOBJ_ADDR], y                ; +2    .       +5      .      
-        sta ZP_POLYOBJ, y                       ; +2    .       +5      .      
-        dey                                     ; +1    .       +2      .      
-        bpl :-                                  ; +2    7       +3      -1     
-        ;                                 loop: ;               =15*37  554
-        ;---------------------------------------;-------------------------------
-        ;                                total: ;       9               556
-.endif  ;///////////////////////////////////////////////////////////////////////
+        .polybj_to_zp
 
         ; TODO: if we use LDX instead, we can preserve the ship-type through
         ;       this logic and do away with a number of additional LDA's?
@@ -806,37 +772,7 @@ process_ship:                                                           ;$202F
 
         ; copy the zero-page PolyObject back to its storage
         ;
-.ifdef  OPTION_MATHTABLES
-        ;///////////////////////////////////////////////////////////////////////
-        ; unrolled version:
-        ;                                       ; bytes/tally   cycles/tally
-        ;-----------------------------------------------------------------------
-        ldy # 0                                 ; +2    2       +2      2
-        .repeat .sizeof(PolyObject)-2, I
-                lda ZP_POLYOBJ + I              ; +2    .       +3      .
-                sta [ZP_POLYOBJ_ADDR], y        ; +2    .       +6      .
-                iny                             ; +1    .       +2      .
-        .endrepeat                      ; loop: ; =5*36 180     =11*36  396
-        ;
-        ; the last iteration does not need to
-        ; include the INY so is split out here
-        lda ZP_POLYOBJ + .sizeof(PolyObject)-1  ; +2    .       +3      .
-        sta [ZP_POLYOBJ_ADDR], y                ; +2    4       +6      9
-        ;---------------------------------------;-------------------------------
-        ;                                total: ;       186             405
-.else   ;///////////////////////////////////////////////////////////////////////
-        ; this is the original copy routine
-        ;                                       ; bytes/tally   cycles/tally
-        ;---------------------------------------;-------------------------------
-        ldy # .sizeof(PolyObject)-1             ; +2    2       +2      2
-:       lda ZP_POLYOBJ, y                       ; +2    .       +4      .
-        sta [ZP_POLYOBJ_ADDR], y                ; +2    .       +6      .
-        dey                                     ; +1    .       +2      .      
-        bpl :-                                  ; +2    7       +3      -1     
-        ;                                 loop: ;               =15*37  554
-        ;---------------------------------------;-------------------------------
-        ;                                total: ;       9               556
-.endif  ;///////////////////////////////////////////////////////////////////////
+        .zp_to_polyobj
 
         ;=======================================================================
         ; [7]:  collision checks
