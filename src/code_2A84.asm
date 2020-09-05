@@ -2124,7 +2124,7 @@ _321e:                                                                  ;$321E
         bne _322b
 
         lda # $50
-        jsr _7bd2
+        jsr damage_player
 _322b:                                                                  ;$322B
         ldx # $04
         bne _3290
@@ -2145,7 +2145,7 @@ _3239:                                                                  ;$3239
 .endif  ;///////////////////////////////////////////////////////////////////////
         
         lda # $fa
-        jmp _7bd2
+        jmp damage_player
 
         ;-----------------------------------------------------------------------
 
@@ -2191,7 +2191,7 @@ _327d:                                                                  ;$327D
         bne _328a
 
         lda # $50
-        jsr _7bd2
+        jsr damage_player
 _328a:                                                                  ;$328A
         lda ZP_POLYOBJ_ATTACK
         and # attack::active ^$FF       ;=%01111111
@@ -2496,7 +2496,7 @@ _33fd:                                                                  ;$33FD
 
         lda [ZP_HULL_ADDR], y
         lsr 
-        jsr _7bd2
+        jsr damage_player
         dec ZP_POLYOBJ_ACCEL
         lda ECM_COUNTER         ; is an ECM already active?
         bne _3499
