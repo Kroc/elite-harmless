@@ -1,8 +1,9 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; text_docked.asm
+;
 ; this file stores the strings typically used when docked (as well as the title
 ; screen), but also the planet descriptions as those are highly complex and
 ; there wasn't any room left in the commonly shared 'flight' strings
@@ -10,11 +11,10 @@
 ; it's important to note that these strings use an entirely different set of
 ; scrambled, compressed tokens than the flight strings, but can also include
 ; flight strings when needed. needless to say, it's complex
-;
+
 ; this is the 'key' used to scramble / unscramble the docked token symbols
 ; https://xania.org/201406/elites-crazy-string-format
-;
-.export TKN_DOCKED_XOR := $57
+.export TKN_DOCKED_XOR = $57
 
 ; tokens in the text database are scrambled in this way:
 .define .scramble(value) value ^ TKN_DOCKED_XOR

@@ -3016,7 +3016,8 @@ _36f8:                                                                  ;$36F8
         rts 
 
 _3701:                                                                  ;$3701
-        lda # $c9
+.import TKN_FLIGHT_MISSILE_JAMMED:direct
+        lda # TKN_FLIGHT_MISSILE_JAMMED
         jmp _900d               ; print an on-screen message
 
 

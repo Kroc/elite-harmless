@@ -1617,7 +1617,7 @@ _71c4:                                                                  ;$71C4
 
 _71ca:                                                                  ;$71CA
         ldx PLAYER_GDRIVE
-        beq _71f2 + 1              ; bug or optimisation?
+        beq _71f2 + 1           ; bug or optimisation?
         inx 
         stx PLAYER_GDRIVE
         stx PLAYER_LEGAL
@@ -1643,16 +1643,18 @@ _71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71F2
         jsr _741c
         jsr _70ab
         ldx # $05
-_7202:                                                                  ;$7202
-        lda ZP_SEED, x
+
+:       lda ZP_SEED, x                                                  ;$7202
         sta VAR_04FA, x
         dex 
-        bpl _7202
+        bpl :-
+
         ldx # $00
         stx TSYSTEM_DISTANCE_LO
         stx TSYSTEM_DISTANCE_HI
         
-        lda # $74
+.import TKN_FLIGHT_GALACTIC_HYPERSPACE:direct
+        lda # TKN_FLIGHT_GALACTIC_HYPERSPACE
         jsr _900d               ; print on-screen message?
 _7217:                                                                  ;$7217
         lda TSYSTEM_POS_X
@@ -4810,7 +4812,7 @@ _82f3:                                                                  ;$82F3
         ldy # .color_nybble( GREEN, HUD_COLOUR )
         jsr untarget_missile
 
-        lda # $c8
+        lda # $c8               ; "GALACTIC HYPERSPACE"?
         jsr _900d               ; print on-screen message?
 _8305:                                                                  ;$8305
         ldy ZP_AD
@@ -4833,11 +4835,11 @@ _8305:                                                                  ;$8305
         inc PLAYER_KILLS_HI
 
 _831d:                                                                  ;$831D
-        cpx # $0f               ; is asteroid?
+        cpx # HULL_HERMIT       ; is asteroid hermit?
         beq _8329
-        cpx # $03               ; is escape capsule?
+        cpx # HULL_ESCAPE       ; is escape capsule?
         bcc _832c
-        cpx # $0b               ; is cobra mk-III? (trader)
+        cpx # HULL_COBRAMK3     ; is cobra mk-III? (trader)
         bcs _832c
 _8329:                                                                  ;$8329
         dec NUM_ASTEROIDS
@@ -7158,7 +7160,7 @@ _900d:                                                                  ;$900D
 ; in:   A       ?
 ;-------------------------------------------------------------------------------
 .export _900d
-        pha 
+        pha                     ; put aside flight message to print
         lda # 16                ; ident-level of message?
 
         ldx ZP_SCREEN           ; are we in the cockpit-view?
@@ -7167,14 +7169,16 @@ _900d:                                                                  ;$900D
         ; clear bottom three lines of menu-screen
         ; to be able to print the on-screen message?
         jsr tkn_docked_fn15
-        lda # $19
+        ; when in the menu (rather than the cockpit),
+        ; display the message on row 25?? (this would be off-screen!)
+        lda # 25
 
 _9019: .bit                                                             ;$9019
        
 _901a:  sta ZP_CURSOR_ROW                                               ;$901A
 
         ; set all capitals?
-        ldx # $00
+        ldx # %00000000
         stx ZP_34
 
         ; set column, but why this variable?
@@ -7188,7 +7192,7 @@ _901a:  sta ZP_CURSOR_ROW                                               ;$901A
         sty OSD_DELAY
         sta VAR_04E6
 
-        lda # $c0
+        lda # %11000000
         sta txt_buffer_flag
         
         lda VAR_048C
@@ -7213,9 +7217,12 @@ _901a:  sta ZP_CURSOR_ROW                                               ;$901A
 _905d:                                                                  ;$905D
         jsr print_flight_token
 
+        ; check bit 0 of the OSD flags by shifting it right
+        ; and popping the bit off, if it exists
         lsr VAR_048C
-        bcc _9001
+        bcc _9001               ; if no bit, just exit
 
+        ; append "destroyed" to the end
 .import TKN_FLIGHT_DESTROYED:direct
         lda # TKN_FLIGHT_DESTROYED
         jmp print_flight_token

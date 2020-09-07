@@ -1108,7 +1108,7 @@ _21ab:                                                                  ;$21AB
         tay 
         jsr _7481
 
-        lda # $00
+        lda # $00               ; TODO: ??
         jsr _900d               ; print an on-screen message
 _21e2:                                                                  ;$21E2
         jmp _829a
@@ -1246,7 +1246,7 @@ _2283:                                                                  ;$2283
         lda # $32
         cmp PLAYER_ENERGY
         bcc _2292
-        asl 
+        asl                     ; !! print "energy low"? (msg 100 / $64)
         jsr _900d               ; print an on-screen message
 _2292:                                                                  ;$2292
         ldy # $ff
@@ -1350,10 +1350,10 @@ _2303:                                                                  ;$2303
         adc PLAYER_FUEL
         cmp # $46
         bcc :+
-        lda # $46                                                                  
+        lda # $46
 :       sta PLAYER_FUEL                                                 ;$2314
 
-        lda # $a0
+        lda # $a0               ; "FUEL SCOOPS ON"?
 _2319:                                                                  ;$2319
         jsr _900d               ; print an on-screen message
 _231c:                                                                  ;$231C
