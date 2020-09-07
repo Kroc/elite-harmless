@@ -46,7 +46,7 @@ check_cargo_capacity:                                                   ;$6A05
 
         ; count the number of tonnes of cargo:
         ; for each cargo type, add its quantity to the Accumulator
-:       adc VAR_CARGO, x                                                ;$6A0D
+:       adc PLAYER_CARGO, x                                             ;$6A0D
         dex 
         bpl :-
 
@@ -81,7 +81,7 @@ check_cargo_capacity:                                                   ;$6A05
         ; carry set   = overflow
         ;
 @kg:    ldy CARGO_ITEM                                                  ;$6A1B
-        adc VAR_CARGO, y        ; number of Kg of selected item
+        adc PLAYER_CARGO, y     ; number of Kg of selected item
         cmp # 200               ; maximum of 200 Kg
 
         pla                     ; restore A
@@ -771,11 +771,11 @@ _6d3e:                                                                  ;$6D3E
         ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
         ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
-.import TKN_FLIGHT_FOOD:direct
+.import TKN_FLIGHT_CARGO_TYPES:direct
 
         lda CARGO_ITEM          ; item index?
         clc 
-        adc # TKN_FLIGHT_FOOD
+        adc # TKN_FLIGHT_CARGO_TYPES
         jsr print_flight_token
 
 .import TKN_FLIGHT_SLASH:direct
@@ -814,8 +814,8 @@ _6d79:                                                                  ;$6D79
         lda ZP_VAR_R
         pha 
         clc 
-        adc VAR_CARGO, y
-        sta VAR_CARGO, y
+        adc PLAYER_CARGO, y
+        sta PLAYER_CARGO, y
         lda VAR_MARKET_FOOD, y  ; update quantity available for sale?
         sec 
         sbc ZP_VAR_R
@@ -936,7 +936,7 @@ _6e58:                                                                  ;$6E58
 _6e5a:                                                                  ;$6E5a
         sty CARGO_ITEM          ; item index?
 _6e5d:                                                                  ;$6E5d
-        ldx VAR_CARGO, y        ; cargo qty?
+        ldx PLAYER_CARGO, y     ; cargo qty?
        .bze _6eca               ; none of that cargo
 
         tya 
@@ -955,8 +955,8 @@ _6e5d:                                                                  ;$6E5d
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
         ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
 
-.import TKN_FLIGHT_FOOD:direct
-        adc # TKN_FLIGHT_FOOD
+.import TKN_FLIGHT_CARGO_TYPES:direct
+        adc # TKN_FLIGHT_CARGO_TYPES
         jsr print_flight_token
 
         lda # 14
@@ -990,10 +990,10 @@ _6e5d:                                                                  ;$6E5d
         stx ZP_34
         jsr _7246
         ldy CARGO_ITEM          ; item index?
-        lda VAR_CARGO, y
+        lda PLAYER_CARGO, y
         sec 
         sbc ZP_VAR_R
-        sta VAR_CARGO, y
+        sta PLAYER_CARGO, y
         lda ZP_VAR_R
         sta ZP_VAR_P1
         lda VAR_04EC
@@ -1651,8 +1651,9 @@ _7202:                                                                  ;$7202
         ldx # $00
         stx TSYSTEM_DISTANCE_LO
         stx TSYSTEM_DISTANCE_HI
+        
         lda # $74
-        jsr _900d
+        jsr _900d               ; print on-screen message?
 _7217:                                                                  ;$7217
         lda TSYSTEM_POS_X
         sta PSYSTEM_POS_X
@@ -1717,10 +1718,10 @@ _7246:                                                                  ;$7246
         ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
         ; "FIREARMS", "FURS", "MINERALS", "GOLD", "PLATINUM", "GEM-STONES"
-.import TKN_FLIGHT_FOOD:direct
+.import TKN_FLIGHT_CARGO_TYPES:direct
 
         pla 
-        adc # TKN_FLIGHT_FOOD
+        adc # TKN_FLIGHT_CARGO_TYPES
         jsr print_flight_token
 
         lda # 14
@@ -2291,9 +2292,9 @@ _75d8:                                                                  ;$75D8
         iny 
         cmp # $09
         bne _75e5
-        ldx VAR_04C4            ; energy charge rate?
+        ldx PLAYER_EUNIT
         bne _75a1
-        inc VAR_04C4            ; energy charge rate?
+        inc PLAYER_EUNIT
 _75e5:                                                                  ;$75E5
         iny 
         cmp # $0a
@@ -2958,8 +2959,8 @@ _7a9f:                                                                  ;$7A9F
 
         ; they've eaten your goods!
         lda # $00
-        sta VAR_CARGO_FOOD
-        sta VAR_CARGO_NARCOTICS
+        sta CARGO_FOOD
+        sta CARGO_NARCOTICS
 
         jsr get_random_number   ; choose a random number
         and # %00001111         ; between 0-15
@@ -3188,50 +3189,78 @@ _7bcc:                                                                  ;$7BCC
 
 damage_player:                                                          ;$7BD2
 ;===============================================================================
+; applies a damage amount to the player's shields and, if they're depleted,
+; directly to your hull (energy banks). if the player's energy-level reaches
+; zero or below, the routine will kill the player 
+;
 ; in:   A       amount to damage the player
 ;-------------------------------------------------------------------------------
-        sta ZP_VAR_T
-        ldx # $00
-        ldy # $08
-        lda [ZP_POLYOBJ_ADDR], y
-        bmi _7bee
+        sta ZP_VAR_T            ; put aside damage value
 
-        lda PLAYER_SHIELD_FRONT
-        sbc ZP_VAR_T
-        bcc _7be7
-        sta PLAYER_SHIELD_FRONT
+        ldx # $00
+
+        ; front or rear hit?
+        ; read the sign byte of the ship's z-position
+        ;
+        ldy # PolyObject::zpos+2
+        lda [ZP_POLYOBJ_ADDR], y
+        ; if the ship's z-sign is negative, we were hit in the trunk
+        bmi @rear
+
+        ; take damage to the front:
+        ;
+        lda PLAYER_SHIELD_FRONT ; subtract the damage from your [front] shields
+        sbc ZP_VAR_T            ; (shouldn't carry be set before doing this?)
+        bcc :+                  ; more damage than shields? skip down
+        sta PLAYER_SHIELD_FRONT ; update your shield level
 
         rts 
 
-_7be7:                                                                  ;$7BE7
-        ldx # $00
-        stx PLAYER_SHIELD_FRONT
-        bcc _7bfe
-_7bee:                                                                  ;$7BEE
-        lda PLAYER_SHIELD_REAR
-        sbc ZP_VAR_T
-        bcc _7bf9
+        ; front shields depleted!
+        ;-----------------------------------------------------------------------
+:       ldx # $00               ; cap shields to zero                   ;$7BE7
+        stx PLAYER_SHIELD_FRONT ; -- prevent underflow to max-shields
+        bcc @hull               ; apply excess damage to the hull!
+
+        ; take damage to the rear:
+        ;-----------------------------------------------------------------------
+@rear:  lda PLAYER_SHIELD_REAR  ; damage your [rear] shields            ;$7BEE
+        sbc ZP_VAR_T            ; (shouldn't carry be set before doing this?)
+        bcc :+
         sta PLAYER_SHIELD_REAR
 
         rts 
 
-_7bf9:                                                                  ;$7BF9
-        ldx # $00
-        stx PLAYER_SHIELD_REAR
-_7bfe:                                                                  ;$7BFE
-        adc PLAYER_ENERGY
-        sta PLAYER_ENERGY
-        beq _7c08
-        bcs _7c0b
-_7c08:                                                                  ;$7C08
-        jmp _87d0
+        ; rear shields depleted!
+        ;-----------------------------------------------------------------------
+:       ldx # $00               ; cap shields to zero                   ;$7BF9
+        stx PLAYER_SHIELD_REAR  ; -- prevent underflow to max-shields
 
-_7c0b:                                                                  ;$7C0B
+
+        ; apply excess damage directly to your hull!
+        ;
+        ; due to the subtraction before, the A register contains the
+        ; negative amount of overdlow. we add this to the player energy
+        ; level to effectively subtract it instead
+        ;
+@hull:  adc PLAYER_ENERGY                                               ;$7BFE
+        sta PLAYER_ENERGY       ; update your current energy-level
+        beq @die                ; if zero, you die, skip onto that
+        bcs @ok                 ; your energy-level is positive, exit
+
+@die:   jmp _87d0               ; handle your untimely demise...        ;$7C08
+
+@ok:                                                                    ;$7C0B
+        ;-----------------------------------------------------------------------
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
-        jsr play_sfx_03
+        jsr play_sfx_03         ; play damage sound?
 .endif  ;///////////////////////////////////////////////////////////////////////
-        jmp _906a
+        
+        ; when taking damage directly, there's a chance that
+        ; you might lose cargo. this routine handles that possibility
+        ;
+        jmp damage_cargo
 
 
 _7c11:                                                                  ;$7C11
@@ -4782,7 +4811,7 @@ _82f3:                                                                  ;$82F3
         jsr untarget_missile
 
         lda # $c8
-        jsr _900d
+        jsr _900d               ; print on-screen message?
 _8305:                                                                  ;$8305
         ldy ZP_AD
         ldx SHIP_SLOTS, y
@@ -5059,9 +5088,11 @@ _8475:                                                                  ;$8475
        .bnz :+                  ; no? skip over
 
         lda VAR_04E6
-        jsr _900d
+        jsr _900d               ; print on-screen message
+        
+        ; clear the on-screen message(?)
         lda # $00
-        sta VAR_048B
+        sta OSD_DELAY
         jmp _84fa
 
 :       jsr tkn_docked_fn15     ; clear rows 21, 22 & 23(?)             ;$8487
@@ -5147,10 +5178,10 @@ _84e2:                                                                  ;$84E2
 _84ed:                                                                  ;$84ED
         jsr _1ec1
 
-        dec VAR_048B            ; "reduce delay?"
+        dec OSD_DELAY           ; "reduce delay?"
         beq _8475               ; "if 0 erase message, up"
         bpl _84fa               ; "skip inc"
-        inc VAR_048B            ; "else undershot, set to 0"
+        inc OSD_DELAY           ; "else undershot, set to 0"
 
 ; ".me3 ; also arrive back from me2"
 _84fa:                                                                  ;$84FA
@@ -5672,11 +5703,11 @@ illegal_cargo:                                                          ;$8798
 ;
 ; TODO: is this a quantity (like tonnes), or just bit-flags?
 ;-------------------------------------------------------------------------------
-        lda VAR_CARGO_SLAVES
+        lda CARGO_SLAVES
         clc 
-        adc VAR_CARGO_NARCOTICS
+        adc CARGO_NARCOTICS
         asl 
-        adc VAR_CARGO_FIREARMS
+        adc CARGO_FIREARMS
         rts 
 
 
@@ -7113,36 +7144,50 @@ _9001:                                                                  ;$9001
 
 _9002:                                                                  ;$9002
 ;===============================================================================
-        stx VAR_048B
+        stx OSD_DELAY
         pha 
         lda VAR_04E6
         jsr _905d
         pla 
+
 _900d:                                                                  ;$900D
+;===============================================================================
+; prints an on-screen message:
+; e.g. "INCOMING MISSILE"
+;
+; in:   A       ?
+;-------------------------------------------------------------------------------
 .export _900d
         pha 
+        lda # 16                ; ident-level of message?
 
-        lda # $10
         ldx ZP_SCREEN           ; are we in the cockpit-view?
         beq _901a               ; yes, skip over
 
+        ; clear bottom three lines of menu-screen
+        ; to be able to print the on-screen message?
         jsr tkn_docked_fn15
         lda # $19
-_9019:                                                                  ;$9019
-       .bit
+
+_9019: .bit                                                             ;$9019
+       
 _901a:  sta ZP_CURSOR_ROW                                               ;$901A
+
+        ; set all capitals?
         ldx # $00
         stx ZP_34
 
+        ; set column, but why this variable?
         lda ZP_B9
         jsr set_cursor_col
 
-        pla 
-        ldy # $14
-        cpx VAR_048B
+        pla                     ; retrieve message-ID parameter
+        ldy # 20
+        cpx OSD_DELAY
         bne _9002
-        sty VAR_048B
+        sty OSD_DELAY
         sta VAR_04E6
+
         lda # $c0
         sta txt_buffer_flag
         
@@ -7176,41 +7221,69 @@ _905d:                                                                  ;$905D
         jmp print_flight_token
 
 
-_906a:                                                                  ;$906A
+damage_cargo:                                                           ;$906A
 ;===============================================================================
-        jsr get_random_number
-        bmi _9001
-        cpx # $16
+; when the player takes damage with no shields, there's a chance
+; that their cargo might be destroyed
+;
+; TODO: should we have a possibility of dropping cargo cannisters?
+;-------------------------------------------------------------------------------
+        jsr get_random_number   ; get a random number in A & X
+        bmi _9001               ; for A >= 128/256 (50% chance), exit (RTS)
+
+        ; in addition to losing their cargo some of the player's equipment
+        ; can be destroyed. whilst there are 17 types of tradable goods,
+        ; random numbers 21 or below are selected which includes the equipment
+        ; slots for their E.C.M., scoops, e-bomb, e-unit and docking computers.
+        ; this does not include the galactic hyperdrive or escape pod, which
+        ; could be included in this list by increasing the number below
+        ;
+        ; for X >= 22/256, (91% chance), also exit
+        cpx # (PLAYER_DOCKCOM-PLAYER_CARGO)+1
         bcs _9001
 
-        lda VAR_CARGO, x
-        beq _9001
-        lda VAR_048B
-        bne _9001
-        ldy # $03
-        sty VAR_048C
-        sta VAR_CARGO, x
-        cpx # $11
-        bcs _908f
-        txa 
-        adc # $d0
-        jmp _900d
+        ; using X as our random cargo index,
+        ; check if we have any
+        ;
+        lda PLAYER_CARGO, x     ; how much of that do we have?
+        beq _9001               ; nothing to lose, exit
+        
+        lda OSD_DELAY           ; is there a message already on screen?
+        bne _9001               ; yes, don't double-up messages
 
-_908f:                                                                  ;$908F
-        beq _909b
+        ; note that due to the nature of the check above,
+        ; A must be zero; i.e. OSD_DELAY = 0
+        ;
+        ldy # %00000011
+        sty VAR_048C            ; message flag?
+
+        sta PLAYER_CARGO, x     ; remove all of that type of cargo
+        cpx # .sizeof(Cargo)    ; was it equipment? (i.e X > tradable goods)
+        bcs :+
+
+        txa 
+.import TKN_FLIGHT_CARGO_TYPES:direct
+        adc # TKN_FLIGHT_CARGO_TYPES
+        jmp _900d               ; print on-screen message?
+
+        ;-----------------------------------------------------------------------
+:       beq @ecm                                                        ;$908F
         cpx # $12
-        beq _90a0
+        beq @scoop
+
         txa 
-        adc # $5d
-        jmp _900d
+        adc # $5d               ; TODO: flight token, but what one??
+        jmp _900d               ; print on-screen message?
 
-_909b:                                                                  ;$909B
-        lda # $6c
-        jmp _900d
+@ecm:                                                                   ;$909B
+.import TKN_FLIGHT_ECM_SYSTEM:direct
+        lda # TKN_FLIGHT_ECM_SYSTEM
+        jmp _900d               ; print on-screen message?
 
-_90a0:                                                                  ;$90A0
-        lda # $6f
-        jmp _900d
+@scoop:                                                                 ;$90A0
+.import TKN_FLIGHT_FUEL_SCOOPS:direct
+        lda # TKN_FLIGHT_FUEL_SCOOPS
+        jmp _900d               ; print on-screen message?
 
 
 ;===============================================================================

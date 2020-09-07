@@ -77,16 +77,13 @@ _tkn_index       .set 0
 ; for each token (once descrambled)
 ;
 ; in order to build the table, we need a macro because
-; each entry in the table must do three things:
+; each entry in the table must do two things:
 ;
 ; 1.    import the symbol for the function -- the functions are not
 ;       in this file but in "code_docked_fns.asm" instead
 ;
 ; 2.    define a local symbol for the token ID as the strings containing the
 ;       token are defined within this file. these will be in the form "FN_*"
-;
-; 3.    define a global version of the symbol for when it appears outside
-;       of the text database. these will be in the form "TXTFN_*"
 ;
 .macro  .tkn_fn         fn_id, fn_import 
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

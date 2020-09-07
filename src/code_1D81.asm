@@ -872,13 +872,13 @@ process_ship:                                                           ;$202F
         bcs explode_obj         ; cargo full, explode the cannister!
 
         ldy CARGO_ITEM          ; retrieve type of cargo
-        adc VAR_CARGO, y        ; add 1 to current cargo count
-        sta VAR_CARGO, y        ; update your cargo holdings
+        adc PLAYER_CARGO, y     ; add 1 to current cargo count
+        sta PLAYER_CARGO, y     ; update your cargo holdings
         tya
 
         ; print the name of the cargo 
-.import TKN_FLIGHT_FOOD:direct
-        adc # TKN_FLIGHT_FOOD
+.import TKN_FLIGHT_CARGO_TYPES:direct
+        adc # TKN_FLIGHT_CARGO_TYPES
         jsr _900d               ; print a message on-screen
 
         ; mark cannister for removal:
@@ -993,15 +993,19 @@ apply_damage:                                                           ;$212B
 _2131:                                                                  ;$2131
         ;-----------------------------------------------------------------------
         ; should the ship be removed?
+        ;
         lda ZP_POLYOBJ_BEHAVIOUR
-        bpl :+
-        jsr _b410
+        bpl :+                  ; is bit 7 set? if no, skip over
+        jsr _b410               ; remove from scanner dispay (?)
 
+        ;=======================================================================
+        ; [10]: laser hit testing
+        ;-----------------------------------------------------------------------
 :       lda ZP_SCREEN           ; are we in the cockpit-view?           ;$2138
        .bnz _21ab               ; no? skip ahead
 
-        jsr _a626
-        jsr _363f
+        jsr _a626               ; BBC: PLUT
+        jsr _363f               ; BBC: HITCH
         bcc _21a8
 
         lda PLAYER_MISSILE_ARMED
@@ -1089,7 +1093,8 @@ _21ab:                                                                  ;$21AB
         and # behaviour::police
         ora PLAYER_LEGAL
         sta PLAYER_LEGAL
-        lda VAR_048B
+
+        lda OSD_DELAY
         ora IS_WITCHSPACE
         bne _21e2
 
@@ -1102,8 +1107,9 @@ _21ab:                                                                  ;$21AB
         lda [ZP_HULL_ADDR], y
         tay 
         jsr _7481
+
         lda # $00
-        jsr _900d
+        jsr _900d               ; print an on-screen message
 _21e2:                                                                  ;$21E2
         jmp _829a
 
@@ -1150,7 +1156,7 @@ _2207:                                                                  ;$2207
         stx PLAYER_SHIELD_FRONT
 _2224:                                                                  ;$2224
         sec 
-        lda VAR_04C4            ; energy charge rate?
+        lda PLAYER_EUNIT
         adc PLAYER_ENERGY
         bcs _2230
         sta PLAYER_ENERGY
@@ -1241,7 +1247,7 @@ _2283:                                                                  ;$2283
         cmp PLAYER_ENERGY
         bcc _2292
         asl 
-        jsr _900d
+        jsr _900d               ; print an on-screen message
 _2292:                                                                  ;$2292
         ldy # $ff
         sty VAR_06F3
@@ -1349,7 +1355,7 @@ _2303:                                                                  ;$2303
 
         lda # $a0
 _2319:                                                                  ;$2319
-        jsr _900d
+        jsr _900d               ; print an on-screen message
 _231c:                                                                  ;$231C
         lda LASER_POWER
         beq _2330

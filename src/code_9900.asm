@@ -2432,7 +2432,7 @@ _set_page:                                                              ;$A731
 
         lda # $00
         sta LASER_POWER
-        sta VAR_048B
+        sta OSD_DELAY
         sta VAR_048C
 
         ; clear the screen and 'home' the cursor
@@ -3294,7 +3294,7 @@ tkn_docked_fn15:                                                        ;$B3D4
 .export tkn_docked_fn15
 
         lda # $00
-        sta VAR_048B
+        sta OSD_DELAY
         sta VAR_048C
 
         lda # %11111111
@@ -3349,7 +3349,7 @@ _b410:                                                                  ;$B410
 ;
 ;-------------------------------------------------------------------------------
         lda ZP_SCREEN           ; are we in the cockpit-view?
-       .bnz _b40f               ; no? exit now (RTS above us)
+       .bnz :-                  ; no? exit now (RTS above us)
 
         ; is the object visible?
         lda ZP_POLYOBJ_STATE

@@ -2024,7 +2024,7 @@ _318a:                                                                  ;$318A
         lda # $00
         ldx # .sizeof( Cargo )-1
 
-:       sta VAR_CARGO, x        ; empty cargo slot                      ;$319B
+:       sta PLAYER_CARGO, x     ; empty cargo slot                      ;$319B
         dex 
         bpl :-
 
@@ -3017,7 +3017,7 @@ _36f8:                                                                  ;$36F8
 
 _3701:                                                                  ;$3701
         lda # $c9
-        jmp _900d
+        jmp _900d               ; print an on-screen message
 
 
 _3706:                                                                  ;$3706
@@ -4027,7 +4027,7 @@ mission_blueprints_birera:                                              ;$3D9B
 
         ; give the player the military energy unit?
         lda # 2
-        sta VAR_04C4            ; energy charge rate?
+        sta PLAYER_EUNIT
 
         inc PLAYER_KILLS_HI
         

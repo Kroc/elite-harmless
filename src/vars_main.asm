@@ -89,8 +89,8 @@ LASER_COUNTER           :=$0487 ; used to space shots between laser pulses
 LASER_HEAT              :=$0488 ; laser temperature
 
 VAR_048A                :=$048a ;?
-VAR_048B                :=$048b ; a delay counter?
-VAR_048C                :=$048c ; message ID for item destroyed?
+OSD_DELAY               :=$048b ; a delay counter, used for on-screen messages
+VAR_048C                :=$048c ; message ID on screen
 
 ;-------------------------------------------------------------------------------
 
@@ -213,34 +213,37 @@ SHIP_HOLD               :=$04af ; cargo capacity of the player's ship
 ; NOTE: the order here has to mimic that of the strings in "text_flight.asm",
 ;       (or vice-versa depending on how you see it)
 ;
-VAR_CARGO               :=$04b0
-VAR_CARGO_FOOD          :=$04b0 ; food
-VAR_CARGO_TEXTILES      :=$04b1 ; textiles
-VAR_CARGO_RADIOACTIVES  :=$04b2 ; radioactives
-VAR_CARGO_SLAVES        :=$04b3 ; slaves
-VAR_CARGO_ALCOHOL       :=$04b4 ; liquor & wines
-VAR_CARGO_LUXURIES      :=$04b5 ; luxuries
-VAR_CARGO_NARCOTICS     :=$04b6 ; narcotics
-VAR_CARGO_COMPUTERS     :=$04b7 ; computers
-VAR_CARGO_MACHINERY     :=$04b8 ; machinery
-VAR_CARGO_ALLOYS        :=$04b9 ; alloys
-VAR_CARGO_FIREARMS      :=$04ba ; firearms
-VAR_CARGO_FURS          :=$04bb ; furs
-VAR_CARGO_MINERALS      :=$04bc ; minerals
-VAR_CARGO_GOLD          :=$04bd ; gold
-VAR_CARGO_PLATINUM      :=$04be ; platinum
-VAR_CARGO_GEMS          :=$04bf ; gem-stones
-VAR_CARGO_ALIENS        :=$04c0 ; alien items
+PLAYER_CARGO            :=$04b0
+CARGO_FOOD              :=$04b0 ; food
+CARGO_TEXTILES          :=$04b1 ; textiles
+CARGO_RADIOACTIVES      :=$04b2 ; radioactives
+CARGO_SLAVES            :=$04b3 ; slaves
+CARGO_ALCOHOL           :=$04b4 ; liquor & wines
+CARGO_LUXURIES          :=$04b5 ; luxuries
+CARGO_NARCOTICS         :=$04b6 ; narcotics
+CARGO_COMPUTERS         :=$04b7 ; computers
+CARGO_MACHINERY         :=$04b8 ; machinery
+CARGO_ALLOYS            :=$04b9 ; alloys
+CARGO_FIREARMS          :=$04ba ; firearms
+CARGO_FURS              :=$04bb ; furs
+CARGO_MINERALS          :=$04bc ; minerals
+CARGO_GOLD              :=$04bd ; gold
+CARGO_PLATINUM          :=$04be ; platinum
+CARGO_GEMS              :=$04bf ; gem-stones
+CARGO_ALIENS            :=$04c0 ; alien items
+
+; note that when the player is taking damage and has no shields
+; there's a possibility of their cargo being destroyed but also
+; the following equipment, which is why they are placed here
+;
+PLAYER_ECM              :=$04c1 ; flag, player has an E.C.M.
+PLAYER_SCOOP            :=$04c2 ; flag, player has a fuel scoop
+PLAYER_EBOMB            :=$04c3 ; flag, player has energy bomb
+PLAYER_EUNIT            :=$04c4 ; flag, player has extra energy unit
+PLAYER_DOCKCOM          :=$04c5 ; flag, player has a docking computer
 
 ;-------------------------------------------------------------------------------
 
-PLAYER_ECM              :=$04c1 ; flag, player has an E.C.M.
-PLAYER_SCOOP            :=$04c2 ; flag, player has a fuel scoop
-PLAYER_EBOMB            :=$04c3 ; player has energy bomb?
-
-VAR_04C4                :=$04c4 ;?
-
-PLAYER_DOCKCOM          :=$04c5 ; player has a docking computer?
 PLAYER_GDRIVE           :=$04c6 ; player has a galactic hyper-drive?
 PLAYER_ESCAPEPOD        :=$04c7 ; player has an escape pod?
 
