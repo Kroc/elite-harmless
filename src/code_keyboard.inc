@@ -56,8 +56,8 @@
 ; [*] note that the read byte uses a bit value of 0 to mean pressed
 ;     and 1 to represent unpressed (i.e the key grounds a voltage level)
 ;
-;     \ B  BIT 7 |  BIT 6 |  BIT 5 |  BIT 4 |  BIT 3 |  BIT 2 |  BIT 1 |  BIT 0   
-;     A +--------¦--------¦--------¦--------¦--------¦--------¦--------¦--------   
+; PORT: B  BIT 7 |  BIT 6 |  BIT 5 |  BIT 4 |  BIT 3 |  BIT 2 |  BIT 1 |  BIT 0
+;     A +--------¦--------¦--------¦--------¦--------¦--------¦--------¦--------
 ; BIT 0 | DOWN   | F5     | F3     | F1     | F7     | RIGHT  | RETURN | DELETE
 ; BIT 1 | LSHIFT | e      | s      | z      | 4      | a      | w      | 3 
 ; BIT 2 | x      | t      | f      | c      | 6      | d      | r      | 5

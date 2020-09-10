@@ -26,7 +26,7 @@ multiply_signed:                                                        ;$3A54
 ; this was adapted (badly) from:
 ; http://codebase64.org/doku.php?id=base:seriously_fast_multiplication
 ;
-.ifdef  OPTION_MATHTABLES
+.ifdef  FEATURE_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
 
         ZP_F8   = $f8

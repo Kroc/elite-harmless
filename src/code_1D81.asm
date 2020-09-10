@@ -30,12 +30,6 @@ docked:                                                                 ;$1D81
         ldy # 44                ; wait 44 frames
         jsr wait_frames         ; -- why would this be necessary?
 
-        ; if the galaxy is not using the original Elite seed, then the missions
-        ; will not function as they rely on specific planet name / placement
-        ;
-.ifndef OPTION_CUSTOMSEED
-        ;///////////////////////////////////////////////////////////////////////
-
         ; check eligibility for the Constrictor mission:
         ;-----------------------------------------------------------------------
         ; available on the first galaxy after 256 or more kills. your job is
@@ -130,11 +124,9 @@ docked:                                                                 ;$1D81
 
         jmp mission_blueprints_birera
 
-.endif  ;///////////////////////////////////////////////////////////////////////
-
 @skip:  ; check for Trumbles™ mission                                   ;$1E00
         ;
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
 
         ; at least 6'553.5 cash?
@@ -319,7 +311,7 @@ _1ec1:                                                                  ;$1EC1
         lda polyobj_00          ; TODO: why this byte?
         sta ZP_GOATSOUP_pt1
 
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; are there any Trumbles™ on-screen?
         lda TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
@@ -328,8 +320,8 @@ _1ec1:                                                                  ;$1EC1
         ; process Trumbles™
         ; (move them about, breed them)
         jmp _1e35
-.endif  ;///////////////////////////////////////////////////////////////////////
 :
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 main_roll_pitch:                                                        ;$1ECE
         ;=======================================================================
@@ -1306,7 +1298,7 @@ _22c2:                                                                  ;$22C2
         cmp # $f0               ; critical temperature?
         bcc _2303
 
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////

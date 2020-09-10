@@ -129,7 +129,7 @@ _6800:  ; sprites:                                                      ;$6800
         .byte   $00, $c8, $80
         .byte   $00, $06, $00, $44
 
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
 
         ; 6: trumble 1 (multi-colour)                                   ;$6940

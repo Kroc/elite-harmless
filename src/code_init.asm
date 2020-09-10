@@ -119,7 +119,7 @@ init:
         lda # %00000000
         sta VIC_SPRITE_ENABLE
 
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; set sprite 3 colour to medium-grey
         lda # GREY
@@ -179,7 +179,7 @@ init:
         sty VIC_SPRITE1_Y
 
         ; setup (but don't display) the Trumbles™
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         asl                     ; double x-position (=36)
         sta VIC_SPRITE2_X
@@ -217,7 +217,7 @@ init:
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE1_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE1_PTR
 
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; each of the Trumbles™ alternate patterns
         lda # ELITE_SPRITES_INDEX + 5
@@ -236,7 +236,7 @@ init:
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-.ifdef  OPTION_MATHTABLES
+.ifdef  FEATURE_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
         ; if we're including the math lookup tables for faster multiplication,
         ; then -- for the disk versions of the game -- we will populate the

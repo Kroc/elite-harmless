@@ -145,7 +145,7 @@ POLYOBJ_COUNT   = 11
         ; here is too large for the low-RAM layout. let's assume that if
         ; the math tables are missing, we don't have room for this unroll...
         ;
-.ifndef OPTION_MATHTABLES
+.ifndef FEATURE_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
         ; a slightly optimised version that takes fewer cycles
         ;
@@ -216,7 +216,7 @@ POLYOBJ_COUNT   = 11
         ; here is too large for the low-RAM layout. let's assume that if
         ; the math tables are missing, we don't have room for this unroll...
         ;
-.ifndef OPTION_MATHTABLES
+.ifndef FEATURE_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
         ; a slightly optimised version that takes fewer cycles
         ;

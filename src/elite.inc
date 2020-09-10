@@ -7,10 +7,13 @@
 .ifdef      FEATURE_AUDIO
 ;;      .out  "audio enabled"
 .endif
-.ifdef      OPTION_MATHTABLES
+.ifdef      FEATURE_TRUMBLES
+;;      .out  "Trumbles™ enabled"
+.endif
+.ifdef      FEATURE_MATHTABLES
 ;;      .out  "math-tables enabled"
 .endif
-.ifdef      OPTION_DYME_FASTLINE
+.ifdef      FEATURE_FASTLINES
 ;;      .out  "fast-lines enabled"
 .endif
 

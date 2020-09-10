@@ -429,7 +429,7 @@ _77a3:  sta $d802,y
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE1_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE1_PTR
 
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; each of the Trumbles™ alternate patterns
         lda # ELITE_SPRITES_INDEX + 5

@@ -50,7 +50,7 @@ check_cargo_capacity:                                                   ;$6A05
         dex 
         bpl :-
 
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         ; have you ever wondered what a Trumble™ weighs? we count 1 tonne
         ; (1000 Kg) for every 256 Tumbles™, disregarding any remainder, so
@@ -5000,7 +5000,7 @@ _83ed:                                                                  ;$83ED
         sta ZP_INV_ROLL_SIGN
         sta ZP_INV_PITCH_SIGN
         sta ZP_A3               ; move counter?
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
 .endif  ;///////////////////////////////////////////////////////////////////////

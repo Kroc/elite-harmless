@@ -117,7 +117,7 @@ MISSION_FLAGS           :=$0499
 
 ; got Trumbles™?
 ;
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
 ;///////////////////////////////////////////////////////////////////////////////
 
 PLAYER_TRUMBLES         :=$04c9 ; number of Trumbles™ in the player's hold

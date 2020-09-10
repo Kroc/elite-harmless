@@ -27,7 +27,7 @@ math_square:                                                            ;$3988
 ; if the math lookup tables are being included,
 ; we can use these to go faster
 ; 
-.ifdef  OPTION_MATHTABLES
+.ifdef  FEATURE_MATHTABLES
         ;///////////////////////////////////////////////////////////////////////
         tax                     ; use A as index into tables (i.e. A * A)
         bne _399f               ; non-zero value?

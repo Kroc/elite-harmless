@@ -2033,7 +2033,8 @@ _318a:                                                                  ;$318A
         
         ; some Trumbles™ will slip away
         ; with you, the sneaky things!
-.ifndef OPTION_NOTRUMBLES
+        ;
+.ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
 
         ; does the player have any Trumbles™?
@@ -4051,7 +4052,7 @@ _3daf:                                                                  ;$3DAF
 _3dbe:                                                                  ;$3DBE
         bne _3d87               ; (always branches)
 
-.ifndef OPTION_NOTRUMBLES
+.ifdef  FEATURE_TRUMBLES
 ;///////////////////////////////////////////////////////////////////////////////
 
 mission_trumbles:                                                       ;$3DC0
