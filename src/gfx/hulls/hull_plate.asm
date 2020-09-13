@@ -32,7 +32,7 @@ HULL_PLATE_KILL         = 10    ;= 0.039
 .proc   hull_plate                                                      ;$D313
         ;-----------------------------------------------------------------------
         ; scooping a plate will get you some alloys
-        .scoop_debris   Cargo::alloys, $0                               ;$D313
+        .scoop_debris   Cargo::alloys, 0                                ;$D313
         
         .byte                       $64, $00, $2c, $3c                  ;$D314
         .byte   $15, $00, $0a, $18, $04, $00, $00, $04

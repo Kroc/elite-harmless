@@ -31,7 +31,8 @@ HULL_TRANSPORTER_KILL   = 17    ;= 0.066
 ;===============================================================================
 .proc   hull_transporter                                                ;$D6E1
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$D6E1
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$D6E1
         
         .byte             $c4, $09, $f2, $aa, $95, $30                  ;$D6E2
         .byte   $1a, $de, $2e, $00, $00, $38, $10, $20

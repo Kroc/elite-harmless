@@ -31,7 +31,8 @@ HULL_KRAIT_KILL         = 85    ;= 0.33
 ;===============================================================================
 .proc   hull_krait                                                      ;$E0BB
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $1                                           ;$E0BB
+        ; does not scoop as anything, drops up to 1 debris:
+        .scoop_debris   0, 1                                            ;$E0BB
         
         .byte        $10, $0e, $7a, $ce                                 ;$E0BC
         .byte   $59, $00, $12, $66, $15, $64, $00, $18                  ;$E0C0

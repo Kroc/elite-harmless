@@ -31,7 +31,8 @@ HULL_ANACONDA_KILL      = 256   ;= 1.00
 ;===============================================================================
 .proc   hull_anaconda                                                   ;$DC33
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $7                                           ;$DC33
+        ; does not scoop as anything, drops up to 7 debris!
+        .scoop_debris   0, 7                                            ;$DC33
 
         .byte                       $10, $27, $6e, $d2                  ;$DC34
         .byte   $5d, $30, $2e, $5a, $19, $00, $00, $30

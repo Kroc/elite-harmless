@@ -31,7 +31,8 @@ HULL_CONSTRICTOR_KILL   = 1365  ;= 5.33!
 ;===============================================================================
 .proc   hull_constrictor                                                ;$EC29
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $3                                           ;$EC29
+        ; does not scoop as anything, drops up to 3 debris:
+        .scoop_debris   0, 3                                            ;$EC29
         
         .byte             $81, $10, $7a, $da, $51, $00                  ;$EC2A
         .byte   $2e, $66, $18, $00, $00, $28, $2d, $fc                  ;$EC30

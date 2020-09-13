@@ -31,7 +31,8 @@ HULL_ASTEROID_KILL      = 8     ;= 0.03
 ;===============================================================================
 .proc   hull_asteroid                                                   ;$D49D
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$D49D
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$D49D
         
         .byte                                 $00, $19                  ;$D49E
         .byte   $4a, $9e, $45, $00, $22, $36, $15, $05                  ;$D4A0

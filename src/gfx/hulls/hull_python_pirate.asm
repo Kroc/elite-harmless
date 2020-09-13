@@ -31,7 +31,8 @@ HULL_PYTHON_PIRATE_KILL = 298   ;= 1.16
 ;===============================================================================
 .proc   hull_py_pirate                                                  ;$E7BD
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $2                                           ;$E7BD
+        ; does not scoop as anything, drops up to 2 debris:
+        .scoop_debris   0, 2                                            ;$E7BD
         
         .byte                                 $00, $19                  ;$E7BE
         .byte   $56, $be, $59, $00, $2a, $42, $1a, $c8                  ;$E7C0

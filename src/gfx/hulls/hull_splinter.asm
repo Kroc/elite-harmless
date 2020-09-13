@@ -32,7 +32,7 @@ HULL_SPLINTER_KILL      = 10    ;= 0.039
 .proc   hull_splinter                                                   ;$D573
         ;-----------------------------------------------------------------------
         ; scooping a splinter will get you some minerals
-        .scoop_debris   Cargo::minerals, $0                             ;$D573
+        .scoop_debris   Cargo::minerals, 0                              ;$D573
         
         .byte                       $00, $01, $78, $44                  ;$D574
         .byte   $1d, $00, $16, $18, $06, $00, $00, $10

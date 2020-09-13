@@ -31,7 +31,8 @@ HULL_PYTHON_TRADER_KILL = 170   ;= 0.66
 ;===============================================================================
 .proc   hull_python_trader                                              ;$DA4B
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $5                                           ;$DA4B
+        ; does not scoop as anything, drops up to 5 debris!
+        .scoop_debris   0, 5                                            ;$DA4B
         
         .byte                       $00, $19, $56, $be                  ;$DA4C
         .byte   $59, $00, $2a, $42, $1a, $00, $00, $34                  ;$DA50

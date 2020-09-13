@@ -982,89 +982,139 @@ apply_damage:                                                           ;$212B
         jsr play_sfx_03
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-_2131:                                                                  ;$2131
-        ;-----------------------------------------------------------------------
         ; should the ship be removed?
         ;
-        lda ZP_POLYOBJ_BEHAVIOUR
+_2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         bpl :+                  ; is bit 7 set? if no, skip over
         jsr _b410               ; remove from scanner dispay (?)
 
         ;=======================================================================
-        ; [10]: laser hit testing
+        ; [10]: missile & laser hit testing
         ;-----------------------------------------------------------------------
 :       lda ZP_SCREEN           ; are we in the cockpit-view?           ;$2138
        .bnz _21ab               ; no? skip ahead
 
+        ; since the universe rotates around the player in elite, we need to
+        ; make sure that the X/Y/Z axes in the ship instance match the current
+        ; view into space, i.e. when looking left or right the X & Z axes are
+        ; flipped. this is so that code below does not have to differentiate
+        ; between view directions
+        ;
         jsr _a626               ; BBC: PLUT
+
+        ; check if the current ship instance is within the player's sights
+        ;
         jsr _363f               ; BBC: HITCH
-        bcc _21a8
+        bcc @draw               ; not in sights, skip over
 
-        lda PLAYER_MISSILE_ARMED
-        beq :+
+        ; ship is in player's sights:
+        ;-----------------------------------------------------------------------
+        ; if a player's missile is armed, the ship can be targetted
+        ;
+        lda PLAYER_MISSILE_ARMED; is the player's missile armed?
+       .bze :+                  ; if not, skip over
 
+        ; missile is armed and target is locked:
+        ;
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_05         ; beep?
 .endif  ;///////////////////////////////////////////////////////////////////////
-        ldx ZP_PRESERVE_X       ; missile target?
+        ; retrieve the current ship's slot-number, which
+        ; was set aside way, way back up at `process_ship`
+        ldx ZP_PRESERVE_X
+        ; set the player's target ship instance, and change
+        ; the missile indicator on the HUD to show locked state
         ldy # .color_nybble( RED, HUD_COLOUR )
         jsr target_missile
 
+        ; are we firing our laser?
+        ;-----------------------------------------------------------------------
+        ; `ZP_LASER` is only set if our laser is actually firing
+        ;
 :       lda ZP_LASER            ; is there a laser on the current view? ;$2153
-        beq _21a8               ; no laser, skip onwards
+       .bze @draw               ; no laser, skip onwards
 
-        ldx # $0f
-        jsr _a7e9
+        ; ship is in player's sights, lasers are firing;
+        ; make the sound of laser striking metal
+.ifdef  FEATURE_AUDIO
+        ;///////////////////////////////////////////////////////////////////////
+        ldx # $0f               ; (this gets lost by the routine below)
+        jsr sound_play_laserstrike
+.endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda ZP_SHIP_TYPE        ; things we've shot with laser?
-        cmp # HULL_COREOLIS
-        beq _21a3
-        cmp # HULL_CONSTRICTOR
-        bcc _2170
+        lda ZP_SHIP_TYPE        ; things we've shot with our laser:
+        cmp # HULL_COREOLIS     ; the station!?
+        beq @_21a3              ; shot the station, uh oh...
+        cmp # HULL_CONSTRICTOR  ; constrictor & cougar (and above)?
+        bcc @hit                ; no, skip over
 
-        lda ZP_LASER
-        cmp # $17
-        bne _21a3
+        ; the Constrictor and Cougar cannot be damaged
+        ; with anything less than military lasers:
+        ;
+        lda ZP_LASER            ; player's laser power
+        cmp # 23                
+        bne @_21a3              ; hit!
+
+        ; divide laser power by 4, making it highly ineffective
+        ; against the Constrictor or Cougar
+        ;
+        ; TODO: does this not account for bit 7 (beam)?
         lsr ZP_LASER
         lsr ZP_LASER
-_2170:                                                                  ;$2170
-        lda ZP_POLYOBJ_ENERGY   ; ship's energy-level
+
+        ; laser has hit ship!
+        ;-----------------------------------------------------------------------
+        ; calculate if your laser fire has destroyed the ship:
+        ;
+@hit:   lda ZP_POLYOBJ_ENERGY   ; ship's energy-level                   ;$2170
         sec 
-        sbc ZP_LASER
-        bcs _21a1
+        sbc ZP_LASER            ; subtract player's laser power
+        bcs @_21a1              ; if energy remains, skip ahead
 
-        ; explode the ship
+        ; explode the ship:
+        ;-----------------------------------------------------------------------
         asl ZP_POLYOBJ_STATE    ; remove bit 7
         sec                     ; take a 1 from the bit bucket
         ror ZP_POLYOBJ_STATE    ; shift it into bit 7
 
-        lda ZP_SHIP_TYPE
-        cmp # HULL_ASTEROID
-        bne _2192
+        lda ZP_SHIP_TYPE        ; retrieve which type of ship this is
+        cmp # HULL_ASTEROID     ; an asteroid?
+        bne @debris             ; skip for non-asteroids
 
-        lda ZP_LASER            ; mining laser(?)
-        cmp # $32
-        bne _2192
+        ; explode an asteroid:
+        ;-----------------------------------------------------------------------
+        ; is the player using a mining laser?
+        ; (other lasers have no effect)
+        ;
+        lda ZP_LASER            ; check laser power for current view
+        cmp # $32               ; is it yey much?
+        bne @debris             ; not a mining laser?
 
-        jsr get_random_number
-        ldx # HULL_SPLINTER     ; spawn a rock splinter
-        and # %00000011
-        jsr _2359
-_2192:                                                                  ;$2192
+        ; spawn some rock splinters when exploding
+        ; an asteroid shot with a mining laser:
+        jsr get_random_number   ; pick a number, any number
+        ldx # HULL_SPLINTER     ; we'll be spawning a rock splinter
+        and # %00000011         ; limit to 0-3 pieces
+        jsr spawn_multiple      ; go spawn the pieces
+
+        ; drop loot:
+        ;-----------------------------------------------------------------------
+@debris:                                                                ;$2192
         ldy # HULL_PLATE
-        jsr _234c
+        jsr spawn_debris
         ldy # HULL_CANNISTER
-        jsr _234c
+        jsr spawn_debris
 
         ldx ZP_SHIP_TYPE
         jsr ship_killed
-_21a1:                                                                  ;$21A1
-        sta ZP_POLYOBJ_ENERGY
-_21a3:                                                                  ;$21A3
+
+@_21a1:                                                                 ;$21A1
+        sta ZP_POLYOBJ_ENERGY   ; update the ships energy level
+@_21a3:                                                                 ;$21A3
         lda ZP_SHIP_TYPE
         jsr _36c5               ; make hostile?
-_21a8:                                                                  ;$21A8
+@draw:                                                                  ;$21A8
         jsr draw_ship
 
 _21ab:                                                                  ;$21AB
@@ -1375,30 +1425,49 @@ _2342:                                                                  ;$2342
         jsr _a786
 _2345:                                                                  ;$2345
         lda ZP_SCREEN           ; are we in the cockpit-view?
-       .bnz _2366               ; (no? skip over)
+       .bnz rts_2366            ; (no? exit)
 
         jmp move_dust
 
 
-_234c:                                                                  ;$234C
+spawn_debris:                                                           ;$234C
 ;===============================================================================
-; in:   Y       ship-type
+; when a ship is destroyed, attempt to spawn debris according
+; to the debris info in the ship's hull structure
+;
+; in:   Y               ship-type
+;       ZP_HULL_ADDR    must be loaded with a pointer to a hull structure
 ;-------------------------------------------------------------------------------
+        ; randomise the chance of dropping loot:
+        ; note that this returns A & X, which is why
+        ; the ship-type must be in Y
+        ;
         jsr get_random_number   ; choose random number,
-        bpl _2366               ; 50/50
+        bpl rts_2366            ; 50/50 do nothing
 
-        tya 
-        tax 
+        ; look up the debris information in the hull data
+        ;
+        tya                     ; ship type to A,
+        tax                     ; and then to X
+        
+        ; use Y for the byte-index in the structure. this byte contains
+        ; scoop information in the upper nybble and debris information
+        ; in the lower-nybble
+        ;
         ldy # Hull::scoop_debris
-        and [ZP_HULL_ADDR], y
-        and # %00001111
+        and [ZP_HULL_ADDR], y   ; combine debris count with random number
+        and # %00001111         ; clip out the scoop info
 
-_2359:                                                                  ;$2359
+
+spawn_multiple:                                                         ;$2359
 ;===============================================================================
-; in:   A       ?
+; spawn multiple of one type of ship:
+;
+; in:   A       number of items to spawn
+;       X       ship-type to spawn, e.g. cargo cannister
 ;-------------------------------------------------------------------------------
         sta ZP_AA
-        beq _2366               ; zero-flag will not be set by STA!
+        beq rts_2366            ; zero-flag will not be set by STA!
 
 :       lda # $00                                                       ;$235D
         jsr _370a               ; NOTE: spawns ship-type in X
@@ -1406,7 +1475,8 @@ _2359:                                                                  ;$2359
         dec ZP_AA
         bne :-
 
-_2366:  rts                                                             ;$2366
+rts_2366:                                                               ;$2366
+        rts
 
 
 _2367:                                                                  ;$2367

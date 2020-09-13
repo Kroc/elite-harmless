@@ -31,7 +31,8 @@ HULL_THARGOID_KILL      = 682   ;= 2.66
 ;===============================================================================
 .proc   hull_thargoid                                                   ;$EAA1
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$EAA1
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$EAA1
         
         .byte             $49, $26, $8c, $f4, $69, $3c                  ;$EAA2
         .byte   $26, $78, $1a, $f4, $01, $28, $37, $f0

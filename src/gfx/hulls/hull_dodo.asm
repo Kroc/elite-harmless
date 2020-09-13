@@ -36,7 +36,8 @@ hull_pointer_dodo:
 ;===============================================================================
 .proc   hull_dodo                                                       ;$EE2D
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$EE2D
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$EE2D
         
         .byte                                 $90, $7e                  ;$EE2E
         .byte   $a4, $2c, $65, $00, $36, $90, $22, $00                  ;$EE30

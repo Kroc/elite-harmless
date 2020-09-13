@@ -31,7 +31,8 @@ HULL_VIPER_KILL         = 26    ;= 0.10
 ;===============================================================================
 .proc   hull_viper                                                      ;$DE0B
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$DE0B
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$DE0B
         
         .byte                       $f9, $15, $6e, $be                  ;$DE0C
         .byte   $51, $00, $2a, $5a, $14, $00, $00, $1c                  ;$DE10

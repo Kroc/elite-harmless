@@ -32,7 +32,7 @@ HULL_ESCAPE_KILL        = 16    ;= 0.06
 .proc   hull_escape                                                     ;$D2BF
         ;-----------------------------------------------------------------------
         ; scooping an escape capsule nets you some slaves!
-        .scoop_debris   Cargo::slaves, $0                               ;$D2BF
+        .scoop_debris   Cargo::slaves, 0                                ;$D2BF
         
         .byte   $00, $01, $2c, $44, $1d, $00, $16, $18                  ;$D2C0
         .byte   $06, $00, $00, $10, $08, $11, $08, $00

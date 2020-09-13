@@ -31,7 +31,8 @@ HULL_CANNISTER_KILL     = 10    ;= 0.039
 ;===============================================================================
 .proc   hull_cannister                                                  ;$D353
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$D353
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$D353
         
         .byte                       $90, $01, $50, $8c                  ;$D354
         .byte   $35, $00, $12, $3c, $0f, $00, $00, $1c

@@ -31,7 +31,8 @@ HULL_FERDELANCE_KILL    = 320   ;= 1.25
 ;===============================================================================
 .proc   hull_ferdelance                                                 ;$E8AF
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$E8AF
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$E8AF
         
         .byte   $40, $06, $86, $f2, $6d, $00, $1a, $72                  ;$E8B0
         .byte   $1b, $00, $00, $28, $28, $a0, $1e, $00

@@ -31,7 +31,8 @@ HULL_BOULDER_KILL       = 6     ;= 0.02
 ;===============================================================================
 .proc   hull_boulder                                                    ;$D3FB
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$D3FB
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$D3FB
         
         .byte                       $84, $03, $3e, $7a                  ;$D3FC
         .byte   $31, $00, $0e, $2a, $0f, $01, $00, $28                  ;$D400

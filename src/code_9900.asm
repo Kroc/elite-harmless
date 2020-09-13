@@ -2532,7 +2532,7 @@ ship_killed:                                                            ;$A7A6
         lda PLAYER_KILLS_LO
         adc hull_kill_hi-1, x
         sta PLAYER_KILLS_LO
-        bcc :+                  ; < 1.0
+        bcc sound_play_explosion               ; < 1.0
         inc PLAYER_KILLS_HI     ; +1
 
         ; every 256 [whole] kills, print "right on commander!"
@@ -2542,14 +2542,18 @@ ship_killed:                                                            ;$A7A6
         ; show an on-screen message
         jsr _900d
 
+
+sound_play_explosion:                                                   ;$A7C3
+;===============================================================================
+; play an explosion sound:
+; the volume is based on distance from the player!
+;
 ; TODO: include this only with FEATURE_AUDIO
-        ;-----------------------------------------------------------------------
-        ; select explosion volume based on distance!
-        ;
+;-------------------------------------------------------------------------------
         ; note that the C64's SID chip uses volume levels 0 to 15,
         ; with 15 being the maximum
-        ;
-:       lda ZP_POLYOBJ_ZPOS_HI  ; distance from player...               ;$A7C3
+        ;        
+        lda ZP_POLYOBJ_ZPOS_HI  ; distance from player...               
         ldx # 11                ; volume 11
         cmp # $10               ; >=$1000?
         bcs :+
@@ -2575,11 +2579,13 @@ ship_killed:                                                            ;$A7A6
         jmp _a850
 
 
-_a7e9:                                                                  ;$A7E9
+sound_play_laserstrike:                                                 ;$A7E9
 ;===============================================================================
+; play the sound of laser-fire hitting a ship:
+; the volume is based upon the distance from the player
+;
 ; TODO: this first bit is a duplicate of the same above,
 ;       so we could turn it into a JSR
-;
 ;-------------------------------------------------------------------------------
         lda ZP_POLYOBJ_ZPOS_HI  ; distance from player...
         ldx # 11

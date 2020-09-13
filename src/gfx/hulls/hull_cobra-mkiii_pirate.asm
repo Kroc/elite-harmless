@@ -31,7 +31,8 @@ HULL_MK3_PIRATE_KILL    = 298   ;= 1.16
 ;===============================================================================
 .proc   hull_mk3_pirate                                                 ;$E50B
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $1                                           ;$E50B
+        ; does not scoop as anything, drops up to 1 debris:
+        .scoop_debris   0, 1                                            ;$E50B
         
         .byte                       $41, $23, $bc, $54                  ;$E50C
         .byte   $9d, $54, $2a, $a8, $26, $af, $00, $34                  ;$E510

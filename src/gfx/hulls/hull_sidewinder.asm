@@ -31,7 +31,8 @@ HULL_SIDEWINDER_KILL    = 85    ;= 0.33
 ;===============================================================================
 .proc   hull_sidewinder                                                 ;$DEE5
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $0                                           ;$DEE5
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0                                            ;$DEE5
         
         .byte                                 $81, $10                  ;$DEE6
         .byte   $50, $8c, $41, $00, $1e, $3c, $0f, $32

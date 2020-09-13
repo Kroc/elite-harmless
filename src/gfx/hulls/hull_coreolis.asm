@@ -44,7 +44,9 @@ hull_pointer_station:                                                   ;$D002
 
         .proc   header
 
-        .scoop_debris   0, $0   ; "scoop / debris"
+        ; does not scoop as anything, does not drop any debris:
+        .scoop_debris   0, 0
+
         .word   $6400           ; "missile lock area"?
         .byte   < edges_offset  ; "edges data offset lo"
         .byte   < faces_offset  ; "faces data offset lo"

@@ -31,7 +31,8 @@ HULL_MAMBA_KILL         = 128   ;= 0.50
 ;===============================================================================
 .proc   hull_mamba                                                      ;$DF8D
         ;-----------------------------------------------------------------------
-        .scoop_debris   0, $1                                           ;$DF8D
+        ; does not scoop as anything, drops up to 1 debris:
+        .scoop_debris   0, 1                                            ;$DF8D
         
         .byte                                 $24, $13                  ;$DF8E
         .byte   $aa, $1a, $61, $00, $22, $96, $1c, $96                  ;$DF90
