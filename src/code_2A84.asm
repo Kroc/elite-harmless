@@ -403,10 +403,10 @@ _29fa:                                                                  ;$29FA
         sta ZP_87
         lda ZP_8C
         sta ZP_88
-        lda ZP_AA
+        lda TEMP_COUNTER
         clc 
         adc ZP_AC
-        sta ZP_AA
+        sta TEMP_COUNTER
 
         rts 
 
@@ -943,7 +943,7 @@ _2d25:                                                                  ;$2D25
         bcc _2d1c
         ldx # $00
 _2d2f:                                                                  ;$2D2F
-        stx ZP_AA
+        stx TEMP_COUNTER
         
         ; print "FRONT" / "REAR" / "LEFT" / "RIGHT"
 .import TKN_FLIGHT_DIRECTIONS:direct
@@ -955,7 +955,7 @@ _2d2f:                                                                  ;$2D2F
         jsr print_flight_token_and_space
 
         lda # $67
-        ldx ZP_AA
+        ldx TEMP_COUNTER
         ldy PLAYER_LASERS, x
         cpy # laser::beam | $0f
         bne _2d4a
@@ -973,7 +973,7 @@ _2d50:                                                                  ;$2D50
 _2d56:                                                                  ;$2D56
         jsr print_flight_token_and_newline_and_indent
 _2d59:                                                                  ;$2D59
-        ldx ZP_AA
+        ldx TEMP_COUNTER
         inx 
         cpx # $04
         bcc _2d2f
@@ -1719,7 +1719,7 @@ _302b:                                                                  ;$302B
         jsr multiplied_now_add
         jsr _3130
         
-        lda ZP_A3               ; move counter?
+        lda MAIN_COUNTER
         and # %00000011
         bne _2fe0
         
@@ -1811,7 +1811,7 @@ _30bb:                                                                  ;$30BB
 ;-------------------------------------------------------------------------------
         ldx # .color_nybble(LTRED, LTRED)
 
-        lda ZP_A3               ; move counter?
+        lda MAIN_COUNTER
         and # %00001000         ; every 8th frame?
         and _1d09               ; is flashing enabled?
        .bze :+
@@ -2013,7 +2013,7 @@ eject_escapepod:                                                        ;$316E
         lsr 
         sta ZP_POLYOBJ_ATTACK
 _318a:                                                                  ;$318A
-        jsr _a2a0               ; move ship?
+        jsr move_ship
         jsr draw_ship
 
         dec ZP_POLYOBJ_ATTACK
@@ -2382,7 +2382,7 @@ _336e:                                                                  ;$336E
         jsr _8c8a
         ldy # $0a
         jsr _3ab2
-        sta ZP_AA
+        sta TEMP_COUNTER
         lda ZP_SHIP_TYPE
         cmp # $01
         bne _3381
@@ -2480,7 +2480,7 @@ _33fd:                                                                  ;$33FD
         jsr _87b1
         and # %11100000
         bne _3434
-        ldx ZP_AA
+        ldx TEMP_COUNTER
         cpx # $a0
         bcc _3434
 
@@ -2528,10 +2528,10 @@ _3442:                                                                  ;$3442
         bcs _3454
 _344b:                                                                  ;$344B
         jsr _35d5
-        lda ZP_AA
+        lda TEMP_COUNTER
         eor # %10000000
 _3452:                                                                  ;$3452
-        sta ZP_AA
+        sta TEMP_COUNTER
 _3454:                                                                  ;$3454
         ldy # $10
         jsr _3ab2
@@ -2566,7 +2566,7 @@ _346c:                                                                  ;$346C
         ora ZP_POLYOBJ_ROLL
         sta ZP_POLYOBJ_ROLL
 _348d:                                                                  ;$348D
-        lda ZP_AA
+        lda TEMP_COUNTER
         bmi _349a
         cmp ZP_AB
         bcc _349a
@@ -4111,14 +4111,14 @@ _3dff:                                                                  ;$3DFF
         jsr set_page            ; switch to an empty menu page
 
         lda # $40
-        sta ZP_A3               ; move counter?
+        sta MAIN_COUNTER
 _3e01:                                                                  ;$3E01
         ldx # $7f
         stx ZP_POLYOBJ_ROLL
         stx ZP_POLYOBJ_PITCH
         jsr draw_ship
-        jsr _a2a0               ; move ship?
-        dec ZP_A3               ; move counter?
+        jsr move_ship
+        dec MAIN_COUNTER
         bne _3e01
 _3e11:                                                                  ;$3E11
         lsr ZP_POLYOBJ_XPOS_LO
@@ -4137,8 +4137,8 @@ _3e11:                                                                  ;$3E11
 _3e24:                                                                  ;$3E24
         stx ZP_POLYOBJ_YPOS_LO
         jsr draw_ship
-        jsr _a2a0               ; move ship?
-        dec ZP_A3               ; move counter?
+        jsr move_ship
+        dec MAIN_COUNTER
         jmp _3e11
 _3e31:                                                                  ;$3E31
         inc ZP_POLYOBJ_ZPOS_HI
@@ -4168,7 +4168,7 @@ _3e65:                                                                  ;$3E65
         sta ZP_POLYOBJ_ZPOS_HI
         
         jsr draw_ship
-        jsr _a2a0               ; move ship?
+        jsr move_ship
         
         jmp get_input
 

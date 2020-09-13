@@ -714,7 +714,7 @@ _9cfe:                                                                  ;$9CFE
         adc # $00
         sta ZP_TEMP_ADDR3_HI
         ldy # $00
-        sty ZP_AA
+        sty TEMP_COUNTER
 _9d45:                                                                  ;$9D45
         sty ZP_9F
         lda [ZP_TEMP_ADDR3], y
@@ -968,7 +968,7 @@ _9eaa:                                                                  ;$9EAA
 
 ; ".LL65 ; both continue for scaling based on z"
 _9ead:                                                                  ;$9EAD
-        ldx ZP_AA
+        ldx TEMP_COUNTER
         lda ZP_VAR_X2
         bmi _9e51
         lda ZP_VAR_R
@@ -1028,9 +1028,9 @@ _9eef:                                                                  ;$9EEF
 ; ".LL50 ; also from LL70, Also from LL49-3. XX3 heap has yscreen, Next vertex."
 _9f06:                                                                  ;$9F06
         clc 
-        lda ZP_AA
+        lda TEMP_COUNTER
         adc # $04
-        sta ZP_AA
+        sta TEMP_COUNTER
         lda ZP_9F
         adc # $06
         tay 
@@ -1671,7 +1671,8 @@ _a29d:                                                                  ;$A29D
         eor ZP_74
         rts 
 
-_a2a0:                                                                  ;$A2A0
+
+move_ship:                                                              ;$A2A0
 ;===============================================================================
 ; do_ship_ai? checks if A.I. needs running and appears to rotate and move
 ; the objcet
@@ -1684,7 +1685,7 @@ _a2a0:                                                                  ;$A2A0
        .bnz @a2cb
 
         ; handle explosion?
-        lda ZP_A3               ; move counter?
+        lda MAIN_COUNTER
         eor ZP_PRESERVE_X
         and # %00001111
         bne :+
@@ -1707,7 +1708,7 @@ _a2a0:                                                                  ;$A2A0
         ; it runs at a much lower rate. these instructions here
         ; gear-down the ratio
         ;
-        lda ZP_A3               ; move counter?
+        lda MAIN_COUNTER
         eor ZP_PRESERVE_X
         and # %00000111         ; modulo 8
         bne @a2cb               ; skip every 7 out of 8 frames
@@ -2049,7 +2050,7 @@ _a53d:                                                                  ;$A53D
         sta ZP_B4
         sta ZP_VAR_P2
 
-        lda $63
+        lda ZP_BETA
         sta ZP_VAR_Q
 
         lda ZP_VALUE_pt4
@@ -2532,7 +2533,7 @@ ship_killed:                                                            ;$A7A6
         lda PLAYER_KILLS_LO
         adc hull_kill_hi-1, x
         sta PLAYER_KILLS_LO
-        bcc sound_play_explosion               ; < 1.0
+        bcc sound_play_explosion; < 1.0
         inc PLAYER_KILLS_HI     ; +1
 
         ; every 256 [whole] kills, print "right on commander!"

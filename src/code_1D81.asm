@@ -193,7 +193,7 @@ _1e35:
         ;-----------------------------------------------------------------------
         ; move Trumbles™ around the screen
         ;
-        lda ZP_A3               ; "move counter"?
+        lda MAIN_COUNTER
         and # %00000111         ; modulo 8 (0-7)
         cmp TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
        .blt :+
@@ -760,7 +760,7 @@ process_ship:                                                           ;$202F
         ;=======================================================================
         ; [6]:  move ship forward
         ;-----------------------------------------------------------------------
-@move:  jsr _a2a0               ; move ship?                            ;$2079
+@move:  jsr move_ship                                                   ;$2079
 
         ; copy the zero-page PolyObject back to its storage
         ;
@@ -1182,7 +1182,7 @@ _21fa:                                                                  ;$21FA
         bmi _2207
         jsr _2367
 _2207:                                                                  ;$2207
-        lda ZP_A3               ; move counter?
+        lda MAIN_COUNTER
         and # %00000111
         bne _227a
 
@@ -1206,7 +1206,7 @@ _2230:                                                                  ;$2230
         lda IS_WITCHSPACE
         bne _2277
 
-        lda ZP_A3               ; move counter?
+        lda MAIN_COUNTER
         and # %00011111
         bne _2283
 
@@ -1280,7 +1280,7 @@ _227a:                                                                  ;$227A
         lda IS_WITCHSPACE
         bne _2277
 
-        lda ZP_A3               ; move counter?
+        lda MAIN_COUNTER
         and # %00011111
 _2283:                                                                  ;$2283
         cmp # $0a
@@ -1466,13 +1466,13 @@ spawn_multiple:                                                         ;$2359
 ; in:   A       number of items to spawn
 ;       X       ship-type to spawn, e.g. cargo cannister
 ;-------------------------------------------------------------------------------
-        sta ZP_AA
+        sta TEMP_COUNTER
         beq rts_2366            ; zero-flag will not be set by STA!
 
 :       lda # $00                                                       ;$235D
         jsr _370a               ; NOTE: spawns ship-type in X
         
-        dec ZP_AA
+        dec TEMP_COUNTER
         bne :-
 
 rts_2366:                                                               ;$2366

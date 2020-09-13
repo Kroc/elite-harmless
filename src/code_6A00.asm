@@ -2675,12 +2675,12 @@ _78f7:                                                                  ;$78F7
         sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _78f7
-        sty ZP_AA
+        sty TEMP_COUNTER
         ldy # $02
 _7903:                                                                  ;$7903
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        eor ZP_AA
+        eor TEMP_COUNTER
         sta $ffff, y                    ;!?
         cpy # $06
         bne _7903
@@ -2717,7 +2717,7 @@ _7911:                                                                  ;$7911
 _7948:                                                                  ;$7948
         dey 
         bpl _7911
-        ldy ZP_AA
+        ldy TEMP_COUNTER
         cpy ZP_A8
         bcc _78f5
         pla 
@@ -2850,7 +2850,7 @@ _79ed:                                                                  ;$79ED
         sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _79ed
-        sty ZP_AA
+        sty TEMP_COUNTER
         lda ZP_POLYOBJ01_YPOS_pt1
         clc 
         adc VAR_050E
@@ -2885,7 +2885,7 @@ _7a36:                                                                  ;$7A36
 _7a38:                                                                  ;$7A38
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        eor ZP_AA
+        eor TEMP_COUNTER
         sta $ffff, y            ;!?
         cpy # $06
         bne _7a38
@@ -2911,7 +2911,7 @@ _7a46:                                                                  ;$7A46
 _7a6c:                                                                  ;$7A6C
         dey 
         bpl _7a46
-        ldy ZP_AA
+        ldy TEMP_COUNTER
         cpy ZP_A8
         bcs _7a78
         jmp _79eb
@@ -3668,7 +3668,7 @@ _7e54:                                                                  ;$7E54
         sta ZP_A8
 _7e58:                                                                  ;$7E58
         ldx # $00
-        stx ZP_AA
+        stx TEMP_COUNTER
         dex 
         stx ZP_A9
 _7e5f:                                                                  ;$7E5F
@@ -3857,7 +3857,7 @@ draw_circle:                                                            ;$7F22
         rol                     ; (shift the carry bit in)
         cpx # 16                ; circle width >= 32?
         rol                     ; (shift the carry bit in)
-        sta ZP_AA               ; "fringe size"
+        sta TEMP_COUNTER        ; "fringe size"
 
         ; clip bottom of circle to viewport:
         ;-----------------------------------------------------------------------
@@ -4067,7 +4067,7 @@ _7f67:                                                                  ;$7F67
         ; add the "fringe"
         ;-----------------------------------------------------------------------
         jsr get_random_number   ; randomise the fringe each frame
-        and ZP_AA               ; limit to the fringe-size chosen earlier
+        and TEMP_COUNTER        ; limit to the fringe-size chosen earlier
         clc                     ; add the fringe to...
         adc ZP_VAR_Q            ; ...the scanline's half-width
         bcc :+                  ; if adding the fringe takes it over 256,
@@ -4216,15 +4216,15 @@ _805e:                                                                  ;$805E
         ldx # $ff
         stx ZP_A9
         inx 
-        stx ZP_AA
+        stx TEMP_COUNTER
 _8065:                                                                  ;$8065
-        lda ZP_AA
+        lda TEMP_COUNTER
         jsr _39e0
 
         ldx # $00
         stx ZP_VAR_T
 
-        ldx ZP_AA
+        ldx TEMP_COUNTER
         cpx # $21
         bcc _8081
 
@@ -4242,14 +4242,14 @@ _8081:                                                                  ;$8081
         lda ZP_VAR_K3_HI
         adc ZP_VAR_T
         sta ZP_8A
-        lda ZP_AA
+        lda TEMP_COUNTER
         clc 
         adc # $10
         jsr _39e0
         tax 
         lda # $00
         sta ZP_VAR_T
-        lda ZP_AA
+        lda TEMP_COUNTER
         adc # $0f
         and # %00111111
         cmp # $21
@@ -4999,7 +4999,7 @@ _83ed:                                                                  ;$83ED
         sta ZP_PITCH_MAGNITUDE
         sta ZP_INV_ROLL_SIGN
         sta ZP_INV_PITCH_SIGN
-        sta ZP_A3               ; move counter?
+        sta MAIN_COUNTER
 .ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
         sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
@@ -5187,7 +5187,7 @@ _84ed:                                                                  ;$84ED
 
 ; ".me3 ; also arrive back from me2"
 _84fa:                                                                  ;$84FA
-        dec ZP_A3               ; move counter?
+        dec MAIN_COUNTER
         beq _8501
 
 ; ".ytq ; a lot of this not needed while docked"
@@ -5823,7 +5823,7 @@ _87fd:                                                                  ;$87FD
         sty ZP_POLYOBJ_ZPOS_HI
         sty ZP_POLYOBJ_ATTACK
         dey 
-        sty ZP_A3               ; move counter?
+        sty MAIN_COUNTER
         eor # %00101010
         sta ZP_POLYOBJ_YPOS_LO
         ora # %01010000
@@ -6140,7 +6140,7 @@ _8920:                                                                  ;$8920
         sta ZP_AB
 
         lda # $05
-        sta ZP_A3               ; move counter?
+        sta MAIN_COUNTER
 
         lda # $ff
         sta _1d0c
@@ -6149,12 +6149,12 @@ _8920:                                                                  ;$8920
         cmp # $01
         beq :+
         dec ZP_POLYOBJ_ZPOS_HI
-:       jsr _a2a0               ; move ship?                            ;$89C6
+:       jsr move_ship                                                   ;$89C6
 
         ldx VAR_06FB            ; title screen poly-object z-distance?
         stx ZP_POLYOBJ_ZPOS_LO
 
-        lda ZP_A3               ; move counter?
+        lda MAIN_COUNTER
         and # %00000011
         lda # $00
         sta ZP_POLYOBJ_XPOS_LO
@@ -6162,7 +6162,7 @@ _8920:                                                                  ;$8920
         jsr draw_ship
         jsr get_input
 
-        dec ZP_A3               ; move counter?
+        dec MAIN_COUNTER
         bit joy_fire
         bmi :+
         bcc @_89be
@@ -6847,7 +6847,7 @@ do_quickjump:                                                           ;$8E29
 
         lda # $01
         sta ZP_SCREEN
-        sta ZP_A3               ; move counter?
+        sta MAIN_COUNTER
         lsr 
         sta VAR_048A
 

@@ -375,7 +375,7 @@ ZP_SCREEN               := $a0
 ZP_VAR_Z                := $a1  ; a common "Z" variable
 
 ZP_A2                   := $a2  ;? x14
-ZP_A3                   := $a3  ;? x18 "MOVE COUNTER"?
+MAIN_COUNTER            := $a3  ;? x18 "MOVE COUNTER"?
 
 ;                       := $a4  ;UNUSED?
 
@@ -386,7 +386,7 @@ ZP_ALPHA                := $a6  ; a rotation variable used in matrix math
 ZP_A7                   := $a7  ;? x10  ; docked flag?
 ZP_A8                   := $a8  ;? x9
 ZP_A9                   := $a9  ;? x4
-ZP_AA                   := $aa  ;? x30
+TEMP_COUNTER            := $aa  ;? x30
 ZP_AB                   := $ab  ;? x12
 ZP_AC                   := $ac  ;? x5
 ZP_AD                   := $ad  ;? x21
