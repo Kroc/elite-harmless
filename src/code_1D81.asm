@@ -992,7 +992,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         ; [10]: missile & laser hit testing
         ;-----------------------------------------------------------------------
 :       lda ZP_SCREEN           ; are we in the cockpit-view?           ;$2138
-       .bnz _21ab               ; no? skip ahead
+       .bnz @_21ab              ; no? skip ahead
 
         ; since the universe rotates around the player in elite, we need to
         ; make sure that the X/Y/Z axes in the ship instance match the current
@@ -1045,7 +1045,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
 
         lda ZP_SHIP_TYPE        ; things we've shot with our laser:
         cmp # HULL_COREOLIS     ; the station!?
-        beq @_21a3              ; shot the station, uh oh...
+        beq @hostile            ; shot the station, uh oh...
         cmp # HULL_CONSTRICTOR  ; constrictor & cougar (and above)?
         bcc @hit                ; no, skip over
 
@@ -1053,8 +1053,8 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         ; with anything less than military lasers:
         ;
         lda ZP_LASER            ; player's laser power
-        cmp # 23                
-        bne @_21a3              ; hit!
+        cmp # 23                ; TODO: confirm and const this!
+        bne @hostile            ; hit!
 
         ; divide laser power by 4, making it highly ineffective
         ; against the Constrictor or Cougar
@@ -1100,78 +1100,122 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
 
         ; drop loot:
         ;-----------------------------------------------------------------------
+        ; each hull definition has a nybble (0-15) for how many items of debris
+        ; it should drop, although randomisation is used to vary how much
+        ; actually gets dropped
 @debris:                                                                ;$2192
-        ldy # HULL_PLATE
-        jsr spawn_debris
-        ldy # HULL_CANNISTER
-        jsr spawn_debris
+        ldy # HULL_PLATE        ; let's try drop some plates
+        jsr spawn_debris        ; spawn a random amount according to hull
+        ldy # HULL_CANNISTER    ; let's try drop some cargo cannisters
+        jsr spawn_debris        ; spawn a random amount according to hull
 
-        ldx ZP_SHIP_TYPE
-        jsr ship_killed
-
+        ldx ZP_SHIP_TYPE        ; retrieve ship-type again
+        jsr ship_killed         ; add points to the player's kill-rank
+                                ; TODO: returns A = 0, no?
 @_21a1:                                                                 ;$21A1
         sta ZP_POLYOBJ_ENERGY   ; update the ships energy level
-@_21a3:                                                                 ;$21A3
+
+@hostile:                                                               ;$21A3
         lda ZP_SHIP_TYPE
         jsr _36c5               ; make hostile?
-@draw:                                                                  ;$21A8
-        jsr draw_ship
 
-_21ab:                                                                  ;$21AB
+        ; *** DRAW THE SHIP ON THE SCREEN ***
+        ; (I felt this needed drawing attention to as it's easy to miss)
+@draw:  jsr draw_ship                                                   ;$21A8
+
+@_21ab:                                                                 ;$21AB
+        ; update the zero-page copy of the ship's energy level
+        ; back to the ship's instance storage
+        ;
+        ; TODO: why do we do this, when we could defer copying the whole
+        ;       ship instance to later in the main loop??
         ldy # PolyObject::energy
         lda ZP_POLYOBJ_ENERGY
         sta [ZP_POLYOBJ_ADDR], y
 
+        ; when will you learn that your actions have consequences?
+        ;-----------------------------------------------------------------------
+        ; check the high-bit of the behaviour flags,
+        ; this indicates if the ship needs to be removed from play
         lda ZP_POLYOBJ_BEHAVIOUR
-        bmi _21e2
+        bmi @clear              ; bit 7 set?
 
+        ; is the ship currently exploding?
         lda ZP_POLYOBJ_STATE
-        bpl _21e5               ; bit 7 set?
+        bpl @_21e5              ; bit 7 not set?
 
         and # state::debris
-        beq _21e5
+        beq @_21e5
 
+        ; did we blow up a police ship?
+        ; the behaviour bit for police (%01000000 = 64) is used as the
+        ; felony-level to set, making the player immediately "Fugitive"
+        ;
         lda ZP_POLYOBJ_BEHAVIOUR
-        and # behaviour::police
-        ora PLAYER_LEGAL
-        sta PLAYER_LEGAL
+        and # behaviour::police ; keep just bit 6
+        ora PLAYER_LEGAL        ; add this to the felony-level (if set)
+        sta PLAYER_LEGAL        ; update player's felony level
 
-        lda OSD_DELAY
-        ora IS_WITCHSPACE
-        bne _21e2
+        ; check if we're able to display an on-screen message:
+        ;
+        ; BUG:  if any on-screen message is displayed when you destroy
+        ;       another ship, you *won't* get paid the bounty!
+        ;
+        ; TODO: fix this bug for harmless
+        ;
+        lda OSD_DELAY           ; is a message already on screen? (>0)
+        ora IS_WITCHSPACE       ; are we in witchspace? (why?)
+       .bnz @clear              ; can't display, skip
 
-        ldy # Hull::bounty      ;=$0A: (bounty lo-byte)
-        lda [ZP_HULL_ADDR], y
-        beq _21e2
-
-        tax 
-        iny                     ;=$0B: (bounty hi-byte)
-        lda [ZP_HULL_ADDR], y
-        tay 
-        jsr _7481
-
-        lda # $00               ; TODO: ??
-        jsr _900d               ; print an on-screen message
-_21e2:                                                                  ;$21E2
-        jmp _829a
-
+        ; pay bounty:
         ;-----------------------------------------------------------------------
+        ; NOTE: since a zero in the low-byte of the bounty amount is assumed
+        ;       to be "no bounty", care must be taken to not give a ship a
+        ;       round hexadecimal bounty, i.e. $??00
+        ;
+        ldy # Hull::bounty      ; (bounty lo-byte)
+        lda [ZP_HULL_ADDR], y   ; read from the hull structure
+       .bze @clear              ; skip if no bountry (=0)
 
-_21e5:                                                                  ;$21E5
+        tax                     ; put aside the lo-byte
+        iny                     ; (bounty hi-byte)
+        lda [ZP_HULL_ADDR], y   ; read the bounty hi-byte
+        tay                     ; put aside hi-byte
+        jsr _7481               ; pay monies
+
+        ; TODO: GitHub issue #50:
+        ;       Display credits earnerd after kill, not total credits
+        ;
+        ; (flight token for printing player's current cash)
+        lda # TKN_FLIGHT_FN_PLAYER_CASH
+        jsr _900d               ; print an in-flight message
+
+        ; clear the ship-slot and shuffle down the rest:
+        ; elite relies upon there not being free gaps between ship-instances
+        ; for detecting when the last ship-instance is reached
+        ;
+        ; TODO: since skipping over unused slots is plenty fast enough,
+        ;       maybe we could do away with this requirement
+        ;
+@clear: jmp _829a                                                       ;$21E2
+
+@_21e5:                                                                 ;$21E5
+        ;-----------------------------------------------------------------------
         lda ZP_SHIP_TYPE
-        bmi _21ee
+        bmi :+
         jsr _87a4
-        bcc _21e2
-_21ee:                                                                  ;$21EE
+        bcc @clear
+
         ; update the poly-object's stored state
         ; with the current working state
-        ldy # PolyObject::state
+:       ldy # PolyObject::state                                         ;$21EE
         lda ZP_POLYOBJ_STATE
         sta [ZP_POLYOBJ_ADDR], y
 
-        ldx ZP_PRESERVE_X
-        inx 
-        jmp process_ship
+        ldx ZP_PRESERVE_X       ; retrieve current ship-slot being processed...
+        inx                     ; move to the next ship-slot
+        jmp process_ship        ; process the next ship
+
 
         ;-----------------------------------------------------------------------
 
@@ -1245,7 +1289,7 @@ _2230:                                                                  ;$2230
         ;
         ; number of bytes to copy:
         ; (up to, and including, the `acceleration` property)
-        ldx # PolyObject::acceleration + .sizeof(PolyObject::acceleration)-1
+        ldx # PolyObject::acceleration + .sizeof( PolyObject::acceleration )-1
 
 :       lda polyobj_00, x       ;=$F900                                 ;$2248
         sta ZP_POLYOBJ, x       ;=$09
@@ -1261,10 +1305,12 @@ _2230:                                                                  ;$2230
         ldy # $0b
         jsr _2c2d
         bne _2277
+
         ldx # $06
         ldy # $0d
         jsr _2c2d
         bne _2277
+        
         lda # $c0
         jsr _87a6
         bcc _2277
@@ -1332,7 +1378,7 @@ _22c2:                                                                  ;$22C2
         lda .loword( SHIP_TYPES + HULL_COREOLIS )
         bne _231c
 
-        ldy # .sizeof(PolyObject)
+        ldy # .sizeof( PolyObject )
         jsr _2c50
        .bnz _231c
 

@@ -147,6 +147,7 @@ print_flight_token:                                                     ;$777E
         ;-----------------------------------------------------------------------
         ; token $00:
         ;
+.export TKN_FLIGHT_FN_PLAYER_CASH = $00
        .bze _775f               ; is A 0? -- print "Cash: " and credit count
 
         ; token $80-$FF:

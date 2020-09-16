@@ -3045,7 +3045,7 @@ _370a:                                                                  ;$370A
 
         ; temporarily backup the current poly object to the bottom
         ; of the stack, and copy in the new poly object
-        ldy # .sizeof(PolyObject)-1
+        ldy # .sizeof( PolyObject )-1
 :       lda ZP_POLYOBJ, y                                               ;$371C
         sta $0100, y
         lda [ZP_POLYOBJ_ADDR], y
@@ -4045,7 +4045,7 @@ _3daf:                                                                  ;$3DAF
         
         ldx # $50
         ldy # $c3
-        jsr _7481
+        jsr _7481               ; pay monies
         
 .import MSG_DOCKED_CONGRATULATIONS:direct
         lda # MSG_DOCKED_CONGRATULATIONS

@@ -999,7 +999,7 @@ _6e5d:                                                                  ;$6E5d
         lda VAR_04EC
         sta ZP_VAR_Q
         jsr _74a2
-        jsr _7481
+        jsr _7481               ; pay monies
 
         lda # $00
         sta ZP_34
@@ -2073,6 +2073,8 @@ _745a:                                                                  ;$745A
 
 _7481:                                                                  ;$7481
 ;===============================================================================
+; pay monies
+;
 .export _7481
         txa 
         clc 
@@ -2260,7 +2262,7 @@ _7596:                                                                  ;$7596
 _75a1:                                                                  ;$75A1
         sty ZP_VALUE_pt1        ; (being used as a temp value)
         jsr _7642
-        jsr _7481
+        jsr _7481               ; pay monies
         lda ZP_VALUE_pt1        ; (being used as a temp value)
         jsr print_flight_token_and_space
 
@@ -2456,7 +2458,7 @@ _76a1:                                                                  ;$76A1
 :       stx ZP_VAR_Z                                                    ;$76BC
         tya 
         jsr _7642
-        jsr _7481
+        jsr _7481               ; pay monies
         ldx ZP_VAR_Z
 _76c7:                                                                  ;$76C7
         lda ZP_TEMP_VAR
@@ -3145,8 +3147,8 @@ _7b9b:                                                                  ;$7B9B
 ;===============================================================================
 ; copy the X/Y/Z-position of `POLYOBJ_01` to the zero page
 ;-------------------------------------------------------------------------------
-        ldx # (.sizeof(PolyObject::xpos) + .sizeof(PolyObject::ypos) \
-            + .sizeof(PolyObject::zpos) - 1)
+        ldx # .sizeof( PolyObject::xpos ) + .sizeof( PolyObject::ypos ) \
+            + .sizeof( PolyObject::zpos ) - 1
 
 :       lda polyobj_01, x       ;=$F925..                               ;$7B9D
         sta ZP_POLYOBJ01, x     ;=$35..
@@ -3390,7 +3392,7 @@ spawn_ship:                                                             ;$7C6B
         bcc @rts                ; overflow? cannot allocate the ship!
         bne :+
 
-        cpy # $25               ;=.sizeof(PolyObject)?
+        cpy # $25               ;=.sizeof( PolyObject )?
         bcc @rts
 
         ; move the heap pointer backwards to its new position
@@ -3437,7 +3439,7 @@ _7cec:  ldy ZP_VAR_T            ; ship type                             ;$7CEC
 
         ; copy the ship from the working-space in the zero-page
         ; to its position in the poly-object array
-        ldy # .sizeof(PolyObject)-1
+        ldy # .sizeof( PolyObject )-1
 :       lda ZP_POLYOBJ_XPOS_LO, y                                       ;$7CF9
         sta [ZP_POLYOBJ_ADDR], y
         dey 
@@ -5042,7 +5044,7 @@ clear_zp_polyobj:                                                       ;$8447
 ;===============================================================================
 ; clear the zero-page PolyObject storage:
 ;-------------------------------------------------------------------------------
-        ldy # .sizeof(PolyObject)-1
+        ldy # .sizeof( PolyObject )-1
         lda # $00
 :       sta ZP_POLYOBJ_XPOS_LO, y                                       ;$844B
         dey 
@@ -6825,7 +6827,7 @@ do_quickjump:                                                           ;$8E29
 :       ldy polyobj_01 + PolyObject::zpos + 2                           ;$8E44
         bmi :+
         ; check the sun's position?
-        ldy # .sizeof(PolyObject)
+        ldy # .sizeof( PolyObject )
         jsr _2c4e
         cmp # $02               ; minimum distance?
         bcc @nojump
@@ -7265,7 +7267,7 @@ damage_cargo:                                                           ;$906A
         sty VAR_048C            ; message flag?
 
         sta PLAYER_CARGO, x     ; remove all of that type of cargo
-        cpx # .sizeof(Cargo)    ; was it equipment? (i.e X > tradable goods)
+        cpx # .sizeof( Cargo )  ; was it equipment? (i.e X > tradable goods)
         bcs :+
 
         txa 

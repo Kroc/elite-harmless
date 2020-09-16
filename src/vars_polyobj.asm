@@ -1,8 +1,9 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "vars_polyobj.asm":
+;
 ; Elite has a number of 'slots' for 3D-objects currently in play;
 ; e.g. ships, asteroids, space stations and other such polygon-objects.
 ; this file defines the runtime structure for a poly-object and reserves
@@ -129,7 +130,7 @@ POLYOBJ_COUNT   = 11
         ; this is the original copy routine
         ;                                       ; bytes/tally   cycles/tally
         ;---------------------------------------;-------------------------------
-        ldy # .sizeof(PolyObject)-1             ; +2    2       +2      2
+        ldy # .sizeof( PolyObject )-1           ; +2    2       +2      2
 :       lda [ZP_POLYOBJ_ADDR], y                ; +2    .       +5      .      
         sta ZP_POLYOBJ, y                       ; +2    .       +5      .      
         dey                                     ; +1    .       +2      .      
@@ -156,7 +157,7 @@ POLYOBJ_COUNT   = 11
         sta @copy+1                             ; +3    .       +4      .
         lda ZP_POLYOBJ_ADDR_HI                  ; +2    .       +3      .
         sta @copy+2                             ; +3    .       +4      .
-        ldx # .sizeof(PolyObject)-1             ; +2    12      +2      16
+        ldx # .sizeof( PolyObject )-1           ; +2    12      +2      16
         ;---------------------------------------;-------------------------------
 @copy:  lda $8888, x                            ; +3    .       +4      .
         sta ZP_POLYOBJ, x                       ; +2    .       +4      .
@@ -173,7 +174,7 @@ POLYOBJ_COUNT   = 11
         ;                                       ; bytes/tally   cycles/tally
         ;-----------------------------------------------------------------------
         ldy # 0                                 ; +2    2       +2      2
-        .repeat .sizeof(PolyObject)-2, I
+        .repeat .sizeof( PolyObject )-2, I
                 lda [ZP_POLYOBJ_ADDR], y        ; +2    .       +5      .
                 sta ZP_POLYOBJ + I              ; +2    .       +3      .
                 iny                             ; +1   (5)      +2     (10)
@@ -182,7 +183,7 @@ POLYOBJ_COUNT   = 11
         ; the last iteration does not need to
         ; include the INY so is split out here
         lda [ZP_POLYOBJ_ADDR], y                ; +2    .       +5      .
-        sta ZP_POLYOBJ + .sizeof(PolyObject)-1  ; +2    4       +3      8
+        sta ZP_POLYOBJ+.sizeof( PolyObject )-1  ; +2    4       +3      8
         ;---------------------------------------;-------------------------------
         ;                                total: ;       186             370
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -200,7 +201,7 @@ POLYOBJ_COUNT   = 11
         ; this is the original copy routine
         ;                                       ; bytes/tally   cycles/tally
         ;---------------------------------------;-------------------------------
-        ldy # .sizeof(PolyObject)-1             ; +2    2       +2      2
+        ldy # .sizeof( PolyObject )-1           ; +2    2       +2      2
 :       lda ZP_POLYOBJ, y                       ; +3    .       +4      .
         sta [ZP_POLYOBJ_ADDR], y                ; +2    .       +6      .
         dey                                     ; +1    .       +2      .      
@@ -228,7 +229,7 @@ POLYOBJ_COUNT   = 11
         sta @addr+1                             ; +3    .       +4      .
         lda ZP_POLYOBJ_ADDR_HI                  ; +2    .       +3      .
         sta @addr+2                             ; +3    .       +4      .
-        ldx # .sizeof(PolyObject)-1             ; +2    12      +2      16
+        ldx # .sizeof( PolyObject )-1           ; +2    12      +2      16
         ;---------------------------------------;-------------------------------
 @copy:  lda ZP_POLYOBJ, x                       ; +2    .       +4      .
 @addr:  sta $8888, x                            ; +3    .       +5      .
@@ -245,7 +246,7 @@ POLYOBJ_COUNT   = 11
         ;                                       ; bytes/tally   cycles/tally
         ;-----------------------------------------------------------------------
         ldy # 0                                 ; +2    2       +2      2
-        .repeat .sizeof(PolyObject)-2, I
+        .repeat .sizeof( PolyObject )-2, I
                 lda ZP_POLYOBJ + I              ; +2    .       +3      .
                 sta [ZP_POLYOBJ_ADDR], y        ; +2    .       +6      .
                 iny                             ; +1   (5)      +2     (11)
@@ -253,7 +254,7 @@ POLYOBJ_COUNT   = 11
         ;
         ; the last iteration does not need to
         ; include the INY so is split out here
-        lda ZP_POLYOBJ + .sizeof(PolyObject)-1  ; +2    .       +3      .
+        lda ZP_POLYOBJ+.sizeof( PolyObject )-1  ; +2    .       +3      .
         sta [ZP_POLYOBJ_ADDR], y                ; +2    4       +6      9
         ;---------------------------------------;-------------------------------
         ;                                total: ;       186             407

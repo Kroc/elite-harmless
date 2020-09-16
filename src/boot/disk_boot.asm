@@ -99,7 +99,7 @@ start:
         jsr KERNAL_SETLFS
 
         ; set file name
-        lda # .sizeof(filename) ; length of file name
+        lda # .sizeof( filename )
         ldx #< filename         ; pointer to name address (lo)
         ldy #> filename         ; pointer to name address (hi)
         jsr KERNAL_SETNAM

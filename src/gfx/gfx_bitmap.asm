@@ -235,7 +235,7 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ;///////////////////////////////////////////////////////////////////////////////
 .segment        "HUD_COLORSCR"
 
-; `proc` is used so that `.sizeof(hud_screenram_copy)` is available
+; `proc` is used so that `.sizeof( hud_screenram_copy )` is available
 .proc   hud_screenram_copy                                              ;$783A
 
         ; include the screen RAM data (for the HUD) from the Koala file
@@ -261,7 +261,7 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ;
 .segment        "GFX_COLORRAM"
 
-; `proc` is used so that `.sizeof(gfx_colorram_init)` is available
+; `proc` is used so that `.sizeof( gfx_colorram_init )` is available
 .proc   gfx_colorram_init                                               ;$795A
 
 .ifdef  OPTION_ORIGINAL
