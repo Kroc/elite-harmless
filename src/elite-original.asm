@@ -8,7 +8,7 @@
 .include        "math/math_3d.inc"
 .include        "math/math_data.asm"
 
-.include        "gfx/hull_struct.inc"
+.include        "hulls/vars_hull.inc"
 
 .include        "vars_zeropage.asm"
 .include        "text/code_docked_fns.inc"
@@ -47,4 +47,4 @@
 .include        "code_9900.asm"                                         ;$9900
 .include        "sound/code_sound.asm"                                  ;$B4CB
 .include        "sound/data_sound.asm"                                  ;$B72D
-.include        "gfx/hull_data.asm"                                     ;$D000
+.include        "hulls/data_hull.asm"                                   ;$D000

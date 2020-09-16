@@ -7,7 +7,7 @@
 
 .include        "math/math_3d.inc"
 
-.include        "gfx/hull_struct.inc"
+.include        "hulls/vars_hull.inc"
 
 .include        "vars_zeropage.asm"
 .include        "text/code_docked_fns.inc"
@@ -57,5 +57,5 @@
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
-.include        "gfx/hull_data.asm"
+.include        "hulls/data_hull.asm"
 .include        "gfx/gfx_bitmap.asm"

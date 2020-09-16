@@ -3,9 +3,11 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; "hull_struct.inc" -- we cannot export structures, so we need to include
-; this file when we want to refer to the bytes [easily] within hull data
-
+; "vars_hull.asm"
+;
+; we cannot export structures, so we need to include this file
+; when we want to refer to the bytes [easily] within hull data
+;
 ; TODO: use https://6502disassembly.com/a2-elite/meshes.html as a reference
 
 .struct Hull

@@ -3,11 +3,15 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-; NOTE: must be aligned; the printing routine relies on the number of
-; characters per page to calculate which page each character is in
 
 .segment        "GFX_FONT"
+
+; NOTE: must be aligned; the printing routine relies on the number of
+; characters per page to calculate which page each character is in
 .align          $0100
+
+; TODO: if no characters used the 8th row, then we could avoid printing
+;       it entirely, giving us a little speed boost for all text-printing
 
 _0b00:  ;                                                code asc  pet   addr
         ;-----------------------------------------------------------------------
