@@ -305,7 +305,7 @@ _1e35:
         jmp main_roll_pitch
 
 
-_1ec1:                                                                  ;$1EC1
+main_flight_loop:                                                       ;$1EC1
 ;===============================================================================
         ; seed the random-number-generator:
         lda polyobj_00          ; TODO: why this byte?
@@ -1045,7 +1045,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
 
         lda ZP_SHIP_TYPE        ; things we've shot with our laser:
         cmp # HULL_COREOLIS     ; the station!?
-        beq @hostile            ; shot the station, uh oh...
+        beq @angry              ; shot the station, uh oh...
         cmp # HULL_CONSTRICTOR  ; constrictor & cougar (and above)?
         bcc @hit                ; no, skip over
 
@@ -1054,7 +1054,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         ;
         lda ZP_LASER            ; player's laser power
         cmp # 23                ; TODO: confirm and const this!
-        bne @hostile            ; hit!
+        bne @angry              ; hit!
 
         ; divide laser power by 4, making it highly ineffective
         ; against the Constrictor or Cougar
@@ -1115,8 +1115,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
 @_21a1:                                                                 ;$21A1
         sta ZP_POLYOBJ_ENERGY   ; update the ships energy level
 
-@hostile:                                                               ;$21A3
-        lda ZP_SHIP_TYPE
+@angry: lda ZP_SHIP_TYPE                                                ;$21A3
         jsr _36c5               ; make hostile?
 
         ; *** DRAW THE SHIP ON THE SCREEN ***
@@ -1144,7 +1143,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         lda ZP_POLYOBJ_STATE
         bpl @_21e5              ; bit 7 not set?
 
-        and # state::debris
+        and # state::debris     ; TODO: not in the BBC code
         beq @_21e5
 
         ; did we blow up a police ship?
@@ -1181,7 +1180,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         iny                     ; (bounty hi-byte)
         lda [ZP_HULL_ADDR], y   ; read the bounty hi-byte
         tay                     ; put aside hi-byte
-        jsr _7481               ; pay monies
+        jsr give_cash           ; pay monies
 
         ; TODO: GitHub issue #50:
         ;       Display credits earnerd after kill, not total credits
@@ -1190,22 +1189,41 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         lda # TKN_FLIGHT_FN_PLAYER_CASH
         jsr _900d               ; print an in-flight message
 
-        ; clear the ship-slot and shuffle down the rest:
+@clear: ; clear the ship-slot and shuffle down the rest:                ;$21E2
+        ;-----------------------------------------------------------------------
         ; elite relies upon there not being free gaps between ship-instances
         ; for detecting when the last ship-instance is reached
         ;
         ; TODO: since skipping over unused slots is plenty fast enough,
         ;       maybe we could do away with this requirement
         ;
-@clear: jmp _829a                                                       ;$21E2
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; once shuffled down, execution jumps back to `process_ship`,
+        ; so this jump can be considered an end-point of this routine
+        jmp clear_ship_slot
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; in the original code it jumps to another routine that only contains
+        ; a handful of instructions, is not used by any other code, and would
+        ; only function as part of `process_ship` anyway, so we inline it here
+        ; instead
+        ;
+        ldx ZP_PRESERVE_X       ; retrieve current ship-slot
+        jsr _82f3               ; empty it and shuffle ship-instances down
+        ldx ZP_PRESERVE_X       ; retrieve to current ship-slot (next ship)
+        jmp process_ship        ; process next ship (continue loop)
+.endif  ;///////////////////////////////////////////////////////////////////////
 
-@_21e5:                                                                 ;$21E5
-        ;-----------------------------------------------------------------------
-        lda ZP_SHIP_TYPE
-        bmi :+
+        ;
+@_21e5: lda ZP_SHIP_TYPE                                                ;$21E5
+        bmi :+                  ; planet or sun?
+
+        ; out of range
         jsr _87a4
         bcc @clear
 
+        ; process next ship:
+        ;-----------------------------------------------------------------------
         ; update the poly-object's stored state
         ; with the current working state
 :       ldy # PolyObject::state                                         ;$21EE
@@ -1217,7 +1235,8 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         jmp process_ship        ; process the next ship
 
 
-        ;-----------------------------------------------------------------------
+        ; [11]:  
+        ;=======================================================================
 
 _21fa:                                                                  ;$21FA
         lda PLAYER_EBOMB        ; player has energy bomb?

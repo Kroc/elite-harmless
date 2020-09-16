@@ -999,7 +999,7 @@ _6e5d:                                                                  ;$6E5d
         lda VAR_04EC
         sta ZP_VAR_Q
         jsr _74a2
-        jsr _7481               ; pay monies
+        jsr give_cash           ; pay monies
 
         lda # $00
         sta ZP_34
@@ -2071,11 +2071,16 @@ _745a:                                                                  ;$745A
         sta PLAYER_CASH_pt1
         bcs _74a1
 
-_7481:                                                                  ;$7481
+give_cash:                                                              ;$7481
 ;===============================================================================
-; pay monies
-;
-.export _7481
+; give the player cash:
+; 
+; in:   X       cash-value, lo-byte
+;       Y       cash-value, hi-byte
+;-------------------------------------------------------------------------------
+.export give_cash
+
+        ; note that the cash total is a big-endian 4-byte number
         txa 
         clc 
         adc PLAYER_CASH_pt4
@@ -2262,7 +2267,7 @@ _7596:                                                                  ;$7596
 _75a1:                                                                  ;$75A1
         sty ZP_VALUE_pt1        ; (being used as a temp value)
         jsr _7642
-        jsr _7481               ; pay monies
+        jsr give_cash           ; pay monies
         lda ZP_VALUE_pt1        ; (being used as a temp value)
         jsr print_flight_token_and_space
 
@@ -2458,7 +2463,7 @@ _76a1:                                                                  ;$76A1
 :       stx ZP_VAR_Z                                                    ;$76BC
         tya 
         jsr _7642
-        jsr _7481               ; pay monies
+        jsr give_cash           ; pay monies
         ldx ZP_VAR_Z
 _76c7:                                                                  ;$76C7
         lda ZP_TEMP_VAR
@@ -4734,13 +4739,24 @@ _828f:                                                                  ;$828F
         rts 
 
 
-_829a:                                                                  ;$829A
+; NOTE: this routine is inlined in elite-harmless,
+;       see `process_ship`
+;
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
+clear_ship_slot:                                                        ;$829A
 ;===============================================================================
+; empty a ship-instance slot and shuffle down the rest:
+; this is part of `process_ship` and is no use outside of that routine
+;
+;-------------------------------------------------------------------------------
         ldx ZP_PRESERVE_X
         jsr _82f3
         ldx ZP_PRESERVE_X
         jmp process_ship
 
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 _82a4:                                                                  ;$82A4
 ;===============================================================================
@@ -4806,6 +4822,10 @@ _82ed:                                                                  ;$82ED
         beq _82be               ; if zero, check the next ship slot
 
 _82f3:                                                                  ;$82F3
+;===============================================================================
+; remove ship slot?
+;
+;-------------------------------------------------------------------------------
         stx ZP_AD
         lda ZP_MISSILE_TARGET
         cmp ZP_AD
@@ -5180,7 +5200,7 @@ _84e2:                                                                  ;$84E2
 ;
 ; ".TT100 ; Start of Main loop and check messages"
 _84ed:                                                                  ;$84ED
-        jsr _1ec1
+        jsr main_flight_loop
 
         dec OSD_DELAY           ; "reduce delay?"
         beq _8475               ; "if 0 erase message, up"
@@ -5861,10 +5881,10 @@ _87fd:                                                                  ;$87FD
         jsr _8ed5               ; clears 56 key-states, not 64
 
         sta ZP_PLAYER_SPEED
-        jsr _1ec1
+        jsr main_flight_loop
         jsr disable_sprites
 _8851:                                                                  ;$8851
-        jsr _1ec1
+        jsr main_flight_loop
         dec LASER_COUNTER
         bne _8851
         ldx # $1f

@@ -8,22 +8,6 @@
 
 ; TODO: use https://6502disassembly.com/a2-elite/meshes.html as a reference
 
-.macro  .scoop_debris   scoop, debris
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ; the scoop-data in a hull definition provides which cargo type it
-        ; gives when scooped, already decremented by 1 to account for the
-        ; non-zero check used when scooping. a side-effect of this is that
-        ; it's not possible for a hull definition to drop food or textiles(?)
-.if     (scoop = 0)
-        ; when the scoop type is zero, it really means zero
-        .byte   .nybl( $0, debris )
-.else
-        ; anything else is a type of cargo
-        .byte   .nybl( scoop-1, debris )
-.endif
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
-
 .struct Hull
         ;=======================================================================
         scoop_debris    .byte   ; nybbles; hi = scoop, lo = debris      ;+$00

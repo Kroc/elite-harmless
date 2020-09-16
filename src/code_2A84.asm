@@ -27,8 +27,9 @@ polyobj_addrs_hi := polyobj_addrs + 1
         .word   polyobj_09
         .word   polyobj_10
         
-;===============================================================================
 
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
 ; unused / unreferenced?
 ;$28BA:
 
@@ -50,6 +51,9 @@ polyobj_addrs_hi := polyobj_addrs + 1
         .byte   %00110000       ;=$30
         .byte   %00001100       ;=$0C
         .byte   %00000011       ;=$03
+
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 _28c8:  ; pixel pairs, in single step (for drawing dust)                ;$28C8
         .byte   %11000000       ;=$C0
@@ -4043,9 +4047,9 @@ _3daf:                                                                  ;$3DAF
         lsr MISSION_FLAGS
         asl MISSION_FLAGS
         
-        ldx # $50
-        ldy # $c3
-        jsr _7481               ; pay monies
+        ldx # < 50000
+        ldy # > 50000
+        jsr give_cash           ; pay monies
         
 .import MSG_DOCKED_CONGRATULATIONS:direct
         lda # MSG_DOCKED_CONGRATULATIONS
