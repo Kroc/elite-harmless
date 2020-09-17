@@ -7,7 +7,7 @@
 
 .include        "math/math_3d.inc"
 
-.include        "hulls/vars_hull.inc"
+.include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
 .include        "text/code_docked_fns.inc"
@@ -37,7 +37,7 @@
 ;-------------------------------------------------------------------------------
 .include        "code_1D81.asm"
 .include        "text/code_docked.asm"
-.include        "code_2A84.asm"
+.include        "code_28ba.asm"
 
 .include        "save_data.asm"
 .include        "gfx/gfx_sprites.asm"
@@ -57,5 +57,5 @@
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
-.include        "hulls/data_hull.asm"
+.include        "hulls/data_hulls.asm"
 .include        "gfx/gfx_bitmap.asm"

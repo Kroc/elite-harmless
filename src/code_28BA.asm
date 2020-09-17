@@ -3,30 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 ; NOTE: the segment that this code belongs to will be set by the including
-;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
-
-polyobj_addrs:                                                          ;$28A4
-;===============================================================================
-; a total of 11 3D-objects ("poly-objects") can be 'in-play' at a time,
-; each object has a block of runtime storage to keep track of its current
-; state including rotation, speed, shield etc. this is a lookup-table of
-; addresses for each poly-object slot
-;
-polyobj_addrs_lo := polyobj_addrs
-polyobj_addrs_hi := polyobj_addrs + 1
-
-        .word   polyobj_00
-        .word   polyobj_01
-        .word   polyobj_02
-        .word   polyobj_03
-        .word   polyobj_04
-        .word   polyobj_05
-        .word   polyobj_06
-        .word   polyobj_07
-        .word   polyobj_08
-        .word   polyobj_09
-        .word   polyobj_10
-        
+;       file, e.g. "elite-original.asm" / "elite-harmless.asm"      
 
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////

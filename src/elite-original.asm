@@ -8,7 +8,7 @@
 .include        "math/math_3d.inc"
 .include        "math/math_data.asm"
 
-.include        "hulls/vars_hull.inc"
+.include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
 .include        "text/code_docked_fns.inc"
@@ -31,9 +31,9 @@
 .include        "text/code_docked.asm"                                  ;$2372
 .include        "save_data.asm"                                         ;$25A6
 
-.segment        "CODE_28A4"
+.segment        "CODE_28BA"
 ;-------------------------------------------------------------------------------
-.include        "code_2A84.asm"                                         ;$2A84
+.include        "code_28ba.asm"                                         ;$2ABA
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
 
 .segment        "CODE_6A00"
@@ -47,4 +47,4 @@
 .include        "code_9900.asm"                                         ;$9900
 .include        "sound/code_sound.asm"                                  ;$B4CB
 .include        "sound/data_sound.asm"                                  ;$B72D
-.include        "hulls/data_hull.asm"                                   ;$D000
+.include        "hulls/data_hulls.asm"                                  ;$D000
