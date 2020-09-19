@@ -235,7 +235,8 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos( 18, 0 )
 ;///////////////////////////////////////////////////////////////////////////////
 .segment        "HUD_COLORSCR"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-; `proc` is used so that `.sizeof( hud_screenram_copy )` is available
+; NOTE: `proc` is used so that `.sizeof( hud_screenram_copy )` is available
+;
 .proc   hud_screenram_copy                                              ;$783A
 
         ; include the screen RAM data (for the HUD) from the Koala file
@@ -261,7 +262,8 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos( 18, 0 )
 ;
 .segment        "GFX_COLORRAM"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-; `proc` is used so that `.sizeof( gfx_colorram_init )` is available
+; NOTE: `proc` is used so that `.sizeof( gfx_colorram_init )` is available
+;
 .proc   gfx_colorram_init                                               ;$795A
 
 .ifdef  OPTION_ORIGINAL
@@ -426,13 +428,13 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
 
 ; write out separate tables for lo-address / hi-address:
 ;
-.segment        "TABLE_BITMAP_LO"
+.segment        "BITMAP_ADDR_LO"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 row_to_bitmap_lo:                                                       ;$9700
 ;===============================================================================
         .lobytes _rowtobmp
 
-.segment        "TABLE_BITMAP_HI"
+.segment        "BITMAP_ADDR_HI"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 row_to_bitmap_hi:                                                       ;$9800
 ;===============================================================================

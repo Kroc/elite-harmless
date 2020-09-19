@@ -3182,8 +3182,8 @@ _b189:                                                                  ;$B189
         ;-----------------------------------------------------------------------
 
         ; line-wrap?
-        ; SPEED: this causes the character address to
-        ;        have to be recalculated again!
+        ; TODO: this causes the character address to
+        ;       have to be recalculated again!
         lda ZP_CURSOR_COL
         cmp # 31                ; max width of line? (32 chars = 256 px)
         bcs @b195               ; reach the end of the line, carriage-return!
@@ -3195,8 +3195,8 @@ _b189:                                                                  ;$B189
         cmp # 24
         bcc :+
 
-        ; SPEED: just copy that code here, or change the branch above to go
-        ;        to `_b16e` and favour falling through for the majority case
+        ; TODO: just copy that code here, or change the branch above to go
+        ;       to `_b16e` and favour falling through for the majority case
         jmp _b16e
 
         ;-----------------------------------------------------------------------
@@ -3204,7 +3204,7 @@ _b189:                                                                  ;$B189
         ; calculate the size of the offset needed for bitmap rows
         ; (320 bytes each). note that A is the current `chrout` row
 
-        ; SPEED: this whole thing could seriously do with a lookup table
+        ; TODO: this whole thing could seriously do with a lookup table
 
         ; divide into 64?
 :       lsr                                                             ;$B1C5
@@ -3241,6 +3241,7 @@ _b189:                                                                  ;$B189
         ; go back 256 pixels??
         dec ZP_CHROUT_DRAWADDR_HI
 
+        ; TODO: erase 8-bytes????
         ldy # $f8
         jsr erase_page_to_end
         beq _b210
@@ -3252,7 +3253,7 @@ _b189:                                                                  ;$B189
         sta ZP_TEMP_ADDR_HI
 
         ; paint the character (8-bytes) to the screen
-        ; SPEED: this could be unrolled
+        ; TODO: this could be unrolled
 
         ldy # 7
 :       lda [ZP_CHROUT_CHARADDR], y                                     ;$B1F4

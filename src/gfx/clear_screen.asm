@@ -217,6 +217,7 @@ _b335:
 
         rts
 
+
 hide_all_ships:
 ;===============================================================================
 ; appears to make all entities invisible to the radar scanner?
