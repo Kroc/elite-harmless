@@ -7,6 +7,9 @@
 ; clear the screen entirely. the HUD will be drawn or erased according to the
 ; current screen (main / menu) so this handles the transition between the two
 ;
+.segment        "CLEAR_SCREEN"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 clear_screen:
 ;===============================================================================
 ; improved screen-clearing code for elite-harmless:

@@ -3287,16 +3287,10 @@ _b210:  ; restore registers before returning                            ;$B210
         rts 
 
 ;===============================================================================
-; routine(s) for clearing the screen, i.e. when changing screen pages between
-; flight screen and menu screens. clears or redraws the HUD accordingly
-;
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        .include        "orig/clear_screen.asm"                         ;$B21A
-.else   ;///////////////////////////////////////////////////////////////////////
-        .include        "gfx/clear_screen.asm"
-.endif  ;///////////////////////////////////////////////////////////////////////
+; NOTE: the original code inserts "orig/clear_screen.asm" here
 
+.segment        "CODE_B3D4"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 tkn_docked_fn15:                                                        ;$B3D4
 ;===============================================================================

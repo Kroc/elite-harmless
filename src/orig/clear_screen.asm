@@ -7,6 +7,9 @@
 ; clear the screen entirely. the HUD will be drawn or erased according to the
 ; current screen (main / menu) so this handles the transition between the two
 ;
+.segment        "CLEAR_SCREEN"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 clear_screen:                                                           ;$B21A
 ;===============================================================================
         ; reset the colour-map (the colour-nybbles held in the text screen)
