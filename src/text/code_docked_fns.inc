@@ -1,11 +1,12 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
-; "code_docked_fns.inc" -- a series of in-string functions, assigned to the
-; first 32 "docked" string tokens. these are stored as macros in this file
-; because their physical location in the original code is all over the place
+;
+; "code_docked_fns.inc":
+;
+; a series of in-string functions, assigned to the first 32 "docked" string
+; tokens. these are stored as macros in this file because their physical
+; location in the original code is all over the place
 
 .macro  .tkn_docked_caps
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

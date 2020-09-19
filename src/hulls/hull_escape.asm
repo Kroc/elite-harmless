@@ -5,7 +5,7 @@
 ; escape capsule
 ;-------------------------------------------------------------------------------
 hull_index              .set hull_index + 1
-HULL_ESCAPE             := hull_index                                   ;=$03
+HULL_ESCAPE             = hull_index                                    ;=$03
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point

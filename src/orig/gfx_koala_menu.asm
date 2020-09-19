@@ -1,7 +1,8 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
+;
+; "gfx_koala_menu.asm"
 ;
 ; this file can be used to assemble a Koala-painter image file,
 ; containing Elite's default menu screen (no HUD)

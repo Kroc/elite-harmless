@@ -3,14 +3,12 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
 ; "draw_lines.asm":
-; code for drawing lines
-;
-; line-drawing data:
-;-------------------------------------------------------------------------------
-; for drawing vertical lines, this is a pixel mask
-; for each particular column in a character cell
-;
+
 _ab31:                                                                  ;$AB31
+;===============================================================================
+; for drawing vertical lines, these are pixel masks
+; for each particular column in a character cell
+;-------------------------------------------------------------------------------
         .byte   %10000000
         .byte   %01000000
         .byte   %00100000

@@ -2,7 +2,7 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; text_flight.asm
+; "text_flight.asm":
 ;
 ; this file stores the more common strings, typically used when in 'flight'
 ; mode, but this also includes some of the shared menu screens that can be

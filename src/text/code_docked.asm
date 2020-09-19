@@ -1,12 +1,15 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
+;
+; "code_docked.asm":
 
+;===============================================================================
 ; insert these docked token functions from "code_docked_fns.asm"
 ;
 .tkn_docked_fn_theirName                                                ;$2372
 .tkn_docked_fn_protoGalaxy                                              ;$2376
+
 
 _237e:                                                                  ;$237E
 ;===============================================================================

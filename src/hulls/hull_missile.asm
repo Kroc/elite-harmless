@@ -5,7 +5,7 @@
 ; missile
 ;-------------------------------------------------------------------------------
 hull_index              .set hull_index + 1
-HULL_MISSILE            := hull_index                                   ;=$01
+HULL_MISSILE            = hull_index                                    ;=$01
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point

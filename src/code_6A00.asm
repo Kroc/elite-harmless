@@ -1,20 +1,23 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
+;
+; "code_6A00.asm":
+;
+; NOTE: the segment that this code belongs to will be set by the including
+;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
+;
 .linecont+
 
 ; yes, I am aware that ca65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
-
+;
 ; from "text_flight.asm"
 .import _0700:absolute
 ; from "text_pairs.asm"
 .import TKN_FLIGHT_pair1:absolute
 .import TKN_FLIGHT_pair2:absolute
 
-; NOTE: the segment that this code belongs to will be set by the including
-;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
 
 check_cargo_capacity_add1:                                              ;$6A00
 ;===============================================================================
@@ -52,6 +55,8 @@ check_cargo_capacity:                                                   ;$6A05
 
 .ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
+        ; Elite Facts!®
+        ;
         ; have you ever wondered what a Trumble™ weighs? we count 1 tonne
         ; (1000 Kg) for every 256 Tumbles™, disregarding any remainder, so
         ; anywhere between 256 to 511 Trumbles™ weigh 1 tonne. one Trumble™

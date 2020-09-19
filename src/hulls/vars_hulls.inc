@@ -1,9 +1,8 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
-; "vars_hull.asm"
+;
+; "vars_hulls.asm":
 ;
 ; we cannot export structures, so we need to include this file
 ; when we want to refer to the bytes [easily] within hull data

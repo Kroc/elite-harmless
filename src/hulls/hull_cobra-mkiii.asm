@@ -5,7 +5,7 @@
 ; cobra mk-III
 ;-------------------------------------------------------------------------------
 hull_index              .set hull_index + 1
-HULL_COBRAMK3           := hull_index                                   ;=$0B
+HULL_COBRAMK3           = hull_index                                    ;=$0B
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point

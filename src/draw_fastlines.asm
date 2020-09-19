@@ -1,13 +1,14 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-.linecont+
-
-; a new line-drawing routine by Dyme! formatted and lightly modified by Kroc.
-; requires illegal opcodes:
 ;
-.ifndef  USE_ILLEGAL_OPS
+; "draw_fastlines.asm":
+;
+; a new line-drawing routine by Dyme! formatted and lightly
+; modified by Kroc. requires illegal opcodes
+;
+.linecont+
+.ifndef USE_ILLEGAL_OPS
         .fatal .concat( \
                 "please enable the extended 6510 instruction set for the ", \
                 "fastlines option (option: --cpu 6502X)" \

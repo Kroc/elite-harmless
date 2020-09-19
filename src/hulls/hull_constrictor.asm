@@ -5,7 +5,7 @@
 ; constrictor
 ;-------------------------------------------------------------------------------
 hull_index              .set hull_index + 1
-HULL_CONSTRICTOR        := hull_index                                   ;=$1F
+HULL_CONSTRICTOR        = hull_index                                    ;=$1F
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point

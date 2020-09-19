@@ -1,7 +1,12 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
+; 
+; "elite.inc":
+;
+; this is the main include file for common definitions for Elite, that is,
+; constants, macros and the like that do not immediately output bytes
+;
 .linecont+
 
 .ifdef      FEATURE_AUDIO
@@ -17,9 +22,6 @@
 ;;      .out  "fast-lines enabled"
 .endif
 
-;===============================================================================
-; this is the main include file for common definitions for Elite, that is,
-; constants, macros and the like that do not immediately output bytes
 
 .include        "c64/c64.inc"           ; define C64 constants
 .include        "text/text.inc"         ; text/string constants

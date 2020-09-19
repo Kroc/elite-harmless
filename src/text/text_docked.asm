@@ -2,7 +2,7 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; text_docked.asm
+; "text_docked.asm":
 ;
 ; this file stores the strings typically used when docked (as well as the title
 ; screen), but also the planet descriptions as those are highly complex and

@@ -5,7 +5,7 @@
 ; moray
 ;-------------------------------------------------------------------------------
 hull_index              .set hull_index + 1
-HULL_MORAY              := hull_index                                   ;=$1C
+HULL_MORAY              = hull_index                                    ;=$1C
 
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
