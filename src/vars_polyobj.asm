@@ -102,7 +102,7 @@
 ; in the original game, this is $F900
 ;
 .segment        "POLYOBJS"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 polyobjects:                                                            ;$F900
 ;===============================================================================
 polyobj_00:      .tag    PolyObject                                     ;$F900
@@ -121,7 +121,7 @@ POLYOBJ_COUNT   = 11
 
 
 .segment        "SHIP_ADDRS"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 polyobj_addrs:                                                          ;$28A4
 ;===============================================================================
 ; a total of 11 3D-objects ("poly-objects") can be 'in-play' at a time,
@@ -132,17 +132,17 @@ polyobj_addrs:                                                          ;$28A4
 polyobj_addrs_lo := polyobj_addrs
 polyobj_addrs_hi := polyobj_addrs + 1
 
-        .word   polyobj_00
-        .word   polyobj_01
-        .word   polyobj_02
-        .word   polyobj_03
-        .word   polyobj_04
-        .word   polyobj_05
-        .word   polyobj_06
-        .word   polyobj_07
-        .word   polyobj_08
-        .word   polyobj_09
-        .word   polyobj_10
+        .addr   polyobj_00
+        .addr   polyobj_01
+        .addr   polyobj_02
+        .addr   polyobj_03
+        .addr   polyobj_04
+        .addr   polyobj_05
+        .addr   polyobj_06
+        .addr   polyobj_07
+        .addr   polyobj_08
+        .addr   polyobj_09
+        .addr   polyobj_10
 
 
 .macro  .polybj_to_zp

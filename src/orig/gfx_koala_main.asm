@@ -19,7 +19,7 @@
 ; are often recognised by this header, so for compatibility with
 ; image editors, we stick to $6000
 ;
-        .word   $6000
+        .addr   $6000
 
 ; bitmap data                                                     original-addr
 ;===============================================================================

@@ -1,27 +1,27 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "stage3.asm":
+;
 ; this file is part of "gma3.prg",
 ; it contains the copy-protection routines
-
+;
 .include        "c64/c64.inc"
 
 ; populate the .PRG header using the address given
 ; by the linker config (see "link/elite-original-gma86.cfg")
 .segment        "HEAD_STAGE3"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .import         __GMA3_PRG_START__
         .addr   __GMA3_PRG_START__+2
-
-;===============================================================================
 
 ; 4 unused (by the Kernal) bytes exist at $FB-$FE
 ZP_C1541_MEM            := $fb
 ZP_C1541_PROGRAM        := $fd
 
 .segment        "CODE_STAGE3"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 _c800:                                                                  ;$C800
         ; save a pointer for a memory address inside the drive
         lda #< C1541_BUFF0

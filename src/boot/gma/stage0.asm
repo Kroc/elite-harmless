@@ -1,25 +1,27 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
-.include        "c64/c64.inc"
-
+;
+; "stage0.asm":
+;
 ; this file is the code for "firebird.prg", the first stage in loading, it's
 ; what gets loaded by the normal C64 KERNAL. the program is designed to hijack
 ; BASIC via the BASIC vectors located at $0300+, this means that the program
 ; starts automatically without a BASIC bootstrap or `RUN`
-
+;
 ; interesting tidbit: the `,1` in `LOAD"*",8,1` tells the C64 to use the
 ; load address given by the program, in this case $02A7. if the user uses
 ; `LOAD"*",8` instead, the program will be placed in the BASIC area -- $0801
 ; onwards -- which obviously breaks this program's attempt at hijacking the
 ; BASIC vectors. a BASIC bootstrap picks up this scenario and copies the
 ; program to the intended load address before executing it
+;
+.include        "c64/c64.inc"
 
 ; populate the .PRG header using the address given
 ; by the linker config (see "link/elite-original-gma86.cfg")
 .segment        "HEAD_STAGE0"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .import         __FIREBIRD_PRG_START__
         .addr   __FIREBIRD_PRG_START__+2
 
@@ -28,7 +30,7 @@
 ; the linker configuration handles this ("link/elite-original-gma86.cfg")
 
 .segment        "BASIC_STAGE0"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         ; the C64 BASIC binary format is described here:
         ; <https://www.c64-wiki.com/wiki/BASIC_token> 
 
@@ -86,14 +88,15 @@
 
         jmp start
 
-;===============================================================================
 
 .segment        "CODE_STAGE0"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 filename:                                                               ;$02c1
+        ;-----------------------------------------------------------------------
         .byte   "gm*"           ; $47, $4D, $2A (PETSCII)
 
 start:                                                                  ;$02c1
+        ;-----------------------------------------------------------------------
         ; call Kernel SETMSG, "Set system error display switch at
         ; memory address $009D". A = the switch value.
         ; i.e. disable error messages?
@@ -135,10 +138,9 @@ start:                                                                  ;$02c1
 
         jmp __CODE_STAGE1A_LOAD__
 
-;===============================================================================
 
 .segment        "BASIC_VECTORS"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; these are various vectors for BASIC -- the loader hijacks these to cause
 ; the loader to start immediately without the need for a BASIC bootstrap
 

@@ -1,8 +1,9 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "clear_screen.asm":
+;
 ; clear the screen entirely. the HUD will be drawn or erased according to the
 ; current screen (main / menu) so this handles the transition between the two
 ;

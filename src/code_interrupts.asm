@@ -1,8 +1,9 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "code_interrupts.asm":
+;
 ; this table contains the state-switches for the raster-splits, that is, what
 ; properties of the VIC-II to change at the first split (bitmap line 1), then
 ; the second split (bitmap line 145), the HUD. for example, the top-border on
@@ -524,15 +525,15 @@ init_mem:                                                               ;$AAB2
 
         ; non-maskable interrupt:
         lda #< nmi_null
-        sta HW_VECTOR_NMI+0
+        sta CPU_VECTOR_NMI+0
         lda #> nmi_null
-        sta HW_VECTOR_NMI+1
+        sta CPU_VECTOR_NMI+1
 
         ; regular interrupt:
         lda #> interrupt
-        sta HW_VECTOR_IRQ+1
+        sta CPU_VECTOR_IRQ+1
         lda #< interrupt
-        sta HW_VECTOR_IRQ+0
+        sta CPU_VECTOR_IRQ+0
 
         cli                     ; enable interrupts
         rts 

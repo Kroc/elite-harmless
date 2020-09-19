@@ -2,9 +2,9 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-
-; "gma5.prg"
-
+;
+; "stage5.asm":
+;
 ; $1D00 +--------+
 ;       |  VARS  |    variable / scratch space used by Elite
 ; $1D22 |--------|
@@ -18,22 +18,24 @@
 ; this is the entry point, jumped to by the stage 1 loader
 .export _1d22
 
-.import init_mem:absolute
-.import _8863:absolute
 
+.segment        "HEAD_STAGE5"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; populate the .PRG header using the address given
 ; by the linker config (see "link/elite-original-gma86.cfg")
-.segment        "HEAD_STAGE5"
+;
 .import         __GMA5_PRG_START__
         .addr   __GMA5_PRG_START__+2
 
-;-------------------------------------------------------------------------------
 
 .segment        "CODE_GMA5"
-
-        ; another bloody decryption routine
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .import ELITE_ZP_SHADOW
+.import init_mem:absolute
+.import _8863:absolute
 
+; another bloody decryption routine
+;
 _1d22:                                                                  ;$1D22
         cld                     ; clear decimal mode (why?)
 
@@ -117,11 +119,8 @@ _1d7d:                                                                  ;$1D7D
 _1d81:                                                                  ;$1D81
 .export _1d81
 
-;$3ED5
-
-;===============================================================================
 
 .segment        "JUNK_GMA5"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         ; trailing, un-ecrypted bytes
-        .byte   $00, $ff, $00
+        .byte   $00, $ff, $00                                           ;$3ED5

@@ -1,13 +1,16 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-; this file defines the 3D vector models of the various
-; ships / objects in the game
+;
+; "data_hulls.asm":
+;
+; this file defines the 3D vector models
+; of the various ships / objects in the game
 ;
 ; this file was produced with the help of nc513 on the lemon64 forums,
 ; and Andy McFadden's Apple ][ Elite disassembly:
 ; <https://6502disassembly.com/a2-elite>
+
 
 .macro  .scoop_debris   scoop, debris
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -27,7 +30,7 @@
 
 
 .segment        "HULL_TABLE"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; we will enumerate hulls as we define them; each needs an index number that
 ; will be used in the code to refer to them, in the order they are added to
 ; this table
@@ -43,21 +46,21 @@ hull_pointers:                                                          ;$D000
         ;
 
 .segment        "HULL_TYPE"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 hull_type:                                                              ;$D042
         ;-----------------------------------------------------------------------
         ; see includes below...
         ;
 
 .segment        "HULL_KILL_LO"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 hull_kill_lo:                                                           ;$D063
         ;-----------------------------------------------------------------------
         ; see includes below...
         ;
 
 .segment        "HULL_KILL_HI"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 hull_kill_hi:                                                           ;$D084
         ;-----------------------------------------------------------------------
         ; see includes below...

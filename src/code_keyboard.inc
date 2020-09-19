@@ -1,12 +1,12 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-.linecont+
-
+;
+; "code_keyboard.inc":
+;
 ; pieces of code relating to reading the hardware keyboard:
 ; (not key processing, which is handled throughout the code)
-;-------------------------------------------------------------------------------
+;
 ; the C64 keyboard is an extremely simple piece of hardware; it has no
 ; "intelligence" to speak of, being literally a long series of PCB traces
 ; that connect CIA1's two ports together via a loop around the columns and rows
@@ -70,9 +70,7 @@
 ; this chart adapted from:
 ; <http://codebase64.org/doku.php?id=base:reading_the_keyboard> 
 ;
-
-.define .key_index(key_addr) \
-        (key_addr - key_states)
+.define .key_index( key_addr ) (key_addr - key_states)
 
 .macro  .key_states
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

@@ -1,17 +1,18 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
-; "c1541.inc" -- definitions for working with the Commodore 1541 disk-drive
+;
+; "c1541.inc":
+;
+; definitions for working with the Commodore 1541 disk-drive
 ;
 ; the 1541 is a self-contained computer with its own 6502 processor, 2 KB RAM
 ; and 16 KB ROM. commands can be sent to it over the serial bus but it's also
 ; possible to execute custom code within the 1541; this is typically used to
 ; implement fast-loaders and copy-protection schemes
 ;
-; a lot of reference material was used to piece this together; including,
-; but not limited to:
+; a lot of reference material was used to piece this together;
+; including, but not limited to:
 ;
 ; "All About Your 1541" by Ninja/The Dreams
 ; http://unusedino.de/ec64/technical/aay/c1541/

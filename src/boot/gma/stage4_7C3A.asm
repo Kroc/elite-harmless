@@ -1,11 +1,12 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "stage4_7C3A.asm":
+;
 ; this data is part of the GMA4 2nd payload, but appears unreferenced.
 ; it gets overwritten by the game's code at $6A00..
-
+;
 .segment        "DATA_7C3A"
 
         ; some data that comes after the sprites (in GMA4), but isn't sprites.

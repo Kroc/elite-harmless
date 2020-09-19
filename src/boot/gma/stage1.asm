@@ -1,26 +1,26 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
-; "stage1.asm" -- this could be considered the 'main' part of the loading
-; process as it displays the fastload option and orchestrates the loading /
+;
+; "stage1.asm":
+;
+; this could be considered the 'main' part of the loading process
+; as it displays the fastload option and orchestrates the loading /
 ; decryption of the other modules
-
+;
 .include        "elite.inc"
 
-;===============================================================================
 ; populate the "GMA1.PRG" header using the address given
 ; by the linker config (see "link/elite-original-gma86.cfg")
-
+;
 .segment        "HEAD_STAGE1"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .import         __GMA1_PRG_START__
         .addr   __GMA1_PRG_START__+2
 
-;===============================================================================
 
 .segment        "CODE_STAGE1A"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; eight bytes of unused (by the KERNAL) RAM exist at $0334, followed by
 ; the 192 byte Datasette buffer (no use to us here), another 4 unused bytes
 ; and then the text screen. since the text screen gets moved to $0800,
@@ -67,20 +67,21 @@ gma1_start:                                                             ;$0345
         jsr _03b5
 
 .ifdef  OPTION_NOCOPY
+        ;///////////////////////////////////////////////////////////////////////
         ; start GMA3's code -- note that the current X & Y
         ; (pointer to filename) are re-used in here
         jsr _c800
-.else
+.else   ;///////////////////////////////////////////////////////////////////////
         ; "crack" the loader by jumping over the copy-protection check
         jmp :+
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; is the value at $02 exactly $97?
         ; (i.e. the result of copy-protection check?)
         lda $02
         eor # $97
         beq :+                  ; skip ahead if [$02] = $97
-        jmp [HW_VECTOR_RESET]   ; hard reset!
+        jmp [CPU_VECTOR_RESET]  ; hard reset!
 
         ; * * * * * *
 
@@ -222,11 +223,11 @@ _03fc:
         
         rts 
 
-;===============================================================================
-; "it belongs in a 1541!"
 
 .segment        "CODE_1541"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; "it belongs in a 1541!"
+;
 read_sector:                                            ;C64:$0403, 1541:$0300
         ;=======================================================================
         ; reads a sector from the disk; this is 324 GCR-encoded bytes
@@ -423,10 +424,9 @@ lda_sector:
 
 :       jmp $d048               ; re-read BAM!??                        ;$04CE
 
-;===============================================================================
 
 .segment        "CODE_STAGE1B"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 _04d1:
         lda $a4                         ; get buffered byte
         sta CIA2_PORTA                  ; write it to the serial port

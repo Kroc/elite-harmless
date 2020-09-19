@@ -8,10 +8,10 @@
 ; we need to know this as portions of the HUD are redrawn during gameplay
 HUD_COLOUR              = YELLOW
 
-; the game's default viewport/HUD data is stored in "gfx_koala_main.asm",
-; and during the build process, this is assembled into a Koala Painter
-; image file "build/bitmap_main.koa" -- the bytes that will go into the
-; game are extracted from that image file here
+; the game's default viewport/HUD data is stored in "orig/gfx_koala_main.asm".
+; during the build process, this is assembled into a Koala Painter image file
+; "build/screen_main.koa" -- the bytes that will go into the game are extracted
+; from that image file here
 
 .macro  .koala_bitmap   file, row, col, chars
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -65,11 +65,11 @@ HUD_COLOUR              = YELLOW
 .endmacro
 
 ; bitmap screen:
-;===============================================================================
-; reserve the bitmap screen in the C64 memory map
 ;
 .segment        "VIC_BITMAP"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; reserve the bitmap screen in the C64 memory map:
+;
 ; in the original game, the bitmap screen is constructed by code and the bitmap
 ; area is instead used as packing space for initialisation. in elite-harmless
 ; we store a pre-constructed bitmap screen in the binary, doing away with
@@ -105,7 +105,7 @@ HUD_COLOUR              = YELLOW
 ; screens are in RAM, we only have to reserve their bytes here
 ;
 .segment        "VIC_SCR_MAIN"
-;-------------------------------------------------------------------------------
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .ifndef OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; in elite-harmless we include the screen RAM, as it will be used,
@@ -118,7 +118,7 @@ HUD_COLOUR              = YELLOW
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 .segment        "VIC_SCR_MENU"
-;-------------------------------------------------------------------------------
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .ifndef OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; include the entire default menu screen RAM
@@ -129,13 +129,13 @@ HUD_COLOUR              = YELLOW
 
 
 ; HUD backup:
-;===============================================================================
+;
 ; this is the multi-colour bitmap data for the HUD. note that this is the
 ; copy of the HUD kept in RAM for restoring a fresh copy of the HUD when
 ; refreshing the screen, not the HUD as it exists on the bitmap screen
 ;
 .segment        "HUD_COPY"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; in what is probably one of the most egregious cases of wasted CPU time and
 ; space in Elite C64, the backup HUD bitmap actually contains all the blank
 ; space on the left and right from where the C64's screen is 320px wide,
@@ -229,12 +229,12 @@ HUD_COLOUR              = YELLOW
 ; including the screens pre-filled in the binary, so this temporary copy is not
 ; needed
 ;
-ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
+ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos( 18, 0 )
 
 .ifdef  OPTION_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 .segment        "HUD_COLORSCR"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; `proc` is used so that `.sizeof( hud_screenram_copy )` is available
 .proc   hud_screenram_copy                                              ;$783A
 
@@ -260,7 +260,7 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos(18, 0)
 ; in elite-harmless the whole colour RAM is stored
 ;
 .segment        "GFX_COLORRAM"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; `proc` is used so that `.sizeof( gfx_colorram_init )` is available
 .proc   gfx_colorram_init                                               ;$795A
 
@@ -427,13 +427,13 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
 ; write out separate tables for lo-address / hi-address:
 ;
 .segment        "TABLE_BITMAP_LO"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 row_to_bitmap_lo:                                                       ;$9700
-;-------------------------------------------------------------------------------
+;===============================================================================
         .lobytes _rowtobmp
 
 .segment        "TABLE_BITMAP_HI"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 row_to_bitmap_hi:                                                       ;$9800
-;-------------------------------------------------------------------------------
+;===============================================================================
         .hibytes _rowtobmp

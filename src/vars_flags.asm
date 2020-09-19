@@ -1,12 +1,13 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "vars_flags.asm":
+;
 ; user preferences & some runtime flags
-
+;
 .segment        "VARS_FLAGS"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 _1d00:  ; nothing appears to actually reference $1D00 itself            ;$1D00
         .byte   $00
 _1d01:

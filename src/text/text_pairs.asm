@@ -11,7 +11,7 @@
 .include        "text.inc"
 
 .segment        "TEXT_PAIRS"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 index_docked    .set    $d7     ; pair tokens for docked-text begin at $D7
 index_flight    .set    $80     ; pair tokens for flight-text begin at $80
 

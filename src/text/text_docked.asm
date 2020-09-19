@@ -71,7 +71,7 @@ _tkn_index       .set 0
 
 
 .segment "TEXT_TOKENS"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; 32 of the docked tokens are functions called when the token is encountered
 ; in a string. this segment defines a look-up table of which function to call
 ; for each token (once descrambled)
@@ -275,7 +275,7 @@ _tkn_index      .set $20
 
 
 .segment        "TEXT_PDESC"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; docked tokens $5B...$80 (unscrambled) are re-routed through this table:
 ; $5B is subtracted so that a docked token of $5B will read the first entry
 ; in this table, and the value is re-used as a new *message* index to print
@@ -673,7 +673,7 @@ AN      = .scramble( tkn_docked_an )                                    ;=$A8
 
 
 .segment        "TEXT_DOCKED"
-;===============================================================================
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 _msg_index     .set 0
 
 .macro  .msg_alias      msg_id

@@ -1,8 +1,9 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "code_9900.asm":
+;
 ; NOTE: the segment that this code belongs to will be set by the including
 ;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
 

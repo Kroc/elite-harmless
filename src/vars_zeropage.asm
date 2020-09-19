@@ -9,9 +9,11 @@
 ; note that $00 & $01 are hard-wired to the CPU, so cannot be used
 
 .segment        "ZP_SHADOW"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .res            $0100
 
-;-------------------------------------------------------------------------------
+.zeropage
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ; "goat soup" is the algorithm for generating planet descriptions.
 ; its seed is taken from the last four bytes of the main seed 

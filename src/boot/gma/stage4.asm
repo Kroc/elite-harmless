@@ -1,8 +1,9 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "stage4.asm":
+;
 ; the stage-4 loader ("GMA4.PRG") consists of two large blocks of scrambled
 ; code/data with the decryption routine wedged between. after decryption, most
 ; of this data is relocated in RAM, which is why DATA1 is split into A/B parts
@@ -32,28 +33,30 @@
 ;
 ;   $7e, $56, $24, $03, $63, $cb, $14, ...
 
-;===============================================================================
-; populate the .PRG header using the address given by the linker config
-; (see "link/elite-original-gma86.cfg")
 
 .segment        "HEAD_STAGE4"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; populate the .PRG header using the address given by the linker config
+; (see "link/elite-original-gma86.cfg")
+;
 .import         __GMA4_PRG_START__
         .addr   __GMA4_PRG_START__+2
 
-;===============================================================================
-; after the DATA1 block follow some unused junk bytes. these are not encrypted,
-; which is why they must be in their own segement
 
 .segment        "GMA4_JUNK1"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; after the DATA1 block follow some unused junk bytes. these are not encrypted,
+; which is why they must be in their own segement
+;
 .export         __GMA4_JUNK1__:absolute = 1
 
         .byte   $4c, $85, $01                                           ;$7590
 
-;===============================================================================
-; now begin the decryption routine
 
 .segment        "CODE_STAGE4"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; now begin the decryption routine
+;
 _7593:                                                                  ;$7593
         .byte   $20, $34, $01
 
@@ -147,11 +150,12 @@ decrypt_byte:                                                           ;$75C8
         rts
 .endproc
 
-;===============================================================================
-; after the DATA2 block follow some unused junk bytes. these are not encrypted,
-; which is why they must be in their own segement
 
 .segment        "GMA4_JUNK2"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; after the DATA2 block follows some unused junk bytes.
+; these are not encrypted, which is why they must be in their own segement
+;
 .export         __GMA4_JUNK2__:absolute = 1
 
         .byte   $00, $ff, $00, $ff, $00                                 ;$865B

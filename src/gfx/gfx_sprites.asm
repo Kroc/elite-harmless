@@ -1,14 +1,15 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "gfx_sprites.asm":
+;
 ; NOTE: must be aligned to 64 bytes (at destination)
 
 .segment        "GFX_SPRITES"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 _6800:  ; sprites:                                                      ;$6800
-
+;===============================================================================
         ; 1: crosshair 1                                                ;$6800
         ;-----------------------------------------------------------------------
         .byte   $00, $00, $00

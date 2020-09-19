@@ -1,15 +1,15 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
+;
+; "math_data.asm":
 ; 
 ; lookup tables for math routines. these are segments, therefore create output
 ; and cannot be included multiple times by other files, which is why the math
 ; routines are in separate files
 
-;===============================================================================
 .segment        "TABLE_SIN"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; table: sin(x/32*pi)*256
 ;
 table_sin:                                                              ;$0AC0
@@ -29,6 +29,7 @@ _0ae0:                                                                  ;$0AE0
 .ifdef  FEATURE_MATHTABLES
 ;///////////////////////////////////////////////////////////////////////////////
 .segment        "TABLE_SQR"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .align          $0100
 
 ; Table generation: I:0..511
@@ -84,7 +85,7 @@ square2_hi:
 ; http://codebase64.org/doku.php?id=base:table_generator_routine_for_fast_8_bit_mul_table
 ;
 .segment        "CODE_INIT"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 populate_multiply_tables:
         ;-----------------------------------------------------------------------
         ldx # $00
@@ -129,6 +130,7 @@ populate_multiply_tables:
 ;///////////////////////////////////////////////////////////////////////////////
 
 .segment        "MATH_LOGS"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .align          $0100
 ;
 ; hello and welcome to "I don't understand logarithims 101"
@@ -376,7 +378,9 @@ _9600:                                                                  ;$9600
         .byte   $b6, $ba, $bf, $c3, $c7, $cb, $d0, $d4                  ;$96F0
         .byte   $d9, $de, $e3, $e8, $ed, $f2, $f7, $fd                  ;$96F8
 
-;===============================================================================
+
+.segment        "LINE_DATA"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; a buffer of line-points is built up so line-drawing can be done continuously.
 ; in the original game, these two buffers (one for X-coords, one for Y-coords)
 ; are filled with junk data (stuff left over in the C64 RAM when the game was
@@ -386,8 +390,6 @@ _9600:                                                                  ;$9600
 ; TODO: this understanding is incorrect!
 ;       something else is happening here
 ;
-.segment        "LINE_DATA"
-
 line_points_x:                                                          ;$26A4
 ;-------------------------------------------------------------------------------
 ; RAM used for X-coords for line-drawing

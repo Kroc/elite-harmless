@@ -3,9 +3,8 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 
-
 .segment        "GFX_FONT"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; NOTE: must be aligned; the printing routine relies on the number of
 ; characters per page to calculate which page each character is in
 .align          $0100

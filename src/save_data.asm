@@ -1,16 +1,18 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "save_data.asm":
+;
 ; a page is reserved for load/save operations
 ; TODO: can this be done away with (the disk drive already has a buffer)
 ;
 .segment        "DISK_BUFFER"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .res            $0100
 
 .segment        "SAVE_DATA"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; file-name?
 
 _25a6:                                                                  ;$25A6
@@ -56,10 +58,9 @@ _25fd   := _25b3::_25fd
 _25fe   := _25b3::_25fe
 _25ff   := _25b3::_25ff
 
-;-------------------------------------------------------------------------------
 
 .segment        "SAVE_DEFAULT"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ;$2600: unreferenced / unused data?
 
         .byte   $00, $00, $00, $00, $00, $00, $00, $00

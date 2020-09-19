@@ -1,9 +1,10 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
-; "disk_boot.asm" -- auto-start code for Elite : Harmless
+;
+; "disk_boot.asm":
+;
+; auto-start code for Elite : Harmless
 ; original Elite uses the code in the "boot/gma" folder
 
 .include        "c64/c64.inc"
@@ -11,6 +12,7 @@
 ; populate the .PRG header using the address given
 ; by the linker config (see "link/elite-original-gma86.cfg")
 .segment        "HEAD_LOAD"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .import         __LOADER_PRG_START__
         .addr   __LOADER_PRG_START__+2
 
@@ -19,7 +21,7 @@
 ; the linker configuration handles this ("link/elite-harmless-d64.cfg")
 ;
 .segment        "BASIC_LOAD"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         ; the C64 BASIC binary format is described here:
         ; <https://www.c64-wiki.com/wiki/BASIC_token> 
         ;
@@ -76,10 +78,9 @@
 
         jmp start
 
-;===============================================================================
 
 .segment        "CODE_LOAD"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   filename                                                        ;$02C1
         .byte   "harmless"
 .endproc
@@ -125,10 +126,9 @@ init_end:
         jsr init_mem
         jmp _8863
 
-;===============================================================================
 
 .segment        "BASIC_VECTORS"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; these are various vectors for BASIC -- the loader hijacks these to cause
 ; the loader to start immediately without the need for a BASIC bootstrap
 

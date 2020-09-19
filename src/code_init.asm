@@ -1,15 +1,19 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
-; once-off intialisation code for elite-harmless; original Elite uses
-; "orig_init.asm". this code is loaded into the variable space the game
-; uses, so once executed it is erased!
-
+;
+; "code_init.asm":
+;
+; once-off intialisation code for elite-harmless;
+; original Elite uses "orig/orig_init.asm"
+;
+; this code is loaded into the variable space the game uses,
+; so once executed it is erased!
+;
 .segment        "CODE_INIT"
-
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 init:
+;===============================================================================
         ; change the address of STOP key routine from $F6ED, to $FFED,
         ; the SCREEN routine which returns row/col count, i.e. does
         ; nothing of use -- this effectively disables the STOP key

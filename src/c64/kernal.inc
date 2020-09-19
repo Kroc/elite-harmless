@@ -1,17 +1,18 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-
+;
+; "kernal.inc":
+;
 ; these vectors are called by hardware events, independent of the KERNAL.
 ; when the KERNAL ROM is enabled the ROM provides the values, which are KERNAL
 ; addresses, to allow normal operation of the C64. if the KERNAL ROM is
 ; switched off, then the vectors will be defined by the RAM underneath
 ; -- if the vectors in RAM are not set the system will crash!
 ; 
-HW_VECTOR_NMI           = $fffa         ; Non-Maskable-Interrupt vector
-HW_VECTOR_RESET         = $fffc         ; cold-reset vector
-HW_VECTOR_IRQ           = $fffe         ; interrupt vector
+CPU_VECTOR_NMI          = $fffa         ; Non-Maskable-Interrupt vector
+CPU_VECTOR_RESET        = $fffc         ; cold-reset vector
+CPU_VECTOR_IRQ          = $fffe         ; interrupt vector
 
 ; device numbers:
 ;-------------------------------------------------------------------------------
