@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
 ; "elite-harmless.asm":
-
+;
 .include        "elite.inc"
 
 .include        "math/math_3d.inc"
@@ -31,11 +31,6 @@
 
 .include        "vars_flags.asm"
 
-; in elite-harmless we conjoin
-; these code segments together:
-;
-.segment        "CODE_LORAM"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .include        "code_1D81.asm"
 .include        "text/code_docked.asm"
 .include        "code_28ba.asm"
@@ -43,11 +38,6 @@
 .include        "save_data.asm"
 .include        "gfx/gfx_sprites.asm"
 
-; in elite-harmless we conjoin
-; these code segments together:
-;
-.segment        "CODE_HIRAM"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .include        "code_6A00.asm"
 .include        "code_9900.asm"
 

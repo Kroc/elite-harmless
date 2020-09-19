@@ -4,10 +4,10 @@
 ;
 ; "code_6A00.asm":
 ;
-; NOTE: the segment that this code belongs to will be set by the including
-;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
-;
 .linecont+
+
+.segment        "CODE_6A00"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ; yes, I am aware that ca65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others

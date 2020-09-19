@@ -4,8 +4,8 @@
 ;
 ; "code_1D81.asm":
 ;
-; NOTE: the segment that this code belongs to will be set by the including
-;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
+.segment        "CODE_1D81"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 docked:                                                                 ;$1D81
 ;===============================================================================

@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
 ; "elite-original.asm":
-
+;
 .include        "elite.inc"
 
 .include        "math/math_3d.inc"
@@ -26,25 +26,17 @@
 .include        "gfx/gfx_font.asm"                                      ;$0B00
 .include        "vars_flags.asm"                                        ;$1D00
 
-.segment        "CODE_1D81"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .include        "code_1D81.asm"                                         ;$1D81
 .include        "text/code_docked.asm"                                  ;$2372
 .include        "save_data.asm"                                         ;$25A6
 
-.segment        "CODE_28BA"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-.include        "code_28ba.asm"                                         ;$2ABA
+.include        "code_28ba.asm"                                         ;$28BA
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
 
-.segment        "CODE_6A00"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .include        "code_6A00.asm"                                         ;$6A00
 .include        "orig/orig_init.asm"                                    ;$75E4
 .include        "gfx/gfx_bitmap.asm"
 
-.segment        "CODE_9900"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .include        "code_9900.asm"                                         ;$9900
 .include        "sound/code_sound.asm"                                  ;$B4CB
 .include        "sound/data_sound.asm"                                  ;$B72D

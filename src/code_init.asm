@@ -285,7 +285,7 @@ init:
         ;
         inc CPU_CONTROL
 
-        ;-----------------------------------------------------------------------        
+        ;-----------------------------------------------------------------------
         ; NOTE: calling `init_mem` clears variable storage from $0400..$0700
         ; *THIS VERY CODE IS WITHIN THAT REGION* -- ergo, we cannot return
         ; from a subroutine here but we will still need to send execution to

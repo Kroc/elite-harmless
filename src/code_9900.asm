@@ -4,8 +4,8 @@
 ;
 ; "code_9900.asm":
 ;
-; NOTE: the segment that this code belongs to will be set by the including
-;       file, e.g. "elite-original.asm" / "elite-harmless.asm"
+.segment        "CODE_9900"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ; referenced in the `chrout` routine, these are a pair of hi/lo-byte lookup
 ; tables that index a row number (0-24) to the place in the menu screen memory
