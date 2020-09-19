@@ -473,12 +473,10 @@ _6b5a:                                                                  ;$6B5A
 
 _6ba9:                                                                  ;$6BA9
 ;===============================================================================
-; extract target planet information
+; extract target planet information:
 ;
-; a more visual guide to the way planet information
-; is generated from the seed can be seen here:
-; http://wiki.alioth.net/index.php/Random_number_generator
-;
+; a more visual guide to the way planet information is generated from the seed
+; can be seen here: http://wiki.alioth.net/index.php/Random_number_generator
 ;-------------------------------------------------------------------------------
         lda ZP_SEED_W0_HI
         and # %00000111
@@ -1682,13 +1680,13 @@ _7224:                                                                  ;$7224
 
 print_int16:                                                            ;$7234
 ;===============================================================================
-; print 16-bit value in X/Y, without decimal point
+; print 16-bit value in X/Y, without decimal point:
 ;-------------------------------------------------------------------------------
         clc 
 
 print_num16:                                                            ;$7235
 ;===============================================================================
-; print 16-bit value in X/Y -- decimal point included if carry set
+; print 16-bit value in X/Y: -- decimal point included if carry set
 ;-------------------------------------------------------------------------------
         lda # $05               ; max. no. digits -- is this 5 or 6?
         jmp print_medium_value
@@ -2127,8 +2125,10 @@ _74a5:                                                                  ;$74A5
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-_74b8:   jmp _88e7                                                      ;$74B8
+.segment        "CODE_74B8"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+_74b8:   jmp _88e7                                                      ;$74B8
 
 equipment_screen:                                                       ;$74BB
 ;===============================================================================
@@ -3204,7 +3204,7 @@ _7bcc:                                                                  ;$7BCC
 damage_player:                                                          ;$7BD2
 ;===============================================================================
 ; applies a damage amount to the player's shields and, if they're depleted,
-; directly to your hull (energy banks). if the player's energy-level reaches
+; directly to the hull (energy banks). if the player's energy-level reaches
 ; zero or below, the routine will kill the player 
 ;
 ; in:   A       amount to damage the player

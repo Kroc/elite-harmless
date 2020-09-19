@@ -3,10 +3,11 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
 ; "code_docked.asm":
-
-;===============================================================================
-; insert these docked token functions from "code_docked_fns.asm"
 ;
+.segment        "CODE_2372"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+; insert these docked token functions from "code_docked_fns.asm"
 .tkn_docked_fn_theirName                                                ;$2372
 .tkn_docked_fn_protoGalaxy                                              ;$2376
 
