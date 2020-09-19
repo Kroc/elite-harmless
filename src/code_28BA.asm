@@ -3453,11 +3453,11 @@ _393e:                                                                  ;$393E
         sta ZP_VAR_P1
         rts 
 
-;===============================================================================
-; insert math square (?^2) routine
+; NOTE: in the original code, "math_square.asm" will be inserted here
+;       between these two segments
 ;
-.include        "math/math_square.asm"                                  ;$3986
-
+.segment        "CODE_39E0"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _39e0:                                                                  ;$39E0
 ;===============================================================================

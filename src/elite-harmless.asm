@@ -34,6 +34,7 @@
 .include        "code_1D81.asm"
 .include        "text/code_docked.asm"
 .include        "code_28ba.asm"
+.include        "math/math_square.asm"
 
 .include        "save_data.asm"
 .include        "gfx/gfx_sprites.asm"
