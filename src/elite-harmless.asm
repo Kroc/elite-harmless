@@ -41,6 +41,7 @@
 
 .include        "code_6A00.asm"
 .include        "code_9900.asm"
+.include        "math/math_square_root.asm"
 
 .ifdef          FEATURE_AUDIO
 ;///////////////////////////////////////////////////////////////////////////////
