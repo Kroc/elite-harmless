@@ -430,8 +430,6 @@ _77a3:  sta $d802,y
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE1_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE1_PTR
 
-.ifdef  FEATURE_TRUMBLES
-        ;///////////////////////////////////////////////////////////////////////
         ; each of the Trumbles™ alternate patterns
         lda # ELITE_SPRITES_INDEX + 5
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE2_PTR
@@ -447,7 +445,6 @@ _77a3:  sta $d802,y
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE5_PTR
         sta ELITE_MENUSCR_ADDR + VIC_SPRITE7_PTR
         sta ELITE_MAINSCR_ADDR + VIC_SPRITE7_PTR
-.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda CPU_CONTROL                 ; get processor port state
         and # %11111000                 ; retain everything except bits 0-2 

@@ -11,7 +11,11 @@
 .segment        "MAIN_FLIGHT"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-; Trumble™ A.I. data?
+.ifdef  FEATURE_TRUMBLES
+;///////////////////////////////////////////////////////////////////////////////
+; the Trumbles™ added in the C64 port are simply 'patched in' to the main
+; flight loop rather than being inlined, therefore the Trumble™ code appears
+; first and the main flight loop JMPs backwards to handle the Trumbles™ first
 ;
 trumble_steps:                                                          ;$1E21
         ;-----------------------------------------------------------------------
@@ -22,30 +26,40 @@ _1e25:                                                                  ;$1E25
         ;-----------------------------------------------------------------------
         .byte   $00, $00, $ff, $00
 
-; masks for sprite MSBs?
-_1e29:                                                                  ;$1E29
-        .byte   %11111011, %00000100
-        .byte   %11110111, %00001000
-        .byte   %11101111, %00010000
-        .byte   %11011111, %00100000
-        .byte   %10111111, %01000000
-        .byte   %01111111, %10000000
-
-_1e35:
+trumble_masks:                                                          ;$1E29
         ;-----------------------------------------------------------------------
-        ; move Trumbles™ around the screen
+        ; these are pairs of bit-masks for the hardware sprites (2-7)
+        ; for each of the Trumbles™ (0-5)
         ;
-        lda MAIN_COUNTER
+        .byte   %11111011, %00000100    ; Trumble™ #0, sprite 2
+        .byte   %11110111, %00001000    ; Trumble™ #1, sprite 3
+        .byte   %11101111, %00010000    ; Trumble™ #2, sprite 4
+        .byte   %11011111, %00100000    ; Trumble™ #3, sprite 5
+        .byte   %10111111, %01000000    ; Trumble™ #4, sprite 6
+        .byte   %01111111, %10000000    ; Trumble™ #5, sprite 7
+
+
+move_trumbles:                                                          ;$1E35
+;===============================================================================
+; [0]:  move Trumbles™ around the screen:
+;-------------------------------------------------------------------------------
+        ; we will only move one Trumble™ per frame:
+        ;
+        ; due to the use of two sprites already, one for the laser sights
+        ; and one for the shared explosion sprite, there can only be a
+        ; maximum of 6 Trumble™ sprites on-screen. out of 8 frames, this
+        ; means that Trumbles™ will move on up to six of every 8 frames
+        ;
+        lda MAIN_COUNTER        ; get current main-loop counter
         and # %00000111         ; modulo 8 (0-7)
-        cmp TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
-       .blt :+
+        cmp TRUMBLES_ONSCREEN   ; compare with number of Trumbles™ on-screen
+       .blt :+                  ; if we have this-many Trumbles™, move one
+        jmp main_roll_pitch     ; otherwise, return to the main flight loop
 
-        jmp main_roll_pitch
-
-        ; take the counter 0-7 and multiply by 2
-        ; for use in a table of 16-bit values later
-:       asl                                                             ;$1E41
-        tay 
+:       ; move a Trumble™:                                              ;$1E41
+        ;-----------------------------------------------------------------------
+        asl                     ; take the counter 0-5 and multiply by 2,
+        tay                     ; for the interlaced X & Y positions
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -69,28 +83,31 @@ _1e35:
         ; select an X direction:
         ; 50% chance stay still, 25% go left, 25% go right
         and # %00000011         ; random number modulo 4 (0-3)
-        tax                     ; choice 1-4
+        tax                     ; choice 0-3
         lda trumble_steps, x    ; pick a direction, i.e. 0, 1 or -1
         sta TRUMBLES_MOVE_X, y  ; set the Trumble™'s X direction
 
-        lda _1e25, x
-        sta VAR_0521, y
+        lda _1e25, x            ; TODO: 0, 0, $ff, 0?
+        sta TRUMBLES_XPOS_LO, y
 
         ; select a Y direction:
         ; 50% chance stay still, 25% go up, 25% go down
         jsr get_random_number   ; pick a new random number
         and # %00000011         ; modulo 4 (0-3)
-        tax                     ; choice 1-4
+        tax                     ; choice 0-3
         lda trumble_steps, x    ; pick a direction, i.e. 0, 1 or -1
         sta TRUMBLES_MOVE_Y, y  ; set the Trumble™'s Y direction
 
-@move:                                                                  ;$1E6A
+@move:  ; update the Trumble™'s position on screen                      ;$1E6A
         ;-----------------------------------------------------------------------
-        lda _1e29, y
-        and VIC_SPRITES_X
-        sta VIC_SPRITES_X
+        ; mask-out the current Trumble™ sprite from the sprite's MSBs
+        ;
+        lda trumble_masks, y    ; sprite mask for current Trumble™
+        and VIC_SPRITES_X       ; mask against the sprite MSBs
+        sta VIC_SPRITES_X       ; update hardware sprites
 
         ; move the Trumble™ sprite vertically:
+        ;
         lda VIC_SPRITE2_Y, y    ; current hardware sprite Y-position
         clc                     ; math!
         adc TRUMBLES_MOVE_Y, y  ; add the Trumble™'s Y direction
@@ -102,8 +119,8 @@ _1e35:
         adc TRUMBLES_MOVE_X, y  ; add the Trumble™'s X direction
         sta ZP_VAR_T            ; put aside whilst we handle the MSB (256-319) 
 
-        lda VAR_0531, y
-        adc VAR_0521, y
+        lda TRUMBLES_XPOS_HI, y
+        adc TRUMBLES_XPOS_LO, y
         bpl :+
 
         lda # $48               ;=72 / %01001000
@@ -121,16 +138,17 @@ _1e35:
         lda # $00
         sta ZP_VAR_T
 
-:       sta VAR_0531, y                                                 ;$1EA4
+:       sta TRUMBLES_XPOS_HI, y                                         ;$1EA4
         beq :+
 
-        ; MSBs?
-        lda _1e29+1, y
+        ; set the MSB for this sprite:
+        ;-----------------------------------------------------------------------
+        lda trumble_masks+1, y  ; get the sprite bit for this Trumble™
         ora VIC_SPRITES_X       ; combine with current hardware sprite MSBs
         sei                     ; disable interrupts whilst repositioning
         sta VIC_SPRITES_X       ; update the 8 hardware sprite MSBs
-:       lda ZP_VAR_T                                                    ;$1EB3
-        sta VIC_SPRITE2_X, y
+:       lda ZP_VAR_T            ; retrieve X-position remainder         ;$1EB3
+        sta VIC_SPRITE2_X, y    ; set the Trumble™'s new X-position
         cli                     ; re-enable interrupts
 
 .ifdef  OPTION_ORIGINAL
@@ -144,11 +162,16 @@ _1e35:
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        jmp main_roll_pitch
+        jmp main_roll_pitch     ; return to the main flight loop
+
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 
 main_flight_loop:                                                       ;$1EC1
 ;===============================================================================
+; MAIN FLIGHT LOOP
+;-------------------------------------------------------------------------------
         ; seed the random-number-generator:
         lda polyobj_00          ; TODO: why this byte?
         sta ZP_GOATSOUP_pt1
@@ -157,18 +180,18 @@ main_flight_loop:                                                       ;$1EC1
         ;///////////////////////////////////////////////////////////////////////
         ; are there any Trumbles™ on-screen?
         lda TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
-       .bze :+                  ; =0; don't process Trumbles™
+       .bze main_roll_pitch     ; =0; don't process Trumbles™
 
-        ; process Trumbles™
-        ; (move them about, breed them)
-        jmp _1e35
-:
+        ; move the Trumbles™ about the screen
+        jmp move_trumbles
+
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+
 main_roll_pitch:                                                        ;$1ECE
-        ;=======================================================================
-        ; [1]:  compute roll & pitch
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [1]:  compute roll & pitch
+;-------------------------------------------------------------------------------
         ; take the roll amount and prepare it for use in the 3D math:
         ;
         ldx JOY_ROLL            ; current roll amount (from joy/key input)
@@ -251,13 +274,14 @@ main_roll_pitch:                                                        ;$1ECE
         ora ZP_PITCH_SIGN
         sta ZP_BETA             ; put aside for the matrix math
 
-        ; TODO: this section processes a number of key presses;
-        ;       could we skip this when no keys are pressed by
-        ;       marking a 'no keys' flag?
 main_keys:
-        ;=======================================================================
-        ; [2]:  handle key presses
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [2]:  handle key presses
+;
+; TODO: this section processes a number of key presses;
+;       could we skip this when no keys are pressed by
+;       marking a 'no keys' flag?
+;-------------------------------------------------------------------------------
         ; accelerate?
         ;-----------------------------------------------------------------------
         lda key_accelerate      ; is accelerate being held?
@@ -419,9 +443,9 @@ main_keys:
 :
 
 main_lasers:                                                            ;$1FD5
-        ;=======================================================================
-        ; [3]:  shoot lasers!
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [3]:  shoot lasers!
+;-------------------------------------------------------------------------------
         lda # $00                                                       
         sta ZP_LASER            ; clear laser-power for current view
         sta ZP_SPEED_LO
@@ -515,14 +539,13 @@ main_lasers:                                                            ;$1FD5
 :       and # %11111010         ; set pulse-wait based on power-level   ;$2028
         sta LASER_COUNTER
 
-        ;=======================================================================
-        ; [4]:  process ship instances
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [4]:  process ship instances
+;-------------------------------------------------------------------------------
 @ships: ldx # $00               ; begin with ship-slot 0                ;$202D
 
-
 process_ship:                                                           ;$202F
-        ;-----------------------------------------------------------------------
+;===============================================================================
         stx ZP_PRESERVE_X       ; set aside ship slot for later
         lda SHIP_SLOTS, x       ; is that a ship in your slot?
         bne :+                  ; if so, process it
@@ -559,9 +582,9 @@ process_ship:                                                           ;$202F
         lda hull_pointers-1, y  ; look up the hull data, hi-byte
         sta ZP_HULL_ADDR_HI
 
-        ;=======================================================================
-        ; [5]:  handle e-bomb explosion
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [5]:  handle e-bomb explosion
+;-------------------------------------------------------------------------------
         ; is the e-bomb active? (bit 7 set)
         ;
         lda PLAYER_EBOMB        ; check e-bomb state
@@ -599,18 +622,18 @@ process_ship:                                                           ;$202F
         ldx ZP_SHIP_TYPE        ; retrieve ship-type again
         jsr ship_killed         ; add points to kill rank
 
-        ;=======================================================================
-        ; [6]:  move ship forward
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [6]:  move ship forward
+;-------------------------------------------------------------------------------
 @move:  jsr move_ship                                                   ;$2079
 
         ; copy the zero-page PolyObject back to its storage
         ;
         .zp_to_polyobj
 
-        ;=======================================================================
-        ; [7]:  collision checks
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [7]:  collision checks
+;-------------------------------------------------------------------------------
         ; is the ship exploding?
         ;
         lda ZP_POLYOBJ_STATE
@@ -650,9 +673,9 @@ process_ship:                                                           ;$202F
         cpx # HULL_MISSILE      ; is it a missile?
         beq @20e0               ; yes, skip
 
-        ;=======================================================================
-        ; [8]:  scooping
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [8]:  scooping
+;-------------------------------------------------------------------------------
         ; can we scoop this object?
         ;
         ; get fuel scoop status ($00 = none, $80 = present)
@@ -724,9 +747,9 @@ process_ship:                                                           ;$202F
         ; (remove ship?)
 @20e0:  jmp _2131                                                       ;$20E0
 
-        ;=======================================================================
-        ; [9]:  docking
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [9]:  docking
+;-------------------------------------------------------------------------------
         ; is the station hostile? poly-object slot 1 is always reserved for
         ; the sun or space-station, so we can refer to its bytes directly
         ;
@@ -830,9 +853,9 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         bpl :+                  ; is bit 7 set? if no, skip over
         jsr _b410               ; remove from scanner dispay (?)
 
-        ;=======================================================================
-        ; [10]: missile & laser hit testing
-        ;-----------------------------------------------------------------------
+;===============================================================================
+; [10]: missile & laser hit testing
+;-------------------------------------------------------------------------------
 :       lda ZP_SCREEN           ; are we in the cockpit-view?           ;$2138
        .bnz @_21ab              ; no? skip ahead
 
@@ -1077,8 +1100,9 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         jmp process_ship        ; process the next ship
 
 
-        ; [11]:  
-        ;=======================================================================
+;===============================================================================
+; [11]:  
+;-------------------------------------------------------------------------------
 _21fa:                                                                  ;$21FA
         lda PLAYER_EBOMB        ; check energy bomb state
         bpl :+                  ; skip over if not going off

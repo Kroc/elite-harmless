@@ -129,7 +129,7 @@ PLAYER_TRUMBLES_HI      :=$04ca
 TRUMBLES_ONSCREEN       :=$0510 ; number of Trumbles™ on-screen; up to 6
 
 ; the amount each Trumble™ moves X / Y
-; (these are interleaved)
+; (these are interlaced)
 ;
 TRUMBLES_MOVE_X         :=$0511
 TRUMBLES_MOVE_Y         :=$0512
@@ -151,14 +151,11 @@ TRUMBLES_MOVE_Y6        :=$051E
 TRUMBLES_MOVE_X7        :=$051F ; UNUSED! There is no 7th Trumble™ on-screen!
 TRUMBLES_MOVE_Y7        :=$0520 ; UNUSED! There is no 7th Trumble™ on-screen!
 
-VAR_0521                :=$0521 ;? (indexed by Y) -- Trumble™ related
+TRUMBLES_XPOS_LO        :=$0521 ; X-positions 0-328, for Trumble™ 0-5, lo-bytes
+TRUMBLES_XPOS_HI        :=$0531 ; X-positions 0-328, for Trumble™ 0-5, hi-bytes
 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
-
-VAR_0531                :=$0531 ;? (indexed by Y)
-
-;-------------------------------------------------------------------------------
 
 ; player's cash:
 PLAYER_CASH             :=$04a2

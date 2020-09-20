@@ -9,9 +9,9 @@
 
 debug_for_brk:                                                          ;$1E14
 ;===============================================================================
-        ; set a routine to capture use of the `brk` instruction.
-        ; not actually used, but present, in original Elite
-        ;
+; set a routine to capture use of the `brk` instruction:
+; not actually used, but present, in original Elite
+;-------------------------------------------------------------------------------
         lda #< debug_brk
         sei                     ; disable interrupts
         sta KERNAL_VECTOR_BRK+0

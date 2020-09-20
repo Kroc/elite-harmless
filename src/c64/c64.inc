@@ -1,9 +1,9 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;===============================================================================
-.linecont+
-
+;
+; "c64.inc":
+;
 .include        "macros.inc"
 .include        "kernal.inc"
 .include        "cart.inc"
@@ -38,8 +38,7 @@
 ; means that a round number of bytes, e.g. $1000 would not calculate as one
 ; more page than necessary
 ; 
-.define  .page_count(size) \
-        ((size + 255) / 256)
+.define  .page_count( size ) ((size + 255) / 256)
 
 ;===============================================================================
 ; CPU port: memory layout & Datasette

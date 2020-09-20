@@ -4,7 +4,7 @@
 ;
 ; "code_9900.asm":
 ;
-.segment        "CODE_9900"
+.segment        "DATA_9900"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ; referenced in the `chrout` routine, these are a pair of hi/lo-byte lookup
