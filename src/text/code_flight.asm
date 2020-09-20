@@ -3,6 +3,22 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
 ; "code_flight.asm":
+;
+
+_7717:                                                                  ;$7717
+;===============================================================================
+; print commander's (your) name
+;
+;-------------------------------------------------------------------------------
+        ldy # $00
+:       lda VAR_0491, y                                                 ;$7719
+        cmp # $0d
+        beq :+
+        jsr print_char
+        iny 
+        bne :-
+
+:       rts                                                             ;$7726 
 
 
 print_local_planet_name:                                                ;$7727
@@ -288,7 +304,7 @@ _indent:                                                                ;$77DF
 
 _77e7:  ; don't do anything if case-switch flag = %11111111             ;$77E7
         cpx # $ff
-        beq _784e
+        beq rts_784e
 
         ; if 'A' or above, print in lower-case
         cmp # 'a'
@@ -322,7 +338,7 @@ _print_str:                                                             ;$77F9
         jsr print_flight_token  ; print it
         lda TKN_FLIGHT_pair2, y ; read second character
         cmp # $3f               ; no second character? (print nothing)
-        beq _784e               ; yes, skip
+        beq rts_784e            ; yes, skip
         jmp print_flight_token  ; print second character (and return)
 
 @canned_token:                                                          ;$7811
@@ -400,4 +416,5 @@ print_flight_token_string:                                              ;$7834
 :       lda [ZP_TEMP_ADDR3], y                                          ;$784A
         bne print_flight_token_string
 
-_784e:  rts                                                             ;$784E
+rts_784e:                                                               ;$784E
+        rts

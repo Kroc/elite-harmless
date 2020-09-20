@@ -2797,24 +2797,9 @@ _a8bd:                                                                  ;$A8BD
         sec                     ; exit with carry set
         rts 
 
-;===============================================================================
-.include        "code_interrupts.asm"
 
-.ifdef  OPTION_ORIGINAL
-;///////////////////////////////////////////////////////////////////////////////
-; unused / unreferenced?
-
-        lda # $ff                                                       ;$AB29
-        sta ZP_32
-        rts 
-
-        sta ZP_32                                                       ;$AB2E
-        rts 
-
-;///////////////////////////////////////////////////////////////////////////////
-.endif
-
-; NOTE: in the original code, "code_lines.asm" would appear here
+; NOTE: in the original code, "code_interrupts.asm" appears here
+; NOTE: in the original code, "code_lines.asm" appears here
 ;
 .segment        "CODE_B09D"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

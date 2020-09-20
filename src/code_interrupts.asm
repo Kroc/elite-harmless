@@ -4,6 +4,9 @@
 ;
 ; "code_interrupts.asm":
 ;
+.segment        "CODE_IRQS"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 ; this table contains the state-switches for the raster-splits, that is, what
 ; properties of the VIC-II to change at the first split (bitmap line 1), then
 ; the second split (bitmap line 145), the HUD. for example, the top-border on
@@ -545,3 +548,18 @@ nmi_null:                                                               ;$AB27
 ;-------------------------------------------------------------------------------
         cli                     ; re-enable interrupts
         rti                     ; "ReTurn from Interrupt"
+
+
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
+; unused / unreferenced?
+
+        lda # $ff                                                       ;$AB29
+        sta ZP_32
+        rts 
+
+        sta ZP_32                                                       ;$AB2E
+        rts 
+
+;///////////////////////////////////////////////////////////////////////////////
+.endif

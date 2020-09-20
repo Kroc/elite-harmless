@@ -836,7 +836,7 @@ process_ship:                                                           ;$202F
         
         ; the scoop-data in a hull definition provides which cargo type it
         ; gives when scooped, already decremented by 1 to account for the
-        ; below non-zero check. a side-effect of this is that it's not
+        ; non-zero check below. a side-effect of this is that it's not
         ; possible for a hull definition to drop food or textiles(?)
         ;
         adc # $01               ; add 1 to cargo type
