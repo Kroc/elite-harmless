@@ -32,6 +32,7 @@
 .include        "vars_flags.asm"
 
 .include        "code_1D81.asm"
+.include        "main_flight.asm"
 .include        "text/text_docked_code.asm"
 .include        "code_28ba.asm"
 .include        "math/math_square.asm"

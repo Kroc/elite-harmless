@@ -27,6 +27,8 @@
 .include        "vars_flags.asm"                                        ;$1D00
 
 .include        "code_1D81.asm"                                         ;$1D81
+.include        "orig/orig_debug.asm"                                   ;$1E14
+.include        "main_flight.asm"                                       ;$1E21
 .include        "text/text_docked_code.asm"                             ;$2372
 .include        "save_data.asm"                                         ;$25A6
 
