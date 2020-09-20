@@ -12,7 +12,7 @@
 .include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
-.include        "text/code_docked_fns.inc"
+.include        "text/text_docked_fns.inc"
 .include        "code_keyboard.inc"
 
 ; due to a limitation, CA65 cannot 'look-ahead' for scopes (including procs &
@@ -27,7 +27,7 @@
 .include        "vars_flags.asm"                                        ;$1D00
 
 .include        "code_1D81.asm"                                         ;$1D81
-.include        "text/code_docked.asm"                                  ;$2372
+.include        "text/text_docked_code.asm"                             ;$2372
 .include        "save_data.asm"                                         ;$25A6
 
 .include        "code_28ba.asm"                                         ;$28BA

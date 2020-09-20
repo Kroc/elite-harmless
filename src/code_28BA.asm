@@ -4132,7 +4132,7 @@ _3e31:                                                                  ;$3E31
         bne _3dbe               ; always branches
 
 ;===============================================================================
-; insert these docked-token functions from "code_docked_fns.asm"
+; insert these docked-token functions from "text_docked_fns.asm"
 ;
 .tkn_docked_incoming_message                                            ;$3E37
 .tkn_docked_fn16_17_1D                                                  ;$3E41
@@ -4157,7 +4157,7 @@ _3e65:                                                                  ;$3E65
 
 
 ;===============================================================================
-; insert this docked-token function from "code_docked_fns.asm"
+; insert this docked-token function from "text_docked_fns.asm"
 ;
 .tkn_docked_waitForAnyKey                                               ;$3E7C
 

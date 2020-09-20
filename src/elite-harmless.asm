@@ -11,7 +11,7 @@
 .include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
-.include        "text/code_docked_fns.inc"
+.include        "text/text_docked_fns.inc"
 .include        "code_keyboard.inc"
 
 .include        "code_init.asm"
@@ -32,7 +32,7 @@
 .include        "vars_flags.asm"
 
 .include        "code_1D81.asm"
-.include        "text/code_docked.asm"
+.include        "text/text_docked_code.asm"
 .include        "code_28ba.asm"
 .include        "math/math_square.asm"
 

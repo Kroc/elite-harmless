@@ -80,7 +80,7 @@ _tkn_index       .set 0
 ; each entry in the table must do two things:
 ;
 ; 1.    import the symbol for the function -- the functions are not
-;       in this file but in "code_docked_fns.asm" instead
+;       in this file but in "text_docked_fns.asm" instead
 ;
 ; 2.    define a local symbol for the token ID as the strings containing the
 ;       token are defined within this file. these will be in the form "FN_*"
@@ -92,7 +92,7 @@ _tkn_index       .set 0
         ; note that token function are prefixed with "FN_"
         .tkn_id .concat( "FN_", fn_id )
 
-        ; import the function from "code_docked_fns.asm",
+        ; import the function from "text_docked_fns.asm",
         ; and write its address to the table
 .import fn_import
         .addr   fn_import

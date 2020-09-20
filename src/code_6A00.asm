@@ -2539,7 +2539,7 @@ _76e9:                                                                  ;$76E9
 
 
 ;===============================================================================
-.include        "text/code_flight.asm"                                  ;$7727
+.include        "text/text_flight_code.asm"                             ;$7727
 
 
 swap_zp_shadow:                                                         ;$784F
@@ -6348,7 +6348,7 @@ _8ab4:                                                                  ;$8AB4
         .byte   $7b
 
 ;===============================================================================
-; insert from "text/code_docked_fns.asm"
+; insert from "text/text_docked_fns.asm"
 ;
 .tkn_docked_fn_media                                                    ;$8AB5
 

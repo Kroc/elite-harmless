@@ -2,7 +2,7 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "code_docked_fns.inc":
+; "text_docked_fns.inc":
 ;
 ; a series of in-string functions, assigned to the first 32 "docked" string
 ; tokens. these are stored as macros in this file because their physical

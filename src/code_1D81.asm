@@ -1236,15 +1236,16 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
 
         ; [11]:  
         ;=======================================================================
-
 _21fa:                                                                  ;$21FA
-        lda PLAYER_EBOMB        ; player has energy bomb?
-        bpl _2207
+        lda PLAYER_EBOMB        ; check energy bomb state
+        bpl :+                  ; skip over if not going off
+
         asl PLAYER_EBOMB
-        bmi _2207
+        bmi :+
+
         jsr _2367
-_2207:                                                                  ;$2207
-        lda MAIN_COUNTER
+
+:       lda MAIN_COUNTER                                                ;$2207
         and # %00000111
         bne _227a
 
