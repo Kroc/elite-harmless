@@ -1,4 +1,4 @@
-# Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
+# Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 # see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 # All Rights Reserved. <github.com/Kroc/elite-harmless>
 #===============================================================================
@@ -47,7 +47,7 @@ with open(args.outfile, wm) as outfile:
     if args.asm:
         # write out the assembly file header
         outfile.writelines("""\
-; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2020,
+; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
@@ -57,8 +57,8 @@ with open(args.outfile, wm) as outfile:
         # include segment name?
         if args.segment:
             outfile.write(".segment \"%s\"\n" % args.segment)
-            # an export symbol is also written to help force the inclusion of the
-            # data for when other code you're linking doesn't reference it
+            # an export symbol is also written to help force the inclusion of
+            # the data for when other code you're linking doesn't reference it
             outfile.write(".export  __%s__:absolute = 1\n" % args.segment)
 
         # we'll batch bytes up into groups of 8 per line
