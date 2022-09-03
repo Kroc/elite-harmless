@@ -45,7 +45,7 @@ interrupt_scanline2:
 
 ; hires/multi-colour bitmap state for each raster-split:
 ;-------------------------------------------------------------------------------
-; (note that these are `VIC_SCREEN_CTL2` states, see "c64/vic.inc" for details)
+; (note that these are `vic_screen_ctl2` states, see "c64/vic.inc" for details)
 interrupt_screenmode:
 interrupt_screenmode1:                                                  ;$A8E0
         .byte   vic_screen_ctl2::unused
@@ -83,7 +83,7 @@ _a8e8:                                                                  ;$A8E8
 interrupt_end_XA:                                                       ;$A8ED
 ;===============================================================================
 ; interrupt finished! restores X & A
-;
+;-------------------------------------------------------------------------------
        .plx                     ; restore X (via A)
 
 .ifdef  OPTION_ORIGINAL
@@ -106,7 +106,7 @@ interrupt_end_XA:                                                       ;$A8ED
 
 interrupt:                                                              ;$A8FA
 ;===============================================================================
-; this is Elite's main interrupt routine
+; this is Elite's main interrupt routine:
 ;
 ; note that this routine gets called by both raster splits,
 ; so functionality for both is combined into the one routine

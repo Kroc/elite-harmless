@@ -385,7 +385,7 @@ _081c:  ;$C7: 39.                                                       ;$081C
         
 _0820:  ;$C8: 40.                                                       ;$0820
         .byte   "T", _AR, _GE, "T", __, "LO", _ST, __end
-        .tkn                                                            ;=$EB
+        .tkn_id "_TARGET_LOST"                                          ;=$EB
         
 _0829:  ;$C9: 41.                                                       ;$0829
         .byte   _MISSILE, __, "JAMM", _ED, __end

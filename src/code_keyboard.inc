@@ -35,7 +35,7 @@
 ; "How the C64 Keyboard Works" by Gregory Nacu
 ; <http://www.c64os.com/post?p=45>
 ;
-; this extreme simplicity in hardware however does not translate to simplicty
+; this extreme simplicity in hardware however does not translate to simplicity
 ; in software. whilst this comment header will describe everything needed to
 ; understand Elite's keyboard code, a great more detail about the software
 ; side can be grokked from the following article:

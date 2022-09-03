@@ -442,7 +442,7 @@ _6b5a:                                                                  ;$6B5A
         lda # TKN_FLIGHT_AVERAGE_RADIUS
         jsr print_flight_token_with_colon
 
-        ; extract the avergae planet radius from the seed
+        ; extract the average planet radius from the seed
         ;
         lda ZP_SEED_W2_HI
         ldx ZP_SEED_W1_HI
@@ -3078,17 +3078,21 @@ original_7b5e:                                                          ;$75BE
 .endif
 
 
-_7b5f:                                                                  ;$7B5F
-;===============================================================================
-        dex 
+:       dex                     ; overflow, set to max (255)            ;$7B5F
         rts 
 
-_7b61:                                                                  ;$7B61
-.export _7b61
-        inx 
-        beq _7b5f
+recharge_shield:                                                        ;$7B61
+;===============================================================================
+; recharge a shield by one tick:
+;
+; in:   X       selected shield current energy level
+;-------------------------------------------------------------------------------
+.export recharge_shield
+
+        inx                     ; add 1 to shield level
+       .bze :-                  ; did we overflow? (255 -> 0)
 _7b64:                                                                  ;$7B64
-        dec PLAYER_ENERGY
+        dec PLAYER_ENERGY       ; take energy from the ship's main banks
         php 
         bne _7b6d
         inc PLAYER_ENERGY
@@ -4821,17 +4825,21 @@ _82f3:                                                                  ;$82F3
 ; remove ship slot?
 ;
 ;-------------------------------------------------------------------------------
+        ; is the ship being removed the current missile target?
+        ;
         stx ZP_AD
         lda ZP_MISSILE_TARGET
         cmp ZP_AD
-        bne _8305
+        bne :+
 
         ldy # .color_nybble( GREEN, HUD_COLOUR )
         jsr untarget_missile
 
-        lda # $c8               ; "GALACTIC HYPERSPACE"?
-        jsr _900d               ; print on-screen message?
-_8305:                                                                  ;$8305
+.import TKN_FLIGHT_TARGET_LOST:direct
+        lda # TKN_FLIGHT_TARGET_LOST
+        jsr _900d
+
+:                                                                       ;$8305
         ldy ZP_AD
         ldx SHIP_SLOTS, y
 

@@ -173,7 +173,13 @@ main_flight_loop:                                                       ;$1EC1
 ; MAIN FLIGHT LOOP
 ;-------------------------------------------------------------------------------
         ; seed the random-number-generator:
-        lda polyobj_00          ; TODO: why this byte?
+        ;
+        ; the byte used here is the low-byte of the planet's X-position --
+        ; since the player is always moving forward (speed cannot be 0),
+        ; this value is always changing
+        ;
+        ; TODO: if we make systems without planets, this will need changing
+        lda polyobj_00
         sta ZP_GOATSOUP_pt1
 
 .ifdef  FEATURE_TRUMBLES
@@ -195,8 +201,8 @@ main_roll_pitch:                                                        ;$1ECE
         ; take the roll amount and prepare it for use in the 3D math:
         ;
         ldx JOY_ROLL            ; current roll amount (from joy/key input)
-        jsr dampen_toward_zero  ; apply damping?
-        jsr dampen_toward_zero  ; apply damping?
+        jsr dampen_toward_zero  ; apply damping
+        jsr dampen_toward_zero  ; apply damping
         txa                     ; transfer roll amount back to A
 
         ; elite actually rotates the universe around the player(!),
@@ -216,7 +222,7 @@ main_roll_pitch:                                                        ;$1ECE
         ; (write back the updated original roll value, after dampening;
         ;  this happens not to be related to the above few instructions)
         stx JOY_ROLL
-        
+
         eor # %10000000         ; flip the sign bit
         sta ZP_INV_ROLL_SIGN    ; keep inverse roll direction
 
@@ -1101,88 +1107,100 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
 
 
 ;===============================================================================
-; [11]:  
+; [11]:  recharge shields:
 ;-------------------------------------------------------------------------------
-_21fa:                                                                  ;$21FA
-        lda PLAYER_EBOMB        ; check energy bomb state
+_21fa:  lda PLAYER_EBOMB        ; check energy bomb state               ;$21FA
         bpl :+                  ; skip over if not going off
 
+        ; the on-going state of the e-bomb is managed by shifting bits
+        ; off the top of a byte instead of using a typical counter
         asl PLAYER_EBOMB
         bmi :+
 
         jsr _2367
 
+        ; only every 8 frames...
 :       lda MAIN_COUNTER                                                ;$2207
-        and # %00000111
-        bne _227a
+        and # %00000111         ; module 8 (0-7)
+        bne _227a               ; =0? (skip for 7 of 8 frames) 
 
-        ldx PLAYER_ENERGY
-        bpl _2224
+        ; recharge shields:
+        ;-----------------------------------------------------------------------
+        ; shields will only begin recharging after the ship's
+        ; energy level reaches 50% or more
+        ;
+        ldx PLAYER_ENERGY       ; current hull energy level
+        bpl :+                  ; skip for < 128 of 256
 
+        ; recharge rear-shield:
+        ;
         ldx PLAYER_SHIELD_REAR
-        jsr _7b61
+        jsr recharge_shield
         stx PLAYER_SHIELD_REAR
 
+        ; recharge front-shield:
+        ;
         ldx PLAYER_SHIELD_FRONT
-        jsr _7b61
+        jsr recharge_shield
         stx PLAYER_SHIELD_FRONT
-_2224:                                                                  ;$2224
-        sec 
+
+        ; recharge ship's main energy banks
+        ;-----------------------------------------------------------------------
+:       sec                                                             ;$2224
         lda PLAYER_EUNIT
         adc PLAYER_ENERGY
-        bcs _2230
+        bcs :+
         sta PLAYER_ENERGY
-_2230:                                                                  ;$2230
-        lda IS_WITCHSPACE
-        bne _2277
 
-        lda MAIN_COUNTER
-        and # %00011111
-        bne _2283
+;===============================================================================
+; [12]: spawn space-station:
+;-------------------------------------------------------------------------------
+        ; there is no space-station in witchspace!
+        ;
+:       lda IS_WITCHSPACE       ; check witchspace flag, $FF = true     ;$2230
+       .bnz _2277               ; if non-zero, skip spawning station
 
+        ; we only check that the space-station is within range every 32 frames
+        ;
+        lda MAIN_COUNTER        ; current frame-count
+        and # %00011111         ; modulo 32, i.e. 0-31
+       .bnz _2283               ; skip every frame other than 0
+
+        ; is the space-station already present?
+        ;
+        ; NOTE: rather than checking the ship slot reserved for the station
+        ; the pointer in the hull table is checked as this gets rewritten
+        ; based on which station is present, if any
+        ;
+        ; TODO: for a ROM-based hull-table, use a ship-slot detection instead 
+        ;
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
         lda .loword( SHIP_TYPES + HULL_COREOLIS )
-        bne _2277
+       .bnz _2277
 
-        tay 
-        jsr _2c50
-        bne _2277
+        tay                     ; set Y to zero (because of previous branch)
+        jsr _2c50               ; calculate distance to planet
+        bne _2277               ; not close enough, skip
 
-        ; copy some of the PolyObject data to zeropage:
-        ;
-        ; the X/Y/Z position of the PolyObject
-        ; (these are not addresses, but they are 24-bit)
-        ;
-        ; $09-$0B:      xpos            .faraddr
-        ; $0C-$0E:      ypos            .faraddr
-        ; $0F-$11:      zpos            .faraddr
-        ;
-        ; a 3x3 rotation matrix?
-        ;
-        ; $12-$13:      m0x0            .word
-        ; $14-$15:      m0x1            .word
-        ; $16-$17:      m0x2            .word
-        ; $18-$19:      m1x0            .word
-        ; $1A-$1B:      m1x1            .word
-        ; $1C-$1D:      m1x2            .word
-        ; $1E-$1F:      m2x0            .word
-        ; $20-$21:      m2x1            .word
-        ; $22-$23:      m2x2            .word
-        ;
-        ; $24:          speed           .byte
-        ; $25:          acceleration    .byte
+        ; spawn the station in:
+        ;-----------------------------------------------------------------------
+        ; since the station is positioned around the planet, we copy the ship
+        ; instance data used for the planet and modify that. we don't need all
+        ; the attributes (planets don't have A.I.)
         ;
         ; number of bytes to copy:
         ; (up to, and including, the `acceleration` property)
         ldx # PolyObject::acceleration + .sizeof( PolyObject::acceleration )-1
 
-:       lda polyobj_00, x       ;=$F900                                 ;$2248
-        sta ZP_POLYOBJ, x       ;=$09
+        ; copy from ship slot 0 to the zero-page working space
+        ;
+:       lda polyobj_00, x                                               ;$2248
+        sta ZP_POLYOBJ, x
         dex 
         bpl :-
 
-        inx 
+        inx                     ; X=0
         ldy # $09
         jsr _2c2d
         bne _2277
@@ -1413,7 +1431,11 @@ rts_2366:                                                               ;$2366
 
 _2367:                                                                  ;$2367
 ;===============================================================================
-        lda # %11000000
+; TODO: something to do with the e-bomb effect:
+;
+;-------------------------------------------------------------------------------
+        ; set the viewport back to monochrome?
+        lda # vic_screen_ctl2::unused
         sta interrupt_screenmode1
 
         lda # $00

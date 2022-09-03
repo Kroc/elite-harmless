@@ -190,7 +190,7 @@ draw_particle:                                                          ;$2918
 :       eor # %10000000                                                 ;$2921
         tax 
         
-        ; has the dust particle travelled off
+        ; has the dust particle traveled off
         ; the top/bottom of the screen?
         lda ZP_VAR_Y            ; get particle's Y-distance from centre
         and # %01111111         ; ignore the sign
@@ -441,7 +441,7 @@ move_dust_front:                                                        ;$2A40
         ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        lda ZP_VAR_R            ; unneccessary, A is R after `get_dust_speed`
+        lda ZP_VAR_R            ; unnecessary, A is R after `get_dust_speed`
 .endif  ;///////////////////////////////////////////////////////////////////////
         lsr ZP_VAR_P            ; divide high byte by 2
         ror                     ; ripple to low-byte
@@ -720,7 +720,12 @@ _2c1a:                                                                  ;$2C1A
         sta ZP_VAR_Y
         sta DUST_Y_HI, y
         bne _2bed
+
 _2c2d:                                                                  ;$2C2D
+;===============================================================================
+; BBC: MAS1
+;
+;-------------------------------------------------------------------------------
         lda ZP_POLYOBJ_XPOS_LO, y
         asl 
         sta ZP_VALUE_pt2
@@ -749,7 +754,14 @@ _2c4e:                                                                  ;$2C4E
 ;       Y       a multiple of 37 bytes for each poly-object
 ;-------------------------------------------------------------------------------
         lda # $00
+
 _2c50:                                                                  ;$2C50
+;===============================================================================
+; get a [rough] maximum-distance to a poly-object:
+;
+; in:   A       a starting value to merge with
+;       Y       a multiple of 37 bytes for each poly-object
+;-------------------------------------------------------------------------------
         ora polyobjects + PolyObject::xpos + 2, y
         ora polyobjects + PolyObject::ypos + 2, y
         ora polyobjects + PolyObject::zpos + 2, y
@@ -1338,14 +1350,15 @@ _print_digit:                                                           ;$2EE7
         clc 
         adc # '0'               ; re-base as an ASCII/PETSCII numeral
 
-@print: jsr print_char                                                  ;$2EFD        
+@print: jsr print_char                                                  ;$2EFD
 
 _2f00:
         dec ZP_MAXLEN
-        bpl _2f06
+        bpl :+
+
         inc ZP_MAXLEN
-_2f06:
-        dec ZP_9F
+
+:       dec ZP_9F                                                       ;$2F06
         bmi @rts
         bne :+
 
@@ -1360,7 +1373,7 @@ _2f06:
         ; handle the next decimal digit...
 :       jmp _x10                                                        ;$2F14
 
-@rts:   rts                                                             ;$2F17 
+@rts:   rts                                                             ;$2F17
 
 
 ; a block of text-printing related flags and variables
