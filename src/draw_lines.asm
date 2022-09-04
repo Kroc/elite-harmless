@@ -1477,7 +1477,7 @@ draw_straight_line:                                                     ;$AFFA
         lsr 
         lsr 
         sta ZP_BE
-        
+
         lda ZP_VAR_X1
         and # %00000111
         tax 
@@ -1491,7 +1491,7 @@ draw_straight_line:                                                     ;$AFFA
         tya 
         adc # $08
         tay 
-        
+
         bcc :+
         inc ZP_TEMP_ADDR_HI
 

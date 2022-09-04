@@ -268,9 +268,9 @@ ZP_INV_ROLL_SIGN        := $6a  ; inverse roll rotation sign (for easier math)
 ;-------------------------------------------------------------------------------
 
 ZP_VAR_X                := $6b  ; a common "X" variable
-ZP_VAR_X1               := $6b  ; also referred to as X1 when used with X2
+ZP_VAR_X1               := $6b  ; also known as X1 when used with X2
 ZP_VAR_Y                := $6c  ; a common "Y" variable
-ZP_VAR_Y1               := $6c  ; also referred to as Y1 when used with Y2
+ZP_VAR_Y1               := $6c  ; also known as Y1 when used with Y2
 
 ZP_VAR_X2               := $6d  ; a secondary "X" variable
 ZP_VAR_Y2               := $6e  ; a secondary "Y" variable
@@ -289,7 +289,7 @@ ZP_76                   := $76  ;? x12
 
 ; a 4-byte big-endian number buffer for working with big integers:
 ;
-ZP_VALUE                := $77
+ZP_VALUE                := $77                                          ; K
 ZP_VALUE_pt1            := $77
 ZP_VALUE_pt2            := $78
 ZP_VALUE_pt3            := $79
@@ -327,10 +327,13 @@ ZP_8B                   := $8b  ;? x9
 ZP_8C                   := $8c  ;? x4
 ZP_8D                   := $8d  ;? x4
 
-; temp variable storage and seed backup?
-ZP_8E                   := $8e  ;? x18 -- cross-hair X-position         ; QQ19
-ZP_8F                   := $8f  ;? x19 -- cross-hair Y-position
-ZP_90                   := $90  ;? x11 -- cross-hair size
+; temp variable storage?
+; these three are reused sometimes as temporaries
+;
+ZP_8E                   := $8e  ; cross-hair X-position                 ; QQ19
+ZP_8F                   := $8f  ; cross-hair Y-position                 ; QQ19+1
+ZP_90                   := $90  ; cross-hair size                       ; QQ19+2
+
 ZP_91                   := $91  ;? x9
 ZP_92                   := $92  ;? x6
 ZP_93                   := $93  ;? x4
@@ -357,7 +360,7 @@ ZP_9F                   := $9f  ; edge index
 ;
 ; NOTE: for the cockpit view, fore/aft/left/right is a separate variable
 ;
-ZP_SCREEN               := $a0
+ZP_SCREEN               := $a0                                          ; QQ11
 
 .enum   page
         ;-----------------------------------------------------------------------

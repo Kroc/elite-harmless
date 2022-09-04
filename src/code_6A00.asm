@@ -644,8 +644,11 @@ get_system_info:                                        ; BBC: TT24     ;$6BA9
         rts 
 
 
-galactic_chart:                                                         ;$6C1C
+galactic_chart:                                         ; BBC: TT22     ;$6C1C
 ;===============================================================================
+; show the long-range (galactic) chart:
+;
+;-------------------------------------------------------------------------------
         lda # page::chart_galaxy
         jsr set_page            ; switch pages, clearing the screen
 
@@ -654,30 +657,33 @@ galactic_chart:                                                         ;$6C1C
         lda # $10
         jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
-        
+
         lda # 7
        .set_cursor_col
 
-        jsr _70a0
+        ; reset the seed to the first system in the galaxy
+        ; (to enumerate them all)
+        jsr get_galaxy_seed
 
+        ; print "GALACTIC CHART <galaxy-number>"
 .import TKN_FLIGHT_GALACTIC_CHART:direct
         lda # TKN_FLIGHT_GALACTIC_CHART
         jsr print_flight_token
 
-        jsr _28e0               ; cursor down 23 times!!!
-                                ; (clear HUD colours off screen?)
+        ; draw line across top of chart (under title)
+        ; this routine also moves the cursor down one row
+        jsr draw_line_divider_galactic_chart
 
-        ; draw line across bottom of chart
-        ;
-        lda # $98               ; Y=152
-        jsr _28e5
+        lda # 152                       ; draw line across bottom of chart
+        jsr draw_line_divider           ; (chart is 128px high)
 
+        ; draw the circle for the current system
         jsr _6cda
 
-        ; draw stars on galactic chart
+        ; draw stars on chart:
+        ;-----------------------------------------------------------------------
         ldx # $00
 _6c40:                                                                  ;$6C40
-        ;-----------------------------------------------------------------------
         stx ZP_PRESERVE_X       ; backup current star index?
 
         ldx ZP_SEED_W1_HI
@@ -709,61 +715,100 @@ _6c40:                                                                  ;$6C40
         sta ZP_8F
         lda # $04
         sta ZP_90
-_6c6d:                                                                  ;$6C6D
-        lda # $18
-        ldx ZP_SCREEN
-        bpl :+
-        lda # $00                                                                  
-:       sta ZP_93                                                       ;$6C75
-        lda ZP_8E
-        sec 
-        sbc ZP_90
-        bcs :+
-        lda # $00
-:       sta ZP_VAR_X                                                    ;$6C80
-        lda ZP_8E
-        clc 
-        adc ZP_90
-        bcc :+
-        lda # $ff
-:       sta ZP_VAR_X2                                                   ;$6C8B
-        lda ZP_8F
-        clc 
-        adc ZP_93
+
+        ; fallthrough...
+        ;
+
+draw_crosshair:                                         ; BBC: TT15     ;$6C6D
+;===============================================================================
+; draws a cross-hair:
+;
+; in:   ZP_8E           cross-hair X-position
+;       ZP_8F           cross-hair Y-position
+;       ZP_90           cross-hair size
+;-------------------------------------------------------------------------------
+        lda # 24                        ; a default offset of 24. why?
+        ldx ZP_SCREEN                   ; check current screen
+        bpl :+                          ; skip over if not short-range chart
+        lda # $00                       ; change the offset to 0
+
+:       sta ZP_93                       ; record the offset chosen      ;$6C75
+
+        ; clip the cross-hair:
+        ;-----------------------------------------------------------------------
+        ; left edge:
+        ;
+        lda ZP_8E                       ; retrieve cross-hair X-position
+        sec                             ; subtract cross-hair size
+        sbc ZP_90                       ;  to get left-most position
+        bcs :+                          ; underflow?
+        lda # $00                       ; clip against left edge
+:       sta ZP_VAR_X1                   ; set line starting X           ;$6C80
+
+        ; right edge:
+        ;
+        lda ZP_8E                       ; retrieve cross-hair X-position
+        clc                             ; add cross-hair size
+        adc ZP_90                       ;  to get right-most position
+        bcc :+                          ; overflow?
+        lda # $ff                       ; clip against right edge
+:       sta ZP_VAR_X2                   ; set line ending X             ;$6C8B
+
+        ; centre-point:
+        ;
+        lda ZP_8F                       ; retrieve cross-hair Y-position
+        clc                             ; add the offset (?)
+        adc ZP_93                       ;  to get centre-point Y position
+
+        ; draw the horizontal line of the cross-hair:
+        ;
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         sta ZP_VAR_Y1
         sta ZP_VAR_Y2
-        ; TODO: do validation of line direction here so as to allow
-        ;       removal of validation in the line routine
         jsr draw_line
-        lda ZP_8F
-        sec 
-        sbc ZP_90
-        bcs :+
-        lda # $00
-:       clc                                                             ;$6CA2
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; TODO: line-validation not required (X1 & X2 are in correct order),
+        ;       so we could skip over validation in the routine
+        ;
+        sta ZP_VAR_Y                    ; use the optimised routine
+        jsr draw_straight_line          ;  for drawing straight lines
+.endif  ;///////////////////////////////////////////////////////////////////////
+
+        ; top edge:
+        ;
+        lda ZP_8F                       ; retrieve cross-hair Y-position
+        sec                             ; subtract cross-hair size
+        sbc ZP_90                       ;  to get top-most position
+        bcs :+                          ; underflow?
+        lda # $00                       ; clip against top edge
+:       clc                             ; add the offset (?)            ;$6CA2
         adc ZP_93
-        sta ZP_VAR_Y
-        lda ZP_8F
-        clc 
-        adc ZP_90
-        adc ZP_93
-        cmp # $98
+        sta ZP_VAR_Y1
+
+        ; bottom edge:
+        ;
+        lda ZP_8F                       ; retrieve cross-hair Y-position
+        clc
+        adc ZP_90                       ; add cross-hair size
+        adc ZP_93                       ;  and the offset (?)
+        cmp # 152                       ; overrun bottom of chart?
         bcc :+
-        ldx ZP_SCREEN
-        bmi :+
-        lda # $97
+        ldx ZP_SCREEN                   ; check which screen
+        bmi :+                          ; ignore for long-range
+        lda # 151                       ; clip for short-range
 :       sta ZP_VAR_Y2                                                   ;$6CB8
+
         lda ZP_8E
         sta ZP_VAR_X1
         sta ZP_VAR_X2
-        ; TODO: do validation of line direction here so as to allow
-        ;       removal of validation in the line routine
+        ; TODO: line-validation not required (Y1 & Y2 are in correct order),
+        ;       so we could skip over validation in the routine
         jmp draw_line
 
 
-_6cc3:                                                                  ;$6CC3
+_6cc3:                                                  ; BBC: TT126    ;$6CC3
 ;===============================================================================
-; BBC: ".TT126 ; default Circle with a cross-hair"
 ; TODO: calculate position from constants
 ;-------------------------------------------------------------------------------
         lda # 104               ; cross-hair X-position
@@ -774,7 +819,7 @@ _6cc3:                                                                  ;$6CC3
         lda # 16                ; cross-hair size
         sta ZP_90
 
-        jsr _6c6d               ; draw cross-hair?
+        jsr draw_crosshair
         
         lda PLAYER_FUEL         ; use the player's fuel count...
         sta ZP_VALUE_pt1        ; ... as the circle-radius!
@@ -782,28 +827,35 @@ _6cc3:                                                                  ;$6CC3
         jmp _6cfe               ; continue drawing the circle
 
 
-_6cda:                                                                  ;$6CDA
+_6cda:                                                  ; BBC: TT14     ;$6CDA
+;===============================================================================
+; draw a circle on a chart (short-range or galactic)
+; for the current system:
+;
+;-------------------------------------------------------------------------------
         ; is this the short-range or the galactic chart?
         ;
         lda ZP_SCREEN           ; are we on the local chart?
         bmi _6cc3               ; do setup for the local chart...
 
-        lda PLAYER_FUEL
-        lsr 
-        lsr 
+        ; draw range circle for long-range (galactic) chart:
+        ;-----------------------------------------------------------------------
+        lda PLAYER_FUEL         ; fuel amount determines jump distance
+        lsr                     ; divide by 4 to scale
+        lsr                     ; (max fuel is 70)
         sta ZP_VALUE_pt1
 
-        lda PSYSTEM_POS_X
-        sta ZP_8E
+        lda PSYSTEM_POS_X       ; get X-position of present system
+        sta ZP_8E               ; this will be cross-hair centre position X
 
-        lda PSYSTEM_POS_Y
-        lsr 
-        sta ZP_8F
+        lda PSYSTEM_POS_Y       ; get Y-position of present system
+        lsr                     ; divide by 2 to scale down to 128 height
+        sta ZP_8F               ; this will be cross-hair centre position Y
 
-        lda # $07
+        lda # 7                 ; set cross-hair size
         sta ZP_90
 
-        jsr _6c6d
+        jsr draw_crosshair
 
         lda ZP_8F
         clc 
@@ -811,6 +863,7 @@ _6cda:                                                                  ;$6CDA
         sta ZP_8F
 
 _6cfe:                                                                  ;$6CFE
+;===============================================================================
         lda ZP_8E               ; cross-hair X-position / centre-point?
         sta ZP_VAR_K3_LO        ; set circle X-position, lo-byte
 
@@ -1173,7 +1226,7 @@ inventory_screen:                                                       ;$6F16
         lda # TKN_FLIGHT_INVENTORY
         jsr print_flight_token_and_newpara
 
-        jsr draw_title_divider
+        jsr draw_line_divider_title
         jsr print_fuel_and_cash
         lda SHIP_HOLD            ; cargo capacity of the player's ship
         cmp # $1a
@@ -1249,7 +1302,8 @@ _6f82:                                                                  ;$6F82
         sta ZP_8F
         lda # $04
         sta ZP_90
-        jmp _6c6d
+        jmp draw_crosshair
+
 _6f98:                                                                  ;$6F98
         sta ZP_92
         clc 
@@ -1294,7 +1348,7 @@ _6fce:                                                                  ;$6FCE
         sta ZP_8F
         lda # $08
         sta ZP_90
-        jmp _6c6d
+        jmp draw_crosshair
 
 
 local_chart:                                                            ;$6FDB
@@ -1328,7 +1382,7 @@ local_chart:                                                            ;$6FDB
 
         jsr _6cda
         jsr _6f82
-        jsr _70a0
+        jsr get_galaxy_seed
 
         lda # $00
         sta ZP_AE
@@ -1516,13 +1570,14 @@ local_chart:                                                            ;$6FDB
         rts 
 
 
-_70a0:                                                                  ;$70A0
+get_galaxy_seed:                                        ; BBC: TT81     ;$70A0
 ;===============================================================================
-; to do with the seed
+; reset the seed to that of the current galaxy:
+;
 ;-------------------------------------------------------------------------------
-        ldx # 5                 ; seed is 6 bytes
-:       lda VAR_049C, x                                                 ;$70A2
-        sta ZP_SEED, x          ; store at $7F...$84
+        ldx # 5                 ; seed is 6 bytes (3 words)
+:       lda SEED_GALAXY, x      ; copy from the galaxy seed             ;$70A2
+        sta ZP_SEED, x          ;  to the "working" seed
         dex 
         bpl :-
 
@@ -1531,7 +1586,7 @@ _70a0:                                                                  ;$70A0
 
 _70ab:                                                                  ;$70AB
 ;===============================================================================
-        jsr _70a0
+        jsr get_galaxy_seed
         ldy # $7f
         sty ZP_VAR_T
         lda # $00
@@ -1730,9 +1785,9 @@ _71ca:                                                                  ;$71CA
         and # %11110111
         sta PLAYER_GALAXY
 _71e8:                                                                  ;$71E8
-        lda VAR_049C, x
+        lda SEED_GALAXY, x
         asl 
-        rol VAR_049C, x
+        rol SEED_GALAXY, x
         dex 
         bpl _71e8
 _71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71F2

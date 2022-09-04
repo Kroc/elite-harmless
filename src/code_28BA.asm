@@ -71,22 +71,29 @@ print_flight_token_and_divider:                                         ;$28D9
         jsr print_flight_token
 
 
-draw_title_divider:                                                     ;$28DC
+draw_line_divider_title:                                ; BBC: NLIN4    ;$28DC
 ;===============================================================================
 ; draws a line across the screen at Y = 19:
 ;
 ;-------------------------------------------------------------------------------
-.export draw_title_divider
+.export draw_line_divider_title
 
         lda # 19
-        bne _28e5               ; (always branches)
+        bne draw_line_divider           ; (always branches)
 
-_28e0:                                                                  ;$28E0
+
+draw_line_divider_galactic_chart:                       ; BBC: NLIN     ;$28E0
 ;===============================================================================
-        lda # 23
-       .cursor_down
+; the galactic chart uses a different position:
+;
+;-------------------------------------------------------------------------------
+        lda # 23                ; set the Y-position to draw the line
+       .cursor_down             ; move down one row
 
-_28e5:                                                                  ;$28E5
+        ; fallthrough...
+        ;
+
+draw_line_divider:                                      ; BBC: NLIN2    ;$28E5
 ;===============================================================================
 ; called from galactic chart screen;
 ; draws a line across the screen
@@ -2069,7 +2076,7 @@ _31c6:                                                                  ;$31C6
         jsr print_docked_str
 
         jsr _6f82
-        jsr _70a0
+        jsr get_galaxy_seed
         lda # $00
         sta ZP_AE
 _31d5:                                                                  ;$31D5

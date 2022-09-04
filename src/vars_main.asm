@@ -330,10 +330,19 @@ CARGO_ITEM              :=$04ef ; type of item                          ; QQ29
 PSYSTEM_GOVERNMENT      :=$04f0
 PSYSTEM_TECHLEVEL       :=$04f1
 PSYSTEM_POS             :=$049a
-PSYSTEM_POS_X           :=$049a
-PSYSTEM_POS_Y           :=$049b
+PSYSTEM_POS_X           :=$049a                                         ; QQ0
+PSYSTEM_POS_Y           :=$049b                                         ; QQ1
 
-VAR_049C                :=$049c ; another seed copy (indexed by X)
+SEED_GALAXY             :=$049c ; seed for the current galaxy           ; QQ21
+SEED_GALAXY_W0          :=$094c ; first word
+SEED_GALAXY_W0_LO       :=$094c ; lo-byte of first word
+SEED_GALAXY_W0_HI       :=$094d ; hi-byte of first word
+SEED_GALAXY_W1          :=$094e ; second word
+SEED_GALAXY_W1_LO       :=$094e ; lo-byte of second word
+SEED_GALAXY_W1_HI       :=$094f ; hi-byte of second word
+SEED_GALAXY_W2          :=$0950 ; third word
+SEED_GALAXY_W2_LO       :=$0950 ; lo-byte of third word
+SEED_GALAXY_W2_HI       :=$0951 ; hi-byte of third word
 
 ;-------------------------------------------------------------------------------
 ; NOTE: there are up-to 13 dust-particles at a time

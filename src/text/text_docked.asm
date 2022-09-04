@@ -141,7 +141,7 @@ tkn_docked_functions:                                                   ;$250C
 ; $0A   print character $0A -- ?
 .tkn_fn "0A",                   print_char                              ;=$5D
 ; $0B   draw a divider across the screen; used for page titles
-.tkn_fn "DIVIDER",              draw_title_divider                      ;=$5C
+.tkn_fn "DIVIDER",              draw_line_divider_title                 ;=$5C
 ; $0C   print a newline character -- $0C
 .tkn_fn "NEWLINE",              print_char                              ;=$5B
 ; $0D   ?

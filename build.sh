@@ -285,7 +285,62 @@ echo "  ======================================"
 cp "src/gfx/screen_main.koa" \
    "build/screen_main.koa"
 
+#-------------------------------------------------------------------------------
+
 echo "* elite-harmless.d64"
+echo "  --------------------------------------"
+clean
+
+options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES"
+
+echo -n "- assembling                        "
+
+# note that the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into the global
+# scope along with the main source code
+
+$cl65 $options \
+    --config "link/elite-harmless-d64.cfg" \
+    --start-addr \$0400 \
+     -m "build/elite-harmless.map" -vm \
+    -Ln "build/elite-harmless.ll" \
+     -o "bin/harmless.prg" \
+        "src/elite-harmless.asm" \
+        "src/text/text_pairs.asm" \
+        "src/text/text_flight.asm" \
+        "src/text/text_docked.asm" \
+        "src/c64/prgheader.asm"
+
+echo "[OK]"
+
+# compress and fast-load the program
+echo -n "- exomizing...                      "
+
+# NB: `lda #$00 sta $d011` turns the screen "off" so no background is
+# displayed. it also speeds up the processor (no VIC wait-states).
+# we don't need to turn the screen back on afterwards as Elite
+# does this itself during initialisation
+
+$exomizer \
+    -s "lda #\$00 sta \$d011 sta \$d020" \
+    -X "inc \$d020 dec \$d020" \
+    -o "bin/harmless-exo.prg" \
+    -- "bin/harmless.prg"
+
+echo "[OK]"
+echo -n "- write floppy disk image           "
+$mkd64 \
+    -o release/elite-harmless.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
+    1>/dev/null
+
+echo "[OK]"
+
+#-------------------------------------------------------------------------------
+
+echo "  --------------------------------------"
+echo "* elite-harmless-fastlines.d64"
 echo "  --------------------------------------"
 clean
 
@@ -328,7 +383,7 @@ $exomizer \
 echo "[OK]"
 echo -n "- write floppy disk image           "
 $mkd64 \
-    -o release/elite-harmless.d64 \
+    -o release/elite-harmless-fastlines.d64 \
     -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
     -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
     1>/dev/null
