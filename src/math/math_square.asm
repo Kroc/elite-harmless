@@ -2,8 +2,6 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "math_square.asm":
-;
 .segment        "CODE_3986"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -17,23 +15,25 @@ math_square_7bit:                                                       ;$3986
 ;-------------------------------------------------------------------------------
         and # %01111111         ; remove sign
 
+        ; fallthrough...
+        ;
 
-math_square:                                                            ;$3988
+; if the math lookup tables are being included,
+; we can use these to go faster
+; 
+.ifdef  FEATURE_MATHTABLES
+;///////////////////////////////////////////////////////////////////////////////
+
+math_square:                                            ; BBC: MLU2     ;$3988
 ;===============================================================================
 ; square a number:
 ; (i.e. A * A)
 ;
 ; in:   A       number to multiply with itself
 ; out:  A.P     16-bit result in A = hi, P = lo
-;
 ;-------------------------------------------------------------------------------
-; if the math lookup tables are being included,
-; we can use these to go faster
-; 
-.ifdef  FEATURE_MATHTABLES
-        ;///////////////////////////////////////////////////////////////////////
         tax                     ; use A as index into tables (i.e. A * A)
-        bne _399f               ; non-zero value?
+        bne multiply_unsigned_PX; non-zero value?
 
         ; zero-squared is zero!
         ;
@@ -48,17 +48,31 @@ _3992:  ;?
 _3997:  ;?
         and # %01111111
         sta ZP_VAR_P
-_399b:  ;?
-.export _399b
+
+        ; fallthrough...
+        ;
+
+multiply_unsigned_PQ:                                   ; BBC: MULTU    ;$399B
+;===============================================================================
+; unsigned multiplication of two 8-bit numbers:
+;
+; in:   ZP_VAR_P        multiplier, i.e. the left-hand-side of 'P * Q'
+;       ZP_VAR_Q        multiplicand, i.e. the right-hand-side of 'P * Q'
+;
+; out:  A.P             16-bit result returned in A.P, where P
+;                       is the lo-byte and A is the hi-byte
+;-------------------------------------------------------------------------------
+.export multiply_unsigned_PQ
 
         ldx ZP_VAR_Q
 
+multiply_unsigned_PX:
         ;-----------------------------------------------------------------------
         ; NOTE: must preserve Y
-_399f:  txa 
+        txa 
         sta @sm1+1
         sta @sm3+1
-        eor # $ff
+        eor # %11111111
         sta @sm2+1
         sta @sm4+1
 
@@ -71,13 +85,23 @@ _399f:  txa
 
         rts 
 
-.else   ;///////////////////////////////////////////////////////////////////////
+.else   ; (no fast-tables)
+;///////////////////////////////////////////////////////////////////////////////
+
+math_square:                                            ; BBC: MLU2     ;$3988
+;===============================================================================
+; square a number:
+; (i.e. A * A)
+;
+; in:   A       number to multiply with itself
+; out:  A.P     16-bit result in A = hi, P = lo
+;-------------------------------------------------------------------------------
         ; original elite square routine, or elite-harmless
         ; without the math lookup tables:
         ; 
         sta ZP_VAR_P            ; put aside initial value
         tax                     ; and again
-       .bnz _399f               ; if not zero, begin multiplication
+       .bnz multiply_unsigned_PX; if not zero, begin multiplication
 
         ; multiplying with zero?
         ; result is zero!
@@ -96,13 +120,27 @@ _3992:                                                                  ;$3992
 _3997:                                                                  ;$3997
         and # %01111111         ; strip the sign
         sta ZP_VAR_P            ; store this as the working multiplier
-_399b:                                                                  ;$399B
-.export _399b
+
+        ; fallthrough...
+        ;
+
+multiply_unsigned_PQ:                                   ; BBC: MULTU    ;$399B
+;===============================================================================
+; unsigned multiplication of two 8-bit numbers:
+;
+; in:   ZP_VAR_P        multiplier, i.e. the left-hand-side of 'P * Q'
+;       ZP_VAR_Q        multiplicand, i.e. the right-hand-side of 'P * Q'
+;
+; out:  A.P             16-bit result returned in A.P, where P
+;                       is the lo-byte and A is the hi-byte
+;-------------------------------------------------------------------------------
+.export multiply_unsigned_PQ
 
         ldx ZP_VAR_Q            ; load our multiplicand
         beq _398d               ; are we multiplying by zero!?
 
-_399f:                                                                  ;$399F
+multiply_unsigned_PX:                                                   ;$399F
+        ;-----------------------------------------------------------------------
         ; NOTE: this routine must preserve Y
         dex                     ; subtract 1 because carry will add one already 
         stx ZP_VAR_T            ; this is the amount to add for each carry
@@ -154,4 +192,5 @@ _399f:                                                                  ;$399F
 
         rts 
 
-.endif  ;///////////////////////////////////////////////////////////////////////
+;///////////////////////////////////////////////////////////////////////////////
+.endif

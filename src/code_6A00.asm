@@ -545,17 +545,29 @@ _6b5a:                                                                  ;$6B5A
 .endif
 
 
-_6ba9:                                                                  ;$6BA9
+get_system_info:                                        ; BBC: TT24     ;$6BA9
 ;===============================================================================
 ; extract target planet information:
 ;
 ; a more visual guide to the way planet information is generated from the seed
 ; can be seen here: <http://wiki.alioth.net/index.php/Random_number_generator>
 ;-------------------------------------------------------------------------------
+        ; economy:
+        ;-----------------------------------------------------------------------
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;            ^^^
+        ;
         lda ZP_SEED_W0_HI
         and # %00000111
         sta TSYSTEM_ECONOMY
 
+        ; government:
+        ;-----------------------------------------------------------------------
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;                                      ^^^
+        ;
         lda ZP_SEED_W1_LO
         lsr 
         lsr 
@@ -563,59 +575,71 @@ _6ba9:                                                                  ;$6BA9
         and # %00000111
         sta TSYSTEM_GOVERNMENT
 
-        lsr 
-        bne :+
-        lda TSYSTEM_ECONOMY
-        ora # %00000010
+        ; anarchy (0) and fuedal (1) systems cannot be rich
+        ; (Japan would like a word)
+        lsr                             ; push off bit 0, any number above 1
+        bne :+                          ;  will have bits remaining
+
+        lda TSYSTEM_ECONOMY             ; patch the economy byte
+        ora # %00000010                 ;  to avoid "rich" (value 0)
         sta TSYSTEM_ECONOMY
-:       lda TSYSTEM_ECONOMY                                              ;$6BC5
-        eor # %00000111
-        clc 
+
+        ; tech-level is determined by a combination of economy,
+        ; a random jitter, and the type of government:
+        ;
+:       lda TSYSTEM_ECONOMY             ; use the economy as the base   ;$6BC5
+        eor # %00000111                 ;  but flip the bits
+        clc                             ;  to form the base tech-level
         sta TSYSTEM_TECHLEVEL
 
-        lda ZP_SEED_W1_HI
-        and # %00000011
+        lda ZP_SEED_W1_HI               ; add a random jitter from the seed
+        and # %00000011                 ;  (0-3)
         adc TSYSTEM_TECHLEVEL
         sta TSYSTEM_TECHLEVEL
 
-        lda TSYSTEM_GOVERNMENT
-        lsr 
-        adc TSYSTEM_TECHLEVEL
-        sta TSYSTEM_TECHLEVEL
+        lda TSYSTEM_GOVERNMENT          ; take the government type,
+        lsr                             ;  right-shift (/2)
+        adc TSYSTEM_TECHLEVEL           ;  and apply to
+        sta TSYSTEM_TECHLEVEL           ;  the tech-level
 
-        asl 
-        asl 
-        adc TSYSTEM_ECONOMY
-        adc TSYSTEM_GOVERNMENT
-        adc # $01
-        sta TSYSTEM_POPULATION
+        ; now use the tech-level as a basis of population:
+        asl                             ; x2
+        asl                             ; x4
+        adc TSYSTEM_ECONOMY             ; add the economy level
+        adc TSYSTEM_GOVERNMENT          ;  and the government type
+        adc # $01                       ;  +1, and use as population
+        sta TSYSTEM_POPULATION          ;  in billions, /10 (fractional)
 
-        lda TSYSTEM_ECONOMY
-        eor # %00000111
-        adc # $03
-        sta ZP_VAR_P
+        ; productivity:
+        ;-----------------------------------------------------------------------
+        lda TSYSTEM_ECONOMY             ; again, begin with the
+        eor # %00000111                 ;  inverse of economy
+        adc # $03                       ;  add a floor of 3 (in case of zero)
+        sta ZP_VAR_P                    ;  put this aside for multiplication
 
-        lda TSYSTEM_GOVERNMENT
-        adc # $04
-        sta ZP_VAR_Q
+        lda TSYSTEM_GOVERNMENT          ; use the government as the other
+        adc # $04                       ;  side of the equation; with a floor
+        sta ZP_VAR_Q                    ;  of 4 (in case of zero)
 
-        jsr _399b
+        jsr multiply_unsigned_PQ        ; multiply P by Q
 
-        lda TSYSTEM_POPULATION
-        sta ZP_VAR_Q
+        lda TSYSTEM_POPULATION          ; multiply the result (in P)
+        sta ZP_VAR_Q                    ;  against the population
 
-        jsr _399b
+        ; TODO: couldn't we just use `ldx` and call `multiply_unsigned_PX`?
+        jsr multiply_unsigned_PQ
 
-        asl ZP_VAR_P
-        rol 
-        asl ZP_VAR_P
-        rol 
-        asl ZP_VAR_P
-        rol 
-        sta TSYSTEM_PRODUCTIVITY_HI
+        ; lastly multiply the 16-bit result (A.P) by 8
+        asl ZP_VAR_P                    ; x2 (lo)
+        rol                             ; x2 (hi)
+        asl ZP_VAR_P                    ; x4 (lo)
+        rol                             ; x4 (hi)
+        asl ZP_VAR_P                    ; x8 (lo)
+        rol                             ; x8 (hi)
+        sta TSYSTEM_PRODUCTIVITY_HI     ; store productivity hi-byte
 
-        lda ZP_VAR_P
-        sta TSYSTEM_PRODUCTIVITY_LO
+        lda ZP_VAR_P                    ; retrieve result lo-byte
+        sta TSYSTEM_PRODUCTIVITY_LO     ; store productivity lo-byte
 
         rts 
 
@@ -1598,7 +1622,7 @@ _7135:                                                                  ;$7135
         asl 
         rol TSYSTEM_DISTANCE_HI
         sta TSYSTEM_DISTANCE_LO
-        jmp _6ba9
+        jmp get_system_info
 
 
 _714f:                                                                  ;$714F
@@ -2178,7 +2202,7 @@ _74a1:                                                                  ;$74A1
 
 _74a2:                                                                  ;$74A2
 ;===============================================================================
-        jsr _399b
+        jsr multiply_unsigned_PQ
 
 _74a5:                                                                  ;$74A5
 ;===============================================================================
@@ -4590,7 +4614,7 @@ _8189:                                                                  ;$8189
         lda # $de
         sta ZP_VAR_Q
         stx ZP_VAR_U
-        jsr _399b
+        jsr multiply_unsigned_PQ
         ldx ZP_VAR_U
         ldy ZP_VALUE_pt4
         bpl _81a7
