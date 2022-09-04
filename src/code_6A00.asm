@@ -449,7 +449,7 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         eor ZP_SEED_W0_HI               ;  with that byte
         and # %00000111                 ;  and take the low 3 bits
         sta ZP_8E                       ; (preserve for later)
-        cmp # $06                       ; the lower 5 values
+        cmp # 6                         ; the lower 5 values
         bcs :+                          ;  will get the adjective
 
         ; print "HARMLESS" | "SLIMY" | "BUG-EYED" | "HORNED" |
@@ -678,7 +678,7 @@ galactic_chart:                                         ; BBC: TT22     ;$6C1C
         jsr draw_line_divider           ; (chart is 128px high)
 
         ; draw the circle for the current system
-        jsr _6cda
+        jsr draw_range_circle
 
         ; draw stars on chart:
         ;-----------------------------------------------------------------------
@@ -807,7 +807,7 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
         jmp draw_line
 
 
-_6cc3:                                                  ; BBC: TT126    ;$6CC3
+draw_range_local:                                       ; BBC: TT126    ;$6CC3
 ;===============================================================================
 ; TODO: calculate position from constants
 ;-------------------------------------------------------------------------------
@@ -820,30 +820,30 @@ _6cc3:                                                  ; BBC: TT126    ;$6CC3
         sta ZP_90
 
         jsr draw_crosshair
-        
+
         lda PLAYER_FUEL         ; use the player's fuel count...
-        sta ZP_VALUE_pt1        ; ... as the circle-radius!
+        sta ZP_VALUE_pt1        ; ... as the circle-radius! (no scaling)
 
-        jmp _6cfe               ; continue drawing the circle
+        jmp draw_chart_circle   ; continue drawing the circle
 
 
-_6cda:                                                  ; BBC: TT14     ;$6CDA
+draw_range_circle:                                      ; BBC: TT14     ;$6CDA
 ;===============================================================================
-; draw a circle on a chart (short-range or galactic)
+; draw the jump range circle on a chart (short-range or galactic)
 ; for the current system:
 ;
 ;-------------------------------------------------------------------------------
         ; is this the short-range or the galactic chart?
         ;
         lda ZP_SCREEN           ; are we on the local chart?
-        bmi _6cc3               ; do setup for the local chart...
+        bmi draw_range_local    ; do setup for the local chart...
 
         ; draw range circle for long-range (galactic) chart:
         ;-----------------------------------------------------------------------
         lda PLAYER_FUEL         ; fuel amount determines jump distance
         lsr                     ; divide by 4 to scale
         lsr                     ; (max fuel is 70)
-        sta ZP_VALUE_pt1
+        sta ZP_VALUE_pt1        ; BBC: K
 
         lda PSYSTEM_POS_X       ; get X-position of present system
         sta ZP_8E               ; this will be cross-hair centre position X
@@ -857,17 +857,25 @@ _6cda:                                                  ; BBC: TT14     ;$6CDA
 
         jsr draw_crosshair
 
-        lda ZP_8F
-        clc 
-        adc # $18
-        sta ZP_8F
+        lda ZP_8F               ; add 24 (?) to the Y-position of
+        clc                     ;  the cross-hair so that the centre
+        adc # 24                ;  of the circle matches the centre
+        sta ZP_8F               ;  of the cross hair
 
-_6cfe:                                                                  ;$6CFE
+        ; fallthrough to draw the circle...
+        ;
+
+draw_chart_circle:                                      ; BBC: TT128    ;$6CFE
 ;===============================================================================
-        lda ZP_8E               ; cross-hair X-position / centre-point?
+; draw a circle on a chart:
+;
+; this routine transfers the 8-bit cross-hair parameters
+; into the 16-bit circle-drawing parameters before invoking
+;-------------------------------------------------------------------------------
+        lda ZP_8E               ; get cross-hair X-position
         sta ZP_VAR_K3_LO        ; set circle X-position, lo-byte
 
-        lda ZP_8F               ; cross-hair Y-position / centre-point?
+        lda ZP_8F               ; get cross-hair Y-position
         sta ZP_VAR_K4_LO        ; set circle Y-position, lo-byte
 
         ; the circle X & Y positions are 16-bit, so set the hi-bytes to 0
@@ -876,13 +884,11 @@ _6cfe:                                                                  ;$6CFE
         stx ZP_VAR_K4_HI
         stx ZP_VAR_K3_HI
 
-        ; BBC: "LSP : step size for circle = 1"
-        inx 
+        inx                     ; BBC: set X=1 to reset ball line-heap
         stx ZP_7E               ;?
 
-        ; BBC: "STP : load step =2, fairly big circle with small step size"
-        ldx # $02
-        stx ZP_AC               ;?
+        ldx # $02               ; BBC: set X=2 for step-size
+        stx ZP_CIRCLE_STEP
 
         jmp _805e               ; draw circle?
 
@@ -1380,13 +1386,13 @@ local_chart:                                                            ;$6FDB
         lda # TKN_FLIGHT_SHORT_RANGE_CHART
         jsr print_flight_token_and_divider
 
-        jsr _6cda
+        jsr draw_range_circle
         jsr _6f82
         jsr get_galaxy_seed
 
         lda # $00
         sta ZP_AE
-        
+
         ; to avoid names overlapping, the chart will not print any two planet
         ; names on the same screen row (even if they would fit). the zero-page
         ; 'current' poly-object is erased to use that space
@@ -1405,7 +1411,7 @@ local_chart:                                                            ;$6FDB
         ;
 @loop:  lda ZP_SEED_W1_HI                                               ;$7009
         sec                     ; subtract our current X location,
-        sbc PSYSTEM_POS_X       ; from the given planet
+        sbc PSYSTEM_POS_X       ;  from the given planet
         bcs :+
 
         ; we want to reduce the relative distance to a positive number;
@@ -1416,7 +1422,7 @@ local_chart:                                                            ;$6FDB
         ; is the given planet within the
         ; visible range of the local chart?
         ;
-:       cmp # $14               ;=20                                    ;$7015
+:       cmp # 20                                                        ;$7015
         bcs @next               ; no? move to the next planet
 
         ; the Y-coordinate of a planet is taken from the hi-byte of W0:
@@ -1546,9 +1552,9 @@ local_chart:                                                            ;$6FDB
         ;       used for drawing a circle, and do away with the need to
         ;       clear the circle buffer -- twice! -- every time
         ;
-        jsr clear_circle_buffer
-        jsr draw_circle
-        jsr clear_circle_buffer
+        jsr clear_sun_buffer
+        jsr draw_sun
+        jsr clear_sun_buffer
 
         ; move to next planet in the galaxy
         ;-----------------------------------------------------------------------
@@ -2824,12 +2830,12 @@ _78f7:                                                                  ;$78F7
         sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _78f7
-        sty TEMP_COUNTER
+        sty ZP_TEMP_COUNTER
         ldy # $02
 _7903:                                                                  ;$7903
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        eor TEMP_COUNTER
+        eor ZP_TEMP_COUNTER
         sta $ffff, y                    ;!?
         cpy # $06
         bne _7903
@@ -2866,7 +2872,7 @@ _7911:                                                                  ;$7911
 _7948:                                                                  ;$7948
         dey 
         bpl _7911
-        ldy TEMP_COUNTER
+        ldy ZP_TEMP_COUNTER
         cpy ZP_A8
         bcc _78f5
         pla 
@@ -2999,7 +3005,7 @@ _79ed:                                                                  ;$79ED
         sta ZP_POLYOBJ01_XPOS_pt1, x
         dex 
         bpl _79ed
-        sty TEMP_COUNTER
+        sty ZP_TEMP_COUNTER
         lda ZP_POLYOBJ01_YPOS_pt1
         clc 
         adc VAR_050E
@@ -3034,7 +3040,7 @@ _7a36:                                                                  ;$7A36
 _7a38:                                                                  ;$7A38
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        eor TEMP_COUNTER
+        eor ZP_TEMP_COUNTER
         sta $ffff, y            ;!?
         cpy # $06
         bne _7a38
@@ -3060,7 +3066,7 @@ _7a46:                                                                  ;$7A46
 _7a6c:                                                                  ;$7A6C
         dey 
         bpl _7a46
-        ldy TEMP_COUNTER
+        ldy ZP_TEMP_COUNTER
         cpy ZP_A8
         bcs _7a78
         jmp _79eb
@@ -3205,20 +3211,24 @@ _7b44:                                                                  ;$7B44
         stx line_points_x       ; mark line-buffer-X as 'empty'
         stx line_points_y       ; mark line-buffer-Y as 'empty'
 
-clear_circle_buffer:                                                    ;$7B4F
+        ; fallthrough...
+        ;
+
+clear_sun_buffer:                                                       ;$7B4F
 ;===============================================================================
-; clear the circle buffer:
+; clear the sun buffer:
 ;-------------------------------------------------------------------------------
-        ; length of the circle buffer (199 scanlines)
-        ldy # 199
+        ldy # 199               ; size of the sun buffer (199 scanlines)
         lda # 0                 ; erase...
 
-:       sta CIRCLE_BUFFER, y    ; set to 0                              ;$7B53
+        ; TODO: unrolling this a little might help
+        ;
+:       sta SUN_BUFFER, y       ; set to 0                              ;$7B53
         dey                     ; move to next line
        .bnz :-                  ; all lines?
 
         dey                     ; change Y to $FF
-        sty CIRCLE_BUFFER       ; write to first entry (TODO: why?)
+        sty SUN_BUFFER          ; write to first entry (TODO: why?)
 
         rts 
 
@@ -3391,7 +3401,6 @@ damage_player:                                                          ;$7BD2
 :       ldx # $00               ; cap shields to zero                   ;$7BF9
         stx PLAYER_SHIELD_REAR  ; -- prevent underflow to max-shields
 
-
         ; apply excess damage directly to your hull!
         ;
         ; due to the subtraction before, the A register contains the
@@ -3466,13 +3475,16 @@ _7c24:                                                                  ;$7C24
         sta hull_pointer_station_hi
 _7c61:                                                                  ;$7C61
         ; scanlines for sun?
-        lda #< CIRCLE_BUFFER
+        lda #< SUN_BUFFER
         sta ZP_POLYOBJ_HEAP_LO
-        lda #> CIRCLE_BUFFER
+        lda #> SUN_BUFFER
         sta ZP_POLYOBJ_HEAP_HI
 
         ; select 'station' ship-type
         lda # HULL_COREOLIS
+
+        ; fallthrough...
+        ;
 
 spawn_ship:                                                             ;$7C6B
 ;===============================================================================
@@ -3704,7 +3716,7 @@ _7d84:                                                                  ;$7D84
         lsr 
         bcc _7d8c
 
-        jmp draw_circle
+        jmp draw_sun
 
 _7d8c:                                                                  ;$7D8C
         jsr _80bb
@@ -3821,7 +3833,7 @@ _7e54:                                                                  ;$7E54
         sta ZP_A8
 _7e58:                                                                  ;$7E58
         ldx # $00
-        stx TEMP_COUNTER
+        stx ZP_TEMP_COUNTER
         dex 
         stx ZP_A9
 _7e5f:                                                                  ;$7E5F
@@ -3915,7 +3927,7 @@ _7efd:                                                                  ;$7EFD
 _7f06:                                                                  ;$7F06
         lda ZP_AB
         clc 
-        adc ZP_AC
+        adc ZP_CIRCLE_STEP
         and # %00111111
         sta ZP_AB
         jmp _7e5f
@@ -3943,15 +3955,15 @@ _7f1d:                                                                  ;$7F1D
         jmp _7f67
 
 
-draw_circle:                                                            ;$7F22
+draw_sun:                                                               ;$7F22
 ;===============================================================================
-; calculate the scan-lines of a circle and draw it:
+; calculate the scan-lines of a sun and draw it:
 ;
-; rather than tracing the perimiter of the circle as you might have seen with
-; BASIC or a number of generalised circle routines, Elite breaks the circle
-; down into scanlines, computing each slice of the circle as a distance from
-; the horizontal midpoint. this distance is then mirrored right-to-left, and
+; because the sun has to be drawn solid, Elite breaks the sun down into
+; scanlines, computing each slice of the circle as a distance from the
+; horizontal midpoint. this distance is then mirrored right-to-left, and
 ; the whole line mirrored from the bottom half of the circle to the top half
+;
 ; TODO: check this is the case, not there yet in the disassembly commenting
 ;
 ; this approach achieves more than just minimising the number of calculations
@@ -3961,39 +3973,39 @@ draw_circle:                                                            ;$7F22
 ; Braben's more pragmatic, hacker approach to code
 ;
 ; the sun, being solid, is too large to draw and erase each frame so instead
-; one scanline is erased and redrawn at a time. this means that the circle-
+; one scanline is erased and redrawn at a time. this means that the sun-
 ; buffer (used to store circle-width per scanline) is used to erase the
 ; previous frame, before being updated with new values
 ;
-; in:   ZP_VAR_K3               circle X-position (16-bits)
-;       ZP_VAR_K4               circle Y-position (16-bits)
+; in:   ZP_VAR_K3               sun X-position (16-bits)
+;       ZP_VAR_K4               sun Y-position (16-bits)
 ;       ZP_CIRCLE_RADIUS        radius
 ;
 ;-------------------------------------------------------------------------------
-        ; TODO: enable the circle buffer?
+        ; TODO: enable the sun buffer?
         ; (value is $FF when buffer is clear)
         lda # $01
-        sta CIRCLE_BUFFER
+        sta SUN_BUFFER
 
-        ; check the circle is visible in the viewport:
+        ; check the sun is visible in the viewport:
         ;-----------------------------------------------------------------------
-        ; carry will be clear if the circle is out of sight; for drawing the
-        ; stars on the short-range chart this will always be the case, but if
-        ; the sun in the cockpit-view goes out of sight it will be erased
+        ; carry will be clear if the sun is out of sight; for drawing the stars
+        ; on the short-range chart this will always be the case, but if the sun
+        ; in the cockpit-view goes out of sight it will be erased
         ;
         ; note that this routine sets some
         ; variables required for drawing:
         ;
         ;       P3.P2           bottom-edge (Y-position + radius)
-        ;                       of the circle (signed, 16-bits)
-        ;                       
-        jsr check_circle        ; is the circle visible?
-        bcs _7f13               ; if circle is out of sight, erase the sun
+        ;                       of the sun (signed, 16-bits)
+        ;
+        jsr check_circle        ; is the sun visible?
+        bcs _7f13               ; if the sun is out of sight, erase it
 
         ; calculate extent of fringes:
         ; (i.e. firery edge of the sun)
         ;-----------------------------------------------------------------------
-        ; the circle's radius is checked against three different scales
+        ; the sun's radius is checked against three different scales
         ; and for each, a true/false bit is shifted into the bottom of
         ; register A. this should give the results:
         ;
@@ -4004,120 +4016,120 @@ draw_circle:                                                            ;$7F22
         ;
         lda # %00000000
         ldx ZP_CIRCLE_RADIUS
-        cpx # 96                ; circle width >= 192?
+        cpx # 96                ; sun radius >= 192?
         rol                     ; (shift the carry bit in)
-        cpx # 40                ; circle width >= 80?
+        cpx # 40                ; sun radius >= 80?
         rol                     ; (shift the carry bit in)
-        cpx # 16                ; circle width >= 32?
+        cpx # 16                ; sun radius >= 32?
         rol                     ; (shift the carry bit in)
-        sta TEMP_COUNTER        ; "fringe size"
+        sta ZP_TEMP_COUNTER     ; "fringe size"
 
-        ; clip bottom of circle to viewport:
+        ; clip bottom of sun to viewport:
         ;-----------------------------------------------------------------------
-        ; we have determined that the circle is visible, even partially, within
-        ; the viewport, but it may be overlapping the edges
+        ; we have determined that the sun is visible, even partially,
+        ; within the viewport, but it may be overlapping the edges
         ;
         lda ZP_VIEWH            ; viewport height (-1)
                                 ; (143 for cockpit, 199 for menu pages)
-        
-        ; the circle's bottom-edge value is 16-bit, so anything > 256
-        ; automatically implies the circle extends below the viewport.
+
+        ; the sun's bottom-edge value is 16-bit, so anything > 256
+        ; automatically implies the sun extends below the viewport.
         ; since A is currently the viewport height, a branch here
-        ; clips the circle's bottom-edge to the viewport's
+        ; clips the sun's bottom-edge to the viewport's
         ;
-        ldx ZP_VAR_P3           ; bottom of circle, hi byte
+        ldx ZP_VAR_P3           ; bottom of sun, hi byte
        .bnz :+                  ; any bit there indicates >256 value
 
-        ; the circle's bottom edge is somewhere 0-256;
+        ; the sun's bottom edge is somewhere 0-256;
         ; now compare against the viewport height:
         ;
-        cmp ZP_VAR_P2           ; circle's bottom edge, lo-byte
+        cmp ZP_VAR_P2           ; sun's bottom edge, lo-byte
        .blt :+                  ; if over, clip to the viewport
 
-        ; circle's bottom-edge is within the viewport
+        ; sun's bottom-edge is within the viewport
         ; -- it must be a non-zero value however
         ;
-        lda ZP_VAR_P2           ; circle's bottom-edge, lo-byte
+        lda ZP_VAR_P2           ; sun's bottom-edge, lo-byte
        .bnz :+                  ; non-zero is okay, skip over
 
         lda # $01               ; set to 1 (TODO: why?)
-:       sta ZP_A8               ; circle's bottom-edge (clipped)        ;$7F4B
+:       sta ZP_A8               ; sun's bottom-edge (clipped)           ;$7F4B
 
-        ; determine portion of circle to draw(?)
+        ; determine portion of sun to draw(?)
         ;-----------------------------------------------------------------------
-        ; since we draw circles as a series of horizontal scanlines, we need
-        ; to determine the visible portion of the circle in terms of a first
-        ; and last scanline because we may have a complex situation such as a
-        ; circle whose centre-point is *above* the viewport, but the radius is
-        ; so large that the bottom-edge of the circle is *below* the viewport,
-        ; meaning that only a sub-portion of the radius (both top and bottom)
-        ; is visible! 
+        ; since we draw the sun as a series of horizontal scanlines, we need
+        ; to determine the visible portion of the sun in terms of a first and
+        ; last scanline because we may have a complex situation such as a sun
+        ; whose centre-point is *above* the viewport, but the radius is so
+        ; large that the bottom-edge of the sun is *below* the viewport,
+        ; meaning that only a sub-portion of the radius (both top and
+        ; bottom) is visible!
         ; 
-        ; the first task is check where the circle's
+        ; the first task is check where the sun's
         ; centre point is in relation to the viewport
         ;
         lda ZP_VIEWH            ; height of the viewport (-1)
         sec                     ; (e.g. 143 for cockpit, 199 for menu pages)
-        sbc ZP_VAR_K4_LO        ; subtract cirlce Y-position, lo-byte
+        sbc ZP_VAR_K4_LO        ; subtract sun Y-position, lo-byte
         tax                     ; put aside the calculated lo-byte
 
         ; validate the hi-byte:
         ;
-        ; if the circle's Y position is off-screen, the hi-byte will be
-        ; a non-zero value. we want to work out if the circle's centre
+        ; if the sun's Y position is off-screen, the hi-byte will be
+        ; a non-zero value. we want to work out if the sun's centre
         ; is ABOVE, WITHIN, or BELOW the screen
         ;
         ; subtracting the hi-byte from zero will give us:
         ;
-        ; 0     the circle's centre is within the screen Y=0...255,
+        ; 0     the sun's centre is within the screen Y=0...255,
         ;       as the hi-bytes are both zero
         ;
-        ; 128+  the circle's hi-byte is positive (0-127),
-        ;       ergo, the circle's centre is below the screen.
+        ; 128+  the sun's hi-byte is positive (0-127),
+        ;       ergo, the sun's centre is below the screen.
         ;       in this instance we invert the result to get
         ;       back to an absolute positive value
         ;
-        ; >0    the cricle's hi-byte is negative (bit 7 set),
-        ;       ergo, the circle's centre is above the screen
+        ; >0    the sun's hi-byte is negative (bit 7 set),
+        ;       ergo, the sun's centre is above the screen
         ;
         lda # $00               ; subtract from zero:
-        sbc ZP_VAR_K4_HI        ; cirlce Y-position, hi-byte
+        sbc ZP_VAR_K4_HI        ; sun Y-position, hi-byte
         bmi _7f16               ; if result negative, invert the value
        .bnz :+                  ; if result positive, skip ahead
 
         ; result hi-byte is zero; if the result lo-byte is zero, the
-        ; circle's centre is directly on the viewport's bottom edge!
-        ; ergo, there is no bottom-half to the circle!
+        ; sun's centre is directly on the viewport's bottom edge!
+        ; ergo, there is no bottom-half to the sun!
         ;
         inx                     ; (a rather clumsy way to check
         dex                     ;  if X is currently zero)
         beq _7f1d               ; if zero, draw top-half only(?)
 
-        ; although we've determined that the circle's Y-centre point is within
-        ; the viewport, we still need to know how much of the circle's radius
-        ; is within that viewport, as this will be the actual number of scan-
-        ; lines we need to draw for the bottom half of the circle
+        ; although we've determined that the sun's Y-centre point is within
+        ; the viewport, we still need to know how much of the sun's radius is
+        ; within that viewport, as this will be the actual number of scan-
+        ; lines we need to draw for the bottom half of the sun
         ;
         ; where the X-register is currently the number of scanlines between
-        ; the circle's Y-centre and the bottom of the viewport, check if
-        ; the circle's radius fits within that space:
+        ; the sun's Y-centre and the bottom of the viewport, check if the
+        ; sun's radius fits within that space:
         ;
         cpx ZP_CIRCLE_RADIUS    ; when the radius doesn't fit,
        .blt _7f67               ; clip it using the value we calculated (X)
 
-        ; the circle's south radius fits within the viewport: that's how
-        ; many scanlines to draw for the bottom half of the cirlce
+        ; the sun's south radius fits within the viewport:
+        ; that's how many scanlines to draw for the bottom half of the sun
         ;
 :       ldx ZP_CIRCLE_RADIUS                                            ;$7F63
         lda # $00
 
 _7f67:                                                                  ;$7F67
         ;-----------------------------------------------------------------------
-        ; X = number of scanlines to draw for the bottom-half of the circle?
+        ; X = number of scanlines to draw for the bottom-half of the sun?
         stx ZP_TEMP_ADDR3_LO
         sta ZP_TEMP_ADDR3_HI    ; can be $FF?
 
-        ; the specifics of the algorithm used to generate the circle are
+        ; the specifics of the algorithm used to generate the sun are
         ; explained in the section below, but for now just know that we
         ; need to square (multiply by itself) the radius and put it aside
         ;
@@ -4127,16 +4139,16 @@ _7f67:                                                                  ;$7F67
         lda ZP_VAR_P            ; (P = result, lo-byte)
         sta ZP_B2               ; squared 16-bit radius lo
 
-        ; IMPORTANT: because we erase and redraw each scanline of the circle,
-        ; and the circle from the previous frame is likely to be in a different
+        ; IMPORTANT: because we erase and redraw each scanline of the sun,
+        ; and the sun from the previous frame is likely to be in a different
         ; position, we must walk all scanlines of the viewport to ensure that
         ; every line of the previous frame is erased, not just the ones that
-        ; lie within the new circle. for speed/simplicity of code, the walk
+        ; lie within the new sun. for speed/simplicity of code, the walk
         ; is done from the bottom of the viewport, upwards
         ;
         ldy ZP_VIEWH            ; height of viewport
 
-        ; copy circle centre-point to YY-LO/HI for the
+        ; copy sun centre-point to YY-LO/HI for the
         ; line-clipping and drawing routines used later
         ; TODO: where does short-range chart set SUNX??
         lda ZP_SUNX_LO
@@ -4146,25 +4158,25 @@ _7f67:                                                                  ;$7F67
 
 @_7f80:                                                                 ;$7F80
         ;-----------------------------------------------------------------------
-        ; is the last scanline of the circle on the viewport border(?)
+        ; is the last scanline of the sun on the viewport border(?)
         ; this will never be the case with the short-range chart, so it skips
         ; TODO: where does this come into play?
         ;
         cpy ZP_A8
         beq @calc               ; if yes, move ahead with next step
 
-        lda CIRCLE_BUFFER, y
+        lda SUN_BUFFER, y
        .bze :+                  ; if half-width is 0, no line
         jsr _28f3               ; calculate the line-width/pos & draw
 :       dey                     ; next scanline                         ;$7F8C
        .bnz @_7f80              ; continue scanning. reaching zero
                                 ; (top of screen) also exits
 
-@calc:  ; slice & draw circle:                                          ;$7F8F
+@calc:  ; slice & draw sun:                                             ;$7F8F
         ;=======================================================================
-        ; this is the main loop that walks along the scanlines of the circle,
-        ; calculating the width of each to form the curvature of the circle,
-        ; i.e, as we approach the bottom of the circle, the width becomes less
+        ; this is the main loop that walks along the scanlines of the sun,
+        ; calculating the width of each to form the curvature of the sun,
+        ; i.e, as we approach the bottom of the sun, the width becomes less
         ;
         ; this curvature is produced via a form of Pythagoras' theorem (the
         ; thing about right-angled triangles and their sides) which does not
@@ -4175,9 +4187,9 @@ _7f67:                                                                  ;$7F67
         ; 
         ;       q = SQR( r^2 - n^2 )
         ;
-        ; where r is the circle's radius, and n is the position within the
+        ; where r is the sun's radius, and n is the position within the
         ; radius to 'slice' the circle. the result, q, is the distance from
-        ; the horizontal mid-point of the circle to the edge (for the given
+        ; the horizontal mid-point of the sun to the edge (for the given
         ; scanline, n) -- the result is doubled to mirror horizontally
         ;
         ; why exactly this is able to produce a curve is beyond me,
@@ -4191,14 +4203,14 @@ _7f67:                                                                  ;$7F67
         ; "r^2" has already been calculated previously and
         ; is stored in ZP_VAR_B2+B3 ("B3.B2" -- hi, lo)
         ;
-        ; begin by squaring the current circle scanline:
+        ; begin by squaring the current sun scanline:
         ;
         lda ZP_TEMP_ADDR3_LO    ; current scanline "n"
         jsr math_square         ; square, the hi-byte will be in P
         sta ZP_VAR_T            ; (P.T = n^2)
 
         ; calculate the difference between the squares of
-        ; the circle's radius and the current scanline:
+        ; the sun's radius and the current scanline:
         ; (i.e. "r^2 - n^2")
         ;
         lda ZP_B2               ; r^2, lo byte
@@ -4219,24 +4231,25 @@ _7f67:                                                                  ;$7F67
 
         ; add the "fringe"
         ;-----------------------------------------------------------------------
+        ; TODO: we should be able to pluck a faster random number from somewhere
         jsr get_random_number   ; randomise the fringe each frame
-        and TEMP_COUNTER        ; limit to the fringe-size chosen earlier
+        and ZP_TEMP_COUNTER     ; limit to the fringe-size chosen earlier
         clc                     ; add the fringe to...
         adc ZP_VAR_Q            ; ...the scanline's half-width
         bcc :+                  ; if adding the fringe takes it over 256,
         lda # $ff               ; clip it to 256
 
         ;-----------------------------------------------------------------------
-        ; check the circle buffer for a scanline from the previous frame:
+        ; check the sun buffer for a scanline from the previous frame:
         ;
-:       ldx CIRCLE_BUFFER, y    ; read old value from circle buffer     ;$7FB6
-        sta CIRCLE_BUFFER, y    ; replace with the just-calculated value
+:       ldx SUN_BUFFER, y       ; read old value from sun buffer        ;$7FB6
+        sta SUN_BUFFER, y       ; replace with the just-calculated value
        .bze @clip               ; if there was no scanline (=0) from the
                                 ; previous frame, skip to drawing the new one
-        
+
         ; erase the previous frame's scanline:
         ;-----------------------------------------------------------------------
-        ; set up the line-drawing routine with the circle's
+        ; set up the line-drawing routine with the sun's
         ; centre-point in the previous frame 
         ;
         lda ZP_SUNX_LO
@@ -4244,7 +4257,7 @@ _7f67:                                                                  ;$7F67
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
         txa                     ; previous scanline width
-        jsr clip_circle_line    ; clip the old line against the viewport
+        jsr clip_sun_line       ; clip the old line against the viewport
 
         ; put aside the result (X1, X2)
         lda ZP_VAR_X1
@@ -4257,8 +4270,8 @@ _7f67:                                                                  ;$7F67
         sta ZP_VAR_YY_LO
         lda ZP_VAR_K3_HI
         sta ZP_VAR_YY_HI
-        lda CIRCLE_BUFFER, y
-        jsr clip_circle_line
+        lda SUN_BUFFER, y
+        jsr clip_sun_line
         bcs :+
         
         lda ZP_VAR_X2
@@ -4286,32 +4299,32 @@ _7f67:                                                                  ;$7F67
 
 @_calc: jmp @calc                                                       ;$8005
 
-        ; clip circle scanline to viewport:
+        ; clip sun scanline to viewport:
         ;-----------------------------------------------------------------------
-        ; working from the horizontal centre-point of the circle (16-bits),
-        ; and given the width of the circle's scanline, calculate the actual
+        ; working from the horizontal centre-point of the sun (16-bits),
+        ; and given the width of the sun's scanline, calculate the actual
         ; bounds of the line to be drawn in the viewport (0-255); e.g. the
-        ; circle might be outside the viewport, but a portion of its radius
+        ; sun might be outside the viewport, but a portion of its radius
         ; within the viewport, this needs to be reduced to just the line of
         ; pixels to actually be drawn between 0 & 255 in the viewport
         ;
         ; note that at this point the A-register contains
-        ; the half-width of the circle's scanline
+        ; the half-width (radius) of the sun's scanline
         ;
-@clip:  ldx ZP_VAR_K3_LO        ; get circle Y-position, lo             ;$8008
+@clip:  ldx ZP_VAR_K3_LO        ; get sun Y-position, lo                ;$8008
         stx ZP_VAR_YY_LO        ; set line mid-point, lo
-        ldx ZP_VAR_K3_HI        ; get circle Y-position, hi
+        ldx ZP_VAR_K3_HI        ; get sun Y-position, hi
         stx ZP_VAR_YY_HI        ; set line mid-point, hi
-        jsr clip_circle_line    ; do the line clipping
+        jsr clip_sun_line       ; do the line clipping
         bcc @draw               ; if line is visible, go draw it
 
-        ; NOTE: `clip_circle_line` already removes the line from
-        ;       the circle-buffer, so this is redundant
+        ; NOTE: `clip_sun_line` already removes the line from
+        ;       the sun-buffer, so this is redundant
         ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        lda # $00               ; clear the line from the circle-buffer,
-        sta CIRCLE_BUFFER, y    ; and move to the next
+        lda # $00               ; clear the line from the sun-buffer,
+        sta SUN_BUFFER, y       ;  and move to the next
 .endif  ;///////////////////////////////////////////////////////////////////////
         beq @next               ; (always branches)
 
@@ -4329,14 +4342,14 @@ _7f67:                                                                  ;$7F67
         lda ZP_SUNX_HI
         sta ZP_VAR_YY_HI
 @_802f:                                                                 ;$02F
-        lda CIRCLE_BUFFER, y
+        lda SUN_BUFFER, y
         beq @_8037
         jsr _28f3               ;...draw_straight_line
 @_8037:                                                                 ;$8037
         dey 
         bne @_802f
 
-        ; copy circle X-position into SUNX
+        ; copy sun X-position into SUNX
         ; (TODO: for overdrawing?)
 @done:  clc                                                             ;$803A 
         lda ZP_VAR_K3_LO
@@ -4364,20 +4377,29 @@ _8044:                                                                  ;$8044
         bcc _805c
         lsr 
 _805c:                                                                  ;$805C
-        sta ZP_AC
-_805e:                                                                  ;$805E
-        ldx # $ff
+        sta ZP_CIRCLE_STEP
+
+        ; fallthrough...
+        ;
+
+_805e:                                                  ; BBC: CIRCLE2  ;$805E
+;===============================================================================
+; draw a circle:
+;
+;-------------------------------------------------------------------------------
+        ldx # $ff                       ; set flag to reset ball-line heap
         stx ZP_A9
-        inx 
-        stx TEMP_COUNTER
-_8065:                                                                  ;$8065
-        lda TEMP_COUNTER
+        inx                             ; reset counter for ball lines
+        stx ZP_TEMP_COUNTER
+
+        ;-----------------------------------------------------------------------
+_8065:  lda ZP_TEMP_COUNTER             ; current index in the circle   ;$8065
         jsr _39e0
 
         ldx # $00
         stx ZP_VAR_T
 
-        ldx TEMP_COUNTER
+        ldx ZP_TEMP_COUNTER
         cpx # $21
         bcc _8081
 
@@ -4395,14 +4417,14 @@ _8081:                                                                  ;$8081
         lda ZP_VAR_K3_HI
         adc ZP_VAR_T
         sta ZP_8A
-        lda TEMP_COUNTER
+        lda ZP_TEMP_COUNTER
         clc 
         adc # $10
         jsr _39e0
         tax 
         lda # $00
         sta ZP_VAR_T
-        lda TEMP_COUNTER
+        lda ZP_TEMP_COUNTER
         adc # $0f
         and # %00111111
         cmp # $21
@@ -4474,7 +4496,7 @@ _80fe:                                                                  ;$80FE
 
 wipe_sun:                                                               ;$80FF
 ;===============================================================================
-        lda CIRCLE_BUFFER
+        lda SUN_BUFFER
         bmi _80fe               ; $FF = nothing to draw, exit
 
         ; copy sun's horizontal position to YY-LO/HI,
@@ -4488,19 +4510,19 @@ wipe_sun:                                                               ;$80FF
         ; from bottom up for the benefit of 6502's zero-flag
         ldy # ELITE_VIEWPORT_HEIGHT-1
         ; check if a line needs to be drawn at this Y-position
-@loop:  lda CIRCLE_BUFFER, y    ; read half-width of line               ;$810E
+@loop:  lda SUN_BUFFER, y       ; read half-width of line               ;$810E
        .bze:+                   ; if zero, skip
         jsr _28f3               ; work out X1/X2 from middle+width, and draw
 :       dey                                                             ;$8116
        .bnz @loop
 
         dey                     ; Y = $FF?
-        sty CIRCLE_BUFFER
+        sty SUN_BUFFER
 
         rts 
 
 
-clip_circle_line:                                                       ;$811E
+clip_sun_line:                                                          ;$811E
 ;===============================================================================
 ; clip a centred, horizontal line so that it fits within the viewport. this
 ; routine is used when drawing circles as that is stored as a centre-point
@@ -4563,7 +4585,7 @@ clip_circle_line:                                                       ;$811E
 
         ;-----------------------------------------------------------------------
 @clear: lda # $00               ; remove the scanline                   ;$8148
-        sta CIRCLE_BUFFER, y    ; from the circle buffer
+        sta SUN_BUFFER, y       ;  from the sun buffer
 
         sec                     ; return carry set = error 
         rts 
@@ -4913,7 +4935,7 @@ clear_ship_slot:                                                        ;$829A
 _82a4:                                                                  ;$82A4
 ;===============================================================================
         jsr clear_zp_polyobj
-        jsr clear_circle_buffer
+        jsr clear_sun_buffer
         
         sta SHIP_SLOT1
         ; NOTE: `.loword` is needed here to force a 16-bit

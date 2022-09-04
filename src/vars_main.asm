@@ -360,17 +360,17 @@ DUST_Z_HI               :=$06d6 ;..$06E2: Z-positions of dust-particles
 DUST_Z_LO               :=$06e3 ;..$06EF: fractional Z-positions
 
 ;-------------------------------------------------------------------------------
-; circles are converted into a list of half-widths for each scan-line, i.e.
+; sun circles are converted into a list of half-widths for each scan-line, i.e.
 ; for each scanline in the viewport, this array provides a radius for that
 ; scanline where the centre point of the circle is already known
 ;
-; the planets in the local chart are also drawn using this system,
+; the stars in the local chart are also drawn using this system,
 ; so up to 200 scan-lines are accounted for despite the viewport
 ; being 144 px tall
 ;
 ; TODO: as this is indexed, keep it within one page
 ;
-CIRCLE_BUFFER           :=$0580
+SUN_BUFFER              :=$0580
 
 TXT_BUFFER              :=$0648 ; printing text-buffer
 

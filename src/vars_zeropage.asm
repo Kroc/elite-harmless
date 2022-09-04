@@ -297,8 +297,8 @@ ZP_VALUE_pt4            := $7a
 
 ZP_LASER                := $7b  ; laser power for current view (bit 7 = beam)
 ZP_MISSILE_TARGET       := $7c  ; missile target?
-ZP_7D                   := $7d  ;? x6
-ZP_7E                   := $7e  ;? x10
+ZP_7D                   := $7d  ;
+ZP_7E                   := $7e  ;                                       ; LSP
 
 ;-------------------------------------------------------------------------------
 ; Elite's random-number seed that defines the entire universe
@@ -393,9 +393,9 @@ ZP_ALPHA                := $a6  ; a rotation variable used in matrix math
 ZP_A7                   := $a7  ;? x10  ; docked flag?
 ZP_A8                   := $a8  ;? x9
 ZP_A9                   := $a9  ;? x4
-TEMP_COUNTER            := $aa  ;? x30
+ZP_TEMP_COUNTER         := $aa  ; temporary counter, e.g. ball lines    ; CNT
 ZP_AB                   := $ab  ;? x12
-ZP_AC                   := $ac  ;? x5
+ZP_CIRCLE_STEP          := $ac  ; step size for drawing circles         ; STP
 ZP_AD                   := $ad  ;? x21
 ZP_AE                   := $ae  ;? x12
 

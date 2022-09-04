@@ -724,7 +724,7 @@ _9cfe:                                                                  ;$9CFE
         adc # $00
         sta ZP_TEMP_ADDR3_HI
         ldy # $00
-        sty TEMP_COUNTER
+        sty ZP_TEMP_COUNTER
 _9d45:                                                                  ;$9D45
         sty ZP_9F
         lda [ZP_TEMP_ADDR3], y
@@ -978,7 +978,7 @@ _9eaa:                                                                  ;$9EAA
 
 ; ".LL65 ; both continue for scaling based on z"
 _9ead:                                                                  ;$9EAD
-        ldx TEMP_COUNTER
+        ldx ZP_TEMP_COUNTER
         lda ZP_VAR_X2
         bmi _9e51
         lda ZP_VAR_R
@@ -1038,9 +1038,9 @@ _9eef:                                                                  ;$9EEF
 ; ".LL50 ; also from LL70, Also from LL49-3. XX3 heap has yscreen, Next vertex."
 _9f06:                                                                  ;$9F06
         clc 
-        lda TEMP_COUNTER
+        lda ZP_TEMP_COUNTER
         adc # $04
-        sta TEMP_COUNTER
+        sta ZP_TEMP_COUNTER
         lda ZP_9F
         adc # $06
         tay 
@@ -2439,7 +2439,7 @@ _set_page:                                                              ;$A731
         ; because the screen will be erased, we need to clear the circle
         ; buffer (used to erase the previous frame's sun) to avoid trying
         ; to erase a circle that's no longer there
-        jsr clear_circle_buffer
+        jsr clear_sun_buffer
 
         lda # $00
         sta LASER_POWER

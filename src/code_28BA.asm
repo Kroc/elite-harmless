@@ -127,7 +127,7 @@ draw_line_divider:                                      ; BBC: NLIN2    ;$28E5
 
 _28f3:                                                                  ;$28F3
 ;===============================================================================
-; for `clip_circle_line`:
+; for `clip_sun_line`:
 ;
 ;      YY = middle-point of line, in viewport px (0-255)
 ;       A = half-width of line
@@ -136,14 +136,14 @@ _28f3:                                                                  ;$28F3
 ;
 ;       Y = Y-pos of line, in viewport px (0-144)
 ;-------------------------------------------------------------------------------
-        jsr clip_circle_line
+        jsr clip_sun_line
 
         ; set parameter for drawing line
         sty ZP_VAR_Y
         
         ; remove this line from the scanline cache
         lda # $00
-        sta CIRCLE_BUFFER, y
+        sta SUN_BUFFER, y
         
         jmp draw_straight_line
 
@@ -393,10 +393,10 @@ _29fa:                                                                  ;$29FA
         sta ZP_87
         lda ZP_8C
         sta ZP_88
-        lda TEMP_COUNTER
+        lda ZP_TEMP_COUNTER
         clc 
-        adc ZP_AC
-        sta TEMP_COUNTER
+        adc ZP_CIRCLE_STEP
+        sta ZP_TEMP_COUNTER
 
         rts 
 
@@ -945,7 +945,7 @@ _2d25:                                                                  ;$2D25
         bcc _2d1c
         ldx # $00
 _2d2f:                                                                  ;$2D2F
-        stx TEMP_COUNTER
+        stx ZP_TEMP_COUNTER
         
         ; print "FRONT" / "REAR" / "LEFT" / "RIGHT"
 .import TKN_FLIGHT_DIRECTIONS:direct
@@ -957,7 +957,7 @@ _2d2f:                                                                  ;$2D2F
         jsr print_flight_token_and_space
 
         lda # $67
-        ldx TEMP_COUNTER
+        ldx ZP_TEMP_COUNTER
         ldy PLAYER_LASERS, x
         cpy # laser::beam | $0f
         bne _2d4a
@@ -975,7 +975,7 @@ _2d50:                                                                  ;$2D50
 _2d56:                                                                  ;$2D56
         jsr print_flight_token_and_newline_and_indent
 _2d59:                                                                  ;$2D59
-        ldx TEMP_COUNTER
+        ldx ZP_TEMP_COUNTER
         inx 
         cpx # $04
         bcc _2d2f
@@ -2390,7 +2390,7 @@ _336e:                                                                  ;$336E
         jsr _8c8a
         ldy # $0a
         jsr _3ab2
-        sta TEMP_COUNTER
+        sta ZP_TEMP_COUNTER
         lda ZP_SHIP_TYPE
         cmp # $01
         bne _3381
@@ -2488,7 +2488,7 @@ _33fd:                                                                  ;$33FD
         jsr _87b1
         and # %11100000
         bne _3434
-        ldx TEMP_COUNTER
+        ldx ZP_TEMP_COUNTER
         cpx # $a0
         bcc _3434
 
@@ -2536,10 +2536,10 @@ _3442:                                                                  ;$3442
         bcs _3454
 _344b:                                                                  ;$344B
         jsr _35d5
-        lda TEMP_COUNTER
+        lda ZP_TEMP_COUNTER
         eor # %10000000
 _3452:                                                                  ;$3452
-        sta TEMP_COUNTER
+        sta ZP_TEMP_COUNTER
 _3454:                                                                  ;$3454
         ldy # $10
         jsr _3ab2
@@ -2574,7 +2574,7 @@ _346c:                                                                  ;$346C
         ora ZP_POLYOBJ_ROLL
         sta ZP_POLYOBJ_ROLL
 _348d:                                                                  ;$348D
-        lda TEMP_COUNTER
+        lda ZP_TEMP_COUNTER
         bmi _349a
         cmp ZP_AB
         bcc _349a
@@ -3152,7 +3152,7 @@ _379e:                                                                  ;$397E
 .endif  ;///////////////////////////////////////////////////////////////////////
         
         lda # $08
-_37a5:  sta ZP_AC                                                       ;$37A5
+_37a5:  sta ZP_CIRCLE_STEP                                              ;$37A5
 
         ; TODO: why does this change the screen,
         ;       but keep the ZP_SCREEN value?
@@ -3478,13 +3478,13 @@ _393e:                                                                  ;$393E
         sta ZP_VAR_P1
         rts 
 
-; NOTE: in the original code, "math_square.asm" will be inserted here
-;       between these two segments
+; NOTE: in the original code, "math_square.asm" will be inserted
+;       here between these two segments
 ;
 .segment        "CODE_39E0"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-_39e0:                                                                  ;$39E0
+_39e0:                                                  ; BBC: FMLTU2   ;$39E0
 ;===============================================================================
 ; calculate ZP_VALUE_pt1 * abs(sin(A))
 ;-------------------------------------------------------------------------------
