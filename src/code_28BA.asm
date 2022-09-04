@@ -84,7 +84,7 @@ draw_title_divider:                                                     ;$28DC
 _28e0:                                                                  ;$28E0
 ;===============================================================================
         lda # 23
-        jsr cursor_down
+       .cursor_down
 
 _28e5:                                                                  ;$28E5
 ;===============================================================================
@@ -829,7 +829,7 @@ status_screen:                                                          ;$2C9B
         jsr _70ab
 
         lda # 7
-        jsr set_cursor_col
+       .set_cursor_col
         
         ; "COMMANDER ... PRESENT SYSTEM ... HYPERSPACE SYSTEM ... CONDITION"
 .import TKN_FLIGHT_STATUS_TITLE:direct
@@ -979,7 +979,12 @@ print_flight_token_and_newline_and_indent:                              ;$2D61
 ;===============================================================================
         jsr print_flight_token_and_newline
         lda # 6
+.ifdef  OPTION_ORIGINAL
         jmp set_cursor_col
+.else
+        sta ZP_CURSOR_COL
+        rts
+.endif
 
 
 _2d69:                                                                  ;$2D69
@@ -4102,7 +4107,7 @@ _3dff:                                                                  ;$3DFF
         .fatal  "optimisation requires that `page::empty` is 1 in `_3dff`"
 .endif
         lda # 1                 ;=page::empty
-        jsr set_cursor_col
+       .set_cursor_col
         sta ZP_POLYOBJ_ZPOS_HI
         jsr set_page            ; switch to an empty menu page
 

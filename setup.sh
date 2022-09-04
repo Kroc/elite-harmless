@@ -13,23 +13,14 @@
 echo
 echo "Enter your Linux root password"
 echo "to install required tools:"
-echo "(git, gcc, make, python3, bison)"
+echo "(git, gcc, make, python3, bison, cc65)"
 echo
 sudo apt update
-sudo apt-get install git gcc make python3 bison
+sudo apt-get install git gcc make python3 bison cc65
 
 # todo: make this script `git pull` if code is already present?
 
 cd bin
-
-if [ ! -d "cc65" ]; then
-    git clone --recurse-submodules https://github.com/cc65/cc65.git cc65
-    
-    cd cc65
-    make
-    sudo PREFIX=/usr/local make install
-    cd ..
-fi
 
 if [ ! -d "mkd64" ]; then
     git clone --recurse-submodules https://github.com/Zirias/c64_tool_mkd64.git mkd64

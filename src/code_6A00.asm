@@ -2,12 +2,7 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "code_6A00.asm":
-;
 .linecont+
-
-.segment        "CODE_6A00"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ; yes, I am aware that ca65 allows for 'default import of undefined labels'
 ; but I want to keep track of things explicitly for clarity and helping others
@@ -19,24 +14,28 @@
 .import TKN_FLIGHT_pair2:absolute
 
 
+.segment        "CODE_6A00"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 check_cargo_capacity_add1:                                              ;$6A00
 ;===============================================================================
 ; check if 1 tonne of a given item will fit in your cargo:
 ;
 ; in:   A       index of cargo item;
 ;               see `Cargo` struct for order
-;
-; out:  carry   unset = OK
-;               set   = cargo overflow
+; out:  carry   clear = fits, set = overflow
 ;-------------------------------------------------------------------------------
         sta CARGO_ITEM          ; item index?
         lda # $01
 
-check_cargo_capacity:                                                   ;$6A05
+check_cargo_capacity:                                   ; BBC: tnpr     ;$6A05
 ;===============================================================================
+; check if a purchase would fit your cargo hold:
+
 ; in:   A               initial quantity count
 ;       CARGO_ITEM      set to the type of item to count
-;
+; out:  carry           clear = fits, set = overflow
+;       A               (preserved)
 ;-------------------------------------------------------------------------------
         pha                     ; preserve A
 
@@ -78,12 +77,15 @@ check_cargo_capacity:                                                   ;$6A05
         rts 
 
         ;-----------------------------------------------------------------------
-        ; will the selected cargo fit? for precious materials, the limit
-        ; is 200 Kg, not taken from your ships hold capacity. maybe you
-        ; stuff it behind your seat?
+        ; for precious materials, the limit is 200 Kg each, not taken from
+        ; your ship's hold capacity. maybe you stuff it behind your seat?
         ;
         ; carry unset = OK
         ; carry set   = overflow
+        ;
+        ; TODO: the BBC disk version has a slight variation between flight &
+        ; docked allowing you to scoop gems that wouldn't otherwise fit, see
+        ; <https://www.bbcelite.com/compare/main/subroutine/tnpr.html>
         ;
 @kg:    ldy CARGO_ITEM                                                  ;$6A1B
         adc PLAYER_CARGO, y     ; number of Kg of selected item
@@ -93,43 +95,11 @@ check_cargo_capacity:                                                   ;$6A05
         rts 
 
 
-set_cursor_col:                                                         ;$6A25
-;===============================================================================
-; set the cursor column (where text printing occurs)
-;
-; in:   A       column number
-;
-;-------------------------------------------------------------------------------
-        sta ZP_CURSOR_COL
-        rts 
+; NOTE: in the original code, "orig/cursor.asm" appears here            ;$6A25
 
-set_cursor_row:                                                         ;$6A28
-;===============================================================================
-; set the cursor row (where text printing occurs)
-;
-; in:   A       row number
-;
-;-------------------------------------------------------------------------------
-        sta ZP_CURSOR_ROW
-        rts 
 
-cursor_down:                                                            ;$6A2B
-;===============================================================================
-; move the cursor down a row (does not change column!)
-;
-;-------------------------------------------------------------------------------
-        inc ZP_CURSOR_ROW
-        rts 
-
-.ifdef  OPTION_ORIGINAL
-;///////////////////////////////////////////////////////////////////////////////
-; stubbed-out routine in the original code
-;
-unused__6a2e:                                                           ;$6A2E
-        rts 
-;///////////////////////////////////////////////////////////////////////////////
-.endif
-
+.segment        "CODE_6A2F"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 set_page_6a2f:                                                          ;$6A2F
 ;===============================================================================
@@ -152,7 +122,7 @@ set_page_6a2f:                                                          ;$6A2F
         rts 
 
 
-randomize:                                                              ;$6A3B
+randomize:                                              ; BBC: TT20     ;$6A3B
 ;===============================================================================
 ; moves the random number generator along 4 steps to produce
 ; fresh random numbers, but does not return a random number
@@ -191,14 +161,19 @@ randomize_once:                                                         ;$6A41
 
         rts 
 
-_6a68:                                                                  ;$6A68
+
+print_target_system_distance:                           ; BBC: TT146    ;$6A68
 ;===============================================================================
+; print distance to target system in light-years:
+; this includes "distance: ", and "light years"
+;
+;-------------------------------------------------------------------------------
         ; is target system distance > 0
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
        .bnz :+
 
-        jmp cursor_down
+       .cursor_down_jmp
 
         ;-----------------------------------------------------------------------
         ; print "DISTANCE:"
@@ -218,243 +193,341 @@ _6a68:                                                                  ;$6A68
 .import TKN_FLIGHT_LIGHT_YEARS:direct
         lda # TKN_FLIGHT_LIGHT_YEARS
 
-_6a84:                                                                  ;$6A84
-        ;-----------------------------------------------------------------------
-        jsr print_flight_token
-_6a87:                                                                  ;$6A87
-        jsr cursor_down
-_6a8a:                                                                  ;$6A8A
-        lda # %10000000
-        sta ZP_34
+        ; fallthrough...
+        ;
 
-print_newline:                                                          ;$6A8E
-        ;-----------------------------------------------------------------------
+print_flight_token_and_newpara:                         ; BBC: TT60     ;$6A84
+;===============================================================================
+; prints a flight text token, a blank line and enables
+; sentance case for starting a new paragrpah:
+;
+;-------------------------------------------------------------------------------
+        jsr print_flight_token
+
+        ; fallthrough...
+        ;
+
+print_newpara:                                          ; BBC: TTX69    ;$6A87
+;===============================================================================
+; prints a blank line and switches to sentance case:
+;
+;-------------------------------------------------------------------------------
+       .cursor_down                     ; move cursor down a row,
+                                        ; but does not reset col
+        ; fallthrough...
+        ;
+
+print_newline_para:                                     ; BBC: TT69     ;$6A8A
+;===============================================================================
+        lda # %10000000                 ; set bit 7 - sentance case
+        sta ZP_PRINT_CASE
+
+        ; fallthrough...
+        ;
+
+print_newline:                                          ; BBC: TT67     ;$6A8E
+;===============================================================================
         lda # TXT_NEWLINE
         jmp print_flight_token
 
-_6a93:                                                                  ;$6A93
-        ;=======================================================================
-        ; print "MAINLY"
-        ;
+
+print_mainly:                                           ; BBC: TT70     ;$6A93
+;===============================================================================
+; print "MAINLY", e.g. for economy, "mainly industrial"
+;
+;-------------------------------------------------------------------------------
 .import TKN_FLIGHT_MAINLY:direct
         lda # TKN_FLIGHT_MAINLY
         jsr print_flight_token
         jmp _6ad3
 
 
-print_flight_token_and_space:                                           ;$6A9B
+print_flight_token_and_space:                           ; BBC: spc      ;$6A9B
 ;===============================================================================
-; prints the given flight token and then a space
+; prints the given flight token and then a space:
 ;
 ;-------------------------------------------------------------------------------
         jsr print_flight_token
         jmp print_space
 
 
-planet_screen:                                                          ;$6AA1
+planet_screen:                                          ; BBC: TT25     ;$6AA1
 ;===============================================================================
-; planetary information screen
+; planetary information screen:
 ;
 ;-------------------------------------------------------------------------------
-        lda # page::empty
-        jsr set_page_6a2f
+        lda # page::empty               ; switch to the menu screen,
+        jsr set_page_6a2f               ;  starting with a blank page
 
         lda # 9
-        jsr set_cursor_col
+       .set_cursor_col
 
         ; print "DATA ON " ...
 .import TKN_FLIGHT_DATA_ON:direct
         lda # TKN_FLIGHT_DATA_ON
         jsr print_flight_token_and_divider
+        jsr print_newpara
 
-        jsr _6a87
-        jsr _6a68
+        ; if the distance is non-zero (i.e. we're not AT the system),
+        ; print "DISTANCE: nn.n LIGHT YEARS", otherwise a blank line
+        jsr print_target_system_distance
 
+        ; economy:
+        ;-----------------------------------------------------------------------
         ; print "ECONOMY:"
 .import TKN_FLIGHT_ECONOMY:direct
         lda # TKN_FLIGHT_ECONOMY
         jsr print_flight_token_with_colon
 
-        ; is this a "MAINLY" economy?
-        lda TSYSTEM_ECONOMY
-        clc 
-        adc # $01
-        lsr 
-        cmp # $02
-        beq _6a93
-
-        lda TSYSTEM_ECONOMY
-        bcc _6ace
-
-        sbc # $05
-        clc 
-_6ace:                                                                  ;$6ACE
-        ; "RICH" / "AVERAGE" / "POOR"
+        ; decode the economy wealth:
         ;
-.import TKN_FLIGHT_WEALTH:direct
-        adc # TKN_FLIGHT_WEALTH
+        ;       %000 (0) or %101 (5) = Rich
+        ;       %001 (1) or %110 (6) = Average
+        ;       %010 (2) or %111 (7) = Poor
+        ;       %011 (3) or %100 (4) = Mainly
+        ;
+        lda TSYSTEM_ECONOMY             ; economy byte of target system
+
+        clc                             ; (ready for math!)
+        adc # %01                       ; check for 3 or 4 by adding 1
+        lsr                             ;  and shifting right, giving 
+        cmp # %10                       ;  %011(3)->%10 or $100(4)->%10
+        beq print_mainly                ; is "mainly", go print
+
+        ; there are three text tokens for "rich", "average" and "poor",
+        ; but economy values 0-7. for values 0-2 we can print as-is --
+        ; the `cmp` will set carry for values 3+ (%011+1=%100>>1=%10)
+        ;
+        lda TSYSTEM_ECONOMY             ; go back to original economy value
+        bcc :+                          ; print for economy values 0-2
+
+        ; (due to the `bcc` above, carry is guaranteed to be set
+        ; ensuring that the subtraction does not borrow)
+        ;
+        sbc # $05                       ; shift 5-thru-7 down to 0-thru-2
+        clc                             ; clear carry for the following add
+
+        ; print "RICH" | "AVERAGE" | "POOR"
+        ;
+.import TKN_FLIGHT_ECONOMY_WEALTH:direct
+:       adc # TKN_FLIGHT_ECONOMY_WEALTH                                 ;$6ACE
         jsr print_flight_token
-_6ad3:                                                                  ;$6AD3
-        lda TSYSTEM_ECONOMY
-        lsr 
-        lsr 
 
-        ; "INDUSTRIAL" / "AGRICULTURAL"
-.import TKN_FLIGHT_INDUSTRIAL:direct
+        ; economy type:
+        ;
+_6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
+        lsr                             ; bit 2 is used for the economy type
+        lsr                             ; argricultural (1) / industrial (0)
+
+        ; print "INDUSTRIAL" | "AGRICULTURAL"
+.import TKN_FLIGHT_ECONOMY_TYPE:direct
         clc 
-        adc # TKN_FLIGHT_INDUSTRIAL
-        jsr _6a84
+        adc # TKN_FLIGHT_ECONOMY_TYPE
+        jsr print_flight_token_and_newpara
 
+        ; government:
+        ;-----------------------------------------------------------------------
+        ; print "GOVERNMENT: "
 .import TKN_FLIGHT_GOVERNMENT:direct
         lda # TKN_FLIGHT_GOVERNMENT
         jsr print_flight_token_with_colon
 
-.import TKN_FLIGHT_ANARCHY:direct
+        ; print "ANARCHY" | "FEUDAL" | "MULTI-GOVERNMENT" | "DICTATORSHIP" |
+        ;       "COMMUNIST" | "CONFEDORACY" | "DEMOCRACY" | "CORPORATE STATE"
+        ;
+        lda TSYSTEM_GOVERNMENT          ; system government byte (0-7)
+        clc
+.import TKN_FLIGHT_GOVERNMENT_TYPE:direct 
+        adc # TKN_FLIGHT_GOVERNMENT_TYPE
+        jsr print_flight_token_and_newpara
 
-        ; "ANARCHY" / "FEUDAL" / "MULTI-GOVERNMENT" / "DICTATORSHIP" /
-        ; "COMMUNIST" / "CONFEDORACY" / "DEMOCRACY" / "CORPORATE STATE"
-
-        lda TSYSTEM_GOVERNMENT
-        clc 
-        adc # TKN_FLIGHT_ANARCHY
-        jsr _6a84
-
+        ; tech-level:
+        ;-----------------------------------------------------------------------
+        ; print "TECH LEVEL: "
 .import TKN_FLIGHT_TECH_LEVEL:direct
         lda # TKN_FLIGHT_TECH_LEVEL
         jsr print_flight_token_with_colon
 
-        ldx TSYSTEM_TECHLEVEL
-        inx 
-        clc 
-        jsr print_tiny_value
-        jsr _6a87
+        ldx TSYSTEM_TECHLEVEL           ; current/target system tech-level
+        inx                             ; adjust to 1-based
+        clc                             ; carry-clear = no decimal point
+        jsr print_tiny_value            ; print the tech-level number
+        jsr print_newpara
 
+        ; population:
+        ;-----------------------------------------------------------------------
+        ; print "POPULATION: "
 .import TKN_FLIGHT_POPULATION:direct
         lda # TKN_FLIGHT_POPULATION
         jsr print_flight_token_with_colon
 
-        sec 
-        ldx TSYSTEM_POPULATION
+        sec                             ; print with decimal point
+        ldx TSYSTEM_POPULATION          ; print population number / 10
         jsr print_tiny_value
 
 .import TKN_FLIGHT_BILLION:direct
-        lda # TKN_FLIGHT_BILLION
-        jsr _6a84
+        lda # TKN_FLIGHT_BILLION        ; print "BILLION"
+        jsr print_flight_token_and_newpara
 
-.import TKN_FLIGHT_LPAREN:direct
+        ; species:
+        ;-----------------------------------------------------------------------
+.import TKN_FLIGHT_LPAREN:direct        ; print "("
         lda # TKN_FLIGHT_LPAREN
         jsr print_flight_token
 
-        lda ZP_SEED_W2_LO
-        bmi :+
+        ; choose species: this is 50/50
+        ; either humans or an alien species
+        ;
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;                                                        ^
+        ;                                       humans or aliens?
+        ;
+        lda ZP_SEED_W2_LO               ; check bit 7 in word 2 of the seed
+        bmi :+                          ; if 1, skip ahead to alien species
 
 .import TKN_FLIGHT_HUMAN_COLONIAL:direct
         lda # TKN_FLIGHT_HUMAN_COLONIAL
-        jsr print_flight_token
+        jsr print_flight_token          ; print "HUMAN COLONIALS", and
+        jmp _6b5a                       ; jump ahead to the closing paranthesis
 
-        jmp _6b5a
-
+        ; choose an alien species:
+        ;
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;                                               ^^^^^^
+        ;                                      alien species
+        ;
 :       lda ZP_SEED_W2_HI                                               ;$61BE
-        lsr 
-        lsr 
-        pha 
-        and # %00000111
-        cmp # $03
-        bcs :+
+        lsr                             ; remove bits 0 & 1,
+        lsr                             ;  leaving bits 2-7 shifted down
+        pha                             ; keep this value for later
+        
+        ; 1st adjective:
+        ;
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;                                                  ^^^
+        ;
+        and # %00000111                 ; look at the lower 3 bits
+        cmp # %00000011                 ; of that, the lower 3 values
+        bcs :+                          ;  will be given an adjective
 
+        ; print "LARGE" | "FIERCE" | "SMALL"
+        ;
 .import TKN_FLIGHT_LARGE:direct
-
-        ; "LARGE" / "FIERCE" / "SMALL" / ?
-
         adc # TKN_FLIGHT_LARGE
         jsr print_flight_token_and_space
-:       pla                                                             ;$6B2E
-        lsr 
-        lsr 
-        lsr 
-        cmp # $06
-        bcs _6b3b
 
+        ; 2nd adjective (colour):
+        ;
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;                                               ^^^
+        ;
+:       pla                             ; retrieve our species again   ;$6B2E
+        lsr                             ; isolate the upper 3 bits
+        lsr                             ;  by shifting off the lower 3 bits
+        lsr 
+        cmp # $06                       ; the lower 5 values will get
+        bcs :+                          ;  a colour assigned
+
+        ; print "GREEN" | "RED" | "YELLOW" | "BLUE" | "BLACK"
+        ;
 .import TKN_FLIGHT_COLORS:direct
-
-        ; "GREEN" / "RED" / "YELLOW" / "BLUE" / "BLACK" / ?
-
         adc # TKN_FLIGHT_COLORS
         jsr print_flight_token_and_space
-_6b3b:                                                                  ;$6B3B
-        lda ZP_SEED_W1_HI
-        eor ZP_SEED_W0_HI
-        and # %00000111
-        sta ZP_8E
-        cmp # $06
-        bcs _6b4c
 
+        ; 3rd adjective:
+        ;
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;            ^^^                 ^^^
+        ;       3rd adj.            <-- (XOR)
+        ;
+:       lda ZP_SEED_W1_HI               ; XOR this byte                 ;$6B3B
+        eor ZP_SEED_W0_HI               ;  with that byte
+        and # %00000111                 ;  and take the low 3 bits
+        sta ZP_8E                       ; (preserve for later)
+        cmp # $06                       ; the lower 5 values
+        bcs :+                          ;  will get the adjective
+
+        ; print "HARMLESS" | "SLIMY" | "BUG-EYED" | "HORNED" |
+        ;       "BONY" | "FAT" | "FURRY"
+        ;
 .import TKN_FLIGHT_ADJECTIVES:direct
-
-        ; "HARMLESS" / "SLIMY" / "BUG-EYED" / "HORNED" /
-        ; "BONY" / "FAT" / "FURRY"
-
         adc # TKN_FLIGHT_ADJECTIVES+1   ; +1, because of borrow?
         jsr print_flight_token_and_space
-_6b4c:                                                                  ;$6B4C
-        lda ZP_SEED_W2_HI
-        and # %00000011
-        clc 
-        adc ZP_8E
-        and # %00000111
 
+        ; species:
+        ;
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;                                                     ^^
+        ;
+:       lda ZP_SEED_W2_HI               ; take two bits                 ;$6B4C
+        and # %00000011                 ;  from the seed
+        clc                             ;  and add the bits we XORed
+        adc ZP_8E                       ;  together earlier, and from this
+        and # %00000111                 ;  modulo 8 to select species
+
+        ; print "RODENT" | "FROG" | "LIZARD" | "LOBSTER" | "BIRD" |
+        ;       "HUMANOID" | "FELINE" | "INSECT"
+        ;
 .import TKN_FLIGHT_SPECIES:direct
-
-        ; "RODENT" / "FROG" / "LIZARD" / "LOBSTER" / "BIRD" / "HUMANOID" /
-        ; "FELINE" / "INSECT"
-
         adc # TKN_FLIGHT_SPECIES
         jsr print_flight_token
+
 _6b5a:                                                                  ;$6B5A
         ; append "s)"
 .import TKN_FLIGHT_S:direct
-        lda # TKN_FLIGHT_S
+        lda # TKN_FLIGHT_S              ; print "s"; e.g. "RODENTS"
         jsr print_flight_token
 .import TKN_FLIGHT_RPAREN:direct
-        lda # TKN_FLIGHT_RPAREN
-        jsr _6a84
+        lda # TKN_FLIGHT_RPAREN         ; and the closing paren
+        jsr print_flight_token_and_newpara
 
+        ; productivity:
+        ;-----------------------------------------------------------------------
 .import TKN_FLIGHT_GROSS_PRODUCTIVITY:direct
         lda # TKN_FLIGHT_GROSS_PRODUCTIVITY
         jsr print_flight_token_with_colon
 
-        ldx TSYSTEM_PRODUCTIVITY_LO
-        ldy TSYSTEM_PRODUCTIVITY_HI
+        ldx TSYSTEM_PRODUCTIVITY_LO     ; print the 16-bit number
+        ldy TSYSTEM_PRODUCTIVITY_HI     ;  for gross productivity
         jsr print_int16
         jsr print_space
-        lda # $00
-        sta ZP_34
+
+        lda # %00000000                 ; enable all-caps
+        sta ZP_PRINT_CASE               ;  for the next string
 
 .import TKN_FLIGHT_M:direct
-        lda # TKN_FLIGHT_M
+        lda # TKN_FLIGHT_M              ; print "M" (million)
         jsr print_flight_token
-
 .import TKN_FLIGHT_CR:direct
-        lda # TKN_FLIGHT_CR
-        jsr _6a84
+        lda # TKN_FLIGHT_CR             ; print " CR" (credits)
+        jsr print_flight_token_and_newpara
 
+        ; average radius:
+        ;-----------------------------------------------------------------------
 .import TKN_FLIGHT_AVERAGE_RADIUS:direct
         lda # TKN_FLIGHT_AVERAGE_RADIUS
         jsr print_flight_token_with_colon
 
-        ; extract the average planet radius from the seed
+        ; extract the average planet radius from the seed:
         ;
+        ;       W0:   HI       LO | W1:   HI       LO | W2:   HI       LO
+        ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
+        ;                           ^^^^^^^^                ^^^^
+        ;                            lo-bits                hi-bits
         lda ZP_SEED_W2_HI
         ldx ZP_SEED_W1_HI
         and # %00001111
 
-        ; add the minimum scale factor; this ensures that all planets
-        ; have a radius of at least 256*11, avoiding a planet of radius 0!
-        clc 
-        adc # 11
-
-        tay 
-        jsr print_num16
+        clc                     ; add the minimum scale factor;
+        adc # 11                ;  this ensures that all planets
+        tay                     ;  have a radius of at least 256*11,
+        jsr print_num16         ;  avoiding a planet of radius 0!
         jsr print_space
 
         ; print "KM" (Kilometers)
@@ -464,11 +537,12 @@ _6b5a:                                                                  ;$6B5A
         lda # $6d               ;="M"
         jsr print_char
 
-        jsr _6a87
-;6ba5?
-        jmp _3d2f
+        jsr print_newpara
+        jmp _3d2f               ; (not in the BBC code)
 
-        rts 
+.ifdef  OPTION_ORIGINAL
+        rts                     ; extraneous
+.endif
 
 
 _6ba9:                                                                  ;$6BA9
@@ -476,7 +550,7 @@ _6ba9:                                                                  ;$6BA9
 ; extract target planet information:
 ;
 ; a more visual guide to the way planet information is generated from the seed
-; can be seen here: http://wiki.alioth.net/index.php/Random_number_generator
+; can be seen here: <http://wiki.alioth.net/index.php/Random_number_generator>
 ;-------------------------------------------------------------------------------
         lda ZP_SEED_W0_HI
         and # %00000111
@@ -558,7 +632,7 @@ galactic_chart:                                                         ;$6C1C
 .endif  ;///////////////////////////////////////////////////////////////////////
         
         lda # 7
-        jsr set_cursor_col
+       .set_cursor_col
 
         jsr _70a0
 
@@ -746,8 +820,8 @@ buy_screen:                                                             ;$6D16
 
         jsr _72db
 
-        lda # $80
-        sta ZP_34
+        lda # %10000000
+        sta ZP_PRINT_CASE
 
         lda # $00
         sta CARGO_ITEM          ; item index?
@@ -830,9 +904,9 @@ _6da4:                                                                  ;$6DA4
         lda CARGO_ITEM          ; item index?
         clc 
         adc # 5
-        jsr set_cursor_row
+       .set_cursor_row
         lda # 0
-        jsr set_cursor_col
+       .set_cursor_col
 
         inc CARGO_ITEM          ; item index?
         lda CARGO_ITEM          ; item index?
@@ -923,7 +997,7 @@ sell_cargo:                                                             ;$6E41
         jsr set_page_6a2f
 
         lda # 10
-        jsr set_cursor_col
+       .set_cursor_col
 
 .import TKN_FLIGHT_SELL:direct
         lda # TKN_FLIGHT_SELL
@@ -949,7 +1023,7 @@ _6e5d:                                                                  ;$6E5d
         lda _90a6, y
         sta ZP_8F
        .phx                     ; push X to stack (via A)
-        jsr _6a8a
+        jsr print_newline_para
 
         clc 
         lda CARGO_ITEM          ; item index?
@@ -963,7 +1037,7 @@ _6e5d:                                                                  ;$6E5d
         jsr print_flight_token
 
         lda # 14
-        jsr set_cursor_col
+       .set_cursor_col
 
         pla 
         tax 
@@ -989,8 +1063,8 @@ _6e5d:                                                                  ;$6E5d
         bcs _6e30
         lda CARGO_ITEM          ; item index?
 
-        ldx # $ff
-        stx ZP_34
+        ldx # %11111111
+        stx ZP_PRINT_CASE
         jsr _7246
         ldy CARGO_ITEM          ; item index?
         lda PLAYER_CARGO, y
@@ -1004,8 +1078,8 @@ _6e5d:                                                                  ;$6E5d
         jsr _74a2
         jsr give_cash           ; pay monies
 
-        lda # $00
-        sta ZP_34
+        lda # %00000000
+        sta ZP_PRINT_CASE
 _6eca:                                                                  ;$6ECA
         ldy CARGO_ITEM          ; item index?
         iny 
@@ -1019,7 +1093,7 @@ _6eca:                                                                  ;$6ECA
         jsr _7627
         jmp _6dbf
 _6ede:                                                                  ;$6EDE
-        jsr _6a8a
+        jsr print_newline_para
         lda PLAYER_TRUMBLES_LO
         ora PLAYER_TRUMBLES_HI
         bne _6eea
@@ -1069,11 +1143,11 @@ inventory_screen:                                                       ;$6F16
         jsr set_page_6a2f
 
         lda # 11
-        jsr set_cursor_col
+       .set_cursor_col
 
 .import TKN_FLIGHT_INVENTORY:direct
         lda # TKN_FLIGHT_INVENTORY
-        jsr _6a84
+        jsr print_flight_token_and_newpara
 
         jsr draw_title_divider
         jsr print_fuel_and_cash
@@ -1222,7 +1296,7 @@ local_chart:                                                            ;$6FDB
         ; print the page title:
         ;
         lda # 7
-        jsr set_cursor_col
+       .set_cursor_col
 
 .import TKN_FLIGHT_SHORT_RANGE_CHART:direct
         lda # TKN_FLIGHT_SHORT_RANGE_CHART
@@ -1306,7 +1380,7 @@ local_chart:                                                            ;$6FDB
         lsr                     ; /8
         clc 
         adc # 1
-        jsr set_cursor_col
+       .set_cursor_col
 
         ;-----------------------------------------------------------------------
         lda ZP_SEED_W0_HI       ; get planet Y-coordinate again
@@ -1347,7 +1421,7 @@ local_chart:                                                            ;$6FDB
         ; print planet's name:
         ;-----------------------------------------------------------------------
 @name:  tya                     ; set the row number                    ;$705C
-        jsr set_cursor_row      ; to print at
+       .set_cursor_row          ; to print at
 
         ; we cannot print within the title space,
         ; so skip attempting to print there or above
@@ -1360,7 +1434,7 @@ local_chart:                                                            ;$6FDB
 
         ; capitalise the first letter of the name
         lda # %10000000
-        sta ZP_34
+        sta ZP_PRINT_CASE
 
         ; print planet name?
         jsr _76e9
@@ -1532,7 +1606,7 @@ _714f:                                                                  ;$714F
         jsr tkn_docked_fn15
 
         lda # 15
-        jsr set_cursor_col
+       .set_cursor_col
 
         ; print "DOCKED"...
 .import MSG_DOCKED_DOCKED:direct
@@ -1577,17 +1651,17 @@ _7181:                                                                  ;$7181
         bpl _7181
 
         lda # 7
-        jsr set_cursor_col
+       .set_cursor_col
 
         lda # 23                ; screen row 23(?)
         ldy ZP_SCREEN           ; are we in the cockpit-view?
        .bnz :+                  ; no? skip over
 
         lda # 17                ; screen row 17(?)
-:       jsr set_cursor_row                                              ;$7196
+:      .set_cursor_row                                                  ;$7196
 
         lda # %00000000
-        sta ZP_34
+        sta ZP_PRINT_CASE
 
 .import TKN_FLIGHT_HYPERSPACE:direct
         lda # TKN_FLIGHT_HYPERSPACE
@@ -1669,8 +1743,8 @@ _7217:                                                                  ;$7217
 _7224:                                                                  ;$7224
 ;===============================================================================
         lda # 1
-        jsr set_cursor_col
-        jsr set_cursor_row
+       .set_cursor_col
+       .set_cursor_row
 
         ldy # $00
         clc 
@@ -1684,7 +1758,7 @@ print_int16:                                                            ;$7234
 ;-------------------------------------------------------------------------------
         clc 
 
-print_num16:                                                            ;$7235
+print_num16:                                            ; BBC: pr5      ;$7235
 ;===============================================================================
 ; print 16-bit value in X/Y: -- decimal point included if carry set
 ;-------------------------------------------------------------------------------
@@ -1718,7 +1792,7 @@ _7246:                                                                  ;$7246
         bne _7244
 
         lda # 1
-        jsr set_cursor_col
+       .set_cursor_col
 
         ; "FOOD", "TEXTILES", "RADIOACTIVES", "SLAVES", "LIQUOR/WINES",
         ; "LUXURIES", "NARCOTICS", "COMPUTERS", "MACHINERY", "ALLOYS",
@@ -1730,7 +1804,7 @@ _7246:                                                                  ;$7246
         jsr print_flight_token
 
         lda # 14
-        jsr set_cursor_col
+       .set_cursor_col
 
         ldx ZP_8E
         lda _90a6, x
@@ -1770,7 +1844,7 @@ _728e:                                                                  ;$728E
         jmp _72b8
 _72af:                                                                  ;$72AF
         lda # 25
-        jsr set_cursor_col
+       .set_cursor_col
 
         lda # $2d
         bne _72c7
@@ -1804,7 +1878,7 @@ _72d6:                                                                  ;$72D6
 _72db:                                                                  ;$72DB
 ;===============================================================================
         lda # 17
-        jsr set_cursor_col
+       .set_cursor_col
 
         lda # $ff
         bne _72c7
@@ -1815,27 +1889,27 @@ market_screen:                                                          ;$72E4
         jsr set_page_6a2f
 
         lda # 5
-        jsr set_cursor_col
+       .set_cursor_col
 
 .import TKN_FLIGHT_MARKET_PRICES:direct
         lda # TKN_FLIGHT_MARKET_PRICES
         jsr print_flight_token_and_divider
 
         lda # 3
-        jsr set_cursor_row
+       .set_cursor_row
 
         jsr _72db
 
         lda # 6
-        jsr set_cursor_row
+       .set_cursor_row
 
         lda # $00
         sta CARGO_ITEM          ; item index?
 _7305:                                                                  ;$7305
-        ldx # $80
-        stx ZP_34
+        ldx # %10000000
+        stx ZP_PRINT_CASE
         jsr _7246
-        jsr cursor_down
+       .cursor_down
         inc CARGO_ITEM          ; item index?
         lda CARGO_ITEM          ; item index?
         cmp # $11
@@ -2140,7 +2214,7 @@ equipment_screen:                                                       ;$74BB
         jsr set_page_6a2f       ; clearing off the HUD if present
 
         lda # 12
-        jsr set_cursor_col
+       .set_cursor_col
 
 .import TKN_FLIGHT_EQUIP:direct
         lda # TKN_FLIGHT_EQUIP
@@ -2150,9 +2224,9 @@ equipment_screen:                                                       ;$74BB
         lda # TKN_FLIGHT_SHIP
         jsr print_flight_token_and_divider
 
-        lda # $80
-        sta ZP_34
-        jsr cursor_down
+        lda # %10000000
+        sta ZP_PRINT_CASE
+       .cursor_down
         lda PSYSTEM_TECHLEVEL
         clc 
         adc # $03
@@ -2187,7 +2261,7 @@ _74f5:                                                                  ;$74F5
         sec 
 
         lda # 25
-        jsr set_cursor_col
+       .set_cursor_col
 
         lda # $06
         jsr print_medium_value
@@ -2208,8 +2282,8 @@ _74f5:                                                                  ;$74F5
         pha 
 
         lda # 2
-        jsr set_cursor_col
-        jsr cursor_down
+       .set_cursor_col
+       .cursor_down
 
         pla 
         pha 
@@ -2398,10 +2472,10 @@ _764c:                                                                  ;$764C
 _7658:                                                                  ;$7658
         lda # 16
         tay 
-        jsr set_cursor_row
+       .set_cursor_row
 _765e:                                                                  ;$765E
         lda # 12
-        jsr set_cursor_col
+       .set_cursor_col
 
         ; print character and space
         tya 
@@ -2416,7 +2490,7 @@ _765e:                                                                  ;$765E
         adc # TKN_FLIGHT_P
         jsr print_flight_token
 
-        jsr cursor_down
+       .cursor_down
         ldy ZP_CURSOR_ROW
         cpy # $14
         bcc _765e
@@ -5708,10 +5782,10 @@ _877e:                                                                  ;$877E
         beq _877d
 
         jsr _7695
-        sta ZP_34
+        sta ZP_PRINT_CASE
         jsr _76e9
-        lda # $80
-        sta ZP_34
+        lda # %10000000
+        sta ZP_PRINT_CASE
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -5721,7 +5795,7 @@ _877e:                                                                  ;$877E
         jsr print_crlf
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        jmp _6a68
+        jmp print_target_system_distance
 
 
 illegal_cargo:                                                          ;$8798
@@ -5827,8 +5901,8 @@ _87d0:                                                                  ;$87D0
         jsr _7af7
 
         lda # 12
-        jsr set_cursor_row
-        jsr set_cursor_col
+       .set_cursor_row
+       .set_cursor_col
 
         lda # $92
         jsr print_canned_message
@@ -5947,7 +6021,7 @@ _8882:                                                                  ;$8882
         jsr clear_keyboard
 
         lda # 3
-        jsr set_cursor_col
+       .set_cursor_col
 
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
@@ -6094,7 +6168,7 @@ _8920:                                                                  ;$8920
         stx ZP_POLYOBJ_ROLL
         stx ZP_POLYOBJ_PITCH
         inx 
-        stx ZP_34
+        stx ZP_PRINT_CASE
         
         lda ZP_SHIP_TYPE
         jsr spawn_ship
@@ -6106,7 +6180,7 @@ _8920:                                                                  ;$8920
 .else   ;///////////////////////////////////////////////////////////////////////
         lda # 2
 .endif  ;///////////////////////////////////////////////////////////////////////
-        jsr set_cursor_col
+       .set_cursor_col
 
 .import TKN_FLIGHT_ELITE:direct
         lda # TKN_FLIGHT_ELITE
@@ -6116,7 +6190,7 @@ _8920:                                                                  ;$8920
         jsr print_char
 
         lda # 6
-        jsr set_cursor_col
+       .set_cursor_col
 
         lda _1d08
         beq :+
@@ -6132,9 +6206,9 @@ _8920:                                                                  ;$8920
         inc _87b8
 
         lda # 7
-        jsr set_cursor_col
+       .set_cursor_col
         lda # 10
-        jsr set_cursor_row
+       .set_cursor_row
 
         ldy # $00
 :       jsr paint_char                                                  ;$898C
@@ -6157,7 +6231,7 @@ _8920:                                                                  ;$8920
                                 ; (see "text/text_docked.asm")
 
         lda # 3
-        jsr set_cursor_col
+       .set_cursor_col
         lda # TXT_NEWLINE
         jsr print_docked_str
 
@@ -7204,11 +7278,11 @@ _901a:  sta ZP_CURSOR_ROW                                               ;$901A
 
         ; set all capitals?
         ldx # %00000000
-        stx ZP_34
+        stx ZP_PRINT_CASE
 
         ; set column, but why this variable?
         lda ZP_B9
-        jsr set_cursor_col
+       .set_cursor_col
 
         pla                     ; retrieve message-ID parameter
         ldy # 20
@@ -7235,7 +7309,7 @@ _901a:  sta ZP_CURSOR_ROW                                               ;$901A
         sbc txt_buffer_index
         lsr 
         sta ZP_B9
-        jsr set_cursor_col
+       .set_cursor_col
 
         jsr text_buffer_off
         lda VAR_04E6
@@ -7258,7 +7332,6 @@ damage_cargo:                                                           ;$906A
 ; when the player takes damage with no shields, there's a chance
 ; that their cargo might be destroyed
 ;
-; TODO: should we have a possibility of dropping cargo cannisters?
 ;-------------------------------------------------------------------------------
         jsr get_random_number   ; get a random number in A & X
         bmi _9001               ; for A >= 128/256 (50% chance), exit (RTS)

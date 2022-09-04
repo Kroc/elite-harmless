@@ -34,7 +34,7 @@ _tkn_index      .set 0
 
 .macro  .tkn_id         tkn_id
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        
+
         ; scramble the token index to produce
         ; the token ID used within flight strings
         .local  _value
@@ -53,7 +53,7 @@ _tkn_index      .set 0
                 _value .set .scramble( _tkn_index - $72 )
         .endif
         ;;.out .sprintf(": $%0.2x: TXT%s", _value, tkn_id)
-        
+
         ; define the token locally, using the name given.
         ; note that this doesn't include a prefix, to make
         ; the text-database below easier on the eyes
@@ -252,19 +252,21 @@ _072b:  ;$A7: 7.                                                        ;$072B
         .byte   $21, __, _MA, "RKET", __, _PRICE, "S", __end
         .tkn_id "_MARKET_PRICES"                                        ;=$84
 
+        ; economy type:
+        ;-----------------------------------------------------------------------
 _0736:  ;$A8: 8.                                                        ;$0736
         .byte   _IN, "D", _US, "T", _RI, _AL, __end
-        .tkn_id "_INDUSTRIAL"                                           ;=$8B
+        .tkn_id "_ECONOMY_TYPE"                                         ;=$8B
 
 _073d:  ;$A9: 9.                                                        ;$073D
         .byte   "AG", _RI, "CULTU", _RA, "L", __end
         .tkn                                                            ;=$8A
 
-        ; wealth level:
+        ; economy wealth:
         ;-----------------------------------------------------------------------
 _0748:  ;$AA: 10.                                                       ;$0748
         .byte   _RI, "CH", __, __end
-        .tkn_id "_WEALTH"                                               ;=$89
+        .tkn_id "_ECONOMY_WEALTH"                                       ;=$89
 
 _074d:  ;$AB: 11.                                                       ;$074D
         .byte   "A", _VE, _RA, _GE, __, __end
@@ -273,12 +275,12 @@ _074d:  ;$AB: 11.                                                       ;$074D
 _0753:  ;$AC: 12.                                                       ;$0753
         .byte   "PO", _OR, __, __end
         .tkn_id "_POOR"                                                 ;=$8F
-        ;-----------------------------------------------------------------------
         
 _0758:  ;$AD: 13.                                                       ;$0758
         .byte   _MA, _IN, "LY", __, __end
         .tkn_id "_MAINLY"                                               ;=$8E
 
+        ;-----------------------------------------------------------------------
 _075e:  ;$AE: 14.                                                       ;$075E
         .byte   "UNIT", __end
         .tkn_id "_UNIT"                                                 ;=$8D
@@ -290,10 +292,12 @@ _0763:  ;$AF: 15.                                                       ;$0763
 _0769:  ;$B0: 16.                                                       ;$0769
         .byte   _QU, _AN, _TI, "TY", __end
         .tkn_id "_QUANTITY"                                             ;=$93
-        
+
+        ; government type:
+        ;-----------------------------------------------------------------------
 _076f:  ;$B1: 17.                                                       ;$076F
         .byte   _AN, _AR, "CHY", __end
-        .tkn_id "_ANARCHY"                                              ;=$92
+        .tkn_id "_GOVERNMENT_TYPE"                                      ;=$92
 
 _0775:  ;$B2: 18.                                                       ;$0775
         .byte   "FEUD", _AL, __end
@@ -323,6 +327,7 @@ _07a2:  ;$B8: 24.                                                       ;$07A2
         .byte   "C", _OR, "P", _OR, _AT, "E", __, _ST, _AT, "E", __end
         .tkn                                                            ;=$9B
 
+        ;-----------------------------------------------------------------------
 _07ad:  ;$B9: 25.                                                       ;$07AD
         .byte   "SHIP", __end
         .tkn_id "_SHIP"                                                 ;=$9A
@@ -382,7 +387,7 @@ _0816:  ;$C6: 38.                                                       ;$0816
 _081c:  ;$C7: 39.                                                       ;$081C
         .byte   _GALACTIC, _CHART, $22, __end
         .tkn_id "_GALACTIC_CHART"                                       ;=$E4
-        
+
 _0820:  ;$C8: 40.                                                       ;$0820
         .byte   "T", _AR, _GE, "T", __, "LO", _ST, __end
         .tkn_id "_TARGET_LOST"                                          ;=$EB
@@ -390,7 +395,7 @@ _0820:  ;$C8: 40.                                                       ;$0820
 _0829:  ;$C9: 41.                                                       ;$0829
         .byte   _MISSILE, __, "JAMM", _ED, __end
         .tkn_id "_MISSILE_JAMMED"                                       ;=$EA
-        
+
 _0831:  ;$CA: 42.                                                       ;$0831
         .byte   "R", _AN, _GE, __end
         .tkn_id "_RANGE"                                                ;=$E9
@@ -410,11 +415,11 @@ _083e:  ;$CD: 45.                                                       ;$083E
 _0842:  ;$CE: 46.                                                       ;$0842
         .byte   __, "C", _AR, "GO", $25, __end
         .tkn_id "_CARGO"                                                ;=$ED
-        
+
 _0849:  ;$CF: 47.                                                       ;$0849
         .byte   "E", _QU, "IP", __end
         .tkn_id "_EQUIP"                                                ;=$EC
-        
+
         ; cargo types:
         ;-----------------------------------------------------------------------
 _084e:  ;$D0: 48.                                                       ;$084E
@@ -424,15 +429,15 @@ _084e:  ;$D0: 48.                                                       ;$084E
 _0853:  ;$D1: 49.                                                       ;$0853
         .byte   _TE, "X", _TI, "L", _ES, __end
         .tkn                                                            ;=$F2
-        
+
 _0859:  ;$D2: 50.                                                       ;$0859
         .byte   _RA, _DI, "OAC", _TI, _VE, "S", __end
         .tkn                                                            ;=$F1
-        
+
 _0862:  ;$D3: 51.                                                       ;$0862
         .byte   "S", _LA, _VE, "S", __end
         .tkn                                                            ;=$F0
-        
+
 _0867:  ;$D4: 52.                                                       ;$0867
         .byte   "LI", _QU, _OR, $0c, "W", _IN, _ES, __end
         .tkn                                                            ;=$F7
@@ -440,47 +445,47 @@ _0867:  ;$D4: 52.                                                       ;$0867
 _0870:  ;$D5: 53.                                                       ;$0870
         .byte   "LUXU", _RI, _ES, __end
         .tkn                                                            ;=$F6
-        
+
 _0877:  ;$D6: 54.                                                       ;$0877
         .byte   "N", _AR, "CO", _TI, "CS", __end
         .tkn                                                            ;=$F5
-        
+
 _087f:  ;$D7: 55.                                                       ;$087F
         .byte   _COM, "PUT", _ER, "S", __end
         .tkn_id "_COMPUTERS"                                            ;=$F4
-        
+
 _0886:  ;$D8: 56.                                                       ;$0886
         .byte   _MA, "CH", _IN, _ER, "Y", __end
         .tkn                                                            ;=$FB
-        
+
 _088dc: ;$D9: 57.                                                       ;$088D
         .byte   "ALLOYS", __end
         .tkn                                                            ;=$FA
-        
+
 _0894:  ;$DA: 58.                                                       ;$0894
         .byte   "FI", _RE, _AR, "MS", __end
         .tkn                                                            ;=$F9
-        
+
 _089b:  ;$DB: 59.                                                       ;$089B
         .byte   "FURS", __end
         .tkn                                                            ;=$F8
-        
+
 _08a0:  ;$DC: 60.                                                       ;$08A0
         .byte   "M", _IN, _ER, _AL, "S", __end
         .tkn                                                            ;=$FF
-        
+
 _08a6:  ;$DD: 61.                                                       ;$08A6
         .byte   "GOLD", __end
         .tkn                                                            ;=$FE
-        
+
 _08ab:  ;$DE: 62.                                                       ;$08AB
         .byte   "PL", _AT, _IN, "UM", __end
         .tkn                                                            ;=$FD
-        
+
 _08b2:  ;$DF: 63.                                                       ;$08B2
         .byte   _GE, "M", _HYPHEN, _ST, _ON, _ES, __end
         .tkn                                                            ;=$FC
-        
+
 _08b9:  ;$E0: 64.                                                       ;$08B9
         .byte   _AL, "I", _EN, __, _ITEM, "S", __end
         .tkn                                                            ;=$C3
@@ -488,15 +493,17 @@ _08b9:  ;$E0: 64.                                                       ;$08B9
 _08c0:  ;$E1: 65.                                                       ;$08C0
         .byte   $2f, $12, $13, $23, $16, $23, __end
         .tkn                                                            ;=$C2
-        
+
 _08c7:  ;$E2: 66.                                                       ;$08C7
         .byte   __, "CR", __end
         .tkn_id "_CR"                                                   ;=$C1
-        
+
+        ; species adjective:
+        ;-----------------------------------------------------------------------
 _08cb:  ;$E3: 67.                                                       ;$08CB
         .byte   "L", _AR, _GE, __end
         .tkn_id "_LARGE"                                                ;=$C0
-        
+
 _08d0:  ;$E4: 68.                                                       ;$08D0
         .byte   "FI", _ER, _CE, __end
         .tkn                                                            ;=$C7
@@ -504,43 +511,43 @@ _08d0:  ;$E4: 68.                                                       ;$08D0
 _08d4:  ;$E5: 69.                                                       ;$08D4
         .byte   "S", _MA, _LL, __end
         .tkn                                                            ;=$C6
-        
+
         ; colours:
         ;-----------------------------------------------------------------------
 _08d8:  ;$E6: 70.                                                       ;$08D8
         .byte   "G", _RE, _EN, __end
         .tkn_id "_COLORS"                                               ;=$C5
-        
+
 _08dc:  ;$E7: 71.                                                       ;$08DC
         .byte   "R", _ED, __end
         .tkn                                                            ;=$C4
-        
+
 _08df:  ;$E8: 72.                                                       ;$08DF
         .byte   "YE", _LL, "OW", __end
         .tkn                                                            ;=$CB
-        
+
 _08e5:  ;$E9: 73.                                                       ;$08E5
         .byte   "BLUE", __end
         .tkn                                                            ;=$CA
-        
+
 _08ea:  ;$EA: 74.                                                       ;$08EA
         .byte   "B", _LA, "CK", __end
         .tkn                                                            ;=$C9
 
-        ; adjectives
+        ; adjectives:
         ;-----------------------------------------------------------------------
 _08ef:  ;$EB: 75.                                                       ;$08EF
         .byte   _HARMLESS, __end
         .tkn_id "_ADJECTIVES"                                           ;=$C8
-        
+
 _08f1:  ;$EC: 76.                                                       ;$08F1
         .byte   "SLIMY", __end
         .tkn                                                            ;=$CF
-        
+
 _08f7:  ;$ED: 77.                                                       ;$08F7
         .byte   "BUG", _HYPHEN, "EY", _ED, __end
         .tkn                                                            ;=$CE
-        
+
 _08ff:  ;$EE: 78.                                                       ;$08FF
         .byte   "H", _OR, "N", _ED, __end
         .tkn                                                            ;=$CD
@@ -556,17 +563,17 @@ _0908:  ;$F0: 80.                                                       ;$0908
 _090b:  ;$F1: 81.                                                       ;$090B
         .byte   "FURRY", __end
         .tkn                                                            ;=$D2
-        
+
         ; species:
         ;-----------------------------------------------------------------------
 _0911:  ;$F2: 82.                                                       ;$0911
         .byte   _RO, "D", _EN, "T", __end
         .tkn_id "_SPECIES"                                              ;=$D1
-        
+
 _0916:  ;$F3: 83.                                                       ;$0916
         .byte   "F", _RO, "G", __end
         .tkn                                                            ;=$D0
-        
+
 _091a:  ;$F4: 84.                                                       ;$091A
         .byte   "LI", _ZA, "RD", __end
         .tkn                                                            ;=$D7
@@ -574,15 +581,15 @@ _091a:  ;$F4: 84.                                                       ;$091A
 _0920:  ;$F5: 85.                                                       ;$0920
         .byte   "LOB", _ST, _ER, __end
         .tkn                                                            ;=$D6
-        
+
 _0926:  ;$F6: 86.                                                       ;$0926
         .byte   _BI, "RD", __end
         .tkn                                                            ;=$D5
-        
+
 _092a:  ;$F7: 87.                                                       ;$092A
         .byte   "HUM", _AN, "OID", __end
         .tkn                                                            ;=$D4
-        
+
 _0932:  ;$F8: 88.                                                       ;$0932
         .byte   "FEL", _IN, "E", __end
         .tkn                                                            ;=$DB
@@ -595,11 +602,11 @@ _0938:  ;$F9: 89.                                                       ;$0938
 _093e:  ;$FA: 90.                                                       ;$093E
         .byte   _AVERAGE, _RA, _DI, _US, __end
         .tkn_id "_AVERAGE_RADIUS"                                       ;=$D9
-        
+
 _0943:  ;$FB: 91.                                                       ;$0943
         .byte   "COM", __end
         .tkn_id "_COM"                                                  ;=$D8
-        
+
 _0947:  ;$FC: 92.                                                       ;$0947
         .byte   _COM, "M", _AN, "D", _ER, __end
         .tkn_id "_COMMANDER"                                            ;=$DF
@@ -607,7 +614,7 @@ _0947:  ;$FC: 92.                                                       ;$0947
 _094d:  ;$FD: 93.                                                       ;$094D
         .byte   __, "D", _ES, "T", _RO, "Y", _ED, __end
         .tkn_id "_DESTROYED"                                            ;=$DE
-        
+
 _0955:  ;$FE: 94.                                                       ;$0955
         .byte   "RO", __end
         .tkn_id "_RO"                                                   ;=$DD
@@ -628,11 +635,11 @@ _0958:  ;$FF: 95.                                                       ;$0958
 _096f:  ;$60: 96.                                                       ;$096F
         .byte   "FR", _ON, "T", __end
         .tkn_id "_DIRECTIONS"                                           ;=$43
-        
+
 _0974:  ;$61: 97.                                                       ;$0974
         .byte   _RE, _AR, __end
         .tkn                                                            ;=$42
-        
+
 _0977:  ;$62: 98.                                                       ;$0977
         .byte   _LE, "FT", __end
         .tkn                                                            ;=$41
@@ -645,7 +652,7 @@ _097b:  ;$63: 99.                                                       ;$097B
 _0980:  ;$64: 100.                                                      ;$0980
         .byte   _ENERGY, "LOW", $24, __end
         .tkn                                                            ;=$47
-        
+
 _0986:  ;$65: 101.                                                      ;$0986
         .byte   _RIGHT, _ON_, _COMMANDER, $02, __end
         .tkn_id "_RIGHT_ON_COMMANDER"                                   ;=$46
@@ -665,7 +672,7 @@ _0998:  ;$68: 104.                                                      ;$0998
 _099d:  ;$69: 105.                                                      ;$099D
         .byte   "FUEL", __end
         .tkn_id "_FUEL"                                                 ;=$4A
-        
+
 _09a2:  ;$6A: 106.                                                      ;$09A2
         .byte   "M", _IS, "SI", _LE, __end
         .tkn_id "_MISSILE"                                              ;=$49
@@ -673,7 +680,7 @@ _09a2:  ;$6A: 106.                                                      ;$09A2
 _09a8:  ;$6B: 107.                                                      ;$09A8
         .byte   _LARGE, _CARGO, __, "BAY", __end
         .tkn_id "_LARGE_CARGO_BAY"                                      ;=$48
-        
+
 _09af:  ;$6C: 108.                                                      ;$09AF
         .byte   "E", _DOT, "C", _DOT, "M", _DOT, _SYSTEM, __end
         .tkn_id "_ECM_SYSTEM"                                           ;=$4F
@@ -693,7 +700,7 @@ _09bf:  ;$6F: 111.                                                      ;$09BF
 _09c8:  ;$70: 112.                                                      ;$09C8
         .byte   _ES, "CAPE", __, "POD", __end
         .tkn_id "_ESCAPE_POD"                                           ;=$53
-        
+
 _09d2:  ;$71: 113.                                                      ;$09D2
         .byte   _ENERGY, "BOMB", __end
         .tkn                                                            ;=$52
@@ -701,7 +708,7 @@ _09d2:  ;$71: 113.                                                      ;$09D2
 _09d8:  ;$72: 114.                                                      ;$09D8
         .byte   _EXTRA, _ENERGY, _UNIT, __end
         .tkn                                                            ;=$51
-        
+
 _09dc:  ;$73: 115.                                                      ;$09dC
         .byte   "DOCK", _IN, "G", __, _COMPUTERS, __end
         .tkn_id "_DOCKING_COMPUTERS"                                    ;=$50
@@ -709,15 +716,15 @@ _09dc:  ;$73: 115.                                                      ;$09dC
 _09e5:  ;$74: 116.                                                      ;$09E5
         .byte   _GALACTIC, __, _HYPERSPACE, __end
         .tkn_id "_GALACTIC_HYPERSPACE"                                  ;=$57
-        
+
 _09e9:  ;$75: 117.                                                      ;$09E9
         .byte   "MILIT", _AR, "Y", __, _LASER, __end
         .tkn                                                            ;=$56
-        
+
 _09f3:  ;$76: 118.                                                      ;$09F3
         .byte   "M", _IN, _IN, "G", __, _LASER, __end
         .tkn_id "_MINING_LASER"                                         ;=$55
-        
+
 _09fa:  ;$77: 119.                                                      ;$09FA
         .byte   _CASH, _COLON, $23, __end
         .tkn_id "_CASH_"                                                ;=$54
@@ -729,7 +736,7 @@ _09fe:  ;$78: 120.                                                      ;$09FE
 _0a05:  ;$79: 121.                                                      ;$0A05
         .byte   _EN, _ER, "GY", __, __end
         .tkn_id "_ENERGY"                                               ;=$5A
-        
+
 _0a0b:  ;$7A: 122.                                                      ;$0A0B
         .byte   "GA", _LA, "C", _TI, "C", __end
         .tkn_id "_GALACTIC"                                             ;=$59
@@ -738,11 +745,10 @@ _0a12:  ;$7B: 123.                                                      ;$0A12
         .byte   _DOCKING_COMPUTERS, __, "ON", __end
         .tkn                                                            ;=$58
 
-
 _0a17:  ;$7C: 124.                                                      ;$0A17
         .byte   "A", _LL, __end
         .tkn                                                            ;=$5F
-        
+
 _0a1a:  ;$7D: 125.                                                      ;$0A1A
         .byte   $26, _LE, "G", _AL, __, _ST, _AT, _US, _COLON, __end
         .tkn_id "_LEGAL_STATUS"                                         ;=$5E
@@ -753,11 +759,11 @@ _0a24:  ;$7E: 126.                                                      ;$0A24
         .byte   _SYSTEM, $2a, $20, $2f
         .byte   "C", _ON, _DI, _TI, _ON, $2a, __end
         .tkn_id "_STATUS_TITLE"                                         ;=$5D
-        
+
 _0a3d:  ;$7F: 127.                                                      ;$0A3D
         .byte   "I", _TE, "M", __end
         .tkn_id "_ITEM"                                                 ;=$5C
-        
+
 ;-------------------------------------------------------------------------------
 ; at this point a different set of token numbers are used
 ;
@@ -768,19 +774,19 @@ _0a41:  ;$0E: 128.                                                      ;$0A41
         ; and its de-scrambled value $0E is a meta-command (switch case?)
         .byte   __end
         .tkn                                                            ;=$2D
-        
+
 _0a42:  ;$0F: 129.                                                      ;$0A42
         .byte   "LL", __end
         .tkn_id "_LL"                                                   ;=$2C
-        
+
 _0a45:  ;$10: 130.                                                      ;$0A45
         .byte   _RA, _TI, "NG", _COLON, __end
         .tkn_id "_RATING"                                               ;=$33
-        
+
 _0a4b:  ;$11: 131.                                                      ;$0A4B
         .byte   __, _ON, __, __end
         .tkn_id "_ON_"                                                  ;=$32
-        
+
 _0a4f:  ;$12: 132.                                                      ;$0A4F
         .byte   $2f, $2b, _EQUIP, "M", _EN, "T", _COLON, $25, __end
         .tkn_id "_EQUIPMENT"                                            ;=$31
@@ -790,11 +796,11 @@ _0a4f:  ;$12: 132.                                                      ;$0A4F
 _0a58:  ;$13: 133.                                                      ;$0A58
         .byte   "C", _LE, _AN, __end
         .tkn_id "_LEGAL_STATE"                                          ;=$30
-        
+
 _0a5c:  ;$14: 134.                                                      ;$0A5C
         .byte   "OFF", _EN, "D", _ER, __end
         .tkn                                                            ;=$37
-        
+
 _0a63:  ;$15: 135.                                                      ;$0A63
         .byte   "FUGI", _TI, _VE, __end
         .tkn                                                            ;=$36
@@ -803,31 +809,31 @@ _0a63:  ;$15: 135.                                                      ;$0A63
 _0a6a:  ;$16: 136.                                                      ;$0A6A
         .byte   "H", _AR, "M", _LE, "SS", __end
         .tkn_id "_HARMLESS"                                             ;=$35
-        
+
 _0a71:  ;$17: 137.                                                      ;$0A71
         .byte   "MO", _ST, "LY", __, _HARMLESS, __end
         .tkn                                                            ;=$34
-        
+
 _0a79:  ;$18: 138.                                                      ;$0A79
         .byte   _POOR, __end
         .tkn                                                            ;=$3B
-        
+
 _0a7b:  ;$19: 139.                                                      ;$0A7B
         .byte   _AVERAGE, __end
         .tkn                                                            ;=$3A
-        
+
 _0a7d:  ;$1A: 140.                                                      ;$0A7D
         .byte   "ABO", _VE, __, _AVERAGE, __end
         .tkn                                                            ;=$39
-        
+
 _0a84:  ;$1B: 141.                                                      ;$0A84
         .byte   _COM, "PET", _EN, "T", __end
         .tkn                                                            ;=$38
-        
+
 _0a8b:  ;$1C: 142.                                                      ;$0A8B
         .byte   "D", _AN, _GE, _RO, _US, __end
         .tkn                                                            ;=$3F
-        
+
 _0a91:  ;$1D: 143.                                                      ;$0A91
         .byte   "DEADLY", __end
         .tkn                                                            ;=$3E
@@ -853,7 +859,7 @@ _0aac:  ;$1F: 145.                                                      ;$0AAC
 _0ab2:  ;$20: 146.                                                      ;$0AB2
         .byte   $2b, "GAME", __, "O", _VE, "R", __end
         .tkn                                                            ;=$03
-        
+
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; padding

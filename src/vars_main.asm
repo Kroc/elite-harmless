@@ -299,20 +299,19 @@ SHIP_LINES_HI           :=$04f3 ; ship lines pointer hi-byte
 VAR_04F4                :=$04f4 ; temp copy of seed? (indexed by X)
 VAR_04FA                :=$04fa ; temp copy of seed? (indexed by X)
 
+; target system:                                                        ; BBC:
 ;-------------------------------------------------------------------------------
-
-; target system:
 TSYSTEM_DATA            :=$0500
-TSYSTEM_ECONOMY         :=$0500
-TSYSTEM_GOVERNMENT      :=$0501
-TSYSTEM_TECHLEVEL       :=$0502
-TSYSTEM_POPULATION      :=$0503 ; & $0504?
-TSYSTEM_PRODUCTIVITY    :=$0505
-TSYSTEM_PRODUCTIVITY_LO :=$0505
-TSYSTEM_PRODUCTIVITY_HI :=$0506
-TSYSTEM_DISTANCE        :=$0507
-TSYSTEM_DISTANCE_LO     :=$0507
-TSYSTEM_DISTANCE_HI     :=$0508
+TSYSTEM_ECONOMY         :=$0500 ; economy type 0-7                      ; QQ3
+TSYSTEM_GOVERNMENT      :=$0501 ; government type 0-7                   ; QQ4
+TSYSTEM_TECHLEVEL       :=$0502                                         ; QQ5
+TSYSTEM_POPULATION      :=$0503                                         ; QQ6
+TSYSTEM_PRODUCTIVITY    :=$0505                                         ; QQ7
+TSYSTEM_PRODUCTIVITY_LO :=$0505                                         ; QQ7+0
+TSYSTEM_PRODUCTIVITY_HI :=$0506                                         ; QQ7+1
+TSYSTEM_DISTANCE        :=$0507                                         ; QQ8
+TSYSTEM_DISTANCE_LO     :=$0507                                         ; QQ8+0
+TSYSTEM_DISTANCE_HI     :=$0508                                         ; QQ8+1
 TSYSTEM_POS             :=$0509
 TSYSTEM_POS_X           :=$0509
 TSYSTEM_POS_Y           :=$050a
@@ -326,7 +325,7 @@ PSYSTEM_ECONOMY         :=$04ee ; present system economy size
 
 VAR_04EC                :=$04ec ; used with market prices
 VAR_04ED                :=$04ed ; quantity of item
-CARGO_ITEM              :=$04ef ; type of item
+CARGO_ITEM              :=$04ef ; type of item                          ; QQ29
 
 PSYSTEM_GOVERNMENT      :=$04f0
 PSYSTEM_TECHLEVEL       :=$04f1

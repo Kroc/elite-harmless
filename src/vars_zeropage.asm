@@ -133,10 +133,11 @@ ZP_VAR_P3               := $30
 
 ;-------------------------------------------------------------------------------
 
-ZP_CURSOR_COL           := $31
+ZP_CURSOR_COL           := $31                                          ; XC
 ZP_32                   := $32  ;?
-ZP_CURSOR_ROW           := $33
-ZP_34                   := $34  ; case switch for flight strings?
+ZP_CURSOR_ROW           := $33                                          ; YC
+
+ZP_PRINT_CASE           := $34  ; auto capitalisation for printing      ; QQ17
 
 ; a variable named "K3" in the BBC code; used as a 16-bit X-position
 ; when drawing circles -- note that the address is reused below!
@@ -303,7 +304,7 @@ ZP_7E                   := $7e  ;? x10
 ; Elite's random-number seed that defines the entire universe
 ; see: http://wiki.alioth.net/index.php/Random_number_generator
 ;
-ZP_SEED                 := $7f
+ZP_SEED                 := $7f                                          ; QQ15
 ZP_SEED_W0              := $7f   ; first word
 ZP_SEED_W0_LO           := $7f   ; lo-byte of first word
 ZP_SEED_W0_HI           := $80   ; hi-byte of first word
@@ -327,9 +328,9 @@ ZP_8C                   := $8c  ;? x4
 ZP_8D                   := $8d  ;? x4
 
 ; temp variable storage and seed backup?
-ZP_8E                   := $8e  ;? x18 "QQ19" -- cross-hair X-position
-ZP_8F                   := $8f  ;? x19 "QQ19" -- cross-hair Y-position
-ZP_90                   := $90  ;? x11 "QQ19" -- cross-hair size
+ZP_8E                   := $8e  ;? x18 -- cross-hair X-position         ; QQ19
+ZP_8F                   := $8f  ;? x19 -- cross-hair Y-position
+ZP_90                   := $90  ;? x11 -- cross-hair size
 ZP_91                   := $91  ;? x9
 ZP_92                   := $92  ;? x6
 ZP_93                   := $93  ;? x4

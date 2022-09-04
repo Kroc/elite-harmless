@@ -43,7 +43,7 @@ tkn_docked_fn1D:                                                        ;$3E5A
 .export tkn_docked_fn1D
 
         lda # 6
-        jsr set_cursor_row
+       .set_cursor_row
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////

@@ -10,7 +10,7 @@ set -e
 
 #===============================================================================
 
-cl65="./bin/cc65/bin/cl65 \
+cl65="cl65 \
     --debug-info \
     --include-dir src \
     --include-dir build \
@@ -18,7 +18,7 @@ cl65="./bin/cc65/bin/cl65 \
     --feature leading_dot_in_identifiers \
     --feature bracket_as_indirect \
     --asm-args --large-alignment"
-ca65="./bin/cc65/bin/ca65 \
+ca65="ca65 \
     --debug-info \
     --target c64 \
     --debug-info \

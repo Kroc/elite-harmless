@@ -206,8 +206,8 @@ print_flight_token:                                                     ;$777E
 
         ; token $06:
         ;
-        lda # $80               ; put 128 (bit 7) into A
-        sta ZP_34               ; set case-switch flag
+        lda # %10000000         ; put 128 (bit 7) into A
+        sta ZP_PRINT_CASE       ; set case-switch flag
         rts 
 
         ; NOTE: token $07 will fall through here
@@ -218,8 +218,8 @@ print_flight_token:                                                     ;$777E
 :       dex                     ; decrement token value twice more      ;$779D
         dex                     ; i.e. if it was 8, it would be 0
        .bnz :+                  ; skip ahead if token was not originally 8
-        stx ZP_34               ; token was 8, store the 0 in the case-switch
-        rts                     ; flag and return
+        stx ZP_PRINT_CASE       ; token was 8, store the 0 in the case-switch
+        rts                     ;  flag (0 = ALL-CAPS?) and return
 
         ; token $09:
         ;
@@ -246,11 +246,11 @@ print_flight_token:                                                     ;$777E
 
         ; switch case?
         ;
-:       ldx ZP_34               ; check case-switch flag                ;$77B3
+:       ldx ZP_PRINT_CASE       ; check case-switch flag                ;$77B3
         beq _77f6               ; =0, leave case as-is and print char
         bmi _is_captial         ; or bit 7 set, switch case
 
-        bit ZP_34               ; check bits 7 & 6 (bit 7 already handled)
+        bit ZP_PRINT_CASE       ; check bits 7 & 6 (bit 7 already handled)
         bvs _77ef               ; bit 6 set -- print char and reset bit 6
 
 _77bd:                                                                  ;$77BD
@@ -271,7 +271,7 @@ _goto_print_char:                                                       ;$77C7
 
 _is_captial:                                                            ;$77CA
         ;-----------------------------------------------------------------------
-        bit ZP_34               ; bit 6 set?
+        bit ZP_PRINT_CASE       ; bit 6 set?
         bvs _77e7
 
         cmp # 'a'               ; less than 'A'?
@@ -282,7 +282,7 @@ _is_captial:                                                            ;$77CA
 
         ; set bit 6 on the case-switch flag
         ora # %01000000
-        sta ZP_34
+        sta ZP_PRINT_CASE
 
         pla 
         bne _goto_print_char    ; print character as-is, but next will be
@@ -297,7 +297,7 @@ _indent:                                                                ;$77DF
         ; set cursor to column 22
         ;
         lda # 21
-        jsr set_cursor_col
+       .set_cursor_col
         jmp print_colon
 
         ;-----------------------------------------------------------------------
@@ -314,7 +314,7 @@ _77e7:  ; don't do anything if case-switch flag = %11111111             ;$77E7
 _77ef:  pha                                                             ;$77EF
         txa 
         and # %10111111
-        sta ZP_34
+        sta ZP_PRINT_CASE
         pla 
 
 _77f6:  jmp print_char                                                  ;$77F6

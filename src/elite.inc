@@ -27,7 +27,7 @@
 .include        "text/text.inc"         ; text/string constants
 
 ; the linker script ("link/elite-*.cfg") defines the memory layout of the game
-; (since it will differ from the original, disk and cartridge versions) so we
+; (since it will differ between original, disk and cartridge versions) so we
 ; import some memory addresses from there and use these to configure the C64
 
 ; the bitmap is the largest portion of memory at 8K

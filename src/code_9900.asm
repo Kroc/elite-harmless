@@ -2433,7 +2433,7 @@ _set_page:                                                              ;$A731
         sta ZP_7E               ; "arc counter"?
 
         lda # %10000000
-        sta ZP_34
+        sta ZP_PRINT_CASE
         sta txt_ucase_flag
 
         ; because the screen will be erased, we need to clear the circle
@@ -2461,13 +2461,13 @@ _set_page:                                                              ;$A731
 
 _a75d:                                                                  ;$A75D
         lda # 1
-        jsr set_cursor_row
+       .set_cursor_row
 
         lda ZP_SCREEN           ; are we in the cockpit-view?
        .bnz :+                  ; no? skip ahead
 
         lda # 11
-        jsr set_cursor_col
+       .set_cursor_col
 
 .import TKN_FLIGHT_DIRECTIONS:direct
         lda COCKPIT_VIEW
@@ -2489,7 +2489,7 @@ _a75d:                                                                  ;$A75D
         stx ZP_CURSOR_ROW
 
         dex 
-        stx ZP_34
+        stx ZP_PRINT_CASE
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -2799,7 +2799,7 @@ _a8bd:                                                                  ;$A8BD
 
 
 ; NOTE: in the original code, "code_interrupts.asm" appears here
-; NOTE: in the original code, "code_lines.asm" appears here
+; NOTE: in the original code, "draw_lines.asm" appears here
 ;
 .segment        "CODE_B09D"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -3094,8 +3094,8 @@ paint_char:                                                             ;$B17B
 
         ; cancel if text reaches a certain point?
         ; prevent off-screen writing?
-        ldy ZP_34
-        cpy # $ff
+        ldy ZP_PRINT_CASE
+        cpy # %11111111
         beq _b176
 _b189:                                                                  ;$B189
         cmp # $07               ; code $07? (unspecified in PETSCII)
@@ -3272,7 +3272,6 @@ _b210:  ; restore registers before returning                            ;$B210
         clc 
         rts 
 
-;===============================================================================
 ; NOTE: the original code inserts "orig/clear_screen.asm" here
 
 .segment        "CODE_B3D4"
@@ -3290,7 +3289,7 @@ tkn_docked_fn15:                                                        ;$B3D4
         sta txt_ucase_flag
 
         lda # %10000000
-        sta ZP_34
+        sta ZP_PRINT_CASE
 
         ; clears rows 21, 22 & 23?? (goat soup description?)
         ;-----------------------------------------------------------------------

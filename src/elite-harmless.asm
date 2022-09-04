@@ -31,6 +31,10 @@
 
 .include        "vars_flags.asm"
 
+; the stub cursor movement routines define a set of macros
+; that must be available before "text_docked_code.asm"
+.include        "orig/cursor.asm"
+
 .include        "code_1D81.asm"
 .include        "main_flight.asm"
 .include        "text/text_docked_code.asm"
@@ -53,12 +57,7 @@
         .include        "draw_lines.asm"
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        .include        "orig/clear_screen.asm"                         ;$B21A
-.else   ;///////////////////////////////////////////////////////////////////////
-        .include        "gfx/clear_screen.asm"
-.endif  ;///////////////////////////////////////////////////////////////////////
+.include        "gfx/clear_screen.asm"
 
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////

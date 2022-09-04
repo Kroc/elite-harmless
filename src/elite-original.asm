@@ -26,6 +26,10 @@
 .include        "gfx/gfx_font.asm"                                      ;$0B00
 .include        "vars_flags.asm"                                        ;$1D00
 
+; the stub cursor movement routines define a set of macros
+; that must be available before "text_docked_code.asm"
+.include        "orig/cursor.asm"                                       ;$6A25
+
 .include        "code_1D81.asm"                                         ;$1D81
 .include        "orig/orig_debug.asm"                                   ;$1E14
 .include        "main_flight.asm"                                       ;$1E21

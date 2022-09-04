@@ -2,8 +2,6 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "text_docked_code.asm":
-;
 .segment        "CODE_2372"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -345,7 +343,7 @@ tkn_docked_fn08:                                                        ;$2478
 .export tkn_docked_fn08
 
         lda # 6
-        jsr set_cursor_col
+       .set_cursor_col
 
         lda # %11111111
         sta txt_ucase_flag
@@ -363,7 +361,7 @@ tkn_docked_clearScreen:                                                 ;$2483
 .export tkn_docked_clearScreen
 
         lda # 1                 ;=page::empty
-        jsr set_cursor_col
+       .set_cursor_col
         jmp set_page
 
 
@@ -391,7 +389,7 @@ use_flight_tokens:                                                      ;$2496
         
         ; reset capitalisation?
         lda # %10000000
-        sta ZP_34
+        sta ZP_PRINT_CASE
 
         ; enable the flag that causes docked tokens to be
         ; interpretted as flight tokens instead
@@ -457,9 +455,9 @@ target_system_provenance:                                               ;$24B0
 .export target_system_provenance
 
         ; remove any current capitalisation?
-        lda ZP_34
+        lda ZP_PRINT_CASE
         and # %10111111
-        sta ZP_34
+        sta ZP_PRINT_CASE
 
         ; print the target system name, e.g. "Lave"
         ; TODO: import this flight-token
