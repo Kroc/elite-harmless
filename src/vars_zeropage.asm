@@ -139,16 +139,12 @@ ZP_CURSOR_ROW           := $33                                          ; YC
 
 ZP_PRINT_CASE           := $34  ; auto capitalisation for printing      ; QQ17
 
-; a variable named "K3" in the BBC code; used as a 16-bit X-position
-; when drawing circles -- note that the address is reused below!
+; used as a 16-bit X-position when drawing circles
+; WARNING: overlaps with ZP_POLYOBJ01_XPOS_pt1/2!
 ;
-ZP_VAR_K3               := $35
-ZP_VAR_K3_LO            := $35  ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt1 
-ZP_VAR_K3_HI            := $36  ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt2
-
-ZP_CIRCLE_XPOS          := ZP_VAR_K3
-ZP_CIRCLE_XPOS_LO       := ZP_VAR_K3_LO
-ZP_CIRCLE_XPOS_HI       := ZP_VAR_K3_HI
+ZP_CIRCLE_XPOS          := $35                                          ; K3
+ZP_CIRCLE_XPOS_LO       := $35                                          ; K3+0
+ZP_CIRCLE_XPOS_HI       := $36                                          ; K3+1
 
 ;-------------------------------------------------------------------------------
 
@@ -181,8 +177,13 @@ ZP_3F                   := $3f  ; a flag, but never gets set; see `_3571`
 ; a variable named "K4" in the BBC code;
 ; used as a 16-bit Y-position when drawing circles
 ;
-ZP_VAR_K4_LO            := $43
-ZP_VAR_K4_HI            := $44
+ZP_VAR_K4               := $43                                          ; K4
+ZP_VAR_K4_LO            := $43                                          ; K4+0
+ZP_VAR_K4_HI            := $44                                          ; K4+1
+
+ZP_CIRCLE_YPOS          := ZP_VAR_K4
+ZP_CIRCLE_YPOS_LO       := ZP_VAR_K4_LO
+ZP_CIRCLE_YPOS_HI       := ZP_VAR_K4_HI
 
 ;-------------------------------------------------------------------------------
 

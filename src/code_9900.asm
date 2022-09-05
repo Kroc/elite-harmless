@@ -61,7 +61,7 @@ _9932:                                                                  ;$9932
         ora ZP_POLYOBJ01_XPOS_pt2
         bne _995d
 
-        lda ZP_VAR_K4_LO
+        lda ZP_CIRCLE_YPOS_LO   ; could be K4 rather than circle, specifically
         cmp # ELITE_VIEWPORT_HEIGHT-2   ; why "-2", height of dot?
         bcs _995d               ; "off top of screen"
 
@@ -69,7 +69,7 @@ _9932:                                                                  ;$9932
         jsr _9964               ; "Ship is point, could end if nono-2"
         ldy # $06               ; "index for edge heap"
 
-        lda ZP_VAR_K4_LO        ; "#Y"
+        lda ZP_CIRCLE_YPOS_LO   ; "#Y"
         adc # $01               ; "1 pixel up"
         jsr _9964               ; "Ship is point, could end if nono-2"
 
@@ -450,7 +450,7 @@ _9b66:                                                                  ;$9B66
         bpl _9b66
 
         lda # $ff
-        sta ZP_VAR_K4_HI
+        sta ZP_CIRCLE_YPOS_HI
 
         ldy # Hull::face_count          ;=$0C: face count
         lda ZP_POLYOBJ_STATE
@@ -3088,7 +3088,7 @@ paint_char:                                                             ;$B17B
 ;-------------------------------------------------------------------------------
         ; store current registers
         ; (compatibility with KERNAL_CHROUT?)
-        sta ZP_VAR_K3
+        sta ZP_CIRCLE_XPOS
         sty VAR_0490
         stx VAR_048F
 
@@ -3267,7 +3267,7 @@ _b210:  ; restore registers before returning                            ;$B210
         ;
         ldy VAR_0490
         ldx VAR_048F
-        lda ZP_VAR_K3
+        lda ZP_CIRCLE_XPOS
 
         clc 
         rts 

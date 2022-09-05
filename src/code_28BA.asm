@@ -305,13 +305,19 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ; draws a segment of a circle, connecting one point
 ; around the circumfrence to another:
 ;
-; in:   ZP_TEMP_COUNTER         
+; in:   ZP_TEMP_COUNTER         the current point number (0-64)
+;       K6                      the x-position of the new point (16-bit)
+;       T.X                     the y-position of the new point (16-bit)
+;       ZP_A9                   set to $FF to indicate first point
+;
+; TOOD: why is flag needed if ZP_TEMP_COUNTER = 0 would indicate the same?
+;       is this because of keeping the heap for later erasing?
 ;-------------------------------------------------------------------------------
-        txa 
-        adc ZP_VAR_K4_LO
+        txa                     ; point Y-position lo-byte
+        adc ZP_CIRCLE_YPOS_LO
         sta ZP_8B
 
-        lda ZP_VAR_K4_HI
+        lda ZP_CIRCLE_YPOS_HI
         adc ZP_VAR_T
         sta ZP_8C
 
@@ -319,11 +325,11 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         beq _2998
         inc ZP_A9
 _2988:                                                                  ;$2988
-        ldy ZP_7E                       ; current line-buffer cursor
-        lda # $ff                       ; line terminator
-        cmp line_points_y-1, y          ; check the line-buffer Y-coords
+        ldy ZP_7E               ; current line-buffer cursor
+        lda # $ff               ; line terminator
+        cmp line_points_y-1, y  ; check the line-buffer Y-coords
         beq _29fa
-        sta line_points_y, y            ; line-buffer Y-coords
+        sta line_points_y, y    ; line-buffer Y-coords
         inc ZP_7E
         bne _29fa
 _2998:                                                                  ;$2998
@@ -366,19 +372,19 @@ _2998:                                                                  ;$2998
         ; add X1/Y1 to line-buffer
         ; (Y is the current cursor position)
         lda ZP_VAR_X1
-        sta line_points_x, y            ; line-buffer X-coords
+        sta line_points_x, y    ; line-buffer X-coords
         lda ZP_VAR_Y1
-        sta line_points_y, y            ; line-buffer Y-coords
-        iny                             ; move to the next point in the buffer
+        sta line_points_y, y    ; line-buffer Y-coords
+        iny                     ; move to the next point in the buffer
 
 _29e6:                                                                  ;$2936
         ; add X2/Y2 to the line-buffer?
         lda ZP_VAR_X2
-        sta line_points_x, y            ; line-buffer X-coords
+        sta line_points_x, y    ; line-buffer X-coords
         lda ZP_VAR_Y2
-        sta line_points_y, y            ; line-buffer Y-coords
-        iny                             ; move to the next point in the buffer
-        sty ZP_7E                       ; update line-buffer cursor
+        sta line_points_y, y    ; line-buffer Y-coords
+        iny                     ; move to the next point in the buffer
+        sty ZP_7E               ; update line-buffer cursor
 
         ; draw the current line in X1/Y1/X2/Y2
         ; TODO: do validation of line direction here so as to allow
@@ -3169,15 +3175,15 @@ _37a5:  sta ZP_CIRCLE_STEP                                              ;$37A5
 
 _37b2:                                                                  ;$37B2
         ldx # $80
-        stx ZP_VAR_K3_LO
+        stx ZP_CIRCLE_XPOS_LO
 
         ldx # $48               ; half viewport height?
-        stx ZP_VAR_K4_LO        ; circle Y-position, lo-byte
+        stx ZP_CIRCLE_YPOS_LO   ; circle Y-position, lo-byte
         
         ldx # $00
         stx ZP_AD
-        stx ZP_VAR_K3_HI
-        stx ZP_VAR_K4_HI
+        stx ZP_CIRCLE_XPOS_HI
+        stx ZP_CIRCLE_YPOS_HI
 _37c2:                                                                  ;$37C2
         jsr _37ce
         inc ZP_AD

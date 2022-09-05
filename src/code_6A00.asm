@@ -874,16 +874,16 @@ draw_chart_circle:                                      ; BBC: TT128    ;$6CFE
 ; into the 16-bit circle-drawing parameters before invoking
 ;-------------------------------------------------------------------------------
         lda ZP_8E               ; get cross-hair X-position
-        sta ZP_VAR_K3_LO        ; set circle X-position, lo-byte
+        sta ZP_CIRCLE_XPOS_LO   ; set circle X-position, lo-byte
 
         lda ZP_8F               ; get cross-hair Y-position
-        sta ZP_VAR_K4_LO        ; set circle Y-position, lo-byte
+        sta ZP_CIRCLE_YPOS_LO   ; set circle Y-position, lo-byte
 
         ; the circle X & Y positions are 16-bit, so set the hi-bytes to 0
         ; as our centre-point is guaranteed to be within the screen
         ldx # $00
-        stx ZP_VAR_K4_HI
-        stx ZP_VAR_K3_HI
+        stx ZP_CIRCLE_YPOS_HI
+        stx ZP_CIRCLE_XPOS_HI
 
         inx                     ; BBC: set X=1 to reset ball line-heap
         stx ZP_7E               ;?
@@ -1481,7 +1481,7 @@ local_chart:                                                            ;$6FDB
         ; is in the middle of the screen
         ;
         adc # 90                ; why 90?
-        sta ZP_VAR_K4_LO        ; set circle Y-position, lo-byte
+        sta ZP_CIRCLE_YPOS_LO   ; set circle Y-position, lo-byte
 
         ; for printing the planet name,
         ; work out the row number
@@ -1531,12 +1531,12 @@ local_chart:                                                            ;$6FDB
         ; off-screen, but the sides can be visible on-screen)
         ;
 @draw:  lda # $00               ; clear some variables:                 ;$7070
-        sta ZP_VAR_K3_HI        ; set circle X-position hi-byte to 0
-        sta ZP_VAR_K4_HI        ; set circle Y-position hi-byte to 0
+        sta ZP_CIRCLE_XPOS_HI   ; set circle X-position hi-byte to 0
+        sta ZP_CIRCLE_YPOS_HI   ; set circle Y-position hi-byte to 0
         sta ZP_CIRCLE_RADIUS_HI ; circle-radius hi-byte(?)
 
         lda ZP_71               ; retrieve screen X-positon of planet
-        sta ZP_VAR_K3_LO        ; set the circle X-position lo-byte
+        sta ZP_CIRCLE_XPOS_LO   ; set the circle X-position lo-byte
 
         ; the hi-byte of W2 is used to calculate both the planet's
         ; radius and determine the first two letters of the planet's name:
@@ -3672,11 +3672,11 @@ _7d1f:                                                                  ;$7D1F
 
         lda ZP_VALUE_pt1
         adc # $48               ;TODO: half viewport height?
-        sta ZP_VAR_K4_LO        ; set circle Y-position, lo-byte
+        sta ZP_CIRCLE_YPOS_LO   ; set circle Y-position, lo-byte
 
         txa 
         adc # $00
-        sta ZP_VAR_K4_HI
+        sta ZP_CIRCLE_YPOS_HI
 
         clc 
 _7d56:                                                                  ;$7D56
@@ -3775,16 +3775,16 @@ _7de0:                                                                  ;$7DE0
         jsr _8189
         sta ZP_VAR_P1
 
-        lda ZP_VAR_K4_LO
+        lda ZP_CIRCLE_YPOS_LO
         sec 
         sbc ZP_VAR_P1
-        sta ZP_VAR_K4_LO
+        sta ZP_CIRCLE_YPOS_LO
 
         sty ZP_VAR_P1
 
-        lda ZP_VAR_K4_HI
+        lda ZP_CIRCLE_YPOS_HI
         sbc ZP_VAR_P1
-        sta ZP_VAR_K4_HI
+        sta ZP_CIRCLE_YPOS_HI
 
         ldx # $09
         jsr _7e36
@@ -3978,8 +3978,8 @@ draw_sun:                                                               ;$7F22
 ; buffer (used to store circle-width per scanline) is used to erase the
 ; previous frame, before being updated with new values
 ;
-; in:   ZP_VAR_K3               sun X-position (16-bits)
-;       ZP_VAR_K4               sun Y-position (16-bits)
+; in:   ZP_CIRCLE_XPOS          sun X-position (16-bits)
+;       ZP_CIRCLE_YPOS          sun Y-position (16-bits)
 ;       ZP_CIRCLE_RADIUS        radius
 ;
 ;-------------------------------------------------------------------------------
@@ -4071,7 +4071,7 @@ draw_sun:                                                               ;$7F22
         ;
         lda ZP_VIEWH            ; height of the viewport (-1)
         sec                     ; (e.g. 143 for cockpit, 199 for menu pages)
-        sbc ZP_VAR_K4_LO        ; subtract sun Y-position, lo-byte
+        sbc ZP_CIRCLE_YPOS_LO   ; subtract sun Y-position, lo-byte
         tax                     ; put aside the calculated lo-byte
 
         ; validate the hi-byte:
@@ -4094,7 +4094,7 @@ draw_sun:                                                               ;$7F22
         ;       ergo, the sun's centre is above the screen
         ;
         lda # $00               ; subtract from zero:
-        sbc ZP_VAR_K4_HI        ; sun Y-position, hi-byte
+        sbc ZP_CIRCLE_YPOS_HI   ; sun Y-position, hi-byte
         bmi _7f16               ; if result negative, invert the value
        .bnz :+                  ; if result positive, skip ahead
 
@@ -4267,9 +4267,9 @@ _7f67:                                                                  ;$7F67
         sta ZP_VAR_XX_HI
 
         ; now clip the new line
-        lda ZP_VAR_K3_LO
+        lda ZP_CIRCLE_XPOS_LO
         sta ZP_VAR_YY_LO
-        lda ZP_VAR_K3_HI
+        lda ZP_CIRCLE_XPOS_HI
         sta ZP_VAR_YY_HI
         lda SUN_BUFFER, y
         jsr clip_sun_line
@@ -4312,15 +4312,15 @@ _7f67:                                                                  ;$7F67
         ; note that at this point the A-register contains
         ; the half-width (radius) of the sun's scanline
         ;
-@clip:  ldx ZP_VAR_K3_LO        ; get sun Y-position, lo                ;$8008
+@clip:  ldx ZP_CIRCLE_XPOS_LO   ; get sun Y-position, lo                ;$8008
         stx ZP_VAR_YY_LO        ; set line mid-point, lo
-        ldx ZP_VAR_K3_HI        ; get sun Y-position, hi
+        ldx ZP_CIRCLE_XPOS_HI   ; get sun Y-position, hi
         stx ZP_VAR_YY_HI        ; set line mid-point, hi
         jsr clip_sun_line       ; do the line clipping
         bcc @draw               ; if line is visible, go draw it
 
-        ; NOTE: `clip_sun_line` already removes the line from
-        ;       the sun-buffer, so this is redundant
+        ; NOTE: `clip_sun_line` already removes the line
+        ;       from the sun-buffer, so this is redundant
         ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -4353,9 +4353,9 @@ _7f67:                                                                  ;$7F67
         ; copy sun X-position into SUNX
         ; (TODO: for overdrawing?)
 @done:  clc                                                             ;$803A 
-        lda ZP_VAR_K3_LO
+        lda ZP_CIRCLE_XPOS_LO
         sta ZP_SUNX_LO
-        lda ZP_VAR_K3_HI
+        lda ZP_CIRCLE_XPOS_HI
         sta ZP_SUNX_HI
 
 _8043:  rts                                                             ;$8043
@@ -4507,7 +4507,10 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         sta ZP_VAR_T            ; update the result hi-byte
         clc                     ;  before continuing
 
-        ; draw the line-segment
+        ; draw the line-segment! this routine will keep track of the previous
+        ; points and automatically connect this new point to the previous;
+        ; the circle-line heap will also be used to erase the circle
+        ;
 :       jsr draw_circle_line                                            ;$80AF
 
         cmp # 65                ; finished? (point 65 reached)
@@ -4675,15 +4678,15 @@ check_circle:                                                           ;$814F
 ;       exactly centred, and coordinates are relative to the viewport (0-256),
 ;       not the C64's screen (0-320 px)
 ;
-; in:   ZP_VAR_K3       signed 16-bit X-position
-;       ZP_VAR_K4       signed 16-bit Y-position
-;       ZP_VIEWH        viewport height to clip against:
-;                       143 = cockpit-view, 199 = menu pages
+; in:   ZP_CIRCLE_XPOS          signed 16-bit X-position
+;       ZP_CIRCLE_YPOS          signed 16-bit Y-position
+;       ZP_VIEWH                viewport height to clip against:
+;                               143 = cockpit-view, 199 = menu pages
 ;
-; out:  carry           returns carry set if the circle is invalid,
-;                       otherwise carry is clear
+; out:  carry                   returns carry set if the circle is invalid,
+;                               otherwise carry is clear
 ;
-;       P3.P2           last scanline the circle would appear on
+;       P3.P2                   last scanline the circle would appear on
 ;
 ; TODO: is there a way to optimise this using CMP, to subtract the radius
 ;       without altering the value?
@@ -4696,10 +4699,10 @@ check_circle:                                                           ;$814F
         ; the left-edge of the screen, but the radius does not reach into the
         ; visible portion of the screen
         ;
-        lda ZP_VAR_K3_LO        ; circle X-position, lo-byte
+        lda ZP_CIRCLE_XPOS_LO   ; circle X-position, lo-byte
         clc 
         adc ZP_CIRCLE_RADIUS    ; add the radius (i.e. bottom of circle)
-        lda ZP_VAR_K3_HI        ; circle X-position, hi-byte
+        lda ZP_CIRCLE_XPOS_HI   ; circle X-position, hi-byte
         adc # 0                 ; (ripple the carry)
         bmi _8187               ; if still negative, circle is not visible!
 
@@ -4707,10 +4710,10 @@ check_circle:                                                           ;$814F
         ; the right-edge of the screen, indicated by the hi-byte of
         ; the X-position + radius being > 0 (i.e. left-edge is > 255)
         ;
-        lda ZP_VAR_K3_LO        ; circle X-position, lo-byte
+        lda ZP_CIRCLE_XPOS_LO   ; circle X-position, lo-byte
         sec 
         sbc ZP_CIRCLE_RADIUS    ; subtract the radius
-        lda ZP_VAR_K3_HI        ; circle X-position, hi-byte
+        lda ZP_CIRCLE_XPOS_HI   ; circle X-position, hi-byte
         sbc # 0                 ; (ripple the carry)
         bmi :+                  ; the left-edge is allowed to be off-screen
         bne _8187               ; left-edge is > 255, circle is not visible!
@@ -4719,11 +4722,11 @@ check_circle:                                                           ;$814F
         ; off the top of the viewport. the 16-bit Y-position of the circle's
         ; bottom- edge is saved to P2/P3 for the circle-drawing routine
         ;
-:       lda ZP_VAR_K4_LO        ; get circle Y-position, lo-byte        ;$8167
+:       lda ZP_CIRCLE_YPOS_LO   ; get circle Y-position, lo-byte        ;$8167
         clc 
         adc ZP_CIRCLE_RADIUS    ; add the radius
         sta ZP_VAR_P2           ; save bottom of circle, lo-byte for drawing
-        lda ZP_VAR_K4_HI        ; get circle Y-position, hi-byte
+        lda ZP_CIRCLE_YPOS_HI   ; get circle Y-position, hi-byte
         adc # 0                 ; (ripple the carry)
         bmi _8187               ; if negative, the bottom is above the top!
         sta ZP_VAR_P3           ; save bottom of circle, hi-byte for drawing
@@ -4734,11 +4737,11 @@ check_circle:                                                           ;$814F
         ; if the circle's top-edge is < 256 as is this is very easily done
         ; (any value > 1 in the hi-byte)
         ;
-        lda ZP_VAR_K4_LO        ; get circle Y-position, lo-byte
+        lda ZP_CIRCLE_YPOS_LO   ; get circle Y-position, lo-byte
         sec 
         sbc ZP_CIRCLE_RADIUS    ; subtract the radius
         tax                     ; put this (signed value) aside
-        lda ZP_VAR_K4_HI        ; get circle Y-position, hi-byte
+        lda ZP_CIRCLE_YPOS_HI   ; get circle Y-position, hi-byte
         sbc # 0                 ; (ripple the carry)
         bmi _81ec               ; the top-egde is allowed to be off-screen
                                 ; -- circle is visible (jump to CLC, RTS)
