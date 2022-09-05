@@ -334,15 +334,15 @@ PSYSTEM_POS_X           :=$049a                                         ; QQ0
 PSYSTEM_POS_Y           :=$049b                                         ; QQ1
 
 SEED_GALAXY             :=$049c ; seed for the current galaxy           ; QQ21
-SEED_GALAXY_W0          :=$094c ; first word
-SEED_GALAXY_W0_LO       :=$094c ; lo-byte of first word
-SEED_GALAXY_W0_HI       :=$094d ; hi-byte of first word
-SEED_GALAXY_W1          :=$094e ; second word
-SEED_GALAXY_W1_LO       :=$094e ; lo-byte of second word
-SEED_GALAXY_W1_HI       :=$094f ; hi-byte of second word
-SEED_GALAXY_W2          :=$0950 ; third word
-SEED_GALAXY_W2_LO       :=$0950 ; lo-byte of third word
-SEED_GALAXY_W2_HI       :=$0951 ; hi-byte of third word
+SEED_GALAXY_W0          :=$049c ; first word
+SEED_GALAXY_W0_LO       :=$049c ; lo-byte of first word
+SEED_GALAXY_W0_HI       :=$049d ; hi-byte of first word
+SEED_GALAXY_W1          :=$049e ; second word
+SEED_GALAXY_W1_LO       :=$049e ; lo-byte of second word
+SEED_GALAXY_W1_HI       :=$049f ; hi-byte of second word
+SEED_GALAXY_W2          :=$04a0 ; third word
+SEED_GALAXY_W2_LO       :=$04a0 ; lo-byte of third word
+SEED_GALAXY_W2_HI       :=$04a1 ; hi-byte of third word
 
 ;-------------------------------------------------------------------------------
 ; NOTE: there are up-to 13 dust-particles at a time
@@ -360,9 +360,9 @@ DUST_Z_HI               :=$06d6 ;..$06E2: Z-positions of dust-particles
 DUST_Z_LO               :=$06e3 ;..$06EF: fractional Z-positions
 
 ;-------------------------------------------------------------------------------
-; sun circles are converted into a list of half-widths for each scan-line, i.e.
-; for each scanline in the viewport, this array provides a radius for that
-; scanline where the centre point of the circle is already known
+; sun circles are converted into a list of half-widths for each scan-line,
+; i.e. for each scanline in the viewport, this array provides a radius for
+; that scanline where the centre point of the circle is already known
 ;
 ; the stars in the local chart are also drawn using this system,
 ; so up to 200 scan-lines are accounted for despite the viewport

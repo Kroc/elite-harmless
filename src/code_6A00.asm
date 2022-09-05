@@ -182,11 +182,10 @@ print_target_system_distance:                           ; BBC: TT146    ;$6A68
 :       lda # TKN_FLIGHT_DISTANCE                                       ;$6A73
         jsr print_flight_token_with_colon
 
-        ; print the distance as a fixed-point decimal, e.g. "6.4"
-        ldx TSYSTEM_DISTANCE_LO
-        ldy TSYSTEM_DISTANCE_HI
-        sec                             ; carry set = use decimal point
-        jsr print_num16                 ; print number in X/Y
+        ldx TSYSTEM_DISTANCE_LO ; print the distance as a fixed-
+        ldy TSYSTEM_DISTANCE_HI ;  point decimal, e.g. "6.4"
+        sec                     ; carry set = use decimal point
+        jsr print_num16         ; print number in X/Y
 
         ; print "LIGHT YEARS"
         ;
@@ -212,14 +211,14 @@ print_newpara:                                          ; BBC: TTX69    ;$6A87
 ; prints a blank line and switches to sentance case:
 ;
 ;-------------------------------------------------------------------------------
-       .cursor_down                     ; move cursor down a row,
-                                        ; but does not reset col
+       .cursor_down             ; move cursor down a row,
+                                ; but does not reset col
         ; fallthrough...
         ;
 
 print_newline_para:                                     ; BBC: TT69     ;$6A8A
 ;===============================================================================
-        lda # %10000000                 ; set bit 7 - sentance case
+        lda # %10000000         ; set bit 7 - sentance case
         sta ZP_PRINT_CASE
 
         ; fallthrough...
@@ -256,8 +255,8 @@ planet_screen:                                          ; BBC: TT25     ;$6AA1
 ; planetary information screen:
 ;
 ;-------------------------------------------------------------------------------
-        lda # page::empty               ; switch to the menu screen,
-        jsr set_page_6a2f               ;  starting with a blank page
+        lda # page::empty       ; switch to the menu screen,
+        jsr set_page_6a2f       ;  starting with a blank page
 
         lda # 9
        .set_cursor_col
@@ -286,26 +285,26 @@ planet_screen:                                          ; BBC: TT25     ;$6AA1
         ;       %010 (2) or %111 (7) = Poor
         ;       %011 (3) or %100 (4) = Mainly
         ;
-        lda TSYSTEM_ECONOMY             ; economy byte of target system
+        lda TSYSTEM_ECONOMY     ; economy byte of target system
 
-        clc                             ; (ready for math!)
-        adc # %01                       ; check for 3 or 4 by adding 1
-        lsr                             ;  and shifting right, giving 
-        cmp # %10                       ;  %011(3)->%10 or $100(4)->%10
-        beq print_mainly                ; is "mainly", go print
+        clc                     ; (ready for math!)
+        adc # %01               ; check for 3 or 4 by adding 1
+        lsr                     ;  and shifting right, giving 
+        cmp # %10               ;  %011(3)->%10 or $100(4)->%10
+        beq print_mainly        ; is "mainly", go print
 
         ; there are three text tokens for "rich", "average" and "poor",
         ; but economy values 0-7. for values 0-2 we can print as-is --
         ; the `cmp` will set carry for values 3+ (%011+1=%100>>1=%10)
         ;
-        lda TSYSTEM_ECONOMY             ; go back to original economy value
-        bcc :+                          ; print for economy values 0-2
+        lda TSYSTEM_ECONOMY     ; go back to original economy value
+        bcc :+                  ; print for economy values 0-2
 
         ; (due to the `bcc` above, carry is guaranteed to be set
         ; ensuring that the subtraction does not borrow)
         ;
-        sbc # $05                       ; shift 5-thru-7 down to 0-thru-2
-        clc                             ; clear carry for the following add
+        sbc # $05               ; shift 5-thru-7 down to 0-thru-2
+        clc                     ; clear carry for the following add
 
         ; print "RICH" | "AVERAGE" | "POOR"
         ;
@@ -316,8 +315,8 @@ planet_screen:                                          ; BBC: TT25     ;$6AA1
         ; economy type:
         ;
 _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
-        lsr                             ; bit 2 is used for the economy type
-        lsr                             ; argricultural (1) / industrial (0)
+        lsr                     ; bit 2 is used for the economy type
+        lsr                     ; argricultural (1) / industrial (0)
 
         ; print "INDUSTRIAL" | "AGRICULTURAL"
 .import TKN_FLIGHT_ECONOMY_TYPE:direct
@@ -335,7 +334,7 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         ; print "ANARCHY" | "FEUDAL" | "MULTI-GOVERNMENT" | "DICTATORSHIP" |
         ;       "COMMUNIST" | "CONFEDORACY" | "DEMOCRACY" | "CORPORATE STATE"
         ;
-        lda TSYSTEM_GOVERNMENT          ; system government byte (0-7)
+        lda TSYSTEM_GOVERNMENT  ; system government byte (0-7)
         clc
 .import TKN_FLIGHT_GOVERNMENT_TYPE:direct 
         adc # TKN_FLIGHT_GOVERNMENT_TYPE
@@ -348,10 +347,10 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         lda # TKN_FLIGHT_TECH_LEVEL
         jsr print_flight_token_with_colon
 
-        ldx TSYSTEM_TECHLEVEL           ; current/target system tech-level
-        inx                             ; adjust to 1-based
-        clc                             ; carry-clear = no decimal point
-        jsr print_tiny_value            ; print the tech-level number
+        ldx TSYSTEM_TECHLEVEL   ; current/target system tech-level
+        inx                     ; adjust to 1-based
+        clc                     ; carry-clear = no decimal point
+        jsr print_tiny_value    ; print the tech-level number
         jsr print_newpara
 
         ; population:
@@ -361,18 +360,19 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         lda # TKN_FLIGHT_POPULATION
         jsr print_flight_token_with_colon
 
-        sec                             ; print with decimal point
-        ldx TSYSTEM_POPULATION          ; print population number / 10
+        sec                     ; print with decimal point
+        ldx TSYSTEM_POPULATION  ; print population number / 10
         jsr print_tiny_value
 
+        ; print "BILLION"
 .import TKN_FLIGHT_BILLION:direct
-        lda # TKN_FLIGHT_BILLION        ; print "BILLION"
+        lda # TKN_FLIGHT_BILLION
         jsr print_flight_token_and_newpara
 
         ; species:
         ;-----------------------------------------------------------------------
-.import TKN_FLIGHT_LPAREN:direct        ; print "("
-        lda # TKN_FLIGHT_LPAREN
+.import TKN_FLIGHT_LPAREN:direct
+        lda # TKN_FLIGHT_LPAREN ; print "("
         jsr print_flight_token
 
         ; choose species: this is 50/50
@@ -383,13 +383,13 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         ;                                                        ^
         ;                                       humans or aliens?
         ;
-        lda ZP_SEED_W2_LO               ; check bit 7 in word 2 of the seed
-        bmi :+                          ; if 1, skip ahead to alien species
+        lda ZP_SEED_W2_LO       ; check bit 7 in word 2 of the seed
+        bmi :+                  ; if 1, skip ahead to alien species
 
 .import TKN_FLIGHT_HUMAN_COLONIAL:direct
         lda # TKN_FLIGHT_HUMAN_COLONIAL
-        jsr print_flight_token          ; print "HUMAN COLONIALS", and
-        jmp _6b5a                       ; jump ahead to the closing paranthesis
+        jsr print_flight_token  ; print "HUMAN COLONIALS", and jump
+        jmp _6b5a               ;  ahead to the closing paranthesis
 
         ; choose an alien species:
         ;
@@ -399,9 +399,9 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         ;                                      alien species
         ;
 :       lda ZP_SEED_W2_HI                                               ;$61BE
-        lsr                             ; remove bits 0 & 1,
-        lsr                             ;  leaving bits 2-7 shifted down
-        pha                             ; keep this value for later
+        lsr                     ; remove bits 0 & 1,
+        lsr                     ;  leaving bits 2-7 shifted down
+        pha                     ; keep this value for later
         
         ; 1st adjective:
         ;
@@ -409,9 +409,9 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
         ;                                                  ^^^
         ;
-        and # %00000111                 ; look at the lower 3 bits
-        cmp # %00000011                 ; of that, the lower 3 values
-        bcs :+                          ;  will be given an adjective
+        and # %00000111         ; look at the lower 3 bits
+        cmp # %00000011         ; of that, the lower 3 values
+        bcs :+                  ;  will be given an adjective
 
         ; print "LARGE" | "FIERCE" | "SMALL"
         ;
@@ -425,12 +425,12 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
         ;                                               ^^^
         ;
-:       pla                             ; retrieve our species again   ;$6B2E
-        lsr                             ; isolate the upper 3 bits
-        lsr                             ;  by shifting off the lower 3 bits
+:       pla                     ; retrieve our species again            ;$6B2E
+        lsr                     ; isolate the upper 3 bits
+        lsr                     ;  by shifting off the lower 3 bits
         lsr 
-        cmp # $06                       ; the lower 5 values will get
-        bcs :+                          ;  a colour assigned
+        cmp # $06               ; the lower 5 values will get
+        bcs :+                  ;  a colour assigned
 
         ; print "GREEN" | "RED" | "YELLOW" | "BLUE" | "BLACK"
         ;
@@ -445,12 +445,12 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         ;            ^^^                 ^^^
         ;       3rd adj.            <-- (XOR)
         ;
-:       lda ZP_SEED_W1_HI               ; XOR this byte                 ;$6B3B
-        eor ZP_SEED_W0_HI               ;  with that byte
-        and # %00000111                 ;  and take the low 3 bits
-        sta ZP_8E                       ; (preserve for later)
-        cmp # 6                         ; the lower 5 values
-        bcs :+                          ;  will get the adjective
+:       lda ZP_SEED_W1_HI       ; XOR this byte                         ;$6B3B
+        eor ZP_SEED_W0_HI       ;  with that byte
+        and # %00000111         ;  and take the low 3 bits
+        sta ZP_8E               ; (preserve for later)
+        cmp # 6                 ; the lower 5 values
+        bcs :+                  ;  will get the adjective
 
         ; print "HARMLESS" | "SLIMY" | "BUG-EYED" | "HORNED" |
         ;       "BONY" | "FAT" | "FURRY"
@@ -465,11 +465,11 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         ; seed: 01011010-01001010 | 00000010-01001000 | 10110111-01010011
         ;                                                     ^^
         ;
-:       lda ZP_SEED_W2_HI               ; take two bits                 ;$6B4C
-        and # %00000011                 ;  from the seed
-        clc                             ;  and add the bits we XORed
-        adc ZP_8E                       ;  together earlier, and from this
-        and # %00000111                 ;  modulo 8 to select species
+:       lda ZP_SEED_W2_HI                                               ;$6B4C
+        and # %00000011         ; take two bits from the seed
+        clc                     ;  and add the bits we XORed
+        adc ZP_8E               ;  together earlier, and from this
+        and # %00000111         ;  modulo 8 to select species
 
         ; print "RODENT" | "FROG" | "LIZARD" | "LOBSTER" | "BIRD" |
         ;       "HUMANOID" | "FELINE" | "INSECT"
@@ -481,10 +481,10 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
 _6b5a:                                                                  ;$6B5A
         ; append "s)"
 .import TKN_FLIGHT_S:direct
-        lda # TKN_FLIGHT_S              ; print "s"; e.g. "RODENTS"
+        lda # TKN_FLIGHT_S      ; print "s"; e.g. "RODENTS"
         jsr print_flight_token
 .import TKN_FLIGHT_RPAREN:direct
-        lda # TKN_FLIGHT_RPAREN         ; and the closing paren
+        lda # TKN_FLIGHT_RPAREN ; and the closing paren
         jsr print_flight_token_and_newpara
 
         ; productivity:
@@ -493,19 +493,19 @@ _6b5a:                                                                  ;$6B5A
         lda # TKN_FLIGHT_GROSS_PRODUCTIVITY
         jsr print_flight_token_with_colon
 
-        ldx TSYSTEM_PRODUCTIVITY_LO     ; print the 16-bit number
-        ldy TSYSTEM_PRODUCTIVITY_HI     ;  for gross productivity
-        jsr print_int16
-        jsr print_space
+        ldx TSYSTEM_PRODUCTIVITY_LO
+        ldy TSYSTEM_PRODUCTIVITY_HI
+        jsr print_int16         ; print the 16-bit number
+        jsr print_space         ;  for gross productivity
 
-        lda # %00000000                 ; enable all-caps
-        sta ZP_PRINT_CASE               ;  for the next string
+        lda # %00000000         ; enable all-caps
+        sta ZP_PRINT_CASE       ;  for the next string
 
 .import TKN_FLIGHT_M:direct
-        lda # TKN_FLIGHT_M              ; print "M" (million)
+        lda # TKN_FLIGHT_M      ; print "M" (million)
         jsr print_flight_token
 .import TKN_FLIGHT_CR:direct
-        lda # TKN_FLIGHT_CR             ; print " CR" (credits)
+        lda # TKN_FLIGHT_CR     ; print " CR" (credits)
         jsr print_flight_token_and_newpara
 
         ; average radius:
@@ -577,69 +577,70 @@ get_system_info:                                        ; BBC: TT24     ;$6BA9
 
         ; anarchy (0) and fuedal (1) systems cannot be rich
         ; (Japan would like a word)
-        lsr                             ; push off bit 0, any number above 1
-        bne :+                          ;  will have bits remaining
+        lsr                     ; push off bit 0, any number above 1
+        bne :+                  ;  will have bits remaining
 
-        lda TSYSTEM_ECONOMY             ; patch the economy byte
-        ora # %00000010                 ;  to avoid "rich" (value 0)
+        lda TSYSTEM_ECONOMY     ; patch the economy byte
+        ora # %00000010         ;  to avoid "rich" (value 0)
         sta TSYSTEM_ECONOMY
 
         ; tech-level is determined by a combination of economy,
         ; a random jitter, and the type of government:
         ;
-:       lda TSYSTEM_ECONOMY             ; use the economy as the base   ;$6BC5
-        eor # %00000111                 ;  but flip the bits
-        clc                             ;  to form the base tech-level
+:       lda TSYSTEM_ECONOMY     ; use the economy as the base   ;$6BC5
+        eor # %00000111         ;  but flip the bits
+        clc                     ;  to form the base tech-level
         sta TSYSTEM_TECHLEVEL
 
-        lda ZP_SEED_W1_HI               ; add a random jitter from the seed
-        and # %00000011                 ;  (0-3)
+        lda ZP_SEED_W1_HI       ; add a random jitter from the seed
+        and # %00000011         ;  (0-3)
         adc TSYSTEM_TECHLEVEL
         sta TSYSTEM_TECHLEVEL
 
-        lda TSYSTEM_GOVERNMENT          ; take the government type,
-        lsr                             ;  right-shift (/2)
-        adc TSYSTEM_TECHLEVEL           ;  and apply to
-        sta TSYSTEM_TECHLEVEL           ;  the tech-level
+        lda TSYSTEM_GOVERNMENT  ; take the government type,
+        lsr                     ;  right-shift (/2)
+        adc TSYSTEM_TECHLEVEL   ;  and apply to
+        sta TSYSTEM_TECHLEVEL   ;  the tech-level
 
         ; now use the tech-level as a basis of population:
-        asl                             ; x2
-        asl                             ; x4
-        adc TSYSTEM_ECONOMY             ; add the economy level
-        adc TSYSTEM_GOVERNMENT          ;  and the government type
-        adc # $01                       ;  +1, and use as population
-        sta TSYSTEM_POPULATION          ;  in billions, /10 (fractional)
+        ;
+        asl                     ; x2
+        asl                     ; x4
+        adc TSYSTEM_ECONOMY     ; add the economy level
+        adc TSYSTEM_GOVERNMENT  ;  and the government type
+        adc # $01               ;  +1, and use as population
+        sta TSYSTEM_POPULATION  ;  in billions, /10 (fractional)
 
         ; productivity:
         ;-----------------------------------------------------------------------
-        lda TSYSTEM_ECONOMY             ; again, begin with the
-        eor # %00000111                 ;  inverse of economy
-        adc # $03                       ;  add a floor of 3 (in case of zero)
-        sta ZP_VAR_P                    ;  put this aside for multiplication
+        lda TSYSTEM_ECONOMY     ; again, begin with the
+        eor # %00000111         ;  inverse of economy
+        adc # $03               ;  add a floor of 3 (in case of zero)
+        sta ZP_VAR_P            ;  put this aside for multiplication
 
-        lda TSYSTEM_GOVERNMENT          ; use the government as the other
-        adc # $04                       ;  side of the equation; with a floor
-        sta ZP_VAR_Q                    ;  of 4 (in case of zero)
+        lda TSYSTEM_GOVERNMENT  ; use the government as the other
+        adc # $04               ;  side of the equation; with a floor
+        sta ZP_VAR_Q            ;  of 4 (in case of zero)
 
-        jsr multiply_unsigned_PQ        ; multiply P by Q
+        jsr multiply_unsigned_PQ
 
-        lda TSYSTEM_POPULATION          ; multiply the result (in P)
-        sta ZP_VAR_Q                    ;  against the population
+        lda TSYSTEM_POPULATION  ; multiply the result (in P)
+        sta ZP_VAR_Q            ;  against the population
 
         ; TODO: couldn't we just use `ldx` and call `multiply_unsigned_PX`?
         jsr multiply_unsigned_PQ
 
         ; lastly multiply the 16-bit result (A.P) by 8
-        asl ZP_VAR_P                    ; x2 (lo)
-        rol                             ; x2 (hi)
-        asl ZP_VAR_P                    ; x4 (lo)
-        rol                             ; x4 (hi)
-        asl ZP_VAR_P                    ; x8 (lo)
-        rol                             ; x8 (hi)
-        sta TSYSTEM_PRODUCTIVITY_HI     ; store productivity hi-byte
-
-        lda ZP_VAR_P                    ; retrieve result lo-byte
-        sta TSYSTEM_PRODUCTIVITY_LO     ; store productivity lo-byte
+        asl ZP_VAR_P            ; x2 (lo)
+        rol                     ; x2 (hi)
+        asl ZP_VAR_P            ; x4 (lo)
+        rol                     ; x4 (hi)
+        asl ZP_VAR_P            ; x8 (lo)
+        rol                     ; x8 (hi)
+        sta TSYSTEM_PRODUCTIVITY_HI
+        ; store productivity lo-byte
+        lda ZP_VAR_P
+        sta TSYSTEM_PRODUCTIVITY_LO
 
         rts 
 
@@ -674,8 +675,8 @@ galactic_chart:                                         ; BBC: TT22     ;$6C1C
         ; this routine also moves the cursor down one row
         jsr draw_line_divider_galactic_chart
 
-        lda # 152                       ; draw line across bottom of chart
-        jsr draw_line_divider           ; (chart is 128px high)
+        lda # 152               ; draw line across bottom of chart
+        jsr draw_line_divider   ; (chart is 128px high)
 
         ; draw the circle for the current system
         jsr draw_range_circle
@@ -727,38 +728,38 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
 ;       ZP_8F           cross-hair Y-position
 ;       ZP_90           cross-hair size
 ;-------------------------------------------------------------------------------
-        lda # 24                        ; a default offset of 24. why?
-        ldx ZP_SCREEN                   ; check current screen
-        bpl :+                          ; skip over if not short-range chart
-        lda # $00                       ; change the offset to 0
+        lda # 24                ; a default offset of 24. why?
+        ldx ZP_SCREEN           ; check current screen
+        bpl :+                  ; skip over if not short-range chart
+        lda # $00               ; change the offset to 0
 
-:       sta ZP_93                       ; record the offset chosen      ;$6C75
+:       sta ZP_93               ; record the offset chosen              ;$6C75
 
         ; clip the cross-hair:
         ;-----------------------------------------------------------------------
         ; left edge:
         ;
-        lda ZP_8E                       ; retrieve cross-hair X-position
-        sec                             ; subtract cross-hair size
-        sbc ZP_90                       ;  to get left-most position
-        bcs :+                          ; underflow?
-        lda # $00                       ; clip against left edge
-:       sta ZP_VAR_X1                   ; set line starting X           ;$6C80
+        lda ZP_8E               ; retrieve cross-hair X-position
+        sec                     ; subtract cross-hair size
+        sbc ZP_90               ;  to get left-most position
+        bcs :+                  ; underflow?
+        lda # $00               ; clip against left edge
+:       sta ZP_VAR_X1           ; set line starting X                   ;$6C80
 
         ; right edge:
         ;
-        lda ZP_8E                       ; retrieve cross-hair X-position
-        clc                             ; add cross-hair size
-        adc ZP_90                       ;  to get right-most position
-        bcc :+                          ; overflow?
-        lda # $ff                       ; clip against right edge
-:       sta ZP_VAR_X2                   ; set line ending X             ;$6C8B
+        lda ZP_8E               ; retrieve cross-hair X-position
+        clc                     ; add cross-hair size
+        adc ZP_90               ;  to get right-most position
+        bcc :+                  ; overflow?
+        lda # $ff               ; clip against right edge
+:       sta ZP_VAR_X2           ; set line ending X                     ;$6C8B
 
         ; centre-point:
         ;
-        lda ZP_8F                       ; retrieve cross-hair Y-position
-        clc                             ; add the offset (?)
-        adc ZP_93                       ;  to get centre-point Y position
+        lda ZP_8F               ; retrieve cross-hair Y-position
+        clc                     ; add the offset (?)
+        adc ZP_93               ;  to get centre-point Y position
 
         ; draw the horizontal line of the cross-hair:
         ;
@@ -771,32 +772,32 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
         ; TODO: line-validation not required (X1 & X2 are in correct order),
         ;       so we could skip over validation in the routine
         ;
-        sta ZP_VAR_Y                    ; use the optimised routine
-        jsr draw_straight_line          ;  for drawing straight lines
+        sta ZP_VAR_Y            ; use the optimised routine
+        jsr draw_straight_line  ;  for drawing straight lines
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; top edge:
         ;
-        lda ZP_8F                       ; retrieve cross-hair Y-position
-        sec                             ; subtract cross-hair size
-        sbc ZP_90                       ;  to get top-most position
-        bcs :+                          ; underflow?
-        lda # $00                       ; clip against top edge
-:       clc                             ; add the offset (?)            ;$6CA2
+        lda ZP_8F               ; retrieve cross-hair Y-position
+        sec                     ; subtract cross-hair size
+        sbc ZP_90               ;  to get top-most position
+        bcs :+                  ; underflow?
+        lda # $00               ; clip against top edge
+:       clc                     ; add the offset (?)                    ;$6CA2
         adc ZP_93
         sta ZP_VAR_Y1
 
         ; bottom edge:
         ;
-        lda ZP_8F                       ; retrieve cross-hair Y-position
+        lda ZP_8F               ; retrieve cross-hair Y-position
         clc
-        adc ZP_90                       ; add cross-hair size
-        adc ZP_93                       ;  and the offset (?)
-        cmp # 152                       ; overrun bottom of chart?
+        adc ZP_90               ; add cross-hair size
+        adc ZP_93               ;  and the offset (?)
+        cmp # 152               ; overrun bottom of chart?
         bcc :+
-        ldx ZP_SCREEN                   ; check which screen
-        bmi :+                          ; ignore for long-range
-        lda # 151                       ; clip for short-range
+        ldx ZP_SCREEN           ; check which screen
+        bmi :+                  ; ignore for long-range
+        lda # 151               ; clip for short-range
 :       sta ZP_VAR_Y2                                                   ;$6CB8
 
         lda ZP_8E
@@ -890,7 +891,7 @@ draw_chart_circle:                                      ; BBC: TT128    ;$6CFE
         ldx # $02               ; BBC: set X=2 for step-size
         stx ZP_CIRCLE_STEP
 
-        jmp _805e               ; draw circle?
+        jmp draw_circle
 
 
 buy_screen:                                                             ;$6D16
@@ -3893,10 +3894,10 @@ _7e5f:                                                                  ;$7E5F
 _7ec8:                                                                  ;$7EC8
         txa 
         adc ZP_POLYOBJ01_XPOS_pt1
-        sta ZP_89
+        sta ZP_VAR_K6
         lda ZP_VAR_T
         adc ZP_POLYOBJ01_XPOS_pt2
-        sta ZP_8A
+        sta ZP_VAR_K6_HI
         lda ZP_VALUE_pt1
         sta ZP_VAR_R
         lda ZP_TEMPOBJ_M2x2_HI
@@ -3920,7 +3921,7 @@ _7ec8:                                                                  ;$7EC8
         adc # $00
         sta ZP_VAR_T
 _7efd:                                                                  ;$7EFD
-        jsr _2977
+        jsr draw_circle_line
         cmp ZP_A8
         beq _7f06
         bcs _7f12
@@ -4382,70 +4383,141 @@ _805c:                                                                  ;$805C
         ; fallthrough...
         ;
 
-_805e:                                                  ; BBC: CIRCLE2  ;$805E
+draw_circle:                                            ; BBC: CIRCLE2  ;$805E
 ;===============================================================================
 ; draw a circle:
 ;
+; circles are drawn as a series of progressive lines starting at 6'clock
+; (the bottom) and going anti-clockwise (rightwards) around the circumfrence
+;
+; all circles drawn this way have up to 64 points but points can be skipped
+; along the way (with `ZP_CIRCLE_STEP`), reducing the circle's 'resolution'
+;
+; because all circles have 64 points, the different quarters / halves of the
+; circle always fall within certain point numbers, and because these quadrants
+; are mirrors of each other (either by horizontal or vertical reflection,
+; or both) the math can be done for one axis and flipped according to need
+;
+;        0-16   bottom-right quarter    +x, +y
+;       16-32   top-right quarter       +x, -y
+;       32-48   top-left quarter        -x, -y
+;       48-64   bottom-left quarter     -x, +y
+;
+; thanks goes to Mark Moxon's BBC disassembly and
+; deep-dive that describes the circle drawing process:
+; <https://www.bbcelite.com/deep_dives/drawing_circles.html>
+;
+; in:   ZP_CIRCLE_XPOS          16-bit X-position of the circle's centre;
+;                               note that 0 is the left-most edge of the
+;                               viewport, not the centre of the screen!
+;
+;       ZP_CIRCLE_STEP          the "resolution" of the circle is set by the
+;                               step rate; values above 1 skip points along
+;                               the circumfrence, e.g. a step rate of 2 would
+;                               connect points 0, 2, 4 etc.
+;
+; TODO: Instead of drawing all (up to) 64 points, I wonder if it would be
+;       faster to draw one quarter (0-15) and automatically mirror the line
+;       to the other quarters?
 ;-------------------------------------------------------------------------------
-        ldx # $ff                       ; set flag to reset ball-line heap
+        ldx # $ff               ; set flag to reset ball-line heap
         stx ZP_A9
-        inx                             ; reset counter for ball lines
-        stx ZP_TEMP_COUNTER
+        inx                     ; reset counter for ball-lines,
+        stx ZP_TEMP_COUNTER     ; draw the circle from the bottom
+
+        ; calculate x-position of point:
+        ;-----------------------------------------------------------------------
+.loop:  lda ZP_TEMP_COUNTER     ; current point in the circle           ;$8065
+        jsr multiply_by_sin     ; calculate: A = radius * sin(counter)
+
+        ldx # $00               ; T will be our hi-byte
+        stx ZP_VAR_T            ;  so set that to zero
+
+        ldx ZP_TEMP_COUNTER     ; left or right half of circle?
+        cpx # 33                ; points 0-32 = right half
+        bcc :+                  ; skip ahead for right-side
+
+        ; swap sides:
+        ;
+        ; negate the number by two's compliment: flip bits and add one.
+        ; due to the `bcc` branch above, carry is guaranteed to be set
+        ; so `adc # $00` will add 1 (the carry)
+        ;
+        eor # %11111111         ; flip all bits
+        adc # $00               ; add 1 (the carry!)
+        tax                     ; put result (lo-byte) aside
+
+        lda # $ff               ; flip the high byte in T ($00)
+        adc # $00               ; ripple the carry!
+        sta ZP_VAR_T            ; update the result hi-byte
+        txa                     ; retrieve our lo-byte again
+        clc                     ;  before continuing
+
+        ; centre the circle by adding the x-position to the value
+        ; we just calculated and storing the result in K6
+        ;
+:       adc ZP_CIRCLE_XPOS_LO   ; add the x-position lo-byte            ;$8081
+        sta ZP_VAR_K6_LO        ;  to the current lo-byte in A
+        lda ZP_CIRCLE_XPOS_HI   ; now do the hi-bytes
+        adc ZP_VAR_T
+        sta ZP_VAR_K6_HI
+
+        ; calculate Y-position of point:
+        ;-----------------------------------------------------------------------
+        ; the sine table contains 32 entries, and if you imagine the upward
+        ; curve of the sine wave occupying the first half and the downward
+        ; curve occupying the second half, then adding 16 to the current
+        ; index would reverse the direction of the curve -- a cosine
+        ; (note: `multiply_by_sin` automatically wraps the input)
+        ;
+        lda ZP_TEMP_COUNTER     ; take our current point index and
+        clc                     ;  add 16 to it to offset
+        adc # 16                ;  the sine into its cosine
+        jsr multiply_by_sin     ;  i.e. A = radius * cosine(counter)
+        tax                     ; put aside the result lo-byte
+
+        lda # $00               ; as before, set the result
+        sta ZP_VAR_T            ;  hi-byte to zero
+
+        ; top half or bottom half?
+        ;
+        ; if we add one-quarter to the current position and ask if we are left
+        ; or right, we are efectively checking for top or bottom as adding one
+        ; quarter rotates the problem 90deg
+        ;
+        lda ZP_TEMP_COUNTER     ; take our current point index
+        adc # 15                ;  add 15
+        and # %00111111         ;  wrap at 64 (0...63)
+        cmp # 33                ; points 0-32 = "bottom" half
+        bcc :+                  ; skip ahead for "bottom" half
+
+        ; swap sides:
+        ;
+        ; negate the number by two's compliment: flip bits and add one.
+        ; due to the `bcc` branch above, carry is guaranteed to be set
+        ; so `adc # $00` will add 1 (the carry)
+        ;
+        txa                     ; retrieve delta lo-byte
+        eor # %11111111         ; flip all bits
+        adc # $00               ; add 1 (the carry!)
+        tax                     ; put result (lo-byte) aside
+
+        lda # $ff               ; flip the high byte in T ($00)
+        adc # $00               ; ripple the carry!
+        sta ZP_VAR_T            ; update the result hi-byte
+        clc                     ;  before continuing
+
+        ; draw the line-segment
+:       jsr draw_circle_line                                            ;$80AF
+
+        cmp # 65                ; finished? (point 65 reached)
+        bcs :+                  ; if yes, leave the loop
+        jmp .loop               ; if no, draw the next segment
 
         ;-----------------------------------------------------------------------
-_8065:  lda ZP_TEMP_COUNTER             ; current index in the circle   ;$8065
-        jsr _39e0
-
-        ldx # $00
-        stx ZP_VAR_T
-
-        ldx ZP_TEMP_COUNTER
-        cpx # $21
-        bcc _8081
-
-        eor # %11111111
-        adc # $00
-        tax 
-        lda # $ff
-        adc # $00
-        sta ZP_VAR_T
-        txa 
-        clc 
-_8081:                                                                  ;$8081
-        adc ZP_VAR_K3_LO
-        sta ZP_89
-        lda ZP_VAR_K3_HI
-        adc ZP_VAR_T
-        sta ZP_8A
-        lda ZP_TEMP_COUNTER
-        clc 
-        adc # $10
-        jsr _39e0
-        tax 
-        lda # $00
-        sta ZP_VAR_T
-        lda ZP_TEMP_COUNTER
-        adc # $0f
-        and # %00111111
-        cmp # $21
-        bcc _80af
-        txa 
-        eor # %11111111
-        adc # $00
-        tax 
-        lda # $ff
-        adc # $00
-        sta ZP_VAR_T
-        clc 
-_80af:                                                                  ;$80AF
-        jsr _2977
-        cmp # $41
-        bcs _80b9
-        jmp _8065
-
-_80b9:                                                                  ;$80B9
-        clc 
+:       clc                                                             ;$80B9
         rts 
+
 
 _80bb:                                                                  ;$80BB
         ldy line_points_x

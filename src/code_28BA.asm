@@ -140,11 +140,11 @@ _28f3:                                                                  ;$28F3
 
         ; set parameter for drawing line
         sty ZP_VAR_Y
-        
+
         ; remove this line from the scanline cache
         lda # $00
         sta SUN_BUFFER, y
-        
+
         jmp draw_straight_line
 
 
@@ -186,7 +186,7 @@ draw_particle:                                                          ;$2918
 ;-------------------------------------------------------------------------------
         lda ZP_VAR_X
         bpl :+                  ; handle dust to the right
-        
+
         ; X is negative (left of centre) --
         ; negate the value for the math to follow:
         eor # %01111111         ; flip the sign
@@ -196,7 +196,7 @@ draw_particle:                                                          ;$2918
         ; flip the sign and put aside for later
 :       eor # %10000000                                                 ;$2921
         tax 
-        
+
         ; has the dust particle traveled off
         ; the top/bottom of the screen?
         lda ZP_VAR_Y            ; get particle's Y-distance from centre
@@ -239,7 +239,7 @@ paint_particle:                                                         ;$293A
 ;-------------------------------------------------------------------------------
         sty ZP_TEMP_VAR         ; preserve Y through this ordeal
         tay                     ; get a copy of our Y-coordinate
-        
+
         ; get a bitmap address for a char row:
         ;
         ; reduce the X-position to a multiple of 8,
@@ -264,7 +264,7 @@ paint_particle:                                                         ;$293A
         txa 
         and # %00000111         ; modulo 8 (0-7)
         tax 
-        
+
         ; the Z-check makes effectively the same paint operation for Z>=144 and
         ; Z>=80, this seems to be a remnant from a different implementation.
         ; we could instead use this to grow dust in more detail, using
@@ -284,7 +284,7 @@ paint_particle:                                                         ;$293A
         lda ZP_VAR_Z            ; again get the dust Z-distance
         cmp # 80                ; is the dust-particle >= 80 Z-distance?
        .bge @done
-        
+
         dey                     ; move up a pixel-row 
         bpl :+                  ; didn't go off the top of the char?
         
@@ -300,9 +300,12 @@ paint_particle:                                                         ;$293A
 _2976:  rts                                                             ;$2976
 
 
-_2977:                                                                  ;$2977
+draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ;===============================================================================
-; BBC code: "BLINE"; ball-line for circle
+; draws a segment of a circle, connecting one point
+; around the circumfrence to another:
+;
+; in:   ZP_TEMP_COUNTER         
 ;-------------------------------------------------------------------------------
         txa 
         adc ZP_VAR_K4_LO
@@ -311,7 +314,7 @@ _2977:                                                                  ;$2977
         lda ZP_VAR_K4_HI
         adc ZP_VAR_T
         sta ZP_8C
-        
+
         lda ZP_A9
         beq _2998
         inc ZP_A9
@@ -332,9 +335,9 @@ _2998:                                                                  ;$2998
         sta ZP_VAR_X2
         lda ZP_88
         sta ZP_VAR_Y2
-        lda ZP_89
+        lda ZP_VAR_K6
         sta ZP_6F
-        lda ZP_8A
+        lda ZP_VAR_K6_HI
         sta ZP_70
         lda ZP_8B
         sta ZP_71
@@ -345,7 +348,7 @@ _2998:                                                                  ;$2998
 
         lda LINE_FLIP           ; was the line co-ords flipped?
         beq :+                  ; no, skip ahead
-        
+
         lda ZP_VAR_X1
         ldy ZP_VAR_X2
         sta ZP_VAR_X2
@@ -376,7 +379,7 @@ _29e6:                                                                  ;$2936
         sta line_points_y, y            ; line-buffer Y-coords
         iny                             ; move to the next point in the buffer
         sty ZP_7E                       ; update line-buffer cursor
-        
+
         ; draw the current line in X1/Y1/X2/Y2
         ; TODO: do validation of line direction here so as to allow
         ;       removal of validation in the line routine
@@ -385,9 +388,9 @@ _29e6:                                                                  ;$2936
         lda ZP_A2
         bne _2988
 _29fa:                                                                  ;$29FA
-        lda ZP_89
+        lda ZP_VAR_K6
         sta ZP_85
-        lda ZP_8A
+        lda ZP_VAR_K6_HI
         sta ZP_86
         lda ZP_8B
         sta ZP_87
@@ -414,7 +417,7 @@ dust_swap_xy:                                                           ;$2A12
         sta DUST_X_HI, y        ; write the X-value to the Y-position
         lda DUST_Z_HI, y        ; get dust z-position
         sta ZP_VAR_Z            ; (put aside Z-position)
-        
+
         jsr draw_particle
 
         dey 
@@ -461,7 +464,7 @@ move_dust_front:                                                        ;$2A40
         lda DUST_Z_LO, y
         sbc ZP_SPEED_LO         ; is probably still (ZP_PLAYER_SPEED&3)<<6
         sta DUST_Z_LO, y
-        
+
         lda DUST_Z_HI, y
         sta ZP_VAR_Z            ; backup old dust-z value
         sbc ZP_SPEED_HI
@@ -473,7 +476,7 @@ move_dust_front:                                                        ;$2A40
         ;       the dust Y-position for the particle index in Y
         jsr _3992
         sta ZP_VAR_YY_HI
-        
+
         lda ZP_VAR_P
         adc DUST_Y_LO, y
         sta ZP_VAR_YY_LO
@@ -483,18 +486,18 @@ move_dust_front:                                                        ;$2A40
         adc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
-        
+
         ; move X:
         ;-----------------------------------------------------------------------
         lda DUST_X_HI, y
         sta ZP_VAR_X
         jsr _3997
         sta ZP_VAR_XX_HI
-        
+
         lda ZP_VAR_P
         adc DUST_X_LO, y
         sta ZP_VAR_XX_LO
-        
+
         lda ZP_VAR_X
         adc ZP_VAR_XX_HI
         sta ZP_VAR_XX_HI
@@ -568,12 +571,12 @@ move_dust_front:                                                        ;$2A40
         ora # %00001000
         sta ZP_VAR_X
         sta DUST_X_HI, y
-        
+
         jsr get_random_number
         ora # %10010000
         sta DUST_Z_HI, y
         sta ZP_VAR_Z
-        
+
         lda ZP_VAR_Y
         jmp @draw
 
@@ -609,21 +612,21 @@ _2b30:                                                                  ;$2B30
         sbc ZP_VAR_P1
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
-        
+
         lda ZP_VAR_Y
         sbc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
-        
+
         lda DUST_Z_LO, y
         adc ZP_SPEED_LO
         sta DUST_Z_LO, y
-        
+
         lda DUST_Z_HI, y
         sta ZP_VAR_Z
         adc ZP_SPEED_HI
         sta DUST_Z_HI, y
-        
+
         lda ZP_VAR_XX_HI
         eor ZP_ROLL_SIGN
         jsr _393c
@@ -635,13 +638,13 @@ _2b30:                                                                  ;$2B30
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         stx ZP_VAR_XX_LO
-        
+
         lda ZP_VAR_YY_HI
         eor ZP_INV_PITCH_SIGN
         ldx ZP_PITCH_MAGNITUDE
         jsr _393e
         sta ZP_VAR_Q
-        
+
         lda ZP_VAR_XX_HI
         sta ZP_VAR_S
         eor # %10000000
@@ -649,7 +652,7 @@ _2b30:                                                                  ;$2B30
         asl ZP_VAR_P1
         rol 
         sta ZP_VAR_T
-        
+
         lda # $00
         ror 
         ora ZP_VAR_T
@@ -657,34 +660,34 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_XX_HI
         txa 
         sta DUST_X_LO, y
-        
+
         lda ZP_VAR_YY_LO
         sta ZP_VAR_R
-        
+
         lda ZP_VAR_YY_HI
         sta ZP_VAR_S
-        
+
         lda # $00
         sta ZP_VAR_P1
-        
+
         lda ZP_BETA
         jsr _290f
-        
+
         lda ZP_VAR_XX_HI
         sta ZP_VAR_X
         sta DUST_X_HI, y
-        
+
         lda ZP_VAR_YY_HI
         sta DUST_Y_HI, y
         sta ZP_VAR_Y
         and # %01111111
         cmp # $6e
         bcs _2bf7
-        
+
         lda DUST_Z_HI, y
         cmp # $a0
         bcs _2bf7
-        
+
         sta ZP_VAR_Z
 _2bed:                                                                  ;$2BED
         jsr draw_particle
@@ -788,7 +791,7 @@ _2c5c:                                                                  ;$2C5C
         adc ZP_VAR_R
         bcs _2c7a
         sta ZP_VAR_R
-        
+
         lda polyobj_00 + PolyObject::zpos + 1, y                        ;=$F907
         jsr math_square
         adc ZP_VAR_R
@@ -888,7 +891,7 @@ _2cc7:                                                                  ;$2CC7
 
         lda PLAYER_KILLS_HI     ; number of kills
        .bnz _2c88               ; >0, skip ahead
-        
+
         tax 
         lda PLAYER_KILLS_LO
         lsr 
@@ -900,7 +903,7 @@ _2cea:                                                                  ;$2CEA
 _2cee:                                                                  ;$2CEE
         ; TODO: what is X if the player has 0 kills?
         txa 
-        
+
         ; print "FUGITIVE"?
         clc 
         adc # $15
@@ -946,7 +949,7 @@ _2d25:                                                                  ;$2D25
         ldx # $00
 _2d2f:                                                                  ;$2D2F
         stx ZP_TEMP_COUNTER
-        
+
         ; print "FRONT" / "REAR" / "LEFT" / "RIGHT"
 .import TKN_FLIGHT_DIRECTIONS:direct
         ldy PLAYER_LASERS, x
@@ -1070,7 +1073,7 @@ _2dc5:                                                                  ;$2DC5
         sec 
         sbc ZP_VAR_T
         sta ZP_VAR_R
-        
+
         lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         sbc # $00
         sta ZP_VAR_S
@@ -1079,7 +1082,7 @@ _2dc5:                                                                  ;$2DC5
         ;-----------------------------------------------------------------------
         lda ZP_POLYOBJ + MATRIX_COL0_LO, y
         sta ZP_VAR_P
-        
+
         lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         and # %10000000         ; extract sign
         sta ZP_VAR_T            ; put sign aside
@@ -1097,7 +1100,7 @@ _2dc5:                                                                  ;$2DC5
         ora ZP_VAR_T            ; restore sign
         eor ZP_B1               ; rotation sign?
         stx ZP_VAR_Q
-        
+
         jsr multiplied_now_add
         sta ZP_VALUE_pt2
         stx ZP_VALUE_pt1
@@ -1226,7 +1229,7 @@ print_large_value:                                                      ;$2E65
         ; parameter ('use decimal point')
         php 
         bcc :+                  ; skip ahead when carry = 0
-        
+
         ; carry flag is set:
         ; a decimal point will be printed
         dec ZP_MAXLEN           ; one less char available
@@ -1249,7 +1252,7 @@ print_large_value:                                                      ;$2E65
         
         jmp _2ec1               ; jump into the main loop
                                 ; (below is not a direct follow-on from here)
-        
+
 _x10:   ; multiply by 10:                                               ;$2E82
         ;-----------------------------------------------------------------------
         ; since you can't 'just' multiply by 10 in binary, we first multiply
@@ -1269,7 +1272,7 @@ _x10:   ; multiply by 10:                                               ;$2E82
         sta ZP_VCOPY, x
         dex 
         bpl :-
-        
+
         lda ZP_VALUE_OVFLW      ; copy the overflow value
         sta ZP_VCOPY_OVFLW      ; to the 2x value copy too
 
@@ -1344,7 +1347,7 @@ _print_digit:                                                           ;$2EE7
         ; (when we first enter this routine, Y will be zero)
         tya 
        .bnz @ascii
-        
+
         lda ZP_MAXLEN
        .bze @ascii
 
@@ -1355,10 +1358,10 @@ _print_digit:                                                           ;$2EE7
         bne @print              ; skip over the next bit (always branches)
 
 @ascii: ; convert value 0-9 to ASCII/PETSCII character                  ;$2EF6
-        
+
         ldy # $00
         sty ZP_MAXLEN
-        
+
         clc 
         adc # '0'               ; re-base as an ASCII/PETSCII numeral
 
@@ -1463,7 +1466,7 @@ print_char:                                                             ;$2F24
         ; remove bit 5, converting characters to upper-case)
         ldx # %11111111
         stx txt_ucase_mask
-        
+
         cmp # '.'               ; end of sentence?
         beq :+
         cmp # ':'               ; colon?
@@ -1489,7 +1492,6 @@ print_char:                                                             ;$2F24
 
         ; no buffer, print character as-is
         jmp paint_char
-        
 
 @add_to_buffer:                                                         ;$2F4D
         ;=======================================================================
@@ -1512,7 +1514,6 @@ print_char:                                                             ;$2F24
         ;=======================================================================
         ; flush the text buffer to screen
         ;
-        
         ; backup X & Y registers:
        .phx                     ; push X to stack (via A)
        .phy                     ; push Y to stack (via A)
@@ -1575,12 +1576,12 @@ print_char:                                                             ;$2F24
         lda TXT_BUFFER, y       ; read character from buffer
         cmp # ' '               ; is it a space?
         bne @find_spc           ; not a space, keep going
-        
+
         ; space found:
         asl ZP_TEMP_ADDR_HI     ; move the space-counter along
         bmi @find_spc           ; if it's hit the end, we ignore this space
                                 ; and look for the next one
-        
+
         ; remember the current position,
         ; i.e. where the space is
         sty ZP_TEMP_ADDR_LO
@@ -1617,7 +1618,7 @@ print_char:                                                             ;$2F24
 .else   ;///////////////////////////////////////////////////////////////////////
         jsr paint_newline
 .endif  ;///////////////////////////////////////////////////////////////////////
-        
+
         lda txt_buffer_index
         sbc # 30
         sta txt_buffer_index
@@ -1692,26 +1693,26 @@ _2ff3:                                                                  ;$2FF3
         sta ZP_TEMP_ADDR_LO
         lda #> dial_speed_addr
         sta ZP_TEMP_ADDR_HI
-        
+
         jsr _30bb               ; flashing?
         stx ZP_VALUE_pt2
         sta ZP_VALUE_pt1
         
         lda # 14                ; threshold to change colour?
         sta ZP_TEMP_VAR
-        
+
         lda ZP_PLAYER_SPEED
         jsr hud_drawbar_32
-        
+
         ;-----------------------------------------------------------------------
 
         lda # $00
         sta ZP_VAR_R
         sta ZP_VAR_P1
-        
+
         lda # $08
         sta ZP_VAR_S
-        
+
         lda ZP_ROLL_MAGNITUDE
         lsr 
         lsr 
@@ -1726,11 +1727,11 @@ _2ff3:                                                                  ;$2FF3
 _302b:                                                                  ;$302B
         jsr multiplied_now_add
         jsr _3130
-        
+
         lda MAIN_COUNTER
         and # %00000011
         bne _2fe0
-        
+
         ldy # $00
         jsr _30bb
         stx ZP_VALUE_pt1
@@ -1774,7 +1775,7 @@ _3068:                                                                  ;$3068
 
         ; location of the fore-shield bar on the HUD
         dial_fore_addr = ELITE_BITMAP_ADDR + .bmppos( 18, 6 )
-        
+
         lda #< dial_fore_addr
         sta ZP_TEMP_ADDR_LO
         lda #> dial_fore_addr
@@ -1785,7 +1786,7 @@ _3068:                                                                  ;$3068
 
         lda PLAYER_SHIELD_FRONT
         jsr hud_drawbar_128
-        
+
         lda PLAYER_SHIELD_REAR
         jsr hud_drawbar_128
 
@@ -1800,7 +1801,7 @@ _3068:                                                                  ;$3068
 
         lda CABIN_HEAT
         jsr hud_drawbar_128
-        
+
         lda LASER_HEAT
         jsr hud_drawbar_128
 
@@ -1809,7 +1810,7 @@ _3068:                                                                  ;$3068
 
         lda VAR_06F3            ; altitude?
         jsr hud_drawbar_128
-        
+
         jmp _7b6f
 
 
@@ -1886,7 +1887,7 @@ hud_drawbar:                                                            ;$30CF
 
 _30e5:                                                                  ;$30E5
         lda ZP_VAR_Q            ; get bar value 0-15
-        
+
         ; subtract 4 if >= 4?
         cmp # $04
        .blt _3109
@@ -1943,7 +1944,7 @@ _next_row:                                                              ;$3122
         lda ZP_TEMP_ADDR_HI
         adc #> 320
         sta ZP_TEMP_ADDR_HI
-        
+
         rts 
 
 
@@ -2009,13 +2010,13 @@ eject_escapepod:                                                        ;$316E
         stx ZP_SHIP_TYPE
         jsr _3680               ; NOTE: spawns ship-type in X
         bcs :+
-        
+
         ldx # HULL_MK3_PIRATE
         jsr _3680               ; NOTE: spawns ship-type in X
 
 :       lda # $08                                                       ;$317F
         sta ZP_POLYOBJ_SPEED
-        
+
         lda # %11000010
         sta ZP_POLYOBJ_PITCH
         lsr 
@@ -2026,9 +2027,9 @@ _318a:                                                                  ;$318A
 
         dec ZP_POLYOBJ_ATTACK
         bne _318a
-        
+
         jsr _b410
-        
+
         lda # $00
         ldx # .sizeof( Cargo )-1
 
@@ -2038,7 +2039,7 @@ _318a:                                                                  ;$318A
 
         sta PLAYER_LEGAL        ; clear legal status
         sta PLAYER_ESCAPEPOD    ; you no longer own an escape pod
-        
+
         ; some Trumbles™ will slip away
         ; with you, the sneaky things!
         ;
@@ -2049,7 +2050,7 @@ _318a:                                                                  ;$318A
         lda PLAYER_TRUMBLES_LO
         ora PLAYER_TRUMBLES_HI
         beq _31be               ; no Trumbles™; skip
-        
+
         ; cull the number of Trumbles™
         jsr get_random_number
         and # %00000111         ; select a range of 0-7
@@ -2152,7 +2153,7 @@ _3239:                                                                  ;$3239
         ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
 .endif  ;///////////////////////////////////////////////////////////////////////
-        
+
         lda # $fa
         jmp damage_player
 
@@ -2165,7 +2166,7 @@ _3244:                                                                  ;$3244
         lda ZP_POLYOBJ_ATTACK
         asl 
         bmi _322f
-        
+
         lsr 
         tax 
         lda polyobj_addrs_lo, x
@@ -2185,7 +2186,7 @@ _3244:                                                                  ;$3244
         lda ZP_POLYOBJ_ATTACK
         cmp # attack::active | attack::aggr1    ;=%10000010
         beq _321e
-        
+
         ldy # $1f
         lda [ZP_TEMP_ADDR3], y
         ; this might be a `ldy # $32`, but I don't see any jump into it
@@ -2249,7 +2250,7 @@ _32ad:                                                                  ;$32AD
         lda ZP_POLYOBJ_BEHAVIOUR
         and # behaviour::angry
         bne _32da
-        
+
         ; is this ship a transporter?
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
@@ -2370,7 +2371,7 @@ _3351:                                                                  ;$3351
 _3357:                                                                  ;$3357
         lsr 
         bcc _3365
-        
+
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
         lda .loword( SHIP_TYPES + HULL_COREOLIS )
@@ -2496,7 +2497,7 @@ _33fd:                                                                  ;$33FD
         lda [ZP_HULL_ADDR], y
         and # %11111000
         beq _3434
-        
+
         lda ZP_POLYOBJ_STATE
         ora # state::firing
         sta ZP_POLYOBJ_STATE
@@ -2594,7 +2595,7 @@ _349a:                                                                  ;$349A
         ldx ZP_SHIP_TYPE
         cpx # $01
         bne _34a9
-        
+
         asl 
 _34a9:                                                                  ;$34A9
         sta ZP_POLYOBJ_ACCEL
@@ -2693,7 +2694,7 @@ _352c:                                                                  ;$352C
 
         lda ZP_SHIP_TYPE
         bpl _3556
-        
+
         eor ZP_VAR_X
         eor ZP_VAR_Y
         asl 
@@ -2750,7 +2751,7 @@ _3581:  sta ZP_TEMP_ADDR3_HI                                            ;$3581
 
         ldy # $05
         jsr _358f
-        
+
         ldy # $08
 _358f:                                                                  ;$358F
         lda [ZP_TEMP_ADDR3], y
@@ -2760,15 +2761,15 @@ _358f:                                                                  ;$358F
         dey 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VALUE_pt3
-        
+
         dey 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VALUE_pt2
-        
+
         sty ZP_VAR_U
         ldx ZP_VAR_U
         jsr _2d69
-        
+
         ldy ZP_VAR_U
         sta ZP_POLYOBJ01_XPOS_pt3, x
         lda ZP_VALUE_pt3
@@ -2871,23 +2872,23 @@ _363f:                                                                  ;$363F
 
         lda ZP_SHIP_TYPE
         bmi _367d
-        
+
         lda ZP_POLYOBJ_STATE
         and # state::debris
         ora ZP_POLYOBJ_XPOS_HI
         ora ZP_POLYOBJ_YPOS_HI
         bne _367d
-        
+
         lda ZP_POLYOBJ_XPOS_LO
         jsr math_square
         sta ZP_VAR_S
-        
+
         lda ZP_VAR_P1
         sta ZP_VAR_R
         
         lda ZP_POLYOBJ_YPOS_LO
         jsr math_square
-        
+
         tax 
         lda ZP_VAR_P1
         adc ZP_VAR_R
@@ -2918,14 +2919,14 @@ _3680:                                                                  ;$3680
 ; in:   X       ship-type to spawn
 ;-------------------------------------------------------------------------------
         jsr clear_zp_polyobj
-        
+
         lda # $1c
         sta ZP_POLYOBJ_YPOS_LO
         lsr 
         sta ZP_POLYOBJ_ZPOS_LO
         lda # $80
         sta ZP_POLYOBJ_YPOS_SIGN
-        
+
         lda ZP_MISSILE_TARGET
         asl 
         ora # attack::active
@@ -2943,7 +2944,7 @@ _3695:                                                                  ;$3695
         lda ZP_PLAYER_SPEED
         rol 
         sta ZP_POLYOBJ_SPEED
-        
+
         txa 
         jmp spawn_ship
 
@@ -3196,7 +3197,7 @@ _37ce:                                                                  ;$37CE
 _37d7:                                                                  ;$37D7
         lda # $01
         sta ZP_7E
-        jsr _805e
+        jsr draw_circle
         asl ZP_VALUE_pt1
         bcs _37e8
         lda ZP_VALUE_pt1
@@ -3484,9 +3485,9 @@ _393e:                                                                  ;$393E
 .segment        "CODE_39E0"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-_39e0:                                                  ; BBC: FMLTU2   ;$39E0
+multiply_by_sin:                                        ; BBC: FMLTU2   ;$39E0
 ;===============================================================================
-; calculate ZP_VALUE_pt1 * abs(sin(A))
+; K * abs(sin(A))
 ;-------------------------------------------------------------------------------
         and # %00011111
         tax                     ; X = A%31, with 0..31 equiv. 0..pi
@@ -3589,9 +3590,8 @@ _3ab2:                                                                  ;$3AB2
         stx ZP_VAR_Q
         lda ZP_VAR_X2
 
-;===============================================================================
-; insert the `multiply_and_add` routine
-;
+        ; fallthrough!
+        ;
 .include        "math/math_multiply+add.asm"                            ;$3ACE 
 
 
@@ -3628,6 +3628,9 @@ get_dust_speed:                                                         ;$3B30
 ;-------------------------------------------------------------------------------
         lda DUST_Z_HI, y
 
+        ; fallthrough...
+        ;
+
 divide_by_player_speed:                                                 ;$3B33
 ;===============================================================================
 ; divide the number, given in A, by the player's speed:
@@ -3635,7 +3638,8 @@ divide_by_player_speed:                                                 ;$3B33
         sta ZP_VAR_Q
         lda ZP_PLAYER_SPEED
 
-;===============================================================================
+        ; fallthrough!
+        ;
 .include        "math/math_divide.asm"                                  ;$3B37
 
 
@@ -3882,7 +3886,7 @@ shoot_lasers:                                                           ;$3CDB
         and # %00000111                 ; clip to 0-7
         adc # $7C                       ; offset by 124 (256-8 / 2?)
         sta VAR_06F0
-        
+
         ; increase laser temperature!
         ;
         lda LASER_HEAT
@@ -3946,7 +3950,7 @@ _3d2f:                                                                  ;$3D2F
         lda TSYSTEM_DISTANCE_LO
         ora TSYSTEM_DISTANCE_HI
        .bnz _3d6f
-       
+
         lda ZP_A7
         bpl _3d6f
         ldy # $00
@@ -3964,9 +3968,9 @@ _3d3d:                                                                  ;$3D3D
         lda MISSION_FLAGS
         lsr 
         bcc _3d6f
-        
+
         jsr text_buffer_on
-        
+
         lda # $01
         ; (this causes the next instruction to become a meaningless `bit`
         ;  instruction, a very handy way of skipping without branching)
@@ -3974,7 +3978,7 @@ _3d3d:                                                                  ;$3D3D
 
 :       lda # $b0                                                       ;$3D5F
         jsr print_docked_token
-        
+
         tya 
         jsr _237e
 
@@ -4040,7 +4044,7 @@ mission_blueprints_birera:                                              ;$3D9B
         sta PLAYER_EUNIT
 
         inc PLAYER_KILLS_HI
-        
+
         ; print mission text
 .import MSG_DOCKED_DF:direct
         lda # MSG_DOCKED_DF
@@ -4050,11 +4054,11 @@ _3daf:                                                                  ;$3DAF
 ;===============================================================================
         lsr MISSION_FLAGS
         asl MISSION_FLAGS
-        
+
         ldx # < 50000
         ldy # > 50000
         jsr give_cash           ; pay monies
-        
+
 .import MSG_DOCKED_CONGRATULATIONS:direct
         lda # MSG_DOCKED_CONGRATULATIONS
 _3dbe:                                                                  ;$3DBE
@@ -4076,14 +4080,14 @@ mission_trumbles:                                                       ;$3DC0
 .import MSG_DOCKED_MISSION_TRUMBLES:direct
         lda # MSG_DOCKED_MISSION_TRUMBLES
         jsr print_docked_str
-        
+
         jsr _81ee
         bcc _3d8a
 
         ldy # $c3
         ldx # $50
         jsr _745a
-        
+
         ;put a Trumble™ in the hold...
         inc PLAYER_TRUMBLES_LO
 
@@ -4135,12 +4139,12 @@ _3e11:                                                                  ;$3E11
 
         inc ZP_POLYOBJ_ZPOS_LO
         beq _3e31
-        
+
         ldx ZP_POLYOBJ_YPOS_LO
         inx 
         cpx # $50
         bcc _3e24
-        
+
         ldx # $50
 _3e24:                                                                  ;$3E24
         stx ZP_POLYOBJ_YPOS_LO
@@ -4171,13 +4175,13 @@ _3e65:                                                                  ;$3E65
         lda # $00
         sta ZP_POLYOBJ_XPOS_LO
         sta ZP_POLYOBJ_ZPOS_LO
-        
+
         lda # $02
         sta ZP_POLYOBJ_ZPOS_HI
-        
+
         jsr draw_ship
         jsr move_ship
-        
+
         jmp get_input
 
 
@@ -4210,7 +4214,7 @@ get_polyobj_addr:                                                       ;$3E87
         sta ZP_POLYOBJ_ADDR_LO
         lda polyobj_addrs_hi, y
         sta ZP_POLYOBJ_ADDR_HI
-        
+
         rts 
 
 
@@ -4225,7 +4229,7 @@ set_psystem_to_tsystem:                                                 ;$3E95
         sta TSYSTEM_POS, x
         dex 
         bpl :-
-        
+
         rts 
 
 

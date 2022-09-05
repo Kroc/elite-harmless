@@ -146,10 +146,9 @@ ZP_VAR_K3               := $35
 ZP_VAR_K3_LO            := $35  ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt1 
 ZP_VAR_K3_HI            := $36  ; NOTE: might be used as ZP_POLYOBJ01_XPOS_pt2
 
-; (the circle radius re-uses part of the temporary big-integer buffer)
-ZP_CIRCLE_RADIUS        := ZP_VALUE_pt1
-ZP_CIRCLE_RADIUS_LO     := ZP_VALUE_pt1
-ZP_CIRCLE_RADIUS_HI     := ZP_VALUE_pt2
+ZP_CIRCLE_XPOS          := ZP_VAR_K3
+ZP_CIRCLE_XPOS_LO       := ZP_VAR_K3_LO
+ZP_CIRCLE_XPOS_HI       := ZP_VAR_K3_HI
 
 ;-------------------------------------------------------------------------------
 
@@ -295,6 +294,14 @@ ZP_VALUE_pt2            := $78
 ZP_VALUE_pt3            := $79
 ZP_VALUE_pt4            := $7a
 
+; also used as a parameter "K"
+ZP_VAR_K                := ZP_VALUE_pt1
+
+; and as a radius parameter for circles
+ZP_CIRCLE_RADIUS        := ZP_VALUE_pt1
+ZP_CIRCLE_RADIUS_LO     := ZP_VALUE_pt1
+ZP_CIRCLE_RADIUS_HI     := ZP_VALUE_pt2
+
 ZP_LASER                := $7b  ; laser power for current view (bit 7 = beam)
 ZP_MISSILE_TARGET       := $7c  ; missile target?
 ZP_7D                   := $7d  ;
@@ -321,8 +328,11 @@ ZP_85                   := $85  ;? x9
 ZP_86                   := $86  ;? x3
 ZP_87                   := $87  ;? x6
 ZP_88                   := $88  ;? x8
-ZP_89                   := $89  ;? x5
-ZP_8A                   := $8a  ;? x8
+
+ZP_VAR_K6               := $89  ;                                       ; K6
+ZP_VAR_K6_LO            := $89  ;                                       ; K6+0
+ZP_VAR_K6_HI            := $8a  ;                                       ; K6+1
+
 ZP_8B                   := $8b  ;? x9
 ZP_8C                   := $8c  ;? x4
 ZP_8D                   := $8d  ;? x4
@@ -392,7 +402,7 @@ ZP_ALPHA                := $a6  ; a rotation variable used in matrix math
 
 ZP_A7                   := $a7  ;? x10  ; docked flag?
 ZP_A8                   := $a8  ;? x9
-ZP_A9                   := $a9  ;? x4
+ZP_A9                   := $a9  ;                                       ; FLAG
 ZP_TEMP_COUNTER         := $aa  ; temporary counter, e.g. ball lines    ; CNT
 ZP_AB                   := $ab  ;? x12
 ZP_CIRCLE_STEP          := $ac  ; step size for drawing circles         ; STP

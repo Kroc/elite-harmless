@@ -483,7 +483,7 @@ _9b8b:                                                                  ;$9B8B
         beq _9baa
 _9b9b:                                                                  ;$9B9B
         inx 
-        lsr ZP_89
+        lsr ZP_VAR_K6
         ror ZP_88
         lsr ZP_86
         ror ZP_85
@@ -501,7 +501,7 @@ _9baa:                                                                  ;$9BAA
         sta ZP_VAR_Y
         lda ZP_88
         sta ZP_VAR_X2
-        lda ZP_8A
+        lda ZP_VAR_K6_HI
         sta ZP_VAR_Y2
         lda ZP_8B
         sta ZP_6F
@@ -513,7 +513,7 @@ _9baa:                                                                  ;$9BAA
         lda ZP_73
         sta ZP_88
         lda ZP_74
-        sta ZP_8A
+        sta ZP_VAR_K6_HI
         lda ZP_75
         sta ZP_8B
         lda ZP_76
@@ -572,7 +572,7 @@ _9c0b:                                                                  ;$9C0B
         sta ZP_VAR_Y
         lda ZP_88
         sta ZP_VAR_X2
-        lda ZP_8A
+        lda ZP_VAR_K6_HI
         sta ZP_VAR_Y2
         lda ZP_8B
         sta ZP_6F
@@ -631,7 +631,7 @@ _9c60:                                                                  ;$9C60
         sta ZP_VAR_S
         lda ZP_88
         sta ZP_VAR_Q
-        lda ZP_8A
+        lda ZP_VAR_K6_HI
         jsr _9a0c
         bcs _9c43
         sta ZP_VAR_X2
