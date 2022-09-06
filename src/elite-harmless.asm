@@ -57,6 +57,7 @@
         .include        "draw_lines.asm"
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+.include        "draw_circles.asm"
 .include        "gfx/clear_screen.asm"
 
 .ifdef  FEATURE_AUDIO

@@ -35,7 +35,7 @@
 .include        "main_flight.asm"                                       ;$1E21
 .include        "text/text_docked_code.asm"                             ;$2372
 .include        "save_data.asm"                                         ;$25A6
-
+.include        "draw_circles.asm"                                      ;$26A4
 .include        "code_28ba.asm"                                         ;$28BA
 .include        "math/math_square.asm"                                  ;$3986
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
