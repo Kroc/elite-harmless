@@ -41,7 +41,7 @@
 
         roll            .byte                                           ;+$1D
         pitch           .byte                                           ;+$1E
-        
+
         ; misc. state & missile count, see enum below
         state           .byte                                           ;+$1F
         ; attack state, see enum below
@@ -49,7 +49,7 @@
 
         ; a pointer to already processed vertex data
         vertexData      .addr                                           ;+$21
-        
+
         energy          .byte                                           ;+$23
 
         ; behaviour state, see enum below

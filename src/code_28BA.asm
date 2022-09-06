@@ -309,29 +309,35 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ;       K6                      the x-position of the new point (16-bit)
 ;       T.X                     the y-position of the new point (16-bit)
 ;       ZP_A9                   set to $FF to indicate first point
+;       ZP_CIRCLE_RADIUS        circle's radius
+;       ZP_CIRCLE_YPOS          circle's centre Y-position (16-bit)
+;                               signed, 0 is the top of the viewport
 ;
-; TOOD: why is flag needed if ZP_TEMP_COUNTER = 0 would indicate the same?
-;       is this because of keeping the heap for later erasing?
+; TOOD: why is flag (ZP_A9) needed if ZP_TEMP_COUNTER = 0 would indicate
+;       the same? is this because of keeping the heap for later erasing?
 ;-------------------------------------------------------------------------------
         txa                     ; point Y-position lo-byte
         adc ZP_CIRCLE_YPOS_LO
-        sta ZP_8B
+        sta ZP_8B               ; BBC: K6+2
 
-        lda ZP_CIRCLE_YPOS_HI
-        adc ZP_VAR_T
-        sta ZP_8C
+        lda ZP_CIRCLE_YPOS_HI   ; circle's y-position, hi-byte
+        adc ZP_VAR_T            ; add point Y-position hi-byte
+        sta ZP_8C               ; BBC: K6+3
 
-        lda ZP_A9
-        beq _2998
-        inc ZP_A9
-_2988:                                                                  ;$2988
-        ldy ZP_7E               ; current line-buffer cursor
+        lda ZP_A9               ; get the flag parameter
+        beq _2998               ; is this the first point?
+        inc ZP_A9               ; roll flag over from $ff to 0
+
+        ; initialise circle-buffer:
+        ;-----------------------------------------------------------------------
+_2988:  ldy ZP_7E               ; current circle-buffer cursor     ;$2988
         lda # $ff               ; line terminator
-        cmp line_points_y-1, y  ; check the line-buffer Y-coords
+        cmp line_points_y-1, y  ; check the circle-buffer Y-coords
         beq _29fa
-        sta line_points_y, y    ; line-buffer Y-coords
+        sta line_points_y, y    ; circle-buffer Y-coords
         inc ZP_7E
         bne _29fa
+
 _2998:                                                                  ;$2998
         lda ZP_85
         sta ZP_VAR_X1
@@ -3199,14 +3205,14 @@ _37ce:                                                                  ;$37CE
         and # %00000111
         clc 
         adc # $08
-        sta ZP_VALUE_pt1
+        sta ZP_VALUE_pt1        ; radius?
 _37d7:                                                                  ;$37D7
         lda # $01
         sta ZP_7E
         jsr draw_circle
-        asl ZP_VALUE_pt1
+        asl ZP_VALUE_pt1        ; radius?
         bcs _37e8
-        lda ZP_VALUE_pt1
+        lda ZP_VALUE_pt1        ; radius?
         cmp # $a0
         bcc _37d7
 _37e8:                                                                  ;$37E8
@@ -3499,7 +3505,7 @@ multiply_by_sin:                                        ; BBC: FMLTU2   ;$39E0
         tax                     ; X = A%31, with 0..31 equiv. 0..pi
         lda table_sin, x
         sta ZP_VAR_Q            ; Q = abs(sin(A))*256
-        lda ZP_VALUE_pt1
+        lda ZP_CIRCLE_RADIUS
 
 _39ea:                                                                  ;$39EA
         ; calculate A=(A*Q)/256 via log-tables

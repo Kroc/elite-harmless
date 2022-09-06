@@ -1,9 +1,5 @@
 cc65
 mkd64
-*.prg
-*.d64
-*.g64
-*.crt
 
 # created when compiling exomizer,
 # not required in the repository

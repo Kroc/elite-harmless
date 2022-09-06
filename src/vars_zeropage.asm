@@ -290,27 +290,28 @@ ZP_76                   := $76  ;? x12
 ; a 4-byte big-endian number buffer for working with big integers:
 ;
 ZP_VALUE                := $77                                          ; K
-ZP_VALUE_pt1            := $77
-ZP_VALUE_pt2            := $78
-ZP_VALUE_pt3            := $79
-ZP_VALUE_pt4            := $7a
+ZP_VALUE_pt1            := $77                                          ; K+0
+ZP_VALUE_pt2            := $78                                          ; K+1
+ZP_VALUE_pt3            := $79                                          ; K+2?
+ZP_VALUE_pt4            := $7a                                          ; K+3?
 
 ; also used as a parameter "K"
-ZP_VAR_K                := ZP_VALUE_pt1
+ZP_VAR_K                := ZP_VALUE_pt1                                 ; K
 
 ; and as a radius parameter for circles
-ZP_CIRCLE_RADIUS        := ZP_VALUE_pt1
-ZP_CIRCLE_RADIUS_LO     := ZP_VALUE_pt1
-ZP_CIRCLE_RADIUS_HI     := ZP_VALUE_pt2
+ZP_CIRCLE_RADIUS        := ZP_VALUE_pt1                                 ; K
+ZP_CIRCLE_RADIUS_LO     := ZP_VALUE_pt1                                 ; K+0
+ZP_CIRCLE_RADIUS_HI     := ZP_VALUE_pt2                                 ; K+1
 
 ZP_LASER                := $7b  ; laser power for current view (bit 7 = beam)
 ZP_MISSILE_TARGET       := $7c  ; missile target?
 ZP_7D                   := $7d  ;
-ZP_7E                   := $7e  ;                                       ; LSP
+
+ZP_7E                   := $7e  ; circle line-buffer cursor             ; LSP
 
 ;-------------------------------------------------------------------------------
 ; Elite's random-number seed that defines the entire universe
-; see: http://wiki.alioth.net/index.php/Random_number_generator
+; see: <http://wiki.alioth.net/index.php/Random_number_generator>
 ;
 ZP_SEED                 := $7f                                          ; QQ15
 ZP_SEED_W0              := $7f   ; first word
@@ -334,9 +335,9 @@ ZP_VAR_K6               := $89  ;                                       ; K6
 ZP_VAR_K6_LO            := $89  ;                                       ; K6+0
 ZP_VAR_K6_HI            := $8a  ;                                       ; K6+1
 
-ZP_8B                   := $8b  ;? x9
-ZP_8C                   := $8c  ;? x4
-ZP_8D                   := $8d  ;? x4
+ZP_8B                   := $8b  ;                                       ; K6+2
+ZP_8C                   := $8c  ;                                       ; K6+3
+ZP_8D                   := $8d  ;
 
 ; temp variable storage?
 ; these three are reused sometimes as temporaries

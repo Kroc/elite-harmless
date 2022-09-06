@@ -37,8 +37,8 @@ _75e4:                                                                  ;$75E4
 
         ; number of whole pages to copy
         ldx #< .page_count(__GMA4_DATA1A_LAST__ - __GMA4_DATA1A_START__)
-        
-        ;TODO: this is not ideal as an import        
+
+        ; TODO: this is not ideal as an import        
 .import __TEXT_FLIGHT_RUN__
 
         lda #< __TEXT_FLIGHT_RUN__
@@ -58,7 +58,7 @@ _75e4:                                                                  ;$75E4
         ; disable interrupts:
         ; (we'll be configuring screen & sprites)
         sei
-    
+
         ; change the C64's memory layout:
         ; bits 0-2 of the processor port ($01) control the memory banks,
         ; a value of of %xxxxx100 turns off all ROM shadows (KERNAL, BASIC,
@@ -71,10 +71,10 @@ _75e4:                                                                  ;$75E4
         ; relocate part of the binary payload in "gma4.prg" --
         ; copy $5600..$7F00 to $D000..$F900 -- note that includes this code!
 
-        ;TODO: this is very difficult to calculate!
+        ; TODO: this is very difficult to calculate!
         ldx # $29               ; size of block-copy -- 41 x 256 = 10'496 bytes
 
-        ;TODO: use HIDATA memory segment address instead?
+        ; TODO: use HIDATA memory segment address instead?
 .import __HULL_TABLE_RUN__
 
         lda #< __HULL_TABLE_RUN__
@@ -108,7 +108,7 @@ _75e4:                                                                  ;$75E4
         ;
         lda CIA2_PORTA          ; read the serial bus / VIC-II bank state
         and # %11111100         ; keep current value except bits 0-1 (VIC bank)
-        
+
         ; set bits 0-1 to %10: bank 1, $4000..$8000
         ora # .vic_bank_bits( ELITE_VIC_BANK )
         sta CIA2_PORTA

@@ -97,7 +97,7 @@ init:
         ;
         lda # ELITE_VIC_LAYOUT_MENUSCR
         sta VIC_LAYOUT
-        
+
         ; upload the colour RAM from the initialisation data:
         ;-----------------------------------------------------------------------
         ; number of pages to copy; even though colour RAM is 1'000 bytes,
@@ -175,7 +175,7 @@ init:
         ldy # 101
         stx VIC_SPRITE0_X
         sty VIC_SPRITE0_Y
-        
+
         ; place the explosion sprite nowhere in particular
         lda # 18
         ldy # 12
@@ -194,7 +194,7 @@ init:
         asl                     ; double x-position (=144)
         sta VIC_SPRITE4_X
         sty VIC_SPRITE4_Y
-        
+
         lda # 14
         sta VIC_SPRITE5_X
         sty VIC_SPRITE5_Y

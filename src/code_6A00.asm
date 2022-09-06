@@ -823,7 +823,7 @@ draw_range_local:                                       ; BBC: TT126    ;$6CC3
         jsr draw_crosshair
 
         lda PLAYER_FUEL         ; use the player's fuel count...
-        sta ZP_VALUE_pt1        ; ... as the circle-radius! (no scaling)
+        sta ZP_CIRCLE_RADIUS    ; ... as the circle-radius! (no scaling)
 
         jmp draw_chart_circle   ; continue drawing the circle
 
@@ -844,7 +844,7 @@ draw_range_circle:                                      ; BBC: TT14     ;$6CDA
         lda PLAYER_FUEL         ; fuel amount determines jump distance
         lsr                     ; divide by 4 to scale
         lsr                     ; (max fuel is 70)
-        sta ZP_VALUE_pt1        ; BBC: K
+        sta ZP_CIRCLE_RADIUS
 
         lda PSYSTEM_POS_X       ; get X-position of present system
         sta ZP_8E               ; this will be cross-hair centre position X
@@ -1545,7 +1545,7 @@ local_chart:                                                            ;$6FDB
         lda ZP_SEED_W2_HI
         and # %00000001
         adc # $02
-        sta ZP_VALUE_pt1
+        sta ZP_CIRCLE_RADIUS
 
         ; draw the planet:
         ;
@@ -1654,7 +1654,7 @@ _70f1:                                                                  ;$70F1
         sta ZP_VALUE_pt2
 
         lda ZP_VAR_P1
-        sta ZP_VALUE_pt1
+        sta ZP_VALUE_pt1        ; radius?
         lda TSYSTEM_POS_Y
         sec 
         sbc PSYSTEM_POS_Y
@@ -1667,7 +1667,7 @@ _7122:                                                                  ;$7122
         pha 
         lda ZP_VAR_P1
         clc 
-        adc ZP_VALUE_pt1
+        adc ZP_VALUE_pt1        ; radius?
         sta ZP_VAR_Q
         pla 
         adc ZP_VALUE_pt2
@@ -3655,7 +3655,7 @@ _7d1f:                                                                  ;$7D1F
         lda ZP_POLYOBJ_XPOS_SIGN
         jsr _81c9
         bcs _7d56
-        lda ZP_VALUE_pt1
+        lda ZP_VALUE_pt1        ; radius?
         adc # $80
         sta ZP_POLYOBJ01_XPOS_pt1
         txa 
@@ -3670,7 +3670,7 @@ _7d1f:                                                                  ;$7D1F
         jsr _81c9
         bcs _7d56
 
-        lda ZP_VALUE_pt1
+        lda ZP_VALUE_pt1        ; radius?
         adc # $48               ;TODO: half viewport height?
         sta ZP_CIRCLE_YPOS_LO   ; set circle Y-position, lo-byte
 
@@ -4334,7 +4334,7 @@ _7f67:                                                                  ;$7F67
         ldx ZP_TEMP_ADDR3_LO
         inx 
         stx ZP_TEMP_ADDR3_LO
-        cpx ZP_VALUE_pt1
+        cpx ZP_CIRCLE_RADIUS
         bcc @_calc
         beq @_calc
 
@@ -4813,10 +4813,10 @@ _81c9:                                                                  ;$81C9
         bcs _81ed
         lda ZP_VALUE_pt4
         bpl _81ed
-        lda ZP_VALUE_pt1
+        lda ZP_VALUE_pt1        ; radius?
         eor # %11111111
         adc # $01
-        sta ZP_VALUE_pt1
+        sta ZP_VALUE_pt1        ; radius?
         txa 
         eor # %11111111
         adc # $00
@@ -5182,7 +5182,7 @@ _834f:                                                                  ;$834F
         sta [ZP_POLYOBJ_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR], y
-        sta ZP_VALUE_pt1
+        sta ZP_VALUE_pt1        ; radius?
         lda ZP_VAR_P1
         sta [ZP_POLYOBJ_ADDR], y
         dey 

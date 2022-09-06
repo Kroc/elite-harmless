@@ -387,12 +387,13 @@ _9600:                                                                  ;$9600
 ; assembled) and occupy space in the disk-file. for elite-harmless we make
 ; these buffers blocks of reserved RAM that do not exist in the disk-file
 ;
-; TODO: this understanding is incorrect!
-;       something else is happening here
+; TODO: BBC code says these are supposed to be max. 78 bytes each:
+;       <https://www.bbcelite.com/deep_dives/the_ball_line_heap.html>
+;       also, why 78 bytes? why not 64? (max. number of points in circle)
 ;
-line_points_x:                                                          ;$26A4
+line_points_x:                                          ; BBC: LSX2     ;$26A4
 ;-------------------------------------------------------------------------------
-; RAM used for X-coords for line-drawing
+; RAM used for X-coords for circle line-drawing
 ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -432,13 +433,12 @@ line_points_x:                                                          ;$26A4
         .byte   $85, $6f, $c8, $b1, $5b, $85, $bb, $29
         .byte   $1f, $c5, $ad, $90, $fb, $c8, $b1, $5b
 .else   ;///////////////////////////////////////////////////////////////////////
-        .res    256
+        .res    78
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-
-line_points_y:                                                          ;$27A4
+line_points_y:                                          ; BBC: LSY2     ;$27A4
 ;-------------------------------------------------------------------------------
-; RAM used for X-coords for line-drawing
+; RAM used for Y-coords for circle line-drawing
 ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -478,5 +478,5 @@ line_points_y:                                                          ;$27A4
         .byte   $38, $e5, $9b, $9d, $00, $01, $e8, $a9
         .byte   $00, $e5, $99, $9d, $00, $01, $4c, $61
 .else   ;///////////////////////////////////////////////////////////////////////
-        .res    256
+        .res    78
 .endif  ;///////////////////////////////////////////////////////////////////////

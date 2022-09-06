@@ -39,18 +39,15 @@ echo "building Elite : Harmless"
 echo
 
 clean() {
-    echo -n "- cleaning up:                      "
+    echo -n "- cleaning up...                    "
 
     rm -rf build/*.o
     rm -rf build/*.s
     rm -rf build/*.bin
     rm -rf build/*.prg
+    rm -rf build/*.exo
     rm -rf build/*.d64
     rm -rf build/*.crt
-
-    rm -f bin/*.prg
-    rm -f bin/*.d64
-    rm -f bin/*.crt
 
     # annoyingly `cl65` will always place object files in the same directory
     # as the source file, so we need to clean these out of "src" ourselves
@@ -214,7 +211,7 @@ cat "build/gma4_prg.bin" \
     "build/gma4_code.bin" \
     "build/gma4_data2.bin" \
     "build/gma4_junk2.bin" \
->   "bin/gma4.prg"
+>   "build/gma4.prg"
 echo "[OK]"
 
 # encrypt GMA5.PRG:
@@ -229,7 +226,7 @@ echo -n "-   concat 'gma5.prg'               "
 cat "build/gma5_code.prg" \
     "build/gma5_data.bin" \
     "build/gma5_junk.bin" \
->   "bin/gma5.prg"
+>   "build/gma5.prg"
 echo "[OK]"
 
 # encrypt GMA6.PRG:
@@ -244,7 +241,7 @@ echo -n "-   concat 'gma6.prg'               "
 cat "build/gma6_prg.bin" \
     "build/gma6_data.bin" \
     "build/gma6_junk.bin" \
->   "bin/gma6.prg"
+>   "build/gma6.prg"
 echo "[OK]"
 
 #-------------------------------------------------------------------------------
@@ -255,13 +252,13 @@ $mkd64 \
     -o release/elite-original-gma86.d64 \
     -m xtracks -XDS \
     -m cbmdos -d "ELITE 040486" -i "GMA86" \
-    -f bin/firebird.prg     -t 17 -s 0 -n "FIREBIRD"    -P -S 1 -w \
-    -f bin/gma1.prg         -t 17 -s 1 -n "GMA1"        -P -S 2 -w \
-    -f bin/byebyejulie.prg  -t 17 -s 4 -n "BYEBYEJULIE" -P -S 3 -w \
-    -f bin/gma3.prg         -t 17 -s 5 -n "GMA3"        -P -S 4 -w \
-    -f bin/gma4.prg         -t 17 -s 6 -n "GMA4"        -P -S 5 -w \
-    -f bin/gma5.prg         -t 19 -s 0 -n "GMA5"        -P -S 6 -w \
-    -f bin/gma6.prg         -t 20 -s 8 -n "GMA6"        -P -S 7 -w \
+    -f build/firebird.prg     -t 17 -s 0 -n "FIREBIRD"    -P -S 1 -w \
+    -f build/gma1.prg         -t 17 -s 1 -n "GMA1"        -P -S 2 -w \
+    -f build/byebyejulie.prg  -t 17 -s 4 -n "BYEBYEJULIE" -P -S 3 -w \
+    -f build/gma3.prg         -t 17 -s 5 -n "GMA3"        -P -S 4 -w \
+    -f build/gma4.prg         -t 17 -s 6 -n "GMA4"        -P -S 5 -w \
+    -f build/gma5.prg         -t 19 -s 0 -n "GMA5"        -P -S 6 -w \
+    -f build/gma6.prg         -t 20 -s 8 -n "GMA6"        -P -S 7 -w \
     1>/dev/null
 
 echo "[OK]"
@@ -269,8 +266,8 @@ echo "[OK]"
 #-------------------------------------------------------------------------------
 
 echo -n "- verifying checksums               "
-cd bin
-md5sum --ignore-missing --quiet --check checksums.md5
+cd build
+md5sum --ignore-missing --quiet --check ../link/checksums.md5
 if [ $? -eq 0 ]; then echo "[OK]"; fi
 cd ..
 
@@ -280,20 +277,44 @@ echo "  ======================================"
 echo "* build Elite : Harmless (disk images)"
 echo "  ======================================"
 
+echo "* assemble:"
+echo "  --------------------------------------"
+clean
+
 # copy the elite : harmless screen bitmap images into the build directory.
 # note that elite-harmless does not assemble the screens from a source file
 cp "src/gfx/screen_main.koa" \
    "build/screen_main.koa"
 
+# elite-harmless-orig:
 #-------------------------------------------------------------------------------
-
-echo "* elite-harmless.d64"
-echo "  --------------------------------------"
-clean
+echo -n "- elite-harmless-orig.cfg           "
 
 options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES"
 
-echo -n "- assembling                        "
+# note that the text database has to be assembled separately from the main code
+# due to the rather insane complexity which is best not leaked into the global
+# scope along with the main source code
+
+$cl65 $options \
+    --config "link/elite-harmless-orig.cfg" \
+    --start-addr \$0400 \
+     -m "build/elite-harmless-orig.map" -vm \
+    -Ln "build/elite-harmless-orig.ll" \
+     -o "build/harmless-orig.prg" \
+        "src/elite-harmless.asm" \
+        "src/text/text_pairs.asm" \
+        "src/text/text_flight.asm" \
+        "src/text/text_docked.asm" \
+        "src/c64/prgheader.asm"
+
+echo "[OK]"
+
+# elite-harmless-d64:
+#-------------------------------------------------------------------------------
+echo -n "- elite-harmless-d64.cfg            "
+
+options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES"
 
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into the global
@@ -304,7 +325,7 @@ $cl65 $options \
     --start-addr \$0400 \
      -m "build/elite-harmless.map" -vm \
     -Ln "build/elite-harmless.ll" \
-     -o "bin/harmless.prg" \
+     -o "build/harmless.prg" \
         "src/elite-harmless.asm" \
         "src/text/text_pairs.asm" \
         "src/text/text_flight.asm" \
@@ -313,41 +334,12 @@ $cl65 $options \
 
 echo "[OK]"
 
-# compress and fast-load the program
-echo -n "- exomizing...                      "
-
-# NB: `lda #$00 sta $d011` turns the screen "off" so no background is
-# displayed. it also speeds up the processor (no VIC wait-states).
-# we don't need to turn the screen back on afterwards as Elite
-# does this itself during initialisation
-
-$exomizer \
-    -s "lda #\$00 sta \$d011 sta \$d020" \
-    -X "inc \$d020 dec \$d020" \
-    -o "bin/harmless-exo.prg" \
-    -- "bin/harmless.prg"
-
-echo "[OK]"
-echo -n "- write floppy disk image           "
-$mkd64 \
-    -o release/elite-harmless.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
-    1>/dev/null
-
-echo "[OK]"
-
+# elite-harmless-fastlines:
 #-------------------------------------------------------------------------------
-
-echo "  --------------------------------------"
-echo "* elite-harmless-fastlines.d64"
-echo "  --------------------------------------"
-clean
+echo -n "- elite-harmless-fastlines.cfg      "
 
 options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES,-DFEATURE_FASTLINES"
 
-echo -n "- assembling                        "
-
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into the global
 # scope along with the main source code
@@ -355,9 +347,9 @@ echo -n "- assembling                        "
 $cl65 $options \
     --config "link/elite-harmless-d64.cfg" \
     --start-addr \$0400 \
-     -m "build/elite-harmless.map" -vm \
-    -Ln "build/elite-harmless.ll" \
-     -o "bin/harmless.prg" \
+     -m "build/elite-harmless-fastlines.map" -vm \
+    -Ln "build/elite-harmless-fastlines.ll" \
+     -o "build/harmless-fastlines.prg" \
         "src/elite-harmless.asm" \
         "src/text/text_pairs.asm" \
         "src/text/text_flight.asm" \
@@ -366,41 +358,12 @@ $cl65 $options \
 
 echo "[OK]"
 
-# compress and fast-load the program
-echo -n "- exomizing...                      "
-
-# NB: `lda #$00 sta $d011` turns the screen "off" so no background is
-# displayed. it also speeds up the processor (no VIC wait-states).
-# we don't need to turn the screen back on afterwards as Elite
-# does this itself during initialisation
-
-$exomizer \
-    -s "lda #\$00 sta \$d011 sta \$d020" \
-    -X "inc \$d020 dec \$d020" \
-    -o "bin/harmless-exo.prg" \
-    -- "bin/harmless.prg"
-
-echo "[OK]"
-echo -n "- write floppy disk image           "
-$mkd64 \
-    -o release/elite-harmless-fastlines.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
-    1>/dev/null
-
-echo "[OK]"
-
+# elite-harmless-hiram:
 #-------------------------------------------------------------------------------
-
-echo "  --------------------------------------"
-echo "* elite-harmless-hiram.d64"
-echo "  --------------------------------------"
-clean
+echo -n "- elite-harmless-hiram.cfg          "
 
 options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,-DFEATURE_TRUMBLES"
 
-echo -n "- assembling                        "
-
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into  the global
 # scope along with the main source code
@@ -410,7 +373,7 @@ $cl65 $options \
     --start-addr \$0400 \
      -m "build/elite-harmless-hiram.map" -vm \
     -Ln "build/elite-harmless-hiram.ll" \
-     -o "bin/harmless.prg" \
+     -o "build/harmless-hiram.prg" \
         "src/elite-harmless.asm" \
         "src/text/text_pairs.asm" \
         "src/text/text_flight.asm" \
@@ -419,41 +382,12 @@ $cl65 $options \
     
 echo "[OK]"
 
-# compress and fast-load the program
-echo -n "- exomizing...                      "
-
-# NB: `lda #$00 sta $d011` turns the screen "off" so no background is
-# displayed. it also speeds up the processor (no VIC wait-states).
-# we don't need to turn the screen back on afterwards as Elite
-# does this itself during initialisation
-
-$exomizer \
-    -s "lda #\$00 sta \$d011 sta \$d020" \
-    -X "inc \$d020 dec \$d020" \
-    -o "bin/harmless-exo.prg" \
-    -- "bin/harmless.prg"
-
-echo "[OK]"
-echo -n "- write floppy disk image           "
-$mkd64 \
-    -o release/elite-harmless-hiram.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
-    1>/dev/null
-
-echo "[OK]"
-
+# elite-harmless-hiram-fastlines:
 #-------------------------------------------------------------------------------
-
-echo "  --------------------------------------"
-echo "* elite-harmless-hiram-fastlines.d64"
-echo "  --------------------------------------"
-clean
+echo -n "- elite-harmless-hiram-fastlines.cfg"
 
 options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,-DFEATURE_FASTLINES,-DFEATURE_TRUMBLES"
 
-echo -n "- assembling                        "
-
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into  the global
 # scope along with the main source code
@@ -461,39 +395,112 @@ echo -n "- assembling                        "
 $cl65 $options \
     --config "link/elite-harmless-hiram.cfg" \
     --start-addr \$0400 \
-     -m "build/elite-harmless-hiram.map" -vm \
-    -Ln "build/elite-harmless-hiram.ll" \
-     -o "bin/harmless.prg" \
+     -m "build/elite-harmless-hiram-fastlines.map" -vm \
+    -Ln "build/elite-harmless-hiram-fastlines.ll" \
+     -o "build/harmless-hiram-fastlines.prg" \
         "src/elite-harmless.asm" \
         "src/text/text_pairs.asm" \
         "src/text/text_flight.asm" \
         "src/text/text_docked.asm" \
         "src/c64/prgheader.asm"
-    
+
 echo "[OK]"
 
-# compress and fast-load the program
-echo -n "- exomizing...                      "
+#===============================================================================
+
+echo "  --------------------------------------"
+echo "* exomize:"
+echo "  --------------------------------------"
 
 # NB: `lda #$00 sta $d011` turns the screen "off" so no background is
 # displayed. it also speeds up the processor (no VIC wait-states).
 # we don't need to turn the screen back on afterwards as Elite
 # does this itself during initialisation
 
+echo -n "- harmless-orig.prg                 "
 $exomizer \
     -s "lda #\$00 sta \$d011 sta \$d020" \
     -X "inc \$d020 dec \$d020" \
-    -o "bin/harmless-exo.prg" \
-    -- "bin/harmless.prg"
-
+    -o "build/harmless-orig.exo" \
+    -- "build/harmless-orig.prg"
 echo "[OK]"
-echo -n "- write floppy disk image           "
+
+echo -n "- harmless.prg                      "
+$exomizer \
+    -s "lda #\$00 sta \$d011 sta \$d020" \
+    -X "inc \$d020 dec \$d020" \
+    -o "build/harmless.exo" \
+    -- "build/harmless.prg"
+echo "[OK]"
+
+echo -n "- harmless-fastlines.prg            "
+$exomizer \
+    -s "lda #\$00 sta \$d011 sta \$d020" \
+    -X "inc \$d020 dec \$d020" \
+    -o "build/harmless-fastlines.exo" \
+    -- "build/harmless-fastlines.prg"
+echo "[OK]"
+
+echo -n "- harmless-hiram.prg                "
+$exomizer \
+    -s "lda #\$00 sta \$d011 sta \$d020" \
+    -X "inc \$d020 dec \$d020" \
+    -o "build/harmless-hiram.exo" \
+    -- "build/harmless-hiram.prg"
+echo "[OK]"
+
+echo -n "- harmless-hiram-fastlines.prg      "
+$exomizer \
+    -s "lda #\$00 sta \$d011 sta \$d020" \
+    -X "inc \$d020 dec \$d020" \
+    -o "build/harmless-hiram-fastlines.exo" \
+    -- "build/harmless-hiram-fastlines.prg"
+echo "[OK]"
+
+#===============================================================================
+
+echo "  --------------------------------------"
+echo "* floppy:"
+echo "  --------------------------------------"
+
+echo -n "- elite-harmless-orig.d64           "
+$mkd64 \
+    -o release/elite-harmless-orig.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f build/harmless-orig.exo -t 17 -s 0 -n "HARMLESS" \
+    -P -w 1>/dev/null
+echo "[OK]"
+
+echo -n "- elite-harmless.d64                "
+$mkd64 \
+    -o release/elite-harmless.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f build/harmless.exo -t 17 -s 0 -n "HARMLESS" \
+    -P -w 1>/dev/null
+echo "[OK]"
+
+echo -n "- elite-harmless-fastlines.d64      "
+$mkd64 \
+    -o release/elite-harmless-fastlines.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f build/harmless-fastlines.exo -t 17 -s 0 -n "HARMLESS" \
+    -P -w 1>/dev/null
+echo "[OK]"
+
+echo -n "- elite-harmless-hiram.d64          "
+$mkd64 \
+    -o release/elite-harmless-hiram.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f build/harmless-hiram.exo -t 17 -s 0 \
+    -n "HARMLESS" -P -w 1>/dev/null
+echo "[OK]"
+
+echo -n "- elite-harmless-hiram-fastlines.d64"
 $mkd64 \
     -o release/elite-harmless-hiram-fastlines.d64 \
     -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f bin/harmless-exo.prg -t 17 -s 0 -n "HARMLESS"    -P -w \
-    1>/dev/null
-
+    -f build/harmless-hiram-fastlines.exo -t 17 -s 0 \
+    -n "HARMLESS" -P -w 1>/dev/null
 echo "[OK]"
 
 #===============================================================================
