@@ -1456,7 +1456,7 @@ local_chart:                                                            ;$6FDB
         ; offset so that the centre-point
         ; is in the middle of the screen
         adc # 104               ; why 104?
-        sta ZP_71
+        sta ZP_VAR_XX12_0
 
         ; for printing the planet name,
         ; work out the column number
@@ -1535,7 +1535,7 @@ local_chart:                                                            ;$6FDB
         sta ZP_CIRCLE_YPOS_HI   ; set circle Y-position hi-byte to 0
         sta ZP_CIRCLE_RADIUS_HI ; circle-radius hi-byte(?)
 
-        lda ZP_71               ; retrieve screen X-positon of planet
+        lda ZP_VAR_XX12_0       ; retrieve screen X-positon of planet
         sta ZP_CIRCLE_XPOS_LO   ; set the circle X-position lo-byte
 
         ; the hi-byte of W2 is used to calculate both the planet's

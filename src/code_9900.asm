@@ -256,9 +256,9 @@ _9a30:                                                                  ;$9A30
         lda ZP_VAR_XX15_5
         eor ZP_TEMPOBJ_M2x2_HI, x
         jsr _9a0c
-        sta ZP_71, y
+        sta ZP_VAR_XX12_0, y
         lda ZP_VAR_S
-        sta ZP_72, y
+        sta ZP_VAR_XX12_1, y
         iny 
         iny 
         txa 
@@ -506,9 +506,9 @@ _9baa:                                                                  ;$9BAA
         lda ZP_VAR_K6_2
         sta ZP_VAR_XX15_4
         jsr _9a2c
-        lda ZP_71
+        lda ZP_VAR_XX12_0
         sta ZP_VAR_K5
-        lda ZP_72
+        lda ZP_VAR_XX12_1
         sta ZP_VAR_K5_2
         lda ZP_73
         sta ZP_VAR_K5_3
@@ -533,7 +533,7 @@ _9baa:                                                                  ;$9BAA
         ldy # Hull::scoop_debris
 _9bf2:                                                                  ;$9BF2
         lda [ZP_TEMP_ADDR3], y
-        sta ZP_72
+        sta ZP_VAR_XX12_1
         and # %00011111
         cmp ZP_AD
         bcs _9c0b
@@ -549,14 +549,14 @@ _9bf2:                                                                  ;$9BF2
         jmp _9cf7
 
 _9c0b:                                                                  ;$9C0B
-        lda ZP_72
+        lda ZP_VAR_XX12_1
         asl 
         sta ZP_74
         asl 
         sta ZP_76
         iny 
         lda [ZP_TEMP_ADDR3], y
-        sta ZP_71
+        sta ZP_VAR_XX12_0
         iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_73
@@ -588,7 +588,7 @@ _9c43:                                                                  ;$9C43
         lsr ZP_VAR_K5_3
         ldx # $01
 _9c4b:                                                                  ;$9C4B
-        lda ZP_71
+        lda ZP_VAR_XX12_0
         sta ZP_VAR_XX15_0
         lda ZP_73
         sta ZP_VAR_XX15_2
@@ -615,7 +615,7 @@ _9c60:                                                                  ;$9C60
         sta ZP_VAR_XX15_5
         lda ZP_VAR_XX15_0
         sta ZP_VAR_R
-        lda ZP_72
+        lda ZP_VAR_XX12_1
         sta ZP_VAR_S
         lda ZP_VAR_K5
         sta ZP_VAR_Q
@@ -638,12 +638,12 @@ _9c60:                                                                  ;$9C60
         lda ZP_VAR_S
         sta ZP_VAR_XX15_3
 _9ca9:                                                                  ;$9CA9
-        lda ZP_71
+        lda ZP_VAR_XX12_0
         sta ZP_VAR_Q
         lda ZP_VAR_XX15_0
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_T
-        lda ZP_72
+        lda ZP_VAR_XX12_1
         eor ZP_VAR_XX15_1
         sta ZP_VAR_S
         lda ZP_73
@@ -786,10 +786,10 @@ _9d91:                                                                  ;$9D91
         jsr _9a2c
         lda ZP_POLYOBJ_XPOS_SIGN
         sta ZP_VAR_XX15_2
-        eor ZP_72
+        eor ZP_VAR_XX12_1
         bmi _9db6
         clc 
-        lda ZP_71
+        lda ZP_VAR_XX12_0
         adc ZP_POLYOBJ_XPOS_LO
         sta ZP_VAR_XX15_0
         lda ZP_POLYOBJ_XPOS_HI
@@ -802,7 +802,7 @@ _9db3:                                                                  ;$9DB3
 _9db6:                                                                  ;$9DB6
         lda ZP_POLYOBJ_XPOS_LO
         sec 
-        sbc ZP_71
+        sbc ZP_VAR_XX12_0
         sta ZP_VAR_XX15_0
         lda ZP_POLYOBJ_XPOS_HI
         sbc # $00
@@ -1105,9 +1105,9 @@ _9f35:                                                                  ;$9F35
         lda # $00
         sta ZP_VAR_XX15_4
         sta ZP_VAR_XX15_5
-        sta ZP_72
+        sta ZP_VAR_XX12_1
         lda ZP_POLYOBJ_ZPOS_LO
-        sta ZP_71
+        sta ZP_VAR_XX12_0
         lda ZP_POLYOBJ_XPOS_SIGN
         bpl _9f82
         dec ZP_VAR_XX15_4
@@ -1195,9 +1195,9 @@ _9fd9:                                                                  ;$9FD9
         lda $0100, x
         sta ZP_VAR_XX15_4
         lda $0103, x
-        sta ZP_72
+        sta ZP_VAR_XX12_1
         lda $0102, x
-        sta ZP_71
+        sta ZP_VAR_XX12_0
         lda $0101, x
         sta ZP_VAR_XX15_5
 
@@ -1223,10 +1223,10 @@ _a01a:                                                                  ;$A01A
 
         ldx # ELITE_VIEWPORT_HEIGHT-1
         
-        ora ZP_72
+        ora ZP_VAR_XX12_1
         bne @_a02a
 
-        cpx ZP_71
+        cpx ZP_VAR_XX12_0
         bcc @_a02a
 
         ldx # $00
@@ -1249,7 +1249,7 @@ _a03c:                                                                  ;$A03C
         sta ZP_VAR_XX15_1
         lda ZP_VAR_XX15_4
         sta ZP_VAR_XX15_2
-        lda ZP_71
+        lda ZP_VAR_XX12_0
         sta ZP_VAR_XX15_3
 
         clc 
@@ -1270,7 +1270,7 @@ _a04e:                                                                  ;$A04E
         and ZP_VAR_XX15_5
         bmi _a04a
         lda ZP_VAR_XX15_3
-        and ZP_72
+        and ZP_VAR_XX12_1
         bmi _a04a
         ldx ZP_VAR_XX15_1
         dex 
@@ -1285,9 +1285,9 @@ _a04e:                                                                  ;$A04E
         lda ZP_VAR_XX15_3
         sbc # $00
         sta ZP_73
-        lda ZP_71
+        lda ZP_VAR_XX12_0
         cmp # $90
-        lda ZP_72
+        lda ZP_VAR_XX12_1
         sbc # $00
         ora ZP_73
         bpl _a04a
@@ -1300,11 +1300,11 @@ _a081:                                                                  ;$A081
         lda ZP_VAR_XX15_5
         sbc ZP_VAR_XX15_1
         sta ZP_74
-        lda ZP_71
+        lda ZP_VAR_XX12_0
         sec 
         sbc ZP_VAR_XX15_2
         sta ZP_75
-        lda ZP_72
+        lda ZP_VAR_XX12_1
         sbc ZP_VAR_XX15_3
         sta ZP_76
         eor ZP_74
@@ -1385,12 +1385,12 @@ _a110:                                                                  ;$A110
         stx ZP_VAR_XX15_5
         sta ZP_VAR_XX15_1
         ldx ZP_VAR_XX15_2
-        lda ZP_71
+        lda ZP_VAR_XX12_0
         sta ZP_VAR_XX15_2
-        stx ZP_71
-        lda ZP_72
+        stx ZP_VAR_XX12_0
+        lda ZP_VAR_XX12_1
         ldx ZP_VAR_XX15_3
-        stx ZP_72
+        stx ZP_VAR_XX12_1
         sta ZP_VAR_XX15_3
         jsr _a19f
         dec LINE_FLIP

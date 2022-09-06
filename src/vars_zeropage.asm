@@ -274,8 +274,8 @@ ZP_VAR_XX15_3           := $6e  ; Y-pos, hi?                            ; XX15+3
 ZP_VAR_XX15_4           := $6f                                          ; XX15+4
 ZP_VAR_XX15_5           := $70                                          ; XX15+5
 
-ZP_71                   := $71  ;                                       ; XX12+0
-ZP_72                   := $72  ;                                       ; XX12+1
+ZP_VAR_XX12_0           := $71  ;                                       ; XX12+0
+ZP_VAR_XX12_1           := $72  ;                                       ; XX12+1
 ZP_73                   := $73  ;? x20
 ZP_74                   := $74
 

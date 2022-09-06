@@ -81,9 +81,9 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         lda ZP_VAR_K6_1         ; new point, X-position, hi-byte
         sta ZP_VAR_XX15_5
         lda ZP_VAR_K6_2         ; new point, Y-position, lo-byte
-        sta ZP_71
+        sta ZP_VAR_XX12_0
         lda ZP_VAR_K6_3         ; new point, Y-position, hi-byte
-        sta ZP_72
+        sta ZP_VAR_XX12_1
 
         jsr _a013               ; clip the line
         bcs .break              ; offscreen? add a line break to the buffer

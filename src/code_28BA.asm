@@ -1642,7 +1642,7 @@ _302b:                                                                  ;$302B
         ldx # $03               ; 4 energy banks
         stx ZP_TEMP_VAR
 _3044:                                                                  ;$3044
-        sty ZP_71, x
+        sty ZP_VAR_XX12_0, x
         dex 
         bpl _3044
 
@@ -1657,16 +1657,16 @@ _3052:                                                                  ;$3052
         bcc _3064
         sta ZP_VAR_Q
         lda # $10
-        sta ZP_71, x
+        sta ZP_VAR_XX12_0, x
         lda ZP_VAR_Q
         dex 
         bpl _3052
         bmi _3068
 _3064:                                                                  ;$3064
         lda ZP_VAR_Q
-        sta ZP_71, x
+        sta ZP_VAR_XX12_0, x
 _3068:                                                                  ;$3068
-        lda ZP_71, y
+        lda ZP_VAR_XX12_0, y
         sty ZP_VAR_P1
         jsr hud_drawbar
 
