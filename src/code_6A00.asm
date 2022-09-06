@@ -3209,8 +3209,8 @@ _7b44:                                                                  ;$7B44
         ldx # $00
         stx ZP_7E
         dex                     ; change X to $FF
-        stx line_points_x       ; mark line-buffer-X as 'empty'
-        stx line_points_y       ; mark line-buffer-Y as 'empty'
+        stx circle_lines_x      ; mark line-buffer-X as 'empty'
+        stx circle_lines_y      ; mark line-buffer-Y as 'empty'
 
         ; fallthrough...
         ;
@@ -4367,7 +4367,7 @@ _8044:                                                                  ;$8044
         bcs _8043               ; circle not valid? exit (RTS above us)
 
         lda # $00
-        sta line_points_x
+        sta circle_lines_x
 
         ldx ZP_VALUE_pt1
         lda # $08
@@ -4523,19 +4523,19 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
 
 
 _80bb:                                                                  ;$80BB
-        ldy line_points_x
+        ldy circle_lines_x
         bne _80f5
 _80c0:                                                                  ;$80C0
         cpy ZP_7E
         bcs _80f5
 
-        lda line_points_y, y
+        lda circle_lines_y, y
         cmp # $ff
         beq _80e6
 
         sta ZP_VAR_Y2
 
-        lda line_points_x, y
+        lda circle_lines_x, y
         sta ZP_VAR_X2
         ; TODO: do validation of line direction here so as to allow
         ;       removal of validation in the line routine
@@ -4553,9 +4553,9 @@ _80c0:                                                                  ;$80C0
 
 _80e6:                                                                  ;$80E6
         iny 
-        lda line_points_x, y
+        lda circle_lines_x, y
         sta ZP_VAR_X
-        lda line_points_y, y
+        lda circle_lines_y, y
         sta ZP_VAR_Y
         iny 
         jmp _80c0
@@ -4564,7 +4564,7 @@ _80f5:                                                                  ;$80F5
         lda # $01
         sta ZP_7E
         lda # $ff
-        sta line_points_x
+        sta circle_lines_x
 _80fe:                                                                  ;$80FE
         rts 
 
@@ -5260,8 +5260,8 @@ _83ed:                                                                  ;$83ED
 
         ; clear line-buffer?
         ldx # $ff
-        stx line_points_x
-        stx line_points_y
+        stx circle_lines_x
+        stx circle_lines_y
         stx ZP_MISSILE_TARGET   ; no missile target
 
         lda # $80
