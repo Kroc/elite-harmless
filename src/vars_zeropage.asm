@@ -267,20 +267,15 @@ ZP_INV_ROLL_SIGN        := $6a  ; inverse roll rotation sign (for easier math)
 
 ;-------------------------------------------------------------------------------
 
-ZP_VAR_X                := $6b  ; a common "X" variable
-ZP_VAR_X1               := $6b  ; also known as X1 when used with X2
-ZP_VAR_Y                := $6c  ; a common "Y" variable
-ZP_VAR_Y1               := $6c  ; also known as Y1 when used with Y2
+ZP_VAR_XX15_0           := $6b  ; X-pos, lo?                            ; XX15+0
+ZP_VAR_XX15_1           := $6c  ; X-pos, hi?                            ; XX15+1
+ZP_VAR_XX15_2           := $6d  ; Y-pos, lo?                            ; XX15+2
+ZP_VAR_XX15_3           := $6e  ; Y-pos, hi?                            ; XX15+3
+ZP_VAR_XX15_4           := $6f                                          ; XX15+4
+ZP_VAR_XX15_5           := $70                                          ; XX15+5
 
-ZP_VAR_X2               := $6d  ; a secondary "X" variable
-ZP_VAR_Y2               := $6e  ; a secondary "Y" variable
-
-ZP_6F                   := $6f  ; `ZP_VAR_Z`?
-ZP_70                   := $70  ; `ZP_VAR_Y3` / `ZP_VAR_Z2`?
-
-; energy banks?
-ZP_71                   := $71  ;? x22
-ZP_72                   := $72  ;? x16
+ZP_71                   := $71  ;                                       ; XX12+0
+ZP_72                   := $72  ;                                       ; XX12+1
 ZP_73                   := $73  ;? x20
 ZP_74                   := $74
 
@@ -307,7 +302,7 @@ ZP_LASER                := $7b  ; laser power for current view (bit 7 = beam)
 ZP_MISSILE_TARGET       := $7c  ; missile target?
 ZP_7D                   := $7d  ;
 
-ZP_7E                   := $7e  ; circle line-buffer cursor             ; LSP
+ZP_CIRCLE_INDEX         := $7e  ; circle line-buffer index             ; LSP
 
 ;-------------------------------------------------------------------------------
 ; Elite's random-number seed that defines the entire universe
@@ -326,17 +321,16 @@ ZP_SEED_W2_HI           := $84   ; hi-byte of third word
 
 ;-------------------------------------------------------------------------------
 
-ZP_85                   := $85  ;? x9
-ZP_86                   := $86  ;? x3
-ZP_87                   := $87  ;? x6
-ZP_88                   := $88  ;? x8
+ZP_VAR_K5               := $85  ;                                       ; K5+0
+ZP_VAR_K5_1             := $86  ;                                       ; K5+1
+ZP_VAR_K5_2             := $87  ;                                       ; K5+2
+ZP_VAR_K5_3             := $88  ;                                       ; K5+3
 
-ZP_VAR_K6               := $89  ;                                       ; K6
-ZP_VAR_K6_LO            := $89  ;                                       ; K6+0
-ZP_VAR_K6_HI            := $8a  ;                                       ; K6+1
+ZP_VAR_K6               := $89  ;                                       ; K6+0
+ZP_VAR_K6_1             := $8a  ;                                       ; K6+1
+ZP_VAR_K6_2             := $8b  ;                                       ; K6+2
+ZP_VAR_K6_3             := $8c  ;                                       ; K6+3
 
-ZP_8B                   := $8b  ;                                       ; K6+2
-ZP_8C                   := $8c  ;                                       ; K6+3
 ZP_8D                   := $8d  ;
 
 ; temp variable storage?

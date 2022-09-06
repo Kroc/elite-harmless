@@ -52,12 +52,11 @@ _ab49:
 
 draw_line:
 ;===============================================================================
-;
-; in:   ZP_VAR_X1       horizontal "beginning" of line in viewport, in pixels
-;       ZP_VAR_X2       horizontal "end" of line in viewport, in pixels
-;       ZP_VAR_Y1       vertical "beginning" of line in viewport, in pixels
-;       ZP_VAR_Y2       vertical "end" of line in viewport, in pixels
-;       Y               (preserved)
+; in:   ZP_VAR_XX15_0           start X-Pos of line in viewport, in px
+;       ZP_VAR_XX15_2           end X-pos of line in viewport, in px
+;       ZP_VAR_XX15_1           start Y-pos of line in viewport, in px
+;       ZP_VAR_XX15_3           end Y-pos of line in viewport, in px
+;       Y                       (preserved)
 ;
 ;       note that the "beginning" and "end" of the line is not necessarily
 ;       left-to-right, top-to-bottom; the routine flips these as necessary
@@ -87,8 +86,8 @@ draw_line:
         ; get abs height of the line:
         ;
         sec 
-        lda ZP_VAR_Y2           ; take line-ending Y pos
-        sbc ZP_VAR_Y1           ; subtract the line-starting Y pos
+        lda ZP_VAR_XX15_3       ; take line-ending Y pos
+        sbc ZP_VAR_XX15_1       ; subtract the line-starting Y pos
         beq @flat               ; completely flat line? use specific routine
         bcs :+                  ; if line is top-to-bottom, skip ahead
         eor # %11111111         ; flip all bits,
@@ -98,8 +97,8 @@ draw_line:
 
         ; get abs width of the line:
         ;
-        lda ZP_VAR_X2           ; take line-starting X pos
-        sbc ZP_VAR_X1           ; and subtract line-ending X pos
+        lda ZP_VAR_XX15_2       ; take line-starting X pos
+        sbc ZP_VAR_XX15_0       ; and subtract line-ending X pos
         bcs :+                  ; if line is left-to-right, skip ahead
         eor # %11111111         ; flip all bits,
         adc # $01               ; and add 1 (two's compliment)

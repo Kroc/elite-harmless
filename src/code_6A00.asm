@@ -697,7 +697,7 @@ _6c40:                                                                  ;$6C40
         lsr 
         clc 
         adc # $18
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
 
         jsr paint_particle
 
@@ -744,7 +744,7 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
         sbc ZP_90               ;  to get left-most position
         bcs :+                  ; underflow?
         lda # $00               ; clip against left edge
-:       sta ZP_VAR_X1           ; set line starting X                   ;$6C80
+:       sta ZP_VAR_XX15_0       ; set line starting X                   ;$6C80
 
         ; right edge:
         ;
@@ -753,7 +753,7 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
         adc ZP_90               ;  to get right-most position
         bcc :+                  ; overflow?
         lda # $ff               ; clip against right edge
-:       sta ZP_VAR_X2           ; set line ending X                     ;$6C8B
+:       sta ZP_VAR_XX15_2       ; set line ending X                     ;$6C8B
 
         ; centre-point:
         ;
@@ -765,14 +765,14 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
         ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        sta ZP_VAR_Y1
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_1
+        sta ZP_VAR_XX15_3
         jsr draw_line
 .else   ;///////////////////////////////////////////////////////////////////////
         ; TODO: line-validation not required (X1 & X2 are in correct order),
         ;       so we could skip over validation in the routine
         ;
-        sta ZP_VAR_Y            ; use the optimised routine
+        sta ZP_VAR_XX15_1       ; use the optimised routine
         jsr draw_straight_line  ;  for drawing straight lines
 .endif  ;///////////////////////////////////////////////////////////////////////
 
@@ -785,7 +785,7 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
         lda # $00               ; clip against top edge
 :       clc                     ; add the offset (?)                    ;$6CA2
         adc ZP_93
-        sta ZP_VAR_Y1
+        sta ZP_VAR_XX15_1
 
         ; bottom edge:
         ;
@@ -798,11 +798,11 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
         ldx ZP_SCREEN           ; check which screen
         bmi :+                  ; ignore for long-range
         lda # 151               ; clip for short-range
-:       sta ZP_VAR_Y2                                                   ;$6CB8
+:       sta ZP_VAR_XX15_3                                               ;$6CB8
 
         lda ZP_8E
-        sta ZP_VAR_X1
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_0
+        sta ZP_VAR_XX15_2
         ; TODO: line-validation not required (Y1 & Y2 are in correct order),
         ;       so we could skip over validation in the routine
         jmp draw_line
@@ -886,7 +886,7 @@ draw_chart_circle:                                      ; BBC: TT128    ;$6CFE
         stx ZP_CIRCLE_XPOS_HI
 
         inx                     ; BBC: set X=1 to reset ball line-heap
-        stx ZP_7E               ;?
+        stx ZP_CIRCLE_INDEX
 
         ldx # $02               ; BBC: set X=2 for step-size
         stx ZP_CIRCLE_STEP
@@ -2862,13 +2862,13 @@ _7911:                                                                  ;$7911
         bne _795d
         cpx # $8f
         bcs _795d
-        stx ZP_VAR_Y
+        stx ZP_VAR_XX15_1
         lda ZP_POLYOBJ01_YPOS_pt1
         sta ZP_VAR_R
         lda ZP_POLYOBJ01_XPOS_pt3
         jsr _7974
         bne _7948
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         jsr paint_particle
 _7948:                                                                  ;$7948
         dey 
@@ -3056,13 +3056,13 @@ _7a46:                                                                  ;$7A46
         bne _7a86
         cpx # $8f
         bcs _7a86
-        stx ZP_VAR_Y
+        stx ZP_VAR_XX15_1
         lda ZP_POLYOBJ01_YPOS_pt1
         sta ZP_VAR_R
         lda ZP_POLYOBJ01_XPOS_pt3
         jsr _7974
         bne _7a6c
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         jsr paint_particle
 _7a6c:                                                                  ;$7A6C
         dey 
@@ -3170,10 +3170,10 @@ _7afa:                                                                  ;$7AFA
         sta ZP_VAR_Z
         jsr get_random_number
         sta DUST_X_HI, y
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         jsr get_random_number
         sta DUST_Y_HI, y
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         jsr draw_particle
         dey 
         bne _7afa
@@ -3207,7 +3207,7 @@ _7b41:                                                                  ;$7B41
         bne _7b1c
 _7b44:                                                                  ;$7B44
         ldx # $00
-        stx ZP_7E
+        stx ZP_CIRCLE_INDEX
         dex                     ; change X to $FF
         stx circle_lines_x      ; mark line-buffer-X as 'empty'
         stx circle_lines_y      ; mark line-buffer-Y as 'empty'
@@ -3324,12 +3324,12 @@ _7ba8:                                                                  ;$7BA8
 ;===============================================================================
         jsr _7b9b
 _7bab:                                                                  ;$7BAB
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         jsr _7b7d
         txa 
         adc # $c3
         sta VAR_04EA
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         jsr _7b7d
         stx ZP_VAR_T
 
@@ -3341,7 +3341,7 @@ _7bab:                                                                  ;$7BAB
         ; i.e. a multi-colour pixel of %10
         lda # %10101010
 
-        ldx ZP_VAR_X2
+        ldx ZP_VAR_XX15_2
 
         bpl _7bcc                       ; always branches
 
@@ -3897,7 +3897,7 @@ _7ec8:                                                                  ;$7EC8
         sta ZP_VAR_K6
         lda ZP_VAR_T
         adc ZP_POLYOBJ01_XPOS_pt2
-        sta ZP_VAR_K6_HI
+        sta ZP_VAR_K6_1
         lda ZP_VALUE_pt1
         sta ZP_VAR_R
         lda ZP_TEMPOBJ_M2x2_HI
@@ -4226,9 +4226,9 @@ _7f67:                                                                  ;$7F67
         ; do the square root:
         ; i.e. "SQR( r^2 - n^2 )"
         ;
-        sty ZP_VAR_Y            ; backup Y; the square-root routine clobbers it
+        sty ZP_VAR_XX15_1       ; backup Y; the square-root routine clobbers it
         jsr square_root         ; calculate the square-root, result in Q
-        ldy ZP_VAR_Y            ; restore Y-register
+        ldy ZP_VAR_XX15_1       ; restore Y-register
 
         ; add the "fringe"
         ;-----------------------------------------------------------------------
@@ -4261,9 +4261,9 @@ _7f67:                                                                  ;$7F67
         jsr clip_sun_line       ; clip the old line against the viewport
 
         ; put aside the result (X1, X2)
-        lda ZP_VAR_X1
+        lda ZP_VAR_XX15_0
         sta ZP_VAR_XX_LO
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sta ZP_VAR_XX_HI
 
         ; now clip the new line
@@ -4275,16 +4275,16 @@ _7f67:                                                                  ;$7F67
         jsr clip_sun_line
         bcs :+
         
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         ldx ZP_VAR_XX_LO
-        stx ZP_VAR_X2
+        stx ZP_VAR_XX15_2
         sta ZP_VAR_XX_LO
         jsr draw_straight_line
 
 :       lda ZP_VAR_XX_LO                                                ;$7FED
-        sta ZP_VAR_X1
+        sta ZP_VAR_XX15_0
         lda ZP_VAR_XX_HI
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
 
         ;-----------------------------------------------------------------------
 @draw:  jsr draw_straight_line                                          ;$7FF5
@@ -4457,10 +4457,10 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         ; we just calculated and storing the result in K6
         ;
 :       adc ZP_CIRCLE_XPOS_LO   ; add the x-position lo-byte            ;$8081
-        sta ZP_VAR_K6_LO        ;  to the current lo-byte in A
+        sta ZP_VAR_K6        ;  to the current lo-byte in A
         lda ZP_CIRCLE_XPOS_HI   ; now do the hi-bytes
         adc ZP_VAR_T
-        sta ZP_VAR_K6_HI
+        sta ZP_VAR_K6_1
 
         ; calculate Y-position of point:
         ;-----------------------------------------------------------------------
@@ -4526,17 +4526,17 @@ _80bb:                                                                  ;$80BB
         ldy circle_lines_x
         bne _80f5
 _80c0:                                                                  ;$80C0
-        cpy ZP_7E
+        cpy ZP_CIRCLE_INDEX
         bcs _80f5
 
         lda circle_lines_y, y
         cmp # $ff
         beq _80e6
 
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
 
         lda circle_lines_x, y
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         ; TODO: do validation of line direction here so as to allow
         ;       removal of validation in the line routine
         jsr draw_line
@@ -4545,24 +4545,24 @@ _80c0:                                                                  ;$80C0
         lda LINE_FLIP
         bne _80c0
         
-        lda ZP_VAR_X2
-        sta ZP_VAR_X
-        lda ZP_VAR_Y2
-        sta ZP_VAR_Y
+        lda ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_0
+        lda ZP_VAR_XX15_3
+        sta ZP_VAR_XX15_1
         jmp _80c0
 
 _80e6:                                                                  ;$80E6
         iny 
         lda circle_lines_x, y
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda circle_lines_y, y
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         iny 
         jmp _80c0
 
 _80f5:                                                                  ;$80F5
         lda # $01
-        sta ZP_7E
+        sta ZP_CIRCLE_INDEX
         lda # $ff
         sta circle_lines_x
 _80fe:                                                                  ;$80FE
@@ -4610,8 +4610,8 @@ clip_sun_line:                                                          ;$811E
 ;       A               half-width
 ;
 ; out:  carry           c=0 if line is visible, c=1 if outside viewport bounds
-;       ZP_VAR_X1       X-position (viewport) of the left end of the line
-;       ZP_VAR_X2       X-position (viewport) of the right end of the line
+;       ZP_VAR_XX15_0   X-position (viewport) of the left end of the line
+;       ZP_VAR_XX15_2   X-position (viewport) of the right end of the line
 ;       Y               (preserved)
 ;
 ;-------------------------------------------------------------------------------
@@ -4622,7 +4622,7 @@ clip_sun_line:                                                          ;$811E
         ;
         clc 
         adc ZP_VAR_YY_LO        ; "add centre of line X mid-point"?
-        sta ZP_VAR_X2           ; this is the right-hand X-coord
+        sta ZP_VAR_XX15_2       ; this is the right-hand X-coord
         lda ZP_VAR_YY_HI        ; did it overflow?
         adc # 0                 ; apply the carry
 
@@ -4631,7 +4631,7 @@ clip_sun_line:                                                          ;$811E
 
         ; line clips to right of viewport (256)
         lda # ELITE_VIEWPORT_WIDTH-1
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
 
         ;-----------------------------------------------------------------------
         ; find left-hand point (X1); i.e. middle (YY) - half-width (T)
@@ -4640,7 +4640,7 @@ clip_sun_line:                                                          ;$811E
 @left:  lda ZP_VAR_YY_LO        ; begin with middle-point               ;$8131
         sec 
         sbc ZP_VAR_T            ; subtract the half-width
-        sta ZP_VAR_X1           ; this is the left-hand X-coord
+        sta ZP_VAR_XX15_0       ; this is the left-hand X-coord
         lda ZP_VAR_YY_HI
         sbc # 0                 ; apply the carry
        .bnz :+                  ; did it overflow?
@@ -4653,7 +4653,7 @@ clip_sun_line:                                                          ;$811E
 
         ; line clips to the left of the viewport (0)
         lda # $00
-        sta ZP_VAR_X1
+        sta ZP_VAR_XX15_0
 
         clc                     ; return carry clear = OK 
         rts 
@@ -7021,22 +7021,22 @@ _8cad:                                                                  ;$8CAD
         lda ZP_POLYOBJ01_XPOS_pt2
         lsr 
         ora ZP_POLYOBJ01_XPOS_pt3
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda ZP_POLYOBJ01_YPOS_pt2
         lsr 
         ora ZP_POLYOBJ01_YPOS_pt3
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         lda ZP_POLYOBJ01_ZPOS_pt2
         lsr 
         ora ZP_POLYOBJ01_ZPOS_pt3
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
 _8cc2:                                                                  ;$8CC2
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         jsr math_square_7bit
         sta ZP_VAR_R
         lda ZP_VAR_P1
         sta ZP_VAR_Q
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         jsr math_square_7bit
         sta ZP_VAR_T
         lda ZP_VAR_P1
@@ -7045,7 +7045,7 @@ _8cc2:                                                                  ;$8CC2
         lda ZP_VAR_T
         adc ZP_VAR_R
         sta ZP_VAR_R
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         jsr math_square_7bit
         sta ZP_VAR_T
         lda ZP_VAR_P1
@@ -7055,15 +7055,15 @@ _8cc2:                                                                  ;$8CC2
         adc ZP_VAR_R
         sta ZP_VAR_R
         jsr square_root
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         jsr _918b
-        sta ZP_VAR_X
-        lda ZP_VAR_Y
+        sta ZP_VAR_XX15_0
+        lda ZP_VAR_XX15_1
         jsr _918b
-        sta ZP_VAR_Y
-        lda ZP_VAR_X2
+        sta ZP_VAR_XX15_1
+        lda ZP_VAR_XX15_2
         jsr _918b
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         rts 
 
 ;===============================================================================
@@ -7600,7 +7600,7 @@ _90e9:                                                                  ;$90E9
 _90f4:                                                                  ;$90F4
 ;===============================================================================
         tax 
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         and # %01100000
         beq _90e9
         lda # $02
@@ -7612,20 +7612,20 @@ _90f4:                                                                  ;$90F4
 _9105:                                                                  ;$9105
 ;===============================================================================
         lda ZP_POLYOBJ_M0x0_HI
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda ZP_POLYOBJ_M0x1_HI
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         lda ZP_POLYOBJ_M0x2_HI
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         jsr _8cc2
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         sta ZP_POLYOBJ_M0x0_HI
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         sta ZP_POLYOBJ_M0x1_HI
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sta ZP_POLYOBJ_M0x2_HI
         ldy # $04
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         and # %01100000
         beq _90f4
         ldx # $02
@@ -7634,17 +7634,17 @@ _9105:                                                                  ;$9105
         sta ZP_POLYOBJ_M1x0_HI
 _9131:                                                                  ;$9131
         lda ZP_POLYOBJ_M1x0_HI
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda ZP_POLYOBJ_M1x1_HI
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         lda ZP_POLYOBJ_M1x2_HI
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         jsr _8cc2
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         sta ZP_POLYOBJ_M1x0_HI
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         sta ZP_POLYOBJ_M1x1_HI
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sta ZP_POLYOBJ_M1x2_HI
         lda ZP_POLYOBJ_M0x1_HI
         sta ZP_VAR_Q

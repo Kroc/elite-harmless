@@ -44,7 +44,7 @@ math_square:                                            ; BBC: MLU2     ;$3988
 _3992:  ;?
         tax 
         lda DUST_Y_HI, y
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
 _3997:  ;?
         and # %01111111
         sta ZP_VAR_P
@@ -115,7 +115,7 @@ _398d:  clc                                                             ;$398D
 
 _3992:                                                                  ;$3992
         lda DUST_Y_HI, y        ; get Y-position of dust particle index Y
-        sta ZP_VAR_Y            ; keep original value before multiplication
+        sta ZP_VAR_XX15_1       ; keep original value before multiplication
 
 _3997:                                                                  ;$3997
         and # %01111111         ; strip the sign

@@ -103,17 +103,17 @@ draw_line_divider:                                      ; BBC: NLIN2    ;$28E5
 ;-------------------------------------------------------------------------------
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        sta ZP_VAR_Y1                   ; set Y-position of line,
-        sta ZP_VAR_Y2                   ; both start and end (straight)
+        sta ZP_VAR_XX15_1       ; set Y-position of line,
+        sta ZP_VAR_XX15_3       ; both start and end (straight)
 .else   ;///////////////////////////////////////////////////////////////////////
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; set X to go from 0 to 255
-        ldx # $00                       ; begin with zero
-        stx ZP_VAR_X1                   ; set line-begin
-        dex                             ; roll around to 255
-        stx ZP_VAR_X2                   ; set line-end
+        ldx # $00               ; begin with zero
+        stx ZP_VAR_XX15_0       ; set line-begin
+        dex                     ; roll around to 255
+        stx ZP_VAR_XX15_2       ; set line-end
         
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ _28f3:                                                                  ;$28F3
         jsr clip_sun_line
 
         ; set parameter for drawing line
-        sty ZP_VAR_Y
+        sty ZP_VAR_XX15_1
 
         ; remove this line from the scanline cache
         lda # $00
@@ -180,11 +180,11 @@ draw_particle:                                                          ;$2918
 ;===============================================================================
 ; draw a single dust particle:
 ;
-; in:   ZP_VAR_X        X-distance from middle of screen
-;       ZP_VAR_Y        Y-distance from middle of screen
-;       ZP_VAR_Z        dust Z-distance
+; in:   ZP_VAR_XX15_0           X-distance from middle of screen
+;       ZP_VAR_XX15_1           Y-distance from middle of screen
+;       ZP_VAR_Z                dust Z-distance
 ;-------------------------------------------------------------------------------
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         bpl :+                  ; handle dust to the right
 
         ; X is negative (left of centre) --
@@ -199,7 +199,7 @@ draw_particle:                                                          ;$2918
 
         ; has the dust particle traveled off
         ; the top/bottom of the screen?
-        lda ZP_VAR_Y            ; get particle's Y-distance from centre
+        lda ZP_VAR_XX15_1       ; get particle's Y-distance from centre
         and # %01111111         ; ignore the sign
         ; has the dust particle gone beyond the half-height?
         cmp # ELITE_VIEWPORT_HEIGHT / 2
@@ -209,7 +209,7 @@ draw_particle:                                                          ;$2918
 
         ; if the dust Y-distance is positive,
         ; the value doesn't need altering
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         bpl :+
         
         ; negate the Y
@@ -312,10 +312,10 @@ dust_swap_xy:                                                           ;$2A12
 
 :       ldx DUST_Y_HI, y        ; get dust-particle Y-position          ;$2A15
         lda DUST_X_HI, y        ; get dust-particle X-position
-        sta ZP_VAR_Y            ; (put aside X-position)
+        sta ZP_VAR_XX15_1       ; (put aside X-position)
         sta DUST_Y_HI, y        ; save the Y-value to the X-position
         txa                     ; move the Y-position into A
-        sta ZP_VAR_X            ; (put aside Y-value)
+        sta ZP_VAR_XX15_0       ; (put aside Y-value)
         sta DUST_X_HI, y        ; write the X-value to the Y-position
         lda DUST_Z_HI, y        ; get dust z-position
         sta ZP_VAR_Z            ; (put aside Z-position)
@@ -384,7 +384,7 @@ move_dust_front:                                                        ;$2A40
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
 
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         adc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
@@ -392,7 +392,7 @@ move_dust_front:                                                        ;$2A40
         ; move X:
         ;-----------------------------------------------------------------------
         lda DUST_X_HI, y
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         jsr _3997
         sta ZP_VAR_XX_HI
 
@@ -400,7 +400,7 @@ move_dust_front:                                                        ;$2A40
         adc DUST_X_LO, y
         sta ZP_VAR_XX_LO
 
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         adc ZP_VAR_XX_HI
         sta ZP_VAR_XX_HI
         eor ZP_INV_ROLL_SIGN
@@ -440,14 +440,14 @@ move_dust_front:                                                        ;$2A40
         eor # %10000000
         jsr _290f
         lda ZP_VAR_XX_HI
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         sta DUST_X_HI, y
         and # %01111111
         cmp # $78
         bcs @2b0a
         lda ZP_VAR_YY_HI
         sta DUST_Y_HI, y
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         and # %01111111
         cmp # $78
         bcs @2b0a
@@ -466,12 +466,12 @@ move_dust_front:                                                        ;$2A40
         ;-----------------------------------------------------------------------
 @2b0a:  jsr get_random_number                                           ;$2B0A
         ora # %00000100
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         sta DUST_Y_HI, y
 
         jsr get_random_number
         ora # %00001000
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         sta DUST_X_HI, y
 
         jsr get_random_number
@@ -479,7 +479,7 @@ move_dust_front:                                                        ;$2A40
         sta DUST_Z_HI, y
         sta ZP_VAR_Z
 
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         jmp @draw
 
 
@@ -496,13 +496,13 @@ _2b30:                                                                  ;$2B30
         ora # %00000001
         sta ZP_VAR_Q
         lda DUST_X_HI, y
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         jsr _3997
         sta ZP_VAR_XX_HI
         lda DUST_X_LO, y
         sbc ZP_VAR_P1
         sta ZP_VAR_XX_LO
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         sbc ZP_VAR_XX_HI
         sta ZP_VAR_XX_HI
         ; NOTE: this call is in the `math_square` routine, and reads
@@ -515,7 +515,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_YY_LO
         sta ZP_VAR_R
 
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         sbc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
         sta ZP_VAR_S
@@ -576,12 +576,12 @@ _2b30:                                                                  ;$2B30
         jsr _290f
 
         lda ZP_VAR_XX_HI
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         sta DUST_X_HI, y
 
         lda ZP_VAR_YY_HI
         sta DUST_Y_HI, y
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         and # %01111111
         cmp # $6e
         bcs _2bf7
@@ -613,10 +613,10 @@ _2bf7:                                                                  ;$2BF7
         lsr 
         lda # $fc
         ror 
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         sta DUST_X_HI, y
         jsr get_random_number
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         sta DUST_Y_HI, y
         jmp _2bed
 
@@ -624,12 +624,12 @@ _2bf7:                                                                  ;$2BF7
 
 _2c1a:                                                                  ;$2C1A
         jsr get_random_number
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         sta DUST_X_HI, y
         lsr 
         lda # $e6
         ror 
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         sta DUST_Y_HI, y
         bne _2bed
 
@@ -2597,33 +2597,33 @@ _352c:                                                                  ;$352C
         lda ZP_SHIP_TYPE
         bpl _3556
 
-        eor ZP_VAR_X
-        eor ZP_VAR_Y
+        eor ZP_VAR_XX15_0
+        eor ZP_VAR_XX15_1
         asl 
         lda # $02
         ror 
         sta ZP_POLYOBJ_ROLL
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         asl 
         cmp # $0c
         bcs _350a
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         asl 
         lda # $02
         ror 
         sta ZP_POLYOBJ_PITCH
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         asl 
         cmp # $0c
         bcs _350a
 _3556:                                                                  ;$3556
         stx ZP_POLYOBJ_ROLL
         lda ZP_POLYOBJ_M2x0_HI
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda ZP_POLYOBJ_M2x1_HI
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         lda ZP_POLYOBJ_M2x2_HI
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         ldy # $10
         jsr _35b3
         asl 
@@ -2685,31 +2685,31 @@ _35b3:                                                                  ;$35B3
 ;===============================================================================
         ldx polyobj_01 + PolyObject::xpos + 0, y                        ;=$F925
         stx ZP_VAR_Q
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         jsr multiply_signed_into_RS
         ldx polyobj_01 + PolyObject::xpos + 2, y                        ;=$F927
         stx ZP_VAR_Q
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         jsr multiply_and_add
         sta ZP_VAR_S
         stx ZP_VAR_R
         ldx polyobj_01 + PolyObject::ypos + 1, y                        ;=$F929
         stx ZP_VAR_Q
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         jmp multiply_and_add
 
 
 _35d5:                                                                  ;$35D5
 ;===============================================================================
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         eor # %10000000
-        sta ZP_VAR_X
-        lda ZP_VAR_Y
+        sta ZP_VAR_XX15_0
+        lda ZP_VAR_XX15_1
         eor # %10000000
-        sta ZP_VAR_Y
-        lda ZP_VAR_X2
+        sta ZP_VAR_XX15_1
+        lda ZP_VAR_XX15_2
         eor # %10000000
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         rts 
 
 
@@ -3098,7 +3098,7 @@ _37ce:                                                                  ;$37CE
         sta ZP_VALUE_pt1        ; radius?
 _37d7:                                                                  ;$37D7
         lda # $01
-        sta ZP_7E
+        sta ZP_CIRCLE_INDEX
         jsr draw_circle
         asl ZP_VALUE_pt1        ; radius?
         bcs _37e8
@@ -3139,13 +3139,13 @@ _37fa:                                                                  ;$37FA
         sta ZP_VAR_P1
         
         lda DUST_X_HI, y
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         jsr multiplied_now_add
         sta ZP_VAR_S
         stx ZP_VAR_R
         
         lda DUST_Y_HI, y
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         eor ZP_PITCH_SIGN
         ldx ZP_PITCH_MAGNITUDE
         jsr _393e
@@ -3156,7 +3156,7 @@ _37fa:                                                                  ;$37FA
         ldx DUST_Y_LO, y
         stx ZP_VAR_R
         
-        ldx ZP_VAR_Y
+        ldx ZP_VAR_XX15_1
         stx ZP_VAR_S
         
         ldx ZP_PITCH_MAGNITUDE
@@ -3192,7 +3192,7 @@ _37fa:                                                                  ;$37FA
         jsr _290f
         lda ZP_VAR_XX_HI
         sta DUST_X_HI, y
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         and # %01111111
         eor # %01111111
         cmp ZP_BA
@@ -3200,7 +3200,7 @@ _37fa:                                                                  ;$37FA
         beq _38be
         lda ZP_VAR_YY_HI
         sta DUST_Y_HI, y
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         and # %01111111
 _3895:                                                                  ;$3895
         cmp # $74
@@ -3233,20 +3233,20 @@ _38a3:                                                                  ;$38A3
 
 _38be:                                                                  ;$38BE
         jsr get_random_number
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         sta DUST_Y_HI, y
         lda # $73
         ora ZP_B0
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         sta DUST_X_HI, y
         bne _38e2
 _38d1:                                                                  ;$38D1
         jsr get_random_number
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         sta DUST_X_HI, y
         lda # $6e
         ora ZP_INV_ROLL_SIGN
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         sta DUST_Y_HI, y
 _38e2:                                                                  ;$38E2
         jsr get_random_number
@@ -3480,17 +3480,17 @@ _3ab2:                                                                  ;$3AB2
 ;===============================================================================
         ldx ZP_POLYOBJ_XPOS_LO, y
         stx ZP_VAR_Q
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_XPOS_SIGN, y
         stx ZP_VAR_Q
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         jsr multiply_and_add
         sta ZP_VAR_S
         stx ZP_VAR_R
         ldx ZP_POLYOBJ_YPOS_HI, y
         stx ZP_VAR_Q
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
 
         ; fallthrough!
         ;
@@ -3812,31 +3812,31 @@ _3cfa:                                                                  ;$3CFA
         ;-----------------------------------------------------------------------
         ; the horizontal end of the line, which will
         ; be somewhere along the bottom of the viewport
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
 
         ; set the start point of the line, in the middle
         ; of the screen (slightly randomised, by above)
         lda VAR_06F0
-        sta ZP_VAR_X1
+        sta ZP_VAR_XX15_0
         lda VAR_06F1
-        sta ZP_VAR_Y1
+        sta ZP_VAR_XX15_1
         
         ; the bottom of the line is always at
         ; the bottom of the viewport
         lda # ELITE_VIEWPORT_HEIGHT - 1
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
 
         ; TODO: skip validation and jump straight to
         ;       the vertical up/down line routine?
         jsr draw_line
 
         lda VAR_06F0
-        sta ZP_VAR_X1
+        sta ZP_VAR_XX15_0
         lda VAR_06F1
-        sta ZP_VAR_Y1
-        sty ZP_VAR_X2
+        sta ZP_VAR_XX15_1
+        sty ZP_VAR_XX15_2
         lda # ELITE_VIEWPORT_HEIGHT - 1
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
 
         ; TODO: skip validation and jump straight to
         ;       the vertical up/down line routine?

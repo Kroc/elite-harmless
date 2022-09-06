@@ -772,7 +772,7 @@ process_ship:                                                           ;$202F
         ; check angle of approach:
         ;
         jsr _8c7b               ; get vector to station
-        lda ZP_VAR_X2           
+        lda ZP_VAR_XX15_2
         cmp # 89
         bcc dock_fail
 

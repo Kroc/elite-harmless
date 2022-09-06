@@ -209,21 +209,21 @@ _hline_startmask = _2907
         ;
 draw_line_horz:
 
-        lax ZP_VAR_X1
-        cpx ZP_VAR_X2
+        lax ZP_VAR_XX15_0
+        cpx ZP_VAR_XX15_2
         bcc :+
         
         ; line is the wrong way around,
         ; flip the line's direction
-;        dec LINE_FLIP           ;?
+        dec LINE_FLIP           ;?
 
-        lda ZP_VAR_X2           ; flip beginning and end points;
-        sta ZP_VAR_X1           ; line-drawing will proceed
-        stx ZP_VAR_X2           ; left-to-right
-        ldx ZP_VAR_Y2           ; also flip vertically, so that the
-        ldy ZP_VAR_Y1           ; line proceeds from the higher to
-        stx ZP_VAR_Y1           ; the lower Y-coordinate
-        sty ZP_VAR_Y2           ; Y = vertical start point (pixels)
+        lda ZP_VAR_XX15_2       ; flip beginning and end points;
+        sta ZP_VAR_XX15_0       ; line-drawing will proceed
+        stx ZP_VAR_XX15_2       ; left-to-right
+        ldx ZP_VAR_XX15_3       ; also flip vertically, so that the
+        ldy ZP_VAR_XX15_1       ; line proceeds from the higher to
+        stx ZP_VAR_XX15_1       ; the lower Y-coordinate
+        sty ZP_VAR_XX15_3       ; Y = vertical start point (pixels)
         sec 
 
         ;-----------------------------------------------------------------------
@@ -256,12 +256,12 @@ _hline_draw_set_slope:
 
 _hline_draw_after_slope:
         ldx # %00000111
-        lda ZP_VAR_X1
+        lda ZP_VAR_XX15_0
         sax _hline_begin_bit+1
         and # %11111000         ; start block * 8
         sta ZP_TEMP_ADDR_LO    
 
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sax _hline_end_bit+1
         and # %11111000         ; end block * 8
         sec 
@@ -282,8 +282,8 @@ _hline_begin_bit:
         ldy ZP_LINE_BLOCKS
         bne :+
         adc # 8
-:       ldy ZP_VAR_Y1
-        cpy ZP_VAR_Y2   
+:       ldy ZP_VAR_XX15_1
+        cpy ZP_VAR_XX15_3
         bcs :+  ; bge
         adc # 16
 :       tax 
@@ -304,7 +304,7 @@ _hline_begin_bit:
         
         tya                     ; get the pixel row again
         and # %00000111         ; mod 8 (0...7), i.e. row within cell
-        cpy ZP_VAR_Y2
+        cpy ZP_VAR_XX15_3
         tay                     ; Y = char cell row index
         bcs _hline_skip_down_adjustments
 _hline_down_adjustments:
@@ -498,14 +498,14 @@ draw_straight_line:
 ;===============================================================================
 ; draw a straight, horizontal line:
 ;
-; in:   ZP_VAR_Y        Y-position
-;       ZP_VAR_X1       starting X-position, in viewport pixels (0-255)
-;       ZP_VAR_X2       ending X-position, in viewport pixels (0-255)
-; out:  Y               (preserved)
-;-------------------------------------------------------------------------------        
+; in:   ZP_VAR_XX15_1           Y-position
+;       ZP_VAR_XX15_0           start X-position, in viewport pixels (0-255)
+;       ZP_VAR_XX15_2           end X-position, in viewport pixels (0-255)
+; out:  Y                       (preserved)
+;------------------------------------------------------------------------------- 
         ; swap X1, X2 if neccessary
-        lax ZP_VAR_X1
-        cpx ZP_VAR_X2
+        lax ZP_VAR_XX15_0
+        cpx ZP_VAR_XX15_2
         ; end pixel (or start pixel if reversed)
         ; seems to be excluded in all lines
         beq _hline_exit4_norestore
@@ -513,9 +513,9 @@ draw_straight_line:
         sty ZP_LINE_RESTORE_Y   ; preserve Y
         bcc _sline_enter
 
-        lda ZP_VAR_X2
-        sta ZP_VAR_X1
-        stx ZP_VAR_X2
+        lda ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_0
+        stx ZP_VAR_XX15_2
         clc
 
 _sline_enter:
@@ -525,7 +525,7 @@ _sline_enter:
         sta _sline_beginblock8+1
 
         ; init dst address (start of block)
-        ldy ZP_VAR_Y
+        ldy ZP_VAR_XX15_1
         adc row_to_bitmap_lo, y
         sta ZP_TEMP_ADDR_LO
         lda row_to_bitmap_hi, y
@@ -535,7 +535,7 @@ _sline_enter:
         tya 
         and # %00000111
         tay 
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sax ZP_SLINE_XOFF2
         and # %11111000          ; end block * 8
         sec

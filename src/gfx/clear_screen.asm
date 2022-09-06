@@ -135,13 +135,13 @@ clear_screen:
 
 drawViewportBorderH:
         ;-----------------------------------------------------------------------
-        ; in:   Y       pixel row to draw border line across
+        ; in:   Y               pixel row to draw border line across
         ;
-        sty ZP_VAR_Y            ; set the pixel row
+        sty ZP_VAR_XX15_1       ; set the pixel row
         ldx # 0                 ; setup the X-positions:
-        stx ZP_VAR_X1           ; X1 = 0
+        stx ZP_VAR_XX15_0       ; X1 = 0
         dex                     ; ($00 -> $FF)
-        stx ZP_VAR_X2           ; X2 = 255
+        stx ZP_VAR_XX15_2       ; X2 = 255
         jmp draw_straight_line
 
 

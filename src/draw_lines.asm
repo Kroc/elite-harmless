@@ -76,8 +76,8 @@ _ab49:                                                                  ;$AB49
         _horzup_col6, \
         _horzup_col7
 
-_ab51:  .lobytes _ab51_addrs            ; just the lo-bytes             ;$AB51
-_ab59:  .hibytes _ab51_addrs            ; just the hi-bytes             ;$AB59
+_ab51:  .lobytes _ab51_addrs    ; just the lo-bytes                     ;$AB51
+_ab59:  .hibytes _ab51_addrs    ; just the hi-bytes                     ;$AB59
 
 .define _ab61_addrs \
         _horzup_col0_next, \
@@ -142,11 +142,11 @@ draw_line:                                                              ;$AB91
 ;       the line-flipping checks here should really be done when building
 ;       the list of lines to draw, rather than every time a line is drawn
 ;
-; in:   ZP_VAR_X1       horizontal "beginning" of line in viewport, in pixels
-;       ZP_VAR_X2       horizontal "end" of line in viewport, in pixels
-;       ZP_VAR_Y1       vertical "beginning" of line in viewport, in pixels
-;       ZP_VAR_Y2       vertical "end" of line in viewport, in pixels
-;       Y               (preserved)
+; in:   ZP_VAR_XX15_0           start X-pos of line in viewport, in px
+;       ZP_VAR_XX15_2           end X-pos of line in viewport, in px
+;       ZP_VAR_XX15_1           start Y-pos of line in viewport, in px
+;       ZP_VAR_XX15_3           end Y-pos of line in viewport, in px
+;       Y                       (preserved)
 ;
 ;       note that the "beginning" and "end" of the line is not necessarily
 ;       left-to-right, top-to-bottom; the routine flips these as necessary
@@ -155,7 +155,7 @@ draw_line:                                                              ;$AB91
 ;       not screen-coordinates (0..320); the routine does the
 ;       centring of the viewport automatically
 ;-------------------------------------------------------------------------------
-        sty ZP_9E                       ; preserve Y
+        sty ZP_9E               ; preserve Y
 
         ; how do we know when to take a step vertically? an 'error' counter
         ; increments a set amount (here named "step fraction") based on the
@@ -164,43 +164,43 @@ draw_line:                                                              ;$AB91
         ; we begin with a step fraction of 1/2,
         ; i.e. the centre of a pixel
         ;
-        lda # $80                       ; = 128/256 (1/2, or "0.5")
-        sta ZP_BF                       ; this will be the incremental counter
-        asl                             ; push bit 7 off, so A = 0
-        sta LINE_FLIP                   ; clear the line flip flag
+        lda # $80               ; = 128/256 (1/2, or "0.5")
+        sta ZP_BF               ; this will be the incremental counter
+        asl                     ; push bit 7 off, so A = 0
+        sta LINE_FLIP           ; clear the line flip flag
 
         ; get width of the line:
-        lda ZP_VAR_X2                   ; take line-starting X pos
-        sbc ZP_VAR_X1                   ; and subtract line-ending X pos
-       .bge :+                          ; if line is left-to-right, skip ahead
+        lda ZP_VAR_XX15_2       ; take line-starting X pos
+        sbc ZP_VAR_XX15_0       ; and subtract line-ending X pos
+       .bge :+                  ; if line is left-to-right, skip ahead
 
         ; line coords are right-to-left, so the result underflowed
         ; invert the result to get the positive length
         ; 
-        eor # %11111111                 ; flip all bits,
-        adc # $01                       ; and add 1 (two's compliment)
+        eor # %11111111         ; flip all bits,
+        adc # $01               ; and add 1 (two's compliment)
 
-:       sta ZP_REG_W                    ; store line-width              ;$ABA5
+:       sta ZP_REG_W            ; store line-width                      ;$ABA5
 
         ; get height of line:
         sec 
-        lda ZP_VAR_Y2                   ; take line-ending Y pos
-        sbc ZP_VAR_Y1                   ; subtract the line-starting Y pos
-       .bge :+                          ; if line is top-to-bottom, skip ahead
+        lda ZP_VAR_XX15_3       ; take line-ending Y pos
+        sbc ZP_VAR_XX15_1       ; subtract the line-starting Y pos
+       .bge :+                  ; if line is top-to-bottom, skip ahead
 
         ; line co-ords are bottom-to-top, so the result underflowed
         ; invert the result to get the positive height
         ;
-        eor # %11111111                 ; flip all bits,
-        adc # $01                       ; and add 1 (two's compliment)
+        eor # %11111111         ; flip all bits,
+        adc # $01               ; and add 1 (two's compliment)
 
-:       sta ZP_REG_H                    ; store line-height             ;$ABB2
+:       sta ZP_REG_H            ; store line-height                     ;$ABB2
         
         ; is the line "horizontal" or "vertical"?
         ; note: A = line-height
         ;
-        cmp ZP_REG_W                    ; compare line-height with width
-       .blt draw_line_horz              ; a "horiztonal" line?
+        cmp ZP_REG_W            ; compare line-height with width
+       .blt draw_line_horz      ; a "horiztonal" line?
 
         ; handle "vertical" line
         jmp draw_line_vert
@@ -218,42 +218,42 @@ draw_line_horz:                                                         ;$ABBB
 ; if calling into this point externally,
 ; the parameters would look like this:
 ;
-; in:   ZP_VAR_X1       x-pos start of line in viewport pixels
-;       ZP_VAR_X2       x-pos end of line in viewport pixels
-;       ZP_VAR_Y1       y-pos start of line in viewport pixels
-;       ZP_VAR_Y2       y-pos end of line in viewport pixels
-;       ZP_REG_W        width of line, i.e. ABS(X2-X1)
-;       ZP_REG_H        height of line, i.e. ABS(Y2-Y1)
+; in:   ZP_VAR_XX15_0           x-pos start of line in viewport pixels
+;       ZP_VAR_XX15_2           x-pos end of line in viewport pixels
+;       ZP_VAR_XX15_1           y-pos start of line in viewport pixels
+;       ZP_VAR_XX15_3           y-pos end of line in viewport pixels
+;       ZP_REG_W                width of line, i.e. ABS(X2-X1)
+;       ZP_REG_H                height of line, i.e. ABS(Y2-Y1)
 ;
 ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
 ;-------------------------------------------------------------------------------
-        ldx ZP_VAR_X1
-        cpx ZP_VAR_X2
-       .blt :+                          ; line is left-to-right, skip ahead.
-                                        ; note that the use of `ldx` means that
-                                        ; X = horizontal start point (pixels)
+        ldx ZP_VAR_XX15_0
+        cpx ZP_VAR_XX15_2
+       .blt :+                  ; line is left-to-right, skip ahead.
+                                ; note that the use of `ldx` means that
+                                ; X = horizontal start point (pixels)
         
         ;-----------------------------------------------------------------------
         ; line is the wrong way around!
         ; flip the line's direction:
-        dec LINE_FLIP                   ; set the line flip flag (=$FF)
+        dec LINE_FLIP           ; set the line flip flag (=$FF)
 
-        lda ZP_VAR_X2                   ; flip beginning and end points;
-        sta ZP_VAR_X1                   ; line-drawing will proceed
-        stx ZP_VAR_X2                   ; left-to-right
-        tax                             ; X = horizontal start point (pixels)
-        lda ZP_VAR_Y2                   ; also flip vertically, so that the
-        ldy ZP_VAR_Y1                   ; line proceeds from the higher to
-        sta ZP_VAR_Y1                   ; the lower Y-coordinate
-        sty ZP_VAR_Y2                   ; Y = vertical start point (pixels)
+        lda ZP_VAR_XX15_2       ; flip beginning and end points;
+        sta ZP_VAR_XX15_0       ; line-drawing will proceed
+        stx ZP_VAR_XX15_2       ;  left-to-right
+        tax                     ; X = horizontal start point (pixels)
+        lda ZP_VAR_XX15_3       ; also flip vertically, so that the
+        ldy ZP_VAR_XX15_1       ;  line proceeds from the higher to
+        sta ZP_VAR_XX15_1       ;  the lower Y-coordinate
+        sty ZP_VAR_XX15_3       ; Y = vertical start point (pixels)
 
         ;-----------------------------------------------------------------------
         ; given a horizontal line that can only adjust one pixel vertically
         ; at a time, we must get the 'step' value that tells us how often
         ; the horizontal line takes a step vertically
         ;
-:       ldx ZP_REG_H                    ; get line height (dy)          ;$ABD3
-       .bze @flat                       ; if zero, line is straight!
+:       ldx ZP_REG_H            ; get line height (dy)                  ;$ABD3
+       .bze @flat               ; if zero, line is straight!
 
         ; divide width by height?
         ; (determine type of slope?)
@@ -261,40 +261,40 @@ draw_line_horz:                                                         ;$ABBB
         ; the log table used here is:
         ; TRUNC(256*(LOG_2(X)*32-TRUNC(LOG_2(X)*32)))
         ;
-        lda table_logdiv, x             ;?
+        lda table_logdiv, x     ;?
 
-        ldx ZP_REG_W                    ; get line width (dx)
+        ldx ZP_REG_W            ; get line width (dx)
         sec 
-        sbc table_logdiv, x             ;
+        sbc table_logdiv, x     ;
         bmi @_abfd
 
-        ldx ZP_REG_H                    ; get line height (dy)
-        lda table_log, x                ;?
-        ldx ZP_REG_W                    ; get line width (dx)
-        sbc table_log, x                ;?
-        bcs @deg45                      ; is the line 45-degrees?
+        ldx ZP_REG_H            ; get line height (dy)
+        lda table_log, x        ;?
+        ldx ZP_REG_W            ; get line width (dx)
+        sbc table_log, x        ;?
+        bcs @deg45              ; is the line 45-degrees?
         
         tax 
-        lda _9500, x                    ;?
+        lda _9500, x            ;?
         jmp @_ac0d
 
 @deg45: ; 45-degree line...                                             ;$ABF5
         ;-----------------------------------------------------------------------
-        lda # $ff                       ; 1:1 step increment, i.e. 45-degrees
-       .bnz @_ac0d                      ; (always branches)
+        lda # $ff               ; 1:1 step increment, i.e. 45-degrees
+       .bnz @_ac0d              ; (always branches)
 
 @flat:  ; straight line...                                              ;$ABF9
         ;-----------------------------------------------------------------------
-        lda # $00                       ; no step increment!
-       .bze @_ac0d                      ; (always branches)
+        lda # $00               ; no step increment!
+       .bze @_ac0d              ; (always branches)
 
 @_abfd:                                                                 ;$ABFD
         ;-----------------------------------------------------------------------
-        ldx ZP_REG_H                    ; get line-height
-        lda table_log, x                ;?
-        ldx ZP_REG_W                    ; get line-width
-        sbc table_log, x                ;?
-        bcs @deg45                      ; is the line 45-degrees?
+        ldx ZP_REG_H            ; get line-height
+        lda table_log, x        ;?
+        ldx ZP_REG_W            ; get line-width
+        sbc table_log, x        ;?
+        bcs @deg45              ; is the line 45-degrees?
 
         tax 
         lda _9600, x
@@ -309,8 +309,8 @@ draw_line_horz:                                                         ;$ABBB
         ;///////////////////////////////////////////////////////////////////////
         clc                     ; unneccessary, the carry is reset on cpy
 .endif  ;///////////////////////////////////////////////////////////////////////
-        ldy ZP_VAR_Y1
-        cpy ZP_VAR_Y2
+        ldy ZP_VAR_XX15_1
+        cpy ZP_VAR_XX15_3
        .bge draw_line_horzup
 
         jmp draw_line_horzdn
@@ -322,33 +322,33 @@ draw_line_horzup:                                                       ;$AC19
 ; if calling into this point externally,
 ; the parameters would look like this:
 ;
-; in:   ZP_VAR_X1       x-pos start of line in viewport pixels
-;       ZP_VAR_Y1       y-pos start of line in viewport pixels
-;       Y               copy of above
-;       ZP_REG_W        width of line
-;       ZP_REG_H        height of line
+; in:   ZP_VAR_XX15_0           x-pos start of line in viewport pixels
+;       ZP_VAR_XX15_1           y-pos start of line in viewport pixels
+;       Y                       copy of above
+;       ZP_REG_W                width of line
+;       ZP_REG_H                height of line
 ;
 ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
 ;-------------------------------------------------------------------------------
         ; get the address within the bitmap where we will be drawing,
         ; stored into `ZP_TEMP_ADDR`
         ;
-        lda ZP_VAR_X1                   ; horizontal pixel column
-        and # %11111000                 ; round to 8-bits, i.e. per char cell
+        lda ZP_VAR_XX15_0       ; horizontal pixel column
+        and # %11111000         ; round to 8-bits, i.e. per char cell
         clc 
-        adc row_to_bitmap_lo, y         ; get bitmap address low-byte
+        adc row_to_bitmap_lo, y ; get bitmap address low-byte
         sta ZP_TEMP_ADDR_LO
-        lda row_to_bitmap_hi, y         ; get bitmap address high-byte
+        lda row_to_bitmap_hi, y ; get bitmap address high-byte
         adc # $00
         sta ZP_TEMP_ADDR_HI
 
-        tya                             ; get the pixel row again
-        and # %00000111                 ; mod 8 (0...7), i.e. row within cell
-        tay                             ; Y = char cell row index
+        tya                     ; get the pixel row again
+        and # %00000111         ; mod 8 (0...7), i.e. row within cell
+        tay                     ; Y = char cell row index
 
-        lda ZP_VAR_X1                   ; again, the horizontal pixel column
-        and # %00000111                 ; mod 8 (0...7)
-        tax                             ; X = char cell pixel column no.
+        lda ZP_VAR_XX15_0       ; again, the horizontal pixel column
+        and # %00000111         ; mod 8 (0...7)
+        tax                     ; X = char cell pixel column no.
 
         bit LINE_FLIP
         bmi @_ac49
@@ -376,8 +376,8 @@ draw_line_horzup:                                                       ;$AC19
 
 line_done1:                                                             ;$AC5D
         ;-----------------------------------------------------------------------
-        ldy ZP_9E                       ; restore Y
-        rts                             ; line has been drawn!
+        ldy ZP_9E               ; restore Y
+        rts                     ; line has been drawn!
 
 ; this series of routines represent an unrolled loop to draw pixels of the
 ; line beginning at a particular column numbers, and proceeding to the next
@@ -387,29 +387,29 @@ _horzup_col0:                                                           ;$AC60
         ; draw a pixel in column 0 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %10000000                 ; we will set the first pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %10000000         ; we will set the first pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzup_col0_next:                                                      ;$AC66
 
-        dex                             ; one less pixel to draw
-       .bze line_done1                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+       .bze line_done1          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzup_col1                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzup_col1        ; draw next pixel if step continues
 
         ; we have stepped vertically:
         ; move up one row in the character cell (8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
-        dey                             ; move to the previous row
-        bpl :+                          ; still within the char-cell?
+        dey                     ; move to the previous row
+        bpl :+                  ; still within the char-cell?
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
@@ -430,29 +430,29 @@ _horzup_col1:                                                           ;$AC83
         ; draw a pixel in column 1 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %01000000                 ; we will set the second pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %01000000         ; we will set the second pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzup_col1_next:                                                      ;$AC89
 
-        dex                             ; one less pixel to draw
-        beq line_done1                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done1          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzup_col2                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzup_col2        ; draw next pixel if step continues
 
         ; we have stepped vertically:
         ; move up one row in the character cell (8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
-        dey                             ; move to the previous row
-        bpl :+                          ; still within the char-cell?
+        dey                     ; move to the previous row
+        bpl :+                  ; still within the char-cell?
 
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
@@ -465,7 +465,7 @@ _horzup_col1_next:                                                      ;$AC89
 
         ; begin at bottom of char-cell, row 7
         ldy # $07
-     
+
 :       clc                                                             ;$ACA5
 
 _horzup_col2:                                                           ;$ACA6
@@ -473,29 +473,29 @@ _horzup_col2:                                                           ;$ACA6
         ; draw a pixel in column 2 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00100000                 ; we will set the third pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00100000         ; we will set the third pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzup_col2_next:                                                      ;$ACAC
 
-        dex                             ; one less pixel to draw
-        beq line_done1                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done1          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzup_col3                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzup_col3        ; draw next pixel if step continues
 
         ; we have stepped vertically:
         ; move up one row in the character cell (8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
-        dey                             ; move to the previous row
-        bpl :+                          ; still within the char-cell?
+        dey                     ; move to the previous row
+        bpl :+                  ; still within the char-cell?
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
@@ -516,29 +516,29 @@ _horzup_col3:                                                           ;$ACC9
         ; draw a pixel in column 3 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00010000                 ; we will set the fourth pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00010000         ; we will set the fourth pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzup_col3_next:                                                      ;$ACCF
 
-        dex                             ; one less pixel to draw
-        beq line_done1                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done1          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzup_col4                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzup_col4        ; draw next pixel if step continues
 
         ; we have stepped vertically:
         ; move up one row in the character cell (8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
-        dey                             ; move to the previous row
-        bpl :+                          ; still within the char-cell?
+        dey                     ; move to the previous row
+        bpl :+                  ; still within the char-cell?
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
@@ -559,31 +559,31 @@ _horzup_col4:                                                           ;$ACEC
         ; draw a pixel in column 4 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00001000                 ; we will set the fifth pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00001000         ; we will set the fifth pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzup_col4_next:                                                      ;$ACF2
-        dex                             ; one less pixel to draw
-        beq _horzup_col6_done           ; no more pixels to draw?
-                                        ; note that the relative branch will
-                                        ; not reach `line_done_rel1` above,
-                                        ; so trampolines downward
+        dex                     ; one less pixel to draw
+        beq _horzup_col6_done   ; no more pixels to draw?
+                                ; note that the relative branch will
+                                ; not reach `line_done_rel1` above,
+                                ; so trampolines downward
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzup_col5                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzup_col5        ; draw next pixel if step continues
 
         ; we have stepped vertically:
         ; move up one row in the character cell (8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
-        dey                             ; move to the previous row
-        bpl :+                          ; still within the char-cell?
+        dey                     ; move to the previous row
+        bpl :+                  ; still within the char-cell?
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
@@ -604,29 +604,29 @@ _horzup_col5:                                                           ;$AD0F
         ; draw a pixel in column 5 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00000100                 ; we will set the sixth pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00000100         ; we will set the sixth pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzup_col5_next:                                                      ;$AD15
 
-        dex                             ; one less pixel to draw
-        beq line_done2                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done2          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzup_col6                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzup_col6        ; draw next pixel if step continues
 
         ; we have stepped vertically:
         ; move up one row in the character cell (8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
-        dey                             ; move to the previous row
-        bpl :+                          ; still within the char-cell?
+        dey                     ; move to the previous row
+        bpl :+                  ; still within the char-cell?
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
@@ -647,29 +647,29 @@ _horzup_col6:                                                           ;$AD32
         ; draw a pixel in column 6 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00000010                 ; we will set the seventh pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00000010         ; we will set the seventh pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzup_col6_next:                                                      ;$AD38
-        dex                             ; one less pixel to draw
+        dex                     ; one less pixel to draw
 _horzup_col6_done:                                                      ;$AD39
-        beq line_done2                  ; no more pixels to draw?
+        beq line_done2          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzup_col7                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzup_col7        ; draw next pixel if step continues
 
         ; we have stepped vertically:
         ; move up one row in the character cell (8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
-        dey                             ; move to the previous row
-        bpl :+                          ; still within the char-cell?
+        dey                     ; move to the previous row
+        bpl :+                  ; still within the char-cell?
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
@@ -690,29 +690,29 @@ _horzup_col7:                                                           ;$AD55
         ; draw a pixel in column 7 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00000001                 ; we will set the eighth pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00000001         ; we will set the eighth pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzup_col7_next:                                                      ;$AD5B
 
-        dex                             ; one less pixel to draw
-        beq line_done2                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done2          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzup_next_char           ; draw next pixel if step continues
-        
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzup_next_char   ; draw next pixel if step continues
+
         ; we have stepped vertically:
         ; move up one row in the character cell (8 rows).
         ; if we're at the top of the cell, move to the next cell above
         ;
-        dey                             ; move to the previous row
-        bpl :+                          ; still within the char-cell?
+        dey                     ; move to the previous row
+        bpl :+                  ; still within the char-cell?
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
@@ -735,17 +735,17 @@ _horzup_next_char:                                                      ;$AD78
         lda ZP_TEMP_ADDR_LO
         adc # $08
         sta ZP_TEMP_ADDR_LO
-        bcs :+                          ; moved to the next page?
+        bcs :+                  ; moved to the next page?
 
-        jmp _horzup_col0                ; begin drawing at column 0
+        jmp _horzup_col0        ; begin drawing at column 0
 
-:       inc ZP_TEMP_ADDR_HI             ; increase bitmap hi-byte       ;$AD83
-        jmp _horzup_col0                ; begin drawing at column 0
+:       inc ZP_TEMP_ADDR_HI     ; increase bitmap hi-byte               ;$AD83
+        jmp _horzup_col0        ; begin drawing at column 0
 
 line_done2:                                                             ;$AD88
         ;-----------------------------------------------------------------------
-        ldy ZP_9E                       ; restore Y
-        rts                             ; line has been drawn!
+        ldy ZP_9E               ; restore Y
+        rts                     ; line has been drawn!
 
 
 draw_line_horzdn:                                                       ;$AD8B
@@ -755,13 +755,13 @@ draw_line_horzdn:                                                       ;$AD8B
 ; if calling into this point externally,
 ; the parameters would look like this:
 ;
-;       ZP_VAR_X1 = x-pos start of line in viewport pixels
-;       ZP_VAR_Y1 = y-pos start of line in viewport pixels
-;               Y = copy of above
-;        ZP_REG_W = width of line
-;        ZP_REG_H = height of line
-;
-;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+; in:   ZP_VAR_XX15_0           x-pos start of line in viewport pixels
+;       ZP_VAR_XX15_1           y-pos start of line in viewport pixels
+;       Y                       copy of above
+;       ZP_REG_W                width of line
+;       ZP_REG_H                height of line
+; out:  Y                       clobbered with whatever was last saved
+;                               at `ZP_9E`!
 ;-------------------------------------------------------------------------------
         ; get the char-cell bitmap address
         ; for the given X & Y pixel coords:
@@ -769,8 +769,8 @@ draw_line_horzdn:                                                       ;$AD8B
         lda row_to_bitmap_hi, y
         sta ZP_TEMP_ADDR_HI
 
-        lda ZP_VAR_X1                   ; horizontal pixel column
-        and # %11111000                 ; round to 8-bits, i.e. per char cell
+        lda ZP_VAR_XX15_0       ; horizontal pixel column
+        and # %11111000         ; round to 8-bits, i.e. per char cell
         adc row_to_bitmap_lo, y
         sta ZP_TEMP_ADDR_LO
         bcc :+
@@ -778,7 +778,7 @@ draw_line_horzdn:                                                       ;$AD8B
         inc ZP_TEMP_ADDR_HI
         clc 
 
-:       sbc # $f7                       ; 255 - 8??                     ;$AD9E
+:       sbc # $f7               ; 255 - 8??                             ;$AD9E
         sta ZP_TEMP_ADDR_LO
         bcs :+
 
@@ -788,7 +788,7 @@ draw_line_horzdn:                                                       ;$AD8B
         and # %00000111
         eor # %11111000
         tay 
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         and # %00000111
         tax 
         bit LINE_FLIP
@@ -818,8 +818,8 @@ _adda:                                                                  ;$ADDA
 
 line_done3:                                                             ;$ADDD
         ;-----------------------------------------------------------------------
-        ldy ZP_9E                       ; restore Y
-        rts                             ; line has been drawn!
+        ldy ZP_9E               ; restore Y
+        rts                     ; line has been drawn!
 
 ; this series of routines represent an unrolled loop to draw pixels of the
 ; line beginning at a particular column numbers, and proceeding to the next
@@ -829,29 +829,29 @@ _horzdn_col0:                                                           ;$ADE0
         ; draw a pixel in column 0 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %10000000                 ; we will set the first pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %10000000         ; we will set the first pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzdn_col0_next:                                                      ;$ADE6
 
-        dex                             ; one less pixel to draw
-        beq line_done3                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done3          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzdn_col1                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzdn_col1        ; draw next pixel if step continues
         
         ; we have stepped vertically:
         ; move down one row in the character cell (8 rows).
         ; if we're at the bottom of the cell, move to the next cell below
         ;
-        iny                             ; move to the next row
-        bne :+                          ; still within the char-cell?
+        iny                     ; move to the next row
+        bne :+                  ; still within the char-cell?
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -873,29 +873,29 @@ _horzdn_col1:                                                           ;$AE03
         ; draw a pixel in column 1 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %01000000                 ; we will set the second pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %01000000         ; we will set the second pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzdn_col1_next:                                                      ;$AE09
 
-        dex                             ; one less pixel to draw
-        beq line_done3                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done3          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzdn_col2                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzdn_col2        ; draw next pixel if step continues
         
         ; we have stepped vertically:
         ; move down one row in the character cell (8 rows).
         ; if we're at the bottom of the cell, move to the next cell below
         ;
-        iny                             ; move to the next row
-        bne :+                          ; still within the char-cell?
+        iny                     ; move to the next row
+        bne :+                  ; still within the char-cell?
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -917,29 +917,29 @@ _horzdn_col2:                                                           ;$AE26
         ; draw a pixel in column 2 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00100000                 ; we will set the third pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00100000         ; we will set the third pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzdn_col2_next:                                                      ;$AE2C
 
-        dex                             ; one less pixel to draw
-        beq line_done3                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done3          ; no more pixels to draw?
         
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzdn_col3                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzdn_col3        ; draw next pixel if step continues
         
         ; we have stepped vertically:
         ; move down one row in the character cell (8 rows).
         ; if we're at the bottom of the cell, move to the next cell below
         ;
-        iny                             ; move to the next row
-        bne :+                          ; still within the char-cell?
+        iny                     ; move to the next row
+        bne :+                  ; still within the char-cell?
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -961,29 +961,29 @@ _horzdn_col3:                                                           ;$AE49
         ; draw a pixel in column 3 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00010000                 ; we will set the fourth pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00010000         ; we will set the fourth pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzdn_col3_next:                                                      ;$AE4F
 
-        dex                             ; one less pixel to draw
-        beq _horzdn_col6_done           ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq _horzdn_col6_done   ; no more pixels to draw?
         
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzdn_col4                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzdn_col4        ; draw next pixel if step continues
         
         ; we have stepped vertically:
         ; move down one row in the character cell (8 rows).
         ; if we're at the bottom of the cell, move to the next cell below
         ;
-        iny                             ; move to the next row
-        bne :+                          ; still within the char-cell?
+        iny                     ; move to the next row
+        bne :+                  ; still within the char-cell?
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -1005,29 +1005,29 @@ _horzdn_col4:                                                           ;$AE6C
         ; draw a pixel in column 4 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00001000                 ; we will set the fifth pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00001000         ; we will set the fifth pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzdn_col4_next:                                                      ;$AE72
 
-        dex                             ; one less pixel to draw
-        beq _horzdn_col6_done           ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq _horzdn_col6_done   ; no more pixels to draw?
         
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzdn_col5                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzdn_col5        ; draw next pixel if step continues
         
         ; we have stepped vertically:
         ; move down one row in the character cell (8 rows).
         ; if we're at the bottom of the cell, move to the next cell below
         ;
-        iny                             ; move to the next row
-        bne :+                          ; still within the char-cell?
+        iny                     ; move to the next row
+        bne :+                  ; still within the char-cell?
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -1049,29 +1049,29 @@ _horzdn_col5:                                                           ;$AE8F
         ; draw a pixel in column 5 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00000100                 ; we will set the sixth pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00000100         ; we will set the sixth pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzdn_col5_next:                                                      ;$AE95
 
-        dex                             ; one less pixel to draw
-        beq line_done4                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done4          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzdn_col6                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzdn_col6        ; draw next pixel if step continues
         
         ; we have stepped vertically:
         ; move down one row in the character cell (8 rows).
         ; if we're at the bottom of the cell, move to the next cell below
         ;
-        iny                             ; move to the next row
-        bne :+                          ; still within the char-cell?
+        iny                     ; move to the next row
+        bne :+                  ; still within the char-cell?
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -1093,29 +1093,29 @@ _horzdn_col6:                                                           ;$AEB2
         ; draw a pixel in column 6 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00000010                 ; we will set the seventh pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00000010         ; we will set the seventh pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzdn_col6_next:                                                      ;$AEB8
-        dex                             ; one less pixel to draw
+        dex                     ; one less pixel to draw
 _horzdn_col6_done:                                                      ;$AEB9
-        beq line_done4                  ; no more pixels to draw?
+        beq line_done4          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzdn_col7                ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzdn_col7        ; draw next pixel if step continues
         
         ; we have stepped vertically:
         ; move down one row in the character cell (8 rows).
         ; if we're at the bottom of the cell, move to the next cell below
         ;
-        iny                             ; move to the next row
-        bne :+                          ; still within the char-cell?
+        iny                     ; move to the next row
+        bne :+                  ; still within the char-cell?
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -1137,29 +1137,29 @@ _horzdn_col7:                                                           ;$AED5
         ; draw a pixel in column 7 of a char-cell and
         ; move to the next pixel, and row if necessary
         ;
-        ;       X = remaining no. of pixels of line to draw
-        ;       Y = char cell row no. 0...7
+        ; in:   X               remaining no. of pixels of line to draw
+        ;       Y               char cell row no. 0...7
         ;
-        lda # %00000001                 ; we will set the eighth pixel
-        eor [ZP_TEMP_ADDR], y           ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y           ; write combined pixels to screen
+        lda # %00000001         ; we will set the eighth pixel
+        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
 
 _horzdn_col7_next:                                                      ;$AEDB
 
-        dex                             ; one less pixel to draw
-        beq line_done4                  ; no more pixels to draw?
+        dex                     ; one less pixel to draw
+        beq line_done4          ; no more pixels to draw?
 
-        lda ZP_BF                       ; current step counter
-        adc ZP_REG_H                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc _horzdn_next_char           ; draw next pixel if step continues
+        lda ZP_BF               ; current step counter
+        adc ZP_REG_H            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc _horzdn_next_char   ; draw next pixel if step continues
         
         ; we have stepped vertically:
         ; move down one row in the character cell (8 rows).
         ; if we're at the bottom of the cell, move to the next cell below
         ;
-        iny                             ; move to the next row
-        bne :+                          ; still within the char-cell?
+        iny                     ; move to the next row
+        bne :+                  ; still within the char-cell?
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -1188,8 +1188,8 @@ _horzdn_next_char:                                                      ;$AEF8
 
 line_done4:                                                             ;$AF05
         ;-----------------------------------------------------------------------
-        ldy ZP_9E                       ; restore Y
-        rts                             ; line has been drawn!
+        ldy ZP_9E               ; restore Y
+        rts                     ; line has been drawn!
 
 
 draw_line_vert:                                                         ;$AF08
@@ -1204,36 +1204,36 @@ draw_line_vert:                                                         ;$AF08
 ; the first thing we have to do is determine which way the line goes
 ; and flip top-down lines so we always work bottom-up
 ;-------------------------------------------------------------------------------
-        ldy ZP_VAR_Y1                   ; get "starting" Y-position
+        ldy ZP_VAR_XX15_1       ; get "starting" Y-position
         tya 
-        ldx ZP_VAR_X1                   ; (get starting X-position, for later)
-        cpy ZP_VAR_Y2                   ; is line top-down, or bottom up?
-       .bge :+                          ; if line is bottom-up, skip ahead
+        ldx ZP_VAR_XX15_0       ; (get starting X-position, for later)
+        cpy ZP_VAR_XX15_3       ; is line top-down, or bottom up?
+       .bge :+                  ; if line is bottom-up, skip ahead
 
         ;-----------------------------------------------------------------------
         ; line is the wrong way around!
         ; flip the line's direction:
-        dec LINE_FLIP                   ; set the line flip flag (=$FF)
+        dec LINE_FLIP           ; set the line flip flag (=$FF)
         
-        lda ZP_VAR_X2
-        sta ZP_VAR_X1
-        stx ZP_VAR_X2
+        lda ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_0
+        stx ZP_VAR_XX15_2
         tax 
-        lda ZP_VAR_Y2
-        sta ZP_VAR_Y1
-        sty ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
+        sta ZP_VAR_XX15_1
+        sty ZP_VAR_XX15_3
         tay 
 
         ;-----------------------------------------------------------------------
         ; work out the bitmap address to begin line drawing
         ;
-:       txa                             ; retrieve starting X-position  ;$AF22
-        and # %11111000                 ; clip to nearest char-cell (8px each)
+:       txa                     ; retrieve starting X-position  ;$AF22
+        and # %11111000         ; clip to nearest char-cell (8px each)
         clc 
-        adc row_to_bitmap_lo, y         ; use the lookup-table to get bitmap
-        sta ZP_TEMP_ADDR_LO             ; address based on the pixel row
-        lda row_to_bitmap_hi, y         ; and store in [ZP_TEMP_ADDR]
-        adc # $00                       ; (propogate any overflow from X)
+        adc row_to_bitmap_lo, y ; use the lookup-table to get bitmap
+        sta ZP_TEMP_ADDR_LO     ; address based on the pixel row
+        lda row_to_bitmap_hi, y ; and store in [ZP_TEMP_ADDR]
+        adc # $00               ; (propogate any overflow from X)
         sta ZP_TEMP_ADDR_HI
         
         ; get the row number (0-7)
@@ -1253,37 +1253,37 @@ draw_line_vert:                                                         ;$AF08
         sta ZP_BE
 
         ; is the line straight? (completely vertical)
-        ldx ZP_REG_W                    ; get line-width
-       .bze @_af77                      ; if zero, skip ahead
-        
+        ldx ZP_REG_W            ; get line-width
+       .bze @_af77              ; if zero, skip ahead
+
         lda table_logdiv, x
         ldx ZP_REG_H
         sec 
         sbc table_logdiv, x
         bmi @_af65
-        
+
         ldx ZP_REG_W
         lda table_log, x
         ldx ZP_REG_H
         sbc table_log, x
         bcs @deg45
-        
+
         tax 
         lda _9500, x
         jmp @_af75
 
 @deg45: ; 45-degree line...                                             ;$AF61
         ;-----------------------------------------------------------------------
-        lda # $ff                       ; 1:1 step increment, i.e. 45-degrees
-        bne @_af75                      ; (always branches)
+        lda # $ff               ; 1:1 step increment, i.e. 45-degrees
+        bne @_af75              ; (always branches)
 
 @_af65:                                                                 ;$AF65
         ;-----------------------------------------------------------------------
-        ldx ZP_REG_W                    ; get line-width
-        lda table_log, x                ;?
-        ldx ZP_REG_H                    ; get line-height
-        sbc table_log, x                ;?
-        bcs @deg45                      ; is the line 45-degrees?
+        ldx ZP_REG_W            ; get line-width
+        lda table_log, x        ;?
+        ldx ZP_REG_H            ; get line-height
+        sbc table_log, x        ;?
+        bcs @deg45              ; is the line 45-degrees?
         
         tax 
         lda _9600, x
@@ -1298,9 +1298,9 @@ draw_line_vert:                                                         ;$AF08
         ldx ZP_REG_H
         inx 
         
-        lda ZP_VAR_X2
-        sbc ZP_VAR_X1
-        bcc _vertlt                     ; handle bottom-up, left-to-right line
+        lda ZP_VAR_XX15_2
+        sbc ZP_VAR_XX15_0
+        bcc _vertlt             ; handle bottom-up, left-to-right line
 
         clc 
         lda LINE_FLIP
@@ -1310,14 +1310,14 @@ draw_line_vert:                                                         ;$AF08
 
 _vertrt_pixel:                                                          ;$AF88
         ;-----------------------------------------------------------------------
-        lda ZP_BE                       ; get the current pixel mask
-        eor [ZP_TEMP_ADDR], y           ; mask against the existing pixels
-        sta [ZP_TEMP_ADDR], y           ; write back the new pixels
+        lda ZP_BE               ; get the current pixel mask
+        eor [ZP_TEMP_ADDR], y   ; mask against the existing pixels
+        sta [ZP_TEMP_ADDR], y   ; write back the new pixels
 
 _vertrt_pixel_next:                                                     ;$AF8E
 
-        dey                             ; move up a row in the char-cell
-        bpl :+                          ; if still within char-cell, skip
+        dey                     ; move up a row in the char-cell
+        bpl :+                  ; if still within char-cell, skip
 
         ; subtract 320 from the current bitmap address, i.e. move up one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -1331,18 +1331,18 @@ _vertrt_pixel_next:                                                     ;$AF8E
         ; begin at bottom of char-cell, row 7
         ldy # $07
 
-:       lda ZP_BF                       ; current step counter          ;$AF9F
-        adc ZP_REG_W                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc :+                          ; draw next pixel if step continues
+:       lda ZP_BF               ; current step counter                  ;$AF9F
+        adc ZP_REG_W            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc :+                  ; draw next pixel if step continues
 
-        lsr ZP_BE                       ; mask the next pixel to the right
-        bcc :+                          ; still within char-cell?
+        lsr ZP_BE               ; mask the next pixel to the right
+        bcc :+                  ; still within char-cell?
 
         ; we have left the char-cell on the right.
         ; reset the mask to the left-most pixel
         ;
-        ror ZP_BE                       ; this just pushes the carry in
+        ror ZP_BE               ; this just pushes the carry in
 
         ; now move to the char-cell to the right
         ; (add 8 to the bitmap address)
@@ -1353,11 +1353,11 @@ _vertrt_pixel_next:                                                     ;$AF8E
         inc ZP_TEMP_ADDR_HI
         clc 
         
-:       dex                             ; one less pixel to draw        ;$AFB8
-       .bnz _vertrt_pixel               ; any remaining?
+:       dex                     ; one less pixel to draw                ;$AFB8
+       .bnz _vertrt_pixel       ; any remaining?
 
-        ldy ZP_9E                       ; restore Y
-        rts                             ; line has been drawn!
+        ldy ZP_9E               ; restore Y
+        rts                     ; line has been drawn!
 
 _vertlt:                                                                ;$AFBE
         ;=======================================================================
@@ -1367,14 +1367,14 @@ _vertlt:                                                                ;$AFBE
 
 _vertlt_pixel:                                                          ;$AFC4
         ;-----------------------------------------------------------------------
-        lda ZP_BE                       ; get the current pixel mask
-        eor [ZP_TEMP_ADDR], y           ; mask against the existing
-        sta [ZP_TEMP_ADDR], y           ; write back the new pixels
+        lda ZP_BE               ; get the current pixel mask
+        eor [ZP_TEMP_ADDR], y   ; mask against the existing
+        sta [ZP_TEMP_ADDR], y   ; write back the new pixels
 
 _vertlt_pixel_next:                                                     ;$AFCA
-        
-        dey                             ; move up a row in the char-cell
-        bpl :+                          ; if still within char-cell, skip
+
+        dey                     ; move up a row in the char-cell
+        bpl :+                  ; if still within char-cell, skip
 
         ; subtract 320 from the current bitmap address, i.e. move up one
         ; char-cell on the screen (note that carry is set, so 319 is used)
@@ -1388,18 +1388,18 @@ _vertlt_pixel_next:                                                     ;$AFCA
         ; begin at bottom of char-cell, row 7
         ldy # $07
 
-:       lda ZP_BF                       ; current step counter          ;$AFDB
-        adc ZP_REG_W                    ; add the step fraction
-        sta ZP_BF                       ; update step counter
-        bcc @next                       ; draw next pixel if step continues
+:       lda ZP_BF               ; current step counter                  ;$AFDB
+        adc ZP_REG_W            ; add the step fraction
+        sta ZP_BF               ; update step counter
+        bcc @next               ; draw next pixel if step continues
 
-        asl ZP_BE                       ; mask the next pixel to the left
-        bcc @next                       ; still within char-cell?
+        asl ZP_BE               ; mask the next pixel to the left
+        bcc @next               ; still within char-cell?
 
         ; we have left the char-cell on the left.
         ; reset the mask to the right-most pixel
         ;
-        rol ZP_BE                       ; this just pushes the carry in
+        rol ZP_BE               ; this just pushes the carry in
 
         ; now move to the char-cell to the left
         ; (add 8 to the bitmap address)
@@ -1423,11 +1423,10 @@ draw_straight_line:                                                     ;$AFFA
 ;===============================================================================
 ; draw a straight, horizontal line:
 ;
-; in:   ZP_VAR_Y        Y-position
-;       ZP_VAR_X1       starting X-position, in viewport pixels (0-255)
-;       ZP_VAR_X2       ending X-position, in viewport pixels (0-255)
-;
-; out:  Y               (preserved)
+; in:   ZP_VAR_XX15_1           Y-position
+;       ZP_VAR_XX15_0           start X-position, in viewport pixels (0-255)
+;       ZP_VAR_XX15_2           end X-position, in viewport pixels (0-255)
+; out:  Y                       (preserved)
 ;
 ; this is reasonably fast as it marches 8-pixels
 ; at a time in the middle of the line
@@ -1436,19 +1435,19 @@ draw_straight_line:                                                     ;$AFFA
 
         ; does the line start/end need to be flipped?
         ;
-        ldx ZP_VAR_X1           ; starting position
-        cpx ZP_VAR_X2           ; 'subtract' the ending position
+        ldx ZP_VAR_XX15_0       ; starting position
+        cpx ZP_VAR_XX15_2       ; 'subtract' the ending position
        .bze :-                  ; start=end, 0-wide line!
         bcc :+                  ; skip over if line is normal
 
         ; flip the line start/end!
-        lda ZP_VAR_X2
-        sta ZP_VAR_X1
-        stx ZP_VAR_X2
+        lda ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_0
+        stx ZP_VAR_XX15_2
         tax 
 
-:       dec ZP_VAR_X2                                                   ;$B00B
-        lda ZP_VAR_Y            ; line Y-position
+:       dec ZP_VAR_XX15_2                                               ;$B00B
+        lda ZP_VAR_XX15_1       ; line Y-position
         tay 
 
         ; get bitmap address:
@@ -1464,11 +1463,11 @@ draw_straight_line:                                                     ;$AFFA
         bcc :+
         inc ZP_TEMP_ADDR_HI
 
-:       txa                                                             ;$B025 
+:       txa                                                             ;$B025
         and # %11111000
         sta ZP_C0
 
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         and # %11111000
         sec 
         sbc ZP_C0
@@ -1478,7 +1477,7 @@ draw_straight_line:                                                     ;$AFFA
         lsr 
         sta ZP_BE
 
-        lda ZP_VAR_X1
+        lda ZP_VAR_XX15_0
         and # %00000111
         tax 
 
@@ -1506,18 +1505,18 @@ draw_straight_line:                                                     ;$AFFA
         ; set a full char-cell row (8px) in one go
         ; i.e. fast-scan through the body of the sun
         ;
-        ;       X = number of char-cells wide to fill
+        ; in:   X               number of char-cells wide to fill
         ;
         lda # %11111111
         eor [ZP_TEMP_ADDR], y
         sta [ZP_TEMP_ADDR], y
-        
+
         ; add 8 to the bitmap address
         ; i.e. move one char-cell to the right
         tya 
         adc # $08
         tay 
-        
+
         ; catch overflow in the address low-byte
         bcc :+
         inc ZP_TEMP_ADDR_HI
@@ -1528,15 +1527,15 @@ draw_straight_line:                                                     ;$AFFA
 
 @_b064:                                                                 ;$B064
         ; draw right-hand-side
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         and # %00000111
         tax 
         lda _2900, x
         eor [ZP_TEMP_ADDR], y
         sta [ZP_TEMP_ADDR], y
-        
-        ldy ZP_9E                       ; restore Y
-        rts                             ; line has been drawn!
+
+        ldy ZP_9E               ; restore Y
+        rts                     ; line has been drawn!
 
 @tiny_line:                                                             ;$B073
         ;-----------------------------------------------------------------------
@@ -1545,24 +1544,24 @@ draw_straight_line:                                                     ;$AFFA
         ; we draw this by combining a left-fill and right-fill pattern to
         ; produce a set of pixels in the middle that corresponds to our line
         ;
-        lda ZP_VAR_X1                   ; starting X position
-        and # %00000111                 ; where within a char-cell? (0-7)
+        lda ZP_VAR_XX15_0       ; starting X position
+        and # %00000111         ; where within a char-cell? (0-7)
         tax 
-        lda _2907, x                    ; get a pixel mask to fill right
+        lda _2907, x            ; get a pixel mask to fill right
         sta ZP_C0
 
-        lda ZP_VAR_X2                   ; ending X position
-        and # %00000111                 ; where within a char-cell? (0-7)
+        lda ZP_VAR_XX15_2       ; ending X position
+        and # %00000111         ; where within a char-cell? (0-7)
         tax 
-        lda _2900, x                    ; get a pixel mask to fill left
-        and ZP_C0                       ; merge the two masks
+        lda _2900, x            ; get a pixel mask to fill left
+        and ZP_C0               ; merge the two masks
 
         ; draw the "line" to screen
         eor [ZP_TEMP_ADDR], y
         sta [ZP_TEMP_ADDR], y
 
-        ldy ZP_9E                       ; restore Y
-        rts                             ; line has been drawn!
+        ldy ZP_9E               ; restore Y
+        rts                     ; line has been drawn!
 
 ;-------------------------------------------------------------------------------
 ; unused / unreferenced?

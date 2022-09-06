@@ -185,13 +185,13 @@ drawViewportBorderH:                                                    ;$B2D5
 ;===============================================================================
 ; draw a horizontal viewport border:
 ;
-; in:    X       pixel row (i.e. 0 or 199)
+; in:    X                      pixel row (i.e. 0 or 199)
 ;-------------------------------------------------------------------------------
-        stx ZP_VAR_Y            ; first pixel row
+        stx ZP_VAR_XX15_1       ; first pixel row
         ldx # $00
-        stx ZP_VAR_X1           ; X1 = 0
+        stx ZP_VAR_XX15_0       ; X1 = 0
         dex                     ; $00 -> $FF
-        stx ZP_VAR_X2           ; X2 = 255
+        stx ZP_VAR_XX15_2       ; X2 = 255
         jmp draw_straight_line
 
 

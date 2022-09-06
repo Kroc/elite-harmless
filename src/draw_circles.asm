@@ -10,6 +10,18 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ; draws a segment of a circle, connecting one point
 ; around the circumfrence to another:
 ;
+; the points in the circle are stored in two lists, `circle_lines_x`
+; for x-positions and `circle_lines_y` for y-positions, with some
+; special values to support disjointed lines;
+;
+; the first byte in `circle_lines_x` has a special meaning:
+; $FF indicates an empty buffer and $00 indicates data present
+;
+; if a circle goes partially off screen, such that entire segments
+; of the circle are outside of the viewport, $FF is inserted into
+; the Y-positions to indicate a break in line and the next entry
+; will begin a new, visible, line (all hidden lines are skipped)
+;
 ; in:   ZP_TEMP_COUNTER         the current point number (0-64)
 ;       K6                      the x-position of the new point (16-bit)
 ;       T.X                     the y-position of the new point (16-bit)
@@ -23,94 +35,107 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ;-------------------------------------------------------------------------------
         txa                     ; point Y-position lo-byte
         adc ZP_CIRCLE_YPOS_LO
-        sta ZP_8B               ; BBC: K6+2
+        sta ZP_VAR_K6_2         ; BBC: K6+2 (previous Y-pos, lo)
 
         lda ZP_CIRCLE_YPOS_HI   ; circle's y-position, hi-byte
         adc ZP_VAR_T            ; add point Y-position hi-byte
-        sta ZP_8C               ; BBC: K6+3
+        sta ZP_VAR_K6_3         ; BBC: K6+3 (previous Y-pos, hi)
 
+        ; break?
+        ;-----------------------------------------------------------------------
+        ; if this is the first point in the circle, there is no previous
+        ; point to connect a line to, so we force a line-break to write
+        ; the starting co-ords and wait for the next call to join the line
+        ;
         lda ZP_A9               ; get the flag parameter
-        beq _2998               ; is this the first point?
+        beq .clip               ; is this the first point?
+
         inc ZP_A9               ; roll flag over from $ff to 0
 
-        ; initialise circle-buffer:
-        ;-----------------------------------------------------------------------
-_2988:  ldy ZP_7E               ; current circle-buffer index           ;$2988
-        lda # $ff               ; $FF is the line terminator
+        ; check if previous y-position is $FF,
+        ; indicating a line break:
+        ;
+.break: ldy ZP_CIRCLE_INDEX     ; current circle-buffer index           ;$2988
+        lda # $ff               ; $FF is a line break
         cmp circle_lines_y-1, y ; check the circle-buffer Y-coords
-        beq _29fa
+        beq ._29fa
         sta circle_lines_y, y   ; update circle-buffer Y-coords
-        inc ZP_7E
-        bne _29fa
+        inc ZP_CIRCLE_INDEX     ; move to the next index in the circle buffer
+        bne ._29fa              ; (always branches)
 
-_2998:  lda ZP_85                                                       ;$2998
-        sta ZP_VAR_X1
-        lda ZP_86
-        sta ZP_VAR_Y1
-        lda ZP_87
-        sta ZP_VAR_X2
-        lda ZP_88
-        sta ZP_VAR_Y2
-        lda ZP_VAR_K6
-        sta ZP_6F
-        lda ZP_VAR_K6_HI
-        sta ZP_70
-        lda ZP_8B
+        ; configure line:
+        ;-----------------------------------------------------------------------
+        ; set the start and end points for drawing the line:
+        ;
+.clip:  lda ZP_VAR_K5           ; previous point, X-position, lo-byte   ;$2998
+        sta ZP_VAR_XX15_0
+        lda ZP_VAR_K5_1         ; previous point, X-position, hi-byte
+        sta ZP_VAR_XX15_1
+        lda ZP_VAR_K5_2         ; previous point, Y-position, lo-byte
+        sta ZP_VAR_XX15_2
+        lda ZP_VAR_K5_3         ; previous point, Y-position, hi-byte
+        sta ZP_VAR_XX15_3
+
+        lda ZP_VAR_K6           ; new point, X-position, lo-byte
+        sta ZP_VAR_XX15_4
+        lda ZP_VAR_K6_1         ; new point, X-position, hi-byte
+        sta ZP_VAR_XX15_5
+        lda ZP_VAR_K6_2         ; new point, Y-position, lo-byte
         sta ZP_71
-        lda ZP_8C
+        lda ZP_VAR_K6_3         ; new point, Y-position, hi-byte
         sta ZP_72
-        jsr _a013
-        bcs _2988
+
+        jsr _a013               ; clip the line
+        bcs .break              ; offscreen? add a line break to the buffer
 
         lda LINE_FLIP           ; was the line co-ords flipped?
         beq :+                  ; no, skip ahead
 
-        lda ZP_VAR_X1
-        ldy ZP_VAR_X2
-        sta ZP_VAR_X2
-        sty ZP_VAR_X1
-        lda ZP_VAR_Y1
-        ldy ZP_VAR_Y2
-        sta ZP_VAR_Y2
-        sty ZP_VAR_Y1
+        lda ZP_VAR_XX15_0
+        ldy ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_2
+        sty ZP_VAR_XX15_0
+        lda ZP_VAR_XX15_1
+        ldy ZP_VAR_XX15_3
+        sta ZP_VAR_XX15_3
+        sty ZP_VAR_XX15_1
 
-:       ldy ZP_7E               ; current line-buffer cursor (1-based)  ;$29D2
+:       ldy ZP_CIRCLE_INDEX     ; current circle-buffer index           ;$29D2
         lda circle_lines_y-1, y ; check current Y-coord
         cmp # $ff               ; is it the terminator?
-        bne _29e6
+        bne ._29e6
 
         ; add X1/Y1 to line-buffer
         ; (Y is the current cursor position)
-        lda ZP_VAR_X1
+        lda ZP_VAR_XX15_0
         sta circle_lines_x, y   ; line-buffer X-coords
-        lda ZP_VAR_Y1
+        lda ZP_VAR_XX15_1
         sta circle_lines_y, y   ; line-buffer Y-coords
         iny                     ; move to the next point in the buffer
 
         ; add X2/Y2 to the line-buffer?
-_29e6:  lda ZP_VAR_X2                                                   ;$2936
+._29e6: lda ZP_VAR_XX15_2                                               ;$2936
         sta circle_lines_x, y   ; line-buffer X-coords
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         sta circle_lines_y, y   ; line-buffer Y-coords
         iny                     ; move to the next point in the buffer
-        sty ZP_7E               ; update line-buffer cursor
+        sty ZP_CIRCLE_INDEX     ; update circle-buffer index
 
         ; draw the current line in X1/Y1/X2/Y2
-        ; TODO: do validation of line direction here so as to allow
-        ;       removal of validation in the line routine
         jsr draw_line
 
         lda ZP_A2
-        bne _2988
+        bne .break
 
-_29fa:  lda ZP_VAR_K6                                                   ;$29FA
-        sta ZP_85
-        lda ZP_VAR_K6_HI
-        sta ZP_86
-        lda ZP_8B
-        sta ZP_87
-        lda ZP_8C
-        sta ZP_88
+        ;-----------------------------------------------------------------------
+._29fa: lda ZP_VAR_K6                                                   ;$29FA
+        sta ZP_VAR_K5
+        lda ZP_VAR_K6_1
+        sta ZP_VAR_K5_1
+        lda ZP_VAR_K6_2
+        sta ZP_VAR_K5_2
+        lda ZP_VAR_K6_3
+        sta ZP_VAR_K5_3
         lda ZP_TEMP_COUNTER
         clc 
         adc ZP_CIRCLE_STEP

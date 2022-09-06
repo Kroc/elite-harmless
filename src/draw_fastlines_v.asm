@@ -77,18 +77,18 @@ _vline_bitmask:
 
 draw_line_vert:
 
-        ldx ZP_VAR_Y1
-        cpx ZP_VAR_Y2
+        ldx ZP_VAR_XX15_1
+        cpx ZP_VAR_XX15_3
         bcs :+
         
         ; flip line so that Y1 > Y2
-        lda ZP_VAR_Y2
-        sta ZP_VAR_Y1
-        stx ZP_VAR_Y2
-        ldx ZP_VAR_X2
-        ldy ZP_VAR_X1
-        stx ZP_VAR_X1
-        sty ZP_VAR_X2
+        lda ZP_VAR_XX15_3
+        sta ZP_VAR_XX15_1
+        stx ZP_VAR_XX15_3
+        ldx ZP_VAR_XX15_2
+        ldy ZP_VAR_XX15_0
+        stx ZP_VAR_XX15_0
+        sty ZP_VAR_XX15_2
         sec 
 
         ;-----------------------------------------------------------------------
@@ -123,17 +123,17 @@ _vline_draw_set_slope:
         sta _vline_slope+1
         
         ldx # %00000111
-        lda ZP_VAR_X1
+        lda ZP_VAR_XX15_0
         sax _vline_begin_bit+1
         and # %11111000         ; start xblock * 8
         sta ZP_TEMP_ADDR_LO
 
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         sax ZP_VLINE_YEND
         and # %11111000
         sta _vline_yblock_end+1
 
-        lda ZP_VAR_Y1
+        lda ZP_VAR_XX15_1
         sax ZP_VLINE_YSTART
         and # %11111000         ; start y % 8
         tay
@@ -174,8 +174,8 @@ _vline_begin_bit:
         ldy ZP_VLINE_YSTART
 
         ldx # $80               ; slope counter
-        lda ZP_VAR_X2
-        cmp ZP_VAR_X1
+        lda ZP_VAR_XX15_2
+        cmp ZP_VAR_XX15_0
         
 _vline_slope:
         lda # 0

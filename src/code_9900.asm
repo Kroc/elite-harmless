@@ -227,33 +227,33 @@ _9a2c:                                                                  ;$9A2C
         ldx # $00
         ldy # $00
 _9a30:                                                                  ;$9A30
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_MATRIX, x
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_T
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         eor ZP_TEMPOBJ_M2x0_HI, x
         sta ZP_VAR_S
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_M2x1_LO, x
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         eor ZP_TEMPOBJ_M2x1_HI, x
         jsr _9a0c
         sta ZP_VAR_T
-        lda ZP_6F
+        lda ZP_VAR_XX15_4
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_M2x2_LO, x
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
-        lda ZP_70
+        lda ZP_VAR_XX15_5
         eor ZP_TEMPOBJ_M2x2_HI, x
         jsr _9a0c
         sta ZP_71, y
@@ -445,7 +445,7 @@ _9b51:                                                                  ;$9B51
         ldx # $08
 _9b66:                                                                  ;$9B66
         lda ZP_POLYOBJ_XPOS_LO, x
-        sta ZP_85, x
+        sta ZP_VAR_K5, x
         dex 
         bpl _9b66
 
@@ -478,44 +478,44 @@ _9b8b:                                                                  ;$9B8B
         ldy # Hull::_12                 ;=$12: "scaling of normals"?
         lda [ZP_HULL_ADDR], y
         tax 
-        lda ZP_8C
+        lda ZP_VAR_K6_3
         tay 
         beq _9baa
 _9b9b:                                                                  ;$9B9B
         inx 
         lsr ZP_VAR_K6
-        ror ZP_88
-        lsr ZP_86
-        ror ZP_85
+        ror ZP_VAR_K5_3
+        lsr ZP_VAR_K5_1
+        ror ZP_VAR_K5
         lsr 
-        ror ZP_8B
+        ror ZP_VAR_K6_2
         tay 
         bne _9b9b
 _9baa:                                                                  ;$9BAA
         stx ZP_9F
         lda ZP_8D
-        sta ZP_70
-        lda ZP_85
-        sta ZP_VAR_X
-        lda ZP_87
-        sta ZP_VAR_Y
-        lda ZP_88
-        sta ZP_VAR_X2
-        lda ZP_VAR_K6_HI
-        sta ZP_VAR_Y2
-        lda ZP_8B
-        sta ZP_6F
+        sta ZP_VAR_XX15_5
+        lda ZP_VAR_K5
+        sta ZP_VAR_XX15_0
+        lda ZP_VAR_K5_2
+        sta ZP_VAR_XX15_1
+        lda ZP_VAR_K5_3
+        sta ZP_VAR_XX15_2
+        lda ZP_VAR_K6_1
+        sta ZP_VAR_XX15_3
+        lda ZP_VAR_K6_2
+        sta ZP_VAR_XX15_4
         jsr _9a2c
         lda ZP_71
-        sta ZP_85
+        sta ZP_VAR_K5
         lda ZP_72
-        sta ZP_87
+        sta ZP_VAR_K5_2
         lda ZP_73
-        sta ZP_88
+        sta ZP_VAR_K5_3
         lda ZP_74
-        sta ZP_VAR_K6_HI
+        sta ZP_VAR_K6_1
         lda ZP_75
-        sta ZP_8B
+        sta ZP_VAR_K6_2
         lda ZP_76
         sta ZP_8D
 
@@ -566,38 +566,38 @@ _9c0b:                                                                  ;$9C0B
         ldx ZP_9F
         cpx # $04
         bcc _9c4b
-        lda ZP_85
-        sta ZP_VAR_X
-        lda ZP_87
-        sta ZP_VAR_Y
-        lda ZP_88
-        sta ZP_VAR_X2
-        lda ZP_VAR_K6_HI
-        sta ZP_VAR_Y2
-        lda ZP_8B
-        sta ZP_6F
+        lda ZP_VAR_K5
+        sta ZP_VAR_XX15_0
+        lda ZP_VAR_K5_2
+        sta ZP_VAR_XX15_1
+        lda ZP_VAR_K5_3
+        sta ZP_VAR_XX15_2
+        lda ZP_VAR_K6_1
+        sta ZP_VAR_XX15_3
+        lda ZP_VAR_K6_2
+        sta ZP_VAR_XX15_4
         lda ZP_8D
-        sta ZP_70
+        sta ZP_VAR_XX15_5
         jmp _9ca9
 
 ;===============================================================================
 
 _9c43:                                                                  ;$9C43
-        lsr ZP_85
-        lsr ZP_8B
-        lsr ZP_88
+        lsr ZP_VAR_K5
+        lsr ZP_VAR_K6_2
+        lsr ZP_VAR_K5_3
         ldx # $01
 _9c4b:                                                                  ;$9C4B
         lda ZP_71
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda ZP_73
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         lda ZP_75
         dex 
         bmi _9c60
 _9c58:                                                                  ;$9C58
-        lsr ZP_VAR_X
-        lsr ZP_VAR_X2
+        lsr ZP_VAR_XX15_0
+        lsr ZP_VAR_XX15_2
         lsr 
         dex 
         bpl _9c58
@@ -605,66 +605,66 @@ _9c60:                                                                  ;$9C60
         sta ZP_VAR_R
         lda ZP_76
         sta ZP_VAR_S
-        lda ZP_8B
+        lda ZP_VAR_K6_2
         sta ZP_VAR_Q
         lda ZP_8D
         jsr _9a0c
         bcs _9c43
-        sta ZP_6F
+        sta ZP_VAR_XX15_4
         lda ZP_VAR_S
-        sta ZP_70
-        lda ZP_VAR_X
+        sta ZP_VAR_XX15_5
+        lda ZP_VAR_XX15_0
         sta ZP_VAR_R
         lda ZP_72
         sta ZP_VAR_S
-        lda ZP_85
+        lda ZP_VAR_K5
         sta ZP_VAR_Q
-        lda ZP_87
+        lda ZP_VAR_K5_2
         jsr _9a0c
         bcs _9c43
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda ZP_VAR_S
-        sta ZP_VAR_Y
-        lda ZP_VAR_X2
+        sta ZP_VAR_XX15_1
+        lda ZP_VAR_XX15_2
         sta ZP_VAR_R
         lda ZP_74
         sta ZP_VAR_S
-        lda ZP_88
+        lda ZP_VAR_K5_3
         sta ZP_VAR_Q
-        lda ZP_VAR_K6_HI
+        lda ZP_VAR_K6_1
         jsr _9a0c
         bcs _9c43
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         lda ZP_VAR_S
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
 _9ca9:                                                                  ;$9CA9
         lda ZP_71
         sta ZP_VAR_Q
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_T
         lda ZP_72
-        eor ZP_VAR_Y
+        eor ZP_VAR_XX15_1
         sta ZP_VAR_S
         lda ZP_73
         sta ZP_VAR_Q
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
         lda ZP_74
-        eor ZP_VAR_Y2
+        eor ZP_VAR_XX15_3
         jsr _9a0c
         sta ZP_VAR_T
         lda ZP_75
         sta ZP_VAR_Q
-        lda ZP_6F
+        lda ZP_VAR_XX15_4
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda ZP_VAR_T
         sta ZP_VAR_R
-        lda ZP_70
+        lda ZP_VAR_XX15_5
         eor ZP_76
         jsr _9a0c
         pha 
@@ -728,13 +728,13 @@ _9cfe:                                                                  ;$9CFE
 _9d45:                                                                  ;$9D45
         sty ZP_9F
         lda [ZP_TEMP_ADDR3], y
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         iny 
         lda [ZP_TEMP_ADDR3], y
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         iny 
         lda [ZP_TEMP_ADDR3], y
-        sta ZP_6F
+        sta ZP_VAR_XX15_4
         iny 
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VAR_T
@@ -778,23 +778,23 @@ _9d8e:                                                                  ;$9D8E
 
 _9d91:                                                                  ;$9D91
         lda ZP_VAR_T
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         asl 
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
         asl 
-        sta ZP_70
+        sta ZP_VAR_XX15_5
         jsr _9a2c
         lda ZP_POLYOBJ_XPOS_SIGN
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         eor ZP_72
         bmi _9db6
         clc 
         lda ZP_71
         adc ZP_POLYOBJ_XPOS_LO
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda ZP_POLYOBJ_XPOS_HI
         adc # $00
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
 _9db3:                                                                  ;$9DB3
         jmp _9dd9
 
@@ -803,36 +803,36 @@ _9db6:                                                                  ;$9DB6
         lda ZP_POLYOBJ_XPOS_LO
         sec 
         sbc ZP_71
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         lda ZP_POLYOBJ_XPOS_HI
         sbc # $00
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         bcs _9dd9
         eor # %11111111
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
         lda # $01
-        sbc ZP_VAR_X
-        sta ZP_VAR_X
+        sbc ZP_VAR_XX15_0
+        sta ZP_VAR_XX15_0
         bcc _9dd3
-        inc ZP_VAR_Y
+        inc ZP_VAR_XX15_1
 _9dd3:                                                                  ;$9DD3
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         eor # %10000000
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
 
 ; ".LL53 ; Both x signs arrive here, Onto y"
 _9dd9:                                                                  ;$9DD9
         lda ZP_POLYOBJ_YPOS_SIGN
-        sta ZP_70
+        sta ZP_VAR_XX15_5
         eor ZP_74
         bmi _9df1
         clc 
         lda ZP_73
         adc ZP_POLYOBJ_YPOS_LO
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
         lda ZP_POLYOBJ_YPOS_HI
         adc # $00
-        sta ZP_6F
+        sta ZP_VAR_XX15_4
 _9dee:                                                                  ;$9DEE
         jmp _9e16
 
@@ -843,22 +843,22 @@ _9df1:                                                                  ;$9DF1
         lda ZP_POLYOBJ_YPOS_LO
         sec 
         sbc ZP_73
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
         lda ZP_POLYOBJ_YPOS_HI
         sbc # $00
-        sta ZP_6F
+        sta ZP_VAR_XX15_4
         bcs _9e16
         eor # %11111111
-        sta ZP_6F
-        lda ZP_VAR_Y2
+        sta ZP_VAR_XX15_4
+        lda ZP_VAR_XX15_3
         eor # %11111111
         adc # $01
-        sta ZP_VAR_Y2
-        lda ZP_70
+        sta ZP_VAR_XX15_3
+        lda ZP_VAR_XX15_5
         eor # %10000000
-        sta ZP_70
+        sta ZP_VAR_XX15_5
         bcc _9e16
-        inc ZP_6F
+        inc ZP_VAR_XX15_4
 
 ; ".LL55 ; Both y signs arrive here, Onto z"
 _9e16:                                                                  ;$9E16
@@ -951,13 +951,13 @@ _9e7b:                                                                  ;$9E7B
 ; ".LL57 ; -> &4404 ; Enter Node additions done, z=T.U  set up from LL55"
 _9e83:                                                                  ;$9E83
         lda ZP_VAR_U
-        ora ZP_VAR_Y
-        ora ZP_6F
+        ora ZP_VAR_XX15_1
+        ora ZP_VAR_XX15_4
         beq _9e9a
-        lsr ZP_VAR_Y
-        ror ZP_VAR_X
-        lsr ZP_6F
-        ror ZP_VAR_Y2
+        lsr ZP_VAR_XX15_1
+        ror ZP_VAR_XX15_0
+        lsr ZP_VAR_XX15_4
+        ror ZP_VAR_XX15_3
         lsr ZP_VAR_U
         ror ZP_VAR_T
         jmp _9e83
@@ -966,7 +966,7 @@ _9e83:                                                                  ;$9E83
 _9e9a:                                                                  ;$9E9A
         lda ZP_VAR_T
         sta ZP_VAR_Q
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         cmp ZP_VAR_Q
         bcc _9eaa
         jsr _9e2a
@@ -979,7 +979,7 @@ _9eaa:                                                                  ;$9EAA
 ; ".LL65 ; both continue for scaling based on z"
 _9ead:                                                                  ;$9EAD
         ldx ZP_TEMP_COUNTER
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         bmi _9e51
         lda ZP_VAR_R
         clc 
@@ -997,7 +997,7 @@ _9ec3:                                                                  ;$9EC3
         sta ZP_VAR_U
         lda ZP_VAR_T
         sta ZP_VAR_Q
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         cmp ZP_VAR_Q
         bcc _9eec
         jsr _9e2a
@@ -1024,7 +1024,7 @@ _9eef:                                                                  ;$9EEF
         pla 
         tax 
         inx 
-        lda ZP_70
+        lda ZP_VAR_XX15_5
         bmi _9ed9
         lda # $48
         sec 
@@ -1091,40 +1091,40 @@ _9f35:                                                                  ;$9F35
         lda [ZP_HULL_ADDR], y
         tay 
         ldx $0100, y
-        stx ZP_VAR_X
+        stx ZP_VAR_XX15_0
         inx 
         beq _9f9f
         ldx $0101, y
-        stx ZP_VAR_Y
+        stx ZP_VAR_XX15_1
         inx 
         beq _9f9f
         ldx $0102, y
-        stx ZP_VAR_X2
+        stx ZP_VAR_XX15_2
         ldx $0103, y
-        stx ZP_VAR_Y2
+        stx ZP_VAR_XX15_3
         lda # $00
-        sta ZP_6F
-        sta ZP_70
+        sta ZP_VAR_XX15_4
+        sta ZP_VAR_XX15_5
         sta ZP_72
         lda ZP_POLYOBJ_ZPOS_LO
         sta ZP_71
         lda ZP_POLYOBJ_XPOS_SIGN
         bpl _9f82
-        dec ZP_6F
+        dec ZP_VAR_XX15_4
 _9f82:                                                                  ;$9F82
         jsr _a013
         bcs _9f9f
         ldy ZP_VAR_U
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         sta [ZP_POLYOBJ_HEAP], y
         iny 
         sty ZP_VAR_U
@@ -1183,23 +1183,23 @@ _9fd9:                                                                  ;$9FD9
         sta ZP_VAR_Q            ; "index into node heap for other node of edge"
 
         lda $0101, x
-        sta ZP_VAR_Y1
+        sta ZP_VAR_XX15_1
         lda $0100, x
-        sta ZP_VAR_X1
+        sta ZP_VAR_XX15_0
         lda $0102, x
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         lda $0103, x
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
 
         ldx ZP_VAR_Q            ; "other index into node heap for second node"
         lda $0100, x
-        sta ZP_6F
+        sta ZP_VAR_XX15_4
         lda $0103, x
         sta ZP_72
         lda $0102, x
         sta ZP_71
         lda $0101, x
-        sta ZP_70
+        sta ZP_VAR_XX15_5
 
         jsr _a01a               ; "CLIP2, take care of swop and clips"?
         bcs _9fd6               ; "edge not visible"?
@@ -1214,7 +1214,7 @@ _9fd9:                                                                  ;$9FD9
 _a013:                                                                  ;$A013
         lda # $00
         sta LINE_FLIP
-        lda ZP_70               ; "X2 HI"
+        lda ZP_VAR_XX15_5       ; "X2 HI"
 
 ; "CLIP2 arrives here from LL79 to do swop and clip"
 _a01a:                                                                  ;$A01A
@@ -1233,24 +1233,24 @@ _a01a:                                                                  ;$A01A
 @_a02a:                                                                 ;$A02A
         stx ZP_A2
 
-        lda ZP_VAR_Y
-        ora ZP_VAR_Y2
+        lda ZP_VAR_XX15_1
+        ora ZP_VAR_XX15_3
         bne _a04e
 
         lda # ELITE_VIEWPORT_HEIGHT-1
-        cmp ZP_VAR_X2
+        cmp ZP_VAR_XX15_2
         bcc _a04e
 
         lda ZP_A2
         bne _a04c
 _a03c:                                                                  ;$A03C
         ; swap co-ordinates
-        lda ZP_VAR_X2
-        sta ZP_VAR_Y1
-        lda ZP_6F
-        sta ZP_VAR_X2
+        lda ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_1
+        lda ZP_VAR_XX15_4
+        sta ZP_VAR_XX15_2
         lda ZP_71
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
 
         clc 
         rts 
@@ -1266,23 +1266,23 @@ _a04c:                                                                  ;$A04C
 _a04e:                                                                  ;$A04E
         lda ZP_A2
         bpl _a081
-        lda ZP_VAR_Y
-        and ZP_70
+        lda ZP_VAR_XX15_1
+        and ZP_VAR_XX15_5
         bmi _a04a
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         and ZP_72
         bmi _a04a
-        ldx ZP_VAR_Y
+        ldx ZP_VAR_XX15_1
         dex 
         txa 
-        ldx ZP_70
+        ldx ZP_VAR_XX15_5
         dex 
         stx ZP_73
         ora ZP_73
         bpl _a04a
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         cmp # $90
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         sbc # $00
         sta ZP_73
         lda ZP_71
@@ -1293,19 +1293,19 @@ _a04e:                                                                  ;$A04E
         bpl _a04a
 _a081:                                                                  ;$A081
        .phy                     ; push Y to stack (via A)
-        lda ZP_6F
+        lda ZP_VAR_XX15_4
         sec 
-        sbc ZP_VAR_X
+        sbc ZP_VAR_XX15_0
         sta ZP_73
-        lda ZP_70
-        sbc ZP_VAR_Y
+        lda ZP_VAR_XX15_5
+        sbc ZP_VAR_XX15_1
         sta ZP_74
         lda ZP_71
         sec 
-        sbc ZP_VAR_X2
+        sbc ZP_VAR_XX15_2
         sta ZP_75
         lda ZP_72
-        sbc ZP_VAR_Y2
+        sbc ZP_VAR_XX15_3
         sta ZP_76
         eor ZP_74
         sta ZP_VAR_S
@@ -1369,29 +1369,29 @@ _a0fd:                                                                  ;$A0FD
         jsr _a19f
         lda ZP_A2
         bpl _a136
-        lda ZP_VAR_Y
-        ora ZP_VAR_Y2
+        lda ZP_VAR_XX15_1
+        ora ZP_VAR_XX15_3
         bne _a13b
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         cmp # $90
         bcs _a13b
 _a110:                                                                  ;$A110
-        ldx ZP_VAR_X
-        lda ZP_6F
-        sta ZP_VAR_X
-        stx ZP_6F
-        lda ZP_70
-        ldx ZP_VAR_Y
-        stx ZP_70
-        sta ZP_VAR_Y
-        ldx ZP_VAR_X2
+        ldx ZP_VAR_XX15_0
+        lda ZP_VAR_XX15_4
+        sta ZP_VAR_XX15_0
+        stx ZP_VAR_XX15_4
+        lda ZP_VAR_XX15_5
+        ldx ZP_VAR_XX15_1
+        stx ZP_VAR_XX15_5
+        sta ZP_VAR_XX15_1
+        ldx ZP_VAR_XX15_2
         lda ZP_71
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         stx ZP_71
         lda ZP_72
-        ldx ZP_VAR_Y2
+        ldx ZP_VAR_XX15_3
         stx ZP_72
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
         jsr _a19f
         dec LINE_FLIP
 _a136:                                                                  ;$A136
@@ -1412,13 +1412,13 @@ _a13f:                                                                  ;$A13F
 ;===============================================================================
 ; BBC code says "Shove visible edge onto XX19 ship lines heap counter U"
 ;
-; in:   ZP_POLYOBJ_HEAP address of heap
-;       ZP_VAR_U        heap-index
-;       ZP_VAR_X1       line-coord X1
-;       ZP_VAR_X2       line-coord X2
-;       ZP_VAR_Y1       line-coord Y1
-;       ZP_VAR_Y2       line-coord Y2
-;       ZP_TEMP_VAR     TODO: unknown
+; in:   ZP_POLYOBJ_HEAP         address of heap
+;       ZP_VAR_U                heap-index
+;       ZP_VAR_XX15_0           line-coord X1
+;       ZP_VAR_XX15_2           line-coord X2
+;       ZP_VAR_XX15_1           line-coord Y1
+;       ZP_VAR_XX15_3           line-coord Y2
+;       ZP_TEMP_VAR             TODO: unknown
 ;
 ; TODO: this appears to write into the $FF20-$FFC0 range
 ; TODO: is the heap-address fixed? can we optimise that?
@@ -1428,16 +1428,16 @@ _a13f:                                                                  ;$A13F
         ; push the line's co-ordinates (X1, Y1, X2, Y2),
         ; one after the other, onto the heap
         ; 
-        lda ZP_VAR_X1
+        lda ZP_VAR_XX15_0
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_Y1
+        lda ZP_VAR_XX15_1
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         sta [ZP_POLYOBJ_HEAP], y
         iny 
         sty ZP_VAR_U            ; update new index position
@@ -1481,16 +1481,16 @@ _a178:                                                                  ;$A178
         ;-----------------------------------------------------------------------
         ; read line start and end co-ords from the heap
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_X1
+        sta ZP_VAR_XX15_0
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_Y1
+        sta ZP_VAR_XX15_1
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
 
         ; TODO: do validation of line direction here so as to allow
         ;       removal of validation in the line routine?
@@ -1505,20 +1505,20 @@ _a178:                                                                  ;$A178
 ;===============================================================================
 
 _a19f:                                                                  ;$A19F
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         bpl _a1ba
         sta ZP_VAR_S
         jsr _a219
         txa 
         clc 
-        adc ZP_VAR_X2
-        sta ZP_VAR_X2
+        adc ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_2
         tya 
-        adc ZP_VAR_Y2
-        sta ZP_VAR_Y2
+        adc ZP_VAR_XX15_3
+        sta ZP_VAR_XX15_3
         lda # $00
-        sta ZP_VAR_X
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_0
+        sta ZP_VAR_XX15_1
         tax 
 _a1ba:                                                                  ;$A1BA
         beq _a1d5
@@ -1527,60 +1527,60 @@ _a1ba:                                                                  ;$A1BA
         jsr _a219
         txa 
         clc 
-        adc ZP_VAR_X2
-        sta ZP_VAR_X2
+        adc ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_2
         tya 
-        adc ZP_VAR_Y2
-        sta ZP_VAR_Y2
+        adc ZP_VAR_XX15_3
+        sta ZP_VAR_XX15_3
         ldx # $ff
-        stx ZP_VAR_X
+        stx ZP_VAR_XX15_0
         inx 
-        stx ZP_VAR_Y
+        stx ZP_VAR_XX15_1
 _a1d5:                                                                  ;$A1D5
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         bpl _a1f3
         sta ZP_VAR_S
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sta ZP_VAR_R
         jsr _a248
         txa 
         clc 
-        adc ZP_VAR_X
-        sta ZP_VAR_X
+        adc ZP_VAR_XX15_0
+        sta ZP_VAR_XX15_0
         tya 
-        adc ZP_VAR_Y
-        sta ZP_VAR_Y
+        adc ZP_VAR_XX15_1
+        sta ZP_VAR_XX15_1
         lda # $00
-        sta ZP_VAR_X2
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_2
+        sta ZP_VAR_XX15_3
 _a1f3:                                                                  ;$A1F3
-        lda ZP_VAR_X2
+        lda ZP_VAR_XX15_2
         sec 
         sbc # $90
         sta ZP_VAR_R
-        lda ZP_VAR_Y2
+        lda ZP_VAR_XX15_3
         sbc # $00
         sta ZP_VAR_S
         bcc _a218
         jsr _a248
         txa 
         clc 
-        adc ZP_VAR_X
-        sta ZP_VAR_X
+        adc ZP_VAR_XX15_0
+        sta ZP_VAR_XX15_0
         tya 
-        adc ZP_VAR_Y
-        sta ZP_VAR_Y
+        adc ZP_VAR_XX15_1
+        sta ZP_VAR_XX15_1
         lda # $8f
-        sta ZP_VAR_X2
+        sta ZP_VAR_XX15_2
         lda # $00
-        sta ZP_VAR_Y2
+        sta ZP_VAR_XX15_3
 _a218:                                                                  ;$A218
         rts 
 
 ;===============================================================================
 
 _a219:                                                                  ;$A219
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         sta ZP_VAR_R
         jsr _a284
         pha 
@@ -2429,8 +2429,8 @@ _set_page:                                                              ;$A731
         ;-----------------------------------------------------------------------
         jsr print_caps_off      ; reset text case-shifting?
 
-        lda # $00
-        sta ZP_7E               ; "arc counter"?
+        lda # $00               ; reset the buffer used for drawing circles?
+        sta ZP_CIRCLE_INDEX
 
         lda # %10000000
         sta ZP_PRINT_CASE
@@ -2654,13 +2654,13 @@ _a822:                                                                  ;$A822
 ;===============================================================================
         ldx # $03
         iny 
-        sty ZP_VAR_X2
+        sty ZP_VAR_XX15_2
 
 :       dex                                                             ;$A827
         bmi _a821
         lda _aa13, x
         and # %00111111
-        cmp ZP_VAR_X2
+        cmp ZP_VAR_XX15_2
         bne :-
 
         lda # $01
@@ -2705,8 +2705,8 @@ _a850:                                                                  ;$A850
         ; WARN: sets overflow flag because _a821 is an RTS (opcode $60)!
         bit _a821
         
-        sta ZP_VAR_X1
-        stx ZP_VAR_Y1
+        sta ZP_VAR_XX15_0
+        stx ZP_VAR_XX15_1
 
         ; (this causes the `clv` below to become a `branch on overflow clear`.
         ;  the address, made up of the next 2 bytes, is not important because
@@ -2731,7 +2731,7 @@ play_sfx:                                                               ;$A858
         ;-----------------------------------------------------------------------
         ldx # $02
         iny                     ; use Y 1-based
-        sty ZP_VAR_X2
+        sty ZP_VAR_XX15_2
         dey                     ; return to 0-based for the lookup
         lda _aa32, y
         lsr                     ; check bit 1 by pushing it off
@@ -2739,7 +2739,7 @@ play_sfx:                                                               ;$A858
 
 :       lda _aa13, x                                                    ;$A86A
         and # %00111111
-        cmp ZP_VAR_X2
+        cmp ZP_VAR_XX15_2
         beq @_a88b
         dex 
         bpl :-
@@ -2770,7 +2770,7 @@ play_sfx:                                                               ;$A858
         lda _aa82, y
 _a8a0:                                                                  ;$A8A0
        .cmp
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         sta _aa29, x
         lda _aa42, y
         sta _aa16, x
@@ -2782,7 +2782,7 @@ _a8a0:                                                                  ;$A8A0
         lda _aa52, y
 _a8bd:                                                                  ;$A8BD
        .cmp
-        lda ZP_VAR_Y
+        lda ZP_VAR_XX15_1
         sta _aa20, x
         lda _aa72, y
         sta _aa26, x
@@ -2815,10 +2815,10 @@ _b09d:                                                                  ;$B09D
 ;
 ;-------------------------------------------------------------------------------
         lda VAR_04EB
-        sta ZP_VAR_Y
+        sta ZP_VAR_XX15_1
 
         lda VAR_04EA
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
 
         lda _1d01
         sta ZP_32
@@ -2829,15 +2829,15 @@ _b0b0:                                                                  ;$B0B0
         ;-----------------------------------------------------------------------
         ; draws two multi-color pixels, one atop the other
         ;
-        jsr _b0b5                       ; draw first multi-color pixel
-        dec ZP_VAR_Y                    ; move up one pixel and draw again
+        jsr _b0b5               ; draw first multi-color pixel
+        dec ZP_VAR_XX15_1       ; move up one pixel and draw again
 
 _b0b5:                                                                  ;$B0B5
         ;-----------------------------------------------------------------------
         ; get bitmap address from X & Y co-ords
         ;
-        ldy ZP_VAR_Y
-        lda ZP_VAR_X            ; X-position, in pixels
+        ldy ZP_VAR_XX15_1
+        lda ZP_VAR_XX15_0       ; X-position, in pixels
         and # %11111000         ; clip X to a char-cell
         clc 
         adc row_to_bitmap_lo, y ; add X to the bitmap address by row
@@ -2852,7 +2852,7 @@ _b0b5:                                                                  ;$B0B5
         tay 
 
         ; let X be the column within the char-cell (0-7)
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         and # %00000111
         tax 
 
@@ -3375,7 +3375,7 @@ _b410:                                                                  ;$B410
         adc # $01               ; and add 1
 
 :       adc # $7b               ;=123 (centre X on scanner?)            ;$B438
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
 
         lda ZP_POLYOBJ_ZPOS_HI
         lsr 
@@ -3403,7 +3403,7 @@ _b410:                                                                  ;$B410
 :       cmp # $c7                                                       ;$B461
         bcc :+
         lda # $c6
-:       sta ZP_VAR_Y                                                    ;$B467
+:       sta ZP_VAR_XX15_1                                               ;$B467
 
         sec 
         sbc ZP_TEMP_ADDR_LO
@@ -3412,7 +3412,7 @@ _b410:                                                                  ;$B410
         jsr _b0b0                       ; draw two multi-color pixels?
         lda _ab49, x
         and ZP_32
-        sta ZP_VAR_X
+        sta ZP_VAR_XX15_0
         pla 
         plp 
         tax 
@@ -3430,7 +3430,7 @@ _b47f:                                                                  ;$B47F
         sbc # $01
         sta ZP_TEMP_ADDR_HI
 _b491:                                                                  ;$B491
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         eor [ZP_TEMP_ADDR], y
         sta [ZP_TEMP_ADDR], y
         dex 
@@ -3463,7 +3463,7 @@ _b4ae:                                                                  ;$B4AE
         adc #> (320-1)
         sta ZP_TEMP_ADDR_HI
 _b4c1:                                                                  ;$B4C1
-        lda ZP_VAR_X
+        lda ZP_VAR_XX15_0
         eor [ZP_TEMP_ADDR], y
         sta [ZP_TEMP_ADDR], y
         inx 
