@@ -75,7 +75,7 @@ init:
         and # %11111100         ; keep current value except bits 0-1 (VIC bank)
 
         ; set the bits according to the bank defined by the linker script,
-        ; e.g. "link/elite-harmless-d64.cfg", and imported by "elite.inc"
+        ; e.g. "link/elite-harmless-*.cfg", and imported by "elite.inc"
         ora # .vic_bank_bits( ELITE_VIC_BANK )
         sta CIA2_PORTA
 

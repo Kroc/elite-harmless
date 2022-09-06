@@ -310,9 +310,9 @@ $cl65 $options \
 
 echo "[OK]"
 
-# elite-harmless-d64:
+# elite-harmless:
 #-------------------------------------------------------------------------------
-echo -n "- elite-harmless-d64.cfg            "
+echo -n "- elite-harmless.cfg                "
 
 options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES"
 
@@ -321,7 +321,7 @@ options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES"
 # scope along with the main source code
 
 $cl65 $options \
-    --config "link/elite-harmless-d64.cfg" \
+    --config "link/elite-harmless.cfg" \
     --start-addr \$0400 \
      -m "build/elite-harmless.map" -vm \
     -Ln "build/elite-harmless.ll" \
@@ -345,7 +345,7 @@ options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES,-DFEATURE_FASTLINES"
 # scope along with the main source code
 
 $cl65 $options \
-    --config "link/elite-harmless-d64.cfg" \
+    --config "link/elite-harmless.cfg" \
     --start-addr \$0400 \
      -m "build/elite-harmless-fastlines.map" -vm \
     -Ln "build/elite-harmless-fastlines.ll" \
@@ -507,7 +507,7 @@ echo "[OK]"
 
 # annoyingly `cl65` will always place object files in the same directory
 # as the source file, so we need to clean these out of "src" ourselves
-echo -n "- cleaning up:                      "
+echo -n "- cleaning up...                    "
 
 rm -f src/*.o
 rm -f src/boot/*.o

@@ -18,7 +18,7 @@
 
 ; the BASIC bootstrap needs to be stored at the beginning of the program,
 ; canonically $02A7, but needs to be addressed as running from $0801.
-; the linker configuration handles this ("link/elite-harmless-d64.cfg")
+; the linker configuration handles this ("link/elite-harmless-*.cfg")
 ;
 .segment        "BASIC_LOAD"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
