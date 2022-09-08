@@ -2330,19 +2330,19 @@ _74e2:                                                                  ;$74E2
         sta price_list+0
         ldx # $01
 _74f5:                                                                  ;$74F5
-        stx ZP_A2
+        stx ZP_VAR_XX13
         jsr print_newline
-        ldx ZP_A2
+        ldx ZP_VAR_XX13
         clc 
         jsr print_tiny_value
         jsr print_space
 
-        lda ZP_A2
+        lda ZP_VAR_XX13
         clc 
         adc # $68               ; TODO: what's being calculated here?
         jsr print_flight_token
 
-        lda ZP_A2
+        lda ZP_VAR_XX13
         jsr _763f
         sec 
 
@@ -2351,7 +2351,7 @@ _74f5:                                                                  ;$74F5
 
         lda # $06
         jsr print_medium_value
-        ldx ZP_A2
+        ldx ZP_VAR_XX13
         inx 
         cpx ZP_VAR_Q
         bcc _74f5
@@ -5657,7 +5657,7 @@ _85f8:                                                                  ;$85F8
 _860b:                                                                  ;$860B
         and # %00000011
         sta VAR_048A
-        sta ZP_A2
+        sta ZP_VAR_XX13
 _8612:                                                                  ;$8612
         jsr get_random_number
         sta ZP_VAR_T
@@ -5668,7 +5668,7 @@ _8612:                                                                  ;$8612
         adc # $11
         jsr spawn_ship
 
-        dec ZP_A2
+        dec ZP_VAR_XX13
         bpl _8612
 
 _8627:                                                                  ;$8627

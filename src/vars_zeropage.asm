@@ -265,23 +265,56 @@ ZP_ROLL_MAGNITUDE       := $68  ; unsigned roll rotation value
 ZP_ROLL_SIGN            := $69  ; roll rotation sign
 ZP_INV_ROLL_SIGN        := $6a  ; inverse roll rotation sign (for easier math)
 
+; line co-ords:
 ;-------------------------------------------------------------------------------
+ZP_VAR_XX15_0           := $6b  ; line XX1-lo or X1                     ; XX15+0
+ZP_VAR_XX15_1           := $6c  ; line XX1-hi or Y1                     ; XX15+1
+ZP_VAR_XX15_2           := $6d  ; line YY1-lo or X2                     ; XX15+2
+ZP_VAR_XX15_3           := $6e  ; line YY1-hi or Y2                     ; XX15+3
+ZP_VAR_XX15_4           := $6f  ; line XX2-lo                           ; XX15+4
+ZP_VAR_XX15_5           := $70  ; line XX2-hi                           ; XX15+5
 
-ZP_VAR_XX15_0           := $6b  ; X-pos, lo?                            ; XX15+0
-ZP_VAR_XX15_1           := $6c  ; X-pos, hi?                            ; XX15+1
-ZP_VAR_XX15_2           := $6d  ; Y-pos, lo?                            ; XX15+2
-ZP_VAR_XX15_3           := $6e  ; Y-pos, hi?                            ; XX15+3
-ZP_VAR_XX15_4           := $6f                                          ; XX15+4
-ZP_VAR_XX15_5           := $70                                          ; XX15+5
+ZP_VAR_XX12_0           := $71  ; line YY2-lo                           ; XX12+0
+ZP_VAR_XX12_1           := $72  ; line YY2-hi                           ; XX12+1
 
-ZP_VAR_XX12_0           := $71  ;                                       ; XX12+0
-ZP_VAR_XX12_1           := $72  ;                                       ; XX12+1
-ZP_73                   := $73  ;? x20
-ZP_74                   := $74
+ZP_VAR_XX12_2           := $73  ;                                       ; XX12+2
+ZP_VAR_XX12_3           := $74  ;                                       ; XX12+3
+ZP_VAR_XX12_4           := $75  ;                                       ; XX12+4
+ZP_VAR_XX12_5           := $76  ;                                       ; XX12+5
 
-ZP_75                   := $75  ;? x14
-ZP_76                   := $76  ;? x12
+; when used as 16-bit parameters,
+; they take on this form:
+;
+ZP_LINE_XX1             := ZP_VAR_XX15_0                                ; XX15
+ZP_LINE_XX1_LO          := ZP_VAR_XX15_0                                ; XX15+0
+ZP_LINE_XX1_HI          := ZP_VAR_XX15_1                                ; XX15+1
 
+ZP_LINE_YY1             := ZP_VAR_XX15_2                                ; XX15+2
+ZP_LINE_YY1_LO          := ZP_VAR_XX15_2                                ; XX15+2
+ZP_LINE_YY1_HI          := ZP_VAR_XX15_3                                ; XX15+3
+
+ZP_LINE_XX2             := ZP_VAR_XX15_4                                ; XX15+4
+ZP_LINE_XX2_LO          := ZP_VAR_XX15_4                                ; XX15+4
+ZP_LINE_XX2_HI          := ZP_VAR_XX15_5                                ; XX15+5
+
+ZP_LINE_YY2             := ZP_VAR_XX12_0                                ; XX12
+ZP_LINE_YY2_LO          := ZP_VAR_XX12_0                                ; XX12+0
+ZP_LINE_YY2_HI          := ZP_VAR_XX12_1                                ; XX12+1
+
+ZP_DELTA_XX_LO          := ZP_VAR_XX12_2                                ; XX12+2
+ZP_DELTA_XX_HI          := ZP_VAR_XX12_3                                ; XX12+3
+
+ZP_DELTA_YY_LO          := ZP_VAR_XX12_4                                ; XX12+4
+ZP_DELTA_YY_HI          := ZP_VAR_XX12_5                                ; XX12+5
+
+; and as 8-bit parameters:
+;
+ZP_LINE_X1              := ZP_VAR_XX15_0                                ; XX15+0
+ZP_LINE_Y1              := ZP_VAR_XX15_1                                ; XX15+1
+ZP_LINE_X2              := ZP_VAR_XX15_2                                ; XX15+2
+ZP_LINE_Y2              := ZP_VAR_XX15_3                                ; XX15+3
+
+;-------------------------------------------------------------------------------
 ; a 4-byte big-endian number buffer for working with big integers:
 ;
 ZP_VALUE                := $77                                          ; K
@@ -387,7 +420,8 @@ ZP_SCREEN               := $a0                                          ; QQ11
 
 ZP_VAR_Z                := $a1  ; a common "Z" variable
 
-ZP_A2                   := $a2  ;? x14
+ZP_VAR_XX13             := $a2  ;                                       ; XX13
+
 MAIN_COUNTER            := $a3  ;? x18 "MOVE COUNTER"?
 
 ;                       := $a4  ;UNUSED?

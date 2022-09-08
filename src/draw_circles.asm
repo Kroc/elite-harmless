@@ -7,8 +7,8 @@
 
 draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ;===============================================================================
-; draws a segment of a circle, connecting one point
-; around the circumfrence to another:
+; draws a segment of a circle, connecting the previous point
+; around the circumfrence to the new one:
 ;
 ; the points in the circle are stored in two lists, `circle_lines_x`
 ; for x-positions and `circle_lines_y` for y-positions, with some
@@ -23,6 +23,8 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ; will begin a new, visible, line (all hidden lines are skipped)
 ;
 ; in:   ZP_TEMP_COUNTER         the current point number (0-64)
+;       ZP_CIRCLE_STEP          number of steps around the circle (0-64)
+;                               to increment to get to the next point (1+)
 ;       K6                      the x-position of the new point (16-bit)
 ;       T.X                     the y-position of the new point (16-bit)
 ;       ZP_A9                   set to $FF to indicate first point
@@ -32,6 +34,7 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ;
 ; TOOD: why is flag (ZP_A9) needed if ZP_TEMP_COUNTER = 0 would indicate
 ;       the same? is this because of keeping the heap for later erasing?
+;       for drawing two circles? (i.e. "crater")
 ;-------------------------------------------------------------------------------
         txa                     ; point Y-position lo-byte
         adc ZP_CIRCLE_YPOS_LO
@@ -48,26 +51,26 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         ; the starting co-ords and wait for the next call to join the line
         ;
         lda ZP_A9               ; get the flag parameter
-        beq .clip               ; is this the first point?
+        beq @clip               ; not the first point?
 
         inc ZP_A9               ; roll flag over from $ff to 0
 
         ; check if previous y-position is $FF,
         ; indicating a line break:
         ;
-.break: ldy ZP_CIRCLE_INDEX     ; current circle-buffer index           ;$2988
+@break: ldy ZP_CIRCLE_INDEX     ; current circle-buffer index           ;$2988
         lda # $ff               ; $FF is a line break
         cmp circle_lines_y-1, y ; check the circle-buffer Y-coords
-        beq ._29fa
+        beq @next
         sta circle_lines_y, y   ; update circle-buffer Y-coords
         inc ZP_CIRCLE_INDEX     ; move to the next index in the circle buffer
-        bne ._29fa              ; (always branches)
+        bne @next               ; (always branches)
 
         ; configure line:
         ;-----------------------------------------------------------------------
         ; set the start and end points for drawing the line:
         ;
-.clip:  lda ZP_VAR_K5           ; previous point, X-position, lo-byte   ;$2998
+@clip:  lda ZP_VAR_K5           ; previous point, X-position, lo-byte   ;$2998
         sta ZP_VAR_XX15_0
         lda ZP_VAR_K5_1         ; previous point, X-position, hi-byte
         sta ZP_VAR_XX15_1
@@ -85,12 +88,21 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         lda ZP_VAR_K6_3         ; new point, Y-position, hi-byte
         sta ZP_VAR_XX12_1
 
-        jsr _a013               ; clip the line
-        bcs .break              ; offscreen? add a line break to the buffer
+        jsr clip_line           ; clip the line to the viewport
+        bcs @break              ; is offscreen? add a line break to the buffer
 
+        ; if the line ends were flipped by the clipping routine, then we must
+        ; flip them back to avoid storing them in the circle buffer the wrong
+        ; way around
+        ;
+        ; TODO: can we avoid this? we should validate line direction
+        ;       everywhere before clipping / drawing lines, since sometime
+        ;       lines are constructed in a way guaranteed the right direction
+        ;
         lda LINE_FLIP           ; was the line co-ords flipped?
         beq :+                  ; no, skip ahead
 
+        ; flip the ends back
         lda ZP_VAR_XX15_0
         ldy ZP_VAR_XX15_2
         sta ZP_VAR_XX15_2
@@ -103,18 +115,19 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 :       ldy ZP_CIRCLE_INDEX     ; current circle-buffer index           ;$29D2
         lda circle_lines_y-1, y ; check current Y-coord
         cmp # $ff               ; is it the terminator?
-        bne ._29e6
+        bne @draw               ; no
 
-        ; add X1/Y1 to line-buffer
-        ; (Y is the current cursor position)
+        ; add X1/Y1 to line-buffer:
+        ; (Y is the current buffer index)
         lda ZP_VAR_XX15_0
         sta circle_lines_x, y   ; line-buffer X-coords
         lda ZP_VAR_XX15_1
         sta circle_lines_y, y   ; line-buffer Y-coords
         iny                     ; move to the next point in the buffer
 
-        ; add X2/Y2 to the line-buffer?
-._29e6: lda ZP_VAR_XX15_2                                               ;$2936
+        ; add X2/Y2 to the line-buffer:
+        ; (Y is the current buffer index)
+@draw:  lda ZP_VAR_XX15_2                                               ;$2936
         sta circle_lines_x, y   ; line-buffer X-coords
         lda ZP_VAR_XX15_3
         sta circle_lines_y, y   ; line-buffer Y-coords
@@ -124,11 +137,12 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         ; draw the current line in X1/Y1/X2/Y2
         jsr draw_line
 
-        lda ZP_A2
-        bne .break
+        lda ZP_VAR_XX13
+        bne @break
 
+        ; prepare for next point:
         ;-----------------------------------------------------------------------
-._29fa: lda ZP_VAR_K6                                                   ;$29FA
+@next:  lda ZP_VAR_K6                                                   ;$29FA
         sta ZP_VAR_K5
         lda ZP_VAR_K6_1
         sta ZP_VAR_K5_1
@@ -136,6 +150,7 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         sta ZP_VAR_K5_2
         lda ZP_VAR_K6_3
         sta ZP_VAR_K5_3
+
         lda ZP_TEMP_COUNTER
         clc 
         adc ZP_CIRCLE_STEP

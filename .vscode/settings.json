@@ -3,7 +3,7 @@
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 80,
     "editor.rulers": [
-        80
+        8, 32, 72, 80,
     ],
     "[markdown]": {
         "editor.wordWrap": "wordWrapColumn",
