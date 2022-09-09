@@ -93,8 +93,8 @@ math_square:                                            ; BBC: MLU2     ;$3988
 ; square a number:
 ; (i.e. A * A)
 ;
-; in:   A       number to multiply with itself
-; out:  A.P     16-bit result in A = hi, P = lo
+; in:   A                       number to multiply with itself
+; out:  A.P                     16-bit result in A = hi, P = lo
 ;-------------------------------------------------------------------------------
         ; original elite square routine, or elite-harmless
         ; without the math lookup tables:
@@ -128,11 +128,11 @@ multiply_unsigned_PQ:                                   ; BBC: MULTU    ;$399B
 ;===============================================================================
 ; unsigned multiplication of two 8-bit numbers:
 ;
-; in:   ZP_VAR_P        multiplier, i.e. the left-hand-side of 'P * Q'
-;       ZP_VAR_Q        multiplicand, i.e. the right-hand-side of 'P * Q'
+; in:   ZP_VAR_P                multiplier, i.e. left-hand-side of 'P * Q'
+;       ZP_VAR_Q                multiplicand, i.e. right-hand-side of 'P * Q'
 ;
-; out:  A.P             16-bit result returned in A.P, where P
-;                       is the lo-byte and A is the hi-byte
+; out:  A.P                     16-bit result returned in A.P, where
+;                               P is the lo-byte and A is the hi-byte
 ;-------------------------------------------------------------------------------
 .export multiply_unsigned_PQ
 
@@ -142,6 +142,7 @@ multiply_unsigned_PQ:                                   ; BBC: MULTU    ;$399B
 multiply_unsigned_PX:                                                   ;$399F
         ;-----------------------------------------------------------------------
         ; NOTE: this routine must preserve Y
+        ;
         dex                     ; subtract 1 because carry will add one already 
         stx ZP_VAR_T            ; this is the amount to add for each carry
 
@@ -194,3 +195,54 @@ multiply_unsigned_PX:                                                   ;$399F
 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
+
+
+.segment        "CODE_9978"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+square_root:                                                            ;$9978
+;===============================================================================
+; this calculates a very good approximation of the square root of R.Q
+; Q = sqrt(R.Q)
+;
+; TODO: create a lookup table for this, for cart ROM
+;-------------------------------------------------------------------------------
+        ldy ZP_VAR_R
+        lda ZP_VAR_Q
+        sta ZP_VAR_S
+        ldx # $00
+        stx ZP_VAR_Q            ; X.Y.S = 0.R.Q ; Q = 0
+        lda # $08
+        sta ZP_VAR_T            ; REPEAT 8
+@loop:                                                                  ;$9986
+        cpx ZP_VAR_Q
+        bcc @next               ; blt
+        bne @inc
+        cpy # $40
+        bcc @next               ; if (X.Y >= Q.$40) increase else next
+@inc:                                                                   ;$9990
+        tya
+        sbc # $40               ; carry is set
+        tay
+        txa
+        sbc ZP_VAR_Q
+        tax                     ; X.Y -= Q.$40; Q++ (via carry from rol below)
+@next:                                                                  ;$9998
+        rol ZP_VAR_Q            ; Q*=2 (+1 if carry set, see above)
+        asl ZP_VAR_S
+        tya
+        rol
+        tay
+        txa
+        rol
+        tax
+        asl ZP_VAR_S
+        tya
+        rol
+        tay
+        txa
+        rol
+        tax                     ; X.Y.S *= 4
+        dec ZP_VAR_T    
+        bne @loop               ; ENDREP
+        rts

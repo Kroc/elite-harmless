@@ -105,18 +105,18 @@ draw_line_vert:
         tay
         sec 
         ldx ZP_LINE_WIDTH
-        lda table_logdiv, x
+        lda table_loglo, x
         ldx ZP_LINE_HEIGHT
-        sbc table_logdiv, x
+        sbc table_loglo, x
         bmi @use9600
         
-        lda _9500, y
+        lda table_antilog, y
         jmp _vline_draw_set_slope
 @deg45:
         lda # $ff
         bne _vline_draw_set_slope
 @use9600:
-        lda _9600, y
+        lda table_antilog_odd, y
         ; ==== END   A = 256 * width/height
         
 _vline_draw_set_slope:

@@ -83,10 +83,10 @@ divide_unsigned:                                                        ;$3B37
         beq @3ba6               ; no remainder: finish
 
         ; calculate (remainder/Q)*256 via the log-tables
-        lda table_logdiv, x
+        lda table_loglo, x
         ldx ZP_VAR_Q
         sec 
-        sbc table_logdiv, x
+        sbc table_loglo, x
         bmi @3bae
         ldx ZP_B6
         lda table_log, x
@@ -94,7 +94,7 @@ divide_unsigned:                                                        ;$3B37
         sbc table_log, x
         bcs @3ba9               ; carry is set: log(remainder) < log(Q)
         tax 
-        lda _9500, x
+        lda table_antilog, x
 @3ba6:  sta ZP_VAR_R                                                    ;$3BA6
 
         rts 
@@ -104,14 +104,14 @@ divide_unsigned:                                                        ;$3B37
         sta ZP_VAR_R
         rts 
 
-        ;-----------------------------------------------------------------------                                                          
+        ;-----------------------------------------------------------------------
 @3bae:  ldx ZP_B6                                                       ;$3ABE
         lda table_log, x
         ldx ZP_VAR_Q
         sbc table_log, x
         bcs @3ba9
         tax 
-        lda _9600, x
+        lda table_antilog_odd, x
         sta ZP_VAR_R
 
         rts 

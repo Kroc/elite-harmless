@@ -3404,18 +3404,18 @@ _39ea:                                                                  ;$39EA
         sta ZP_B6
         tax 
         beq _3a1d
-        lda table_logdiv, x
+        lda table_loglo, x
         ldx ZP_VAR_Q
         beq _3a20
         clc 
-        adc table_logdiv, x
+        adc table_loglo, x
         bmi _3a0f
         lda table_log, x
         ldx ZP_B6
         adc table_log, x
         bcc _3a20               ; no overflow: A*Q < 256
         tax 
-        lda _9500, x
+        lda table_antilog, x
         ldx ZP_VAR_P            ; restore X
         rts 
 
@@ -3427,7 +3427,7 @@ _3a0f:                                                                  ;$3A0F
         adc table_log, x
         bcc _3a20               ; no overflow: A*Q < 256
         tax 
-        lda _9600, x            ; A = X*ZP_B6
+        lda table_antilog_odd, x; A = X*ZP_B6
 _3a1d:                                                                  ;$3A1D
         ldx ZP_VAR_P            ; restore X
         rts 

@@ -156,8 +156,8 @@ populate_multiply_tables:
 ;
 ;       2^8 = 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 = 256
 ;
-; then log answers the question "given a number, what power do we need to raise
-; our base [2] to get that number?". i.e.
+; then log answers the question "given a number, what power
+; do we need to raise our base [2] to get that number?". i.e.
 ;
 ;       log2(256) = 2^? = 8
 ;
@@ -165,8 +165,8 @@ populate_multiply_tables:
 ; tables and addition. a multiplication of X & Y can be reduced to adding
 ; two logs together and then using exponention to restore the number base
 ;
-; likewise, a division can be done by subtracting the logarithms of two
-; numbers end exponentiating the result.
+; likewise, a division can be done by subtracting the logarithms
+; of two numbers end exponentiating the result
 ;
 ; however, given that the input number is not always going to be a square
 ; number the answer is, more often than not, going to be a fraction, e.g.
@@ -185,43 +185,44 @@ populate_multiply_tables:
 ;    loss of precision becomes
 ;
 ; 2. it's not possible to use these log-tables for typical multiplication.
-;    Elite has its own multiplication tables (see "math_data.asm")
-;    required to produce correct results
+;       Elite has its own multiplication tables to produce correct results
 ;
-; =============================================
-; ==  USE OF THE LOGARITHM TABLES IN ELITE:  ==
-; =============================================
-; _9500 and _9600 together build an exp table for 2^((x*2)/32),
-; where _9500 contains all the even entries (thus being a 2^(x/32) table)
-; and _9600 contains all the odd entries (thus being a 2^((x+0.5)/32) table)
-; table_logdiv is used to determine which of the two exp-tables to use
+; USE OF THE LOGARITHM TABLES IN ELITE:
+;
+; `table_antilog` and `table_antilog_odd` together build an exponention table
+; for 2^((x*2)/32), where `table_antilog` contains all the even entries --
+; being a 2^(x/32) table -- and `table_antilog_odd` contains all the odd
+; entries -- thus being a 2^((x+0.5)/32) table
+;
+; `table_loglo` is used to determine which of the two exp-tables to use
 ; to get the most accurate result for a log-table multiplication or division.
-; This gives an extra bit of accuracy in log-space, which is direly needed.
+; this gives an extra bit of accuracy in log-space, which is direly needed
 ;
-; whenever a log-addition (A*X) or a log-subtraction (A/X) is done, the same
-; operation with the table_logdiv yields a negative value if the _9600-table
-; should be used.
+; whenever a log-addition (A*X) or a log-subtraction (A/X) is done,
+; the same operation with the `table_loglo` yields a negative value
+; if the `table_antilog_odd`-table should be used
 ;
-; ==  OVERFLOW AND UNDERFLOW:  ==
+; OVERFLOW AND UNDERFLOW:
 ;
 ; Elite uses log and exp-tables that scale the value internally by a factor
-; of 32. this just gives a little extra precision, and  since both the
-; log and exp-tables use this factor, they normally cancel each other out:
+; of 32. this just gives a little extra precision, and since both the log
+; and exp-tables use this factor, they normally cancel each other out:
+;
 ; exp((log(A)*32 + log(B)*32)/32) = exp((log(A)+log(B)) = A*B
 ; exp((log(A)*32 - log(B)*32)/32) = exp((log(A)-log(B)) = A/B
 ; 
-; but when an overflow occurs, the 256 overflow difference conviniently turns
-; into an 8 bit shift:
+; but when an overflow occurs, the 256 overflow
+; difference conviniently turns into an 8 bit shift:
+;
 ; exp((log(A)*32 + log(B)*32 - 256)/32) = exp(log(A)+log(B)-8) = (A*B)/256
 ; exp((log(A)*32 - log(B)*32 + 256)/32) = exp(log(A)-log(B)+8) = (A/B)*256
 ;
 ; so when multiplying two big values (overflow occurs when adding the logs),
-; the result of the exp() is the hi-byte of the multiplication.
-; and when dividing the lesser of two values by the greater, the subtraction
-; of the two logs underflows, and the result is the fraction in 8-bit fixed
-; point.
+; the result of the exp() is the hi-byte of the multiplication, and when
+; dividing the lesser of two values by the greater, the subtraction of the
+; two logs underflows, and the result is the fraction in 8-bit fixed point
 ;
-
+;
 table_log:                                                              ;$9300
 ;===============================================================================
 ; nc513 says:
@@ -261,7 +262,7 @@ table_log:                                                              ;$9300
         .byte   $fd, $fd, $fd, $fd, $fd, $fd, $fe, $fe                  ;$93F0
         .byte   $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff                  ;$93F8
 
-table_logdiv:                                                           ;$9400
+table_loglo:                                                            ;$9400
 ;===============================================================================
 ; nc513 says:
 ; - $9400..94FF is a lookup table for the function
@@ -301,7 +302,7 @@ table_logdiv:                                                           ;$9400
         .byte   $05, $36, $67, $98, $c8, $f8, $29, $59                  ;$94F0
         .byte   $88, $b8, $e7, $16, $45, $74, $a3, $d1                  ;$94F8
 
-_9500:                                                                  ;$9500
+table_antilog:                                                          ;$9500
 ;===============================================================================
 ; nc513 says:
 ; - $9500..$95FF is a lookup table for the function TRUNC(2^(X/32))
@@ -339,7 +340,7 @@ _9500:                                                                  ;$9500
         .byte   $b5, $b8, $bd, $c1, $c5, $c9, $ce, $d2                  ;$95F0
         .byte   $d7, $db, $e0, $e5, $ea, $ef, $f5, $fa                  ;$95F8
 
-_9600:                                                                  ;$9600
+table_antilog_odd:                                                      ;$9600
 ;===============================================================================
 ; nc513 says:
 ; - $9600..96FF seems to follow the pattern of

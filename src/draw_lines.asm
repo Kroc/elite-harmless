@@ -262,11 +262,11 @@ draw_line_horz:                                                         ;$ABBB
         ; the log table used here is:
         ; TRUNC(256*(LOG_2(X)*32-TRUNC(LOG_2(X)*32)))
         ;
-        lda table_logdiv, x     ;?
+        lda table_loglo, x      ;?
 
         ldx ZP_REG_W            ; get line width (dx)
         sec 
-        sbc table_logdiv, x     ;
+        sbc table_loglo, x      ;
         bmi @_abfd
 
         ldx ZP_REG_H            ; get line height (dy)
@@ -276,7 +276,7 @@ draw_line_horz:                                                         ;$ABBB
         bcs @deg45              ; is the line 45-degrees?
         
         tax 
-        lda _9500, x            ;?
+        lda table_antilog, x    ;?
         jmp @_ac0d
 
 @deg45: ; 45-degree line...                                             ;$ABF5
@@ -298,7 +298,7 @@ draw_line_horz:                                                         ;$ABBB
         bcs @deg45              ; is the line 45-degrees?
 
         tax 
-        lda _9600, x
+        lda table_antilog_odd, x
 
 @_ac0d:                                                                 ;$AC0D
         ; set the step-fraction. for every pixel horizontal, this fractional
@@ -1258,10 +1258,10 @@ draw_line_vert:                                                         ;$AF08
         ldx ZP_REG_W            ; get line-width
        .bze @_af77              ; if zero, skip ahead
 
-        lda table_logdiv, x
+        lda table_loglo, x
         ldx ZP_REG_H
         sec 
-        sbc table_logdiv, x
+        sbc table_loglo, x
         bmi @_af65
 
         ldx ZP_REG_W
@@ -1271,7 +1271,7 @@ draw_line_vert:                                                         ;$AF08
         bcs @deg45
 
         tax 
-        lda _9500, x
+        lda table_antilog, x
         jmp @_af75
 
 @deg45: ; 45-degree line...                                             ;$AF61
@@ -1288,7 +1288,7 @@ draw_line_vert:                                                         ;$AF08
         bcs @deg45              ; is the line 45-degrees?
         
         tax 
-        lda _9600, x
+        lda table_antilog_odd, x
 
 @_af75:                                                                 ;$AF75
         ; set the step-fraction. for every pixel vertical, this fractional
