@@ -314,6 +314,9 @@ ZP_LINE_Y1              := ZP_VAR_XX15_1                                ; XX15+1
 ZP_LINE_X2              := ZP_VAR_XX15_2                                ; XX15+2
 ZP_LINE_Y2              := ZP_VAR_XX15_3                                ; XX15+3
 
+ZP_DELTA_X              := ZP_DELTA_XX_LO                               ; XX12+2
+ZP_DELTA_Y              := ZP_DELTA_YY_LO                               ; XX12+4
+
 ;-------------------------------------------------------------------------------
 ; a 4-byte big-endian number buffer for working with big integers:
 ;

@@ -1571,7 +1571,7 @@ local_chart:                                                            ;$6FDB
         ;-----------------------------------------------------------------------
 :       lda # $00               ;?                                      ;$7097
         sta ZP_B7
-        lda # ELITE_VIEWPORT_HEIGHT-1
+        lda # VIEWPORT_HEIGHT-1
         sta ZP_VIEWH
 
         rts 
@@ -4542,7 +4542,7 @@ _80c0:                                                                  ;$80C0
         jsr draw_line
         
         iny 
-        lda LINE_FLIP
+        lda LINE_SWAP
         bne _80c0
         
         lda ZP_VAR_XX15_2
@@ -4583,7 +4583,7 @@ wipe_sun:                                                               ;$80FF
 
         ; this is the vertical cut-off point. we'll be erasing
         ; from bottom up for the benefit of 6502's zero-flag
-        ldy # ELITE_VIEWPORT_HEIGHT-1
+        ldy # VIEWPORT_HEIGHT-1
         ; check if a line needs to be drawn at this Y-position
 @loop:  lda SUN_BUFFER, y       ; read half-width of line               ;$810E
        .bze:+                   ; if zero, skip
@@ -4629,8 +4629,7 @@ clip_sun_line:                                                          ;$811E
         bmi @clear              ; too large, don't draw!
         beq @left               ; fits, now do left-side
 
-        ; line clips to right of viewport (256)
-        lda # ELITE_VIEWPORT_WIDTH-1
+        lda # VIEWPORT_WIDTH-1  ; line clips to right of viewport (256)
         sta ZP_VAR_XX15_2
 
         ;-----------------------------------------------------------------------

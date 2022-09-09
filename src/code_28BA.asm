@@ -202,7 +202,7 @@ draw_particle:                                                          ;$2918
         lda ZP_VAR_XX15_1       ; get particle's Y-distance from centre
         and # %01111111         ; ignore the sign
         ; has the dust particle gone beyond the half-height?
-        cmp # ELITE_VIEWPORT_HEIGHT / 2
+        cmp # VIEWPORT_HEIGHT / 2
         ; if yes, don't process
         ; (this is an RTS jump)
        .bge _2976
@@ -219,7 +219,7 @@ draw_particle:                                                          ;$2918
         ; put aside the positive-only Y value
 :       sta ZP_VAR_T                                                    ;$2934
         ; get the viewport half-height again
-        lda # (ELITE_VIEWPORT_HEIGHT / 2) + 1
+        lda # (VIEWPORT_HEIGHT / 2) + 1
         ; calculate "Y-distance from the centre of the screen"
         sbc ZP_VAR_T
 
@@ -3757,7 +3757,7 @@ _3cc7:                                                                  ;$3CC7
         ;-----------------------------------------------------------------------
 
 _3cce:                                                                  ;$3CCE
-        jsr _99af
+        jsr math_divide_AQ
         lda ZP_VAR_R
         lsr 
         lsr 
@@ -3823,7 +3823,7 @@ _3cfa:                                                                  ;$3CFA
         
         ; the bottom of the line is always at
         ; the bottom of the viewport
-        lda # ELITE_VIEWPORT_HEIGHT - 1
+        lda # VIEWPORT_HEIGHT - 1
         sta ZP_VAR_XX15_3
 
         ; TODO: skip validation and jump straight to
@@ -3835,7 +3835,7 @@ _3cfa:                                                                  ;$3CFA
         lda VAR_06F1
         sta ZP_VAR_XX15_1
         sty ZP_VAR_XX15_2
-        lda # ELITE_VIEWPORT_HEIGHT - 1
+        lda # VIEWPORT_HEIGHT - 1
         sta ZP_VAR_XX15_3
 
         ; TODO: skip validation and jump straight to

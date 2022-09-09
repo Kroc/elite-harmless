@@ -213,9 +213,10 @@ draw_line_horz:
         cpx ZP_VAR_XX15_2
         bcc :+
         
-        ; line is the wrong way around,
-        ; flip the line's direction
-        dec LINE_FLIP           ;?
+        ; line is the wrong way around: set flag to indicate the ends
+        ; were swapped so that the caller doesn't get confused
+        ;
+        dec LINE_SWAP           ; (underflow to $FF)
 
         lda ZP_VAR_XX15_2       ; flip beginning and end points;
         sta ZP_VAR_XX15_0       ; line-drawing will proceed

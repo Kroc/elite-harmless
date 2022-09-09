@@ -99,7 +99,7 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         ;       everywhere before clipping / drawing lines, since sometime
         ;       lines are constructed in a way guaranteed the right direction
         ;
-        lda LINE_FLIP           ; was the line co-ords flipped?
+        lda LINE_SWAP           ; was the line co-ords swapped?
         beq :+                  ; no, skip ahead
 
         ; flip the ends back

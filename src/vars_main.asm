@@ -378,6 +378,6 @@ VAR_06F0                :=$06f0 ;?
 VAR_06F1                :=$06f1 ;?
 VAR_06F3                :=$06f3 ;?
 
-LINE_FLIP               :=$06f4 ; flag for when line's start/end were swapped
+LINE_SWAP               :=$06f4 ; flag for line start/end swapped       ; SWAP
 
 VAR_06FB                :=$06fb ; title screen poly-object z-distance?

@@ -21,10 +21,10 @@ clear_screen:                                                           ;$B21A
         lda #> (ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ))
         sta ZP_TEMP_ADDR_HI
 
-        ldx # 24                        ; colour 24 rows
+        ldx # 24                ; colour 24 rows
 
 @row:   lda # .color_nybble( WHITE, BLACK )                             ;$B224
-        ldy # ELITE_VIEWPORT_COLS-1     ; 32 columns (0-31)
+        ldy # VIEWPORT_COLS-1   ; 32 columns (0-31)
 
         ; colour one row
 :       sta [ZP_TEMP_ADDR], y                                           ;$B228
@@ -106,7 +106,7 @@ clear_screen:                                                           ;$B21A
         jsr hide_all_ships
         jsr disable_sprites
 
-        ldy # ELITE_VIEWPORT_COLS-1
+        ldy # VIEWPORT_COLS-1
         lda # .color_nybble( HUD_COLOUR, BLACK )
 
 :       sta ELITE_MENUSCR_ADDR + .scrpos( 0, 4 ), y                     ;$B289
@@ -123,7 +123,7 @@ clear_screen:                                                           ;$B21A
         beq drawViewportBorders
         
         ; apply the yellow colour to the second header-border on some screens
-        ldy # ELITE_VIEWPORT_COLS-1
+        ldy # VIEWPORT_COLS-1
 :       sta ELITE_MENUSCR_ADDR + .scrpos( 2, 4 ), y                     ;$B29F
         dey
         bpl :-
@@ -148,7 +148,7 @@ drawViewportBordersV:                                                   ;$B2B2
         ;-----------------------------------------------------------------------
         ; for the flight screen, draw the side borders
         ; just for the viewport portion of the screen
-        ldx # ELITE_VIEWPORT_ROWS
+        ldx # VIEWPORT_ROWS
         ; remember line-length for later
         stx ZP_C0
 

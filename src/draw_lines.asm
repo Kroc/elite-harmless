@@ -167,7 +167,7 @@ draw_line:                                                              ;$AB91
         lda # $80               ; = 128/256 (1/2, or "0.5")
         sta ZP_BF               ; this will be the incremental counter
         asl                     ; push bit 7 off, so A = 0
-        sta LINE_FLIP           ; clear the line flip flag
+        sta LINE_SWAP           ; clear the line swap flag
 
         ; get width of the line:
         lda ZP_VAR_XX15_2       ; take line-starting X pos
@@ -236,7 +236,8 @@ draw_line_horz:                                                         ;$ABBB
         ;-----------------------------------------------------------------------
         ; line is the wrong way around!
         ; flip the line's direction:
-        dec LINE_FLIP           ; set the line flip flag (=$FF)
+        ;
+        dec LINE_SWAP           ; set the line swap flag (=$FF)
 
         lda ZP_VAR_XX15_2       ; flip beginning and end points;
         sta ZP_VAR_XX15_0       ; line-drawing will proceed
@@ -350,7 +351,7 @@ draw_line_horzup:                                                       ;$AC19
         and # %00000111         ; mod 8 (0...7)
         tax                     ; X = char cell pixel column no.
 
-        bit LINE_FLIP
+        bit LINE_SWAP
         bmi @_ac49
 
         ; each pixel column has its own routine for drawing for speed purposes,
@@ -791,7 +792,7 @@ draw_line_horzdn:                                                       ;$AD8B
         lda ZP_VAR_XX15_0
         and # %00000111
         tax 
-        bit LINE_FLIP
+        bit LINE_SWAP
         bmi _adc9
 
         lda _ab71, x
@@ -1213,7 +1214,8 @@ draw_line_vert:                                                         ;$AF08
         ;-----------------------------------------------------------------------
         ; line is the wrong way around!
         ; flip the line's direction:
-        dec LINE_FLIP           ; set the line flip flag (=$FF)
+        ;
+        dec LINE_SWAP           ; set the line swap flag (=$FF)
         
         lda ZP_VAR_XX15_2
         sta ZP_VAR_XX15_0
@@ -1303,7 +1305,7 @@ draw_line_vert:                                                         ;$AF08
         bcc _vertlt             ; handle bottom-up, left-to-right line
 
         clc 
-        lda LINE_FLIP
+        lda LINE_SWAP
         beq _vertrt_pixel_next
         
         dex 
@@ -1361,7 +1363,7 @@ _vertrt_pixel_next:                                                     ;$AF8E
 
 _vertlt:                                                                ;$AFBE
         ;=======================================================================
-        lda LINE_FLIP
+        lda LINE_SWAP
         beq _vertlt_pixel_next
         dex 
 

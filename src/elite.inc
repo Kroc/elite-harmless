@@ -98,11 +98,11 @@ ELITE_SPRITES_INDEX     = <((ELITE_SPRITES_ADDR - ELITE_VIC_ADDR) / 64)
 ;
 ; (DON'T change this, the code is inextricably tied to this size)
 ;
-ELITE_VIEWPORT_WIDTH    = 256
-ELITE_VIEWPORT_HEIGHT   = 144
+VIEWPORT_WIDTH          = 256
+VIEWPORT_HEIGHT         = 144
 
-ELITE_VIEWPORT_COLS     = ELITE_VIEWPORT_WIDTH / 8      ;=32
-ELITE_VIEWPORT_ROWS     = ELITE_VIEWPORT_HEIGHT / 8     ;=18
+VIEWPORT_COLS           = VIEWPORT_WIDTH / 8                            ;=32
+VIEWPORT_ROWS           = VIEWPORT_HEIGHT / 8                           ;=18
 
 ; the HUD occupies 7 lines at the bottom of the screen; this fact is used in
 ; a wide variety of calculations and implicit values in non-obvious ways

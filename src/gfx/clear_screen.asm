@@ -121,7 +121,7 @@ clear_screen:
 ;;        cpx # $80
 ;;        beq drawViewportBorders
 
-;;        ldy # ELITE_VIEWPORT_COLS-1
+;;        ldy # VIEWPORT_COLS-1
 ;;:       sta ELITE_MENUSCR_ADDR + .scrpos( 2, 4 ), y
 ;;        dey
 ;;        bpl :-

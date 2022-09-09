@@ -62,7 +62,7 @@ _9932:                                                                  ;$9932
         bne _995d
 
         lda ZP_CIRCLE_YPOS_LO   ; could be K4 rather than circle, specifically
-        cmp # ELITE_VIEWPORT_HEIGHT-2   ; why "-2", height of dot?
+        cmp # VIEWPORT_HEIGHT-2 ; why "-2", height of dot?
         bcs _995d               ; "off top of screen"
 
         ldy # $02               ; "index for edge heap"
@@ -117,16 +117,16 @@ _9964:                                                                  ;$9964
 .segment        "CODE_99AF"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-_99af:                                                                  ;$99AF
+math_divide_AQ:                                         ; BBC: LL28     ;$99AF
 ;===============================================================================
 ; calculates A=R = A/Q*256 using log-tables. Uses A,X,B6
 ;
 ;-------------------------------------------------------------------------------
         cmp ZP_VAR_Q
-        bcs _9a07           ; if (A>=Q) return $FF
+        bcs _9a07               ; if (A>=Q) return $FF
         sta ZP_B6
         tax 
-        beq _99d3           ; if (A==0) return 0
+        beq _99d3               ; if (A==0) return 0
         lda table_logdiv, x
         ldx ZP_VAR_Q
         sec 
@@ -136,7 +136,7 @@ _99af:                                                                  ;$99AF
         lda table_log, x
         ldx ZP_VAR_Q
         sbc table_log, x
-        bcs _9a07           ; if (log(A)>=log(Q)) return $FF
+        bcs _9a07               ; if (log(A)>=log(Q)) return $FF
         tax 
         lda _9500, x
 _99d3:                                                                  ;$99D3
@@ -148,7 +148,7 @@ _99d6:                                                                  ;$99D6
         lda table_log, x
         ldx ZP_VAR_Q
         sbc table_log, x
-        bcs _9a07           ; if (log(A)>=log(Q)) return $FF
+        bcs _9a07               ; if (log(A)>=log(Q)) return $FF
         tax 
         lda _9600, x
         sta ZP_VAR_R
@@ -161,26 +161,26 @@ _99d6:                                                                  ;$99D6
 
 ; unused / unreferenced entry point?
 ;$99e9:
-        bcs _9a07           ; -> return $FF, presumably when A > Q
-        ldx # $fe           ; 1-bit is not set and serves as the ending flag
+        bcs _9a07               ; -> return $FF, presumably when A > Q
+        ldx # $fe               ; 1-bit is not set and serves as the ending flag
         stx ZP_VAR_R
 _99ef:                                                                  ;$99EF
         asl 
-        bcs _99fd           ; A overflows? continue at _99fd
+        bcs _99fd               ; A overflows? continue at _99fd
         cmp ZP_VAR_Q
         bcc _99f8
         sbc ZP_VAR_Q
 _99f8:                                                                  ;$99F8
         rol ZP_VAR_R
-        bcs _99ef           ; test for the ending flag, else continue division
-        rts 
+        bcs _99ef               ; test for the ending flag,
+        rts                     ;  else continue division
 
 _99fd:  ; the first bit is shifted out of A into the carry              ;$99FD
-        sbc ZP_VAR_Q        ; no test needed, A+carry is > Q
+        sbc ZP_VAR_Q            ; no test needed, A+carry is > Q
         sec 
         rol ZP_VAR_R
-        bcs _99ef           ; test for the ending flag, else continue division
-        lda ZP_VAR_R
+        bcs _99ef               ; test for the ending flag,
+        lda ZP_VAR_R            ;  else continue division
         rts 
 
 _9a07:                                                                  ;$9A07
@@ -197,7 +197,7 @@ _9a07:                                                                  ;$9A07
 ; unsigned_with_sign_bit and the unsigned_with_external_sign-variables
 _9a0c:                                                                  ;$9A0C
         eor ZP_VAR_S
-        bmi _9a16           ; if (sign1 == sign2) return Q+R, keep sign
+        bmi _9a16               ; if (sign1 == sign2) return Q+R, keep sign
         lda ZP_VAR_Q
         clc 
         adc ZP_VAR_R
@@ -207,13 +207,13 @@ _9a16:                                                                  ;$9A16
         lda ZP_VAR_R
         sec 
         sbc ZP_VAR_Q
-        bcc _9a1f           ; if (R>=Q) return R-Q
+        bcc _9a1f               ; if (R>=Q) return R-Q
         clc 
         rts 
 
 _9a1f:                                                                  ;$9A1F
         pha 
-        lda ZP_VAR_S        ; if (R<Q) sign=-sign; return Q-R
+        lda ZP_VAR_S            ; if (R<Q) sign=-sign; return Q-R
         eor # %10000000
         sta ZP_VAR_S
         pla 
@@ -311,10 +311,10 @@ draw_ship:                                                              ;$9A86
         lda # $12
         sta [ZP_POLYOBJ_HEAP], y
 
-        ldy # Hull::_07                  ;=$07: "explosion count"?
+        ldy # Hull::_07         ;=$07: "explosion count"?
         lda [ZP_HULL_ADDR], y
 
-        ldy # $02                       ;?
+        ldy # $02               ;?
         sta [ZP_POLYOBJ_HEAP], y
 
         ; BBC: ".EE55 ; counter Y, 4 rnd bytes to edge heap"
@@ -436,7 +436,7 @@ _9b51:                                                                  ;$9B51
         asl 
         lda ZP_TEMPOBJ_M2x0_HI, y
         rol 
-        jsr _99af
+        jsr math_divide_AQ
         ldx ZP_VAR_R
         stx ZP_TEMPOBJ_MATRIX, y
         dey 
@@ -888,7 +888,7 @@ _9e30:                                                                  ;$9E30
         cmp ZP_VAR_Q
         bcs _9e30
         stx ZP_VAR_S
-        jsr _99af
+        jsr math_divide_AQ
         ldx ZP_VAR_S
         lda ZP_VAR_R
 
@@ -974,7 +974,7 @@ _9e9a:                                                                  ;$9E9A
 
 ; ".LL69 ; small x angle"
 _9eaa:                                                                  ;$9EAA
-        jsr _99af
+        jsr math_divide_AQ
 
 ; ".LL65 ; both continue for scaling based on z"
 _9ead:                                                                  ;$9EAD
@@ -1017,7 +1017,7 @@ _9ed9:                                                                  ;$9ED9
 
 ; ".LL67 ; Arrive from LL66 above if XX15+3 < Q ; small yangle"
 _9eec:                                                                  ;$9EEC
-        jsr _99af
+        jsr math_divide_AQ
 
 ; ".LL68 ; both carry on, also arrive from LL66, scaling y based on z."
 _9eef:                                                                  ;$9EEF
@@ -1226,11 +1226,11 @@ clip_line:                                              ; BBC: LL145    ;$A013
 ;                               carry set if line is wholly outside viewport
 ;
 ;       ZP_VAR_XX13             indicates the state of the line:
-;                               0   = end-point is within viewport
+;                               0   = only end-point is within viewport
 ;                               71  = only start-point is within viewport
 ;                               143 = both points are outside the viewport
 ;
-;       LINE_FLIP               indicates if the ends of the line had to be
+;       LINE_SWAP               indicates if the ends of the line had to be
 ;                               swapped to face left-to-right; 0=no, $FF=yes
 ;
 ;       ZP_LINE_X1              ; X1 (8-bit)
@@ -1239,7 +1239,7 @@ clip_line:                                              ; BBC: LL145    ;$A013
 ;       ZP_LINE_Y2              ; Y2 (8-bit)
 ;-------------------------------------------------------------------------------
         lda # %00000000         ; clear the flag that indicates
-        sta LINE_FLIP           ;  if the line-ends were swapped
+        sta LINE_SWAP           ;  if the line-ends were swapped
 
         lda ZP_LINE_XX2_HI      ; X2, hi-byte
 
@@ -1253,7 +1253,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         ; default return value will be the viewport height, which indicates
         ; start *and* end points being outside the viewport. upon return,
         ; carry clear indicates the line is visible (crosses the viewport)
-@end:   ldx # ELITE_VIEWPORT_HEIGHT-1
+@end:   ldx # VIEWPORT_HEIGHT-1
 
         ; is the end point within X|Y 0-255?
         ;
@@ -1276,14 +1276,14 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         ;
         lda ZP_LINE_XX1_HI      ; combine X1, hi-byte
         ora ZP_LINE_YY1_HI      ;  with Y1, hi-byte
-        bne @clip               ; skip if start-point is beyond 8-bit range
+        bne @view               ; skip if start-point is beyond 8-bit range
 
         ; the start point is at Y 0-255, but could still be outside the viewport
         ; which isn't 256 px high; C64 screen is 200px, and there's the hud
         ;
-        lda # ELITE_VIEWPORT_HEIGHT-1
+        lda # VIEWPORT_HEIGHT-1
         cmp ZP_LINE_YY1_LO      ; compare Y1 lo-byte with viewport height
-        bcc @clip               ; skip onward if end-point is off-screen
+        bcc @view               ; skip onward if end-point is off-screen
 
         ; the start point is within the viewport;
         ; check against the end-point result
@@ -1310,7 +1310,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         rts                     ;  for visible line
 
         ;-----------------------------------------------------------------------
-@hidden:sec                     ; return carry set                      ;$A04A
+@novis: sec                     ; return carry set                      ;$A04A
         rts                     ;  for non-visible line
 
         ;-----------------------------------------------------------------------
@@ -1324,12 +1324,12 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         ; the line below
         ;
 
-        ; clip the line to the viewport:
+        ; clip the line to the viewport:                ; BBC: LL145    ;$A04E
         ;=======================================================================
         ; is one of the points inside the viewport? a value of 0 or 71
         ; indicates one or the other points is in-bounds
         ;
-@clip:  lda ZP_VAR_XX13         ; result from above     ; BBC: LL145    ;$A04E
+@view:  lda ZP_VAR_XX13         ; result from above                     ;$A04E
         bpl @slope              ; <128? skip ahead
 
         ; both points are off-screen:
@@ -1341,10 +1341,10 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         ; (outside the screen)
         lda ZP_LINE_XX1_HI      ; combine X1 hi-byte with X2 hi-byte 
         and ZP_LINE_XX2_HI      ;  and if the sign is negative, 
-        bmi @hidden             ;  return line not visible
+        bmi @novis              ;  return line not visible
         lda ZP_LINE_YY1_HI      ; combine Y1 hi-byte with Y2 hi-byte
         and ZP_LINE_YY2_HI      ;  and if the sign is negative, 
-        bmi @hidden             ;  return line not visible
+        bmi @novis              ;  return line not visible
  
         ; if both X hi-bytes are positive, then the line cannot
         ; be visible. i.e. if the start and end points are X>255
@@ -1364,23 +1364,23 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         stx ZP_VAR_XX12_2       ; put aside to compare...
 
         ora ZP_VAR_XX12_2       ; combine X1 & X2 signs
-        bpl @hidden             ; if *both* are positive, line is not visible
+        bpl @novis              ; if *both* are positive, line is not visible
 
         ; if both Y hi-bytes are positive, then the line cannot be visible
         ; i.e. if the start and end points are Y > viewport-height
         ;
         lda ZP_LINE_YY1_LO      ; below the viewport height? (144)
-        cmp # ELITE_VIEWPORT_HEIGHT
+        cmp # VIEWPORT_HEIGHT
         lda ZP_LINE_YY1_HI      ; likewise, subtract 1 (carry)
         sbc # 0                 ;  to normalise above/below screens
         sta ZP_VAR_XX12_2       ; put aside to compare
 
         lda ZP_LINE_YY2_LO      ; repeat with end-point
-        cmp # ELITE_VIEWPORT_HEIGHT
+        cmp # VIEWPORT_HEIGHT
         lda ZP_LINE_YY2_HI      ; subtract 1 (carry)
         sbc # 0                 ;  to normalise above/below screens
         ora ZP_VAR_XX12_2       ; combine YY1 & YY2 hi-bytes
-        bpl @hidden             ; if *both* are positive, line is not visible 
+        bpl @novis              ; if *both* are positive, line is not visible 
 
         ; at this point, we've determined that the line does indeed cross
         ; the viewport, even if the start+end points lie outside of it
@@ -1398,7 +1398,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         sbc ZP_LINE_XX1_LO      ; subtact X1 lo-byte
         sta ZP_DELTA_XX_LO      ; store as delta-X, lo-byte
         lda ZP_LINE_XX2_HI      ; repeat for hi-byte
-        sbc ZP_LINE_XX1_HI      ; (rippling the carry)
+        sbc ZP_LINE_XX1_HI      ; (rippling the borrow)
         sta ZP_DELTA_XX_HI      ; store as delta-X, hi-byte
 
         ; calculate Y2 - Y1 (16-bits)
@@ -1408,14 +1408,17 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         sbc ZP_LINE_YY1_LO      ; subtract Y1 lo-byte
         sta ZP_DELTA_YY_LO      ; store as delta-Y, lo-byte
         lda ZP_LINE_YY2_HI      ; repeat for hi-byte
-        sbc ZP_LINE_YY1_HI      ; (rippling the carry)
+        sbc ZP_LINE_YY1_HI      ; (rippling the borrow)
         sta ZP_DELTA_YY_HI      ; store as delta-Y, hi-byte
 
         ; work out the direction of the slope, either downwards (positive),
-        ; or upwards (negative) by XORing together the delta-X & delta-Y signs
-        ; 
-        eor ZP_DELTA_XX_HI
-        sta ZP_VAR_S            ; slope sign
+        ; or upwards (negative) by XORing together the delta-X & delta-Y signs:
+        ;
+        ;       bit 7 clear = top-left to bottom-right direction
+        ;       bit 7 set   = bottom-left to top-right direction
+        ;
+        eor ZP_DELTA_XX_HI      ; "now kiss"
+        sta ZP_VAR_S            ; store slope sign for much later
 
         lda ZP_DELTA_YY_HI      ; check delta-Y sign
         bpl @flipx              ; skip ahead for positive
@@ -1434,7 +1437,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         sta ZP_DELTA_YY_HI
 
 @flipx: lda ZP_DELTA_XX_HI                                              ;$A0B2
-        bpl @a0c1
+        bpl @delta
 
         ; delta-X is negative, i.e. the start and end-points are crossed;
         ; calculate 0 - delta-X to make the number positive
@@ -1447,56 +1450,88 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         lda # $00
         sbc ZP_DELTA_XX_HI
 
+        ; reduce delta to 8-bit range:
         ;-----------------------------------------------------------------------
-@a0c1:  tax                                                             ;$A0C1
-        bne @a0c8
+@delta: tax                     ; has delta-X hi-byte reached zero?     ;$A0C1
+        bne @div2               ; if not, divide both deltas by 2
 
-        ldx ZP_DELTA_YY_HI
-        beq @a0d2
+        ldx ZP_DELTA_YY_HI      ; has delta-Y hi-byte reached zero?
+        beq @horv               ; if yes, we can stop
 
-@a0c8:  lsr                                                             ;$A0C8
-        ror ZP_DELTA_XX_LO
-        lsr ZP_DELTA_YY_HI
-        ror ZP_DELTA_YY_LO
-        jmp @a0c1
+@div2:  lsr                     ; divide delta-X hi-byte                ;$A0C8
+        ror ZP_DELTA_X          ;  and ripple to lo-byte
+        lsr ZP_DELTA_YY_HI      ; divide delta-Y hi-byte
+        ror ZP_DELTA_Y          ;  and ripple to lo-byte
+        jmp @delta              ; recheck
 
         ;-----------------------------------------------------------------------
-@a0d2:  stx ZP_VAR_T                                                    ;$A0D2
-        lda ZP_DELTA_XX_LO
-        cmp ZP_VAR_XX12_4
-        bcc @a0e4
+@horv:  stx ZP_VAR_T            ; (set T=0 by nature of process above)  ;$A0D2
+
+        ; is the line more vertical than it is horizontal?
+        ;
+        lda ZP_DELTA_X          ; compare delta-X
+        cmp ZP_DELTA_Y          ;  to delta-Y
+        bcc @vert
+
         sta ZP_VAR_Q
-        lda ZP_VAR_XX12_4
-        jsr _99af
+        lda ZP_DELTA_Y
+        jsr math_divide_AQ      ; divide delta-Y by delta-X
+
         jmp @a0ef
 
-@a0e4:  lda ZP_VAR_XX12_4                                               ;$A0E4
-        sta ZP_VAR_Q
-        lda ZP_DELTA_XX_LO
-        jsr _99af
-        dec ZP_VAR_T
-
-@a0ef:  lda ZP_VAR_R                                                    ;$A0EF
-        sta ZP_DELTA_XX_LO
-        lda ZP_VAR_S
-        sta ZP_VAR_XX12_3
-        lda ZP_VAR_XX13
-        beq @a0fd
-        bpl @flip
-
-@a0fd:  jsr clip_point                                                  ;$A0FD
-        lda ZP_VAR_XX13
-        bpl @a136
-        lda ZP_VAR_XX15_1
-        ora ZP_VAR_XX15_3
-        bne @a13b
-        lda ZP_VAR_XX15_2
-        cmp # $90
-        bcs @a13b
-
-        ; swap the start and end points of the line:
         ;-----------------------------------------------------------------------
-@flip:  ldx ZP_LINE_XX1_LO                                              ;$A110
+@vert:  lda ZP_DELTA_Y          ; use delta-Y                           ;$A0E4
+        sta ZP_VAR_Q            ;  for later calculation
+
+        lda ZP_DELTA_X
+        jsr math_divide_AQ      ; divide delta-X by delta-Y
+
+        dec ZP_VAR_T            ; underflow T to $FF
+
+        ; clip start, end, or both points:
+        ;-----------------------------------------------------------------------
+@a0ef:  lda ZP_VAR_R            ; store the resultant slope             ;$A0EF
+        sta ZP_DELTA_XX_LO
+
+        lda ZP_VAR_S            ; bit 7 of S is a flag to indicate if the slope
+        sta ZP_DELTA_XX_HI      ;  goes downhill (0) or uphill (1) 
+
+        lda ZP_VAR_XX13         ; check the result of viewport bounds
+        beq @left               ; 0: start-point is offscreen
+        bpl @right              ; <128, i.e. 71: end-point is off-screen
+
+        ; note that the fallthrough here implies a value of
+        ; 143: start-point and end-point are off-screen
+        ;
+        ; clip start point:
+        ;-----------------------------------------------------------------------
+@left:  jsr clip_point          ; clip start point into viewport        ;$A0FD
+
+        ; check again viewport bounding result; the start point has already
+        ; been clipped so now check if the end-point needs clipping too:
+        ;
+        lda ZP_VAR_XX13         ; a value of zero indicates the end-point
+        bpl @ok                 ;  is already in-bounds so exit early
+
+        lda ZP_LINE_XX1_HI      ; sanity check(?) TODO: is this necessary?
+        ora ZP_LINE_YY1_HI      ; if X1,Y1 is still out-of-bounds,
+        bne @err                ;  then exit
+
+        ; if the start point is less than 256, then check
+        ; that it still fits within the viewport height 
+        lda ZP_LINE_YY1_LO
+        cmp # VIEWPORT_HEIGHT
+        bcs @err
+
+        ; clip end point:
+        ;-----------------------------------------------------------------------
+        ; swap the start and end points of the line simply beacuse
+        ; `clip_point` can only operate on X1 & Y1!
+        ;
+        ; TODO: create a copy of `clip_point` that can operate
+        ;       on X2 / Y2; we've saved enough bytes elsewhere
+        ;
+@right: ldx ZP_LINE_XX1_LO                                              ;$A110
         lda ZP_LINE_XX2_LO
         sta ZP_LINE_XX1_LO
         stx ZP_LINE_XX2_LO
@@ -1516,16 +1551,16 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         stx ZP_LINE_YY2_HI
         sta ZP_LINE_YY1_HI
 
-        jsr clip_point
-        dec LINE_FLIP
+        jsr clip_point          ; clip end point (now start point) to viewport
+        dec LINE_SWAP           ; set flag to indicate line points were swapped
 
-@a136: .ply                                                             ;$A136 
-        jmp @both
+@ok:   .ply                     ; (restore Y)                           ;$A136 
+        jmp @both               ; set return parameters and exit
 
         ;-----------------------------------------------------------------------
-@a13b: .ply                                                             ;$A13B 
-        sec 
-        rts 
+@err:  .ply                     ; (restore Y)                           ;$A13B 
+        sec                     ; indicate line is not visible
+        rts                     ;  and return
 
 
 _a13f:                                                                  ;$A13F
@@ -1615,7 +1650,7 @@ _a178:                                                                  ;$A178
         ; TODO: do validation of line direction here so as to allow
         ;       removal of validation in the line routine?
         jsr draw_line
-        
+
         iny 
         cpy ZP_AE               ; keep drawing?
         bcc @draw
@@ -1676,26 +1711,30 @@ _a1d5:                                                                  ;$A1D5
 _a1f3:                                                                  ;$A1F3
         lda ZP_VAR_XX15_2
         sec 
-        sbc # $90
+        sbc # VIEWPORT_HEIGHT
         sta ZP_VAR_R
         lda ZP_VAR_XX15_3
         sbc # $00
         sta ZP_VAR_S
-        bcc _a218
+        bcc :+
+
         jsr _a248
+
         txa 
         clc 
         adc ZP_VAR_XX15_0
         sta ZP_VAR_XX15_0
+
         tya 
         adc ZP_VAR_XX15_1
         sta ZP_VAR_XX15_1
+
         lda # $8f
         sta ZP_VAR_XX15_2
         lda # $00
         sta ZP_VAR_XX15_3
-_a218:                                                                  ;$A218
-        rts 
+
+:       rts                                                             ;$A218
 
 ;===============================================================================
 
@@ -3529,7 +3568,7 @@ _b410:                                                                  ;$B410
         sbc ZP_TEMP_ADDR_LO
         php 
         pha 
-        jsr _b0b0                       ; draw two multi-color pixels?
+        jsr _b0b0               ; draw two multi-color pixels?
         lda _ab49, x
         and ZP_32
         sta ZP_VAR_XX15_0

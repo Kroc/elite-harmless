@@ -37,7 +37,7 @@ _a8dc:                                                                  ;$A8DC
 interrupt_scanline:                                                     ;$A8DE
 interrupt_scanline1:
         ; top of screen, plus height of viewport
-        .byte   51 + ELITE_VIEWPORT_HEIGHT-1
+        .byte   51 + VIEWPORT_HEIGHT-1
 interrupt_scanline2:
         ; scanline 51, 2nd pixel row in screen
         ; i.e. changes after the yellow border at the top
