@@ -2,8 +2,6 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "draw_fastlines_h.asm":
-
 .macro  .hline_next_y_up
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; carry is set when entering and must be clear on exit                  ;cycles

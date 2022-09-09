@@ -2,8 +2,6 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "draw_fastlines.asm":
-;
 ; a new line-drawing routine by Dyme! formatted and lightly
 ; modified by Kroc. requires illegal opcodes
 ;
@@ -119,5 +117,5 @@ draw_line:
         jmp draw_straight_line
 
 
-.include        "draw_fastlines_h.asm"
-.include        "draw_fastlines_v.asm"
+.include        "draw_fastline_h.asm"
+.include        "draw_fastline_v.asm"

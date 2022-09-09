@@ -50,10 +50,10 @@
 
 .ifdef  FEATURE_FASTLINES
         ;///////////////////////////////////////////////////////////////////////
-        .include        "draw_fastlines.asm"
+        .include        "draw_fastline.asm"
 .else   ;///////////////////////////////////////////////////////////////////////
         ; standard / original line-drawing code
-        .include        "draw_lines.asm"
+        .include        "draw_line.asm"
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 .include        "draw_circles.asm"

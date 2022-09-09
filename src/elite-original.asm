@@ -46,7 +46,7 @@
 
 .include        "code_9900.asm"                                         ;$9900
 .include        "code_interrupts.asm"                                   ;$A8D9
-.include        "draw_lines.asm"                                        ;$AB31
+.include        "draw_line.asm"                                         ;$AB31
 .include        "orig/clear_screen.asm"                                 ;$B21A
 .include        "sound/code_sound.asm"                                  ;$B4CB
 .include        "sound/data_sound.asm"                                  ;$B72D
