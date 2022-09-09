@@ -56,15 +56,15 @@ multiply_unsigned_PQ:                                   ; BBC: MULTU    ;$399B
 ;===============================================================================
 ; unsigned multiplication of two 8-bit numbers:
 ;
-; in:   ZP_VAR_P        multiplier, i.e. the left-hand-side of 'P * Q'
-;       ZP_VAR_Q        multiplicand, i.e. the right-hand-side of 'P * Q'
+; in:   ZP_VAR_P                multiplier, i.e. left-hand-side of 'P * Q'
+;       Q                       multiplicand, i.e. right-hand-side of 'P * Q'
 ;
-; out:  A.P             16-bit result returned in A.P, where P
-;                       is the lo-byte and A is the hi-byte
+; out:  A.P                     16-bit result returned in A.P, where P
+;                               is the lo-byte and A is the hi-byte
 ;-------------------------------------------------------------------------------
 .export multiply_unsigned_PQ
 
-        ldx ZP_VAR_Q
+        ldx Q
 
 multiply_unsigned_PX:
         ;-----------------------------------------------------------------------
@@ -129,14 +129,14 @@ multiply_unsigned_PQ:                                   ; BBC: MULTU    ;$399B
 ; unsigned multiplication of two 8-bit numbers:
 ;
 ; in:   ZP_VAR_P                multiplier, i.e. left-hand-side of 'P * Q'
-;       ZP_VAR_Q                multiplicand, i.e. right-hand-side of 'P * Q'
+;       Q                       multiplicand, i.e. right-hand-side of 'P * Q'
 ;
 ; out:  A.P                     16-bit result returned in A.P, where
 ;                               P is the lo-byte and A is the hi-byte
 ;-------------------------------------------------------------------------------
 .export multiply_unsigned_PQ
 
-        ldx ZP_VAR_Q            ; load our multiplicand
+        ldx Q                   ; load our multiplicand
         beq _398d               ; are we multiplying by zero!?
 
 multiply_unsigned_PX:                                                   ;$399F
@@ -208,14 +208,14 @@ square_root:                                                            ;$9978
 ; TODO: create a lookup table for this, for cart ROM
 ;-------------------------------------------------------------------------------
         ldy R
-        lda ZP_VAR_Q
+        lda Q
         sta S
         ldx # $00
-        stx ZP_VAR_Q            ; X.Y.S = 0.R.Q ; Q = 0
+        stx Q                   ; X.Y.S = 0.R.Q ; Q = 0
         lda # $08
         sta T                   ; REPEAT 8
 @loop:                                                                  ;$9986
-        cpx ZP_VAR_Q
+        cpx Q
         bcc @next               ; blt
         bne @inc
         cpy # $40
@@ -225,10 +225,10 @@ square_root:                                                            ;$9978
         sbc # $40               ; carry is set
         tay
         txa
-        sbc ZP_VAR_Q
+        sbc Q
         tax                     ; X.Y -= Q.$40; Q++ (via carry from rol below)
 @next:                                                                  ;$9998
-        rol ZP_VAR_Q            ; Q*=2 (+1 if carry set, see above)
+        rol Q                   ; Q*=2 (+1 if carry set, see above)
         asl S
         tya
         rol

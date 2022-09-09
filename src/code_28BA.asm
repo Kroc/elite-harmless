@@ -360,7 +360,7 @@ move_dust_front:                                                        ;$2A40
         lsr ZP_VAR_P            ; divide high byte by 2, again
         ror                     ; ripple to low-byte
         ora # %00000001         ; must never be completely zero!
-        sta ZP_VAR_Q            ; so Q is SPEED/DZ/4 if P is 0..sure?
+        sta Q                   ; so Q is SPEED/DZ/4 if P is 0..sure?
 
         ; subtract the fractional speed
         lda DUST_Z_LO, y
@@ -417,7 +417,7 @@ move_dust_front:                                                        ;$2A40
         lda ZP_VAR_YY_HI
         eor ZP_INV_PITCH_SIGN
         jsr _393e               ; multiply_small_number:A.P = A*X (X<32)
-        sta ZP_VAR_Q
+        sta Q
         jsr _3a4c
         asl ZP_VAR_P
         rol 
@@ -494,7 +494,7 @@ _2b30:                                                                  ;$2B30
         lsr ZP_VAR_P1
         ror 
         ora # %00000001
-        sta ZP_VAR_Q
+        sta Q
         lda DUST_X_HI, y
         sta ZP_VAR_XX15_0
         jsr _3997
@@ -545,7 +545,7 @@ _2b30:                                                                  ;$2B30
         eor ZP_INV_PITCH_SIGN
         ldx ZP_PITCH_MAGNITUDE
         jsr _393e
-        sta ZP_VAR_Q
+        sta Q
 
         lda ZP_VAR_XX_HI
         sta S
@@ -1001,12 +1001,12 @@ _2dc5:                                                                  ;$2DC5
         ror ZP_VAR_P
         ora T                   ; restore sign
         eor ZP_B1               ; rotation sign?
-        stx ZP_VAR_Q
+        stx Q
 
         jsr multiplied_now_add
         sta ZP_VALUE_pt2
         stx ZP_VALUE_pt1
-        ldx ZP_VAR_Q
+        ldx Q
         lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         and # %01111111
         lsr 
@@ -1036,11 +1036,11 @@ _2dc5:                                                                  ;$2DC5
         ora T
         eor # %10000000
         eor ZP_B1
-        stx ZP_VAR_Q
+        stx Q
         jsr multiplied_now_add
         sta ZP_POLYOBJ + MATRIX_COL0_HI, y
         stx ZP_POLYOBJ + MATRIX_COL0_LO, y
-        ldx ZP_VAR_Q
+        ldx Q
         lda ZP_VALUE_pt1
         sta ZP_POLYOBJ + MATRIX_COL0_LO, x
         lda ZP_VALUE_pt2
@@ -1650,20 +1650,20 @@ _3044:                                                                  ;$3044
         lda PLAYER_ENERGY
         lsr 
         lsr 
-        sta ZP_VAR_Q
+        sta Q
 _3052:                                                                  ;$3052
         sec 
         sbc # $10
         bcc _3064
-        sta ZP_VAR_Q
+        sta Q
         lda # $10
         sta ZP_VAR_XX12_0, x
-        lda ZP_VAR_Q
+        lda Q
         dex 
         bpl _3052
         bmi _3068
 _3064:                                                                  ;$3064
-        lda ZP_VAR_Q
+        lda Q
         sta ZP_VAR_XX12_0, x
 _3068:                                                                  ;$3068
         lda ZP_VAR_XX12_0, y
@@ -1770,7 +1770,7 @@ hud_drawbar:                                                            ;$30CF
         ;
         ;       A = value to represent on the bar, 0-15
         ;
-        sta ZP_VAR_Q            ; "bar value 1-15"
+        sta Q                   ; "bar value 1-15"
 
         ldx # %11111111         ; mask?
         stx R
@@ -1788,14 +1788,14 @@ hud_drawbar:                                                            ;$30CF
         ldx # $03               ; "height of bar - 1"
 
 _30e5:                                                                  ;$30E5
-        lda ZP_VAR_Q            ; get bar value 0-15
+        lda Q                   ; get bar value 0-15
 
         ; subtract 4 if >= 4?
         cmp # $04
        .blt _3109
 
         sbc # $04
-        sta ZP_VAR_Q
+        sta Q
 
         lda R                   ; mask
 _30f1:                                                                  ;$30F1
@@ -1817,18 +1817,18 @@ _30f1:                                                                  ;$30F1
         bpl _30e5
 _3109:                                                                  ;$3109
         eor # %00000011
-        sta ZP_VAR_Q
+        sta Q
         lda R
         
 :       asl                                                             ;$310F
         asl 
-        dec ZP_VAR_Q
+        dec Q
         bpl :-
         pha 
         lda # $00
         sta R
         lda # $63
-        sta ZP_VAR_Q
+        sta Q
         pla 
         jmp _30f1
 
@@ -1855,16 +1855,16 @@ _3130:                                                                  ;$3130
 ; ".DIL2 -> roll/pitch indicator takes X.A"
 ;-------------------------------------------------------------------------------
         ldy # $01               ; counter Y = 1
-        sta ZP_VAR_Q
+        sta Q
 @_3134:                                                                 ;$3134
         sec 
-        lda ZP_VAR_Q
+        lda Q
         sbc # $04
         bcs @_3149               ; >= 4?
 
         lda # $ff
-        ldx ZP_VAR_Q
-        sta ZP_VAR_Q
+        ldx Q
+        sta Q
         lda _28d0, x
         and # %10101010         ; colour mask
         
@@ -1872,7 +1872,7 @@ _3130:                                                                  ;$3130
 
 @_3149:                                                                 ;$3149
         ; clear the bar
-        sta ZP_VAR_Q
+        sta Q
         lda # $00
 @_314d:                                                                 ;$314D
         ; fill four pixel rows?
@@ -2543,7 +2543,7 @@ _34cf:                                                                  ;$34CF
         and # %01111111
         bne _34cc
         jsr _8cad
-        lda ZP_VAR_Q
+        lda Q
         sta ZP_VALUE_pt1
         jsr _8c8a
         ldy # $0a
@@ -2684,17 +2684,17 @@ _358f:                                                                  ;$358F
 _35b3:                                                                  ;$35B3
 ;===============================================================================
         ldx polyobj_01 + PolyObject::xpos + 0, y                        ;=$F925
-        stx ZP_VAR_Q
+        stx Q
         lda ZP_VAR_XX15_0
         jsr multiply_signed_into_RS
         ldx polyobj_01 + PolyObject::xpos + 2, y                        ;=$F927
-        stx ZP_VAR_Q
+        stx Q
         lda ZP_VAR_XX15_1
         jsr multiply_and_add
         sta S
         stx R
         ldx polyobj_01 + PolyObject::ypos + 1, y                        ;=$F929
-        stx ZP_VAR_Q
+        stx Q
         lda ZP_VAR_XX15_2
         jmp multiply_and_add
 
@@ -3169,7 +3169,7 @@ _37fa:                                                                  ;$37FA
         ldx ZP_ROLL_MAGNITUDE
         eor ZP_ROLL_SIGN
         jsr _393e
-        sta ZP_VAR_Q
+        sta Q
         lda ZP_VAR_XX_LO
         sta R
         lda ZP_VAR_XX_HI
@@ -3268,7 +3268,7 @@ _38f8:                                                                  ;$38F8
         sta R
         and # %01111111
         sta ZP_VALUE_pt3
-        lda ZP_VAR_Q
+        lda Q
         and # %01111111
         beq _38ee
         sec 
@@ -3295,7 +3295,7 @@ _391d:                                                                  ;$391D
         bne _3919
         sta T
         lda R
-        eor ZP_VAR_Q
+        eor Q
         and # %10000000
         ora T
         sta ZP_VALUE_pt4
@@ -3394,7 +3394,7 @@ multiply_by_sin:                                        ; BBC: FMLTU2   ;$39E0
         and # %00011111
         tax                     ; X = A%31, with 0..31 equiv. 0..pi
         lda table_sin, x
-        sta ZP_VAR_Q            ; Q = abs(sin(A))*256
+        sta Q                   ; Q = abs(sin(A))*256
         lda ZP_CIRCLE_RADIUS
 
 _39ea:                                                                  ;$39EA
@@ -3405,7 +3405,7 @@ _39ea:                                                                  ;$39EA
         tax 
         beq _3a1d
         lda table_loglo, x
-        ldx ZP_VAR_Q
+        ldx Q
         beq _3a20
         clc 
         adc table_loglo, x
@@ -3442,7 +3442,7 @@ _3a20:                                                                  ;$3A20
 
 _3a25:                                                                  ;$3A25
 ;===============================================================================
-        stx ZP_VAR_Q
+        stx Q
 _3a27:                                                                  ;$3A27
         eor # %11111111
         lsr 
@@ -3452,7 +3452,7 @@ _3a27:                                                                  ;$3A27
         ror ZP_VAR_P1
 _3a32:                                                                  ;$3A32
         bcs _3a3f
-        adc ZP_VAR_Q
+        adc Q
         ror 
         ror ZP_VAR_P2
         ror ZP_VAR_P1
@@ -3479,17 +3479,17 @@ _3a3f:                                                                  ;$3A3F
 _3ab2:                                                                  ;$3AB2
 ;===============================================================================
         ldx ZP_POLYOBJ_XPOS_LO, y
-        stx ZP_VAR_Q
+        stx Q
         lda ZP_VAR_XX15_0
         jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_XPOS_SIGN, y
-        stx ZP_VAR_Q
+        stx Q
         lda ZP_VAR_XX15_1
         jsr multiply_and_add
         sta S
         stx R
         ldx ZP_POLYOBJ_YPOS_HI, y
-        stx ZP_VAR_Q
+        stx Q
         lda ZP_VAR_XX15_2
 
         ; fallthrough!
@@ -3499,7 +3499,7 @@ _3ab2:                                                                  ;$3AB2
 
 _3b0d:                                                                  ;$3B0D
 ;===============================================================================
-        stx ZP_VAR_Q
+        stx Q
         eor # %10000000
         jsr multiply_and_add
         tax 
@@ -3537,7 +3537,7 @@ divide_by_player_speed:                                                 ;$3B33
 ;===============================================================================
 ; divide the number, given in A, by the player's speed:
 ;-------------------------------------------------------------------------------
-        sta ZP_VAR_Q
+        sta Q
         lda ZP_PLAYER_SPEED
 
         ; fallthrough!
@@ -3553,7 +3553,7 @@ _3bc1:                                                                  ;$3BC1
         sta ZP_VAR_P3
         lda ZP_POLYOBJ_ZPOS_LO
         ora # %00000001
-        sta ZP_VAR_Q
+        sta Q
         lda ZP_POLYOBJ_ZPOS_HI
         sta R
         lda ZP_POLYOBJ_ZPOS_SIGN
@@ -3582,27 +3582,27 @@ _3bf1:                                                                  ;$3BF1
         and # %01111111
 _3bf7:                                                                  ;$3BF7
         dey 
-        asl ZP_VAR_Q
+        asl Q
         rol R
         rol 
         bpl _3bf7
-        sta ZP_VAR_Q
+        sta Q
         lda # $fe
         sta R
         lda ZP_VAR_P3
 _3c07:                                                                  ;$3C07
         asl 
         bcs _3c17
-        cmp ZP_VAR_Q
+        cmp Q
         bcc _3c10
-        sbc ZP_VAR_Q
+        sbc Q
 _3c10:                                                                  ;$3C10
         rol R
         bcs _3c07
         jmp _3c20
 
 _3c17:                                                                  ;$3C17
-        sbc ZP_VAR_Q
+        sbc Q
         sec 
         rol R
         bcs _3c07
@@ -3716,15 +3716,15 @@ _3c8c:                                                                  ;$3C8C
         bmi _3c7c
 _3c95:                                                                  ;$3C95
         lda ZP_VAR_P1
-        eor ZP_VAR_Q
+        eor Q
         sta ZP_TEMP_VAR
-        lda ZP_VAR_Q
+        lda Q
         beq _3cc4
         asl 
-        sta ZP_VAR_Q
+        sta Q
         lda ZP_VAR_P1
         asl 
-        cmp ZP_VAR_Q
+        cmp Q
         bcs _3cb2
         jsr _3cce
         sec 
@@ -3736,8 +3736,8 @@ _3cad:                                                                  ;$3CAD
         ;-----------------------------------------------------------------------
 
 _3cb2:                                                                  ;$3CB2
-        ldx ZP_VAR_Q
-        sta ZP_VAR_Q
+        ldx Q
+        sta Q
         stx ZP_VAR_P1
         txa 
         jsr _3cce

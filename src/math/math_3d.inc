@@ -171,8 +171,8 @@ rotate_polyobj_axis:                                                    ;$A4A1
         ;
         ;       X.A = Q * A + R.S 
         ;
-        lda ZP_ALPHA                    ; our roll amount
-        sta ZP_VAR_Q                    ; Q = ALPHA
+        lda ZP_ALPHA            ; our roll amount
+        sta Q                   ; Q = ALPHA
 
         ; R.S = mYx1
         ;
@@ -226,8 +226,8 @@ rotate_polyobj_axis:                                                    ;$A4A1
         ;       mYx1 = BETA * -mYx2 + mYx1
         ;       mYx2 = BETA *  mYx1 + mYx2
         ;
-        lda ZP_BETA                     ; our pitch amount
-        sta ZP_VAR_Q                    ; Q = BETA
+        lda ZP_BETA             ; our pitch amount
+        sta Q                   ; Q = BETA
         
         ; R.S = mYx1 
         ;

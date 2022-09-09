@@ -7,8 +7,8 @@ divide_unsigned:                                                        ;$3B37
 ;===============================================================================
 ; unsigned integer division:
 ;
-; in:   A               ?
-;       ZP_VAR_Q        ?
+; in:   A                       ?
+;       Q                       ?
 ;
 ; returns:
 ;       A/Q*256 as 16-bit value in P.R  (A is the same as R on exit)
@@ -23,51 +23,51 @@ divide_unsigned:                                                        ;$3B37
         
         lda # $00
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+        
-        sbc ZP_VAR_Q
+        sbc Q
 
 :       rol ZP_VAR_P            ; 1                                     ;$3B43
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+
-        sbc ZP_VAR_Q
+        sbc Q
 
 :       rol ZP_VAR_P            ; 2                                     ;$3B4C
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+
-        sbc ZP_VAR_Q
+        sbc Q
 
 :       rol ZP_VAR_P            ; 4                                     ;$3B55
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+
-        sbc ZP_VAR_Q
+        sbc Q
 
 :       rol ZP_VAR_P            ; 8                                     ;$3B5E
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+
-        sbc ZP_VAR_Q
+        sbc Q
 
 :       rol ZP_VAR_P            ; 16                                    ;$3B67
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+
-        sbc ZP_VAR_Q
+        sbc Q
 
 :       rol ZP_VAR_P            ; 32                                    ;$3B70
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+
-        sbc ZP_VAR_Q
+        sbc Q
 
 :       rol ZP_VAR_P            ; 64                                    ;$3B79
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+
-        sbc ZP_VAR_Q
+        sbc Q
 
 :       rol ZP_VAR_P            ; 128                                   ;$3B82
         
@@ -82,18 +82,18 @@ divide_unsigned:                                                        ;$3B37
 
         ; calculate (remainder/Q)*256 via the log-tables
         lda table_loglo, x
-        ldx ZP_VAR_Q
+        ldx Q
         sec 
         sbc table_loglo, x
         bmi @3bae
         ldx ZP_B6
         lda table_log, x
-        ldx ZP_VAR_Q
+        ldx Q
         sbc table_log, x
         bcs @3ba9               ; carry is set: log(remainder) < log(Q)
         tax 
         lda table_antilog, x
-@3ba6:  sta R                                                    ;$3BA6
+@3ba6:  sta R                                                           ;$3BA6
 
         rts 
         
@@ -105,7 +105,7 @@ divide_unsigned:                                                        ;$3B37
         ;-----------------------------------------------------------------------
 @3bae:  ldx ZP_B6                                                       ;$3ABE
         lda table_log, x
-        ldx ZP_VAR_Q
+        ldx Q
         sbc table_log, x
         bcs @3ba9
         tax 
@@ -128,10 +128,10 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
 ; <bbcelite.com/deep_dives/multiplication_and_division_using_logarithms.html>
 ;
 ; in:   A                       dividend -- number to divide
-;       ZP_VAR_Q                divisor  -- number dividing by
+;       Q                       divisor  -- number dividing by
 ; out:  R                       quotient -- result, * 256
 ;-------------------------------------------------------------------------------
-        cmp ZP_VAR_Q            ; if A >= Q, the result won't fit,
+        cmp Q                   ; if A >= Q, the result won't fit,
         bcs @rtsff              ;  in which case just return $FF
 
         sta ZP_B6               ; preserve input dividend for reuse
@@ -149,7 +149,7 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
         ; method should be used for best accuracy
         ;
         lda table_loglo, x      ; look up log(2) lo-byte for the dividend
-        ldx ZP_VAR_Q            ; switch to the divisor
+        ldx Q                   ; switch to the divisor
         sec                     ;  and subtract its log(2) lo-byte
         sbc table_loglo, x      ;  from the dividend's
         bmi @odd                ; if there's no underflow, use the odd method
@@ -157,7 +157,7 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
         ;-----------------------------------------------------------------------
 @even:  ldx ZP_B6               ; retrieve our input dividend value
         lda table_log, x        ; look that up in the log table
-        ldx ZP_VAR_Q            ; repeat this for the divisor
+        ldx Q                   ; repeat this for the divisor
         sbc table_log, x        ;  and subtract the two
         bcs @rtsff              ; if log2(A) >= log2(Q) return $FF
 
@@ -170,7 +170,7 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
         ;-----------------------------------------------------------------------
 @odd:   ldx ZP_B6               ; retrieve our input dividend value     ;$99D6
         lda table_log, x        ; look this up in the log table
-        ldx ZP_VAR_Q            ; repeat this for the divisor
+        ldx Q                   ; repeat this for the divisor
         sbc table_log, x        ;  and subtract the two
         bcs @rtsff              ; if log2(A) >= log2(Q) return $FF
 
@@ -193,14 +193,14 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
 @shift: asl                     ; pop a bit off dividend                ;$99EF
         bcs @sub                ; if carry, apply subtraction
 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc :+
-        sbc ZP_VAR_Q
+        sbc Q
 :       rol R                                                           ;$99F8
         bcs @shift              ; test for the ending flag,
         rts                     ;  else continue division
 
-@sub:   sbc ZP_VAR_Q            ; no test needed, A+carry is > Q        ;$99FD
+@sub:   sbc Q                   ; no test needed, A+carry is > Q        ;$99FD
         sec 
         rol R
         bcs @shift              ; test for the ending flag,

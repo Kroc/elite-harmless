@@ -1252,7 +1252,7 @@ _2292:                                                                  ;$2292
         bcc _22b2
         sta R
         jsr square_root
-        lda ZP_VAR_Q
+        lda Q
         sta VAR_06F3
         bne _231c
 _22b2:                                                                  ;$22B2

@@ -388,7 +388,7 @@ ZP_SPEED_LO             := $97  ; player speed * 64, lo-byte
 ZP_SPEED_HI             := $98  ; player speed * 64, hi-byte
 
 ZP_VAR_U                := $99  ; a common pseudo-register named "U"
-ZP_VAR_Q                := $9a  ; a common pseudo-register named "Q"
+Q                       := $9a  ; a common pseudo-register named "Q"
 R                       := $9b  ; a common pseudo-register named "R"
 S                       := $9c  ; a common pseudo-register named "S"
 

@@ -620,12 +620,12 @@ get_system_info:                                        ; BBC: TT24     ;$6BA9
 
         lda TSYSTEM_GOVERNMENT  ; use the government as the other
         adc # $04               ;  side of the equation; with a floor
-        sta ZP_VAR_Q            ;  of 4 (in case of zero)
+        sta Q                   ;  of 4 (in case of zero)
 
         jsr multiply_unsigned_PQ
 
         lda TSYSTEM_POPULATION  ; multiply the result (in P)
-        sta ZP_VAR_Q            ;  against the population
+        sta Q                   ;  against the population
 
         ; TODO: couldn't we just use `ldx` and call `multiply_unsigned_PX`?
         jsr multiply_unsigned_PQ
@@ -966,7 +966,7 @@ _6d3e:                                                                  ;$6D3E
         bcs _6d34
 _6d79:                                                                  ;$6D79
         lda VAR_04EC
-        sta ZP_VAR_Q
+        sta Q
         jsr _74a2
         jsr _745a
         ldy # $c5
@@ -1019,7 +1019,7 @@ _6dd6:                                                                  ;$6DD6
         cmp # $4e
         beq _6e26
 _6de5:                                                                  ;$6DE5
-        sta ZP_VAR_Q
+        sta Q
         sec 
         sbc # $30
         bcc _6e13
@@ -1040,7 +1040,7 @@ _6de5:                                                                  ;$6DE5
         beq _6e0a
         bcs _6e13
 _6e0a:                                                                  ;$6E0A
-        lda ZP_VAR_Q
+        lda Q
         jsr print_char
 
         dec ZP_TEMP_VAR
@@ -1158,7 +1158,7 @@ _6e5d:                                                                  ;$6E5d
         lda R
         sta ZP_VAR_P1
         lda VAR_04EC
-        sta ZP_VAR_Q
+        sta Q
         jsr _74a2
         jsr give_cash           ; pay monies
 
@@ -1668,7 +1668,7 @@ _7122:                                                                  ;$7122
         lda ZP_VAR_P1
         clc 
         adc ZP_VALUE_pt1        ; radius?
-        sta ZP_VAR_Q
+        sta Q
         pla 
         adc ZP_VALUE_pt2
         bcc _7135
@@ -1676,7 +1676,7 @@ _7122:                                                                  ;$7122
 _7135:                                                                  ;$7135
         sta R
         jsr square_root
-        lda ZP_VAR_Q
+        lda Q
         asl 
         ldx # $00
         stx TSYSTEM_DISTANCE_HI
@@ -2320,9 +2320,9 @@ equipment_screen:                                                       ;$74BB
         bcc _74e2
         lda # $0e
 _74e2:                                                                  ;$74E2
-        sta ZP_VAR_Q
+        sta Q
         sta VAR_04ED
-        inc ZP_VAR_Q
+        inc Q
         lda # $46
         sec 
         sbc PLAYER_FUEL
@@ -2353,7 +2353,7 @@ _74f5:                                                                  ;$74F5
         jsr print_medium_value
         ldx ZP_VAR_XX13
         inx 
-        cpx ZP_VAR_Q
+        cpx Q
         bcc _74f5
         jsr tkn_docked_fn15
 
@@ -2750,7 +2750,7 @@ _787d:                                                                  ;$787D
         sec 
         rol 
 _7885:                                                                  ;$7885
-        sta ZP_VAR_Q
+        sta Q
         ldy # $01
         lda [ZP_POLYOBJ_HEAP], y
         sta VAR_050D
@@ -2805,7 +2805,7 @@ _78bc:                                                                  ;$78BC
 _78d6:                                                                  ;$78D6
         ldy # $00
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_Q
+        sta Q
         iny
         lda [ZP_POLYOBJ_HEAP], y
         bpl _78e3
@@ -2927,7 +2927,7 @@ _7974:                                                                  ;$7974
         stx ZP_GOATSOUP_pt4
         rol                     ; -> A is still random, carry is random
         bcs _7998               
-        jsr _39ea               ; A=(A*Q)/256  isn't that still simply random?
+        jsr _39ea               ; A=(A*Q)/256 isn't that still simply random?
         adc R                   ; A+=R
         tax                     ; why do we need x?
         lda S                   ; restore A
@@ -2935,7 +2935,7 @@ _7974:                                                                  ;$7974
         rts 
 
 _7998:                                                                  ;$7998
-        jsr _39ea               ; A=(A*Q)/256  isn't that still simply random?
+        jsr _39ea               ; A=(A*Q)/256 isn't that still simply random?
         sta T
         lda R
         sbc T                   ; A = R-A
@@ -2980,7 +2980,7 @@ _79c0:                                                                  ;$79C0
         sty VAR_050F
         ldy # $00
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_Q
+        sta Q
         iny 
         lda [ZP_POLYOBJ_HEAP], y
         bpl _79d9
@@ -3287,7 +3287,7 @@ _7b7d:                                                                  ;$7B7D
         ror 
         tay 
         lda # $14
-        sta ZP_VAR_Q
+        sta Q
         txa 
         jsr divide_unsigned
         ldx ZP_VAR_P1
@@ -3842,7 +3842,7 @@ _7e5f:                                                                  ;$7E5F
         and # %00011111
         tax 
         lda table_sin, x        
-        sta ZP_VAR_Q            ; Q = abs(sin(AB))*256
+        sta Q                   ; Q = abs(sin(AB))*256
         lda ZP_B4
         jsr _39ea               ; A=(A*Q)/256
         sta R                   ; R = B4 * abs(sin(AB))
@@ -3860,7 +3860,7 @@ _7e5f:                                                                  ;$7E5F
         and # %00011111
         tax 
         lda table_sin, x
-        sta ZP_VAR_Q            ; Q = abs(cos(AB))*256
+        sta Q                   ; Q = abs(cos(AB))*256
         lda ZP_B3
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VALUE_pt3        ; VALUE_pt3 = B3 * abs(cos(AB))
@@ -4217,7 +4217,7 @@ _7f67:                                                                  ;$7F67
         lda ZP_B2               ; r^2, lo byte
         sec                     ; subtract:
         sbc ZP_VAR_P            ; n^2, lo-byte
-        sta ZP_VAR_Q            ; result, lo-byte
+        sta Q                   ; result, lo-byte
 
         lda ZP_B3               ; r^2, hi-byte
         sbc T                   ; subtract n^2, hi byte
@@ -4236,7 +4236,7 @@ _7f67:                                                                  ;$7F67
         jsr get_random_number   ; randomise the fringe each frame
         and ZP_TEMP_COUNTER     ; limit to the fringe-size chosen earlier
         clc                     ; add the fringe to...
-        adc ZP_VAR_Q            ; ...the scanline's half-width
+        adc Q                   ; ...the scanline's half-width
         bcc :+                  ; if adding the fringe takes it over 256,
         lda # $ff               ; clip it to 256
 
@@ -4763,7 +4763,7 @@ _8189:                                                                  ;$8189
         jsr _7e36
         sta ZP_VAR_P1
         lda # $de
-        sta ZP_VAR_Q
+        sta Q
         stx ZP_VAR_U
         jsr multiply_unsigned_PQ
         ldx ZP_VAR_U
@@ -4781,7 +4781,7 @@ _81a7:                                                                  ;$81A7
         rts 
 
 _81aa:                                                                  ;$81AA
-        sta ZP_VAR_Q
+        sta Q
         jsr _3c95
         ldx ZP_POLYOBJ_M0x2_HI
         bmi _81b5
@@ -7034,13 +7034,13 @@ _8cc2:                                                                  ;$8CC2
         jsr math_square_7bit
         sta R
         lda ZP_VAR_P1
-        sta ZP_VAR_Q
+        sta Q
         lda ZP_VAR_XX15_1
         jsr math_square_7bit
         sta T
         lda ZP_VAR_P1
-        adc ZP_VAR_Q
-        sta ZP_VAR_Q
+        adc Q
+        sta Q
         lda T
         adc R
         sta R
@@ -7048,8 +7048,8 @@ _8cc2:                                                                  ;$8CC2
         jsr math_square_7bit
         sta T
         lda ZP_VAR_P1
-        adc ZP_VAR_Q
-        sta ZP_VAR_Q
+        adc Q
+        sta Q
         lda T
         adc R
         sta R
@@ -7646,7 +7646,7 @@ _9131:                                                                  ;$9131
         lda ZP_VAR_XX15_2
         sta ZP_POLYOBJ_M1x2_HI
         lda ZP_POLYOBJ_M0x1_HI
-        sta ZP_VAR_Q
+        sta Q
         lda ZP_POLYOBJ_M1x2_HI
         jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_M0x2_HI
@@ -7682,15 +7682,15 @@ _918b:                                                                  ;$918B
 ;===============================================================================
         tay 
         and # %01111111
-        cmp ZP_VAR_Q
+        cmp Q
         bcs _91b2
         ldx # $fe
         stx T
 _9196:                                                                  ;$9196
         asl 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc _919d
-        sbc ZP_VAR_Q
+        sbc Q
 _919d:                                                                  ;$919D
         rol T
         bcs _9196
@@ -7717,33 +7717,33 @@ _91b8:                                                                  ;$91B8
 ;===============================================================================
         sta ZP_VAR_P3
         lda ZP_POLYOBJ_M0x0_HI, x
-        sta ZP_VAR_Q
+        sta Q
         lda ZP_POLYOBJ_M1x0_HI, x
         jsr multiply_signed_into_RS
         ldx ZP_POLYOBJ_M0x0_HI, y
-        stx ZP_VAR_Q
+        stx Q
         lda ZP_POLYOBJ_M1x0_HI, y
         jsr multiply_and_add
         stx ZP_VAR_P1
         ldy ZP_VAR_P3
         ldx ZP_POLYOBJ_M0x0_HI, y
-        stx ZP_VAR_Q
+        stx Q
         eor # %10000000
         sta ZP_VAR_P2
-        eor ZP_VAR_Q
+        eor Q
         and # %10000000
         sta T
         lda # $00
         ldx # $10
         asl ZP_VAR_P1
         rol ZP_VAR_P2
-        asl ZP_VAR_Q
-        lsr ZP_VAR_Q
+        asl Q
+        lsr Q
 _91eb:                                                                  ;$91EB
         rol 
-        cmp ZP_VAR_Q
+        cmp Q
         bcc _91f2
-        sbc ZP_VAR_Q
+        sbc Q
 _91f2:                                                                  ;$91F2
         rol ZP_VAR_P1
         rol ZP_VAR_P2

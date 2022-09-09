@@ -52,14 +52,14 @@ multiply_signed:                                                        ;$3A54
         ; -ve * +ve = -ve
         ; -ve * -ve = +ve
         ;
-        eor ZP_VAR_Q            ; load multiplicand, combining the signs
+        eor Q                   ; load multiplicand, combining the signs
         and # %10000000         ; extract resulting sign
         sta T                   ; keep resulting sign for the end
 
         ; now the sign is separate, extract the "magnitude"
         ; -- the value, without sign, which will be 0 to 127
         ;
-        lda ZP_VAR_Q            ; again, multiplicand
+        lda Q                   ; again, multiplicand
         and # %01111111         ; extract the magnitude
         sta sm1+1               ; these effectively add A and X
         sta sm3+1               ; ->  `lda table+A, X`
@@ -168,7 +168,7 @@ sm4:    sbc square2_hi, x
         ; -ve * -ve = +ve
         ;
         txa                     ; load multiplier
-        eor ZP_VAR_Q            ; load multiplicand, combining the signs
+        eor Q                   ; load multiplicand, combining the signs
         and # %10000000         ; extract resulting sign
         sta T                   ; keep resulting sign for the end
 
@@ -176,7 +176,7 @@ sm4:    sbc square2_hi, x
         ; without sign, which will be 0 to 127. we'll check here to see if
         ; we're multiplying with zero, which will always yield a result of zero
         ;
-        lda ZP_VAR_Q            ; again, multiplicand
+        lda Q                   ; again, multiplicand
         and # %01111111         ; extract the magnitude
        .bze @zero               ; multiplying with 0? skip everything!
         

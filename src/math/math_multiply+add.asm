@@ -4,7 +4,7 @@
 ;
 ; "math_multiply+add.asm":
 ;
-; return a 16-bit number (in X & A), by multiplying "Q" (`ZP_VAR_Q`) with `A`
+; return a 16-bit number (in X & A), by multiplying "Q" (`Q`) with `A`
 ; and adding the 16-bit number in R & S
 ;
 ;       A.X = Q * A + S.R
