@@ -111,108 +111,12 @@ _9964:                                                                  ;$9964
         rts 
 
 
-; NOTE: in the original, `square_root` goes here
-;       between these two segments
-;
-.segment        "CODE_99AF"
+; NOTE: in the original, segment "CODE_9978" goes here                  ; $9978
+; NOTE: in the original, segment "CODE_99AF" goes here                  ; $99AF
+
+
+.segment        "CODE_9A0C"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-math_divide_AQ:                                         ; BBC: LL28     ;$99AF
-;===============================================================================
-; divide A by Q:
-;
-; the result is multiplied by 256 to return a fractional value as a whole byte.
-; the exact mathematics involved in log-based multiplication and division are
-; extremely complex; an overview can be seen in Mark Moxon's BBC disassembly:
-; <bbcelite.com/deep_dives/multiplication_and_division_using_logarithms.html>
-;
-; in:   A                       dividend -- number to divide
-;       ZP_VAR_Q                divisor  -- number dividing by
-; out:  ZP_VAR_R                quotient -- result, * 256
-;-------------------------------------------------------------------------------
-        cmp ZP_VAR_Q            ; if A >= Q, the result won't fit,
-        bcs @rtsff              ;  in which case just return $FF
-
-        sta ZP_B6               ; preserve input dividend for reuse
-        tax                     ; copy to X for a lookup in a moment
-
-        beq :+                  ; 0*256 = 0, and anything divided by zero
-                                ; ends the universe, but we will return zero
-                                ; for convenience
-
-        ; use the log tables: logs are the opposite of exponention (e.g.
-        ; powers of 2). if multiplication can be represented by adding
-        ; powers, then division can be represented by subtracting logs
-        ;
-        ; the log-lo table is used first to guage which
-        ; method should be used for best accuracy
-        ;
-        lda table_loglo, x      ; look up log(2) lo-byte for the dividend
-        ldx ZP_VAR_Q            ; switch to the divisor
-        sec                     ;  and subtract its log(2) lo-byte
-        sbc table_loglo, x      ;  from the dividend's
-        bmi @odd                ; if there's no underflow, use the odd method
-
-        ;-----------------------------------------------------------------------
-@even:  ldx ZP_B6               ; retrieve our input dividend value
-        lda table_log, x        ; look that up in the log table
-        ldx ZP_VAR_Q            ; repeat this for the divisor
-        sbc table_log, x        ;  and subtract the two
-        bcs @rtsff              ; if log2(A) >= log2(Q) return $FF
-
-        tax                     ; use the delta to look up the
-        lda table_antilog, x    ;  result in the antilog (even) table
-
-:       sta ZP_VAR_R            ; return result in R                    ;$99D3
-        rts
-
-        ;-----------------------------------------------------------------------
-@odd:   ldx ZP_B6               ; retrieve our input dividend value     ;$99D6
-        lda table_log, x        ; look this up in the log table
-        ldx ZP_VAR_Q            ; repeat this for the divisor
-        sbc table_log, x        ;  and subtract the two
-        bcs @rtsff              ; if log2(A) >= log2(Q) return $FF
-
-        tax                     ; use the delta to look up the
-        lda table_antilog_odd, x;  result in the antilog (odd) table
-
-        sta ZP_VAR_R            ; return result in R
-        rts 
-
-        ; here follows the remnants of the older BBC
-        ; code to do the division by rotation
-        ;
-.ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        bcs @rtsff              ; return $FF, presumably when A > Q     ; $99E9
-
-        ldx # %11111110         ; this is a  7-bit train counter
-        stx ZP_VAR_R            ; the result will be rotated into R
-
-@shift: asl                     ; pop a bit off dividend                ;$99EF
-        bcs @sub                ; if carry, apply subtraction
-
-        cmp ZP_VAR_Q
-        bcc :+
-        sbc ZP_VAR_Q
-:       rol ZP_VAR_R                                                    ;$99F8
-        bcs @shift              ; test for the ending flag,
-        rts                     ;  else continue division
-
-@sub:   sbc ZP_VAR_Q            ; no test needed, A+carry is > Q        ;$99FD
-        sec 
-        rol ZP_VAR_R
-        bcs @shift              ; test for the ending flag,
-
-        lda ZP_VAR_R            ; return A & R = result
-        rts 
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-@rtsff: lda # $ff                                                       ;$9A07
-        sta ZP_VAR_R
-        rts 
-
-;===============================================================================
 ; returns A=Q+R, sign-bit S. regards two sign-bits in A,S.
 ; only uses A (and stack). this is another example of the curious
 ; "unsigned value+sign bit" math used at many places in Elite.
