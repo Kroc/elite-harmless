@@ -5,7 +5,7 @@
 ; "math_multiply+add.asm":
 ;
 ; return a 16-bit number (in X & A), by multiplying "Q" (`ZP_VAR_Q`) with `A`
-; and adding the 16-bit number in `R` (`R`) & `S` (`ZP_VAR_S`):
+; and adding the 16-bit number in R & S
 ;
 ;       A.X = Q * A + S.R
 ;
@@ -23,14 +23,14 @@ multiplied_now_add:                                                     ;$3AD1
         sta ZP_TEMP_VAR
         and # %10000000
         sta T
-        eor ZP_VAR_S
+        eor S
         bmi :+
 
         lda R
         clc 
         adc ZP_VAR_P
         tax 
-        lda ZP_VAR_S
+        lda S
         adc ZP_TEMP_VAR
         ora T
         
@@ -38,7 +38,7 @@ multiplied_now_add:                                                     ;$3AD1
 
         ;-----------------------------------------------------------------------
 
-:       lda ZP_VAR_S                                                    ;$3AE8
+:       lda S                                                           ;$3AE8
         and # %01111111
         sta ZP_VAR_U
         lda ZP_VAR_P

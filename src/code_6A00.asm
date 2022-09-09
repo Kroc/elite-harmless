@@ -1025,7 +1025,7 @@ _6de5:                                                                  ;$6DE5
         bcc _6e13
         cmp # $0a
         bcs _6dbf
-        sta ZP_VAR_S
+        sta S
         lda R
         cmp # $1a
         bcs _6e13
@@ -1034,7 +1034,7 @@ _6de5:                                                                  ;$6DE5
         asl 
         asl 
         adc T
-        adc ZP_VAR_S
+        adc S
         sta R
         cmp VAR_04ED
         beq _6e0a
@@ -1607,7 +1607,7 @@ _70b6:                                                                  ;$70B6
         adc # $01
 _70c2:                                                                  ;$70C2
         lsr 
-        sta ZP_VAR_S
+        sta S
         lda ZP_SEED_W0_HI
         sec 
         sbc TSYSTEM_POS_Y
@@ -1617,7 +1617,7 @@ _70c2:                                                                  ;$70C2
 _70d1:                                                                  ;$70D1
         lsr 
         clc 
-        adc ZP_VAR_S
+        adc S
         cmp T
         bcs _70e8
         sta T
@@ -2912,7 +2912,7 @@ _795d:                                                                  ;$795D
 
 _7974:                                                                  ;$7974
 ;===============================================================================
-        sta ZP_VAR_S            ; retain A
+        sta S                   ; retain A
         clc 
         lda ZP_GOATSOUP_pt1
         rol 
@@ -2930,7 +2930,7 @@ _7974:                                                                  ;$7974
         jsr _39ea               ; A=(A*Q)/256  isn't that still simply random?
         adc R                   ; A+=R
         tax                     ; why do we need x?
-        lda ZP_VAR_S            ; restore A
+        lda S                   ; restore A
         adc # $00               ; add 1 on overflow?
         rts 
 
@@ -2940,7 +2940,7 @@ _7998:                                                                  ;$7998
         lda R
         sbc T                   ; A = R-A
         tax                     ; why do we need x?
-        lda ZP_VAR_S            ; restore A
+        lda S                   ; restore A
         sbc # $00               ; sub 1 on underflow?
         rts 
 
@@ -3876,7 +3876,7 @@ _7e5f:                                                                  ;$7E5F
         sta ZP_TEMPOBJ_M2x2_LO
         lda ZP_TEMPOBJ_M2x2_HI
         eor ZP_TEMPOBJ_M2x1_LO
-        sta ZP_VAR_S
+        sta S
         lda ZP_TEMPOBJ_M2x2_LO
         eor $45
         jsr multiplied_now_add
@@ -3902,7 +3902,7 @@ _7ec8:                                                                  ;$7EC8
         sta R
         lda ZP_TEMPOBJ_M2x2_HI
         eor ZP_TEMPOBJ_M2x1_HI
-        sta ZP_VAR_S
+        sta S
         lda ZP_VALUE_pt3
         sta ZP_VAR_P1
         lda ZP_TEMPOBJ_M2x2_LO
@@ -7105,7 +7105,7 @@ do_quickjump:                                                           ;$8E29
         bcc @nojump
 
 :       lda # $81               ; jump distance?                        ;$8E52
-        sta ZP_VAR_S
+        sta S
         sta R
         sta ZP_VAR_P
 

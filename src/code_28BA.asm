@@ -387,7 +387,7 @@ move_dust_front:                                                        ;$2A40
         lda ZP_VAR_XX15_1
         adc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
-        sta ZP_VAR_S
+        sta S
 
         ; move X:
         ;-----------------------------------------------------------------------
@@ -433,7 +433,7 @@ move_dust_front:                                                        ;$2A40
         lda ZP_VAR_YY_LO
         sta R
         lda ZP_VAR_YY_HI
-        sta ZP_VAR_S
+        sta S
         lda # $00
         sta ZP_VAR_P
         lda ZP_BETA
@@ -518,7 +518,7 @@ _2b30:                                                                  ;$2B30
         lda ZP_VAR_XX15_1
         sbc ZP_VAR_YY_HI
         sta ZP_VAR_YY_HI
-        sta ZP_VAR_S
+        sta S
 
         lda DUST_Z_LO, y
         adc ZP_SPEED_LO
@@ -548,7 +548,7 @@ _2b30:                                                                  ;$2B30
         sta ZP_VAR_Q
 
         lda ZP_VAR_XX_HI
-        sta ZP_VAR_S
+        sta S
         eor # %10000000
         jsr _3a50
         asl ZP_VAR_P1
@@ -567,7 +567,7 @@ _2b30:                                                                  ;$2B30
         sta R
 
         lda ZP_VAR_YY_HI
-        sta ZP_VAR_S
+        sta S
 
         lda # $00
         sta ZP_VAR_P1
@@ -902,7 +902,7 @@ print_flight_token_and_newline_and_indent:                              ;$2D61
 _2d69:                                                                  ;$2D69
 ;===============================================================================
         lda ZP_VALUE_pt4
-        sta ZP_VAR_S
+        sta S
         and # %10000000
         sta T
         eor ZP_POLYOBJ_XPOS_SIGN, x
@@ -924,9 +924,9 @@ _2d69:                                                                  ;$2D69
         ;-----------------------------------------------------------------------
 
 _2d8d:                                                                  ;$2D8D
-        lda ZP_VAR_S
+        lda S
         and # %01111111
-        sta ZP_VAR_S
+        sta S
         lda ZP_POLYOBJ_XPOS_LO, x
         sec 
         sbc ZP_VALUE_pt2
@@ -936,7 +936,7 @@ _2d8d:                                                                  ;$2D8D
         sta ZP_VALUE_pt3
         lda ZP_POLYOBJ_XPOS_SIGN, x
         and # %01111111
-        sbc ZP_VAR_S
+        sbc S
         ora # %10000000
         eor T
         sta ZP_VALUE_pt4
@@ -978,7 +978,7 @@ _2dc5:                                                                  ;$2DC5
 
         lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         sbc # $00
-        sta ZP_VAR_S
+        sta S
 
         ; ROW Y
         ;-----------------------------------------------------------------------
@@ -1017,7 +1017,7 @@ _2dc5:                                                                  ;$2DC5
         sta R
         lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         sbc # $00
-        sta ZP_VAR_S
+        sta S
         lda ZP_POLYOBJ + MATRIX_COL0_LO, x
         sta ZP_VAR_P
         lda ZP_POLYOBJ + MATRIX_COL0_HI, x
@@ -1613,7 +1613,7 @@ _2ff3:                                                                  ;$2FF3
         sta ZP_VAR_P1
 
         lda # $08
-        sta ZP_VAR_S
+        sta S
 
         lda ZP_ROLL_MAGNITUDE
         lsr 
@@ -2691,7 +2691,7 @@ _35b3:                                                                  ;$35B3
         stx ZP_VAR_Q
         lda ZP_VAR_XX15_1
         jsr multiply_and_add
-        sta ZP_VAR_S
+        sta S
         stx R
         ldx polyobj_01 + PolyObject::ypos + 1, y                        ;=$F929
         stx ZP_VAR_Q
@@ -2783,7 +2783,7 @@ _363f:                                                                  ;$363F
 
         lda ZP_POLYOBJ_XPOS_LO
         jsr math_square
-        sta ZP_VAR_S
+        sta S
 
         lda ZP_VAR_P1
         sta R
@@ -2796,12 +2796,12 @@ _363f:                                                                  ;$363F
         adc R
         sta R
         txa 
-        adc ZP_VAR_S
+        adc S
         bcs _367e
-        sta ZP_VAR_S
+        sta S
         ldy # Hull::_0102 + 1   ;=$02: "missile lock area" hi-byte?
         lda [ZP_HULL_ADDR], y
-        cmp ZP_VAR_S
+        cmp S
         bne _367d
         dey                     ;=$01: "missile lock area" lo-byte?
         lda [ZP_HULL_ADDR], y
@@ -3133,7 +3133,7 @@ _37fa:                                                                  ;$37FA
         lda ZP_VAR_P1
         sta ZP_BA
         eor ZP_B1
-        sta ZP_VAR_S
+        sta S
         
         lda DUST_X_LO, y
         sta ZP_VAR_P1
@@ -3141,7 +3141,7 @@ _37fa:                                                                  ;$37FA
         lda DUST_X_HI, y
         sta ZP_VAR_XX15_0
         jsr multiplied_now_add
-        sta ZP_VAR_S
+        sta S
         stx R
         
         lda DUST_Y_HI, y
@@ -3157,7 +3157,7 @@ _37fa:                                                                  ;$37FA
         stx R
         
         ldx ZP_VAR_XX15_1
-        stx ZP_VAR_S
+        stx S
         
         ldx ZP_PITCH_MAGNITUDE
         eor ZP_INV_PITCH_SIGN
@@ -3173,7 +3173,7 @@ _37fa:                                                                  ;$37FA
         lda ZP_VAR_XX_LO
         sta R
         lda ZP_VAR_XX_HI
-        sta ZP_VAR_S
+        sta S
         eor # %10000000
         jsr multiply_and_add
         sta ZP_VAR_XX_HI
@@ -3182,9 +3182,9 @@ _37fa:                                                                  ;$37FA
         lda ZP_VAR_YY_LO
         sta R
         lda ZP_VAR_YY_HI
-        sta ZP_VAR_S
+        sta S
         jsr multiply_and_add
-        sta ZP_VAR_S
+        sta S
         stx R
         lda # $00
         sta ZP_VAR_P1
@@ -3308,7 +3308,7 @@ _3934:                                                                  ;$3934
         ldx ZP_VAR_XX_LO
         stx R
         ldx ZP_VAR_XX_HI
-        stx ZP_VAR_S
+        stx S
 
 _393c:                                                                  ;$393C
 ;===============================================================================
@@ -3486,7 +3486,7 @@ _3ab2:                                                                  ;$3AB2
         stx ZP_VAR_Q
         lda ZP_VAR_XX15_1
         jsr multiply_and_add
-        sta ZP_VAR_S
+        sta S
         stx R
         ldx ZP_POLYOBJ_YPOS_HI, y
         stx ZP_VAR_Q
@@ -3557,12 +3557,12 @@ _3bc1:                                                                  ;$3BC1
         lda ZP_POLYOBJ_ZPOS_HI
         sta R
         lda ZP_POLYOBJ_ZPOS_SIGN
-        sta ZP_VAR_S
+        sta S
         lda ZP_VAR_P1
         ora # %00000001
         sta ZP_VAR_P1
         lda ZP_VAR_P3
-        eor ZP_VAR_S
+        eor S
         and # %10000000
         sta T
         ldy # $00
@@ -3578,7 +3578,7 @@ _3be5:                                                                  ;$3BE5
         bne _3be5
 _3bf1:                                                                  ;$3BF1
         sta ZP_VAR_P3
-        lda ZP_VAR_S
+        lda S
         and # %01111111
 _3bf7:                                                                  ;$3BF7
         dey 

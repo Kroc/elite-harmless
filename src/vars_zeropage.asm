@@ -387,10 +387,10 @@ ZP_PLAYER_SPEED         := $96
 ZP_SPEED_LO             := $97  ; player speed * 64, lo-byte
 ZP_SPEED_HI             := $98  ; player speed * 64, hi-byte
 
-ZP_VAR_U                := $99  ; a common variable named "U"
-ZP_VAR_Q                := $9a  ; a common variable named "Q"
-R                       := $9b  ; a common variable named "R"
-ZP_VAR_S                := $9c  ; a common variable named "S"
+ZP_VAR_U                := $99  ; a common pseudo-register named "U"
+ZP_VAR_Q                := $9a  ; a common pseudo-register named "Q"
+R                       := $9b  ; a common pseudo-register named "R"
+S                       := $9c  ; a common pseudo-register named "S"
 
 ZP_PRESERVE_X           := $9d  ; temp backup of X
 ZP_9E                   := $9e  ; tmep backup of Y

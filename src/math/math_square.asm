@@ -209,7 +209,7 @@ square_root:                                                            ;$9978
 ;-------------------------------------------------------------------------------
         ldy R
         lda ZP_VAR_Q
-        sta ZP_VAR_S
+        sta S
         ldx # $00
         stx ZP_VAR_Q            ; X.Y.S = 0.R.Q ; Q = 0
         lda # $08
@@ -229,14 +229,14 @@ square_root:                                                            ;$9978
         tax                     ; X.Y -= Q.$40; Q++ (via carry from rol below)
 @next:                                                                  ;$9998
         rol ZP_VAR_Q            ; Q*=2 (+1 if carry set, see above)
-        asl ZP_VAR_S
+        asl S
         tya
         rol
         tay
         txa
         rol
         tax
-        asl ZP_VAR_S
+        asl S
         tya
         rol
         tay

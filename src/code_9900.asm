@@ -124,7 +124,7 @@ _9964:                                                                  ;$9964
 ; we probably need a consistent naming for both the
 ; unsigned_with_sign_bit and the unsigned_with_external_sign-variables
 _9a0c:                                                                  ;$9A0C
-        eor ZP_VAR_S
+        eor S
         bmi _9a16               ; if (sign1 == sign2) return Q+R, keep sign
         lda ZP_VAR_Q
         clc 
@@ -141,9 +141,9 @@ _9a16:                                                                  ;$9A16
 
 _9a1f:                                                                  ;$9A1F
         pha 
-        lda ZP_VAR_S            ; if (R<Q) sign=-sign; return Q-R
+        lda S                   ; if (R<Q) sign=-sign; return Q-R
         eor # %10000000
-        sta ZP_VAR_S
+        sta S
         pla 
         eor # %11111111
         adc # $01
@@ -162,7 +162,7 @@ _9a30:                                                                  ;$9A30
         sta T
         lda ZP_VAR_XX15_1
         eor ZP_TEMPOBJ_M2x0_HI, x
-        sta ZP_VAR_S
+        sta S
         lda ZP_VAR_XX15_2
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_M2x1_LO, x
@@ -185,7 +185,7 @@ _9a30:                                                                  ;$9A30
         eor ZP_TEMPOBJ_M2x2_HI, x
         jsr _9a0c
         sta ZP_VAR_XX12_0, y
-        lda ZP_VAR_S
+        lda S
         sta ZP_VAR_XX12_1, y
         iny 
         iny 
@@ -532,38 +532,38 @@ _9c58:                                                                  ;$9C58
 _9c60:                                                                  ;$9C60
         sta R
         lda ZP_VAR_XX12_5
-        sta ZP_VAR_S
+        sta S
         lda ZP_VAR_K6_2
         sta ZP_VAR_Q
         lda ZP_8D
         jsr _9a0c
         bcs _9c43
         sta ZP_VAR_XX15_4
-        lda ZP_VAR_S
+        lda S
         sta ZP_VAR_XX15_5
         lda ZP_VAR_XX15_0
         sta R
         lda ZP_VAR_XX12_1
-        sta ZP_VAR_S
+        sta S
         lda ZP_VAR_K5
         sta ZP_VAR_Q
         lda ZP_VAR_K5_2
         jsr _9a0c
         bcs _9c43
         sta ZP_VAR_XX15_0
-        lda ZP_VAR_S
+        lda S
         sta ZP_VAR_XX15_1
         lda ZP_VAR_XX15_2
         sta R
         lda ZP_VAR_XX12_3
-        sta ZP_VAR_S
+        sta S
         lda ZP_VAR_K5_3
         sta ZP_VAR_Q
         lda ZP_VAR_K6_1
         jsr _9a0c
         bcs _9c43
         sta ZP_VAR_XX15_2
-        lda ZP_VAR_S
+        lda S
         sta ZP_VAR_XX15_3
 _9ca9:                                                                  ;$9CA9
         lda ZP_VAR_XX12_0
@@ -573,7 +573,7 @@ _9ca9:                                                                  ;$9CA9
         sta T
         lda ZP_VAR_XX12_1
         eor ZP_VAR_XX15_1
-        sta ZP_VAR_S
+        sta S
         lda ZP_VAR_XX12_2
         sta ZP_VAR_Q
         lda ZP_VAR_XX15_2
@@ -601,7 +601,7 @@ _9ca9:                                                                  ;$9CA9
         lsr 
         tax 
         pla 
-        bit ZP_VAR_S
+        bit S
         bmi _9cf4
         lda # $00
 _9cf4:                                                                  ;$9CF4
@@ -815,9 +815,9 @@ _9e30:                                                                  ;$9E30
         inx 
         cmp ZP_VAR_Q
         bcs _9e30
-        stx ZP_VAR_S
+        stx S
         jsr math_divide_AQ
-        ldx ZP_VAR_S
+        ldx S
         lda R
 
 ; ".LL64 ; counter Xreg"
@@ -1346,7 +1346,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         ;       bit 7 set   = bottom-left to top-right direction
         ;
         eor ZP_DELTA_XX_HI      ; "now kiss"
-        sta ZP_VAR_S            ; store slope sign for much later
+        sta S                   ; store slope sign for much later
 
         lda ZP_DELTA_YY_HI      ; check delta-Y sign
         bpl @flipx              ; skip ahead for positive
@@ -1421,7 +1421,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
 @a0ef:  lda R                   ; store the resultant slope             ;$A0EF
         sta ZP_DELTA_XX_LO
 
-        lda ZP_VAR_S            ; bit 7 of S is a flag to indicate if the slope
+        lda S                   ; bit 7 of S is a flag to indicate if the slope
         sta ZP_DELTA_XX_HI      ;  goes downhill (0) or uphill (1) 
 
         lda ZP_VAR_XX13         ; check the result of viewport bounds
@@ -1598,7 +1598,7 @@ clip_point:                                             ; BBC: LL118    ;$A19F
 ;-------------------------------------------------------------------------------
         lda ZP_VAR_XX15_1
         bpl _a1ba
-        sta ZP_VAR_S
+        sta S
         jsr _a219
         txa 
         clc 
@@ -1613,8 +1613,8 @@ clip_point:                                             ; BBC: LL118    ;$A19F
         tax 
 _a1ba:                                                                  ;$A1BA
         beq _a1d5
-        sta ZP_VAR_S
-        dec ZP_VAR_S
+        sta S
+        dec S
         jsr _a219
         txa 
         clc 
@@ -1630,7 +1630,7 @@ _a1ba:                                                                  ;$A1BA
 _a1d5:                                                                  ;$A1D5
         lda ZP_VAR_XX15_3
         bpl _a1f3
-        sta ZP_VAR_S
+        sta S
         lda ZP_VAR_XX15_2
         sta R
         jsr _a248
@@ -1651,7 +1651,7 @@ _a1f3:                                                                  ;$A1F3
         sta R
         lda ZP_VAR_XX15_3
         sbc # $00
-        sta ZP_VAR_S
+        sta S
         bcc :+
 
         jsr _a248
@@ -1685,7 +1685,7 @@ _a225:                                                                  ;$A225
         lda # $00
         tax 
         tay 
-        lsr ZP_VAR_S
+        lsr S
         ror R
         asl ZP_VAR_Q
         bcc _a23a
@@ -1695,10 +1695,10 @@ _a231:                                                                  ;$A231
         adc R
         tax 
         tya 
-        adc ZP_VAR_S
+        adc S
         tay 
 _a23a:                                                                  ;$A23A
-        lsr ZP_VAR_S
+        lsr S
         ror R
         asl ZP_VAR_Q
         bcs _a231
@@ -1721,14 +1721,14 @@ _a250:                                                                  ;$A250
         tax 
 _a255:                                                                  ;$A255
         asl R
-        rol ZP_VAR_S
-        lda ZP_VAR_S
+        rol S
+        lda S
         bcs _a261
         cmp ZP_VAR_Q
         bcc _a26c
 _a261:                                                                  ;$A261
         sbc ZP_VAR_Q
-        sta ZP_VAR_S
+        sta S
         lda R
         sbc # $00
         sta R
@@ -1760,17 +1760,17 @@ _a283:                                                                  ;$A283
 _a284:                                                                  ;$A284
         ldx ZP_VAR_XX12_2
         stx ZP_VAR_Q
-        lda ZP_VAR_S
+        lda S
         bpl _a29d
         lda # $00
         sec 
         sbc R
         sta R
-        lda ZP_VAR_S
+        lda S
         pha 
         eor # %11111111
         adc # $00
-        sta ZP_VAR_S
+        sta S
         pla 
 _a29d:                                                                  ;$A29D
         eor ZP_VAR_XX12_3

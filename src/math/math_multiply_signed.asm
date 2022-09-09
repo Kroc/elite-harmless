@@ -11,7 +11,7 @@
         stx ZP_VAR_P
 _3a4c:                                                                  ;$3A4C
         ldx ZP_VAR_XX_HI
-        stx ZP_VAR_S
+        stx S
 _3a50:                                                                  ;$3A50
         ldx ZP_VAR_XX_LO
         stx R
@@ -264,10 +264,10 @@ sm4:    sbc square2_hi, x
 multiply_signed_into_RS:                                                ;$3AA8
 ;===============================================================================
 ; does a multiply as above (`multiply_signed`) and stores
-; the result in R.S (`R` & `ZP_VAR_S`)
+; the result in R.S
 ;-------------------------------------------------------------------------------
         jsr multiply_signed
-        sta ZP_VAR_S
+        sta S
         lda ZP_VAR_P
         sta R
 
