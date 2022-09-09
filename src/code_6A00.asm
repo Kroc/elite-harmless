@@ -1597,7 +1597,7 @@ _70ab:                                                                  ;$70AB
         ldy # $7f
         sty T
         lda # $00
-        sta ZP_VAR_U
+        sta U
 _70b6:                                                                  ;$70B6
         lda ZP_SEED_W1_HI
         sec 
@@ -1627,11 +1627,11 @@ _70dd:                                                                  ;$70DD
         sta ZP_8E, x
         dex 
         bpl _70dd
-        lda ZP_VAR_U
+        lda U
         sta ZP_VAR_Z
 _70e8:                                                                  ;$70E8
         jsr randomize
-        inc ZP_VAR_U
+        inc U
         bne _70b6
         ldx # $05
 _70f1:                                                                  ;$70F1
@@ -2816,7 +2816,7 @@ _78e3:                                                                  ;$78E3
         lsr 
         lsr 
         ora # %00000001
-        sta ZP_VAR_U
+        sta U
         iny 
         lda [ZP_POLYOBJ_HEAP], y
         sta ZP_A8
@@ -2840,7 +2840,7 @@ _7903:                                                                  ;$7903
         sta $ffff, y                    ;!?
         cpy # $06
         bne _7903
-        ldy ZP_VAR_U
+        ldy U
 _7911:                                                                  ;$7911
         clc 
         lda ZP_GOATSOUP_pt1
@@ -2991,7 +2991,7 @@ _79d9:                                                                  ;$79D9
         lsr 
         lsr 
         ora # %00000001
-        sta ZP_VAR_U
+        sta U
         iny 
         lda [ZP_POLYOBJ_HEAP], y
         sta ZP_A8
@@ -3045,7 +3045,7 @@ _7a38:                                                                  ;$7A38
         sta $ffff, y            ;!?
         cpy # $06
         bne _7a38
-        ldy ZP_VAR_U
+        ldy U
 _7a46:                                                                  ;$7A46
         jsr _84ae
         sta ZP_VAR_Z
@@ -4764,9 +4764,9 @@ _8189:                                                                  ;$8189
         sta ZP_VAR_P1
         lda # $de
         sta Q
-        stx ZP_VAR_U
+        stx U
         jsr multiply_unsigned_PQ
-        ldx ZP_VAR_U
+        ldx U
         ldy ZP_VALUE_pt4
         bpl _81a7
         eor # %11111111

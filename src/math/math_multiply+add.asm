@@ -40,22 +40,22 @@ multiplied_now_add:                                                     ;$3AD1
 
 :       lda S                                                           ;$3AE8
         and # %01111111
-        sta ZP_VAR_U
+        sta U
         lda ZP_VAR_P
         sec 
         sbc R
         tax 
         lda ZP_TEMP_VAR
         and # %01111111
-        sbc ZP_VAR_U
+        sbc U
         bcs :+
-        sta ZP_VAR_U
+        sta U
         txa 
         eor # %11111111
         adc # $01
         tax 
         lda # $00
-        sbc ZP_VAR_U
+        sbc U
         ora # %10000000
 
 :       eor T                                                           ;$3B0A

@@ -2668,11 +2668,11 @@ _358f:                                                                  ;$358F
         lda [ZP_TEMP_ADDR3], y
         sta ZP_VALUE_pt2
 
-        sty ZP_VAR_U
-        ldx ZP_VAR_U
+        sty U
+        ldx U
         jsr _2d69
 
-        ldy ZP_VAR_U
+        ldy U
         sta ZP_POLYOBJ01_XPOS_pt3, x
         lda ZP_VALUE_pt3
         sta ZP_POLYOBJ01_XPOS_pt2, x

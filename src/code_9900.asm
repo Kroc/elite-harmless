@@ -798,7 +798,7 @@ _9e16:                                                                  ;$9E16
         sta T
         lda ZP_POLYOBJ_ZPOS_HI
         adc # $00
-        sta ZP_VAR_U
+        sta U
 _9e27:                                                                  ;$9E27
         jmp _9e83
 
@@ -823,7 +823,7 @@ _9e30:                                                                  ;$9E30
 ; ".LL64 ; counter Xreg"
 _9e3f:                                                                  ;$9E3F
         asl 
-        rol ZP_VAR_U
+        rol U
         bmi _9e4a
         dex 
         bne _9e3f
@@ -834,7 +834,7 @@ _9e3f:                                                                  ;$9E3F
 _9e4a:                                                                  ;$9E4A
         lda # $32
         sta R
-        sta ZP_VAR_U
+        sta U
         rts 
 
 ;===============================================================================
@@ -848,7 +848,7 @@ _9e51:                                                                  ;$9E51
         sta $0100, x
         inx 
         lda # $00
-        sbc ZP_VAR_U
+        sbc U
         sta $0100, x
         jmp _9ec3
 
@@ -861,7 +861,7 @@ _9e64:                                                                  ;$9E64
 
         lda ZP_POLYOBJ_ZPOS_HI  ; "z hi"
         sbc # $00
-        sta ZP_VAR_U
+        sta U
         bcc _9e7b               ; "underflow, make node close"
         bne _9e83               ; "Enter Node additions done, UT=z"
         
@@ -872,13 +872,13 @@ _9e64:                                                                  ;$9E64
 ; ".LL140 ; else make node close"
 _9e7b:                                                                  ;$9E7B
         lda # $00               ; "hi"?
-        sta ZP_VAR_U
+        sta U
         lda # $04               ; "lo"?
         sta T
 
 ; ".LL57 ; -> &4404 ; Enter Node additions done, z=T.U  set up from LL55"
 _9e83:                                                                  ;$9E83
-        lda ZP_VAR_U
+        lda U
         ora ZP_VAR_XX15_1
         ora ZP_VAR_XX15_4
         beq _9e9a
@@ -886,7 +886,7 @@ _9e83:                                                                  ;$9E83
         ror ZP_VAR_XX15_0
         lsr ZP_VAR_XX15_4
         ror ZP_VAR_XX15_3
-        lsr ZP_VAR_U
+        lsr U
         ror T
         jmp _9e83
 
@@ -914,7 +914,7 @@ _9ead:                                                                  ;$9EAD
         adc # $80
         sta $0100, x
         inx 
-        lda ZP_VAR_U
+        lda U
         adc # $00
         sta $0100, x
 
@@ -922,7 +922,7 @@ _9ead:                                                                  ;$9EAD
 _9ec3:                                                                  ;$9EC3
        .phx                     ; push X to stack (via A)
         lda # $00
-        sta ZP_VAR_U
+        sta U
         lda T
         sta Q
         lda ZP_VAR_XX15_3
@@ -939,7 +939,7 @@ _9ed9:                                                                  ;$9ED9
         sta $0100, x
         inx 
         lda # $00
-        adc ZP_VAR_U
+        adc U
         sta $0100, x
         jmp _9f06
 
@@ -960,7 +960,7 @@ _9eef:                                                                  ;$9EEF
         sta $0100, x
         inx 
         lda # $00
-        sbc ZP_VAR_U
+        sbc U
         sta $0100, x
 
 ; ".LL50 ; also from LL70, Also from LL49-3. XX3 heap has yscreen, Next vertex."
@@ -1006,9 +1006,9 @@ _9f35:                                                                  ;$9F35
         sta ZP_AE
 
         ldy # $00
-        sty ZP_VAR_U
+        sty U
         sty ZP_9F
-        inc ZP_VAR_U
+        inc U
         bit ZP_POLYOBJ_STATE
         bvc _9f9f
         lda ZP_POLYOBJ_STATE
@@ -1042,7 +1042,7 @@ _9f35:                                                                  ;$9F35
 _9f82:                                                                  ;$9F82
         jsr clip_line
         bcs _9f9f
-        ldy ZP_VAR_U
+        ldy U
         lda ZP_VAR_XX15_0
         sta [ZP_POLYOBJ_HEAP], y
         iny 
@@ -1055,7 +1055,7 @@ _9f82:                                                                  ;$9F82
         lda ZP_VAR_XX15_3
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        sty ZP_VAR_U
+        sty U
 
 ; ".LL170 ; (laser not firing) ; Calculate new lines ; their comment"
 _9f9f:                                                                  ;$9F9F
@@ -1496,7 +1496,7 @@ _a13f:                                                                  ;$A13F
 ; BBC code says "Shove visible edge onto XX19 ship lines heap counter U"
 ;
 ; in:   ZP_POLYOBJ_HEAP         address of heap
-;       ZP_VAR_U                heap-index
+;       U                       heap-index
 ;       ZP_VAR_XX15_0           line-coord X1
 ;       ZP_VAR_XX15_2           line-coord X2
 ;       ZP_VAR_XX15_1           line-coord Y1
@@ -1506,7 +1506,7 @@ _a13f:                                                                  ;$A13F
 ; TODO: this appears to write into the $FF20-$FFC0 range
 ; TODO: is the heap-address fixed? can we optimise that?
 ;-------------------------------------------------------------------------------
-        ldy ZP_VAR_U            ; get the current index within the heap
+        ldy U                   ; get the current index within the heap
 
         ; push the line's co-ordinates (X1, Y1, X2, Y2),
         ; one after the other, onto the heap
@@ -1523,7 +1523,7 @@ _a13f:                                                                  ;$A13F
         lda ZP_VAR_XX15_3
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        sty ZP_VAR_U            ; update new index position
+        sty U                   ; update new index position
 
         cpy ZP_TEMP_VAR         ; some kind of upper limit?
        .bge _a172
@@ -1547,7 +1547,7 @@ _a15b:                                                                  ;$A15B
         ;-----------------------------------------------------------------------
 
 _a172:                                                                  ;$A172
-        lda ZP_VAR_U            ; heap index?
+        lda U                   ; heap index?
 _a174:                                                                  ;$A174
         ldy # $00
         sta [ZP_POLYOBJ_HEAP], y

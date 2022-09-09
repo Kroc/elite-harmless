@@ -92,7 +92,7 @@ _775f:                                                                  ;$775F
         bpl :-
 
         lda # $09               ; align to 10 digits
-        sta ZP_VAR_U
+        sta U
 
         sec                     ; set carry flag - use decimal point
         jsr print_large_value   ; convert value to string
