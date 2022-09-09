@@ -93,13 +93,13 @@ divide_unsigned:                                                        ;$3B37
         bcs @3ba9               ; carry is set: log(remainder) < log(Q)
         tax 
         lda table_antilog, x
-@3ba6:  sta ZP_VAR_R                                                    ;$3BA6
+@3ba6:  sta R                                                    ;$3BA6
 
         rts 
         
         ;-----------------------------------------------------------------------
 @3ba9:  lda # $ff                                                       ;$3BA9
-        sta ZP_VAR_R
+        sta R
         rts 
 
         ;-----------------------------------------------------------------------
@@ -110,7 +110,7 @@ divide_unsigned:                                                        ;$3B37
         bcs @3ba9
         tax 
         lda table_antilog_odd, x
-        sta ZP_VAR_R
+        sta R
 
         rts 
 
@@ -129,7 +129,7 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
 ;
 ; in:   A                       dividend -- number to divide
 ;       ZP_VAR_Q                divisor  -- number dividing by
-; out:  ZP_VAR_R                quotient -- result, * 256
+; out:  R                       quotient -- result, * 256
 ;-------------------------------------------------------------------------------
         cmp ZP_VAR_Q            ; if A >= Q, the result won't fit,
         bcs @rtsff              ;  in which case just return $FF
@@ -164,7 +164,7 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
         tax                     ; use the delta to look up the
         lda table_antilog, x    ;  result in the antilog (even) table
 
-:       sta ZP_VAR_R            ; return result in R                    ;$99D3
+:       sta R                   ; return result in R                    ;$99D3
         rts
 
         ;-----------------------------------------------------------------------
@@ -177,7 +177,7 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
         tax                     ; use the delta to look up the
         lda table_antilog_odd, x;  result in the antilog (odd) table
 
-        sta ZP_VAR_R            ; return result in R
+        sta R                   ; return result in R
         rts 
 
         ; here follows the remnants of the older BBC
@@ -188,7 +188,7 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
         bcs @rtsff              ; return $FF, presumably when A > Q     ; $99E9
 
         ldx # %11111110         ; this is a  7-bit train counter
-        stx ZP_VAR_R            ; the result will be rotated into R
+        stx R                   ; the result will be rotated into R
 
 @shift: asl                     ; pop a bit off dividend                ;$99EF
         bcs @sub                ; if carry, apply subtraction
@@ -196,19 +196,19 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
         cmp ZP_VAR_Q
         bcc :+
         sbc ZP_VAR_Q
-:       rol ZP_VAR_R                                                    ;$99F8
+:       rol R                                                           ;$99F8
         bcs @shift              ; test for the ending flag,
         rts                     ;  else continue division
 
 @sub:   sbc ZP_VAR_Q            ; no test needed, A+carry is > Q        ;$99FD
         sec 
-        rol ZP_VAR_R
+        rol R
         bcs @shift              ; test for the ending flag,
 
-        lda ZP_VAR_R            ; return A & R = result
+        lda R                   ; return A & R = result
         rts 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 @rtsff: lda # $ff                                                       ;$9A07
-        sta ZP_VAR_R
+        sta R
         rts 

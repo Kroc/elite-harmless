@@ -128,11 +128,11 @@ _9a0c:                                                                  ;$9A0C
         bmi _9a16               ; if (sign1 == sign2) return Q+R, keep sign
         lda ZP_VAR_Q
         clc 
-        adc ZP_VAR_R
+        adc R
         rts 
 
 _9a16:                                                                  ;$9A16
-        lda ZP_VAR_R
+        lda R
         sec 
         sbc ZP_VAR_Q
         bcc _9a1f               ; if (R>=Q) return R-Q
@@ -169,7 +169,7 @@ _9a30:                                                                  ;$9A30
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda T
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_XX15_3
         eor ZP_TEMPOBJ_M2x1_HI, x
         jsr _9a0c
@@ -180,7 +180,7 @@ _9a30:                                                                  ;$9A30
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda T
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_XX15_5
         eor ZP_TEMPOBJ_M2x2_HI, x
         jsr _9a0c
@@ -365,7 +365,7 @@ _9b51:                                                                  ;$9B51
         lda ZP_TEMPOBJ_M2x0_HI, y
         rol 
         jsr math_divide_AQ
-        ldx ZP_VAR_R
+        ldx R
         stx ZP_TEMPOBJ_MATRIX, y
         dey 
         dey 
@@ -530,7 +530,7 @@ _9c58:                                                                  ;$9C58
         dex 
         bpl _9c58
 _9c60:                                                                  ;$9C60
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_XX12_5
         sta ZP_VAR_S
         lda ZP_VAR_K6_2
@@ -542,7 +542,7 @@ _9c60:                                                                  ;$9C60
         lda ZP_VAR_S
         sta ZP_VAR_XX15_5
         lda ZP_VAR_XX15_0
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_XX12_1
         sta ZP_VAR_S
         lda ZP_VAR_K5
@@ -554,7 +554,7 @@ _9c60:                                                                  ;$9C60
         lda ZP_VAR_S
         sta ZP_VAR_XX15_1
         lda ZP_VAR_XX15_2
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_XX12_3
         sta ZP_VAR_S
         lda ZP_VAR_K5_3
@@ -580,7 +580,7 @@ _9ca9:                                                                  ;$9CA9
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda T
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_XX12_3
         eor ZP_VAR_XX15_3
         jsr _9a0c
@@ -591,7 +591,7 @@ _9ca9:                                                                  ;$9CA9
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
         lda T
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_XX15_5
         eor ZP_VAR_XX12_5
         jsr _9a0c
@@ -818,7 +818,7 @@ _9e30:                                                                  ;$9E30
         stx ZP_VAR_S
         jsr math_divide_AQ
         ldx ZP_VAR_S
-        lda ZP_VAR_R
+        lda R
 
 ; ".LL64 ; counter Xreg"
 _9e3f:                                                                  ;$9E3F
@@ -827,13 +827,13 @@ _9e3f:                                                                  ;$9E3F
         bmi _9e4a
         dex 
         bne _9e3f
-        sta ZP_VAR_R
+        sta R
         rts 
 
 ; ".LL84 ; div error R=U=#50"
 _9e4a:                                                                  ;$9E4A
         lda # $32
-        sta ZP_VAR_R
+        sta R
         sta ZP_VAR_U
         rts 
 
@@ -844,7 +844,7 @@ _9e4a:                                                                  ;$9E4A
 _9e51:                                                                  ;$9E51
         lda # $80
         sec 
-        sbc ZP_VAR_R
+        sbc R
         sta $0100, x
         inx 
         lda # $00
@@ -909,7 +909,7 @@ _9ead:                                                                  ;$9EAD
         ldx ZP_TEMP_COUNTER
         lda ZP_VAR_XX15_2
         bmi _9e51
-        lda ZP_VAR_R
+        lda R
         clc 
         adc # $80
         sta $0100, x
@@ -935,7 +935,7 @@ _9ec3:                                                                  ;$9EC3
 _9ed9:                                                                  ;$9ED9
         lda # $48
         clc 
-        adc ZP_VAR_R
+        adc R
         sta $0100, x
         inx 
         lda # $00
@@ -956,7 +956,7 @@ _9eef:                                                                  ;$9EEF
         bmi _9ed9
         lda # $48
         sec 
-        sbc ZP_VAR_R
+        sbc R
         sta $0100, x
         inx 
         lda # $00
@@ -1418,7 +1418,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
 
         ; clip start, end, or both points:
         ;-----------------------------------------------------------------------
-@a0ef:  lda ZP_VAR_R            ; store the resultant slope             ;$A0EF
+@a0ef:  lda R                   ; store the resultant slope             ;$A0EF
         sta ZP_DELTA_XX_LO
 
         lda ZP_VAR_S            ; bit 7 of S is a flag to indicate if the slope
@@ -1632,7 +1632,7 @@ _a1d5:                                                                  ;$A1D5
         bpl _a1f3
         sta ZP_VAR_S
         lda ZP_VAR_XX15_2
-        sta ZP_VAR_R
+        sta R
         jsr _a248
         txa 
         clc 
@@ -1648,7 +1648,7 @@ _a1f3:                                                                  ;$A1F3
         lda ZP_VAR_XX15_2
         sec 
         sbc # VIEWPORT_HEIGHT
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_XX15_3
         sbc # $00
         sta ZP_VAR_S
@@ -1676,7 +1676,7 @@ _a1f3:                                                                  ;$A1F3
 
 _a219:                                                                  ;$A219
         lda ZP_VAR_XX15_0
-        sta ZP_VAR_R
+        sta R
         jsr _a284
         pha 
         ldx T
@@ -1686,20 +1686,20 @@ _a225:                                                                  ;$A225
         tax 
         tay 
         lsr ZP_VAR_S
-        ror ZP_VAR_R
+        ror R
         asl ZP_VAR_Q
         bcc _a23a
 _a231:                                                                  ;$A231
         txa 
         clc 
-        adc ZP_VAR_R
+        adc R
         tax 
         tya 
         adc ZP_VAR_S
         tay 
 _a23a:                                                                  ;$A23A
         lsr ZP_VAR_S
-        ror ZP_VAR_R
+        ror R
         asl ZP_VAR_Q
         bcs _a231
         bne _a23a
@@ -1720,7 +1720,7 @@ _a250:                                                                  ;$A250
         asl 
         tax 
 _a255:                                                                  ;$A255
-        asl ZP_VAR_R
+        asl R
         rol ZP_VAR_S
         lda ZP_VAR_S
         bcs _a261
@@ -1729,9 +1729,9 @@ _a255:                                                                  ;$A255
 _a261:                                                                  ;$A261
         sbc ZP_VAR_Q
         sta ZP_VAR_S
-        lda ZP_VAR_R
+        lda R
         sbc # $00
-        sta ZP_VAR_R
+        sta R
         sec 
 _a26c:                                                                  ;$A26C
         txa 
@@ -1764,8 +1764,8 @@ _a284:                                                                  ;$A284
         bpl _a29d
         lda # $00
         sec 
-        sbc ZP_VAR_R
-        sta ZP_VAR_R
+        sbc R
+        sta R
         lda ZP_VAR_S
         pha 
         eor # %11111111
@@ -1832,7 +1832,7 @@ move_ship:                                                              ;$A2A0
         lda ZP_POLYOBJ_M0x0_HI
         and # %01111111         ; remove sign
         jsr _39ea               ; A=(A*Q)/256
-        sta ZP_VAR_R
+        sta R
 
         lda ZP_POLYOBJ_M0x0_HI
         ldx # $00
@@ -1840,7 +1840,7 @@ move_ship:                                                              ;$A2A0
         lda ZP_POLYOBJ_M0x1_HI
         and # %01111111
         jsr _39ea               ; A=(A*Q)/256
-        sta ZP_VAR_R
+        sta R
 
         lda ZP_POLYOBJ_M0x1_HI
         ldx # $03
@@ -1848,7 +1848,7 @@ move_ship:                                                              ;$A2A0
         lda ZP_POLYOBJ_M0x2_HI
         and # %01111111
         jsr _39ea               ; A=(A*Q)/256
-        sta ZP_VAR_R
+        sta R
 
         lda ZP_POLYOBJ_M0x2_HI
         ldx # $06
@@ -1962,7 +1962,7 @@ _a39d:                                                                  ;$A39D
         sta ZP_POLYOBJ_XPOS_LO
 _a3bf:                                                                  ;$A3BF
         lda ZP_PLAYER_SPEED
-        sta ZP_VAR_R
+        sta R
 
         lda # $80
         ldx # $06

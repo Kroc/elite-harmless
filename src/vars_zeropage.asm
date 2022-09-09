@@ -389,7 +389,7 @@ ZP_SPEED_HI             := $98  ; player speed * 64, hi-byte
 
 ZP_VAR_U                := $99  ; a common variable named "U"
 ZP_VAR_Q                := $9a  ; a common variable named "Q"
-ZP_VAR_R                := $9b  ; a common variable named "R"
+R                       := $9b  ; a common variable named "R"
 ZP_VAR_S                := $9c  ; a common variable named "S"
 
 ZP_PRESERVE_X           := $9d  ; temp backup of X

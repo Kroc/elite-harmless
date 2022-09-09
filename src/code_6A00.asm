@@ -951,7 +951,7 @@ _6d3e:                                                                  ;$6D3E
 
         jsr print_newline
         ldx # $00
-        stx ZP_VAR_R
+        stx R
         ldx # $0c
         stx ZP_TEMP_VAR
         jsr _6dc9
@@ -961,7 +961,7 @@ _6d3e:                                                                  ;$6D3E
         jsr check_cargo_capacity
 
         ldy # $ce
-        lda ZP_VAR_R
+        lda R
         beq _6d79
         bcs _6d34
 _6d79:                                                                  ;$6D79
@@ -972,14 +972,14 @@ _6d79:                                                                  ;$6D79
         ldy # $c5
         bcc _6d34
         ldy CARGO_ITEM          ; item index?
-        lda ZP_VAR_R
+        lda R
         pha 
         clc 
         adc PLAYER_CARGO, y
         sta PLAYER_CARGO, y
         lda VAR_MARKET_FOOD, y  ; update quantity available for sale?
         sec 
-        sbc ZP_VAR_R
+        sbc R
         sta VAR_MARKET_FOOD, y  ; quantity available for sale?
         pla 
         beq _6da4
@@ -1007,12 +1007,12 @@ _6dc9:                                                                  ;$6DC9
         lda # $40
         sta VAR_050C
         ldx # $00
-        stx ZP_VAR_R
+        stx R
         ldx # $0c
         stx ZP_TEMP_VAR
 _6dd6:                                                                  ;$6DD6
         jsr _8fea
-        ldx ZP_VAR_R
+        ldx R
         bne _6de5
         cmp # $59
         beq _6e1b
@@ -1026,7 +1026,7 @@ _6de5:                                                                  ;$6DE5
         cmp # $0a
         bcs _6dbf
         sta ZP_VAR_S
-        lda ZP_VAR_R
+        lda R
         cmp # $1a
         bcs _6e13
         asl 
@@ -1035,7 +1035,7 @@ _6de5:                                                                  ;$6DE5
         asl 
         adc T
         adc ZP_VAR_S
-        sta ZP_VAR_R
+        sta R
         cmp VAR_04ED
         beq _6e0a
         bcs _6e13
@@ -1048,17 +1048,17 @@ _6e0a:                                                                  ;$6E0A
 _6e13:                                                                  ;$6E13
         lda # $10
         sta VAR_050C
-        lda ZP_VAR_R
+        lda R
         rts 
 _6e1b:                                                                  ;$6E1b
         jsr print_char
         lda VAR_04ED
-        sta ZP_VAR_R
+        sta R
         jmp _6e13
 _6e26:                                                                  ;$6E26
         jsr print_char
         lda # $00
-        sta ZP_VAR_R
+        sta R
         jmp _6e13
 _6e30:                                                                  ;$6E30
         jsr print_newline
@@ -1153,9 +1153,9 @@ _6e5d:                                                                  ;$6E5d
         ldy CARGO_ITEM          ; item index?
         lda PLAYER_CARGO, y
         sec 
-        sbc ZP_VAR_R
+        sbc R
         sta PLAYER_CARGO, y
-        lda ZP_VAR_R
+        lda R
         sta ZP_VAR_P1
         lda VAR_04EC
         sta ZP_VAR_Q
@@ -1674,7 +1674,7 @@ _7122:                                                                  ;$7122
         bcc _7135
         lda # $ff
 _7135:                                                                  ;$7135
-        sta ZP_VAR_R
+        sta R
         jsr square_root
         lda ZP_VAR_Q
         asl 
@@ -2764,11 +2764,11 @@ _7885:                                                                  ;$7885
         lda # $fe
         bne _78aa
 _78a1:                                                                  ;$78A1
-        asl ZP_VAR_R
+        asl R
         rol 
-        asl ZP_VAR_R
+        asl R
         rol 
-        asl ZP_VAR_R
+        asl R
         rol 
 _78aa:                                                                  ;$78AA
         dey 
@@ -2856,7 +2856,7 @@ _7911:                                                                  ;$7911
         stx ZP_GOATSOUP_pt4
         sta ZP_VAR_Z
         lda ZP_POLYOBJ01_XPOS_pt2
-        sta ZP_VAR_R
+        sta R
         lda ZP_POLYOBJ01_XPOS_pt1
         jsr _7974
         bne _795d
@@ -2864,7 +2864,7 @@ _7911:                                                                  ;$7911
         bcs _795d
         stx ZP_VAR_XX15_1
         lda ZP_POLYOBJ01_YPOS_pt1
-        sta ZP_VAR_R
+        sta R
         lda ZP_POLYOBJ01_XPOS_pt3
         jsr _7974
         bne _7948
@@ -2928,7 +2928,7 @@ _7974:                                                                  ;$7974
         rol                     ; -> A is still random, carry is random
         bcs _7998               
         jsr _39ea               ; A=(A*Q)/256  isn't that still simply random?
-        adc ZP_VAR_R            ; A+=R
+        adc R                   ; A+=R
         tax                     ; why do we need x?
         lda ZP_VAR_S            ; restore A
         adc # $00               ; add 1 on overflow?
@@ -2937,7 +2937,7 @@ _7974:                                                                  ;$7974
 _7998:                                                                  ;$7998
         jsr _39ea               ; A=(A*Q)/256  isn't that still simply random?
         sta T
-        lda ZP_VAR_R
+        lda R
         sbc T                   ; A = R-A
         tax                     ; why do we need x?
         lda ZP_VAR_S            ; restore A
@@ -3050,7 +3050,7 @@ _7a46:                                                                  ;$7A46
         jsr _84ae
         sta ZP_VAR_Z
         lda ZP_POLYOBJ01_XPOS_pt2
-        sta ZP_VAR_R
+        sta R
         lda ZP_POLYOBJ01_XPOS_pt1
         jsr _7974
         bne _7a86
@@ -3058,7 +3058,7 @@ _7a46:                                                                  ;$7A46
         bcs _7a86
         stx ZP_VAR_XX15_1
         lda ZP_POLYOBJ01_YPOS_pt1
-        sta ZP_VAR_R
+        sta R
         lda ZP_POLYOBJ01_XPOS_pt3
         jsr _7974
         bne _7a6c
@@ -3845,7 +3845,7 @@ _7e5f:                                                                  ;$7E5F
         sta ZP_VAR_Q            ; Q = abs(sin(AB))*256
         lda ZP_B4
         jsr _39ea               ; A=(A*Q)/256
-        sta ZP_VAR_R            ; R = B4 * abs(sin(AB))
+        sta R                   ; R = B4 * abs(sin(AB))
         lda ZP_B5
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VALUE_pt1        ; VALUE_pt1 = B5 * abs(sin(AB))
@@ -3899,7 +3899,7 @@ _7ec8:                                                                  ;$7EC8
         adc ZP_POLYOBJ01_XPOS_pt2
         sta ZP_VAR_K6_1
         lda ZP_VALUE_pt1
-        sta ZP_VAR_R
+        sta R
         lda ZP_TEMPOBJ_M2x2_HI
         eor ZP_TEMPOBJ_M2x1_HI
         sta ZP_VAR_S
@@ -4221,7 +4221,7 @@ _7f67:                                                                  ;$7F67
 
         lda ZP_B3               ; r^2, hi-byte
         sbc T                   ; subtract n^2, hi byte
-        sta ZP_VAR_R            ; result, hi-byte
+        sta R                   ; result, hi-byte
 
         ; do the square root:
         ; i.e. "SQR( r^2 - n^2 )"
@@ -7032,7 +7032,7 @@ _8cad:                                                                  ;$8CAD
 _8cc2:                                                                  ;$8CC2
         lda ZP_VAR_XX15_0
         jsr math_square_7bit
-        sta ZP_VAR_R
+        sta R
         lda ZP_VAR_P1
         sta ZP_VAR_Q
         lda ZP_VAR_XX15_1
@@ -7042,8 +7042,8 @@ _8cc2:                                                                  ;$8CC2
         adc ZP_VAR_Q
         sta ZP_VAR_Q
         lda T
-        adc ZP_VAR_R
-        sta ZP_VAR_R
+        adc R
+        sta R
         lda ZP_VAR_XX15_2
         jsr math_square_7bit
         sta T
@@ -7051,8 +7051,8 @@ _8cc2:                                                                  ;$8CC2
         adc ZP_VAR_Q
         sta ZP_VAR_Q
         lda T
-        adc ZP_VAR_R
-        sta ZP_VAR_R
+        adc R
+        sta R
         jsr square_root
         lda ZP_VAR_XX15_0
         jsr _918b
@@ -7106,7 +7106,7 @@ do_quickjump:                                                           ;$8E29
 
 :       lda # $81               ; jump distance?                        ;$8E52
         sta ZP_VAR_S
-        sta ZP_VAR_R
+        sta R
         sta ZP_VAR_P
 
         ; push the player forward

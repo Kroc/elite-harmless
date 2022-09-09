@@ -24,8 +24,8 @@
         ;-----------------------------------------------------------------------
         ; move the current poly-object's X position a small amount (9-bits) 
         ;
-        ;       A = sign
-        ;       R = X-amount to move object
+        ; in:   A               sign
+        ;       R               X-amount to move object
         ;
         and # %10000000         ; only use the sign in A
 
@@ -33,8 +33,8 @@ move_polyobj_x:                                                         ;$A44C
         ;-----------------------------------------------------------------------
         ; move the current poly-object's X position (16-bits)
         ;
-        ;       R = lo-byte of X-amount to move object
-        ;       A = hi-byte of X-amount to move object
+        ; in:   R               lo-byte of X-amount to move object
+        ;       A               hi-byte of X-amount to move object
         ;
         asl                     ; shift the sign into carry
         sta ZP_VAR_S            ; set aside the magnitude (shifted left once,
@@ -59,7 +59,7 @@ move_polyobj_x:                                                         ;$A44C
         bmi :+
            
         ; add `RS` to object's X-position 
-        lda ZP_VAR_R
+        lda R
         adc ZP_POLYOBJ_XPOS_LO, x       ; if low-byte overflows, carry is set
         sta ZP_POLYOBJ_XPOS_LO, x
         lda ZP_VAR_S
@@ -78,7 +78,7 @@ move_polyobj_x:                                                         ;$A44C
         ; subtract `RS` from object's X-position
 :       lda ZP_POLYOBJ_XPOS_LO, x                                      ;$A46F
         sec 
-        sbc ZP_VAR_R                    ; subtract lo-byte `R`
+        sbc R                   ; subtract lo-byte `R`
         sta ZP_POLYOBJ_XPOS_LO, x
         lda ZP_POLYOBJ_XPOS_HI, x
         sbc ZP_VAR_S                    ; subtract hi-byte `S`
@@ -177,7 +177,7 @@ rotate_polyobj_axis:                                                    ;$A4A1
         ; R.S = mYx1
         ;
         ldx ZP_POLYOBJ + mYx1_LO, y
-        stx ZP_VAR_R
+        stx R
         ldx ZP_POLYOBJ + mYx1_HI, y
         stx ZP_VAR_S
 
@@ -206,7 +206,7 @@ rotate_polyobj_axis:                                                    ;$A4A1
         ; R.S = mYx0
         ;
         ldx ZP_POLYOBJ + mYx0_LO, y
-        stx ZP_VAR_R
+        stx R
         ldx ZP_POLYOBJ + mYx0_HI, y
         stx ZP_VAR_S
 
@@ -232,7 +232,7 @@ rotate_polyobj_axis:                                                    ;$A4A1
         ; R.S = mYx1 
         ;
         ldx ZP_POLYOBJ + mYx1_LO, y
-        stx ZP_VAR_R
+        stx R
         ldx ZP_POLYOBJ + mYx1_HI, y
         stx ZP_VAR_S
         
@@ -260,7 +260,7 @@ rotate_polyobj_axis:                                                    ;$A4A1
         ; R.S = mYx2
         ;
         ldx ZP_POLYOBJ + mYx2_LO, y
-        stx ZP_VAR_R
+        stx R
         ldx ZP_POLYOBJ + mYx2_HI, y
         stx ZP_VAR_S
         

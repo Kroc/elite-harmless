@@ -1250,7 +1250,7 @@ _2292:                                                                  ;$2292
         bcs _231c
         sbc # $24
         bcc _22b2
-        sta ZP_VAR_R
+        sta R
         jsr square_root
         lda ZP_VAR_Q
         sta VAR_06F3

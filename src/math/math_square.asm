@@ -207,7 +207,7 @@ square_root:                                                            ;$9978
 ;
 ; TODO: create a lookup table for this, for cart ROM
 ;-------------------------------------------------------------------------------
-        ldy ZP_VAR_R
+        ldy R
         lda ZP_VAR_Q
         sta ZP_VAR_S
         ldx # $00
