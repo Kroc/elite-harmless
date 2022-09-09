@@ -41,7 +41,7 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         sta ZP_VAR_K6_2         ; BBC: K6+2 (previous Y-pos, lo)
 
         lda ZP_CIRCLE_YPOS_HI   ; circle's y-position, hi-byte
-        adc ZP_VAR_T            ; add point Y-position hi-byte
+        adc T                   ; add point Y-position hi-byte
         sta ZP_VAR_K6_3         ; BBC: K6+3 (previous Y-pos, hi)
 
         ; break?

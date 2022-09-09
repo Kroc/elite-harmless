@@ -1030,10 +1030,10 @@ _6de5:                                                                  ;$6DE5
         cmp # $1a
         bcs _6e13
         asl 
-        sta ZP_VAR_T
+        sta T
         asl 
         asl 
-        adc ZP_VAR_T
+        adc T
         adc ZP_VAR_S
         sta ZP_VAR_R
         cmp VAR_04ED
@@ -1595,7 +1595,7 @@ _70ab:                                                                  ;$70AB
 ;===============================================================================
         jsr get_galaxy_seed
         ldy # $7f
-        sty ZP_VAR_T
+        sty T
         lda # $00
         sta ZP_VAR_U
 _70b6:                                                                  ;$70B6
@@ -1618,9 +1618,9 @@ _70d1:                                                                  ;$70D1
         lsr 
         clc 
         adc ZP_VAR_S
-        cmp ZP_VAR_T
+        cmp T
         bcs _70e8
-        sta ZP_VAR_T
+        sta T
         ldx # 5
 _70dd:                                                                  ;$70DD
         lda ZP_SEED, x
@@ -2672,7 +2672,7 @@ _76e9:                                                                  ;$76E9
         bvs :+
         dey 
 
-:       sty ZP_VAR_T                                                    ;$76F9
+:       sty T                                                           ;$76F9
 
 @_76fb:                                                                 ;$76FB
         ; print a random letter pair?:
@@ -2685,7 +2685,7 @@ _76e9:                                                                  ;$76E9
         jsr print_flight_token
 
 :       jsr randomize_once                                              ;$7706
-        dec ZP_VAR_T
+        dec T
         bpl @_76fb
         ldx # $05
 
@@ -2736,16 +2736,16 @@ _7866:                                                                  ;$7866
         jsr _78d6
 _786f:                                                                  ;$786F
         lda ZP_POLYOBJ_ZPOS_LO
-        sta ZP_VAR_T
+        sta T
         lda ZP_POLYOBJ_ZPOS_HI
         cmp # $20
         bcc _787d
         lda # $fe
         bne _7885
 _787d:                                                                  ;$787D
-        asl ZP_VAR_T
+        asl T
         rol 
-        asl ZP_VAR_T
+        asl T
         rol 
         sec 
         rol 
@@ -2936,9 +2936,9 @@ _7974:                                                                  ;$7974
 
 _7998:                                                                  ;$7998
         jsr _39ea               ; A=(A*Q)/256  isn't that still simply random?
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_R
-        sbc ZP_VAR_T            ; A = R-A
+        sbc T                   ; A = R-A
         tax                     ; why do we need x?
         lda ZP_VAR_S            ; restore A
         sbc # $00               ; sub 1 on underflow?
@@ -3331,10 +3331,10 @@ _7bab:                                                                  ;$7BAB
         sta VAR_04EA
         lda ZP_VAR_XX15_1
         jsr _7b7d
-        stx ZP_VAR_T
+        stx T
 
         lda # $9c
-        sbc ZP_VAR_T
+        sbc T
         sta VAR_04EB
 
         ; use the colour from the lower-nybble of screen RAM
@@ -3361,7 +3361,7 @@ damage_player:                                                          ;$7BD2
 ;
 ; in:   A       amount to damage the player
 ;-------------------------------------------------------------------------------
-        sta ZP_VAR_T            ; put aside damage value
+        sta T                   ; put aside damage value
 
         ldx # $00
 
@@ -3376,7 +3376,7 @@ damage_player:                                                          ;$7BD2
         ; take damage to the front:
         ;
         lda PLAYER_SHIELD_FRONT ; subtract the damage from your [front] shields
-        sbc ZP_VAR_T            ; (shouldn't carry be set before doing this?)
+        sbc T                   ; (shouldn't carry be set before doing this?)
         bcc :+                  ; more damage than shields? skip down
         sta PLAYER_SHIELD_FRONT ; update your shield level
 
@@ -3391,7 +3391,7 @@ damage_player:                                                          ;$7BD2
         ; take damage to the rear:
         ;-----------------------------------------------------------------------
 @rear:  lda PLAYER_SHIELD_REAR  ; damage your [rear] shields            ;$7BEE
-        sbc ZP_VAR_T            ; (shouldn't carry be set before doing this?)
+        sbc T                   ; (shouldn't carry be set before doing this?)
         bcc :+
         sta PLAYER_SHIELD_REAR
 
@@ -3491,7 +3491,7 @@ spawn_ship:                                                             ;$7C6B
 ;===============================================================================
 ; in:   A       ship-type ID
 ;-------------------------------------------------------------------------------
-        sta ZP_VAR_T            ; put aside ship-type
+        sta T                   ; put aside ship-type
 
         ; find an empty slot to add the ship:
         ;-----------------------------------------------------------------------
@@ -3510,7 +3510,7 @@ spawn_ship:                                                             ;$7C6B
         ; (address returned in ZP_POLYOBJ_ADDR)
 @new:   jsr get_polyobj_addr                                            ;$7C7B
 
-        lda ZP_VAR_T            ; retrieve ship type again
+        lda T                   ; retrieve ship type again
         bmi _7cd4               ; handle planet or sun!
 
         asl                     ; double ship type for table lookup
@@ -3575,7 +3575,7 @@ _7cc4:                                                                  ;$7CC4
         and # state::missiles
         sta ZP_POLYOBJ_STATE
 
-        lda ZP_VAR_T
+        lda T
 _7cd4:                                                                  ;$7CD4
         sta SHIP_SLOTS, x
         
@@ -3595,7 +3595,7 @@ _7ce6:  inc NUM_ASTEROIDS                                               ;$7CE6
 _7ce9:  inc SHIP_TYPES, x                                               ;$7CE9
 
         ; update behaviour?
-_7cec:  ldy ZP_VAR_T            ; ship type                             ;$7CEC
+_7cec:  ldy T                   ; ship type                             ;$7CEC
         lda hull_type - 1, y
         and # (behaviour::remove | behaviour::docking)^$FF    ;=%01101111
         ora ZP_POLYOBJ_BEHAVIOUR
@@ -3880,22 +3880,22 @@ _7e5f:                                                                  ;$7E5F
         lda ZP_TEMPOBJ_M2x2_LO
         eor $45
         jsr multiplied_now_add
-        sta ZP_VAR_T
+        sta T
         bpl _7ec8
         txa 
         eor # %11111111
         clc 
         adc # $01
         tax 
-        lda ZP_VAR_T
+        lda T
         eor # %01111111
         adc # $00
-        sta ZP_VAR_T
+        sta T
 _7ec8:                                                                  ;$7EC8
         txa 
         adc ZP_POLYOBJ01_XPOS_pt1
         sta ZP_VAR_K6
-        lda ZP_VAR_T
+        lda T
         adc ZP_POLYOBJ01_XPOS_pt2
         sta ZP_VAR_K6_1
         lda ZP_VALUE_pt1
@@ -3909,17 +3909,17 @@ _7ec8:                                                                  ;$7EC8
         eor ZP_TEMPOBJ_M2x0_HI
         jsr multiplied_now_add
         eor # %10000000
-        sta ZP_VAR_T
+        sta T
         bpl _7efd
         txa 
         eor # %11111111
         clc 
         adc # $01
         tax 
-        lda ZP_VAR_T
+        lda T
         eor # %01111111
         adc # $00
-        sta ZP_VAR_T
+        sta T
 _7efd:                                                                  ;$7EFD
         jsr draw_circle_line
         cmp ZP_A8
@@ -4208,7 +4208,7 @@ _7f67:                                                                  ;$7F67
         ;
         lda ZP_TEMP_ADDR3_LO    ; current scanline "n"
         jsr math_square         ; square, the hi-byte will be in P
-        sta ZP_VAR_T            ; (P.T = n^2)
+        sta T                   ; (P.T = n^2)
 
         ; calculate the difference between the squares of
         ; the sun's radius and the current scanline:
@@ -4220,7 +4220,7 @@ _7f67:                                                                  ;$7F67
         sta ZP_VAR_Q            ; result, lo-byte
 
         lda ZP_B3               ; r^2, hi-byte
-        sbc ZP_VAR_T            ; subtract n^2, hi byte
+        sbc T                   ; subtract n^2, hi byte
         sta ZP_VAR_R            ; result, hi-byte
 
         ; do the square root:
@@ -4431,7 +4431,7 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         jsr multiply_by_sin     ; calculate: A = radius * sin(counter)
 
         ldx # $00               ; T will be our hi-byte
-        stx ZP_VAR_T            ;  so set that to zero
+        stx T                   ;  so set that to zero
 
         ldx ZP_TEMP_COUNTER     ; left or right half of circle?
         cpx # 33                ; points 0-32 = right half
@@ -4449,7 +4449,7 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
 
         lda # $ff               ; flip the high byte in T ($00)
         adc # $00               ; ripple the carry!
-        sta ZP_VAR_T            ; update the result hi-byte
+        sta T                   ; update the result hi-byte
         txa                     ; retrieve our lo-byte again
         clc                     ;  before continuing
 
@@ -4457,9 +4457,9 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         ; we just calculated and storing the result in K6
         ;
 :       adc ZP_CIRCLE_XPOS_LO   ; add the x-position lo-byte            ;$8081
-        sta ZP_VAR_K6        ;  to the current lo-byte in A
+        sta ZP_VAR_K6           ;  to the current lo-byte in A
         lda ZP_CIRCLE_XPOS_HI   ; now do the hi-bytes
-        adc ZP_VAR_T
+        adc T
         sta ZP_VAR_K6_1
 
         ; calculate Y-position of point:
@@ -4477,7 +4477,7 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         tax                     ; put aside the result lo-byte
 
         lda # $00               ; as before, set the result
-        sta ZP_VAR_T            ;  hi-byte to zero
+        sta T                   ;  hi-byte to zero
 
         ; top half or bottom half?
         ;
@@ -4504,7 +4504,7 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
 
         lda # $ff               ; flip the high byte in T ($00)
         adc # $00               ; ripple the carry!
-        sta ZP_VAR_T            ; update the result hi-byte
+        sta T                   ; update the result hi-byte
         clc                     ;  before continuing
 
         ; draw the line-segment! this routine will keep track of the previous
@@ -4615,7 +4615,7 @@ clip_sun_line:                                                          ;$811E
 ;       Y               (preserved)
 ;
 ;-------------------------------------------------------------------------------
-        sta ZP_VAR_T            ; put aside half-width
+        sta T                   ; put aside half-width
 
         ; find right-hand point (X2); i.e. middle (YY) + half-width (T)
         ; and clip if it goes beyond the viewport right edge (256)
@@ -4638,7 +4638,7 @@ clip_sun_line:                                                          ;$811E
         ;
 @left:  lda ZP_VAR_YY_LO        ; begin with middle-point               ;$8131
         sec 
-        sbc ZP_VAR_T            ; subtract the half-width
+        sbc T                   ; subtract the half-width
         sta ZP_VAR_XX15_0       ; this is the left-hand X-coord
         lda ZP_VAR_YY_HI
         sbc # 0                 ; apply the carry
@@ -5152,10 +5152,10 @@ _834f:                                                                  ;$834F
 
         ldy # $05
         lda [ZP_TEMP_ADDR], y
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_P1
         sec 
-        sbc ZP_VAR_T
+        sbc T
         sta ZP_VAR_P1
         lda ZP_VAR_P2
         sbc # $00
@@ -5194,7 +5194,7 @@ _8399:                                                                  ;$8399
         sta ZP_POLYOBJ_ADDR_LO
         lda ZP_TEMP_ADDR_HI
         sta ZP_POLYOBJ_ADDR_HI
-        ldy ZP_VAR_T
+        ldy T
 _83aa:                                                                  ;$83AA
         dey 
         lda [ZP_VALUE], y
@@ -5549,11 +5549,11 @@ _856a:                                                                  ;$856A
         
         ora PLAYER_LEGAL
 _8576:                                                                  ;$8576
-        sta ZP_VAR_T
+        sta T
         jsr _848d
         cmp # $88
         beq _85f8
-        cmp ZP_VAR_T
+        cmp T
         bcs :+
 
         ; spawn a police viper ship
@@ -5659,10 +5659,10 @@ _860b:                                                                  ;$860B
         sta ZP_VAR_XX13
 _8612:                                                                  ;$8612
         jsr get_random_number
-        sta ZP_VAR_T
+        sta T
 
         jsr get_random_number
-        and ZP_VAR_T
+        and T
         and # %00000111
         adc # $11
         jsr spawn_ship
@@ -5740,17 +5740,17 @@ _8627:                                                                  ;$8627
 :       lda PLAYER_TRUMBLES_HI                                          ;$8670
        .bze @_86a1
 
-        sta ZP_VAR_T            ; put aside the Trumble™ hi-byte
+        sta T                   ; put aside the Trumble™ hi-byte
                                 ; this will be the 'odds' (n/256)
         lda CABIN_HEAT          ; get current cabin temperature
         cmp # 224               ; is it >= 224?
         bcs :+                  ; yes, skip the next instruction
                                 ; (reduces Trumble™ growth in hot conditions)
 
-        asl ZP_VAR_T            ; double the odds
+        asl T                   ; double the odds
 
 :       jsr get_random_number   ; pick a random number 0-255            ;$8680
-        cmp ZP_VAR_T            ; compare against our odds
+        cmp T                   ; compare against our odds
         bcs @_86a1              ; if random number >= odds, skip
 
         ; get random number between 64 and 255
@@ -6464,8 +6464,8 @@ _89f9:                                                                  ;$89F9
         ldx # 73
         clc 
         txa 
-:       stx ZP_VAR_T                                                    ;$89FD
-        eor ZP_VAR_T
+:       stx T                                                           ;$89FD
+        eor T
         ror 
         adc _25b2, x
         eor _25b3, x
@@ -7037,20 +7037,20 @@ _8cc2:                                                                  ;$8CC2
         sta ZP_VAR_Q
         lda ZP_VAR_XX15_1
         jsr math_square_7bit
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_P1
         adc ZP_VAR_Q
         sta ZP_VAR_Q
-        lda ZP_VAR_T
+        lda T
         adc ZP_VAR_R
         sta ZP_VAR_R
         lda ZP_VAR_XX15_2
         jsr math_square_7bit
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_P1
         adc ZP_VAR_Q
         sta ZP_VAR_Q
-        lda ZP_VAR_T
+        lda T
         adc ZP_VAR_R
         sta ZP_VAR_R
         jsr square_root
@@ -7685,25 +7685,25 @@ _918b:                                                                  ;$918B
         cmp ZP_VAR_Q
         bcs _91b2
         ldx # $fe
-        stx ZP_VAR_T
+        stx T
 _9196:                                                                  ;$9196
         asl 
         cmp ZP_VAR_Q
         bcc _919d
         sbc ZP_VAR_Q
 _919d:                                                                  ;$919D
-        rol ZP_VAR_T
+        rol T
         bcs _9196
-        lda ZP_VAR_T
+        lda T
         lsr 
         lsr 
-        sta ZP_VAR_T
+        sta T
         lsr 
-        adc ZP_VAR_T
-        sta ZP_VAR_T
+        adc T
+        sta T
         tya 
         and # %10000000
-        ora ZP_VAR_T
+        ora T
         rts 
 
 _91b2:                                                                  ;$91B2
@@ -7732,7 +7732,7 @@ _91b8:                                                                  ;$91B8
         sta ZP_VAR_P2
         eor ZP_VAR_Q
         and # %10000000
-        sta ZP_VAR_T
+        sta T
         lda # $00
         ldx # $10
         asl ZP_VAR_P1
@@ -7750,7 +7750,7 @@ _91f2:                                                                  ;$91F2
         dex 
         bne _91eb
         lda ZP_VAR_P1
-        ora ZP_VAR_T
+        ora T
 _91fd:                                                                  ;$91FD
         rts 
 

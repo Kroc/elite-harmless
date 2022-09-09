@@ -159,7 +159,7 @@ _9a30:                                                                  ;$9A30
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_MATRIX, x
         jsr _39ea               ; A=(A*Q)/256
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_XX15_1
         eor ZP_TEMPOBJ_M2x0_HI, x
         sta ZP_VAR_S
@@ -168,18 +168,18 @@ _9a30:                                                                  ;$9A30
         lda ZP_TEMPOBJ_M2x1_LO, x
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
-        lda ZP_VAR_T
+        lda T
         sta ZP_VAR_R
         lda ZP_VAR_XX15_3
         eor ZP_TEMPOBJ_M2x1_HI, x
         jsr _9a0c
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_XX15_4
         sta ZP_VAR_Q
         lda ZP_TEMPOBJ_M2x2_LO, x
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
-        lda ZP_VAR_T
+        lda T
         sta ZP_VAR_R
         lda ZP_VAR_XX15_5
         eor ZP_TEMPOBJ_M2x2_HI, x
@@ -309,17 +309,17 @@ _9ae6:                                                                  ;$9AE6
         sta $0100, x
         sta $0101, x
         lda ZP_POLYOBJ_ZPOS_LO
-        sta ZP_VAR_T
+        sta T
         lda ZP_POLYOBJ_ZPOS_HI
         lsr 
-        ror ZP_VAR_T
+        ror T
         lsr 
-        ror ZP_VAR_T
+        ror T
         lsr 
-        ror ZP_VAR_T
+        ror T
         lsr 
         bne _9b29
-        lda ZP_VAR_T
+        lda T
         ror 
         lsr 
         lsr 
@@ -570,7 +570,7 @@ _9ca9:                                                                  ;$9CA9
         sta ZP_VAR_Q
         lda ZP_VAR_XX15_0
         jsr _39ea               ; A=(A*Q)/256
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_XX12_1
         eor ZP_VAR_XX15_1
         sta ZP_VAR_S
@@ -579,18 +579,18 @@ _9ca9:                                                                  ;$9CA9
         lda ZP_VAR_XX15_2
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
-        lda ZP_VAR_T
+        lda T
         sta ZP_VAR_R
         lda ZP_VAR_XX12_3
         eor ZP_VAR_XX15_3
         jsr _9a0c
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_XX12_4
         sta ZP_VAR_Q
         lda ZP_VAR_XX15_4
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_Q
-        lda ZP_VAR_T
+        lda T
         sta ZP_VAR_R
         lda ZP_VAR_XX15_5
         eor ZP_VAR_XX12_5
@@ -665,7 +665,7 @@ _9d45:                                                                  ;$9D45
         sta ZP_VAR_XX15_4
         iny 
         lda [ZP_TEMP_ADDR3], y
-        sta ZP_VAR_T
+        sta T
         and # %00011111
         cmp ZP_AD
         bcc _9d8e
@@ -705,7 +705,7 @@ _9d8e:                                                                  ;$9D8E
         ;-----------------------------------------------------------------------
 
 _9d91:                                                                  ;$9D91
-        lda ZP_VAR_T
+        lda T
         sta ZP_VAR_XX15_1
         asl 
         sta ZP_VAR_XX15_3
@@ -795,7 +795,7 @@ _9e16:                                                                  ;$9E16
         lda ZP_VAR_XX12_4
         clc 
         adc ZP_POLYOBJ_ZPOS_LO
-        sta ZP_VAR_T
+        sta T
         lda ZP_POLYOBJ_ZPOS_HI
         adc # $00
         sta ZP_VAR_U
@@ -857,7 +857,7 @@ _9e64:                                                                  ;$9E64
         lda ZP_POLYOBJ_ZPOS_LO  ; "z org lo"
         sec 
         sbc ZP_VAR_XX12_4       ; "rotated z node lo"
-        sta ZP_VAR_T
+        sta T
 
         lda ZP_POLYOBJ_ZPOS_HI  ; "z hi"
         sbc # $00
@@ -865,7 +865,7 @@ _9e64:                                                                  ;$9E64
         bcc _9e7b               ; "underflow, make node close"
         bne _9e83               ; "Enter Node additions done, UT=z"
         
-        lda ZP_VAR_T            ; "restore z lo"
+        lda T                   ; "restore z lo"
         cmp # 4                 ; "">= 4?"
         bcs _9e83               ; "zlo big enough, Enter Node additions done"
 
@@ -874,7 +874,7 @@ _9e7b:                                                                  ;$9E7B
         lda # $00               ; "hi"?
         sta ZP_VAR_U
         lda # $04               ; "lo"?
-        sta ZP_VAR_T
+        sta T
 
 ; ".LL57 ; -> &4404 ; Enter Node additions done, z=T.U  set up from LL55"
 _9e83:                                                                  ;$9E83
@@ -887,12 +887,12 @@ _9e83:                                                                  ;$9E83
         lsr ZP_VAR_XX15_4
         ror ZP_VAR_XX15_3
         lsr ZP_VAR_U
-        ror ZP_VAR_T
+        ror T
         jmp _9e83
 
 ; ".LL60 ; hi U rolled to 0, exited loop above."
 _9e9a:                                                                  ;$9E9A
-        lda ZP_VAR_T
+        lda T
         sta ZP_VAR_Q
         lda ZP_VAR_XX15_0
         cmp ZP_VAR_Q
@@ -923,7 +923,7 @@ _9ec3:                                                                  ;$9EC3
        .phx                     ; push X to stack (via A)
         lda # $00
         sta ZP_VAR_U
-        lda ZP_VAR_T
+        lda T
         sta ZP_VAR_Q
         lda ZP_VAR_XX15_3
         cmp ZP_VAR_Q
@@ -1393,7 +1393,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         jmp @delta              ; recheck
 
         ;-----------------------------------------------------------------------
-@horv:  stx ZP_VAR_T            ; (set T=0 by nature of process above)  ;$A0D2
+@horv:  stx T                   ; (set T=0 by nature of process above)  ;$A0D2
 
         ; is the line more vertical than it is horizontal?
         ;
@@ -1414,7 +1414,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         lda ZP_DELTA_X
         jsr math_divide_AQ      ; divide delta-X by delta-Y
 
-        dec ZP_VAR_T            ; underflow T to $FF
+        dec T                   ; underflow T to $FF
 
         ; clip start, end, or both points:
         ;-----------------------------------------------------------------------
@@ -1588,6 +1588,14 @@ _a178:                                                                  ;$A178
 
 clip_point:                                             ; BBC: LL118    ;$A19F
 ;===============================================================================
+; move the point X1,Y1 along a given direction /
+; slope until it's within the viewport:
+;
+; in:   ZP_LINE_XX1             ; X-position (16-bit)
+;       ZP_LINE_YY1             ; Y-position (16-bit)
+; out:  ZP_LINE_X1              ; new X-position (8-bit)
+;       ZP_LINE_Y1              ; new Y-position (8-bit)
+;-------------------------------------------------------------------------------
         lda ZP_VAR_XX15_1
         bpl _a1ba
         sta ZP_VAR_S
@@ -1671,7 +1679,7 @@ _a219:                                                                  ;$A219
         sta ZP_VAR_R
         jsr _a284
         pha 
-        ldx ZP_VAR_T
+        ldx T
         bne _a250
 _a225:                                                                  ;$A225
         lda # $00
@@ -1704,7 +1712,7 @@ _a23a:                                                                  ;$A23A
 _a248:                                                                  ;$A248
         jsr _a284
         pha 
-        ldx ZP_VAR_T
+        ldx T
         bne _a225
 _a250:                                                                  ;$A250
         lda # $ff
@@ -2173,7 +2181,7 @@ _a53d:                                                                  ;$A53D
 
         lda ZP_VALUE_pt4
         and # %10000000
-        sta ZP_VAR_T
+        sta T
         eor ZP_B5
         bmi _a5a8
 
@@ -2222,7 +2230,7 @@ _a5a8:                                                                  ;$A5A8
         sbc ZP_VAR_P1
         ora # %10000000
 _a5db:                                                                  ;$A5DB
-        eor ZP_VAR_T
+        eor T
         sta ZP_POLYOBJ_YPOS_SIGN
         lda ZP_ALPHA
         sta ZP_VAR_Q
@@ -2255,9 +2263,9 @@ _a604:                                                                  ;$A604
         txa 
 _a60e:                                                                  ;$A60E
         stx ZP_TEMP_ADDR3_HI
-        sty ZP_VAR_T
+        sty T
         adc [ZP_TEMP_ADDR3], y
-        eor ZP_VAR_T
+        eor T
         sbc ZP_TEMP_ADDR3_HI
         dey 
         bne _a60e
@@ -2448,7 +2456,7 @@ _a700:                                                                  ;$A700
 
 .ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
-        sta ZP_VAR_T
+        sta T
 
         lda PLAYER_TRUMBLES_HI
         and # %01111111
@@ -2460,7 +2468,7 @@ _a700:                                                                  ;$A700
         lda trumbles_sprite_count, x
         sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
         lda trumbles_sprite_mask, x
-        ora ZP_VAR_T            ; other sprites mask?
+        ora T                   ; other sprites mask?
         sta VIC_SPRITE_ENABLE
 .endif  ;///////////////////////////////////////////////////////////////////////
 

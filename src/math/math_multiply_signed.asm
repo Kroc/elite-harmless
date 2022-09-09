@@ -54,7 +54,7 @@ multiply_signed:                                                        ;$3A54
         ;
         eor ZP_VAR_Q            ; load multiplicand, combining the signs
         and # %10000000         ; extract resulting sign
-        sta ZP_VAR_T            ; keep resulting sign for the end
+        sta T                   ; keep resulting sign for the end
 
         ; now the sign is separate, extract the "magnitude"
         ; -- the value, without sign, which will be 0 to 127
@@ -81,7 +81,7 @@ sm2:    sbc square2_lo, x
 sm3:    lda square1_hi, x
 sm4:    sbc square2_hi, x
 
-        ora ZP_VAR_T            ; restore the sign
+        ora T                   ; restore the sign
         rts 
 
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ sm4:    sbc square2_hi, x
         txa                     ; load multiplier
         eor ZP_VAR_Q            ; load multiplicand, combining the signs
         and # %10000000         ; extract resulting sign
-        sta ZP_VAR_T            ; keep resulting sign for the end
+        sta T                   ; keep resulting sign for the end
 
         ; now the sign is separate, extract the "magnitude" -- the value,
         ; without sign, which will be 0 to 127. we'll check here to see if
@@ -247,7 +247,7 @@ sm4:    sbc square2_hi, x
         ; be gone and the result will have been shifted down fully 8 times,
         ; producing a 16-bit result value
         ror ZP_VAR_P
-        ora ZP_VAR_T            ; restore the sign
+        ora T                   ; restore the sign
 
         rts 
 

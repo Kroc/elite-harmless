@@ -458,7 +458,7 @@ ZP_VIEWH                := $b8  ; screen Y-value for clipping drawing
 ZP_B9                   := $b9  ;? x2
 ZP_BA                   := $ba  ;? x2
 
-ZP_VAR_T                := $bb  ; a common variable named "T"
+T                       := $bb  ; a common variable named "T"
 
 ; used in line-drawing:
 ;

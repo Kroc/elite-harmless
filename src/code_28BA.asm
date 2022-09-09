@@ -217,11 +217,11 @@ draw_particle:                                                          ;$2918
         adc # $01
 
         ; put aside the positive-only Y value
-:       sta ZP_VAR_T                                                    ;$2934
+:       sta T                                                           ;$2934
         ; get the viewport half-height again
         lda # (VIEWPORT_HEIGHT / 2) + 1
         ; calculate "Y-distance from the centre of the screen"
-        sbc ZP_VAR_T
+        sbc T
 
         ; fall through to the routine that does
         ; the actual bitmap manipulation
@@ -421,11 +421,11 @@ move_dust_front:                                                        ;$2A40
         jsr _3a4c
         asl ZP_VAR_P
         rol 
-        sta ZP_VAR_T
+        sta T
 
         lda # $00
         ror 
-        ora ZP_VAR_T
+        ora T
         jsr multiplied_now_add  ; A.P + R.S -> X.A
         sta ZP_VAR_XX_HI
         txa 
@@ -553,11 +553,11 @@ _2b30:                                                                  ;$2B30
         jsr _3a50
         asl ZP_VAR_P1
         rol 
-        sta ZP_VAR_T
+        sta T
 
         lda # $00
         ror 
-        ora ZP_VAR_T
+        ora T
         jsr multiplied_now_add
         sta ZP_VAR_XX_HI
         txa 
@@ -904,7 +904,7 @@ _2d69:                                                                  ;$2D69
         lda ZP_VALUE_pt4
         sta ZP_VAR_S
         and # %10000000
-        sta ZP_VAR_T
+        sta T
         eor ZP_POLYOBJ_XPOS_SIGN, x
         bmi _2d8d
         lda ZP_VALUE_pt2
@@ -917,7 +917,7 @@ _2d69:                                                                  ;$2D69
         lda ZP_VALUE_pt4
         adc ZP_POLYOBJ_XPOS_SIGN, x
         and # %01111111
-        ora ZP_VAR_T
+        ora T
         sta ZP_VALUE_pt4
         rts 
 
@@ -938,7 +938,7 @@ _2d8d:                                                                  ;$2D8D
         and # %01111111
         sbc ZP_VAR_S
         ora # %10000000
-        eor ZP_VAR_T
+        eor T
         sta ZP_VALUE_pt4
         bcs _2dc4
         lda # $01
@@ -950,7 +950,7 @@ _2d8d:                                                                  ;$2D8D
         lda # $00
         sbc ZP_VALUE_pt4
         and # %01111111
-        ora ZP_VAR_T
+        ora T
         sta ZP_VALUE_pt4
 _2dc4:                                                                  ;$2DC4
         rts 
@@ -969,11 +969,11 @@ _2dc5:                                                                  ;$2DC5
         lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         and # %01111111         ; extract HI byte without sign
         lsr                     ; divide by 2
-        sta ZP_VAR_T
+        sta T
 
         lda ZP_POLYOBJ + MATRIX_COL0_LO, x
         sec 
-        sbc ZP_VAR_T
+        sbc T
         sta ZP_VAR_R
 
         lda ZP_POLYOBJ + MATRIX_COL0_HI, x
@@ -987,7 +987,7 @@ _2dc5:                                                                  ;$2DC5
 
         lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         and # %10000000         ; extract sign
-        sta ZP_VAR_T            ; put sign aside
+        sta T                   ; put sign aside
         
         lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         and # %01111111         ; extract magnitude
@@ -999,7 +999,7 @@ _2dc5:                                                                  ;$2DC5
         ror ZP_VAR_P
         lsr 
         ror ZP_VAR_P
-        ora ZP_VAR_T            ; restore sign
+        ora T                   ; restore sign
         eor ZP_B1               ; rotation sign?
         stx ZP_VAR_Q
 
@@ -1010,10 +1010,10 @@ _2dc5:                                                                  ;$2DC5
         lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         and # %01111111
         lsr 
-        sta ZP_VAR_T
+        sta T
         lda ZP_POLYOBJ + MATRIX_COL0_LO, y
         sec 
-        sbc ZP_VAR_T
+        sbc T
         sta ZP_VAR_R
         lda ZP_POLYOBJ + MATRIX_COL0_HI, y
         sbc # $00
@@ -1022,7 +1022,7 @@ _2dc5:                                                                  ;$2DC5
         sta ZP_VAR_P
         lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         and # %10000000
-        sta ZP_VAR_T
+        sta T
         lda ZP_POLYOBJ + MATRIX_COL0_HI, x
         and # %01111111
         lsr 
@@ -1033,7 +1033,7 @@ _2dc5:                                                                  ;$2DC5
         ror ZP_VAR_P
         lsr 
         ror ZP_VAR_P
-        ora ZP_VAR_T
+        ora T
         eor # %10000000
         eor ZP_B1
         stx ZP_VAR_Q
@@ -2359,11 +2359,11 @@ _33d6:                                                                  ;$33D6
         lda ZP_POLYOBJ_STATE
         and # state::missiles
         beq _33fd
-        sta ZP_VAR_T
+        sta T
 
         jsr get_random_number
         and # %00011111
-        cmp ZP_VAR_T
+        cmp T
         bcs _33fd
         
         lda ECM_COUNTER         ; is an ECM already active?
@@ -3273,7 +3273,7 @@ _38f8:                                                                  ;$38F8
         beq _38ee
         sec 
         sbc # $01
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_P2
         lsr ZP_VALUE_pt3
         ror 
@@ -3285,7 +3285,7 @@ _38f8:                                                                  ;$38F8
         ldx # $18
 _3919:                                                                  ;$3919
         bcc _391d
-        adc ZP_VAR_T
+        adc T
 _391d:                                                                  ;$391D
         ror 
         ror ZP_VALUE_pt3
@@ -3293,11 +3293,11 @@ _391d:                                                                  ;$391D
         ror ZP_VALUE_pt1
         dex 
         bne _3919
-        sta ZP_VAR_T
+        sta T
         lda ZP_VAR_R
         eor ZP_VAR_Q
         and # %10000000
-        ora ZP_VAR_T
+        ora T
         sta ZP_VALUE_pt4
         rts 
 
@@ -3328,7 +3328,7 @@ _393e:                                                                  ;$393E
         stx ZP_VAR_P
         tax 
         and # %10000000         ; extract the sign-bit
-        sta ZP_VAR_T            ; put aside (to add back later)
+        sta T                   ; put aside (to add back later)
 
         txa 
         and # %01111111         ; extract the magnitude
@@ -3371,7 +3371,7 @@ _393e:                                                                  ;$393E
         ror ZP_VAR_P
         lsr 
         ror ZP_VAR_P
-        ora ZP_VAR_T            ; restore the sign
+        ora T                   ; restore the sign
         
         rts 
 
@@ -3504,7 +3504,7 @@ _3b0d:                                                                  ;$3B0D
         jsr multiply_and_add
         tax 
         and # %10000000
-        sta ZP_VAR_T
+        sta T
         txa 
         and # %01111111
         ldx # $fe
@@ -3518,7 +3518,7 @@ _3b27:                                                                  ;$3B27
         rol ZP_TEMP_VAR
         bcs _3b20
         lda ZP_TEMP_VAR
-        ora ZP_VAR_T
+        ora T
         rts 
 
 
@@ -3564,7 +3564,7 @@ _3bc1:                                                                  ;$3BC1
         lda ZP_VAR_P3
         eor ZP_VAR_S
         and # %10000000
-        sta ZP_VAR_T
+        sta T
         ldy # $00
         lda ZP_VAR_P3
         and # %01111111
@@ -3624,7 +3624,7 @@ _3c2d:                                                                  ;$3C2D
         bne _3c2d
         sta ZP_VALUE_pt1
         lda ZP_VALUE_pt4
-        ora ZP_VAR_T
+        ora T
         sta ZP_VALUE_pt4
         rts 
 
@@ -3633,7 +3633,7 @@ _3c40:                                                                  ;$3C40
 ;===============================================================================
         lda ZP_VAR_R
         sta ZP_VALUE_pt1
-        lda ZP_VAR_T
+        lda T
         sta ZP_VALUE_pt4
         rts 
 
@@ -3647,7 +3647,7 @@ _3c4d:                                                                  ;$3C4D
         dey 
         bne _3c4d
         sta ZP_VALUE_pt1
-        lda ZP_VAR_T
+        lda T
         sta ZP_VALUE_pt4
         rts 
 
@@ -3684,26 +3684,26 @@ dampen_toward_zero:                                                     ;$3C58
 
 _3c6f:                                                                  ;$3C6F
 ;===============================================================================
-        sta ZP_VAR_T
+        sta T
         txa 
         clc 
-        adc ZP_VAR_T
+        adc T
         tax 
         bcc _3c7a
         ldx # $ff
 _3c7a:                                                                  ;$3C7A
         bpl _3c8c
 _3c7c:                                                                  ;$3C7C
-        lda ZP_VAR_T
+        lda T
         rts 
 
         ;-----------------------------------------------------------------------
 
 _3c7f:                                                                  ;$3C7F
-        sta ZP_VAR_T
+        sta T
         txa 
         sec 
-        sbc ZP_VAR_T
+        sbc T
         tax 
         bcs _3c8a
         ldx # $01
@@ -3741,9 +3741,9 @@ _3cb2:                                                                  ;$3CB2
         stx ZP_VAR_P1
         txa 
         jsr _3cce
-        sta ZP_VAR_T
+        sta T
         lda # $40
-        sbc ZP_VAR_T
+        sbc T
         bcs _3cad
 _3cc4:                                                                  ;$3CC4
         lda # $3f
@@ -3752,9 +3752,9 @@ _3cc4:                                                                  ;$3CC4
         ;-----------------------------------------------------------------------
 
 _3cc7:                                                                  ;$3CC7
-        sta ZP_VAR_T
+        sta T
         lda # $80
-        sbc ZP_VAR_T
+        sbc T
         rts 
 
         ;-----------------------------------------------------------------------

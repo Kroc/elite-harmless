@@ -42,7 +42,7 @@ move_polyobj_x:                                                         ;$A44C
         
         lda # $00
         ror                     ; restore sign
-        sta ZP_VAR_T            ; put aside sign
+        sta T                   ; put aside sign
         
         lsr ZP_VAR_S            ; restore the magnitude
 
@@ -69,7 +69,7 @@ move_polyobj_x:                                                         ;$A44C
         adc # $00                       ; add carry to high-byte if it's set
             
         ; restore the sign taken at the beginning
-        ora ZP_VAR_T
+        ora T
         sta ZP_POLYOBJ_XPOS_SIGN, x
 
         rts 
@@ -89,7 +89,7 @@ move_polyobj_x:                                                         ;$A44C
         ora # %10000000                 ; un-mask sign
 
         ; restore sign from beginning
-        eor ZP_VAR_T
+        eor T
         sta ZP_POLYOBJ_XPOS_SIGN, x
 
         ; has the subtraction caused the X-position to go from positive
@@ -108,7 +108,7 @@ move_polyobj_x:                                                         ;$A44C
         lda # $00                       ; zero in the high-byte,
         sbc ZP_POLYOBJ_XPOS_SIGN, x     ; and subract the high-byte
         and # %01111111                 ; remove old sign
-        ora ZP_VAR_T                    ; set the sign
+        ora T                           ; set the sign
         sta ZP_POLYOBJ_XPOS_SIGN, x
 
 :       rts                                                             ;$A4A0

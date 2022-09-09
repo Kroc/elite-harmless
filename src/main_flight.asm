@@ -117,26 +117,26 @@ move_trumbles:                                                          ;$1E35
         clc 
         lda VIC_SPRITE2_X, y    ; current hardware sprite X-position (0-255)
         adc TRUMBLES_MOVE_X, y  ; add the Trumble™'s X direction
-        sta ZP_VAR_T            ; put aside whilst we handle the MSB (256-319) 
+        sta T                   ; put aside whilst we handle the MSB (256-319) 
 
         lda TRUMBLES_XPOS_HI, y
         adc TRUMBLES_XPOS_LO, y
         bpl :+
 
         lda # $48               ;=72 / %01001000
-        sta ZP_VAR_T            ; '328'?
+        sta T                   ; '328'?
 
         lda # $01
 :       and # %00000001                                                 ;$1E94
         beq :+
 
-        lda ZP_VAR_T
+        lda T
         cmp # $50               ;=80 / %10000000
         lda # $01
         bcc :+
 
         lda # $00
-        sta ZP_VAR_T
+        sta T
 
 :       sta TRUMBLES_XPOS_HI, y                                         ;$1EA4
         beq :+
@@ -147,7 +147,7 @@ move_trumbles:                                                          ;$1E35
         ora VIC_SPRITES_X       ; combine with current hardware sprite MSBs
         sei                     ; disable interrupts whilst repositioning
         sta VIC_SPRITES_X       ; update the 8 hardware sprite MSBs
-:       lda ZP_VAR_T            ; retrieve X-position remainder         ;$1EB3
+:       lda T                   ; retrieve X-position remainder         ;$1EB3
         sta VIC_SPRITE2_X, y    ; set the Trumble™'s new X-position
         cli                     ; re-enable interrupts
 

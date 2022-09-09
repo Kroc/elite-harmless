@@ -22,7 +22,7 @@ multiplied_now_add:                                                     ;$3AD1
         ;
         sta ZP_TEMP_VAR
         and # %10000000
-        sta ZP_VAR_T
+        sta T
         eor ZP_VAR_S
         bmi :+
 
@@ -32,7 +32,7 @@ multiplied_now_add:                                                     ;$3AD1
         tax 
         lda ZP_VAR_S
         adc ZP_TEMP_VAR
-        ora ZP_VAR_T
+        ora T
         
         rts 
 
@@ -58,5 +58,5 @@ multiplied_now_add:                                                     ;$3AD1
         sbc ZP_VAR_U
         ora # %10000000
 
-:       eor ZP_VAR_T                                                    ;$3B0A
+:       eor T                                                           ;$3B0A
         rts 

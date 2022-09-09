@@ -144,49 +144,49 @@ multiply_unsigned_PX:                                                   ;$399F
         ; NOTE: this routine must preserve Y
         ;
         dex                     ; subtract 1 because carry will add one already 
-        stx ZP_VAR_T            ; this is the amount to add for each carry
+        stx T                   ; this is the amount to add for each carry
 
         lda # $00
         tax 
 
         lsr ZP_VAR_P            ; pop a bit off
         bcc :+                  ; if zero, nothing to add
-        adc ZP_VAR_T            ; add x1 quantity to the result
+        adc T                   ; add x1 quantity to the result
 
 :       ror                     ; shift to the next power of 2          ;$39AB
         ror ZP_VAR_P            ; move the result down and pop next bit
         bcc :+                  ; if zero, nothing to add
-        adc ZP_VAR_T            ; add x2 quantity to result
+        adc T                   ; add x2 quantity to result
 
 :       ror                                                             ;$39B2
         ror ZP_VAR_P
         bcc :+
-        adc ZP_VAR_T
+        adc T
 
 :       ror                                                             ;$39B9
         ror ZP_VAR_P
         bcc :+
-        adc ZP_VAR_T
+        adc T
 
 :       ror                                                             ;$39C0
         ror ZP_VAR_P
         bcc :+
-        adc ZP_VAR_T
+        adc T
 
 :       ror                                                             ;$39C7
         ror ZP_VAR_P
         bcc :+
-        adc ZP_VAR_T
+        adc T
 
 :       ror                                                             ;$39CE
         ror ZP_VAR_P
         bcc :+
-        adc ZP_VAR_T
+        adc T
 
 :       ror                                                             ;$39D5
         ror ZP_VAR_P
         bcc :+
-        adc ZP_VAR_T
+        adc T
 
 :       ror                                                             ;$39DC
         ror ZP_VAR_P
@@ -213,7 +213,7 @@ square_root:                                                            ;$9978
         ldx # $00
         stx ZP_VAR_Q            ; X.Y.S = 0.R.Q ; Q = 0
         lda # $08
-        sta ZP_VAR_T            ; REPEAT 8
+        sta T                   ; REPEAT 8
 @loop:                                                                  ;$9986
         cpx ZP_VAR_Q
         bcc @next               ; blt
@@ -243,6 +243,6 @@ square_root:                                                            ;$9978
         txa
         rol
         tax                     ; X.Y.S *= 4
-        dec ZP_VAR_T    
+        dec T    
         bne @loop               ; ENDREP
         rts
