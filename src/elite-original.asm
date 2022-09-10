@@ -38,6 +38,7 @@
 .include        "draw_circles.asm"                                      ;$26A4
 .include        "code_28ba.asm"                                         ;$28BA
 .include        "math/math_square.asm"                                  ;$3986
+.include        "math/math_multiply_signed.asm"                         ;$3A48
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
 
 .include        "code_6A00.asm"                                         ;$6A00

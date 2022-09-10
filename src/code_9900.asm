@@ -51,10 +51,8 @@ menuscr_hi:                                                             ;$9919
 .segment        "CODE_9932"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-_9932:                                                                  ;$9932
+_9932:                                                  ; BBC: SHPPT    ;$9932
 ;===============================================================================
-; ".SHPPT ; ship plot as point from LL10"
-;
 ;-------------------------------------------------------------------------------
         jsr _9ad8
         jsr _7d1f
@@ -198,36 +196,52 @@ _9a30:                                                                  ;$9A30
 
         rts 
 
-_9a83:                                                                  ;$9A83
-        jmp _7d62               ; draw sun or planet?
 
-
-draw_ship:                                                              ;$9A86
+; draw_ship:                                            ; BBC: LL9      ;$9A86
 ;===============================================================================
 ; draw a ship?
 ;-------------------------------------------------------------------------------
-        lda ZP_SHIP_TYPE        ; ship type
-        bmi _9a83               ; sun or planet?
-        
-        lda # $1f
-        sta ZP_AD
+:       jmp _7d62               ; draw sun or planet                    ;$9A83
 
-        ; is the ship being removed?
-        ; (has to be erased from screen by redrawing over it)
+draw_ship:
+        ;=======================================================================
+        lda ZP_SHIP_TYPE        ; check ship type
+        bmi :-                  ; hi-bit indicates sun or planet
+        
+        lda # 31                ; set a default ship distance
+        sta ZP_AD               ;  (will be populated later)
+
+        ; is the ship being removed? (has to be erased from screen
+        ; by redrawing over it) this occurs when a ship either docks
+        ; or is scooped (for cannisters)
+        ;
         lda ZP_POLYOBJ_BEHAVIOUR
         bmi _9ad8
 
-        ; is it exploded?
-        lda # state::debris
-        bit ZP_POLYOBJ_STATE
-        bne @9ac5
-        bpl @9ac5               ; bit 7 clear, ship has not yet been removed?
+        ; exploded?
+        ;=======================================================================
+        ; before erasing + drawing the ship we should check if it's been
+        ; destroyed; there are two states, a flag to indicate that a ship has
+        ; just been killed and needs erasing, and a flag to indicate that the
+        ; ship is a cloud of debris and shouldn't have its lines drawn
+        ;
+        lda # state::debris     ; = is debris?
+        bit ZP_POLYOBJ_STATE    ; check against state of the ship
+        bne @9ac5               ; is debris
+        bpl @9ac5               ; 
 
+        ; erase ship and explode it:
+        ;-----------------------------------------------------------------------
+        ; stop the ship firing and remove its 'just killed' state
+        ; as we're going to create the debris cloud
+        ;
         ora ZP_POLYOBJ_STATE
         and # (state::exploding | state::firing)^$FF    ;=%00111111
         sta ZP_POLYOBJ_STATE
 
         ; halt acceleration + pitch
+        ; TODO: should we keep this so that the debris "sprays"?
+        ;
         lda # $00
         ldy # PolyObject::acceleration
         sta [ZP_POLYOBJ_ADDR], y
@@ -235,14 +249,14 @@ draw_ship:                                                              ;$9A86
         sta [ZP_POLYOBJ_ADDR], y
         jsr _9ad8
 
-        ldy # $01
-        lda # $12
+        ldy # 1                 ; set byte 1 of ship heap to the
+        lda # 18                ; initial size of the debris cloud
         sta [ZP_POLYOBJ_HEAP], y
 
         ldy # Hull::_07         ;=$07: "explosion count"?
         lda [ZP_HULL_ADDR], y
 
-        ldy # $02               ;?
+        ldy # 2
         sta [ZP_POLYOBJ_HEAP], y
 
         ; BBC: ".EE55 ; counter Y, 4 rnd bytes to edge heap"
@@ -270,10 +284,8 @@ _9ac9:                                                                  ;$9AC9
         sta ZP_POLYOBJ_STATE
         jmp _7866
 
-_9ad8:                                                                  ;$9AD8
+_9ad8:                                                  ; BBC: EE51     ;$9AD8
         ;-----------------------------------------------------------------------
-        ; BBC: ".EE51 ; if bit3 set draw lines in XX19 heap"
-        ;
         lda # state::redraw
         bit ZP_POLYOBJ_STATE
         beq :+
@@ -301,7 +313,7 @@ _9ae6:                                                                  ;$9AE6
         sbc ZP_POLYOBJ_ZPOS_HI
         bcs _9ac9
 
-        ldy # Hull::_06                 ;=$06: "gun vertex"?
+        ldy # Hull::_06         ;=$06: "gun vertex"?
         lda [ZP_HULL_ADDR], y
         tax 
 
@@ -342,7 +354,7 @@ _9b29:                                                                  ;$9B29
 
 ; ".LL17 ; draw Wireframe (including nodes exploding)"
 _9b3a:                                                                  ;$9B3A
-        ldx # $05                       ; 6-byte counter
+        ldx # $05               ; 6-byte counter
 
         ; take a copy of matrix 2x0, 2x1 & 2x2
 :       lda ZP_POLYOBJ_M2x0, x                                          ;$9B3C
@@ -380,7 +392,7 @@ _9b66:                                                                  ;$9B66
         lda # $ff
         sta ZP_CIRCLE_YPOS_HI
 
-        ldy # Hull::face_count          ;=$0C: face count
+        ldy # Hull::face_count
         lda ZP_POLYOBJ_STATE
         and # state::debris
         beq _9b8b
@@ -403,7 +415,7 @@ _9b8b:                                                                  ;$9B8B
         beq _9b88
         sta ZP_AE
 
-        ldy # Hull::_12                 ;=$12: "scaling of normals"?
+        ldy # Hull::_12         ;=$12: "scaling of normals"?
         lda [ZP_HULL_ADDR], y
         tax 
         lda ZP_VAR_K6_3
@@ -1161,10 +1173,10 @@ clip_line:                                              ; BBC: LL145    ;$A013
 ;       LINE_SWAP               indicates if the ends of the line had to be
 ;                               swapped to face left-to-right; 0=no, $FF=yes
 ;
-;       ZP_LINE_X1              ; X1 (8-bit)
-;       ZP_LINE_Y1              ; Y1 (8-bit)
-;       ZP_LINE_X2              ; X2 (8-bit)
-;       ZP_LINE_Y2              ; Y2 (8-bit)
+;       ZP_LINE_X1              X1 (8-bit)
+;       ZP_LINE_Y1              Y1 (8-bit)
+;       ZP_LINE_X2              X2 (8-bit)
+;       ZP_LINE_Y2              Y2 (8-bit)
 ;-------------------------------------------------------------------------------
         lda # %00000000         ; clear the flag that indicates
         sta LINE_SWAP           ;  if the line-ends were swapped
@@ -1594,10 +1606,9 @@ clip_point:                                             ; BBC: LL118    ;$A19F
 ; slope until it's within the viewport:
 ;
 ; the "slope" of the line can be thought of a ratio of how far to move along
-; the line before having to move down; the units are arbitrary, and when
+; the line before having to move up/down; the units are arbitrary, and when
 ; drawing lines we use pixels, where the slope describes how many pixels
-; along to draw before having to move up/down a pixel (or vice-versa in
-; vertical lines)
+; along to draw before having to move up/down a pixel
 ;
 ; when a point is outside the viewport, we need to work out where the line
 ; would intersect the edge of the viewport if we followed it. rather than
@@ -1605,12 +1616,19 @@ clip_point:                                             ; BBC: LL118    ;$A19F
 ; to the viewport as one "unit" and use the slope's ratio to determine what the
 ; equivalent "unit" amount down is!
 ;
-; in:   ZP_LINE_XX1             ; point X-position (16-bit)
-;       ZP_LINE_YY1             ; point Y-position (16-bit)
-;       ZP_LINE_SLOPE           ; slope
-;       ZP_LINE_DIR             ; direction of slope
-; out:  ZP_LINE_X1              ; new X-position (8-bit)
-;       ZP_LINE_Y1              ; new Y-position (8-bit)
+; this assumes a "horizontal" (or "shallow") line which is wider than it is
+; tall but a line can also be "vertical" (or "steep"), this routine doesn't
+; deal with this difference but the routines it calls may flip the axis
+; internally to normalise the direction and return the equivalent result
+;
+; in:   ZP_LINE_XX1             point X-position (16-bit)
+;       ZP_LINE_YY1             point Y-position (16-bit)
+;       ZP_LINE_SLOPE           slope
+;       ZP_LINE_DIR             direction of slope, flag:
+;                               $00 = vertical slope, $FF = horitzontal slope
+;
+; out:  ZP_LINE_X1              new X-position (8-bit)
+;       ZP_LINE_Y1              new Y-position (8-bit)
 ;-------------------------------------------------------------------------------
         ; is the X-postion outside the left or right side of the viewport?
         ;
@@ -1622,11 +1640,12 @@ clip_point:                                             ; BBC: LL118    ;$A19F
         ; point back to 0 to calculate the distance Y1 has to be adjusted
         ; for the two to meet:
         ;
-        ; TODO: note that only this routine ever calls `_a248` & `_a219`
-        ;       meaning we could just bake the parameters in directly?
+        ; TODO: note that only this routine ever calls `deltax_from_slope` &
+        ; `deltay_from_slope` meaning we could just bake the parameters
+        ; in directly?
         ;
 @left:  sta S                   ; put X1 hi-byte into S for the call
-        jsr _a219               ; calculate the delta-Y given the delta-X
+        jsr deltay_from_slope   ; calculate the delta-Y given the delta-X
 
         txa                     ; add the result to Y1:
         clc                     ;
@@ -1662,7 +1681,7 @@ clip_point:                                             ; BBC: LL118    ;$A19F
         ;
         sta S                   ; put X1 hi-byte into S for the call    
         dec S                   ; "subtract" 256 by decrementing hi-byte
-        jsr _a219               ; calculate the delta-Y given the delta-X
+        jsr deltay_from_slope   ; calculate the delta-Y given the delta-X
 
         txa                     ; add the result to Y1:
         clc                     ;
@@ -1693,7 +1712,7 @@ clip_point:                                             ; BBC: LL118    ;$A19F
         sta S                   ; put Y1 hi-byte into S for the call
         lda ZP_LINE_YY1_LO      ; put Y1 lo-byte
         sta R                   ;  into R for the call
-        jsr _a248               ; calculate the delta-X given the delta-Y
+        jsr deltax_from_slope   ; calculate the delta-X given the delta-Y
 
         txa                     ; add the result to X1:
         clc                     ;
@@ -1724,7 +1743,7 @@ clip_point:                                             ; BBC: LL118    ;$A19F
         sta S
         bcc :+                  ; skip if Y-position is within the viewport!
 
-        jsr _a248               ; calculate the delta-X given the delta-Y
+        jsr deltax_from_slope   ; calculate the delta-X given the delta-Y
 
         txa                     ; add the result to X1:
         clc                     ;
@@ -1746,7 +1765,7 @@ clip_point:                                             ; BBC: LL118    ;$A19F
 :       rts                                                             ;$A218
 
 
-_a219:                                                  ; BBC: LL120    ;$A219
+deltay_from_slope:                                      ; BBC: LL120    ;$A219
 ;===============================================================================
 ; in:   T                       flag;
 ;                               $00 = vertical slope
@@ -1757,8 +1776,10 @@ _a219:                                                  ; BBC: LL120    ;$A219
 
         jsr _a284
         pha 
-        ldx T
-        bne _a250
+
+        ldx T                   ; "vertical" or "horizontal" line?
+        bne _a250               ; skip ahead to handle horizontal line
+
 _a225:                                                                  ;$A225
         lda # $00
         tax 
@@ -1786,12 +1807,13 @@ _a23a:                                                                  ;$A23A
         rts 
 
 
-_a248:                                                  ; BBC: LL123    ;$A248
+deltax_from_slope:                                      ; BBC: LL123    ;$A248
 ;===============================================================================
         jsr _a284
         pha 
         ldx T
         bne _a225
+
 _a250:                                                                  ;$A250
         lda # $ff
         tay 
@@ -1836,22 +1858,33 @@ _a283:  rts                                                             ;$A283
 
 _a284:                                                  ; BBC: LL129    ;$A284
 ;===============================================================================
-        ldx ZP_VAR_XX12_2
-        stx Q
-        lda S
-        bpl :+
+; in:   ZP_LINE_SLOPE           the line's slope, a single byte value where
+;                               $FF = 1.0, $80 = 0.5 and $00 = 0
+;       R                       the lo-byte of the point's X or Y position;
+;                               that is, `ZP_LINE_XX1_LO` or `ZP_LINE_YY1_LO`
+;       S                       the hi-byte of the point's X or Y position;
+;                               that is, `ZP_LINE_XX1_HI` or `ZP_LINE_YY1_HI`
+;-------------------------------------------------------------------------------
+        ldx ZP_LINE_SLOPE       ; transfer slope to Q
+        stx Q                   ;  for the calculation
+
+        lda S                   ; check the position hi-byte
+        bpl :+                  ; for positive values, skip ahead
+
         lda # $00
         sec 
         sbc R
         sta R
         lda S
         pha 
+
         eor # %11111111
         adc # $00
         sta S
+
         pla 
 
-:       eor ZP_VAR_XX12_3                                               ;$A29D
+:       eor ZP_LINE_DIR         ; flip direction flag                   ;$A29D
         rts 
 
 
@@ -1860,7 +1893,7 @@ move_ship:                                                              ;$A2A0
 ; do_ship_ai? checks if A.I. needs running and appears to rotate and move
 ; the objcet
 ;
-; in:   X       ship type (i.e. a `hull_pointers` index)
+; in:   X                       ship type (i.e. a `hull_pointers` index)
 ;-------------------------------------------------------------------------------
         ; is the ship exploding?
         lda ZP_POLYOBJ_STATE    ; check the ship's state flags
@@ -2450,10 +2483,10 @@ _a6ae:                                                                  ;$A6AE
 ;===============================================================================
 ; set cockpit view:
 ;
-; in:   X       $00 = front
-;               $01 = rear ("aft")
-;               $02 = left
-;               $03 = right
+; in:   X                       $00 = front
+;                               $01 = rear ("aft")
+;                               $02 = left
+;                               $03 = right
 ;-------------------------------------------------------------------------------
         stx COCKPIT_VIEW
         jsr set_page
@@ -2592,8 +2625,9 @@ set_page:                                                               ;$A72F
 ;===============================================================================
 ; switch screen page:
 ;
-; in:   A       page to switch to; e.g. cockpit-view, galactic chart &c.
-;               see the `page` constants defined in `vars_zeropage.asm`
+; in:   A                       page to switch to; e.g. cockpit-view, galactic
+;                                chart &c. see the `page` constants defined in
+;                                "vars_zeropage.asm"
 ;
 ;-------------------------------------------------------------------------------
         sta ZP_SCREEN           ; set the variable for current active page
@@ -2871,9 +2905,9 @@ _a839:                                                                  ;$A839
 
 _a850:                                                                  ;$A850
 ;===============================================================================
-; in:   A       X1
-;       X       Y1
-;       Y       ?
+; in:   A                       X1
+;       X                       Y1
+;       Y                       ?
 ;-------------------------------------------------------------------------------
         ; WARN: sets overflow flag because _a821 is an RTS (opcode $60)!
         bit _a821
@@ -2893,7 +2927,7 @@ play_sfx:                                                               ;$A858
 ; the actual SID twiddling happens during interrupt,
 ; so this routine sets up the necessary variables
 ;
-; in:   Y       SFX index
+; in:   Y                       SFX index
 ;-------------------------------------------------------------------------------
         clv                     ;?
 
@@ -2981,10 +3015,11 @@ _b09d:                                                                  ;$B09D
 ;===============================================================================
 ; plot a multi-color pixel:
 ;
-; in:   VAR_04EB        Y position, in view-port pixels (0-255). adjusted
-;                       automatically to nearest multi-color pixel (0-127)
-;       VAR_04EA        X position, in view-port pixels
-;       _1d01           colour-mask
+; in:   VAR_04EB                Y position, in view-port pixels (0-255).
+;                               adjusted automatically to nearest multi-
+;                               color pixel (0-127)
+;       VAR_04EA                X position, in view-port pixels
+;       _1d01                   colour-mask
 ;
 ;-------------------------------------------------------------------------------
         lda VAR_04EB
@@ -3124,9 +3159,9 @@ update_missile_indicator:                                               ;$B11F
 ;===============================================================================
 ; update a selected missile indicator on the HUD:
 ;
-; in:   X       missile number, 1-4
-;       Y       a colour nybble pair for the missile block
-; out:  Y       =$00
+; in:   X                       missile number, 1-4
+;       Y                       a colour nybble pair for the missile block
+; out:  Y                       =$00
 ;-------------------------------------------------------------------------------
         dex                     ; switch to zero-based for our purposes
         txa 
@@ -3198,7 +3233,7 @@ chrout:                                                                 ;$B155
 ; IMPORTANT NOTE: Elite stores its text in ASCII, not PETSCII!
 ; this is due to the data being copied over as-is from the BBC
 ;
-; in:   A       ASCII code of character to print
+; in:   A                       ASCII code of character to print
 ;
 ;-------------------------------------------------------------------------------
         ; re-define the use of some zero-page variables for this routine

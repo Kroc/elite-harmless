@@ -84,9 +84,9 @@ move_polyobj_x:                                                         ;$A44C
         sbc S                   ; subtract hi-byte `S`
         sta ZP_POLYOBJ_XPOS_HI, x
         lda ZP_POLYOBJ_XPOS_SIGN, x
-        and # %01111111                 ; mask sign before applying carry
-        sbc # $00                       ; subtract carry if set
-        ora # %10000000                 ; un-mask sign
+        and # %01111111         ; mask sign before applying carry
+        sbc # $00               ; subtract carry if set
+        ora # %10000000         ; un-mask sign
 
         ; restore sign from beginning
         eor T
@@ -94,7 +94,7 @@ move_polyobj_x:                                                         ;$A44C
 
         ; has the subtraction caused the X-position to go from positive
         ; to negative? e.g. 100 + -150 = -50
-        bcs :+                          ; if no, skip over
+        bcs :+                  ; if no, skip over
 
         ; do a two's-compliment of the whole number --
         ; flipping the bits and adding one; done as '1 - number'

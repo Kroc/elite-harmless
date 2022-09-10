@@ -59,9 +59,9 @@
 ; ship state and missile count
 ;-------------------------------------------------------------------------------
 .enum   state
-        exploding       = %10000000     ; is exploding!
+        exploding       = %10000000     ; is exploding! ("just killed")
         firing          = %01000000     ; is firing at player!
-        debris          = %00100000     ; display debris(?)
+        debris          = %00100000     ; exploded -- is debris cloud
         scanner         = %00010000     ; visible on scanner
         redraw          = %00001000     ; needs a redraw
         missiles        = %00000111     ; no. of missiles (or thargons)

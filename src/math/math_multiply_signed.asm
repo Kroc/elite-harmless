@@ -2,8 +2,8 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "math_multiply_signed.asm":
-;
+.segment        "CODE_3A48"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ; unused / unreferenced?
 ;$3a48

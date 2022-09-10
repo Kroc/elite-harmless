@@ -65,7 +65,7 @@ print_flight_token_and_divider:                                         ;$28D9
 ; print a flight token and then draw a line across the screen:
 ; i.e. screen titles
 ;
-; in:   A       flight-token, already descrambled
+; in:   A                       flight-token, already descrambled
 ;
 ;-------------------------------------------------------------------------------
         jsr print_flight_token
@@ -98,7 +98,7 @@ draw_line_divider:                                      ; BBC: NLIN2    ;$28E5
 ; called from galactic chart screen;
 ; draws a line across the screen
 ;
-; in:   A       Y-position of line
+; in:   A                       Y-position of line
 ;
 ;-------------------------------------------------------------------------------
 .ifdef  OPTION_ORIGINAL
@@ -231,11 +231,11 @@ paint_particle:                                                         ;$293A
 ;===============================================================================
 ; paint a dust particle to the bitmap screen:
 ;
-; in:   A               Y-position (px)
-;       X               X-position (px)
-;       ZP_VAR_Z        dust Z-distance
+; in:   A                       Y-position (px)
+;       X                       X-position (px)
+;       ZP_VAR_Z                dust Z-distance
 ;
-; out:  Y               (preserved)
+; out:  Y                       (preserved)
 ;-------------------------------------------------------------------------------
         sty ZP_TEMP_VAR         ; preserve Y through this ordeal
         tay                     ; get a copy of our Y-coordinate
@@ -662,8 +662,8 @@ _2c4e:                                                                  ;$2C4E
 ;===============================================================================
 ; examine a poly-object's X/Y/Z position?
 ;
-; in:   A       a starting value to merge with
-;       Y       a multiple of 37 bytes for each poly-object
+; in:   A                       a starting value to merge with
+;       Y                       a multiple of 37 bytes for each poly-object
 ;-------------------------------------------------------------------------------
         lda # $00
 
@@ -671,8 +671,8 @@ _2c50:                                                                  ;$2C50
 ;===============================================================================
 ; get a [rough] maximum-distance to a poly-object:
 ;
-; in:   A       a starting value to merge with
-;       Y       a multiple of 37 bytes for each poly-object
+; in:   A                       a starting value to merge with
+;       Y                       a multiple of 37 bytes for each poly-object
 ;-------------------------------------------------------------------------------
         ora polyobjects + PolyObject::xpos + 2, y
         ora polyobjects + PolyObject::ypos + 2, y
@@ -958,11 +958,11 @@ _2dc4:                                                                  ;$2DC4
 
 _2dc5:                                                                  ;$2DC5
 ;===============================================================================
-; in:   X       offset from `ZP_POLYOBJECT` to the desired matrix row;
-;               that is, a `MATRIX_ROW_*` constant
+; in:   X                       offset from `ZP_POLYOBJECT` to the desired
+;                                matrix row; i.e. a `MATRIX_ROW_*` constant
 ;
-;       Y       offset from `ZP_POLYOBJECT` to the desired matrix row;
-;               that is, a `MATRIX_ROW_*` constant
+;       Y                       offset from `ZP_POLYOBJECT` to the desired
+;                               matrix row; i.e. a `MATRIX_ROW_*` constant
 ;-------------------------------------------------------------------------------
         ; ROW X
         ;-----------------------------------------------------------------------
@@ -1079,7 +1079,7 @@ print_tiny_value:                                                       ;$2E55
 ;===============================================================================
 ; print an 8-bit value, given in X, padded to 3 chars:
 ;
-; in:   X       value to print
+; in:   X                       value to print
 ;-------------------------------------------------------------------------------
         ; set the padding to a max. number of digits to 3, i.e. "  0"-"255"
         lda # $03
@@ -1089,8 +1089,8 @@ print_small_value:                                                      ;$2E57
 ; print an 8-bit value, given in X, with A specifying
 ; the number of characters to pad to:
 ;
-; in:   X       value to print
-;       A       width in chars to pad to
+; in:   X                       value to print
+;       A                       width in chars to pad to
 ;-------------------------------------------------------------------------------
         ; strip the hi-byte for what follows; only use X
         ldy # $00
@@ -1099,9 +1099,9 @@ print_medium_value:                                                     ;$2E59
 ;===============================================================================
 ; print a 16-bit value stored in X/Y:
 ;
-; in:   A       max. no. of expected digits
-;       X       lo-byte of value
-;       Y       hi-byte of value
+; in:   A                       max. no. of expected digits
+;       X                       lo-byte of value
+;       Y                       hi-byte of value
 ;-------------------------------------------------------------------------------
         sta ZP_PADDING
 
@@ -1354,7 +1354,7 @@ print_char:                                                             ;$2F24
 ; that copies pixels to screen is `paint_char`, but this routine is the one
 ; the text-handling works with
 ;
-; in:   A       ASCII code
+; in:   A                       ASCII code
 ;-------------------------------------------------------------------------------
 .export print_char
 
@@ -2818,7 +2818,7 @@ _367e:                                                                  ;$367E
 
 _3680:                                                                  ;$3680
 ;===============================================================================
-; in:   X       ship-type to spawn
+; in:   X                       ship-type to spawn
 ;-------------------------------------------------------------------------------
         jsr clear_zp_polyobj
 
@@ -2836,7 +2836,7 @@ _3680:                                                                  ;$3680
 
 _3695:                                                                  ;$3695
 ;===============================================================================
-; in:   X       ship-type to spawn
+; in:   X                       ship-type to spawn
 ;-------------------------------------------------------------------------------
         lda # $60
         sta ZP_POLYOBJ_M0x2_HI
@@ -3314,7 +3314,7 @@ _393c:                                                                  ;$393C
 ;===============================================================================
 ; TODO: is this is a multiply routine?
 ;
-; in:   A       ?
+; in:   A                       ?
 ;-------------------------------------------------------------------------------
         ldx ZP_ROLL_MAGNITUDE
 
@@ -3322,8 +3322,8 @@ _393e:                                                                  ;$393E
 ;===============================================================================
 ; TODO: is this is a multiply routine?
 ;
-; in:   A       ?
-;       X       ?
+; in:   A                       ?
+;       X                       ?
 ;-------------------------------------------------------------------------------
         stx ZP_VAR_P
         tax 
@@ -3470,11 +3470,12 @@ _3a3f:                                                                  ;$3A3F
         bne _3a32
         rts 
 
-;===============================================================================
-; insert `multiply_signed` (and some precedents)
-;
-.include        "math/math_multiply_signed.asm"                         ;$3A48
 
+; note: in the original, segment "CODE_3A48" goes here                  ;$34A8
+
+
+.segment        "CODE_3AB2"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _3ab2:                                                                  ;$3AB2
 ;===============================================================================
@@ -3526,7 +3527,7 @@ get_dust_speed:                                                         ;$3B30
 ;===============================================================================
 ; calculate dust speed:
 ;
-; in:   Y       dust particle index
+; in:   Y                       dust particle index
 ;-------------------------------------------------------------------------------
         lda DUST_Z_HI, y
 
@@ -3657,8 +3658,8 @@ dampen_toward_zero:                                                     ;$3C58
 ; reduce a signed value toward zero by adding/subtracting 1 according to sign:
 ; this is used to dampen the roll/pitch values 
 ;
-; in:   X       value to dampen
-; out:  X       updated X value
+; in:   X                       value to dampen
+; out:  X                       updated X value
 ;-------------------------------------------------------------------------------
         lda DOCKCOM_STATE       ; is docking computer enabled?
        .bnz :+                  ; yes, skip over the following
@@ -4105,11 +4106,11 @@ get_polyobj_addr:                                                       ;$3E87
 ; given an index for a poly-object 0-10, this routine will
 ; return an address for the poly-object's variable storage
 ;
-; in:   X               index
+; in:   X                       index
 ;
-; out:  ZP_POLYOBJ_ADDR address
-;       X               (preserved)
-;       A, Y            (clobbered)
+; out:  ZP_POLYOBJ_ADDR         address
+;       X                       (preserved)
+;       A, Y                    (clobbered)
 ;-------------------------------------------------------------------------------
         txa                     ; take poly-object index,
         asl                     ; multiply by 2 (for 2-byte table-lookup)

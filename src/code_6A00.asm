@@ -1235,7 +1235,7 @@ inventory_screen:                                                       ;$6F16
 
         jsr draw_line_divider_title
         jsr print_fuel_and_cash
-        lda SHIP_HOLD            ; cargo capacity of the player's ship
+        lda SHIP_HOLD           ; cargo capacity of the player's ship
         cmp # $1a
         bcc _6f37
 
@@ -1503,7 +1503,7 @@ local_chart:                                                            ;$6FDB
         ldx ZP_POLYOBJ, y       ; look up the row above
        .bnz @draw               ; in use? can't print name anywhere, skip
 
-        ; print planet's name:
+        ; print star's name:
         ;-----------------------------------------------------------------------
 @name:  tya                     ; set the row number                    ;$705C
        .set_cursor_row          ; to print at
@@ -1521,10 +1521,10 @@ local_chart:                                                            ;$6FDB
         lda # %10000000
         sta ZP_PRINT_CASE
 
-        ; print planet name?
+        ; print system's name?
         jsr _76e9
 
-        ; draw the planet's shape:
+        ; draw the star's shape:
         ;-----------------------------------------------------------------------
         ; NOTE: the X-position on screen of a circle is a 16-bit number
         ; (this is to handle suns, where the centre of the sun can be
@@ -1535,10 +1535,10 @@ local_chart:                                                            ;$6FDB
         sta ZP_CIRCLE_YPOS_HI   ; set circle Y-position hi-byte to 0
         sta ZP_CIRCLE_RADIUS_HI ; circle-radius hi-byte(?)
 
-        lda ZP_VAR_XX12_0       ; retrieve screen X-positon of planet
+        lda ZP_VAR_XX12_0       ; retrieve screen X-positon of star
         sta ZP_CIRCLE_XPOS_LO   ; set the circle X-position lo-byte
 
-        ; the hi-byte of W2 is used to calculate both the planet's
+        ; the hi-byte of W2 is used to calculate both the star's
         ; radius and determine the first two letters of the planet's name:
         ; <http://wiki.alioth.net/index.php/Random_number_generator>
         ;
@@ -1547,7 +1547,7 @@ local_chart:                                                            ;$6FDB
         adc # $02
         sta ZP_CIRCLE_RADIUS
 
-        ; draw the planet:
+        ; draw the star:
         ;
         ; TODO: investigate if we can remember the first & last scanlines
         ;       used for drawing a circle, and do away with the need to
@@ -3489,7 +3489,7 @@ _7c61:                                                                  ;$7C61
 
 spawn_ship:                                                             ;$7C6B
 ;===============================================================================
-; in:   A       ship-type ID
+; in:   A                       ship-type ID
 ;-------------------------------------------------------------------------------
         sta T                   ; put aside ship-type
 
@@ -3694,7 +3694,7 @@ _7d5f:                                                                  ;$7D5F
         jmp wipe_sun
 
 
-_7d62:                                                                  ;$7D62
+_7d62:                                                  ; BBC: PLANET   ;$7D62
 ;===============================================================================
         lda ZP_POLYOBJ_ZPOS_SIGN
         cmp # $30
@@ -6303,9 +6303,9 @@ _8920:                                                                  ;$8920
 ;===============================================================================
 ; draw the title screen:
 ;
-; in:   A       a docked-string token to print
-;       X       which ship model to display
-;       Y       ? e.g. $D2
+; in:   A                       a docked-string token to print
+;       X                       which ship model to display
+;       Y                       ? e.g. $D2
 ;-------------------------------------------------------------------------------
         sty VAR_06FB            ; z-distance?
         pha                     ; keep A parameter

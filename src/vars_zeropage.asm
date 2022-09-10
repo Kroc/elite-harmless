@@ -122,7 +122,7 @@ ZP_POLYOBJ_HEAP_LO      := $2a
 ZP_POLYOBJ_HEAP_HI      := $2b
 
 ZP_POLYOBJ_ENERGY       := $2c
-ZP_POLYOBJ_BEHAVIOUR    := $2d
+ZP_POLYOBJ_BEHAVIOUR    := $2d                                          ; NEWB
 
 ;-------------------------------------------------------------------------------
 
@@ -440,8 +440,9 @@ ZP_A9                   := $a9  ;                                       ; FLAG
 ZP_TEMP_COUNTER         := $aa  ; temporary counter, e.g. ball lines    ; CNT
 ZP_AB                   := $ab  ;? x12
 ZP_CIRCLE_STEP          := $ac  ; step size for drawing circles         ; STP
-ZP_AD                   := $ad  ;? x21
-ZP_AE                   := $ae  ;? x12
+
+ZP_AD                   := $ad                                          ; XX4+0
+ZP_AE                   := $ae                                          ; XX4+1
 
 ;                       := $af  ;UNUSED?
 
