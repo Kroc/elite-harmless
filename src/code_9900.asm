@@ -1169,7 +1169,7 @@ clip_line:                                              ; BBC: LL145    ;$A013
         lda # %00000000         ; clear the flag that indicates
         sta LINE_SWAP           ;  if the line-ends were swapped
 
-        lda ZP_LINE_XX2_HI      ; X2, hi-byte
+        lda ZP_LINE_XX2_HI      ; begin with X2, hi-byte
 
 clip_line_flip:                                         ; BBC: LL147    ;$A01A
         ;-----------------------------------------------------------------------
@@ -1419,10 +1419,11 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         ; clip start, end, or both points:
         ;-----------------------------------------------------------------------
 @a0ef:  lda R                   ; store the resultant slope             ;$A0EF
-        sta ZP_DELTA_XX_LO
+        sta ZP_LINE_SLOPE       ; (note: alias of ZP_VAR_XX12_2)
 
-        lda S                   ; bit 7 of S is a flag to indicate if the slope
-        sta ZP_DELTA_XX_HI      ;  goes downhill (0) or uphill (1) 
+        lda S                   ; bit 7 of S is a flag to indicate if
+        sta ZP_LINE_DIR         ;  the slope goes downhill (0) or uphill (1)
+                                ;  (note: alias of ZP_VAR_XX12_3)
 
         lda ZP_VAR_XX13         ; check the result of viewport bounds
         beq @left               ; 0: start-point is offscreen
@@ -1497,10 +1498,10 @@ _a13f:                                                                  ;$A13F
 ;
 ; in:   ZP_POLYOBJ_HEAP         address of heap
 ;       U                       heap-index
-;       ZP_VAR_XX15_0           line-coord X1
-;       ZP_VAR_XX15_2           line-coord X2
-;       ZP_VAR_XX15_1           line-coord Y1
-;       ZP_VAR_XX15_3           line-coord Y2
+;       ZP_LINE_X1              line-coord X1
+;       ZP_LINE_Y1              line-coord Y1
+;       ZP_LINE_X2              line-coord X2
+;       ZP_LINE_Y2              line-coord Y2
 ;       ZP_TEMP_VAR             TODO: unknown
 ;
 ; TODO: this appears to write into the $FF20-$FFC0 range
@@ -1511,16 +1512,16 @@ _a13f:                                                                  ;$A13F
         ; push the line's co-ordinates (X1, Y1, X2, Y2),
         ; one after the other, onto the heap
         ; 
-        lda ZP_VAR_XX15_0
+        lda ZP_LINE_X1
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_XX15_1
+        lda ZP_LINE_Y1
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_XX15_2
+        lda ZP_LINE_X2
         sta [ZP_POLYOBJ_HEAP], y
         iny 
-        lda ZP_VAR_XX15_3
+        lda ZP_LINE_Y2
         sta [ZP_POLYOBJ_HEAP], y
         iny 
         sty U                   ; update new index position
@@ -1563,17 +1564,18 @@ _a178:                                                                  ;$A178
 @draw:  ; draw a line from the line-heap:                               ;$A183
         ;-----------------------------------------------------------------------
         ; read line start and end co-ords from the heap
+        ;
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_XX15_0
+        sta ZP_LINE_X1
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_XX15_1
+        sta ZP_LINE_Y1
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_XX15_2
+        sta ZP_LINE_X2
         iny 
         lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_VAR_XX15_3
+        sta ZP_LINE_Y2
 
         ; TODO: do validation of line direction here so as to allow
         ;       removal of validation in the line routine?
@@ -1591,92 +1593,168 @@ clip_point:                                             ; BBC: LL118    ;$A19F
 ; move the point X1,Y1 along a given direction /
 ; slope until it's within the viewport:
 ;
-; in:   ZP_LINE_XX1             ; X-position (16-bit)
-;       ZP_LINE_YY1             ; Y-position (16-bit)
+; the "slope" of the line can be thought of a ratio of how far to move along
+; the line before having to move down; the units are arbitrary, and when
+; drawing lines we use pixels, where the slope describes how many pixels
+; along to draw before having to move up/down a pixel (or vice-versa in
+; vertical lines)
+;
+; when a point is outside the viewport, we need to work out where the line
+; would intersect the edge of the viewport if we followed it. rather than
+; iteratively walk down the line we can just treat the distance from the point
+; to the viewport as one "unit" and use the slope's ratio to determine what the
+; equivalent "unit" amount down is!
+;
+; in:   ZP_LINE_XX1             ; point X-position (16-bit)
+;       ZP_LINE_YY1             ; point Y-position (16-bit)
+;       ZP_LINE_SLOPE           ; slope
+;       ZP_LINE_DIR             ; direction of slope
 ; out:  ZP_LINE_X1              ; new X-position (8-bit)
 ;       ZP_LINE_Y1              ; new Y-position (8-bit)
 ;-------------------------------------------------------------------------------
-        lda ZP_VAR_XX15_1
-        bpl _a1ba
-        sta S
-        jsr _a219
-        txa 
-        clc 
-        adc ZP_VAR_XX15_2
-        sta ZP_VAR_XX15_2
-        tya 
-        adc ZP_VAR_XX15_3
-        sta ZP_VAR_XX15_3
-        lda # $00
-        sta ZP_VAR_XX15_0
-        sta ZP_VAR_XX15_1
-        tax 
-_a1ba:                                                                  ;$A1BA
-        beq _a1d5
-        sta S
-        dec S
-        jsr _a219
-        txa 
-        clc 
-        adc ZP_VAR_XX15_2
-        sta ZP_VAR_XX15_2
-        tya 
-        adc ZP_VAR_XX15_3
-        sta ZP_VAR_XX15_3
-        ldx # $ff
-        stx ZP_VAR_XX15_0
-        inx 
-        stx ZP_VAR_XX15_1
-_a1d5:                                                                  ;$A1D5
-        lda ZP_VAR_XX15_3
-        bpl _a1f3
-        sta S
-        lda ZP_VAR_XX15_2
-        sta R
-        jsr _a248
-        txa 
-        clc 
-        adc ZP_VAR_XX15_0
-        sta ZP_VAR_XX15_0
-        tya 
-        adc ZP_VAR_XX15_1
-        sta ZP_VAR_XX15_1
-        lda # $00
-        sta ZP_VAR_XX15_2
-        sta ZP_VAR_XX15_3
-_a1f3:                                                                  ;$A1F3
-        lda ZP_VAR_XX15_2
-        sec 
-        sbc # VIEWPORT_HEIGHT
-        sta R
-        lda ZP_VAR_XX15_3
-        sbc # $00
-        sta S
-        bcc :+
+        ; is the X-postion outside the left or right side of the viewport?
+        ;
+        lda ZP_LINE_XX1_HI      ; hi-byte of X-position
+        bpl @right              ; positive? in or off right-side of viewport
 
-        jsr _a248
+        ;-----------------------------------------------------------------------
+        ; X1 is outside the left of the viewport; use the distance from the
+        ; point back to 0 to calculate the distance Y1 has to be adjusted
+        ; for the two to meet:
+        ;
+        ; TODO: note that only this routine ever calls `_a248` & `_a219`
+        ;       meaning we could just bake the parameters in directly?
+        ;
+@left:  sta S                   ; put X1 hi-byte into S for the call
+        jsr _a219               ; calculate the delta-Y given the delta-X
 
-        txa 
-        clc 
-        adc ZP_VAR_XX15_0
-        sta ZP_VAR_XX15_0
+        txa                     ; add the result to Y1:
+        clc                     ;
+        adc ZP_LINE_YY1_LO      ; add result lo-byte to Y1 lo-byte
+        sta ZP_LINE_YY1_LO      ; write back to Y1 lo-byte
+        tya                     ; now handle result hi-byte
+        adc ZP_LINE_YY1_HI      ; add result hi-byte to Y1 hi-byte
+        sta ZP_LINE_YY1_HI      ; write back to Y1 hi-byte
+        
+        ; because we've calculated the Y-position where the line intersects
+        ; the left-edge of the viewport, X1 can now be moved to the first
+        ; pixel in the viewport
+        ;
+        lda # $00               ; set X1 to zero
+        sta ZP_LINE_XX1_LO      ;  lo-byte &
+        sta ZP_LINE_XX1_HI      ;  hi-byte
+        tax                     ; set X-register to zero too, for later
 
-        tya 
-        adc ZP_VAR_XX15_1
-        sta ZP_VAR_XX15_1
+        ; note that we fall through
+        ; with A & X set to zero...
+        ;
 
-        lda # $8f
-        sta ZP_VAR_XX15_2
-        lda # $00
-        sta ZP_VAR_XX15_3
+        ;-----------------------------------------------------------------------
+        ; if the X-coordinate is already within
+        ; the viewport (0-255), skip ahead
+        ;
+@right: beq @above                                                      ;$A1BA
+
+        ; X1 is outside the right-edge of the viewport; to calculate the
+        ; intersection point we need the distance from the right edge of the
+        ; viewport to the point which, given the viewport is 256px wide, is
+        ; simply X1 - 256
+        ;
+        sta S                   ; put X1 hi-byte into S for the call    
+        dec S                   ; "subtract" 256 by decrementing hi-byte
+        jsr _a219               ; calculate the delta-Y given the delta-X
+
+        txa                     ; add the result to Y1:
+        clc                     ;
+        adc ZP_LINE_YY1_LO      ; add result lo-byte to Y1 lo-byte
+        sta ZP_LINE_YY1_LO      ; write back to Y1 lo-byte
+        tya                     ; now handle result hi-byte
+        adc ZP_LINE_YY1_HI      ; add result hi-byte to Y1 hi-byte
+        sta ZP_LINE_YY1_HI      ; write back to Y1 hi-byte
+
+        ; because we've calculated the Y-position where the line intersects
+        ; the right-edge of the viewport, X1 can now be moved to the last
+        ; pixel in the viewport
+        ;
+        ldx # VIEWPORT_WIDTH-1  ; set X1 to 255
+        stx ZP_LINE_XX1_LO      ;  lo-byte
+        inx                     ; overflow to $00
+        stx ZP_LINE_XX1_HI      ;  set X1 hi-byte to zero
+
+        ;-----------------------------------------------------------------------
+        ; even though X1 is now within the viewport's left<->right boundaries,
+        ; the point could still be above the screen!
+        ;
+@above: lda ZP_LINE_YY1_HI      ; check the point's Y-position          ;$A1D5
+        bpl @below              ; skip if positive (0, 1 -- in or below)
+
+        ; Y1 is negative, above the viewport
+        ;
+        sta S                   ; put Y1 hi-byte into S for the call
+        lda ZP_LINE_YY1_LO      ; put Y1 lo-byte
+        sta R                   ;  into R for the call
+        jsr _a248               ; calculate the delta-X given the delta-Y
+
+        txa                     ; add the result to X1:
+        clc                     ;
+        adc ZP_LINE_XX1_LO      ; add result lo-byte to X1 lo-byte
+        sta ZP_LINE_XX1_LO      ; write back to X1 lo-byte
+        tya                     ; now handle result hi-byte
+        adc ZP_LINE_XX1_HI      ; add result hi-byte to X1 hi-byte
+        sta ZP_LINE_XX1_HI      ; write back to X1 hi-byte
+
+        ; because we've calculated the X-position where the line intersects
+        ; the top-edge of the viewport, Y1 can now be moved to the first
+        ; pixel in the viewport
+        ;
+        lda # $00               ; set Y1 to zero
+        sta ZP_LINE_YY1_LO      ;  lo-byte &
+        sta ZP_LINE_YY1_HI      ;  hi-byte
+
+        ;-----------------------------------------------------------------------
+        ; moving the point to the bottom of the viewport is trickier
+        ; because it's neither a 0 or 255 co-ord
+        ;
+@below: lda ZP_LINE_YY1_LO      ; we subtract 144 (viewport height)     ;$A1F3
+        sec                     ;  from the Y-position to get the
+        sbc # VIEWPORT_HEIGHT   ;  distance from the bottom of the
+        sta R                   ;  viewport to the point, which will
+        lda ZP_LINE_YY1_HI      ;  form the one "unit" (delta-Y)
+        sbc # $00               ;  needed to calculate the delta-X
+        sta S
+        bcc :+                  ; skip if Y-position is within the viewport!
+
+        jsr _a248               ; calculate the delta-X given the delta-Y
+
+        txa                     ; add the result to X1:
+        clc                     ;
+        adc ZP_LINE_XX1_LO      ; add result lo-byte to X1 lo-byte
+        sta ZP_LINE_XX1_LO      ; write back to X1 lo-byte
+        tya                     ; now handle result hi-byte
+        adc ZP_LINE_XX1_HI      ; add result hi-byte to X1 hi-byte
+        sta ZP_LINE_XX1_HI      ; write back to X1 hi-byte
+
+        ; because we've calculated the X-position where the line intersects
+        ; the bottom-edge of the viewport, Y1 can now be moved to the last
+        ; pixel in the viewport
+        ;
+        lda # VIEWPORT_HEIGHT-1 ; set Y1 to viewport height-1
+        sta ZP_LINE_YY1_LO      ; lo-byte is last pixel
+        lda # $00               ; hi-byte is zero
+        sta ZP_LINE_YY1_HI
 
 :       rts                                                             ;$A218
 
-;===============================================================================
 
-_a219:                                                                  ;$A219
-        lda ZP_VAR_XX15_0
+_a219:                                                  ; BBC: LL120    ;$A219
+;===============================================================================
+; in:   T                       flag;
+;                               $00 = vertical slope
+;                               $FF = horitzontal slope
+;-------------------------------------------------------------------------------
+        lda ZP_LINE_XX1_LO      ; load R with X-position, lo-byte
         sta R
+
         jsr _a284
         pha 
         ldx T
@@ -1707,9 +1785,9 @@ _a23a:                                                                  ;$A23A
         bpl _a277
         rts 
 
-;===============================================================================
 
-_a248:                                                                  ;$A248
+_a248:                                                  ; BBC: LL123    ;$A248
+;===============================================================================
         jsr _a284
         pha 
         ldx T
@@ -1752,16 +1830,16 @@ _a277:                                                                  ;$A277
         eor # %11111111
         adc # $00
         tay 
-_a283:                                                                  ;$A283
-        rts 
 
+_a283:  rts                                                             ;$A283
+
+
+_a284:                                                  ; BBC: LL129    ;$A284
 ;===============================================================================
-
-_a284:                                                                  ;$A284
         ldx ZP_VAR_XX12_2
         stx Q
         lda S
-        bpl _a29d
+        bpl :+
         lda # $00
         sec 
         sbc R
@@ -1772,8 +1850,8 @@ _a284:                                                                  ;$A284
         adc # $00
         sta S
         pla 
-_a29d:                                                                  ;$A29D
-        eor ZP_VAR_XX12_3
+
+:       eor ZP_VAR_XX12_3                                               ;$A29D
         rts 
 
 

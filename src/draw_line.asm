@@ -136,22 +136,22 @@ draw_line:                                                              ;$AB91
 ; this routine determines what type of line the coordinates describe
 ; and uses either a horizontal or vertical algorithm accordingly
 ;
+; note that the "beginning" and "end" of the line is not necessarily
+; left-to-right, top-to-bottom; the routine flips these as necessary
+;
+; also, the X/Y values are viewport-coordinates (0..255), not screen-
+; coordinates (0..320); the routine does the centring of the viewport
+; automatically
+;
 ; TODO: since every line is drawn twice (drawn once, then erased next frame),
 ;       the line-flipping checks here should really be done when building
 ;       the list of lines to draw, rather than every time a line is drawn
 ;
-; in:   ZP_VAR_XX15_0           start X-pos of line in viewport, in px
-;       ZP_VAR_XX15_2           end X-pos of line in viewport, in px
-;       ZP_VAR_XX15_1           start Y-pos of line in viewport, in px
-;       ZP_VAR_XX15_3           end Y-pos of line in viewport, in px
+; in:   ZP_LINE_X1              start X-pos of line in viewport, in px
+;       ZP_LINE_Y1              start Y-pos of line in viewport, in px
+;       ZP_LINE_X2              end X-pos of line in viewport, in px
+;       ZP_LINE_Y2              end Y-pos of line in viewport, in px
 ;       Y                       (preserved)
-;
-;       note that the "beginning" and "end" of the line is not necessarily
-;       left-to-right, top-to-bottom; the routine flips these as necessary
-;
-;       also, the X/Y values are viewport-coordinates (0..255),
-;       not screen-coordinates (0..320); the routine does the
-;       centring of the viewport automatically
 ;-------------------------------------------------------------------------------
         sty ZP_9E               ; preserve Y
 
@@ -168,8 +168,8 @@ draw_line:                                                              ;$AB91
         sta LINE_SWAP           ; clear the line swap flag
 
         ; get width of the line:
-        lda ZP_VAR_XX15_2       ; take line-starting X pos
-        sbc ZP_VAR_XX15_0       ; and subtract line-ending X pos
+        lda ZP_LINE_X2          ; take line-starting X pos
+        sbc ZP_LINE_X1          ; and subtract line-ending X pos
        .bge :+                  ; if line is left-to-right, skip ahead
 
         ; line coords are right-to-left, so the result underflowed
@@ -182,11 +182,11 @@ draw_line:                                                              ;$AB91
 
         ; get height of line:
         sec 
-        lda ZP_VAR_XX15_3       ; take line-ending Y pos
-        sbc ZP_VAR_XX15_1       ; subtract the line-starting Y pos
+        lda ZP_LINE_Y2          ; take line-ending Y pos
+        sbc ZP_LINE_Y1          ; subtract the line-starting Y pos
        .bge :+                  ; if line is top-to-bottom, skip ahead
 
-        ; line co-ords are bottom-to-top, so the result underflowed
+        ; line co-ords are bottom-to-top, so the result underflowed.
         ; invert the result to get the positive height
         ;
         eor # %11111111         ; flip all bits,
@@ -216,17 +216,17 @@ draw_line_horz:                                                         ;$ABBB
 ; if calling into this point externally,
 ; the parameters would look like this:
 ;
-; in:   ZP_VAR_XX15_0           x-pos start of line in viewport pixels
-;       ZP_VAR_XX15_2           x-pos end of line in viewport pixels
-;       ZP_VAR_XX15_1           y-pos start of line in viewport pixels
-;       ZP_VAR_XX15_3           y-pos end of line in viewport pixels
+; in:   ZP_LINE_X1              x-pos start of line in viewport pixels
+;       ZP_LINE_X2              x-pos end of line in viewport pixels
+;       ZP_LINE_Y1              y-pos start of line in viewport pixels
+;       ZP_LINE_Y2              y-pos end of line in viewport pixels
 ;       ZP_REG_W                width of line, i.e. ABS(X2-X1)
 ;       ZP_REG_H                height of line, i.e. ABS(Y2-Y1)
 ;
 ;       Y will be clobbered with whatever was last saved at `ZP_9E`!
 ;-------------------------------------------------------------------------------
-        ldx ZP_VAR_XX15_0
-        cpx ZP_VAR_XX15_2
+        ldx ZP_LINE_X1
+        cpx ZP_LINE_X2
        .blt :+                  ; line is left-to-right, skip ahead.
                                 ; note that the use of `ldx` means that
                                 ; X = horizontal start point (pixels)
@@ -237,14 +237,14 @@ draw_line_horz:                                                         ;$ABBB
         ;
         dec LINE_SWAP           ; set the line swap flag (=$FF)
 
-        lda ZP_VAR_XX15_2       ; flip beginning and end points;
-        sta ZP_VAR_XX15_0       ; line-drawing will proceed
-        stx ZP_VAR_XX15_2       ;  left-to-right
+        lda ZP_LINE_X2          ; flip beginning and end points;
+        sta ZP_LINE_X1          ; line-drawing will proceed
+        stx ZP_LINE_X2          ;  left-to-right
         tax                     ; X = horizontal start point (pixels)
-        lda ZP_VAR_XX15_3       ; also flip vertically, so that the
-        ldy ZP_VAR_XX15_1       ;  line proceeds from the higher to
-        sta ZP_VAR_XX15_1       ;  the lower Y-coordinate
-        sty ZP_VAR_XX15_3       ; Y = vertical start point (pixels)
+        lda ZP_LINE_Y2          ; also flip vertically, so that the
+        ldy ZP_LINE_Y1          ;  line proceeds from the higher to
+        sta ZP_LINE_Y1          ;  the lower Y-coordinate
+        sty ZP_LINE_Y2          ; Y = vertical start point (pixels)
 
         ;-----------------------------------------------------------------------
         ; given a horizontal line that can only adjust one pixel vertically
@@ -308,8 +308,8 @@ draw_line_horz:                                                         ;$ABBB
         ;///////////////////////////////////////////////////////////////////////
         clc                     ; unneccessary, the carry is reset on cpy
 .endif  ;///////////////////////////////////////////////////////////////////////
-        ldy ZP_VAR_XX15_1
-        cpy ZP_VAR_XX15_3
+        ldy ZP_LINE_Y1
+        cpy ZP_LINE_Y2
        .bge draw_line_horzup
 
         jmp draw_line_horzdn
@@ -321,8 +321,8 @@ draw_line_horzup:                                                       ;$AC19
 ; if calling into this point externally,
 ; the parameters would look like this:
 ;
-; in:   ZP_VAR_XX15_0           x-pos start of line in viewport pixels
-;       ZP_VAR_XX15_1           y-pos start of line in viewport pixels
+; in:   ZP_LINE_X1              x-pos start of line in viewport pixels
+;       ZP_LINE_Y1              y-pos start of line in viewport pixels
 ;       Y                       copy of above
 ;       ZP_REG_W                width of line
 ;       ZP_REG_H                height of line
@@ -332,7 +332,7 @@ draw_line_horzup:                                                       ;$AC19
         ; get the address within the bitmap where we will be drawing,
         ; stored into `ZP_TEMP_ADDR`
         ;
-        lda ZP_VAR_XX15_0       ; horizontal pixel column
+        lda ZP_LINE_X1          ; horizontal pixel column
         and # %11111000         ; round to 8-bits, i.e. per char cell
         clc 
         adc row_to_bitmap_lo, y ; get bitmap address low-byte
@@ -345,7 +345,7 @@ draw_line_horzup:                                                       ;$AC19
         and # %00000111         ; mod 8 (0...7), i.e. row within cell
         tay                     ; Y = char cell row index
 
-        lda ZP_VAR_XX15_0       ; again, the horizontal pixel column
+        lda ZP_LINE_X1          ; again, the horizontal pixel column
         and # %00000111         ; mod 8 (0...7)
         tax                     ; X = char cell pixel column no.
 
@@ -754,8 +754,8 @@ draw_line_horzdn:                                                       ;$AD8B
 ; if calling into this point externally,
 ; the parameters would look like this:
 ;
-; in:   ZP_VAR_XX15_0           x-pos start of line in viewport pixels
-;       ZP_VAR_XX15_1           y-pos start of line in viewport pixels
+; in:   ZP_LINE_X1              x-pos start of line in viewport pixels
+;       ZP_LINE_Y1              y-pos start of line in viewport pixels
 ;       Y                       copy of above
 ;       ZP_REG_W                width of line
 ;       ZP_REG_H                height of line
@@ -768,7 +768,7 @@ draw_line_horzdn:                                                       ;$AD8B
         lda row_to_bitmap_hi, y
         sta ZP_TEMP_ADDR_HI
 
-        lda ZP_VAR_XX15_0       ; horizontal pixel column
+        lda ZP_LINE_X1          ; horizontal pixel column
         and # %11111000         ; round to 8-bits, i.e. per char cell
         adc row_to_bitmap_lo, y
         sta ZP_TEMP_ADDR_LO
@@ -787,7 +787,7 @@ draw_line_horzdn:                                                       ;$AD8B
         and # %00000111
         eor # %11111000
         tay 
-        lda ZP_VAR_XX15_0
+        lda ZP_LINE_X1
         and # %00000111
         tax 
         bit LINE_SWAP
@@ -1203,10 +1203,10 @@ draw_line_vert:                                                         ;$AF08
 ; the first thing we have to do is determine which way the line goes
 ; and flip top-down lines so we always work bottom-up
 ;-------------------------------------------------------------------------------
-        ldy ZP_VAR_XX15_1       ; get "starting" Y-position
+        ldy ZP_LINE_Y1          ; get "starting" Y-position
         tya 
-        ldx ZP_VAR_XX15_0       ; (get starting X-position, for later)
-        cpy ZP_VAR_XX15_3       ; is line top-down, or bottom up?
+        ldx ZP_LINE_X1          ; (get starting X-position, for later)
+        cpy ZP_LINE_Y2          ; is line top-down, or bottom up?
        .bge :+                  ; if line is bottom-up, skip ahead
 
         ;-----------------------------------------------------------------------
@@ -1215,13 +1215,13 @@ draw_line_vert:                                                         ;$AF08
         ;
         dec LINE_SWAP           ; set the line swap flag (=$FF)
         
-        lda ZP_VAR_XX15_2
-        sta ZP_VAR_XX15_0
-        stx ZP_VAR_XX15_2
+        lda ZP_LINE_X2
+        sta ZP_LINE_X1
+        stx ZP_LINE_X2
         tax 
-        lda ZP_VAR_XX15_3
-        sta ZP_VAR_XX15_1
-        sty ZP_VAR_XX15_3
+        lda ZP_LINE_Y2
+        sta ZP_LINE_Y1
+        sty ZP_LINE_Y2
         tay 
 
         ;-----------------------------------------------------------------------
@@ -1298,8 +1298,8 @@ draw_line_vert:                                                         ;$AF08
         ldx ZP_REG_H
         inx 
         
-        lda ZP_VAR_XX15_2
-        sbc ZP_VAR_XX15_0
+        lda ZP_LINE_X2
+        sbc ZP_LINE_X1
         bcc _vertlt             ; handle bottom-up, left-to-right line
 
         clc 
@@ -1423,9 +1423,9 @@ draw_straight_line:                                                     ;$AFFA
 ;===============================================================================
 ; draw a straight, horizontal line:
 ;
-; in:   ZP_VAR_XX15_1           Y-position
-;       ZP_VAR_XX15_0           start X-position, in viewport pixels (0-255)
-;       ZP_VAR_XX15_2           end X-position, in viewport pixels (0-255)
+; in:   ZP_LINE_Y1              Y-position
+;       ZP_LINE_X1              start X-position, in viewport pixels (0-255)
+;       ZP_LINE_X2              end X-position, in viewport pixels (0-255)
 ; out:  Y                       (preserved)
 ;
 ; this is reasonably fast as it marches 8-pixels
@@ -1435,19 +1435,19 @@ draw_straight_line:                                                     ;$AFFA
 
         ; does the line start/end need to be flipped?
         ;
-        ldx ZP_VAR_XX15_0       ; starting position
-        cpx ZP_VAR_XX15_2       ; 'subtract' the ending position
+        ldx ZP_LINE_X1          ; starting position
+        cpx ZP_LINE_X2          ; 'subtract' the ending position
        .bze :-                  ; start=end, 0-wide line!
         bcc :+                  ; skip over if line is normal
 
         ; flip the line start/end!
-        lda ZP_VAR_XX15_2
-        sta ZP_VAR_XX15_0
-        stx ZP_VAR_XX15_2
+        lda ZP_LINE_X2
+        sta ZP_LINE_X1
+        stx ZP_LINE_X2
         tax 
 
-:       dec ZP_VAR_XX15_2                                               ;$B00B
-        lda ZP_VAR_XX15_1       ; line Y-position
+:       dec ZP_LINE_X2                                               ;$B00B
+        lda ZP_LINE_Y1          ; line Y-position
         tay 
 
         ; get bitmap address:
@@ -1467,7 +1467,7 @@ draw_straight_line:                                                     ;$AFFA
         and # %11111000
         sta ZP_C0
 
-        lda ZP_VAR_XX15_2
+        lda ZP_LINE_X2
         and # %11111000
         sec 
         sbc ZP_C0
@@ -1477,7 +1477,7 @@ draw_straight_line:                                                     ;$AFFA
         lsr 
         sta ZP_BE
 
-        lda ZP_VAR_XX15_0
+        lda ZP_LINE_X1
         and # %00000111
         tax 
 
@@ -1527,7 +1527,7 @@ draw_straight_line:                                                     ;$AFFA
 
 @_b064:                                                                 ;$B064
         ; draw right-hand-side
-        lda ZP_VAR_XX15_2
+        lda ZP_LINE_X2
         and # %00000111
         tax 
         lda _2900, x
@@ -1544,13 +1544,13 @@ draw_straight_line:                                                     ;$AFFA
         ; we draw this by combining a left-fill and right-fill pattern to
         ; produce a set of pixels in the middle that corresponds to our line
         ;
-        lda ZP_VAR_XX15_0       ; starting X position
+        lda ZP_LINE_X1          ; starting X position
         and # %00000111         ; where within a char-cell? (0-7)
         tax 
         lda _2907, x            ; get a pixel mask to fill right
         sta ZP_C0
 
-        lda ZP_VAR_XX15_2       ; ending X position
+        lda ZP_LINE_X2          ; ending X position
         and # %00000111         ; where within a char-cell? (0-7)
         tax 
         lda _2900, x            ; get a pixel mask to fill left

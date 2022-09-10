@@ -273,14 +273,12 @@ ZP_VAR_XX15_2           := $6d  ; line YY1-lo or X2                     ; XX15+2
 ZP_VAR_XX15_3           := $6e  ; line YY1-hi or Y2                     ; XX15+3
 ZP_VAR_XX15_4           := $6f  ; line XX2-lo                           ; XX15+4
 ZP_VAR_XX15_5           := $70  ; line XX2-hi                           ; XX15+5
-
 ZP_VAR_XX12_0           := $71  ; line YY2-lo                           ; XX12+0
 ZP_VAR_XX12_1           := $72  ; line YY2-hi                           ; XX12+1
-
-ZP_VAR_XX12_2           := $73  ;                                       ; XX12+2
-ZP_VAR_XX12_3           := $74  ;                                       ; XX12+3
-ZP_VAR_XX12_4           := $75  ;                                       ; XX12+4
-ZP_VAR_XX12_5           := $76  ;                                       ; XX12+5
+ZP_VAR_XX12_2           := $73  ; line delta-X-lo, or delta-X           ; XX12+2
+ZP_VAR_XX12_3           := $74  ; line delta-X-hi                       ; XX12+3
+ZP_VAR_XX12_4           := $75  ; line delta-Y-lo, or delta-Y           ; XX12+4
+ZP_VAR_XX12_5           := $76  ; line delta-Y-hi                       ; XX12+5
 
 ; when used as 16-bit parameters,
 ; they take on this form:
@@ -316,6 +314,9 @@ ZP_LINE_Y2              := ZP_VAR_XX15_3                                ; XX15+3
 
 ZP_DELTA_X              := ZP_DELTA_XX_LO                               ; XX12+2
 ZP_DELTA_Y              := ZP_DELTA_YY_LO                               ; XX12+4
+
+ZP_LINE_SLOPE           := ZP_VAR_XX12_2                                ; XX12+2
+ZP_LINE_DIR             := ZP_VAR_XX12_3                                ; XX12+3
 
 ;-------------------------------------------------------------------------------
 ; a 4-byte big-endian number buffer for working with big integers:
