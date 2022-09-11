@@ -1,8 +1,7 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;
-; "math_3d.inc":
+;===============================================================================
 ;
 ; hello and welcome to disassembly hell!
 ;
@@ -16,9 +15,8 @@
 ; describing everything using those terms. it also doesn't crank out the formal
 ; math notation on page.1 like every other math tutorial does :|
 ;
-
-.macro  .move_ship_x
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+.segment        "CODE_A44A"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 .move_ship_x_small:                                                  ;$A44A
         ;-----------------------------------------------------------------------
@@ -113,11 +111,9 @@ move_ship_x:                                                         ;$A44C
 
 :       rts                                                             ;$A4A0
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
 
-.macro  .rotate_ship_axis
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+.segment        "CODE_A4A1"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ;
 ; rotate a ship around a single axis:
 ;
@@ -270,7 +266,3 @@ rotate_ship_axis:                                                    ;$A4A1
         stx ZP_SHIP+mYx2_LO, y  ; write back the lo-byte
         
         rts 
-
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
-

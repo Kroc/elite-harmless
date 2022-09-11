@@ -6,8 +6,6 @@
 ;
 .include        "elite.inc"
 
-.include        "math/math_3d.inc"
-
 .include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
@@ -47,6 +45,7 @@
 
 .include        "code_6A00.asm"
 .include        "code_9900.asm"
+.include        "math/math_3d.inc"
 .include        "code_interrupts.asm"
 
 .ifdef  FEATURE_FASTLINES

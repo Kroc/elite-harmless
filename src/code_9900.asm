@@ -2190,12 +2190,12 @@ _a3bf:                                                                  ;$A3BF
         rts 
 
 
-;===============================================================================
-; insert these routines from "math_3d.inc"
-;
-.move_ship_x                                                            ;$A44A
-.rotate_ship_axis                                                       ;$A4A1
+; NOTE: in the original, segment "CODE_A44A" appears here               ;$A44A
+; NOTE: in the original, segment "CODE_A4A1" appears here               ;$A4A1
 
+
+.segment        "CODE_A508"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _a508:                                                                  ;$A508
 ;===============================================================================
