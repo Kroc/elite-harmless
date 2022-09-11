@@ -16,11 +16,11 @@
 .include        "code_keyboard.inc"
 
 ; due to a limitation, CA65 cannot 'look-ahead' for scopes (including procs &
-; structs) and therefore our `PolyObject` struct must be loaded in before it
+; structs) and therefore our `Ship` struct must be loaded in before it
 ; is referenced anywhere, even though the code segment might be addressed
 ; much higher up in memory than this line might imply
 ;
-.include        "vars_polyobj.asm"                                      ;$F900
+.include        "vars_ships.asm"                                        ;$F900
 
 .include        "vars_main.asm"                                         ;$0400
 .include        "gfx/gfx_font.asm"                                      ;$0B00

@@ -22,7 +22,7 @@ _3e46:                                                                  ;$3E46
         
         ; this might be a temporary variable and not the ship state
         lda # %00000000
-        sta ZP_POLYOBJ_STATE
+        sta ZP_SHIP_STATE
         
         lda # page::empty
         jsr set_page

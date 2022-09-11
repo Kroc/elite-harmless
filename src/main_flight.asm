@@ -179,7 +179,7 @@ main_flight_loop:                                                       ;$1EC1
         ; this value is always changing
         ;
         ; TODO: if we make systems without planets, this will need changing
-        lda polyobj_00
+        lda ship_00
         sta ZP_GOATSOUP_pt1
 
 .ifdef  FEATURE_TRUMBLES
@@ -559,19 +559,20 @@ process_ship:                                                           ;$202F
                                 ; you're just happy to see me
 
 :       sta ZP_SHIP_TYPE        ; put ship type aside                   ;$2039
-        jsr get_polyobj_addr    ; look up the ship's instance data
+        jsr get_ship_addr       ; look up the ship's instance data
 
-        ; copy the given PolyObject to
-        ; the working space in zero page:
+        ; copy the given Ship to the
+        ; working space in zero page:
         ;
-        ; see "vars_polyobj.asm" for the code in this macro as different
+        ; see "vars_ship.asm" for the code in this macro as different
         ; approaches are taken for optimisation depending on the build
         ;
         ; TODO: given the ~1'100 cycles to copy the object back and forth,
         ;       would it be faster to stick to indexing the object instead?
-        ;       i.e. `... [polyobj], x`
+        ;       i.e. `... [ship], x`. we might get away with copying less
+        ;       of the struct to ZP and index the lesser used properties
         ;
-        .polybj_to_zp
+        .ship_to_zp
 
         ; TODO: if we use LDX instead, we can preserve the ship-type through
         ;       this logic and do away with a number of additional LDA's?
@@ -611,7 +612,7 @@ process_ship:                                                           ;$202F
 
         ; make ship disappear?
         ;
-        lda ZP_POLYOBJ_STATE    ; get the ship's state
+        lda ZP_SHIP_STATE       ; get the ship's state
         and # state::debris     ; check for exploding (is debris)
        .bnz @move               ; skip if already exploding
 
@@ -621,9 +622,9 @@ process_ship:                                                           ;$202F
 .if     (state::exploding <> %10000000)
         .fatal  "`process_ship` assumes that `state::exploding` is bit 7"
 .endif
-        asl ZP_POLYOBJ_STATE    ; push bit 7 off
+        asl ZP_SHIP_STATE       ; push bit 7 off
         sec                     ; set carry and...
-        ror ZP_POLYOBJ_STATE    ; ...shift the carry into bit 7
+        ror ZP_SHIP_STATE       ; ...shift the carry into bit 7
 
         ldx ZP_SHIP_TYPE        ; retrieve ship-type again
         jsr ship_killed         ; add points to kill rank
@@ -633,34 +634,34 @@ process_ship:                                                           ;$202F
 ;-------------------------------------------------------------------------------
 @move:  jsr move_ship                                                   ;$2079
 
-        ; copy the zero-page PolyObject back to its storage
+        ; copy the zero-page Ship back to its storage
         ;
-        .zp_to_polyobj
+        .zp_to_ship
 
 ;===============================================================================
 ; [7]:  collision checks
 ;-------------------------------------------------------------------------------
         ; is the ship exploding?
         ;
-        lda ZP_POLYOBJ_STATE
+        lda ZP_SHIP_STATE
         and # state::exploding | state::debris
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr _87b1               ; combine check with distance
 .else   ;///////////////////////////////////////////////////////////////////////
-        ora ZP_POLYOBJ_XPOS_HI  ; there's really no need for a JSR for this
-        ora ZP_POLYOBJ_YPOS_HI
-        ora ZP_POLYOBJ_ZPOS_HI
+        ora ZP_SHIP_XPOS_HI     ; there's really no need for a JSR for this
+        ora ZP_SHIP_YPOS_HI
+        ora ZP_SHIP_ZPOS_HI
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; if the ship is exploding / exploded or far away then skip
        .bnz @20e0               
 
         ; check the near distance
-        lda ZP_POLYOBJ_XPOS_LO
-        ora ZP_POLYOBJ_YPOS_LO
-        ora ZP_POLYOBJ_ZPOS_LO
+        lda ZP_SHIP_XPOS_LO
+        ora ZP_SHIP_YPOS_LO
+        ora ZP_SHIP_ZPOS_LO
         ; if the high-bit is set on the lo-byte of any axis (>=128)
         ; then the ship is still far enough away, skip ahead
         bmi @20e0
@@ -688,7 +689,7 @@ process_ship:                                                           ;$202F
         lda PLAYER_SCOOP
         ; is the object below the player? i.e. if its Y-position is negative.
         ; we've already established that it's near enough to us
-        and ZP_POLYOBJ_YPOS_SIGN
+        and ZP_SHIP_YPOS_SIGN
         bpl big_damage          ; if not scoopable, skip
 
         ; attempt to scoop object
@@ -746,9 +747,9 @@ process_ship:                                                           ;$202F
 
         ; mark cannister for removal:
         ; (set bit 7)
-        asl ZP_POLYOBJ_BEHAVIOUR
+        asl ZP_SHIP_BEHAVIOUR
         sec 
-        ror ZP_POLYOBJ_BEHAVIOUR
+        ror ZP_SHIP_BEHAVIOUR
 
         ; (remove ship?)
 @20e0:  jmp _2131                                                       ;$20E0
@@ -756,16 +757,16 @@ process_ship:                                                           ;$202F
 ;===============================================================================
 ; [9]:  docking
 ;-------------------------------------------------------------------------------
-        ; is the station hostile? poly-object slot 1 is always reserved for
+        ; is the station hostile? ship slot 1 is always reserved for
         ; the sun or space-station, so we can refer to its bytes directly
         ;
-@dock:  lda polyobj_01 + PolyObject::behaviour                          ;$20E3
+@dock:  lda ship_01 + Ship::behaviour                                   ;$20E3
         and # behaviour::angry  ; check the angry flag
        .bnz dock_fail           ; cannot dock!
 
         ; check the rotation of the station:
         ;
-        lda ZP_POLYOBJ_M0x2_HI
+        lda ZP_SHIP_M0x2_HI
         cmp # 214
         bcc dock_fail
 
@@ -778,7 +779,7 @@ process_ship:                                                           ;$202F
 
         ; check rotation of slot:
         ;
-        lda ZP_POLYOBJ_M1x0_HI
+        lda ZP_SHIP_M1x0_HI
         and # %01111111         ; (remove sign)
         cmp # 80
         bcc dock_fail
@@ -810,9 +811,9 @@ explode_obj:                                                            ;$2110
         ; set 'exploding' state (bit 7)
         ;
         ; TODO: can this be more efficiently combined with the below copy?
-        asl ZP_POLYOBJ_STATE    ; push bit 7 off
+        asl ZP_SHIP_STATE       ; push bit 7 off
         sec                     ; set carry and...
-        ror ZP_POLYOBJ_STATE    ; ...shift the carry into bit 7
+        ror ZP_SHIP_STATE       ; ...shift the carry into bit 7
         bne _2131               ; (always brunches)
 
 small_damage:                                                           ;$211A
@@ -830,14 +831,14 @@ big_damage:                                                             ;$2122
         ; set 'exploding' state (bit 7)
         ;
         ; TODO: can this be more efficiently combined with the above copy?
-        asl ZP_POLYOBJ_STATE    ; push bit 7 off
+        asl ZP_SHIP_STATE       ; push bit 7 off
         sec                     ; set carry and...
-        ror ZP_POLYOBJ_STATE    ; ...shift the carry into bit 7
+        ror ZP_SHIP_STATE       ; ...shift the carry into bit 7
         
         ; take damage proportional to the energy level of the ship you collided
         ; with; the ship's energy level is divided by 2 and 128 is added
         ;
-        lda ZP_POLYOBJ_ENERGY   ; ship's energy level...
+        lda ZP_SHIP_ENERGY      ; ship's energy level...
         sec                     ; we'll introduce a high-bit (128)   
         ror                     ; divide by 2 and insert the high-bit (+128)
 
@@ -855,7 +856,7 @@ apply_damage:                                                           ;$212B
 
         ; should the ship be removed?
         ;
-_2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
+_2131:  lda ZP_SHIP_BEHAVIOUR                                           ;$2131
         bpl :+                  ; is bit 7 set? if no, skip over
         jsr _b410               ; remove from scanner dispay (?)
 
@@ -938,16 +939,16 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         ;-----------------------------------------------------------------------
         ; calculate if your laser fire has destroyed the ship:
         ;
-@hit:   lda ZP_POLYOBJ_ENERGY   ; ship's energy-level                   ;$2170
+@hit:   lda ZP_SHIP_ENERGY      ; ship's energy-level                   ;$2170
         sec 
         sbc ZP_LASER            ; subtract player's laser power
         bcs @_21a1              ; if energy remains, skip ahead
 
         ; explode the ship:
         ;-----------------------------------------------------------------------
-        asl ZP_POLYOBJ_STATE    ; remove bit 7
+        asl ZP_SHIP_STATE       ; remove bit 7
         sec                     ; take a 1 from the bit bucket
-        ror ZP_POLYOBJ_STATE    ; shift it into bit 7
+        ror ZP_SHIP_STATE       ; shift it into bit 7
 
         lda ZP_SHIP_TYPE        ; retrieve which type of ship this is
         cmp # HULL_ASTEROID     ; an asteroid?
@@ -984,7 +985,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         jsr ship_killed         ; add points to the player's kill-rank
                                 ; TODO: returns A = 0, no?
 @_21a1:                                                                 ;$21A1
-        sta ZP_POLYOBJ_ENERGY   ; update the ships energy level
+        sta ZP_SHIP_ENERGY      ; update the ships energy level
 
 @angry: lda ZP_SHIP_TYPE                                                ;$21A3
         jsr _36c5               ; make hostile?
@@ -999,19 +1000,19 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         ;
         ; TODO: why do we do this, when we could defer copying the whole
         ;       ship instance to later in the main loop??
-        ldy # PolyObject::energy
-        lda ZP_POLYOBJ_ENERGY
-        sta [ZP_POLYOBJ_ADDR], y
+        ldy # Ship::energy
+        lda ZP_SHIP_ENERGY
+        sta [ZP_SHIP_ADDR], y
 
         ; when will you learn that your actions have consequences?
         ;-----------------------------------------------------------------------
         ; check the high-bit of the behaviour flags,
         ; this indicates if the ship needs to be removed from play
-        lda ZP_POLYOBJ_BEHAVIOUR
+        lda ZP_SHIP_BEHAVIOUR
         bmi @clear              ; bit 7 set?
 
         ; is the ship currently exploding?
-        lda ZP_POLYOBJ_STATE
+        lda ZP_SHIP_STATE
         bpl @_21e5              ; bit 7 not set?
 
         and # state::debris     ; TODO: not in the BBC code
@@ -1021,7 +1022,7 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
         ; the behaviour bit for police (%01000000 = 64) is used as the
         ; felony-level to set, making the player immediately "Fugitive"
         ;
-        lda ZP_POLYOBJ_BEHAVIOUR
+        lda ZP_SHIP_BEHAVIOUR
         and # behaviour::police ; keep just bit 6
         ora PLAYER_LEGAL        ; add this to the felony-level (if set)
         sta PLAYER_LEGAL        ; update player's felony level
@@ -1095,11 +1096,11 @@ _2131:  lda ZP_POLYOBJ_BEHAVIOUR                                        ;$2131
 
         ; process next ship:
         ;-----------------------------------------------------------------------
-        ; update the poly-object's stored state
-        ; with the current working state
-:       ldy # PolyObject::state                                         ;$21EE
-        lda ZP_POLYOBJ_STATE
-        sta [ZP_POLYOBJ_ADDR], y
+        ; update the ship's stored state with the current working state
+        ;
+:       ldy # Ship::state                                               ;$21EE
+        lda ZP_SHIP_STATE
+        sta [ZP_SHIP_ADDR], y
 
         ldx ZP_PRESERVE_X       ; retrieve current ship-slot being processed...
         inx                     ; move to the next ship-slot
@@ -1191,12 +1192,12 @@ _21fa:  lda PLAYER_EBOMB        ; check energy bomb state               ;$21FA
         ;
         ; number of bytes to copy:
         ; (up to, and including, the `acceleration` property)
-        ldx # PolyObject::acceleration + .sizeof( PolyObject::acceleration )-1
+        ldx # Ship::acceleration + .sizeof( Ship::acceleration )-1
 
         ; copy from ship slot 0 to the zero-page working space
         ;
-:       lda polyobj_00, x                                               ;$2248
-        sta ZP_POLYOBJ, x
+:       lda ship_00, x                                                  ;$2248
+        sta ZP_SHIP, x
         dex 
         bpl :-
 
@@ -1282,7 +1283,7 @@ _22c2:                                                                  ;$22C2
         lda .loword( SHIP_TYPES + HULL_COREOLIS )
         bne _231c
 
-        ldy # .sizeof( PolyObject )
+        ldy # .sizeof( Ship )
         jsr _2c50
        .bnz _231c
 
@@ -1385,8 +1386,8 @@ spawn_debris:                                                           ;$234C
 ; when a ship is destroyed, attempt to spawn debris according
 ; to the debris info in the ship's hull structure
 ;
-; in:   Y               ship-type
-;       ZP_HULL_ADDR    must be loaded with a pointer to a hull structure
+; in:   Y                       ship-type
+;       ZP_HULL_ADDR            must be loaded with a pointer to a hull struct
 ;-------------------------------------------------------------------------------
         ; randomise the chance of dropping loot:
         ; note that this returns A & X, which is why
@@ -1413,8 +1414,8 @@ spawn_multiple:                                                         ;$2359
 ;===============================================================================
 ; spawn multiple of one type of ship:
 ;
-; in:   A       number of items to spawn
-;       X       ship-type to spawn, e.g. cargo cannister
+; in:   A                       number of items to spawn
+;       X                       ship-type to spawn, e.g. cargo cannister
 ;-------------------------------------------------------------------------------
         sta ZP_TEMP_COUNTER
         beq rts_2366            ; zero-flag will not be set by STA!

@@ -32,30 +32,30 @@ ZP_TEMP_ADDR_LO         := $07
 ZP_TEMP_ADDR_HI         := $08
 
 ;-------------------------------------------------------------------------------
-; a poly-object is a runtime 3D object in-play, such as a ship, asteroid or
-; space station. see "vars_polyobj.asm" for the structure definition and
-; reserved space in RAM. for speed, poly-objects are copied to the
-; zero-page each time they are handled
+; a "ship" is a runtime 3D object in-play, such as a ship, asteroid or space-
+; station. see "vars_ship.asm" for the structure definition and reserved
+; space in RAM. for speed, ships are copied to the zero-page each time
+; they are handled
 ;
-ZP_POLYOBJ              := $09
-ZP_POLYOBJ_XPOS         := $09
-ZP_POLYOBJ_XPOS_LO      := $09
-ZP_POLYOBJ_XPOS_HI      := $0a
-ZP_POLYOBJ_XPOS_SIGN    := $0b
-ZP_POLYOBJ_YPOS         := $0c
-ZP_POLYOBJ_YPOS_LO      := $0c
-ZP_POLYOBJ_YPOS_HI      := $0d
-ZP_POLYOBJ_YPOS_SIGN    := $0e
-ZP_POLYOBJ_ZPOS         := $0f
-ZP_POLYOBJ_ZPOS_LO      := $0f
-ZP_POLYOBJ_ZPOS_HI      := $10
-ZP_POLYOBJ_ZPOS_SIGN    := $11
+ZP_SHIP                 := $09
+ZP_SHIP_XPOS            := $09
+ZP_SHIP_XPOS_LO         := $09
+ZP_SHIP_XPOS_HI         := $0a
+ZP_SHIP_XPOS_SIGN       := $0b
+ZP_SHIP_YPOS            := $0c
+ZP_SHIP_YPOS_LO         := $0c
+ZP_SHIP_YPOS_HI         := $0d
+ZP_SHIP_YPOS_SIGN       := $0e
+ZP_SHIP_ZPOS            := $0f
+ZP_SHIP_ZPOS_LO         := $0f
+ZP_SHIP_ZPOS_HI         := $10
+ZP_SHIP_ZPOS_SIGN       := $11
 
 ; some math routines take parameters that are offsets
-; from the start of the poly-object to the desired matrix row 
-MATRIX_ROW0             = (ZP_POLYOBJ_M0x0 - ZP_POLYOBJ)                ;=$09
-MATRIX_ROW1             = (ZP_POLYOBJ_M1x0 - ZP_POLYOBJ)                ;=$0f
-MATRIX_ROW2             = (ZP_POLYOBJ_M2x0 - ZP_POLYOBJ)                ;=$15
+; from the start of the ship struct to the desired matrix row 
+MATRIX_ROW0             = (ZP_SHIP_M0x0 - ZP_SHIP)                      ;=$09
+MATRIX_ROW1             = (ZP_SHIP_M1x0 - ZP_SHIP)                      ;=$0f
+MATRIX_ROW2             = (ZP_SHIP_M2x0 - ZP_SHIP)                      ;=$15
 
 MATRIX_COL0             = $00   ; column 0 of a matrix row
 MATRIX_COL0_LO          = $00
@@ -71,58 +71,58 @@ MATRIX_COL2_HI          = $05
 ; [ M1x0, M1x1, M1x2 ]
 ; [ M2x0, M2x1, M2x2 ]
 ;
-ZP_POLYOBJ_M0           := $12  ; matrix row 0
+ZP_SHIP_M0              := $12  ; matrix row 0
 ;-----------------------------
-ZP_POLYOBJ_M0x0         := $12
-ZP_POLYOBJ_M0x0_LO      := $12
-ZP_POLYOBJ_M0x0_HI      := $13
-ZP_POLYOBJ_M0x1         := $14
-ZP_POLYOBJ_M0x1_LO      := $14
-ZP_POLYOBJ_M0x1_HI      := $15
-ZP_POLYOBJ_M0x2         := $16
-ZP_POLYOBJ_M0x2_LO      := $16
-ZP_POLYOBJ_M0x2_HI      := $17
+ZP_SHIP_M0x0            := $12
+ZP_SHIP_M0x0_LO         := $12
+ZP_SHIP_M0x0_HI         := $13
+ZP_SHIP_M0x1            := $14
+ZP_SHIP_M0x1_LO         := $14
+ZP_SHIP_M0x1_HI         := $15
+ZP_SHIP_M0x2            := $16
+ZP_SHIP_M0x2_LO         := $16
+ZP_SHIP_M0x2_HI         := $17
 
-ZP_POLYOBJ_M1           := $18  ; matrix row 1
+ZP_SHIP_M1              := $18  ; matrix row 1
 ;-----------------------------
-ZP_POLYOBJ_M1x0         := $18
-ZP_POLYOBJ_M1x0_LO      := $18
-ZP_POLYOBJ_M1x0_HI      := $19
-ZP_POLYOBJ_M1x1         := $1a
-ZP_POLYOBJ_M1x1_LO      := $1a
-ZP_POLYOBJ_M1x1_HI      := $1b
-ZP_POLYOBJ_M1x2         := $1c
-ZP_POLYOBJ_M1x2_LO      := $1c
-ZP_POLYOBJ_M1x2_HI      := $1d
+ZP_SHIP_M1x0            := $18
+ZP_SHIP_M1x0_LO         := $18
+ZP_SHIP_M1x0_HI         := $19
+ZP_SHIP_M1x1            := $1a
+ZP_SHIP_M1x1_LO         := $1a
+ZP_SHIP_M1x1_HI         := $1b
+ZP_SHIP_M1x2            := $1c
+ZP_SHIP_M1x2_LO         := $1c
+ZP_SHIP_M1x2_HI         := $1d
 
-ZP_POLYOBJ_M2           := $1e  ; matrix row 2
+ZP_SHIP_M2              := $1e  ; matrix row 2
 ;-----------------------------
-ZP_POLYOBJ_M2x0         := $1e
-ZP_POLYOBJ_M2x0_LO      := $1e
-ZP_POLYOBJ_M2x0_HI      := $1f
-ZP_POLYOBJ_M2x1         := $20
-ZP_POLYOBJ_M2x1_LO      := $20
-ZP_POLYOBJ_M2x1_HI      := $21
-ZP_POLYOBJ_M2x2         := $22
-ZP_POLYOBJ_M2x2_LO      := $22
-ZP_POLYOBJ_M2x2_HI      := $23
+ZP_SHIP_M2x0            := $1e
+ZP_SHIP_M2x0_LO         := $1e
+ZP_SHIP_M2x0_HI         := $1f
+ZP_SHIP_M2x1            := $20
+ZP_SHIP_M2x1_LO         := $20
+ZP_SHIP_M2x1_HI         := $21
+ZP_SHIP_M2x2            := $22
+ZP_SHIP_M2x2_LO         := $22
+ZP_SHIP_M2x2_HI         := $23
 
-ZP_POLYOBJ_SPEED        := $24
-ZP_POLYOBJ_ACCEL        := $25
+ZP_SHIP_SPEED           := $24
+ZP_SHIP_ACCEL           := $25
 
-ZP_POLYOBJ_ROLL         := $26
-ZP_POLYOBJ_PITCH        := $27
+ZP_SHIP_ROLL            := $26
+ZP_SHIP_PITCH           := $27
 
-ZP_POLYOBJ_STATE        := $28
+ZP_SHIP_STATE           := $28
 
-ZP_POLYOBJ_ATTACK       := $29
+ZP_SHIP_ATTACK          := $29
 
-ZP_POLYOBJ_HEAP         := $2a
-ZP_POLYOBJ_HEAP_LO      := $2a
-ZP_POLYOBJ_HEAP_HI      := $2b
+ZP_SHIP_HEAP            := $2a
+ZP_SHIP_HEAP_LO         := $2a
+ZP_SHIP_HEAP_HI         := $2b
 
-ZP_POLYOBJ_ENERGY       := $2c
-ZP_POLYOBJ_BEHAVIOUR    := $2d                                          ; NEWB
+ZP_SHIP_ENERGY          := $2c
+ZP_SHIP_BEHAVIOUR       := $2d                                          ; NEWB
 
 ;-------------------------------------------------------------------------------
 
@@ -140,7 +140,7 @@ ZP_CURSOR_ROW           := $33                                          ; YC
 ZP_PRINT_CASE           := $34  ; auto capitalisation for printing      ; QQ17
 
 ; used as a 16-bit X-position when drawing circles
-; WARNING: overlaps with ZP_POLYOBJ01_XPOS_pt1/2!
+; WARNING: overlaps with ZP_SHIP01_XPOS_pt1/2!
 ;
 ZP_CIRCLE_XPOS          := $35                                          ; K3
 ZP_CIRCLE_XPOS_LO       := $35                                          ; K3+0
@@ -148,23 +148,23 @@ ZP_CIRCLE_XPOS_HI       := $36                                          ; K3+1
 
 ;-------------------------------------------------------------------------------
 
-; the X/Y/Z-position of `POLYOBJ_01` are copied here
-ZP_POLYOBJ01            := $35
-ZP_POLYOBJ01_XPOS       := $35
-ZP_POLYOBJ01_XPOS_pt1   := $35
-ZP_POLYOBJ01_XPOS_pt2   := $36
-ZP_POLYOBJ01_XPOS_pt3   := $37
-ZP_POLYOBJ01_YPOS       := $38
-ZP_POLYOBJ01_YPOS_pt1   := $38
-ZP_POLYOBJ01_YPOS_pt2   := $39
-ZP_POLYOBJ01_YPOS_pt3   := $3a
-ZP_POLYOBJ01_ZPOS       := $3b
-ZP_POLYOBJ01_ZPOS_pt1   := $3b
-ZP_POLYOBJ01_ZPOS_pt2   := $3c
-ZP_POLYOBJ01_ZPOS_pt3   := $3d
+; the X/Y/Z-position of `SHIP_01` are copied here
+ZP_SHIP01               := $35
+ZP_SHIP01_XPOS          := $35
+ZP_SHIP01_XPOS_pt1      := $35
+ZP_SHIP01_XPOS_pt2      := $36
+ZP_SHIP01_XPOS_pt3      := $37
+ZP_SHIP01_YPOS          := $38
+ZP_SHIP01_YPOS_pt1      := $38
+ZP_SHIP01_YPOS_pt2      := $39
+ZP_SHIP01_YPOS_pt3      := $3a
+ZP_SHIP01_ZPOS          := $3b
+ZP_SHIP01_ZPOS_pt1      := $3b
+ZP_SHIP01_ZPOS_pt2      := $3c
+ZP_SHIP01_ZPOS_pt3      := $3d
 
 ; only ever used once to check for non-zero X/Y/Z-position
-ZP_POLYOBJ01_POS        := $3e
+ZP_SHIP01_POS           := $3e
 
 ;-------------------------------------------------------------------------------
 
@@ -187,7 +187,7 @@ ZP_CIRCLE_YPOS_HI       := ZP_VAR_K4_HI
 
 ;-------------------------------------------------------------------------------
 
-; a working copy of the zero-page poly object rotation matrix:
+; a working copy of the zero-page ship struct rotation matrix:
 ;
 ZP_TEMPOBJ_MATRIX       := $45
 ZP_TEMPOBJ_M2x0         := $45
@@ -228,11 +228,11 @@ ZP_HULL_ADDR            := $57
 ZP_HULL_ADDR_LO         := $57
 ZP_HULL_ADDR_HI         := $58
 
-; a pointer to a PolyObject in RAM -- i.e. a currently in-play 3D object,
+; a pointer to a Ship in RAM -- i.e. a currently in-play 3D object,
 ; such as a ship, asteroid or station
-ZP_POLYOBJ_ADDR         := $59
-ZP_POLYOBJ_ADDR_LO      := $59
-ZP_POLYOBJ_ADDR_HI      := $5a
+ZP_SHIP_ADDR            := $59
+ZP_SHIP_ADDR_LO         := $59
+ZP_SHIP_ADDR_HI         := $5a
 
 ZP_TEMP_ADDR3           := $5b
 ZP_TEMP_ADDR3_LO        := $5b

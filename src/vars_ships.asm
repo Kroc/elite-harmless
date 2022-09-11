@@ -1,20 +1,18 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
+;===============================================================================
 ;
-; "vars_polyobj.asm":
-;
-; Elite has a number of 'slots' for 3D-objects currently in play;
-; e.g. ships, asteroids, space stations and other such polygon-objects.
-; this file defines the runtime structure for a poly-object and reserves
-; the space in RAM
+; Elite has a number of 'slots' for 3D-objects currently in play; e.g. ships,
+; asteroids, space stations and other such polygon-objects. this file defines
+; the runtime structure for a "ship" and reserves the space in RAM
 ;
 ; huge thanks to "DrBeeb" for documenting the data structure on the Elite Wiki
 ; http://wiki.alioth.net/index.php/Classic_Elite_entity_states
 ;
-.struct PolyObject                                                      ;offset
+.struct Ship                                                            ;offset
         ;=======================================================================
-        ; NOTE: these are not addresses, but they are 24-bit
+        ; NOTE: these are not addresses, but they are 24-bit numbers
         xpos            .faraddr                                        ;+$00
         ypos            .faraddr                                        ;+$03
         zpos            .faraddr                                        ;+$06
@@ -101,65 +99,65 @@
 ; see the linker configs ("link/elite-*.cfg") for memory assignment.
 ; in the original game, this is $F900
 ;
-.segment        "POLYOBJS"
+.segment        "SHIPS"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-polyobjects:                                                            ;$F900
+ships:                                                                  ;$F900
 ;===============================================================================
-polyobj_00:      .tag    PolyObject                                     ;$F900
-polyobj_01:      .tag    PolyObject                                     ;$F925
-polyobj_02:      .tag    PolyObject                                     ;$F94A
-polyobj_03:      .tag    PolyObject                                     ;$F96F
-polyobj_04:      .tag    PolyObject                                     ;$F994
-polyobj_05:      .tag    PolyObject                                     ;$F9B9
-polyobj_06:      .tag    PolyObject                                     ;$F9DE
-polyobj_07:      .tag    PolyObject                                     ;$FA03
-polyobj_08:      .tag    PolyObject                                     ;$FA28
-polyobj_09:      .tag    PolyObject                                     ;$FA4D
-polyobj_10:      .tag    PolyObject                                     ;$FA72
+ship_00:        .tag    Ship                                            ;$F900
+ship_01:        .tag    Ship                                            ;$F925
+ship_02:        .tag    Ship                                            ;$F94A
+ship_03:        .tag    Ship                                            ;$F96F
+ship_04:        .tag    Ship                                            ;$F994
+ship_05:        .tag    Ship                                            ;$F9B9
+ship_06:        .tag    Ship                                            ;$F9DE
+ship_07:        .tag    Ship                                            ;$FA03
+ship_08:        .tag    Ship                                            ;$FA28
+ship_09:        .tag    Ship                                            ;$FA4D
+ship_10:        .tag    Ship                                            ;$FA72
 
-POLYOBJ_COUNT   = 11
+SHIP_COUNT      = 11
 
 
 .segment        "SHIP_ADDRS"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-polyobj_addrs:                                                          ;$28A4
+ship_addrs:                                                             ;$28A4
 ;===============================================================================
-; a total of 11 3D-objects ("poly-objects") can be 'in-play' at a time,
-; each object has a block of runtime storage to keep track of its current
-; state including rotation, speed, shield etc. this is a lookup-table of
-; addresses for each poly-object slot
+; a total of 11 3D-objects ("ships") can be 'in-play' at a time, each object
+; has a block of runtime storage to keep track of its current state including
+; rotation, speed, shield etc. this is a lookup-table of addresses for each
+; ship slot
 ;
-polyobj_addrs_lo := polyobj_addrs
-polyobj_addrs_hi := polyobj_addrs + 1
+ship_addrs_lo   := ship_addrs + 0
+ship_addrs_hi   := ship_addrs + 1
 
-        .addr   polyobj_00
-        .addr   polyobj_01
-        .addr   polyobj_02
-        .addr   polyobj_03
-        .addr   polyobj_04
-        .addr   polyobj_05
-        .addr   polyobj_06
-        .addr   polyobj_07
-        .addr   polyobj_08
-        .addr   polyobj_09
-        .addr   polyobj_10
+        .addr   ship_00
+        .addr   ship_01
+        .addr   ship_02
+        .addr   ship_03
+        .addr   ship_04
+        .addr   ship_05
+        .addr   ship_06
+        .addr   ship_07
+        .addr   ship_08
+        .addr   ship_09
+        .addr   ship_10
 
 
-.macro  .polybj_to_zp
+.macro  .ship_to_zp
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ; copy the given PolyObject to
-        ; the working space in zero page
+        ; copy the given Ship to the
+        ; working space in zero page
         ;
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this is the original copy routine
         ;                                       ; bytes/tally   cycles/tally
         ;---------------------------------------;-------------------------------
-        ldy # .sizeof( PolyObject )-1           ; +2    2       +2      2
-:       lda [ZP_POLYOBJ_ADDR], y                ; +2    .       +5      .      
-        sta ZP_POLYOBJ, y                       ; +2    .       +5      .      
+        ldy # .sizeof( Ship )-1                 ; +2    2       +2      2
+:       lda [ZP_SHIP_ADDR], y                   ; +2    .       +5      .      
+        sta ZP_SHIP, y                          ; +2    .       +5      .      
         dey                                     ; +1    .       +2      .      
         bpl :-                                  ; +2    7       +3     (15)
         ;                                 loop: ;               -1  *37=555
@@ -180,14 +178,14 @@ polyobj_addrs_hi := polyobj_addrs + 1
         .local  @copy
         ;                                       ; bytes/tally   cycles/tally
         ;---------------------------------------;-------------------------------
-        lda ZP_POLYOBJ_ADDR_LO                  ; +2    .       +3      .
+        lda ZP_SHIP_ADDR_LO                     ; +2    .       +3      .
         sta @copy+1                             ; +3    .       +4      .
-        lda ZP_POLYOBJ_ADDR_HI                  ; +2    .       +3      .
+        lda ZP_SHIP_ADDR_HI                     ; +2    .       +3      .
         sta @copy+2                             ; +3    .       +4      .
-        ldx # .sizeof( PolyObject )-1           ; +2    12      +2      16
+        ldx # .sizeof( Ship )-1                 ; +2    12      +2      16
         ;---------------------------------------;-------------------------------
 @copy:  lda $8888, x                            ; +3    .       +4      .
-        sta ZP_POLYOBJ, x                       ; +2    .       +4      .
+        sta ZP_SHIP, x                          ; +2    .       +4      .
         dex                                     ; +1    .       +2      .
         bpl @copy                               ; +2    8       +3     (13)
         ;                                 loop: ;               -1  *37=481
@@ -201,16 +199,16 @@ polyobj_addrs_hi := polyobj_addrs + 1
         ;                                       ; bytes/tally   cycles/tally
         ;-----------------------------------------------------------------------
         ldy # 0                                 ; +2    2       +2      2
-        .repeat .sizeof( PolyObject )-2, I
-                lda [ZP_POLYOBJ_ADDR], y        ; +2    .       +5      .
-                sta ZP_POLYOBJ + I              ; +2    .       +3      .
+        .repeat .sizeof( Ship )-2, I
+                lda [ZP_SHIP_ADDR], y           ; +2    .       +5      .
+                sta ZP_SHIP + I                 ; +2    .       +3      .
                 iny                             ; +1   (5)      +2     (10)
         .endrep                         ; loop: ;   *36=180         *36=360
         ;
         ; the last iteration does not need to
         ; include the INY so is split out here
-        lda [ZP_POLYOBJ_ADDR], y                ; +2    .       +5      .
-        sta ZP_POLYOBJ+.sizeof( PolyObject )-1  ; +2    4       +3      8
+        lda [ZP_SHIP_ADDR], y                   ; +2    .       +5      .
+        sta ZP_SHIP+.sizeof( Ship )-1           ; +2    4       +3      8
         ;---------------------------------------;-------------------------------
         ;                                total: ;       186             370
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -218,9 +216,9 @@ polyobj_addrs_hi := polyobj_addrs + 1
 .endmacro
 
 
-.macro  .zp_to_polyobj
+.macro  .zp_to_ship
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ; copy the working poly-object in zero-page
+        ; copy the working ship struct in zero-page
         ; back to its storage space
         ;
 .ifdef  OPTION_ORIGINAL
@@ -228,9 +226,9 @@ polyobj_addrs_hi := polyobj_addrs + 1
         ; this is the original copy routine
         ;                                       ; bytes/tally   cycles/tally
         ;---------------------------------------;-------------------------------
-        ldy # .sizeof( PolyObject )-1           ; +2    2       +2      2
-:       lda ZP_POLYOBJ, y                       ; +3    .       +4      .
-        sta [ZP_POLYOBJ_ADDR], y                ; +2    .       +6      .
+        ldy # .sizeof( Ship )-1                 ; +2    2       +2      2
+:       lda ZP_SHIP, y                          ; +3    .       +4      .
+        sta [ZP_SHIP_ADDR], y                   ; +2    .       +6      .
         dey                                     ; +1    .       +2      .      
         bpl :-                                  ; +2    7       +3     (15)
         ;                                 loop: ;               -1  *37=555
@@ -252,13 +250,13 @@ polyobj_addrs_hi := polyobj_addrs + 1
         .local  @addr
         ;                                       ; bytes/tally   cycles/tally
         ;---------------------------------------;-------------------------------
-        lda ZP_POLYOBJ_ADDR_LO                  ; +2    .       +3      .
+        lda ZP_SHIP_ADDR_LO                     ; +2    .       +3      .
         sta @addr+1                             ; +3    .       +4      .
-        lda ZP_POLYOBJ_ADDR_HI                  ; +2    .       +3      .
+        lda ZP_SHIP_ADDR_HI                     ; +2    .       +3      .
         sta @addr+2                             ; +3    .       +4      .
-        ldx # .sizeof( PolyObject )-1           ; +2    12      +2      16
+        ldx # .sizeof( Ship )-1                 ; +2    12      +2      16
         ;---------------------------------------;-------------------------------
-@copy:  lda ZP_POLYOBJ, x                       ; +2    .       +4      .
+@copy:  lda ZP_SHIP, x                          ; +2    .       +4      .
 @addr:  sta $8888, x                            ; +3    .       +5      .
         dex                                     ; +1    .       +2      .
         bpl @copy                               ; +2    8       +3     (14)
@@ -273,16 +271,16 @@ polyobj_addrs_hi := polyobj_addrs + 1
         ;                                       ; bytes/tally   cycles/tally
         ;-----------------------------------------------------------------------
         ldy # 0                                 ; +2    2       +2      2
-        .repeat .sizeof( PolyObject )-2, I
-                lda ZP_POLYOBJ + I              ; +2    .       +3      .
-                sta [ZP_POLYOBJ_ADDR], y        ; +2    .       +6      .
+        .repeat .sizeof( Ship )-2, I
+                lda ZP_SHIP + I                 ; +2    .       +3      .
+                sta [ZP_SHIP_ADDR], y           ; +2    .       +6      .
                 iny                             ; +1   (5)      +2     (11)
         .endrep                         ; loop: ;   *36=180         *36=396
         ;
         ; the last iteration does not need to
         ; include the INY so is split out here
-        lda ZP_POLYOBJ+.sizeof( PolyObject )-1  ; +2    .       +3      .
-        sta [ZP_POLYOBJ_ADDR], y                ; +2    4       +6      9
+        lda ZP_SHIP+.sizeof( Ship )-1           ; +2    .       +3      .
+        sta [ZP_SHIP_ADDR], y                   ; +2    4       +6      9
         ;---------------------------------------;-------------------------------
         ;                                total: ;       186             407
 .endif  ;///////////////////////////////////////////////////////////////////////

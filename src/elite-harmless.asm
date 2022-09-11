@@ -19,11 +19,11 @@
 .include        "math/math_data.asm"
 
 ; due to a limitation, CA65 cannot 'look-ahead' for scopes (including procs &
-; structs) and therefore our `PolyObject` struct must be loaded in before it
-; is referenced anywhere, even though the code segment might be addressed
+; structs) and therefore our `Ship` struct must be loaded in before it is
+; referenced anywhere, even though the code segment might be addressed
 ; much higher up in memory than this line might imply
 ;
-.include        "vars_polyobj.asm"
+.include        "vars_ships.asm"
 
 .include        "vars_main.asm"
 

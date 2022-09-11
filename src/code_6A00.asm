@@ -1394,12 +1394,12 @@ local_chart:                                                            ;$6FDB
         lda # $00
         sta ZP_AE
 
-        ; to avoid names overlapping, the chart will not print any two planet
+        ; to avoid names overlapping, the chart will not print any two system
         ; names on the same screen row (even if they would fit). the zero-page
-        ; 'current' poly-object is erased to use that space
+        ; 'current' ship instance is erased to use that space
         ;
         ldx # 24                ; make room for 24 screen rows
-:       sta ZP_POLYOBJ, x                                               ;$7004
+:       sta ZP_SHIP, x                                                  ;$7004
         dex 
         bpl :-
 
@@ -1493,14 +1493,14 @@ local_chart:                                                            ;$6FDB
         ; check if a planet-name has already
         ; been printed on this row:
         ;
-        ldx ZP_POLYOBJ, y       ; look up the current row
+        ldx ZP_SHIP, y          ; look up the current row
        .bze @name               ; empty? ok, print name here
         iny 
-        ldx ZP_POLYOBJ, y       ; look up the row below
+        ldx ZP_SHIP, y          ; look up the row below
        .bze @name               ; empty? ok, print name here
         dey 
         dey 
-        ldx ZP_POLYOBJ, y       ; look up the row above
+        ldx ZP_SHIP, y          ; look up the row above
        .bnz @draw               ; in use? can't print name anywhere, skip
 
         ; print star's name:
@@ -1515,7 +1515,7 @@ local_chart:                                                            ;$6FDB
         ; mark the given row as "full" so other
         ; other names are not printed there
         lda # $ff
-        sta ZP_POLYOBJ, y
+        sta ZP_SHIP, y
 
         ; capitalise the first letter of the name
         lda # %10000000
@@ -2092,7 +2092,7 @@ _739b:                                                                  ;$739B
         jsr _848d
 
         lda # %11111111
-        sta ZP_POLYOBJ_ATTACK
+        sta ZP_SHIP_ATTACK
 
         ; spawn a thargoid!
         lda # HULL_THARGOID
@@ -2182,11 +2182,11 @@ _741c:  ; launch ship from docking?                                     ;$741C
         jsr _379e
         jsr _83df
         jsr _70ab
-        inc ZP_POLYOBJ_ZPOS_SIGN
+        inc ZP_SHIP_ZPOS_SIGN
         jsr _7a8c
         lda # $80
-        sta ZP_POLYOBJ_ZPOS_SIGN
-        inc ZP_POLYOBJ_ZPOS_HI
+        sta ZP_SHIP_ZPOS_SIGN
+        inc ZP_SHIP_ZPOS_HI
         jsr _7c24
         lda # $0c
         sta ZP_PLAYER_SPEED
@@ -2722,22 +2722,22 @@ _785f:                                                                  ;$785F
 ;===============================================================================
 ; unused / unreferenced?
 ;
-        lda ZP_POLYOBJ_STATE
+        lda ZP_SHIP_STATE
         ora # state::exploding | state::debris
-        sta ZP_POLYOBJ_STATE
+        sta ZP_SHIP_STATE
         rts 
 
 
 _7866:                                                                  ;$7866
 ;===============================================================================
-        lda ZP_POLYOBJ_STATE
+        lda ZP_SHIP_STATE
         and # state::firing
         beq _786f
         jsr _78d6
 _786f:                                                                  ;$786F
-        lda ZP_POLYOBJ_ZPOS_LO
+        lda ZP_SHIP_ZPOS_LO
         sta T
-        lda ZP_POLYOBJ_ZPOS_HI
+        lda ZP_SHIP_ZPOS_HI
         cmp # $20
         bcc _787d
         lda # $fe
@@ -2752,11 +2752,11 @@ _787d:                                                                  ;$787D
 _7885:                                                                  ;$7885
         sta Q
         ldy # $01
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         sta VAR_050D
         adc # $04
         bcs _785f
-        sta [ZP_POLYOBJ_HEAP], y
+        sta [ZP_SHIP_HEAP], y
         jsr divide_unsigned
         lda ZP_VAR_P1
         cmp # $1c
@@ -2772,25 +2772,25 @@ _78a1:                                                                  ;$78A1
         rol 
 _78aa:                                                                  ;$78AA
         dey 
-        sta [ZP_POLYOBJ_HEAP], y
-        lda ZP_POLYOBJ_STATE
+        sta [ZP_SHIP_HEAP], y
+        lda ZP_SHIP_STATE
         and # state::firing ^$FF        ;=%10111111
-        sta ZP_POLYOBJ_STATE
+        sta ZP_SHIP_STATE
         and # state::redraw
         beq rts_784e
 
         ldy # $02
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         tay 
 _78bc:                                                                  ;$78BC
         lda ZP_F9, y            ;???
-        sta [ZP_POLYOBJ_HEAP], y
+        sta [ZP_SHIP_HEAP], y
         dey 
         cpy # $06
         bne _78bc
-        lda ZP_POLYOBJ_STATE
+        lda ZP_SHIP_STATE
         ora # state::firing
-        sta ZP_POLYOBJ_STATE
+        sta ZP_SHIP_STATE
         ldy VAR_050D
         cpy # $12
         bne _78d6
@@ -2804,10 +2804,10 @@ _78bc:                                                                  ;$78BC
 
 _78d6:                                                                  ;$78D6
         ldy # $00
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         sta Q
         iny
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         bpl _78e3
         eor # %11111111
 _78e3:                                                                  ;$78E3
@@ -2818,7 +2818,7 @@ _78e3:                                                                  ;$78E3
         ora # %00000001
         sta U
         iny 
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         sta ZP_A8
         lda ZP_GOATSOUP_pt2     ;?
         pha 
@@ -2827,15 +2827,15 @@ _78f5:                                                                  ;$78F5
         ldx # $03
 _78f7:                                                                  ;$78F7
         iny 
-        lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_POLYOBJ01_XPOS_pt1, x
+        lda [ZP_SHIP_HEAP], y
+        sta ZP_SHIP01_XPOS_pt1, x
         dex 
         bpl _78f7
         sty ZP_TEMP_COUNTER
         ldy # $02
 _7903:                                                                  ;$7903
         iny 
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         eor ZP_TEMP_COUNTER
         sta $ffff, y                    ;!?
         cpy # $06
@@ -2855,17 +2855,17 @@ _7911:                                                                  ;$7911
         sta ZP_GOATSOUP_pt2
         stx ZP_GOATSOUP_pt4
         sta ZP_VAR_Z
-        lda ZP_POLYOBJ01_XPOS_pt2
+        lda ZP_SHIP01_XPOS_pt2
         sta R
-        lda ZP_POLYOBJ01_XPOS_pt1
+        lda ZP_SHIP01_XPOS_pt1
         jsr _7974
         bne _795d
         cpx # $8f
         bcs _795d
         stx ZP_VAR_XX15_1
-        lda ZP_POLYOBJ01_YPOS_pt1
+        lda ZP_SHIP01_YPOS_pt1
         sta R
-        lda ZP_POLYOBJ01_XPOS_pt3
+        lda ZP_SHIP01_XPOS_pt3
         jsr _7974
         bne _7948
         lda ZP_VAR_XX15_1
@@ -2879,7 +2879,7 @@ _7948:                                                                  ;$7948
         pla 
         sta ZP_GOATSOUP_pt2
 
-        lda polyobj_00 + PolyObject::zpos                               ;=$F906
+        lda ship_00 + Ship::zpos                                     ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
 
@@ -2963,7 +2963,7 @@ _79a9:                                                                  ;$79A9
         inc CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda ZP_POLYOBJ_ZPOS_HI
+        lda ZP_SHIP_ZPOS_HI
         cmp # $07
         lda # %11111101
         ldx # $2c
@@ -2979,10 +2979,10 @@ _79c0:                                                                  ;$79C0
         stx VAR_050E
         sty VAR_050F
         ldy # $00
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         sta Q
         iny 
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         bpl _79d9
         eor # %11111111
 _79d9:                                                                  ;$79D9
@@ -2993,7 +2993,7 @@ _79d9:                                                                  ;$79D9
         ora # %00000001
         sta U
         iny 
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         sta ZP_A8
         lda ZP_GOATSOUP_pt2
         pha 
@@ -3002,26 +3002,26 @@ _79eb:                                                                  ;$79EB
         ldx # $03
 _79ed:                                                                  ;$79ED
         iny 
-        lda [ZP_POLYOBJ_HEAP], y
-        sta ZP_POLYOBJ01_XPOS_pt1, x
+        lda [ZP_SHIP_HEAP], y
+        sta ZP_SHIP01_XPOS_pt1, x
         dex 
         bpl _79ed
         sty ZP_TEMP_COUNTER
-        lda ZP_POLYOBJ01_YPOS_pt1
+        lda ZP_SHIP01_YPOS_pt1
         clc 
         adc VAR_050E
         sta ZP_TEMP_ADDR_LO
-        lda ZP_POLYOBJ01_XPOS_pt3
+        lda ZP_SHIP01_XPOS_pt3
         adc # $00
         bmi _7a36
         cmp # $02
         bcs _7a36
         tax 
-        lda ZP_POLYOBJ01_XPOS_pt2
+        lda ZP_SHIP01_XPOS_pt2
         clc 
         adc VAR_050F
         tay 
-        lda ZP_POLYOBJ01_XPOS_pt1
+        lda ZP_SHIP01_XPOS_pt1
         adc # $00
         bne _7a36
         cpy # $c2
@@ -3040,7 +3040,7 @@ _7a36:                                                                  ;$7A36
         ldy # $02
 _7a38:                                                                  ;$7A38
         iny 
-        lda [ZP_POLYOBJ_HEAP], y
+        lda [ZP_SHIP_HEAP], y
         eor ZP_TEMP_COUNTER
         sta $ffff, y            ;!?
         cpy # $06
@@ -3049,17 +3049,17 @@ _7a38:                                                                  ;$7A38
 _7a46:                                                                  ;$7A46
         jsr _84ae
         sta ZP_VAR_Z
-        lda ZP_POLYOBJ01_XPOS_pt2
+        lda ZP_SHIP01_XPOS_pt2
         sta R
-        lda ZP_POLYOBJ01_XPOS_pt1
+        lda ZP_SHIP01_XPOS_pt1
         jsr _7974
         bne _7a86
         cpx # $8f
         bcs _7a86
         stx ZP_VAR_XX15_1
-        lda ZP_POLYOBJ01_YPOS_pt1
+        lda ZP_SHIP01_YPOS_pt1
         sta R
-        lda ZP_POLYOBJ01_XPOS_pt3
+        lda ZP_SHIP01_XPOS_pt3
         jsr _7974
         bne _7a6c
         lda ZP_VAR_XX15_1
@@ -3087,7 +3087,7 @@ _7a78:                                                                  ;$7A78
         dec CPU_CONTROL
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda polyobj_00 + PolyObject::zpos                               ;=$F906
+        lda ship_00 + Ship::zpos                                        ;=$F906
         sta ZP_GOATSOUP_pt4
         rts 
 
@@ -3101,8 +3101,8 @@ _7a8c:                                                                  ;$7A8C
         jsr _845c               ; update missile blocks on HUD
 
         lda # $7f
-        sta ZP_POLYOBJ_ROLL
-        sta ZP_POLYOBJ_PITCH
+        sta ZP_SHIP_ROLL
+        sta ZP_SHIP_PITCH
 
         lda PSYSTEM_TECHLEVEL
         and # %00000010         ; select tech levels 2, 4, 6, 8...
@@ -3132,28 +3132,28 @@ _7a9f:                                                                  ;$7A9F
 
 _7ac2:                                                                  ;$7AC2
         lsr PLAYER_LEGAL
-        jsr clear_zp_polyobj
+        jsr clear_zp_ship
 
         lda ZP_SEED_W0_HI
         and # %00000011
         adc # $03
-        sta ZP_POLYOBJ_ZPOS_SIGN
+        sta ZP_SHIP_ZPOS_SIGN
         ror 
-        sta ZP_POLYOBJ_XPOS_SIGN
-        sta ZP_POLYOBJ_YPOS_SIGN
+        sta ZP_SHIP_XPOS_SIGN
+        sta ZP_SHIP_YPOS_SIGN
         jsr _7a8c
         lda ZP_SEED_W1_HI
         and # %00000111
         ora # %10000001
-        sta ZP_POLYOBJ_ZPOS_SIGN
+        sta ZP_SHIP_ZPOS_SIGN
         lda ZP_SEED_W2_HI
         and # %00000011
-        sta ZP_POLYOBJ_XPOS_SIGN
-        sta ZP_POLYOBJ_XPOS_HI
+        sta ZP_SHIP_XPOS_SIGN
+        sta ZP_SHIP_XPOS_HI
 
         lda # $00
-        sta ZP_POLYOBJ_ROLL
-        sta ZP_POLYOBJ_PITCH
+        sta ZP_SHIP_ROLL
+        sta ZP_SHIP_PITCH
 
         lda # $81               ; TODO?
         jsr spawn_ship
@@ -3186,22 +3186,22 @@ _7b1c:                                                                  ;$7B1C
         bmi _7b41
         sta ZP_SHIP_TYPE
 
-        jsr get_polyobj_addr
+        jsr get_ship_addr
 
-        ldy # PolyObject::state
+        ldy # Ship::state
 _7b2a:                                                                  ;$7B2A
-        lda [ZP_POLYOBJ_ADDR], y
-        sta ZP_POLYOBJ_XPOS_LO, y
+        lda [ZP_SHIP_ADDR], y
+        sta ZP_SHIP_XPOS_LO, y
         dey 
         bpl _7b2a
         stx ZP_PRESERVE_X
         jsr _b410
         ldx ZP_PRESERVE_X
 
-        ldy # PolyObject::state
-        lda [ZP_POLYOBJ_ADDR], y
+        ldy # Ship::state
+        lda [ZP_SHIP_ADDR], y
         and # state::exploding | state::debris | state::missiles
-        sta [ZP_POLYOBJ_ADDR], y
+        sta [ZP_SHIP_ADDR], y
 _7b41:                                                                  ;$7B41
         inx 
         bne _7b1c
@@ -3307,13 +3307,13 @@ _7b93:                                                                  ;$7B93
 
 _7b9b:                                                                  ;$7B9B
 ;===============================================================================
-; copy the X/Y/Z-position of `POLYOBJ_01` to the zero page
+; copy the X/Y/Z-position of `SHIP_01` to the zero page
 ;-------------------------------------------------------------------------------
-        ldx # .sizeof( PolyObject::xpos ) + .sizeof( PolyObject::ypos ) \
-            + .sizeof( PolyObject::zpos ) - 1
+        ldx # .sizeof( Ship::xpos ) + .sizeof( Ship::ypos ) \
+            + .sizeof( Ship::zpos ) - 1
 
-:       lda polyobj_01, x       ;=$F925..                               ;$7B9D
-        sta ZP_POLYOBJ01, x     ;=$35..
+:       lda ship_01, x          ;=$F925..                               ;$7B9D
+        sta ZP_SHIP01, x        ;=$35..
         dex 
         bpl :-
 
@@ -3368,8 +3368,8 @@ damage_player:                                                          ;$7BD2
         ; front or rear hit?
         ; read the sign byte of the ship's z-position
         ;
-        ldy # PolyObject::zpos+2
-        lda [ZP_POLYOBJ_ADDR], y
+        ldy # Ship::zpos+2
+        lda [ZP_SHIP_ADDR], y
         ; if the ship's z-sign is negative, we were hit in the trunk
         bmi @rear
 
@@ -3430,15 +3430,15 @@ damage_player:                                                          ;$7BD2
 
 _7c11:                                                                  ;$7C11
 ;===============================================================================
-        lda polyobj_00 + PolyObject::xpos + 1, x        ;=$F901
-        sta ZP_POLYOBJ01_XPOS_pt1, x
-        lda polyobj_00 + PolyObject::xpos + 2, x        ;=$F902
+        lda ship_00 + Ship::xpos + 1, x                                 ;=$F901
+        sta ZP_SHIP01_XPOS_pt1, x
+        lda ship_00 + Ship::xpos + 2, x                                 ;=$F902
         tay 
         and # %01111111
-        sta ZP_POLYOBJ01_XPOS_pt2, x
+        sta ZP_SHIP01_XPOS_pt2, x
         tya 
         and # %10000000
-        sta ZP_POLYOBJ01_XPOS_pt3, x
+        sta ZP_SHIP01_XPOS_pt3, x
         rts
 
 
@@ -3446,15 +3446,15 @@ _7c24:                                                                  ;$7C24
 ;===============================================================================
         jsr _b10e
         ldx # attack::active | attack::ecm      ;=%10000001
-        stx ZP_POLYOBJ_ATTACK
+        stx ZP_SHIP_ATTACK
 
         ldx # $00
-        stx ZP_POLYOBJ_PITCH
-        stx ZP_POLYOBJ_BEHAVIOUR
+        stx ZP_SHIP_PITCH
+        stx ZP_SHIP_BEHAVIOUR
         stx SHIP_SLOT1
 
         dex 
-        stx ZP_POLYOBJ_ROLL
+        stx ZP_SHIP_ROLL
 
         ldx # $0a
         jsr _7d03
@@ -3477,9 +3477,9 @@ _7c24:                                                                  ;$7C24
 _7c61:                                                                  ;$7C61
         ; scanlines for sun?
         lda #< SUN_BUFFER
-        sta ZP_POLYOBJ_HEAP_LO
+        sta ZP_SHIP_HEAP_LO
         lda #> SUN_BUFFER
-        sta ZP_POLYOBJ_HEAP_HI
+        sta ZP_SHIP_HEAP_HI
 
         ; select 'station' ship-type
         lda # HULL_COREOLIS
@@ -3499,16 +3499,16 @@ spawn_ship:                                                             ;$7C6B
 :       lda SHIP_SLOTS, x       ; is this ship-slot occupied?           ;$7C6F
        .bze @new                ; no, this slot is free
         inx                     ; continue to the next slot
-        cpx # POLYOBJ_COUNT-1   ; maximum number of poly-objects
+        cpx # SHIP_COUNT-1      ; maximum number of ships
         bcc :-                  ; keep looping if slots remain
 
 @err:   clc                     ; return carry-clear for error          ;$7C79
 @rts:   rts                                                             ;$7C7A
 
         ;-----------------------------------------------------------------------
-        ; retrieve the poly-object storage address for the given slot
-        ; (address returned in ZP_POLYOBJ_ADDR)
-@new:   jsr get_polyobj_addr                                            ;$7C7B
+        ; retrieve the ship struct storage address for the given slot
+        ; (address returned in `ZP_SHIP_ADDR`)
+@new:   jsr get_ship_addr                                               ;$7C7B
 
         lda T                   ; retrieve ship type again
         bmi _7cd4               ; handle planet or sun!
@@ -3537,43 +3537,43 @@ spawn_ship:                                                             ;$7C6B
         lda SHIP_LINES_LO       ; heap-pointer address, lo byte
         sec 
         sbc ZP_TEMP_VAR         ; subtract the bytes for the max. lines
-        sta ZP_POLYOBJ_HEAP_LO
+        sta ZP_SHIP_HEAP_LO
         lda SHIP_LINES_HI       ; heap-pointer address, lo byte
         sbc # 0                 ; (ripple the carry)
-        sta ZP_POLYOBJ_HEAP_HI
+        sta ZP_SHIP_HEAP_HI
 
-        ; TODO: this assumes that the poly object structure selected is always
-        ;       the highest numbered one, such that the heap could come as far
-        ;       down as the end of the poly object structure -- this would not
-        ;       be true if we were using a free slot between other used slots!
+        ; TODO: this assumes that the `Ship` structure selected is always the
+        ;       highest numbered one, such that the heap could come as far down
+        ;       as the end of the `Ship` structure -- this would not be true if
+        ;       we were using a free slot between other used slots!
         ; 
-        lda ZP_POLYOBJ_HEAP_LO  ; bottom of the heap, lo-byte
-        sbc ZP_POLYOBJ_ADDR_LO
+        lda ZP_SHIP_HEAP_LO     ; bottom of the heap, lo-byte
+        sbc ZP_SHIP_ADDR_LO
         tay 
 
-        lda ZP_POLYOBJ_HEAP_HI  ; bottom of the heap, hi-byte
-        sbc ZP_POLYOBJ_ADDR_HI
+        lda ZP_SHIP_HEAP_HI     ; bottom of the heap, hi-byte
+        sbc ZP_SHIP_ADDR_HI
         bcc @rts                ; overflow? cannot allocate the ship!
         bne :+
 
-        cpy # $25               ;=.sizeof( PolyObject )?
+        cpy # $25               ;=.sizeof( Ship )?
         bcc @rts
 
         ; move the heap pointer backwards to its new position
-:       lda ZP_POLYOBJ_HEAP_LO                                            ;$7CBA
+:       lda ZP_SHIP_HEAP_LO                                             ;$7CBA
         sta SHIP_LINES_LO
-        lda ZP_POLYOBJ_HEAP_HI
+        lda ZP_SHIP_HEAP_HI
         sta SHIP_LINES_HI
 
 _7cc4:                                                                  ;$7CC4
         ldy # Hull::energy
         lda [ZP_HULL_ADDR], y
-        sta ZP_POLYOBJ_ENERGY
+        sta ZP_SHIP_ENERGY
 
         ldy # Hull::laser_missiles
         lda [ZP_HULL_ADDR], y
         and # state::missiles
-        sta ZP_POLYOBJ_STATE
+        sta ZP_SHIP_STATE
 
         lda T
 _7cd4:                                                                  ;$7CD4
@@ -3598,14 +3598,14 @@ _7ce9:  inc SHIP_TYPES, x                                               ;$7CE9
 _7cec:  ldy T                   ; ship type                             ;$7CEC
         lda hull_type - 1, y
         and # (behaviour::remove | behaviour::docking)^$FF    ;=%01101111
-        ora ZP_POLYOBJ_BEHAVIOUR
-        sta ZP_POLYOBJ_BEHAVIOUR
+        ora ZP_SHIP_BEHAVIOUR
+        sta ZP_SHIP_BEHAVIOUR
 
         ; copy the ship from the working-space in the zero-page
-        ; to its position in the poly-object array
-        ldy # .sizeof( PolyObject )-1
-:       lda ZP_POLYOBJ_XPOS_LO, y                                       ;$7CF9
-        sta [ZP_POLYOBJ_ADDR], y
+        ; to its position in the ship struct array
+        ldy # .sizeof( Ship )-1
+:       lda ZP_SHIP_XPOS_LO, y                                          ;$7CF9
+        sta [ZP_SHIP_ADDR], y
         dey 
         bpl :-
 
@@ -3615,9 +3615,9 @@ _7cec:  ldy T                   ; ship type                             ;$7CEC
 ;-------------------------------------------------------------------------------
 
 _7d03:                                                                  ;$7D03
-        lda ZP_POLYOBJ_XPOS_LO, x
+        lda ZP_SHIP_XPOS_LO, x
         eor # %10000000
-        sta ZP_POLYOBJ_XPOS_LO, x
+        sta ZP_SHIP_XPOS_LO, x
         inx 
         inx 
         rts 
@@ -3648,24 +3648,24 @@ target_missile:                                                         ;$7D0E
         .byte   $04, $00, $00, $00, $00
 
 _7d1f:                                                                  ;$7D1F
-        lda ZP_POLYOBJ_XPOS_LO
+        lda ZP_SHIP_XPOS_LO
         sta ZP_VAR_P1
-        lda ZP_POLYOBJ_XPOS_HI
+        lda ZP_SHIP_XPOS_HI
         sta ZP_VAR_P2
-        lda ZP_POLYOBJ_XPOS_SIGN
+        lda ZP_SHIP_XPOS_SIGN
         jsr _81c9
         bcs _7d56
         lda ZP_VALUE_pt1        ; radius?
         adc # $80
-        sta ZP_POLYOBJ01_XPOS_pt1
+        sta ZP_SHIP01_XPOS_pt1
         txa 
         adc # $00
-        sta ZP_POLYOBJ01_XPOS_pt2
-        lda ZP_POLYOBJ_YPOS_LO
+        sta ZP_SHIP01_XPOS_pt2
+        lda ZP_SHIP_YPOS_LO
         sta ZP_VAR_P1
-        lda ZP_POLYOBJ_YPOS_HI
+        lda ZP_SHIP_YPOS_HI
         sta ZP_VAR_P2
-        lda ZP_POLYOBJ_YPOS_SIGN
+        lda ZP_SHIP_YPOS_SIGN
         eor # %10000000
         jsr _81c9
         bcs _7d56
@@ -3696,10 +3696,10 @@ _7d5f:                                                                  ;$7D5F
 
 _7d62:                                                  ; BBC: PLANET   ;$7D62
 ;===============================================================================
-        lda ZP_POLYOBJ_ZPOS_SIGN
+        lda ZP_SHIP_ZPOS_SIGN
         cmp # $30
         bcs _7d57
-        ora ZP_POLYOBJ_ZPOS_HI
+        ora ZP_SHIP_ZPOS_HI
         beq _7d57
         jsr _7d1f
         bcs _7d57
@@ -3737,10 +3737,10 @@ _7d99:                                                                  ;$7D99
         lda ZP_VALUE_pt1
         cmp # $06
         bcc _7d98
-        lda ZP_POLYOBJ_M0x2_HI
+        lda ZP_SHIP_M0x2_HI
         eor # %10000000
         sta ZP_VAR_P1
-        lda ZP_POLYOBJ_M1x2_HI
+        lda ZP_SHIP_M1x2_HI
         jsr _81aa
         ldx # $09
         jsr _7e36
@@ -3752,26 +3752,26 @@ _7d99:                                                                  ;$7D99
         ldx # $0f
         jsr _81ba
         jsr _7e54
-        lda ZP_POLYOBJ_M0x2_HI
+        lda ZP_SHIP_M0x2_HI
         eor # %10000000
         sta ZP_VAR_P1
-        lda ZP_POLYOBJ_M2x2_HI
+        lda ZP_SHIP_M2x2_HI
         jsr _81aa
         ldx # $15
         jsr _81ba
         jmp _7e54
 
 _7de0:                                                                  ;$7DE0
-        lda ZP_POLYOBJ_M1x2_HI
+        lda ZP_SHIP_M1x2_HI
         bmi _7d98
         ldx # $0f
         jsr _8189
         clc 
-        adc ZP_POLYOBJ01_XPOS_pt1
-        sta ZP_POLYOBJ01_XPOS_pt1
+        adc ZP_SHIP01_XPOS_pt1
+        sta ZP_SHIP01_XPOS_pt1
         tya 
-        adc ZP_POLYOBJ01_XPOS_pt2
-        sta ZP_POLYOBJ01_XPOS_pt2
+        adc ZP_SHIP01_XPOS_pt2
+        sta ZP_SHIP01_XPOS_pt2
         jsr _8189
         sta ZP_VAR_P1
 
@@ -3811,12 +3811,12 @@ _7de0:                                                                  ;$7DE0
         jmp _7e58
 
 _7e36:                                                                  ;$7E36
-        lda ZP_POLYOBJ_XPOS_LO, x
+        lda ZP_SHIP_XPOS_LO, x
         sta ZP_VAR_P1
-        lda ZP_POLYOBJ_XPOS_HI, x
+        lda ZP_SHIP_XPOS_HI, x
         and # %01111111
         sta ZP_VAR_P2
-        lda ZP_POLYOBJ_XPOS_HI, x
+        lda ZP_SHIP_XPOS_HI, x
         and # %10000000
         jsr _3bc1
         lda ZP_VALUE_pt1
@@ -3893,10 +3893,10 @@ _7e5f:                                                                  ;$7E5F
         sta T
 _7ec8:                                                                  ;$7EC8
         txa 
-        adc ZP_POLYOBJ01_XPOS_pt1
+        adc ZP_SHIP01_XPOS_pt1
         sta ZP_VAR_K6
         lda T
-        adc ZP_POLYOBJ01_XPOS_pt2
+        adc ZP_SHIP01_XPOS_pt2
         sta ZP_VAR_K6_1
         lda ZP_VALUE_pt1
         sta R
@@ -4783,7 +4783,7 @@ _81a7:                                                                  ;$81A7
 _81aa:                                                                  ;$81AA
         sta Q
         jsr _3c95
-        ldx ZP_POLYOBJ_M0x2_HI
+        ldx ZP_SHIP_M0x2_HI
         bmi _81b5
         eor # %10000000
 _81b5:                                                                  ;$81B5
@@ -4994,7 +4994,7 @@ _828f:                                                                  ;$828F
 
 clear_ship_slot:                                                        ;$829A
 ;===============================================================================
-; empty a ship-instance slot and shuffle down the rest:
+; empty a `Ship`-instance slot and shuffle down the rest:
 ; this is part of `process_ship` and is no use outside of that routine
 ;
 ;-------------------------------------------------------------------------------
@@ -5008,7 +5008,7 @@ clear_ship_slot:                                                        ;$829A
 
 _82a4:                                                                  ;$82A4
 ;===============================================================================
-        jsr clear_zp_polyobj
+        jsr clear_zp_ship
         jsr clear_sun_buffer
         
         sta SHIP_SLOT1
@@ -5019,7 +5019,7 @@ _82a4:                                                                  ;$82A4
         jsr _b10e
         
         lda # $06
-        sta ZP_POLYOBJ_YPOS_SIGN
+        sta ZP_SHIP_YPOS_SIGN
 
         lda # $81               ; TODO: ?
         jmp spawn_ship
@@ -5043,13 +5043,13 @@ _82be:                                                                  ;$82BE
         asl                     ; double for lookup table
         tay                     ; move to index register
 
-        ; get the PolyObject address from that index
-        lda polyobj_addrs_lo, y
+        ; get the Ship address from that index
+        lda ship_addrs_lo, y
         sta ZP_TEMP_ADDR_LO
-        lda polyobj_addrs_hi, y
+        lda ship_addrs_hi, y
         sta ZP_TEMP_ADDR_HI
 
-        ldy # PolyObject::attack
+        ldy # Ship::attack
         lda [ZP_TEMP_ADDR], y
         bpl _82be               ; if bit 7 is unset, check next ship slot
 
@@ -5125,13 +5125,13 @@ _832c:                                                                  ;$832C
         ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
 
-        ldy # PolyObject::vertexData
+        ldy # Ship::vertexData
         clc 
-        adc [ZP_POLYOBJ_ADDR], y
+        adc [ZP_SHIP_ADDR], y
         sta ZP_VAR_P1
 
         iny                     ;=$22: acceleration
-        lda [ZP_POLYOBJ_ADDR], y
+        lda [ZP_SHIP_ADDR], y
         adc # $00
         sta ZP_VAR_P2
 _8343:                                                                  ;$8343
@@ -5163,37 +5163,37 @@ _834f:                                                                  ;$834F
         txa 
         asl 
         tay 
-        lda polyobj_addrs_lo, y
+        lda ship_addrs_lo, y
         sta ZP_TEMP_ADDR_LO
-        lda polyobj_addrs_hi, y
+        lda ship_addrs_hi, y
         sta ZP_TEMP_ADDR_HI
 
         ldy # $24
         lda [ZP_TEMP_ADDR], y
-        sta [ZP_POLYOBJ_ADDR], y
+        sta [ZP_SHIP_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR], y
-        sta [ZP_POLYOBJ_ADDR], y
+        sta [ZP_SHIP_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR], y
         sta ZP_VALUE_pt2
         lda ZP_VAR_P2
-        sta [ZP_POLYOBJ_ADDR], y
+        sta [ZP_SHIP_ADDR], y
         dey 
         lda [ZP_TEMP_ADDR], y
         sta ZP_VALUE_pt1        ; radius?
         lda ZP_VAR_P1
-        sta [ZP_POLYOBJ_ADDR], y
+        sta [ZP_SHIP_ADDR], y
         dey 
 _8399:                                                                  ;$8399
         lda [ZP_TEMP_ADDR], y
-        sta [ZP_POLYOBJ_ADDR], y
+        sta [ZP_SHIP_ADDR], y
         dey 
         bpl _8399
         lda ZP_TEMP_ADDR_LO
-        sta ZP_POLYOBJ_ADDR_LO
+        sta ZP_SHIP_ADDR_LO
         lda ZP_TEMP_ADDR_HI
-        sta ZP_POLYOBJ_ADDR_HI
+        sta ZP_SHIP_ADDR_HI
         ldy T
 _83aa:                                                                  ;$83AA
         dey 
@@ -5312,22 +5312,22 @@ _8437:                                                                  ;$8437
         sta SHIP_LINES_HI
 
 
-clear_zp_polyobj:                                                       ;$8447
+clear_zp_ship:                                                          ;$8447
 ;===============================================================================
-; clear the zero-page PolyObject storage:
+; clear the zero-page `Ship` instance:
 ;-------------------------------------------------------------------------------
-        ldy # .sizeof( PolyObject )-1
+        ldy # .sizeof( Ship )-1
         lda # $00
-:       sta ZP_POLYOBJ_XPOS_LO, y                                       ;$844B
+:       sta ZP_SHIP_XPOS_LO, y                                          ;$844B
         dey 
         bpl :-
 
         ; set the default $6000 vector scale?
         lda # $60
-        sta ZP_POLYOBJ_M1x1_HI
-        sta ZP_POLYOBJ_M2x0_HI
+        sta ZP_SHIP_M1x1_HI
+        sta ZP_SHIP_M2x0_HI
         ora # %10000000
-        sta ZP_POLYOBJ_M0x2_HI
+        sta ZP_SHIP_M0x2_HI
 
         rts 
 
@@ -5377,23 +5377,23 @@ _8475:                                                                  ;$8475
 
 _848d:                                                                  ;$848D
 ;===============================================================================
-        jsr clear_zp_polyobj
+        jsr clear_zp_ship
         jsr get_random_number
         sta ZP_TEMP_VAR
         and # %10000000
-        sta ZP_POLYOBJ_XPOS_SIGN
+        sta ZP_SHIP_XPOS_SIGN
         txa 
         and # %10000000
-        sta ZP_POLYOBJ_YPOS_SIGN
+        sta ZP_SHIP_YPOS_SIGN
         lda # $19
-        sta ZP_POLYOBJ_XPOS_HI
-        sta ZP_POLYOBJ_YPOS_HI
-        sta ZP_POLYOBJ_ZPOS_HI
+        sta ZP_SHIP_XPOS_HI
+        sta ZP_SHIP_YPOS_HI
+        sta ZP_SHIP_ZPOS_HI
         txa 
         cmp # $f5
         rol                     ; increase aggression level?
         ora # attack::active | attack::target   ;=%11000000
-        sta ZP_POLYOBJ_ATTACK
+        sta ZP_SHIP_ATTACK
 
 _84ae:                                                                  ;$84AE
 ;===============================================================================
@@ -5425,22 +5425,22 @@ _84c3:                                                                  ;$84C3
 ;===============================================================================
         jsr get_random_number
         lsr 
-        sta ZP_POLYOBJ_ATTACK
-        sta ZP_POLYOBJ_ROLL
-        rol ZP_POLYOBJ_STATE
+        sta ZP_SHIP_ATTACK
+        sta ZP_SHIP_ROLL
+        rol ZP_SHIP_STATE
         and # %00011111
         ora # %00010000
-        sta ZP_POLYOBJ_SPEED
+        sta ZP_SHIP_SPEED
 
         jsr get_random_number
         bmi _84e2
 
-        lda ZP_POLYOBJ_ATTACK
+        lda ZP_SHIP_ATTACK
         ora # attack::active | attack::target   ;=%11000000
-        sta ZP_POLYOBJ_ATTACK
+        sta ZP_SHIP_ATTACK
 
         ldx # behaviour::docking
-        stx ZP_POLYOBJ_BEHAVIOUR
+        stx ZP_SHIP_BEHAVIOUR
 _84e2:                                                                  ;$84E2
         and # %00000010         ; = 0 or 2?
         adc # $0b               ; = $0B or $0D?
@@ -5480,25 +5480,25 @@ _8501:                                                                  ;$8501
         cmp # $03               ; more than 2?
         bcs _8562
 
-        jsr clear_zp_polyobj    ; clear the temp polyobject ready for spawning
+        jsr clear_zp_ship       ; clear the temp `Ship` ready for spawning
 
         lda # $26
-        sta ZP_POLYOBJ_ZPOS_HI  ; set the middle distance
+        sta ZP_SHIP_ZPOS_HI     ; set the middle distance
         jsr get_random_number   ; vary the distance a little
-        sta ZP_POLYOBJ_XPOS_LO  ; spread the objects about horionzontally...
-        stx ZP_POLYOBJ_YPOS_LO  ; ...and vertically
+        sta ZP_SHIP_XPOS_LO     ; spread the objects about horionzontally...
+        stx ZP_SHIP_YPOS_LO     ; ...and vertically
         and # %10000000         ; pick the sign from the random number
-        sta ZP_POLYOBJ_XPOS_SIGN; position object either left or right of us
+        sta ZP_SHIP_XPOS_SIGN   ; position object either left or right of us
         txa 
         and # %10000000         ; pick another sign from the random number
-        sta ZP_POLYOBJ_YPOS_SIGN; position the object either above or below
-        rol ZP_POLYOBJ_XPOS_HI  ; increase the scale of the left/right spread
-        rol ZP_POLYOBJ_XPOS_HI  ; now, with more feeling
+        sta ZP_SHIP_YPOS_SIGN   ; position the object either above or below
+        rol ZP_SHIP_XPOS_HI     ; increase the scale of the left/right spread
+        rol ZP_SHIP_XPOS_HI     ; now, with more feeling
 
         jsr get_random_number
         bvs _84c3
         ora # %01101111
-        sta ZP_POLYOBJ_ROLL
+        sta ZP_SHIP_ROLL
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
@@ -5509,18 +5509,18 @@ _8501:                                                                  ;$8501
         bcs _8548
         and # %00011111
         ora # %00010000
-        sta ZP_POLYOBJ_SPEED
+        sta ZP_SHIP_SPEED
         bcc _854c
 _8548:                                                                  ;$8548
         ora # %01111111
-        sta ZP_POLYOBJ_PITCH
+        sta ZP_SHIP_PITCH
 _854c:                                                                  ;$854C
         jsr get_random_number
         cmp # $fc
         bcc _8559
 
         lda # attack::ecm | attack::aggr1 | attack::aggr2 | attack::aggr3
-        sta ZP_POLYOBJ_ATTACK   ;=%00001111
+        sta ZP_SHIP_ATTACK      ;=%00001111
         bne _855f
 _8559:                                                                  ;$8559
         cmp # $0a
@@ -5603,7 +5603,7 @@ _85bb:                                                                  ;$85BB
         lda # attack::active | attack::target \
             | attack::aggr5  | attack::aggr4 | attack::aggr3 \
             | attack::ecm
-        sta ZP_POLYOBJ_ATTACK   ;=%11111001
+        sta ZP_SHIP_ATTACK      ;=%11111001
 
         lda MISSION_FLAGS
         and # missions::constrictor
@@ -5618,13 +5618,13 @@ _85bb:                                                                  ;$85BB
         beq _85f0
 _85e0:                                                                  ;$85E0
         lda # behaviour::angry
-        sta ZP_POLYOBJ_BEHAVIOUR
+        sta ZP_SHIP_BEHAVIOUR
 
         jsr get_random_number
         cmp # $c8
         rol 
         ora # attack::active | attack::target   ;=%11000000
-        sta ZP_POLYOBJ_ATTACK
+        sta ZP_SHIP_ATTACK
         tya 
         ; (this causes the next instruction to become a meaningless `bit`
         ;  instruction, a very handy way of skipping without branching)
@@ -5638,18 +5638,18 @@ _85f2:                                                                  ;$85F2
 
 _85f8:                                                                  ;$85F8
         ;-----------------------------------------------------------------------
-        lda polyobj_00 + PolyObject::zpos                               ;=$F906
+        lda ship_00 + Ship::zpos                                        ;=$F906
         and # %00111110
         bne _85a5
 
         lda # $12
-        sta ZP_POLYOBJ_SPEED
+        sta ZP_SHIP_SPEED
 
         ; perhaps this bit-pattern has an alternative meaning?
         lda # attack::target \
             | attack::aggr5  | attack::aggr4 | attack::aggr3 \
             | attack::ecm
-        sta ZP_POLYOBJ_ATTACK   ;=%01111001
+        sta ZP_SHIP_ATTACK      ;=%01111001
 
         lda # $20
         bne _85f2
@@ -5991,20 +5991,20 @@ _87a4:                                                                  ;$87A4
 ;===============================================================================
         lda # $e0
 _87a6:                                                                  ;$87A6
-        cmp ZP_POLYOBJ_XPOS_HI
+        cmp ZP_SHIP_XPOS_HI
         bcc _87b0
-        cmp ZP_POLYOBJ_YPOS_HI
+        cmp ZP_SHIP_YPOS_HI
         bcc _87b0
-        cmp ZP_POLYOBJ_ZPOS_HI
+        cmp ZP_SHIP_ZPOS_HI
 _87b0:                                                                  ;$87B0
         rts 
 
 
 _87b1:                                                                  ;$87B1
 ;===============================================================================
-        ora ZP_POLYOBJ_XPOS_HI
-        ora ZP_POLYOBJ_YPOS_HI
-        ora ZP_POLYOBJ_ZPOS_HI
+        ora ZP_SHIP_XPOS_HI
+        ora ZP_SHIP_YPOS_HI
+        ora ZP_SHIP_ZPOS_HI
 
         rts 
 
@@ -6085,32 +6085,32 @@ _87fd:                                                                  ;$87FD
         jsr _848d
         lsr 
         lsr 
-        sta ZP_POLYOBJ_XPOS_LO
+        sta ZP_SHIP_XPOS_LO
 
         ; switch to cockpit-view(?)
         ; (does not call `set_page` though)
         ldy # page::cockpit     ; NOTE: Y = 0
         sty ZP_SCREEN
 
-        sty ZP_POLYOBJ_XPOS_HI
-        sty ZP_POLYOBJ_YPOS_HI
-        sty ZP_POLYOBJ_ZPOS_HI
-        sty ZP_POLYOBJ_ATTACK
+        sty ZP_SHIP_XPOS_HI
+        sty ZP_SHIP_YPOS_HI
+        sty ZP_SHIP_ZPOS_HI
+        sty ZP_SHIP_ATTACK
         dey 
         sty MAIN_COUNTER
         eor # %00101010
-        sta ZP_POLYOBJ_YPOS_LO
+        sta ZP_SHIP_YPOS_LO
         ora # %01010000
-        sta ZP_POLYOBJ_ZPOS_LO
+        sta ZP_SHIP_ZPOS_LO
         txa 
         and # %10001111
-        sta ZP_POLYOBJ_ROLL
+        sta ZP_SHIP_ROLL
         ldy # $40
         sty LASER_COUNTER
         sec 
         ror 
         and # %10000111
-        sta ZP_POLYOBJ_PITCH
+        sta ZP_SHIP_PITCH
 
         ; spawn a cargo-cannister or plate-alloy:
         ; WARN: this assumes the plate/alloy ID
@@ -6126,7 +6126,7 @@ _87fd:                                                                  ;$87FD
         jsr get_random_number
         and # %10000000
         ldy # $1f
-        sta [ZP_POLYOBJ_ADDR], y
+        sta [ZP_SHIP_ADDR], y
         lda SHIP_SLOT4
         beq _87fd
 
@@ -6336,12 +6336,12 @@ _8920:                                                                  ;$8920
         sta ZP_SCREEN
 
         lda # $60
-        sta ZP_POLYOBJ_M0x2_HI
+        sta ZP_SHIP_M0x2_HI
         lda # $60
-        sta ZP_POLYOBJ_ZPOS_HI
+        sta ZP_SHIP_ZPOS_HI
         ldx # $7f
-        stx ZP_POLYOBJ_ROLL
-        stx ZP_POLYOBJ_PITCH
+        stx ZP_SHIP_ROLL
+        stx ZP_SHIP_PITCH
         inx 
         stx ZP_PRINT_CASE
         
@@ -6419,20 +6419,20 @@ _8920:                                                                  ;$8920
         lda # $ff
         sta _1d0c
 @_89be:                                                                 ;$89BE
-        lda ZP_POLYOBJ_ZPOS_HI
+        lda ZP_SHIP_ZPOS_HI
         cmp # $01
         beq :+
-        dec ZP_POLYOBJ_ZPOS_HI
+        dec ZP_SHIP_ZPOS_HI
 :       jsr move_ship                                                   ;$89C6
 
-        ldx VAR_06FB            ; title screen poly-object z-distance?
-        stx ZP_POLYOBJ_ZPOS_LO
+        ldx VAR_06FB            ; title screen ship z-distance?
+        stx ZP_SHIP_ZPOS_LO
 
         lda MAIN_COUNTER
         and # %00000011
         lda # $00
-        sta ZP_POLYOBJ_XPOS_LO
-        sta ZP_POLYOBJ_YPOS_LO
+        sta ZP_SHIP_XPOS_LO
+        sta ZP_SHIP_YPOS_LO
         jsr draw_ship
         jsr get_input
 
@@ -6500,7 +6500,7 @@ _8a1d:                                                                  ;$8A1D
         lda _8bbe
         sta _8bbf
 _8a25:                                                                  ;$8A25
-        lda ZP_POLYOBJ_YPOS_SIGN, x
+        lda ZP_SHIP_YPOS_SIGN, x
         sta _25ab, x
         dex 
         bpl _8a25
@@ -6508,7 +6508,7 @@ _8a2d:                                                                  ;$8A2D
         ldx # $07
 _8a2f:                                                                  ;$8A2F
         lda _25ab, x
-        sta ZP_POLYOBJ_YPOS_SIGN, x
+        sta ZP_SHIP_YPOS_SIGN, x
         dex 
         bpl _8a2f
         rts 
@@ -6517,7 +6517,7 @@ _8a38:                                                                  ;$8A38
         ldx # $04
 _8a3a:                                                                  ;$8A3A
         lda _25a6, x
-        sta ZP_POLYOBJ_XPOS_LO, x
+        sta ZP_SHIP_XPOS_LO, x
         dex 
         bpl _8a3a
         lda # $07
@@ -6562,7 +6562,7 @@ _8a6a:                                                                  ;$8A6A
         bcc @_8a8d
         cmp _8ab4
         bcs @_8a8d
-        sta ZP_POLYOBJ_YPOS_SIGN, y
+        sta ZP_SHIP_YPOS_SIGN, y
         iny 
         ; (this causes the next instruction to become a meaningless `bit`
         ;  instruction, a very handy way of skipping without branching)
@@ -6574,7 +6574,7 @@ _8a6a:                                                                  ;$8A6A
         bcc _8a6a               ; always branches?
 
 @_8a94:                                                                 ;$8A94
-        sta ZP_POLYOBJ_YPOS_SIGN, y
+        sta ZP_SHIP_YPOS_SIGN, y
 
         lda # $10
         sta VAR_050C
@@ -6995,39 +6995,39 @@ _8c7b:                                                                  ;$8C7B
         ldx # $06
         jsr _7c11
 _8c8a:                                                                  ;$8C8A
-        lda ZP_POLYOBJ01_XPOS_pt1
-        ora ZP_POLYOBJ01_YPOS_pt1
-        ora ZP_POLYOBJ01_ZPOS_pt1
+        lda ZP_SHIP01_XPOS_pt1
+        ora ZP_SHIP01_YPOS_pt1
+        ora ZP_SHIP01_ZPOS_pt1
         ora # %00000001
-        sta ZP_POLYOBJ01_POS
+        sta ZP_SHIP01_POS
 
-        lda ZP_POLYOBJ01_XPOS_pt2
-        ora ZP_POLYOBJ01_YPOS_pt2
-        ora ZP_POLYOBJ01_ZPOS_pt2
+        lda ZP_SHIP01_XPOS_pt2
+        ora ZP_SHIP01_YPOS_pt2
+        ora ZP_SHIP01_ZPOS_pt2
 _8c9a:                                                                  ;$8C9A
-        asl ZP_POLYOBJ01_POS
+        asl ZP_SHIP01_POS
         rol 
         bcs _8cad
 
-        asl ZP_POLYOBJ01_XPOS_pt1
-        rol ZP_POLYOBJ01_XPOS_pt2
-        asl ZP_POLYOBJ01_YPOS_pt1
-        rol ZP_POLYOBJ01_YPOS_pt2
-        asl ZP_POLYOBJ01_ZPOS_pt1
-        rol ZP_POLYOBJ01_ZPOS_pt2
+        asl ZP_SHIP01_XPOS_pt1
+        rol ZP_SHIP01_XPOS_pt2
+        asl ZP_SHIP01_YPOS_pt1
+        rol ZP_SHIP01_YPOS_pt2
+        asl ZP_SHIP01_ZPOS_pt1
+        rol ZP_SHIP01_ZPOS_pt2
         bcc _8c9a
 _8cad:                                                                  ;$8CAD
-        lda ZP_POLYOBJ01_XPOS_pt2
+        lda ZP_SHIP01_XPOS_pt2
         lsr 
-        ora ZP_POLYOBJ01_XPOS_pt3
+        ora ZP_SHIP01_XPOS_pt3
         sta ZP_VAR_XX15_0
-        lda ZP_POLYOBJ01_YPOS_pt2
+        lda ZP_SHIP01_YPOS_pt2
         lsr 
-        ora ZP_POLYOBJ01_YPOS_pt3
+        ora ZP_SHIP01_YPOS_pt3
         sta ZP_VAR_XX15_1
-        lda ZP_POLYOBJ01_ZPOS_pt2
+        lda ZP_SHIP01_ZPOS_pt2
         lsr 
-        ora ZP_POLYOBJ01_ZPOS_pt3
+        ora ZP_SHIP01_ZPOS_pt3
         sta ZP_VAR_XX15_2
 _8cc2:                                                                  ;$8CC2
         lda ZP_VAR_XX15_0
@@ -7086,7 +7086,7 @@ do_quickjump:                                                           ;$8E29
 
         ; check player's Z-position
         ;
-        ldy polyobj_00 + PolyObject::zpos + 2                           ;=$F908
+        ldy ship_00 + Ship::zpos + 2                                    ;=$F908
         bmi :+
 
         ; note that A is zero due to the
@@ -7096,10 +7096,10 @@ do_quickjump:                                                           ;$8E29
         cmp # $02               ; minimum distance? ($020000?)
         bcc @nojump
 
-:       ldy polyobj_01 + PolyObject::zpos + 2                           ;$8E44
+:       ldy ship_01 + Ship::zpos + 2                                    ;$8E44
         bmi :+
         ; check the sun's position?
-        ldy # .sizeof( PolyObject )
+        ldy # .sizeof( Ship )
         jsr _2c4e
         cmp # $02               ; minimum distance?
         bcc @nojump
@@ -7111,13 +7111,13 @@ do_quickjump:                                                           ;$8E29
 
         ; push the player forward
         ;
-        lda polyobj_00 + PolyObject::zpos + 2
+        lda ship_00 + Ship::zpos + 2
         jsr multiplied_now_add
-        sta polyobj_00 + PolyObject::zpos + 2
+        sta ship_00 + Ship::zpos + 2
 
-        lda polyobj_01 + PolyObject::zpos + 2
+        lda ship_01 + Ship::zpos + 2
         jsr multiplied_now_add
-        sta polyobj_01 + PolyObject::zpos + 2
+        sta ship_01 + Ship::zpos + 2
 
         lda # $01
         sta ZP_SCREEN
@@ -7245,18 +7245,18 @@ _8ee3:                                                                  ;$8EE3
         lda DOCKCOM_STATE
         beq _8f4d
 
-        jsr clear_zp_polyobj
+        jsr clear_zp_ship
 
         lda # $60               ; this is the $6000 vector scale?
-        sta ZP_POLYOBJ_M0x2_HI
+        sta ZP_SHIP_M0x2_HI
         ora # %10000000
-        sta ZP_POLYOBJ_M2x0_HI
+        sta ZP_SHIP_M2x0_HI
         sta ZP_SHIP_TYPE
 
         lda ZP_PLAYER_SPEED
-        sta ZP_POLYOBJ_SPEED
+        sta ZP_SHIP_SPEED
         jsr _34bc
-        lda ZP_POLYOBJ_SPEED
+        lda ZP_SHIP_SPEED
 _8f01:                                                                  ;$8F01
         cmp # $16
         bcc :+
@@ -7266,7 +7266,7 @@ _8f01:                                                                  ;$8F01
 
         lda # $ff
         ldx # $09
-        ldy ZP_POLYOBJ_ACCEL
+        ldy ZP_SHIP_ACCEL
         beq _8f18
         bmi _8f15
 
@@ -7276,13 +7276,13 @@ _8f15:                                                                  ;$8F15
 _8f18:                                                                  ;$8F18
         lda # $80
         ldx # $11
-        asl ZP_POLYOBJ_ROLL
+        asl ZP_SHIP_ROLL
         beq _8f35
         bcc _8f24
 
         ldx # $14
 _8f24:                                                                  ;$8F24
-        bit ZP_POLYOBJ_ROLL
+        bit ZP_SHIP_ROLL
         bpl _8f2f
 
         lda # $40
@@ -7297,7 +7297,7 @@ _8f35:                                                                  ;$8F35
         sta JOY_ROLL
         lda # $80
         ldx # $29
-        asl ZP_POLYOBJ_PITCH
+        asl ZP_SHIP_PITCH
         beq _8f4a
         bcs _8f44
         ldx # $33
@@ -7585,14 +7585,14 @@ _90a8:                                                                  ;$90A8
 
 ; unused code?
 ;$90e5:
-        and ZP_POLYOBJ_ZPOS_LO, x
+        and ZP_SHIP_ZPOS_LO, x
         cpy # $07
 
 _90e9:                                                                  ;$90E9
         tya 
         ldy # $02
         jsr _91b8
-        sta ZP_POLYOBJ_M1x2_HI
+        sta ZP_SHIP_M1x2_HI
         jmp _9131
 
 
@@ -7604,25 +7604,25 @@ _90f4:                                                                  ;$90F4
         beq _90e9
         lda # $02
         jsr _91b8
-        sta ZP_POLYOBJ_M1x1_HI
+        sta ZP_SHIP_M1x1_HI
         jmp _9131
 
 
 _9105:                                                                  ;$9105
 ;===============================================================================
-        lda ZP_POLYOBJ_M0x0_HI
+        lda ZP_SHIP_M0x0_HI
         sta ZP_VAR_XX15_0
-        lda ZP_POLYOBJ_M0x1_HI
+        lda ZP_SHIP_M0x1_HI
         sta ZP_VAR_XX15_1
-        lda ZP_POLYOBJ_M0x2_HI
+        lda ZP_SHIP_M0x2_HI
         sta ZP_VAR_XX15_2
         jsr _8cc2
         lda ZP_VAR_XX15_0
-        sta ZP_POLYOBJ_M0x0_HI
+        sta ZP_SHIP_M0x0_HI
         lda ZP_VAR_XX15_1
-        sta ZP_POLYOBJ_M0x1_HI
+        sta ZP_SHIP_M0x1_HI
         lda ZP_VAR_XX15_2
-        sta ZP_POLYOBJ_M0x2_HI
+        sta ZP_SHIP_M0x2_HI
         ldy # $04
         lda ZP_VAR_XX15_0
         and # %01100000
@@ -7630,48 +7630,48 @@ _9105:                                                                  ;$9105
         ldx # $02
         lda # $00
         jsr _91b8
-        sta ZP_POLYOBJ_M1x0_HI
+        sta ZP_SHIP_M1x0_HI
 _9131:                                                                  ;$9131
-        lda ZP_POLYOBJ_M1x0_HI
+        lda ZP_SHIP_M1x0_HI
         sta ZP_VAR_XX15_0
-        lda ZP_POLYOBJ_M1x1_HI
+        lda ZP_SHIP_M1x1_HI
         sta ZP_VAR_XX15_1
-        lda ZP_POLYOBJ_M1x2_HI
+        lda ZP_SHIP_M1x2_HI
         sta ZP_VAR_XX15_2
         jsr _8cc2
         lda ZP_VAR_XX15_0
-        sta ZP_POLYOBJ_M1x0_HI
+        sta ZP_SHIP_M1x0_HI
         lda ZP_VAR_XX15_1
-        sta ZP_POLYOBJ_M1x1_HI
+        sta ZP_SHIP_M1x1_HI
         lda ZP_VAR_XX15_2
-        sta ZP_POLYOBJ_M1x2_HI
-        lda ZP_POLYOBJ_M0x1_HI
+        sta ZP_SHIP_M1x2_HI
+        lda ZP_SHIP_M0x1_HI
         sta Q
-        lda ZP_POLYOBJ_M1x2_HI
+        lda ZP_SHIP_M1x2_HI
         jsr multiply_signed_into_RS
-        ldx ZP_POLYOBJ_M0x2_HI
-        lda ZP_POLYOBJ_M1x1_HI
+        ldx ZP_SHIP_M0x2_HI
+        lda ZP_SHIP_M1x1_HI
         jsr _3b0d
         eor # %10000000
-        sta ZP_POLYOBJ_M2x0_HI
-        lda ZP_POLYOBJ_M1x0_HI
+        sta ZP_SHIP_M2x0_HI
+        lda ZP_SHIP_M1x0_HI
         jsr multiply_signed_into_RS
-        ldx ZP_POLYOBJ_M0x0_HI
-        lda ZP_POLYOBJ_M1x2_HI
+        ldx ZP_SHIP_M0x0_HI
+        lda ZP_SHIP_M1x2_HI
         jsr _3b0d
         eor # %10000000
-        sta ZP_POLYOBJ_M2x1_HI
-        lda ZP_POLYOBJ_M1x1_HI
+        sta ZP_SHIP_M2x1_HI
+        lda ZP_SHIP_M1x1_HI
         jsr multiply_signed_into_RS
-        ldx ZP_POLYOBJ_M0x1_HI
-        lda ZP_POLYOBJ_M1x0_HI
+        ldx ZP_SHIP_M0x1_HI
+        lda ZP_SHIP_M1x0_HI
         jsr _3b0d
         eor # %10000000
-        sta ZP_POLYOBJ_M2x2_HI
+        sta ZP_SHIP_M2x2_HI
         lda # $00
         ldx # $0e
 _9184:                                                                  ;$9184
-        sta ZP_POLYOBJ_M0x0_LO, x
+        sta ZP_SHIP_M0x0_LO, x
         dex 
         dex 
         bpl _9184
@@ -7716,17 +7716,17 @@ _91b2:                                                                  ;$91B2
 _91b8:                                                                  ;$91B8
 ;===============================================================================
         sta ZP_VAR_P3
-        lda ZP_POLYOBJ_M0x0_HI, x
+        lda ZP_SHIP_M0x0_HI, x
         sta Q
-        lda ZP_POLYOBJ_M1x0_HI, x
+        lda ZP_SHIP_M1x0_HI, x
         jsr multiply_signed_into_RS
-        ldx ZP_POLYOBJ_M0x0_HI, y
+        ldx ZP_SHIP_M0x0_HI, y
         stx Q
-        lda ZP_POLYOBJ_M1x0_HI, y
+        lda ZP_SHIP_M1x0_HI, y
         jsr multiply_and_add
         stx ZP_VAR_P1
         ldy ZP_VAR_P3
-        ldx ZP_POLYOBJ_M0x0_HI, y
+        ldx ZP_SHIP_M0x0_HI, y
         stx Q
         eor # %10000000
         sta ZP_VAR_P2

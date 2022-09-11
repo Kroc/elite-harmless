@@ -14,9 +14,9 @@ VAR_0403                :=$0403
 VAR_0441                :=$0441 ;?
 
 ;-------------------------------------------------------------------------------
-; up to 11 3D-objects ("poly objects") can be in the game at a time.
-; these are the 11 available slots; a value of $00 represents an unused slot,
-; otherwise the value is a hull index (see "hull_data.asm") 
+; up to 11 3D-objects ("ships") can be in the game at a time. these are the
+; 11 available slots; a value of $00 represents an unused slot, otherwise
+; the value is a hull index (see "hull_data.asm") 
 
 SHIP_SLOTS              :=$0452
 
@@ -380,4 +380,4 @@ VAR_06F3                :=$06f3 ;?
 
 LINE_SWAP               :=$06f4 ; flag for line start/end swapped       ; SWAP
 
-VAR_06FB                :=$06fb ; title screen poly-object z-distance?
+VAR_06FB                :=$06fb ; title screen ship z-distance?

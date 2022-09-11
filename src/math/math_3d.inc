@@ -17,21 +17,21 @@
 ; math notation on page.1 like every other math tutorial does :|
 ;
 
-.macro  .move_polyobj_x
+.macro  .move_ship_x
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-.move_polyobj_x_small:                                                  ;$A44A
+.move_ship_x_small:                                                  ;$A44A
         ;-----------------------------------------------------------------------
-        ; move the current poly-object's X position a small amount (9-bits) 
+        ; move the current ship's X position a small amount (9-bits) 
         ;
         ; in:   A               sign
         ;       R               X-amount to move object
         ;
         and # %10000000         ; only use the sign in A
 
-move_polyobj_x:                                                         ;$A44C
+move_ship_x:                                                         ;$A44C
         ;-----------------------------------------------------------------------
-        ; move the current poly-object's X position (16-bits)
+        ; move the current ship's X position (16-bits)
         ;
         ; in:   R               lo-byte of X-amount to move object
         ;       A               hi-byte of X-amount to move object
@@ -54,43 +54,43 @@ move_polyobj_x:                                                         ;$A44C
         ; -ve(1) + +ve(0) = -ve(1)
         ; -ve(1) + -ve(1) = +ve(0)
         ;
-        eor ZP_POLYOBJ_XPOS_SIGN, x
+        eor ZP_SHIP_XPOS_SIGN, x
         ; if the result will be negative, skip ahead
         bmi :+
            
         ; add `RS` to object's X-position 
         lda R
-        adc ZP_POLYOBJ_XPOS_LO, x       ; if low-byte overflows, carry is set
-        sta ZP_POLYOBJ_XPOS_LO, x
+        adc ZP_SHIP_XPOS_LO, x  ; if low-byte overflows, carry is set
+        sta ZP_SHIP_XPOS_LO, x
         lda S
-        adc ZP_POLYOBJ_XPOS_HI, x       ; if middle-byte overflows, carry set
-        sta ZP_POLYOBJ_XPOS_HI, x
-        lda ZP_POLYOBJ_XPOS_SIGN, x
-        adc # $00                       ; add carry to high-byte if it's set
+        adc ZP_SHIP_XPOS_HI, x  ; if middle-byte overflows, carry set
+        sta ZP_SHIP_XPOS_HI, x
+        lda ZP_SHIP_XPOS_SIGN, x
+        adc # $00               ; add carry to high-byte if it's set
             
         ; restore the sign taken at the beginning
         ora T
-        sta ZP_POLYOBJ_XPOS_SIGN, x
+        sta ZP_SHIP_XPOS_SIGN, x
 
         rts 
 
         ; handle negative result outcome;
         ; subtract `RS` from object's X-position
-:       lda ZP_POLYOBJ_XPOS_LO, x                                      ;$A46F
+:       lda ZP_SHIP_XPOS_LO, x                                          ;$A46F
         sec 
         sbc R                   ; subtract lo-byte `R`
-        sta ZP_POLYOBJ_XPOS_LO, x
-        lda ZP_POLYOBJ_XPOS_HI, x
+        sta ZP_SHIP_XPOS_LO, x
+        lda ZP_SHIP_XPOS_HI, x
         sbc S                   ; subtract hi-byte `S`
-        sta ZP_POLYOBJ_XPOS_HI, x
-        lda ZP_POLYOBJ_XPOS_SIGN, x
+        sta ZP_SHIP_XPOS_HI, x
+        lda ZP_SHIP_XPOS_SIGN, x
         and # %01111111         ; mask sign before applying carry
         sbc # $00               ; subtract carry if set
         ora # %10000000         ; un-mask sign
 
         ; restore sign from beginning
         eor T
-        sta ZP_POLYOBJ_XPOS_SIGN, x
+        sta ZP_SHIP_XPOS_SIGN, x
 
         ; has the subtraction caused the X-position to go from positive
         ; to negative? e.g. 100 + -150 = -50
@@ -99,27 +99,27 @@ move_polyobj_x:                                                         ;$A44C
         ; do a two's-compliment of the whole number --
         ; flipping the bits and adding one; done as '1 - number'
         ;
-        lda # $01                       ; start with 1
-        sbc ZP_POLYOBJ_XPOS_LO, x       ; subtract the low-byte
-        sta ZP_POLYOBJ_XPOS_LO, x
-        lda # $00                       ; zero in the middle byte,
-        sbc ZP_POLYOBJ_XPOS_HI, x       ; and subtract the middle-byte
-        sta ZP_POLYOBJ_XPOS_HI, x
-        lda # $00                       ; zero in the high-byte,
-        sbc ZP_POLYOBJ_XPOS_SIGN, x     ; and subract the high-byte
-        and # %01111111                 ; remove old sign
-        ora T                           ; set the sign
-        sta ZP_POLYOBJ_XPOS_SIGN, x
+        lda # $01               ; start with 1
+        sbc ZP_SHIP_XPOS_LO, x  ; subtract the low-byte
+        sta ZP_SHIP_XPOS_LO, x
+        lda # $00               ; zero in the middle byte,
+        sbc ZP_SHIP_XPOS_HI, x  ; and subtract the middle-byte
+        sta ZP_SHIP_XPOS_HI, x
+        lda # $00               ; zero in the high-byte,
+        sbc ZP_SHIP_XPOS_SIGN, x; and subract the high-byte
+        and # %01111111         ; remove old sign
+        ora T                   ; set the sign
+        sta ZP_SHIP_XPOS_SIGN, x
 
 :       rts                                                             ;$A4A0
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .rotate_polyobj_axis
+.macro  .rotate_ship_axis
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ;
-; rotate a poly-object around a single axis:
+; rotate a ship around a single axis:
 ;
 ;        Y = matrix row (0, 1 or 2), i.e. axis to rotate
 ; ZP_ALPHA = roll  (signed byte) -- rotation around the Z axis (in/out)
@@ -159,7 +159,7 @@ mYx2    = $04           ; column 2 of the matrix row given in Y (0, 1 or 2)
 mYx2_LO = $04
 mYx2_HI = $05
 
-rotate_polyobj_axis:                                                    ;$A4A1
+rotate_ship_axis:                                                    ;$A4A1
 ;===============================================================================
         ; compute the following:
         ;
@@ -176,12 +176,12 @@ rotate_polyobj_axis:                                                    ;$A4A1
 
         ; R.S = mYx1
         ;
-        ldx ZP_POLYOBJ + mYx1_LO, y
+        ldx ZP_SHIP + mYx1_LO, y
         stx R
-        ldx ZP_POLYOBJ + mYx1_HI, y
+        ldx ZP_SHIP + mYx1_HI, y
         stx S
 
-        ldx ZP_POLYOBJ + mYx0_LO, y
+        ldx ZP_SHIP + mYx0_LO, y
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -190,12 +190,12 @@ rotate_polyobj_axis:                                                    ;$A4A1
         ; without the multiplication lookup-tables, this instruction is skipped
         stx ZP_VAR_P
 .endif  ;///////////////////////////////////////////////////////////////////////
-        lda ZP_POLYOBJ + mYx0_HI, y
-        eor # %10000000                 ; flip the sign-bit
+        lda ZP_SHIP + mYx0_HI, y
+        eor # %10000000         ; flip the sign-bit
         
-        jsr multiply_and_add            ; calculate! (Q, R & S are setup)
-        sta ZP_POLYOBJ + mYx1_HI, y     ; write back the hi-byte
-        stx ZP_POLYOBJ + mYx1_LO, y     ; write back the lo-byte
+        jsr multiply_and_add    ; calculate! (Q, R & S are setup)
+        sta ZP_SHIP+mYx1_HI, y  ; write back the hi-byte
+        stx ZP_SHIP+mYx1_LO, y  ; write back the lo-byte
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -205,15 +205,15 @@ rotate_polyobj_axis:                                                    ;$A4A1
 
         ; R.S = mYx0
         ;
-        ldx ZP_POLYOBJ + mYx0_LO, y
+        ldx ZP_SHIP+mYx0_LO, y
         stx R
-        ldx ZP_POLYOBJ + mYx0_HI, y
+        ldx ZP_SHIP+mYx0_HI, y
         stx S
 
-        lda ZP_POLYOBJ + mYx1_HI, y
+        lda ZP_SHIP+mYx1_HI, y
         jsr multiply_and_add
-        sta ZP_POLYOBJ + mYx0_HI, y     ; write back the hi-byte
-        stx ZP_POLYOBJ + mYx0_LO, y     ; write back the lo-byte
+        sta ZP_SHIP+mYx0_HI, y  ; write back the hi-byte
+        stx ZP_SHIP+mYx0_LO, y  ; write back the lo-byte
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -231,12 +231,12 @@ rotate_polyobj_axis:                                                    ;$A4A1
         
         ; R.S = mYx1 
         ;
-        ldx ZP_POLYOBJ + mYx1_LO, y
+        ldx ZP_SHIP + mYx1_LO, y
         stx R
-        ldx ZP_POLYOBJ + mYx1_HI, y
+        ldx ZP_SHIP + mYx1_HI, y
         stx S
         
-        ldx ZP_POLYOBJ + mYx2_LO, y
+        ldx ZP_SHIP + mYx2_LO, y
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -244,12 +244,12 @@ rotate_polyobj_axis:                                                    ;$A4A1
         stx ZP_VAR_P
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda ZP_POLYOBJ + mYx2_HI, y
-        eor # %10000000                 ; flip the sign-bit
+        lda ZP_SHIP + mYx2_HI, y
+        eor # %10000000         ; flip the sign-bit
 
-        jsr multiply_and_add            ; calculate! (Q, R & S are setup)
-        sta ZP_POLYOBJ + mYx1_HI, y     ; write back the hi-byte
-        stx ZP_POLYOBJ + mYx1_LO, y     ; write back the lo-byte
+        jsr multiply_and_add    ; calculate! (Q, R & S are setup)
+        sta ZP_SHIP+mYx1_HI, y  ; write back the hi-byte
+        stx ZP_SHIP+mYx1_LO, y  ; write back the lo-byte
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -259,15 +259,15 @@ rotate_polyobj_axis:                                                    ;$A4A1
         ;
         ; R.S = mYx2
         ;
-        ldx ZP_POLYOBJ + mYx2_LO, y
+        ldx ZP_SHIP+mYx2_LO, y
         stx R
-        ldx ZP_POLYOBJ + mYx2_HI, y
+        ldx ZP_SHIP+mYx2_HI, y
         stx S
         
-        lda ZP_POLYOBJ + mYx1_HI, y
+        lda ZP_SHIP+mYx1_HI, y
         jsr multiply_and_add
-        sta ZP_POLYOBJ + mYx2_HI, y     ; write back the hi-byte
-        stx ZP_POLYOBJ + mYx2_LO, y     ; write back the lo-byte
+        sta ZP_SHIP+mYx2_HI, y  ; write back the hi-byte
+        stx ZP_SHIP+mYx2_LO, y  ; write back the lo-byte
         
         rts 
 
