@@ -261,9 +261,9 @@ _b301:                                                                  ;$B301
         ;
         ldx # 8                 ; number of pages to copy (8*256)
         lda #< __HUD_COPY_RUN__
-        sta ZP_TEMP_ADDR3_LO
+        sta ZP_TEMP_ADDR2_LO
         lda #> __HUD_COPY_RUN__
-        sta ZP_TEMP_ADDR3_HI
+        sta ZP_TEMP_ADDR2_HI
 
         hud_bmp = ELITE_BITMAP_ADDR + .bmppos( ELITE_HUD_TOP_ROW, 0 )   ;=$5680
 
@@ -442,7 +442,7 @@ block_copy:                                                             ;$B3C3
         ; does a large block-copy of bytes. used to wipe the HUD
         ; by copying over a clean copy of the HUD in RAM.
         ;
-        ; [ZP_TEMP_ADDR3] = from address
+        ; [ZP_TEMP_ADDR2] = from address
         ; [ZP_TEMP_ADDR] = to address
         ;               X = number of pages to copy
         ;
@@ -454,13 +454,13 @@ block_copy:                                                             ;$B3C3
 
 block_copy_from:                                                        ;$B3C5
         ;-----------------------------------------------------------------------
-        lda [ZP_TEMP_ADDR3], y  ; read from
+        lda [ZP_TEMP_ADDR2], y  ; read from
         sta [ZP_TEMP_ADDR], y   ; write to
         dey                     ; roll the byte-counter
        .bnz block_copy_from     ; keep going until it looped
 
         ; move to the next page
-        inc ZP_TEMP_ADDR3_HI
+        inc ZP_TEMP_ADDR2_HI
         inc ZP_TEMP_ADDR_HI
         dex                     ; one less page to copy
        .bnz block_copy_from     ; still pages to do?

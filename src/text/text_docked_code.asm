@@ -44,9 +44,9 @@ _237e:                                                                  ;$237E
         pha 
         tax 
        .phy                     ; push Y to stack (via A)
-        lda ZP_TEMP_ADDR3_LO
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda ZP_TEMP_ADDR3_HI
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; switch base-address of the message pool and jump into the print
@@ -55,7 +55,7 @@ _237e:                                                                  ;$237E
 .import _1a5c
         
         lda # < _1a5c
-        sta ZP_TEMP_ADDR3_LO
+        sta ZP_TEMP_ADDR2_LO
         lda # > _1a5c
         bne _23a0
 
@@ -66,7 +66,7 @@ print_docked_str:                                                       ;$2390
 ;
 ; in:   A       message index of string to print
 ;
-; out:  A, Y    preserves A, Y & ZP_TEMP_ADDR3
+; out:  A, Y    preserves A, Y & ZP_TEMP_ADDR2
 ;               (due to recursion)
 ;-------------------------------------------------------------------------------
 .import txt_docked
@@ -74,20 +74,20 @@ print_docked_str:                                                       ;$2390
         pha                     ; preserve A (message index)
         tax                     ; move message index to X
 
-        ; when recursing, [ZP_TEMP_ADDR3]+Y represent the
+        ; when recursing, [ZP_TEMP_ADDR2]+Y represent the
         ; current position in the message data
        .phy                     ; push Y to stack (via A)
-        lda ZP_TEMP_ADDR3_LO
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda ZP_TEMP_ADDR3_HI
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; load the message table
         lda #< txt_docked
-        sta ZP_TEMP_ADDR3_LO
+        sta ZP_TEMP_ADDR2_LO
         lda #> txt_docked
 _23a0:                                                                  ;$23A0
-        sta ZP_TEMP_ADDR3_HI
+        sta ZP_TEMP_ADDR2_HI
         ldy # $00
 
 @skip_str:                                                              ;$23A4
@@ -97,21 +97,21 @@ _23a0:                                                                  ;$23A0
         ;
 .import TKN_DOCKED_XOR:direct
 
-        lda [ZP_TEMP_ADDR3], y
+        lda [ZP_TEMP_ADDR2], y
         eor # TKN_DOCKED_XOR    ;=$57 -- descramble token
         bne :+                  ; keep going if not a message terminator ($00)
         dex                     ; message has ended, decrement index
         beq @read_token         ; if we've found our message, exit loop
 :       iny                     ; move to next token                    ;$23AD
         bne @skip_str           ; if we haven't crossed the page, keep going
-        inc ZP_TEMP_ADDR3_HI    ; move to the next page (256 bytes)
+        inc ZP_TEMP_ADDR2_HI    ; move to the next page (256 bytes)
         bne @skip_str           ; and continue
 
 @read_token:                                                            ;$23B4
         ;-----------------------------------------------------------------------
         iny                     ; step over the terminator byte ($00)
         bne :+                  ; did we step over the page boundary?
-        inc ZP_TEMP_ADDR3_HI    ; if so, move forward to next page
+        inc ZP_TEMP_ADDR2_HI    ; if so, move forward to next page
 
 :       ; read and descramble a token:                                  ;$23B9
         ;
@@ -124,7 +124,7 @@ _23a0:                                                                  ;$23A0
         ; $81-$D6 = text expansions
         ; $D7-$FF = some pre-defined character pairs ("text_pairs.asm")
         ;
-        lda [ZP_TEMP_ADDR3], y  ; read a token
+        lda [ZP_TEMP_ADDR2], y  ; read a token
         eor # TKN_DOCKED_XOR    ;=$57 -- descramble token
         beq @rts                ; has message ended? (token $00)
 
@@ -134,9 +134,9 @@ _23a0:                                                                  ;$23A0
 @rts:   ; finished printing, clean up and exit                          ;$23C5
         ;-----------------------------------------------------------------------
         pla 
-        sta ZP_TEMP_ADDR3_HI
+        sta ZP_TEMP_ADDR2_HI
         pla 
-        sta ZP_TEMP_ADDR3_LO
+        sta ZP_TEMP_ADDR2_LO
        .ply 
         pla 
 
@@ -156,9 +156,9 @@ print_docked_token:                                                     ;$23CF
         ; save state before we recurse
         tax 
        .phy                     ; push Y to stack (via A)
-        lda ZP_TEMP_ADDR3_LO
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda ZP_TEMP_ADDR3_HI
+        lda ZP_TEMP_ADDR2_HI
         pha 
         txa 
 
@@ -232,9 +232,9 @@ _format_code:                                                           ;$241B
         ; -- these format codes can get recursive
         tax 
        .phy                     ; push Y to stack (via A)
-        lda ZP_TEMP_ADDR3_LO
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda ZP_TEMP_ADDR3_HI
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; multiply token by two
@@ -266,9 +266,9 @@ _format_code:                                                           ;$241B
 _2438:  ; restore state and exit                                        ;$2438
         ;-----------------------------------------------------------------------
         pla 
-        sta ZP_TEMP_ADDR3_HI
+        sta ZP_TEMP_ADDR2_HI
         pla 
-        sta ZP_TEMP_ADDR3_LO
+        sta ZP_TEMP_ADDR2_LO
        .ply 
         rts 
 
@@ -278,9 +278,9 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
 
         ; put aside our current location in the text data
        .phy                     ; push Y to stack (via A)
-        lda ZP_TEMP_ADDR3_LO
+        lda ZP_TEMP_ADDR2_LO
         pha 
-        lda ZP_TEMP_ADDR3_HI
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; choose planet description template 0-4:

@@ -1,14 +1,13 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;
-; "vars_hulls.asm":
+;===============================================================================
 ;
 ; we cannot export structures, so we need to include this file
 ; when we want to refer to the bytes [easily] within hull data
 ;
 ; TODO: use https://6502disassembly.com/a2-elite/meshes.html as a reference
-
+;
 .struct Hull
         ;=======================================================================
         scoop_debris    .byte   ; nybbles; hi = scoop, lo = debris      ;+$00
@@ -16,9 +15,9 @@
         edge_data_lo    .byte   ; edge data offset, lo-byte             ;+$03
         face_data_lo    .byte   ; face data offset, lo-byte             ;+$04
         _05             .byte   ; max.lines                             ;+$05
-        _06             .byte   ; "gun vertex"                          ;+$06
+        laser_vertex    .byte   ; which vertex the lasers come from     ;+$06
         _07             .byte   ; explosion count; 4*n +6               ;+$07
-        _08             .byte   ; verticies byte count                  ;+$08
+        vertex_count    .byte   ; vertices byte count                   ;+$08
         edge_count      .byte   ; edge count                            ;+$09
         bounty          .word   ; bounty (in 0.1 Cr units)              ;+$0A
         face_count      .byte   ; face count                            ;+$0C

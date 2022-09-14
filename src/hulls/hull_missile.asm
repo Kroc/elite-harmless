@@ -42,7 +42,7 @@ HULL_MISSILE_KILL       = 149   ;= 0.58
         .byte   $55             ; "4*maxlines+1 for ship lines stack"?
         .byte   $00             ; "gun vertex*4"?
         .byte   $0a             ; "explosion count"?
-        .byte   vertex_bytes    ; verticies byte count
+        .byte   vertex_bytes    ; vertices byte count
         .byte   edge_count      ; edge count
         .word   0               ; bounty
         .byte   face_count      ; face count
@@ -114,10 +114,14 @@ HULL_MISSILE_KILL       = 149   ;= 0.58
 
         .proc   faces
         ;-----------------------------------------------------------------------
-        .byte   $9f, $40, $00, $10, $5f, $00, $40, $10
-        .byte   $1f, $40, $00, $10, $1f, $00, $40, $10
-        .byte   $1f, $20, $00, $00, $5f, $00, $20, $00
-        .byte   $9f, $20, $00, $00, $1f, $00, $20, $00
+        .byte   $9f, $40, $00, $10
+        .byte   $5f, $00, $40, $10
+        .byte   $1f, $40, $00, $10
+        .byte   $1f, $00, $40, $10
+        .byte   $1f, $20, $00, $00
+        .byte   $5f, $00, $20, $00
+        .byte   $9f, $20, $00, $00
+        .byte   $1f, $00, $20, $00
         .byte   $3f, $00, $00, $b0
 
         .endproc

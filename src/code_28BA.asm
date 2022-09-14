@@ -837,15 +837,15 @@ _2d0e:                                                                  ;$2D0E
         jsr print_flight_token_and_newline_and_indent
 _2d18:                                                                  ;$2D18
         lda # $71               ;="ENERGY BOMB"
-        sta ZP_AD
+        sta ZP_VAR_XX4_LO
 _2d1c:                                                                  ;$2D1C
         tay 
         ldx SHIP_SLOTS, y       ; ship slots? NB: "$04c3 - $71"
         beq _2d25
         jsr print_flight_token_and_newline_and_indent
 _2d25:                                                                  ;$2D25
-        inc ZP_AD
-        lda ZP_AD
+        inc ZP_VAR_XX4_LO
+        lda ZP_VAR_XX4_LO
         cmp # $75
         bcc _2d1c
         ldx # $00
@@ -1139,7 +1139,7 @@ print_large_value:                                                      ;$2E65
 
 :       lda # 11                ; max length of text (12 chars)         ;$2E70
         sec                     ; set carry-flag, see note below
-        sta ZP_9F               ; put original max.length of text aside
+        sta ZP_COUNT            ; put original max.length of text aside
 
         ; subtract the max. number of digits from the max. length of text.
         ; since carry is set, this will underflow (sign-bit) if equal
@@ -1275,7 +1275,7 @@ _2f00:
 
         inc ZP_MAXLEN
 
-:       dec ZP_9F                                                       ;$2F06
+:       dec ZP_COUNT                                                    ;$2F06
         bmi @rts
         bne :+
 
@@ -1981,7 +1981,7 @@ _31c6:                                                                  ;$31C6
         jsr _6f82
         jsr get_galaxy_seed
         lda # $00
-        sta ZP_AE
+        sta ZP_VAR_XX4_HI
 _31d5:                                                                  ;$31D5
         jsr text_buffer_on
         jsr _76e9
@@ -2000,7 +2000,7 @@ _31e4:                                                                  ;$31E4
         bmi _3208
 _31f1:                                                                  ;$31F1
         jsr randomize
-        inc ZP_AE
+        inc ZP_VAR_XX4_HI
         bne _31d5
         jsr _70ab
         jsr _6f82
@@ -2072,7 +2072,7 @@ _3244:                                                                  ;$3244
         lsr 
         tax 
         lda ship_addrs_lo, x
-        sta ZP_TEMP_ADDR3_LO
+        sta ZP_TEMP_ADDR2_LO
         lda ship_addrs_hi, x
         jsr _3581
 
@@ -2090,12 +2090,12 @@ _3244:                                                                  ;$3244
         beq _321e
 
         ldy # $1f
-        lda [ZP_TEMP_ADDR3], y
+        lda [ZP_TEMP_ADDR2], y
         ; this might be a `ldy # $32`, but I don't see any jump into it
         bit _32a0+1             ;!?
         bne _327d
         ora # %10000000
-        sta [ZP_TEMP_ADDR3], y
+        sta [ZP_TEMP_ADDR2], y
 _327d:                                                                  ;$327D
         lda ZP_SHIP_XPOS_LO     ;=$09
         ora ZP_SHIP_YPOS_LO     ;=$0C
@@ -2126,7 +2126,7 @@ _3299:                                                                  ;$3299
         bcs _32a7
 _32a0:                                                                  ;$32A0
         ldy # $20
-        lda [ZP_TEMP_ADDR3], y
+        lda [ZP_TEMP_ADDR2], y
         lsr 
         bcs _32aa
 _32a7:                                                                  ;$32A7
@@ -2644,9 +2644,9 @@ _357a:                                                                  ;$357A
 _357b:                                                                  ;$357B
 ;===============================================================================
         lda #< ship_01                                                  ;=$F925
-        sta ZP_TEMP_ADDR3_LO
+        sta ZP_TEMP_ADDR2_LO
         lda #> ship_01                                                  ;=$F925
-_3581:  sta ZP_TEMP_ADDR3_HI                                            ;$3581
+_3581:  sta ZP_TEMP_ADDR2_HI                                            ;$3581
 
         ldy # $02
         jsr _358f
@@ -2656,16 +2656,16 @@ _3581:  sta ZP_TEMP_ADDR3_HI                                            ;$3581
 
         ldy # $08
 _358f:                                                                  ;$358F
-        lda [ZP_TEMP_ADDR3], y
+        lda [ZP_TEMP_ADDR2], y
         eor # %10000000
         sta ZP_VALUE_pt4
 
         dey 
-        lda [ZP_TEMP_ADDR3], y
+        lda [ZP_TEMP_ADDR2], y
         sta ZP_VALUE_pt3
 
         dey 
-        lda [ZP_TEMP_ADDR3], y
+        lda [ZP_TEMP_ADDR2], y
         sta ZP_VALUE_pt2
 
         sty U
@@ -3077,13 +3077,13 @@ _37b2:                                                                  ;$37B2
         stx ZP_CIRCLE_YPOS_LO   ; circle Y-position, lo-byte
         
         ldx # $00
-        stx ZP_AD
+        stx ZP_VAR_XX4_LO
         stx ZP_CIRCLE_XPOS_HI
         stx ZP_CIRCLE_YPOS_HI
 _37c2:                                                                  ;$37C2
         jsr _37ce
-        inc ZP_AD
-        ldx ZP_AD
+        inc ZP_VAR_XX4_LO
+        ldx ZP_VAR_XX4_LO
         cpx # $08
         bne _37c2
         rts 
@@ -3091,7 +3091,7 @@ _37c2:                                                                  ;$37C2
 
 _37ce:                                                                  ;$37CE
 ;===============================================================================
-        lda ZP_AD
+        lda ZP_VAR_XX4_LO
         and # %00000111
         clc 
         adc # $08

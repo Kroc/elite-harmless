@@ -128,13 +128,20 @@ hull_pointer_station:                                                   ;$D002
 
         .proc   faces
         ;-----------------------------------------------------------------------
-        .byte   $1f, $00, $00, $a0, $5f, $6b, $6b, $6b
-        .byte   $1f, $6b, $6b, $6b, $9f, $6b, $6b, $6b
-        .byte   $df, $6b, $6b, $6b, $5f, $00, $a0, $00
-        .byte   $1f, $a0, $00, $00, $9f, $a0, $00, $00
-        .byte   $1f, $00, $a0, $00, $ff, $6b, $6b, $6b
-        .byte   $7f, $6b, $6b, $6b, $3f, $6b, $6b, $6b
-        .byte   $bf, $6b, $6b, $6b, $3f, $00, $00, $a0
+        .byte   $1f, $00, $00, $a0                              ; face 1
+        .byte   $5f, $6b, $6b, $6b                              ; face 2
+        .byte   $1f, $6b, $6b, $6b                              ; face 3
+        .byte   $9f, $6b, $6b, $6b                              ; face 4
+        .byte   $df, $6b, $6b, $6b                              ; face 5
+        .byte   $5f, $00, $a0, $00                              ; face 6
+        .byte   $1f, $a0, $00, $00                              ; face 7
+        .byte   $9f, $a0, $00, $00                              ; face 8
+        .byte   $1f, $00, $a0, $00                              ; face 9
+        .byte   $ff, $6b, $6b, $6b                              ; face 10
+        .byte   $7f, $6b, $6b, $6b                              ; face 11
+        .byte   $3f, $6b, $6b, $6b                              ; face 12
+        .byte   $bf, $6b, $6b, $6b                              ; face 13
+        .byte   $3f, $00, $00, $a0                              ; face 14
         
         .endproc
 

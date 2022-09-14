@@ -355,9 +355,9 @@ print_canned_message:                                                   ;$7813
 
         ; select the table of canned-messages
         lda #< _0700
-        sta ZP_TEMP_ADDR3_LO
+        sta ZP_TEMP_ADDR2_LO
         lda #> _0700
-        sta ZP_TEMP_ADDR3_HI
+        sta ZP_TEMP_ADDR2_HI
 
         ; initialise loop counter
         ldy # $00
@@ -369,16 +369,16 @@ print_canned_message:                                                   ;$7813
 
 @skip_message:                                                           ;$7821
 
-        lda [ZP_TEMP_ADDR3], y  ; read a code from the compressed text
+        lda [ZP_TEMP_ADDR2], y  ; read a code from the compressed text
         beq :+                  ; if zero terminator, end string
         iny                     ; next character
         bne @skip_message       ; loop if not at 256 chars
-        inc ZP_TEMP_ADDR3_HI    ; move to the next page,
+        inc ZP_TEMP_ADDR2_HI    ; move to the next page,
         bne @skip_message       ; and keep reading
 
 :       iny                     ; move forward over the zero            ;$782C
         bne :+                  ; skip if we haven't overflowed a page
-        inc ZP_TEMP_ADDR3_HI    ; next page if the zero happened there
+        inc ZP_TEMP_ADDR2_HI    ; next page if the zero happened there
 :       dex                     ; decrement message skip counter        ;$7831
         bne @skip_message       ; keep looping if we haven't reached
                                 ; the desired message index yet
@@ -389,31 +389,31 @@ print_flight_token_string:                                              ;$7834
         ; (this routine can call recursively)
        .phy                     ; push Y to stack (via A)
         ; remember the current page
-        lda ZP_TEMP_ADDR3_HI
+        lda ZP_TEMP_ADDR2_HI
         pha 
 
         ; get the 'key' used for de-scrambling the text
         ; (see "text_flight.asm")
 .import TKN_FLIGHT_XOR:direct
 
-        lda [ZP_TEMP_ADDR3], y  ; read a token
+        lda [ZP_TEMP_ADDR2], y  ; read a token
         eor # TKN_FLIGHT_XOR    ; 'descramble' token
         jsr print_flight_token  ; process it
 
         ; restore the previous page
         pla 
-        sta ZP_TEMP_ADDR3_HI
+        sta ZP_TEMP_ADDR2_HI
         ; and index
         pla 
         tay 
 
         iny                     ; next character
         bne :+                  ; overflowed the page?
-        inc ZP_TEMP_ADDR3_HI    ; move to the next page
+        inc ZP_TEMP_ADDR2_HI    ; move to the next page
 
         ; is this the end of the string?
         ; (check for a $00 token)
-:       lda [ZP_TEMP_ADDR3], y                                          ;$784A
+:       lda [ZP_TEMP_ADDR2], y                                          ;$784A
         bne print_flight_token_string
 
 rts_784e:                                                               ;$784E

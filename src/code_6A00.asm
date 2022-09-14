@@ -1392,7 +1392,7 @@ local_chart:                                                            ;$6FDB
         jsr get_galaxy_seed
 
         lda # $00
-        sta ZP_AE
+        sta ZP_VAR_XX4_HI
 
         ; to avoid names overlapping, the chart will not print any two system
         ; names on the same screen row (even if they would fit). the zero-page
@@ -1564,7 +1564,7 @@ local_chart:                                                            ;$6FDB
         ; don't need to backup / restore the seed
         ;
 @next:  jsr randomize                                                   ;$708D
-        inc ZP_AE               ; increment the planet counter
+        inc ZP_VAR_XX4_HI       ; increment the planet counter
        .bze :+                  ; 256 planets done? exit
         jmp @loop               ; more planets to go, loop
 
@@ -2049,7 +2049,7 @@ _7337:                                                                  ;$7337
         sta VAR_MARKET_RANDOM
 
         ldx # $00
-        stx ZP_AD
+        stx ZP_VAR_XX4_LO
 _7365:                                                                  ;$7365
         lda _90a6, x
         sta ZP_8F
@@ -2071,12 +2071,12 @@ _7384:                                                                  ;$7384
         bpl _7388
         lda # $00
 _7388:                                                                  ;$7388
-        ldy ZP_AD
+        ldy ZP_VAR_XX4_LO
         and # %00111111
         sta VAR_MARKET_FOOD, y
         iny 
         tya 
-        sta ZP_AD
+        sta ZP_VAR_XX4_LO
         asl 
         asl 
         tax 
@@ -2728,8 +2728,10 @@ _785f:                                                                  ;$785F
         rts 
 
 
-_7866:                                                                  ;$7866
+draw_explosion:                                         ; BBC: DOEXP    ;$7866
 ;===============================================================================
+; draw explosion cloud:
+;-------------------------------------------------------------------------------
         lda ZP_SHIP_STATE
         and # state::firing
         beq _786f
@@ -3748,7 +3750,7 @@ _7d99:                                                                  ;$7D99
         sty $45
         jsr _7e36
         sta ZP_B3
-        sty ZP_TEMPOBJ_M2x0_HI
+        sty ZP_ROTATE_M2x0_HI
         ldx # $0f
         jsr _81ba
         jsr _7e54
@@ -3794,16 +3796,16 @@ _7de0:                                                                  ;$7DE0
         jsr _7e36
         lsr 
         sta ZP_B3
-        sty ZP_TEMPOBJ_M2x0_HI
+        sty ZP_ROTATE_M2x0_HI
         ldx # $15
         jsr _7e36
         lsr 
         sta ZP_B4
-        sty ZP_TEMPOBJ_M2x1_LO
+        sty ZP_ROTATE_M2x1_LO
         jsr _7e36
         lsr 
         sta ZP_B5
-        sty ZP_TEMPOBJ_M2x1_HI
+        sty ZP_ROTATE_M2x1_HI
         lda # $40
         sta ZP_A8
         lda # $00
@@ -3853,7 +3855,7 @@ _7e5f:                                                                  ;$7E5F
         cpx # $21               ; AB > pi : invert matrix sign
         lda # $00               ;   (because sin turns negative at $21)
         ror 
-        sta ZP_TEMPOBJ_M2x2_HI  ; store the sign
+        sta ZP_ROTATE_M2x2_HI   ; store the sign
         lda ZP_AB
         clc 
         adc # $10               ; offset in sine-table: sin(x+pi/2) = cos(x)
@@ -3873,11 +3875,11 @@ _7e5f:                                                                  ;$7E5F
         cmp # $21
         lda # $00
         ror 
-        sta ZP_TEMPOBJ_M2x2_LO
-        lda ZP_TEMPOBJ_M2x2_HI
-        eor ZP_TEMPOBJ_M2x1_LO
+        sta ZP_ROTATE_M2x2_LO
+        lda ZP_ROTATE_M2x2_HI
+        eor ZP_ROTATE_M2x1_LO
         sta S
-        lda ZP_TEMPOBJ_M2x2_LO
+        lda ZP_ROTATE_M2x2_LO
         eor $45
         jsr multiplied_now_add
         sta T
@@ -3900,13 +3902,13 @@ _7ec8:                                                                  ;$7EC8
         sta ZP_VAR_K6_1
         lda ZP_VALUE_pt1
         sta R
-        lda ZP_TEMPOBJ_M2x2_HI
-        eor ZP_TEMPOBJ_M2x1_HI
+        lda ZP_ROTATE_M2x2_HI
+        eor ZP_ROTATE_M2x1_HI
         sta S
         lda ZP_VALUE_pt3
         sta ZP_VAR_P1
-        lda ZP_TEMPOBJ_M2x2_LO
-        eor ZP_TEMPOBJ_M2x0_HI
+        lda ZP_ROTATE_M2x2_LO
+        eor ZP_ROTATE_M2x0_HI
         jsr multiplied_now_add
         eor # %10000000
         sta T
@@ -4127,8 +4129,8 @@ draw_sun:                                                               ;$7F22
 _7f67:                                                                  ;$7F67
         ;-----------------------------------------------------------------------
         ; X = number of scanlines to draw for the bottom-half of the sun?
-        stx ZP_TEMP_ADDR3_LO
-        sta ZP_TEMP_ADDR3_HI    ; can be $FF?
+        stx ZP_TEMP_ADDR2_LO
+        sta ZP_TEMP_ADDR2_HI    ; can be $FF?
 
         ; the specifics of the algorithm used to generate the sun are
         ; explained in the section below, but for now just know that we
@@ -4206,7 +4208,7 @@ _7f67:                                                                  ;$7F67
         ;
         ; begin by squaring the current sun scanline:
         ;
-        lda ZP_TEMP_ADDR3_LO    ; current scanline "n"
+        lda ZP_TEMP_ADDR2_LO    ; current scanline "n"
         jsr math_square         ; square, the hi-byte will be in P
         sta T                   ; (P.T = n^2)
 
@@ -4292,11 +4294,11 @@ _7f67:                                                                  ;$7F67
 @next:  dey                                                             ;$7FF8
         beq @done               ; exit once we hit the top of the viewport
 
-        lda ZP_TEMP_ADDR3_HI
+        lda ZP_TEMP_ADDR2_HI
         bne @_801c
-        dec ZP_TEMP_ADDR3_LO
+        dec ZP_TEMP_ADDR2_LO
         bne @calc
-        dec ZP_TEMP_ADDR3_HI
+        dec ZP_TEMP_ADDR2_HI
 
 @_calc: jmp @calc                                                       ;$8005
 
@@ -4331,9 +4333,9 @@ _7f67:                                                                  ;$7F67
 
 @_801c:                                                                 ;$801C
         ;-----------------------------------------------------------------------
-        ldx ZP_TEMP_ADDR3_LO
+        ldx ZP_TEMP_ADDR2_LO
         inx 
-        stx ZP_TEMP_ADDR3_LO
+        stx ZP_TEMP_ADDR2_LO
         cpx ZP_CIRCLE_RADIUS
         bcc @_calc
         beq @_calc
@@ -4795,10 +4797,10 @@ _81b5:                                                                  ;$81B5
 _81ba:                                                                  ;$81BA
         jsr _7e36
         sta ZP_B4
-        sty ZP_TEMPOBJ_M2x1_LO
+        sty ZP_ROTATE_M2x1_LO
         jsr _7e36
         sta ZP_B5
-        sty ZP_TEMPOBJ_M2x1_HI
+        sty ZP_ROTATE_M2x1_HI
         rts 
 
 _81c9:                                                                  ;$81C9
@@ -5055,7 +5057,7 @@ _82be:                                                                  ;$82BE
 
         and # %01111111         ; remove the sign
         lsr                     ; divide by 2
-        cmp ZP_AD               ;?
+        cmp ZP_VAR_XX4_LO       ;?
        .blt _82be               ;?
         beq _82ed               ;?
         sbc # $01               ; adjust for two's compliment
@@ -5076,9 +5078,9 @@ _82f3:                                                                  ;$82F3
 ;-------------------------------------------------------------------------------
         ; is the ship being removed the current missile target?
         ;
-        stx ZP_AD
+        stx ZP_VAR_XX4_LO
         lda ZP_MISSILE_TARGET
-        cmp ZP_AD
+        cmp ZP_VAR_XX4_LO
         bne :+
 
         ldy # .color_nybble( GREEN, HUD_COLOUR )
@@ -5089,7 +5091,7 @@ _82f3:                                                                  ;$82F3
         jsr _900d
 
 :                                                                       ;$8305
-        ldy ZP_AD
+        ldy ZP_VAR_XX4_LO
         ldx SHIP_SLOTS, y
 
         ; is space station?
@@ -5120,7 +5122,7 @@ _8329:                                                                  ;$8329
 _832c:                                                                  ;$832C
         dec SHIP_TYPES, x
 
-        ldx ZP_AD
+        ldx ZP_VAR_XX4_LO
 
         ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y

@@ -71,7 +71,7 @@ MATRIX_COL2_HI          = $05
 ; [ M1x0, M1x1, M1x2 ]
 ; [ M2x0, M2x1, M2x2 ]
 ;
-ZP_SHIP_M0              := $12  ; matrix row 0
+ZP_SHIP_M0              := $12
 ;-----------------------------
 ZP_SHIP_M0x0            := $12
 ZP_SHIP_M0x0_LO         := $12
@@ -83,7 +83,7 @@ ZP_SHIP_M0x2            := $16
 ZP_SHIP_M0x2_LO         := $16
 ZP_SHIP_M0x2_HI         := $17
 
-ZP_SHIP_M1              := $18  ; matrix row 1
+ZP_SHIP_M1              := $18
 ;-----------------------------
 ZP_SHIP_M1x0            := $18
 ZP_SHIP_M1x0_LO         := $18
@@ -95,7 +95,7 @@ ZP_SHIP_M1x2            := $1c
 ZP_SHIP_M1x2_LO         := $1c
 ZP_SHIP_M1x2_HI         := $1d
 
-ZP_SHIP_M2              := $1e  ; matrix row 2
+ZP_SHIP_M2              := $1e
 ;-----------------------------
 ZP_SHIP_M2x0            := $1e
 ZP_SHIP_M2x0_LO         := $1e
@@ -122,31 +122,35 @@ ZP_SHIP_HEAP_LO         := $2a
 ZP_SHIP_HEAP_HI         := $2b
 
 ZP_SHIP_ENERGY          := $2c
-ZP_SHIP_BEHAVIOUR       := $2d                                          ; NEWB
+ZP_SHIP_BEHAVIOUR       := $2d                                          ;NEWB
 
 ;-------------------------------------------------------------------------------
 
 ZP_VAR_P                := $2e  ; a common variable called "P"
 ZP_VAR_P1               := $2e  ; additional bytes for storing-
-ZP_VAR_P2               := $2f  ; 16 or 24-bit values in P
+ZP_VAR_P2               := $2f  ;  16 or 24-bit values in P
 ZP_VAR_P3               := $30
 
 ;-------------------------------------------------------------------------------
 
-ZP_CURSOR_COL           := $31                                          ; XC
+ZP_CURSOR_COL           := $31                                          ;XC
 ZP_32                   := $32  ;?
-ZP_CURSOR_ROW           := $33                                          ; YC
+ZP_CURSOR_ROW           := $33                                          ;YC
 
-ZP_PRINT_CASE           := $34  ; auto capitalisation for printing      ; QQ17
+ZP_PRINT_CASE           := $34  ; auto capitalisation for printing      ;QQ17
 
 ; used as a 16-bit X-position when drawing circles
 ; WARNING: overlaps with ZP_SHIP01_XPOS_pt1/2!
 ;
-ZP_CIRCLE_XPOS          := $35                                          ; K3
-ZP_CIRCLE_XPOS_LO       := $35                                          ; K3+0
-ZP_CIRCLE_XPOS_HI       := $36                                          ; K3+1
+ZP_CIRCLE_XPOS          := $35                                          ;K3
+ZP_CIRCLE_XPOS_LO       := $35                                          ;K3+0
+ZP_CIRCLE_XPOS_HI       := $36                                          ;K3+1
 
 ;-------------------------------------------------------------------------------
+
+; this area is used to store the list of faces and their visibility;
+; i think the size is limited to 15/16 bytes?
+ZP_VAR_XX2              := $35                                          ;XX2
 
 ; the X/Y/Z-position of `SHIP_01` are copied here
 ZP_SHIP01               := $35
@@ -166,8 +170,6 @@ ZP_SHIP01_ZPOS_pt3      := $3d
 ; only ever used once to check for non-zero X/Y/Z-position
 ZP_SHIP01_POS           := $3e
 
-;-------------------------------------------------------------------------------
-
 ZP_3F                   := $3f  ; a flag, but never gets set; see `_3571`
 
 ;                       := $40  ;UNUSED?
@@ -177,9 +179,9 @@ ZP_3F                   := $3f  ; a flag, but never gets set; see `_3571`
 ; a variable named "K4" in the BBC code;
 ; used as a 16-bit Y-position when drawing circles
 ;
-ZP_VAR_K4               := $43                                          ; K4
-ZP_VAR_K4_LO            := $43                                          ; K4+0
-ZP_VAR_K4_HI            := $44                                          ; K4+1
+ZP_VAR_K4               := $43                                          ;K4
+ZP_VAR_K4_LO            := $43                                          ;K4+0
+ZP_VAR_K4_HI            := $44                                          ;K4+1
 
 ZP_CIRCLE_YPOS          := ZP_VAR_K4
 ZP_CIRCLE_YPOS_LO       := ZP_VAR_K4_LO
@@ -189,44 +191,47 @@ ZP_CIRCLE_YPOS_HI       := ZP_VAR_K4_HI
 
 ; a working copy of the zero-page ship struct rotation matrix:
 ;
-ZP_TEMPOBJ_MATRIX       := $45
-ZP_TEMPOBJ_M2x0         := $45
-ZP_TEMPOBJ_M2x0_LO      := $45
-ZP_TEMPOBJ_M2x0_HI      := $46
-ZP_TEMPOBJ_M2x1         := $47
-ZP_TEMPOBJ_M2x1_LO      := $47
-ZP_TEMPOBJ_M2x1_HI      := $48
-ZP_TEMPOBJ_M2x2         := $49
-ZP_TEMPOBJ_M2x2_LO      := $49
-ZP_TEMPOBJ_M2x2_HI      := $4a
+ZP_ROTATE               := $45                                          ;XX16
+ZP_ROTATE_LO            := $45                                          ;XX16+0
+ZP_ROTATE_HI            := $46                                          ;XX16+1
 
-ZP_TEMPOBJ_M1x0         := $4b
-ZP_TEMPOBJ_M1x0_LO      := $4b
-ZP_TEMPOBJ_M1x0_HI      := $4c
-ZP_TEMPOBJ_M1x1         := $4d  ; NOTE: not referenced directly?
-ZP_TEMPOBJ_M1x1_LO      := $4d  ; "
-ZP_TEMPOBJ_M1x1_HI      := $4e  ; "
-ZP_TEMPOBJ_M1x2         := $4f
-ZP_TEMPOBJ_M1x2_LO      := $4f
-ZP_TEMPOBJ_M1x2_HI      := $50
+ZP_ROTATE_M2x0          := $45  ; "side"                                ;XX16+0
+ZP_ROTATE_M2x0_LO       := $45                                          ;XX16+0
+ZP_ROTATE_M2x0_HI       := $46                                          ;XX16+1
+ZP_ROTATE_M2x1          := $47                                          ;XX16+2
+ZP_ROTATE_M2x1_LO       := $47                                          ;XX16+2
+ZP_ROTATE_M2x1_HI       := $48                                          ;XX16+3
+ZP_ROTATE_M2x2          := $49                                          ;XX16+4
+ZP_ROTATE_M2x2_LO       := $49                                          ;XX16+4
+ZP_ROTATE_M2x2_HI       := $4a                                          ;XX16+5
 
-ZP_TEMPOBJ_M0x0         := $51
-ZP_TEMPOBJ_M0x0_LO      := $51
-ZP_TEMPOBJ_M0x0_HI      := $52
-ZP_TEMPOBJ_M0x1         := $53
-ZP_TEMPOBJ_M0x1_LO      := $53
-ZP_TEMPOBJ_M0x1_HI      := $54
-ZP_TEMPOBJ_M0x2         := $55  ; NOTE: not referenced directly?
-ZP_TEMPOBJ_M0x2_LO      := $55  ; "
-ZP_TEMPOBJ_M0x2_HI      := $56  ; "
+ZP_ROTATE_M1x0          := $4b  ; "roof"                                ;XX16+6
+ZP_ROTATE_M1x0_LO       := $4b                                          ;XX16+6
+ZP_ROTATE_M1x0_HI       := $4c                                          ;XX16+7
+ZP_ROTATE_M1x1          := $4d                                          ;XX16+8
+ZP_ROTATE_M1x1_LO       := $4d                                          ;XX16+8
+ZP_ROTATE_M1x1_HI       := $4e                                          ;XX16+9
+ZP_ROTATE_M1x2          := $4f                                          ;XX16+10
+ZP_ROTATE_M1x2_LO       := $4f                                          ;XX16+10
+ZP_ROTATE_M1x2_HI       := $50                                          ;XX16+11
+
+ZP_ROTATE_M0x0          := $51  ; "nose"                                ;XX16+12
+ZP_ROTATE_M0x0_LO       := $51                                          ;XX16+12
+ZP_ROTATE_M0x0_HI       := $52                                          ;XX16+13
+ZP_ROTATE_M0x1          := $53                                          ;XX16+14
+ZP_ROTATE_M0x1_LO       := $53                                          ;XX16+14
+ZP_ROTATE_M0x1_HI       := $54                                          ;XX16+15
+ZP_ROTATE_M0x2          := $55                                          ;XX16+16
+ZP_ROTATE_M0x2_LO       := $55                                          ;XX16+16
+ZP_ROTATE_M0x2_HI       := $56                                          ;XX16+17
 
 ;-------------------------------------------------------------------------------
 
 ; pointer to a hull data structure:
 ; (verticies, edges, faces &c.)
-ZP_HULL_ADDR            := $57
-ZP_HULL_ADDR_LO         := $57
-ZP_HULL_ADDR_HI         := $58
+ZP_HULL_ADDR            := $57                                          ;XX0
+ZP_HULL_ADDR_LO         := $57                                          ;XX0+0
+ZP_HULL_ADDR_HI         := $58                                          ;XX0+1
 
 ; a pointer to a Ship in RAM -- i.e. a currently in-play 3D object,
 ; such as a ship, asteroid or station
@@ -234,9 +239,9 @@ ZP_SHIP_ADDR            := $59
 ZP_SHIP_ADDR_LO         := $59
 ZP_SHIP_ADDR_HI         := $5a
 
-ZP_TEMP_ADDR3           := $5b
-ZP_TEMP_ADDR3_LO        := $5b
-ZP_TEMP_ADDR3_HI        := $5c
+ZP_TEMP_ADDR2           := $5b                                          ;V
+ZP_TEMP_ADDR2_LO        := $5b                                          ;V+0
+ZP_TEMP_ADDR2_HI        := $5c                                          ;V+1
 
 ZP_VAR_XX               := $5d
 ZP_VAR_XX_LO            := $5d
@@ -267,85 +272,85 @@ ZP_INV_ROLL_SIGN        := $6a  ; inverse roll rotation sign (for easier math)
 
 ; line co-ords:
 ;-------------------------------------------------------------------------------
-ZP_VAR_XX15_0           := $6b  ; line XX1-lo or X1                     ; XX15+0
-ZP_VAR_XX15_1           := $6c  ; line XX1-hi or Y1                     ; XX15+1
-ZP_VAR_XX15_2           := $6d  ; line YY1-lo or X2                     ; XX15+2
-ZP_VAR_XX15_3           := $6e  ; line YY1-hi or Y2                     ; XX15+3
-ZP_VAR_XX15_4           := $6f  ; line XX2-lo                           ; XX15+4
-ZP_VAR_XX15_5           := $70  ; line XX2-hi                           ; XX15+5
-ZP_VAR_XX12_0           := $71  ; line YY2-lo                           ; XX12+0
-ZP_VAR_XX12_1           := $72  ; line YY2-hi                           ; XX12+1
-ZP_VAR_XX12_2           := $73  ; line delta-X-lo, or delta-X           ; XX12+2
-ZP_VAR_XX12_3           := $74  ; line delta-X-hi                       ; XX12+3
-ZP_VAR_XX12_4           := $75  ; line delta-Y-lo, or delta-Y           ; XX12+4
-ZP_VAR_XX12_5           := $76  ; line delta-Y-hi                       ; XX12+5
+ZP_VAR_XX15_0           := $6b  ; line XX1-lo or X1                     ;XX15+0
+ZP_VAR_XX15_1           := $6c  ; line XX1-hi or Y1                     ;XX15+1
+ZP_VAR_XX15_2           := $6d  ; line YY1-lo or X2                     ;XX15+2
+ZP_VAR_XX15_3           := $6e  ; line YY1-hi or Y2                     ;XX15+3
+ZP_VAR_XX15_4           := $6f  ; line XX2-lo                           ;XX15+4
+ZP_VAR_XX15_5           := $70  ; line XX2-hi                           ;XX15+5
+ZP_VAR_XX12_0           := $71  ; line YY2-lo                           ;XX12+0
+ZP_VAR_XX12_1           := $72  ; line YY2-hi                           ;XX12+1
+ZP_VAR_XX12_2           := $73  ; line delta-X-lo, or delta-X           ;XX12+2
+ZP_VAR_XX12_3           := $74  ; line delta-X-hi                       ;XX12+3
+ZP_VAR_XX12_4           := $75  ; line delta-Y-lo, or delta-Y           ;XX12+4
+ZP_VAR_XX12_5           := $76  ; line delta-Y-hi                       ;XX12+5
 
 ; when used as 16-bit parameters,
 ; they take on this form:
 ;
-ZP_LINE_XX1             := ZP_VAR_XX15_0                                ; XX15
-ZP_LINE_XX1_LO          := ZP_VAR_XX15_0                                ; XX15+0
-ZP_LINE_XX1_HI          := ZP_VAR_XX15_1                                ; XX15+1
+ZP_LINE_XX1             := ZP_VAR_XX15_0                                ;XX15
+ZP_LINE_XX1_LO          := ZP_VAR_XX15_0                                ;XX15+0
+ZP_LINE_XX1_HI          := ZP_VAR_XX15_1                                ;XX15+1
 
-ZP_LINE_YY1             := ZP_VAR_XX15_2                                ; XX15+2
-ZP_LINE_YY1_LO          := ZP_VAR_XX15_2                                ; XX15+2
-ZP_LINE_YY1_HI          := ZP_VAR_XX15_3                                ; XX15+3
+ZP_LINE_YY1             := ZP_VAR_XX15_2                                ;XX15+2
+ZP_LINE_YY1_LO          := ZP_VAR_XX15_2                                ;XX15+2
+ZP_LINE_YY1_HI          := ZP_VAR_XX15_3                                ;XX15+3
 
-ZP_LINE_XX2             := ZP_VAR_XX15_4                                ; XX15+4
-ZP_LINE_XX2_LO          := ZP_VAR_XX15_4                                ; XX15+4
-ZP_LINE_XX2_HI          := ZP_VAR_XX15_5                                ; XX15+5
+ZP_LINE_XX2             := ZP_VAR_XX15_4                                ;XX15+4
+ZP_LINE_XX2_LO          := ZP_VAR_XX15_4                                ;XX15+4
+ZP_LINE_XX2_HI          := ZP_VAR_XX15_5                                ;XX15+5
 
-ZP_LINE_YY2             := ZP_VAR_XX12_0                                ; XX12
-ZP_LINE_YY2_LO          := ZP_VAR_XX12_0                                ; XX12+0
-ZP_LINE_YY2_HI          := ZP_VAR_XX12_1                                ; XX12+1
+ZP_LINE_YY2             := ZP_VAR_XX12_0                                ;XX12
+ZP_LINE_YY2_LO          := ZP_VAR_XX12_0                                ;XX12+0
+ZP_LINE_YY2_HI          := ZP_VAR_XX12_1                                ;XX12+1
 
-ZP_DELTA_XX_LO          := ZP_VAR_XX12_2                                ; XX12+2
-ZP_DELTA_XX_HI          := ZP_VAR_XX12_3                                ; XX12+3
+ZP_DELTA_XX_LO          := ZP_VAR_XX12_2                                ;XX12+2
+ZP_DELTA_XX_HI          := ZP_VAR_XX12_3                                ;XX12+3
 
-ZP_DELTA_YY_LO          := ZP_VAR_XX12_4                                ; XX12+4
-ZP_DELTA_YY_HI          := ZP_VAR_XX12_5                                ; XX12+5
+ZP_DELTA_YY_LO          := ZP_VAR_XX12_4                                ;XX12+4
+ZP_DELTA_YY_HI          := ZP_VAR_XX12_5                                ;XX12+5
 
 ; and as 8-bit parameters:
 ;
-ZP_LINE_X1              := ZP_VAR_XX15_0                                ; XX15+0
-ZP_LINE_Y1              := ZP_VAR_XX15_1                                ; XX15+1
-ZP_LINE_X2              := ZP_VAR_XX15_2                                ; XX15+2
-ZP_LINE_Y2              := ZP_VAR_XX15_3                                ; XX15+3
+ZP_LINE_X1              := ZP_VAR_XX15_0                                ;XX15+0
+ZP_LINE_Y1              := ZP_VAR_XX15_1                                ;XX15+1
+ZP_LINE_X2              := ZP_VAR_XX15_2                                ;XX15+2
+ZP_LINE_Y2              := ZP_VAR_XX15_3                                ;XX15+3
 
-ZP_DELTA_X              := ZP_DELTA_XX_LO                               ; XX12+2
-ZP_DELTA_Y              := ZP_DELTA_YY_LO                               ; XX12+4
+ZP_DELTA_X              := ZP_DELTA_XX_LO                               ;XX12+2
+ZP_DELTA_Y              := ZP_DELTA_YY_LO                               ;XX12+4
 
-ZP_LINE_SLOPE           := ZP_VAR_XX12_2                                ; XX12+2
-ZP_LINE_DIR             := ZP_VAR_XX12_3                                ; XX12+3
+ZP_LINE_SLOPE           := ZP_VAR_XX12_2                                ;XX12+2
+ZP_LINE_DIR             := ZP_VAR_XX12_3                                ;XX12+3
 
 ;-------------------------------------------------------------------------------
 ; a 4-byte big-endian number buffer for working with big integers:
 ;
-ZP_VALUE                := $77                                          ; K
-ZP_VALUE_pt1            := $77                                          ; K+0
-ZP_VALUE_pt2            := $78                                          ; K+1
-ZP_VALUE_pt3            := $79                                          ; K+2?
-ZP_VALUE_pt4            := $7a                                          ; K+3?
+ZP_VALUE                := $77                                          ;K
+ZP_VALUE_pt1            := $77                                          ;K+0
+ZP_VALUE_pt2            := $78                                          ;K+1
+ZP_VALUE_pt3            := $79                                          ;K+2?
+ZP_VALUE_pt4            := $7a                                          ;K+3?
 
 ; also used as a parameter "K"
-ZP_VAR_K                := ZP_VALUE_pt1                                 ; K
+ZP_VAR_K                := ZP_VALUE_pt1                                 ;K
 
 ; and as a radius parameter for circles
-ZP_CIRCLE_RADIUS        := ZP_VALUE_pt1                                 ; K
-ZP_CIRCLE_RADIUS_LO     := ZP_VALUE_pt1                                 ; K+0
-ZP_CIRCLE_RADIUS_HI     := ZP_VALUE_pt2                                 ; K+1
+ZP_CIRCLE_RADIUS        := ZP_VALUE_pt1                                 ;K
+ZP_CIRCLE_RADIUS_LO     := ZP_VALUE_pt1                                 ;K+0
+ZP_CIRCLE_RADIUS_HI     := ZP_VALUE_pt2                                 ;K+1
 
 ZP_LASER                := $7b  ; laser power for current view (bit 7 = beam)
 ZP_MISSILE_TARGET       := $7c  ; missile target?
 ZP_7D                   := $7d  ;
 
-ZP_CIRCLE_INDEX         := $7e  ; circle line-buffer index             ; LSP
+ZP_CIRCLE_INDEX         := $7e  ; circle line-buffer index             ;LSP
 
 ;-------------------------------------------------------------------------------
 ; Elite's random-number seed that defines the entire universe
 ; see: <http://wiki.alioth.net/index.php/Random_number_generator>
 ;
-ZP_SEED                 := $7f                                          ; QQ15
+ZP_SEED                 := $7f                                          ;QQ15
 ZP_SEED_W0              := $7f   ; first word
 ZP_SEED_W0_LO           := $7f   ; lo-byte of first word
 ZP_SEED_W0_HI           := $80   ; hi-byte of first word
@@ -358,24 +363,36 @@ ZP_SEED_W2_HI           := $84   ; hi-byte of third word
 
 ;-------------------------------------------------------------------------------
 
-ZP_VAR_K5               := $85  ;                                       ; K5+0
-ZP_VAR_K5_1             := $86  ;                                       ; K5+1
-ZP_VAR_K5_2             := $87  ;                                       ; K5+2
-ZP_VAR_K5_3             := $88  ;                                       ; K5+3
+ZP_VAR_K5               := $85  ;                                       ;K5+0
+ZP_VAR_K5_1             := $86  ;                                       ;K5+1
+ZP_VAR_K5_2             := $87  ;                                       ;K5+2
+ZP_VAR_K5_3             := $88  ;                                       ;K5+3
 
-ZP_VAR_K6               := $89  ;                                       ; K6+0
-ZP_VAR_K6_1             := $8a  ;                                       ; K6+1
-ZP_VAR_K6_2             := $8b  ;                                       ; K6+2
-ZP_VAR_K6_3             := $8c  ;                                       ; K6+3
+ZP_VAR_K6               := $89  ;                                       ;K6+0
+ZP_VAR_K6_1             := $8a  ;                                       ;K6+1
+ZP_VAR_K6_2             := $8b  ;                                       ;K6+2
+ZP_VAR_K6_3             := $8c  ;                                       ;K6+3
 
-ZP_8D                   := $8d  ;
+; these are also re-used as XX18 when drawing ships
+;
+ZP_VAR_XX18             := $85  ;                                       ;XX18
+ZP_VAR_XX18_0           := $85  ; X-lo                                  ;XX18+0
+ZP_VAR_XX18_1           := $86  ; X-hi                                  ;XX18+1
+ZP_VAR_XX18_2           := $87  ; X-sign                                ;XX18+2
+ZP_VAR_XX18_3           := $88  ; Y-lo                                  ;XX18+3
+ZP_VAR_XX18_4           := $89  ; Y-hi                                  ;XX18+4
+ZP_VAR_XX18_5           := $8a  ; Y-sign                                ;XX18+5
+ZP_VAR_XX18_6           := $8b  ; Z-lo                                  ;XX18+6
+ZP_VAR_XX18_7           := $8c  ; Z-hi                                  ;XX18+7
+ZP_VAR_XX18_8           := $8d  ; Z-sign (note: isn't part of K5/6)     ;XX18+8
 
+;-------------------------------------------------------------------------------
 ; temp variable storage?
 ; these three are reused sometimes as temporaries
 ;
-ZP_8E                   := $8e  ; cross-hair X-position                 ; QQ19
-ZP_8F                   := $8f  ; cross-hair Y-position                 ; QQ19+1
-ZP_90                   := $90  ; cross-hair size                       ; QQ19+2
+ZP_8E                   := $8e  ; cross-hair X-position                 ;QQ19
+ZP_8F                   := $8f  ; cross-hair Y-position                 ;QQ19+1
+ZP_90                   := $90  ; cross-hair size                       ;QQ19+2
 
 ZP_91                   := $91  ;? x9
 ZP_92                   := $92  ;? x6
@@ -396,14 +413,14 @@ S                       := $9c  ; a common pseudo-register named "S"
 ZP_PRESERVE_X           := $9d  ; temp backup of X
 ZP_9E                   := $9e  ; tmep backup of Y
 
-ZP_9F                   := $9f  ; edge index
+ZP_COUNT                := $9f  ; edge index                            ;CNT
 
 ; which screen the game is on, e.g. cockpit-view, galactic chart &c.
 ; not to be confused with the bitmap screen and colour screens
 ;
 ; NOTE: for the cockpit view, fore/aft/left/right is a separate variable
 ;
-ZP_SCREEN               := $a0                                          ; QQ11
+ZP_SCREEN               := $a0                                          ;QQ11
 
 .enum   page
         ;-----------------------------------------------------------------------
@@ -424,7 +441,7 @@ ZP_SCREEN               := $a0                                          ; QQ11
 
 ZP_VAR_Z                := $a1  ; a common "Z" variable
 
-ZP_VAR_XX13             := $a2  ;                                       ; XX13
+ZP_VAR_XX13             := $a2  ;                                       ;XX13
 
 MAIN_COUNTER            := $a3  ;? x18 "MOVE COUNTER"?
 
@@ -436,13 +453,14 @@ ZP_ALPHA                := $a6  ; a rotation variable used in matrix math
 
 ZP_A7                   := $a7  ;? x10  ; docked flag?
 ZP_A8                   := $a8  ;? x9
-ZP_A9                   := $a9  ;                                       ; FLAG
-ZP_TEMP_COUNTER         := $aa  ; temporary counter, e.g. ball lines    ; CNT
+ZP_A9                   := $a9  ;                                       ;FLAG
+ZP_TEMP_COUNTER         := $aa  ; temporary counter, e.g. ball lines    ;CNT
 ZP_AB                   := $ab  ;? x12
-ZP_CIRCLE_STEP          := $ac  ; step size for drawing circles         ; STP
+ZP_CIRCLE_STEP          := $ac  ; step size for drawing circles         ;STP
 
-ZP_AD                   := $ad                                          ; XX4+0
-ZP_AE                   := $ae                                          ; XX4+1
+ZP_VAR_XX4              := $ad                                          ;XX4
+ZP_VAR_XX4_LO           := $ad                                          ;XX4+0
+ZP_VAR_XX4_HI           := $ae                                          ;XX4+1
 
 ;                       := $af  ;UNUSED?
 

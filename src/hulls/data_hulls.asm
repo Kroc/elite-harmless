@@ -28,6 +28,22 @@
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
+.macro  .vertex         vx, vy, vz, vis_dist, face1, face2, face3, face4
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        .byte   vx & %01111111  ; X-position, without sign
+        .byte   vy & %01111111  ; Y-position, without sign
+        .byte   vz & %01111111  ; Z-position, without sign
+        
+        ; bits 0-4: distance 0-31 before this vertex becomes invsible
+        ; bits 5-7: X, Y & Z sign-bits 
+        .byte   (vis_dist & %00001111) | \
+                (vx & %10000000) | (vy & %10000000)>>1 | (vz & %10000000)>>2
+        
+        
+        .byte   .nybl( face2, face1 )
+        .byte   .nybl( face4, face3 )
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro 
 
 .segment        "HULL_TABLE"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
