@@ -37,7 +37,7 @@ ZP_TEMP_ADDR_HI         := $08
 ; space in RAM. for speed, ships are copied to the zero-page each time
 ; they are handled
 ;
-ZP_SHIP                 := $09
+ZP_SHIP                 := $09                                          ;XX1
 ZP_SHIP_XPOS            := $09
 ZP_SHIP_XPOS_LO         := $09
 ZP_SHIP_XPOS_HI         := $0a
@@ -117,9 +117,9 @@ ZP_SHIP_STATE           := $28
 
 ZP_SHIP_ATTACK          := $29
 
-ZP_SHIP_HEAP            := $2a
-ZP_SHIP_HEAP_LO         := $2a
-ZP_SHIP_HEAP_HI         := $2b
+ZP_SHIP_HEAP            := $2a                                          ;XX19
+ZP_SHIP_HEAP_LO         := $2a                                          ;XX19+0
+ZP_SHIP_HEAP_HI         := $2b                                          ;XX19+1
 
 ZP_SHIP_ENERGY          := $2c
 ZP_SHIP_BEHAVIOUR       := $2d                                          ;NEWB
@@ -138,6 +138,10 @@ ZP_32                   := $32  ;?
 ZP_CURSOR_ROW           := $33                                          ;YC
 
 ZP_PRINT_CASE           := $34  ; auto capitalisation for printing      ;QQ17
+
+ZP_VAR_K3               := $35                                          ;K3
+ZP_VAR_K3_LO            := $35                                          ;K3+0
+ZP_VAR_K3_HI            := $36                                          ;K3+1
 
 ; used as a 16-bit X-position when drawing circles
 ; WARNING: overlaps with ZP_SHIP01_XPOS_pt1/2!
@@ -272,12 +276,14 @@ ZP_INV_ROLL_SIGN        := $6a  ; inverse roll rotation sign (for easier math)
 
 ; line co-ords:
 ;-------------------------------------------------------------------------------
+ZP_VAR_XX15             := $6b                                          ;XX15
 ZP_VAR_XX15_0           := $6b  ; line XX1-lo or X1                     ;XX15+0
 ZP_VAR_XX15_1           := $6c  ; line XX1-hi or Y1                     ;XX15+1
 ZP_VAR_XX15_2           := $6d  ; line YY1-lo or X2                     ;XX15+2
 ZP_VAR_XX15_3           := $6e  ; line YY1-hi or Y2                     ;XX15+3
 ZP_VAR_XX15_4           := $6f  ; line XX2-lo                           ;XX15+4
 ZP_VAR_XX15_5           := $70  ; line XX2-hi                           ;XX15+5
+ZP_VAR_XX12             := $70                                          ;XX12
 ZP_VAR_XX12_0           := $71  ; line YY2-lo                           ;XX12+0
 ZP_VAR_XX12_1           := $72  ; line YY2-hi                           ;XX12+1
 ZP_VAR_XX12_2           := $73  ; line delta-X-lo, or delta-X           ;XX12+2
@@ -312,10 +318,10 @@ ZP_DELTA_YY_HI          := ZP_VAR_XX12_5                                ;XX12+5
 
 ; and as 8-bit parameters:
 ;
-ZP_LINE_X1              := ZP_VAR_XX15_0                                ;XX15+0
-ZP_LINE_Y1              := ZP_VAR_XX15_1                                ;XX15+1
-ZP_LINE_X2              := ZP_VAR_XX15_2                                ;XX15+2
-ZP_LINE_Y2              := ZP_VAR_XX15_3                                ;XX15+3
+ZP_LINE_X1              := ZP_VAR_XX15_0                                ;X1
+ZP_LINE_Y1              := ZP_VAR_XX15_1                                ;Y1
+ZP_LINE_X2              := ZP_VAR_XX15_2                                ;X2
+ZP_LINE_Y2              := ZP_VAR_XX15_3                                ;Y2
 
 ZP_DELTA_X              := ZP_DELTA_XX_LO                               ;XX12+2
 ZP_DELTA_Y              := ZP_DELTA_YY_LO                               ;XX12+4
@@ -411,9 +417,9 @@ R                       := $9b  ; a common pseudo-register named "R"
 S                       := $9c  ; a common pseudo-register named "S"
 
 ZP_PRESERVE_X           := $9d  ; temp backup of X
-ZP_9E                   := $9e  ; tmep backup of Y
+ZP_PRESERVE_Y           := $9e  ; temp backup of Y
 
-ZP_COUNT                := $9f  ; edge index                            ;CNT
+ZP_VAR_XX17             := $9f  ; edge index
 
 ; which screen the game is on, e.g. cockpit-view, galactic chart &c.
 ; not to be confused with the bitmap screen and colour screens
@@ -459,10 +465,9 @@ ZP_AB                   := $ab  ;? x12
 ZP_CIRCLE_STEP          := $ac  ; step size for drawing circles         ;STP
 
 ZP_VAR_XX4              := $ad                                          ;XX4
-ZP_VAR_XX4_LO           := $ad                                          ;XX4+0
-ZP_VAR_XX4_HI           := $ae                                          ;XX4+1
+ZP_VAR_XX20             := $ae                                          ;XX20
 
-;                       := $af  ;UNUSED?
+;                       := $af  ; ?
 
 ZP_B0                   := $b0  ;? x12
 ZP_B1                   := $b1  ;? x17
@@ -537,6 +542,8 @@ ZP_F9                   := $f9  ;? x1
 
 ;                       := $fa  ;UNUSED?
 ;                       := $fb  ;UNUSED?
+
+ZP_VAR_XX14             := $fb  ; used during flicker-free drawing      ;XX14
 ;                       := $fc  ;UNUSED?
 
 ZP_FD                   := $fd  ; KERNAL use?

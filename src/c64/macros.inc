@@ -6,7 +6,7 @@
 
 ; a macro to combine two nybbles into one byte
 ;
-.define .nybl( upper, lower ) \
+.define .nybl( lower, upper ) \
         ((upper & 15) << 4 | (lower & 15))
 
 .macro .phx             ; "Push X"

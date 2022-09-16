@@ -290,7 +290,7 @@ cp "src/gfx/screen_main.koa" \
 #-------------------------------------------------------------------------------
 echo -n "- elite-harmless-orig.cfg           "
 
-options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES"
+options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES,-DFEATURE_FLICKERFREE"
 
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into the global
@@ -314,7 +314,7 @@ echo "[OK]"
 #-------------------------------------------------------------------------------
 echo -n "- elite-harmless.cfg                "
 
-options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES"
+options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES,-DFEATURE_FLICKERFREE"
 
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into the global
@@ -338,7 +338,7 @@ echo "[OK]"
 #-------------------------------------------------------------------------------
 echo -n "- elite-harmless-fastlines.cfg      "
 
-options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES,-DFEATURE_FASTLINES"
+options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_TRUMBLES,-DFEATURE_FASTLINES,-DFEATURE_FLICKERFREE"
 
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into the global
@@ -362,7 +362,7 @@ echo "[OK]"
 #-------------------------------------------------------------------------------
 echo -n "- elite-harmless-hiram.cfg          "
 
-options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,-DFEATURE_TRUMBLES"
+options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,-DFEATURE_TRUMBLES,-DFEATURE_FLICKERFREE"
 
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into  the global
@@ -386,7 +386,7 @@ echo "[OK]"
 #-------------------------------------------------------------------------------
 echo -n "- elite-harmless-hiram-fastlines.cfg"
 
-options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,-DFEATURE_FASTLINES,-DFEATURE_TRUMBLES"
+options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,-DFEATURE_FASTLINES,-DFEATURE_TRUMBLES,-DFEATURE_FLICKERFREE"
 
 # note that the text database has to be assembled separately from the main code
 # due to the rather insane complexity which is best not leaked into  the global

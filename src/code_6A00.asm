@@ -1392,7 +1392,7 @@ local_chart:                                                            ;$6FDB
         jsr get_galaxy_seed
 
         lda # $00
-        sta ZP_VAR_XX4_HI
+        sta ZP_VAR_XX20
 
         ; to avoid names overlapping, the chart will not print any two system
         ; names on the same screen row (even if they would fit). the zero-page
@@ -1564,7 +1564,7 @@ local_chart:                                                            ;$6FDB
         ; don't need to backup / restore the seed
         ;
 @next:  jsr randomize                                                   ;$708D
-        inc ZP_VAR_XX4_HI       ; increment the planet counter
+        inc ZP_VAR_XX20         ; increment the planet counter
        .bze :+                  ; 256 planets done? exit
         jmp @loop               ; more planets to go, loop
 
@@ -2049,7 +2049,7 @@ _7337:                                                                  ;$7337
         sta VAR_MARKET_RANDOM
 
         ldx # $00
-        stx ZP_VAR_XX4_LO
+        stx ZP_VAR_XX4
 _7365:                                                                  ;$7365
         lda _90a6, x
         sta ZP_8F
@@ -2071,12 +2071,12 @@ _7384:                                                                  ;$7384
         bpl _7388
         lda # $00
 _7388:                                                                  ;$7388
-        ldy ZP_VAR_XX4_LO
+        ldy ZP_VAR_XX4
         and # %00111111
         sta VAR_MARKET_FOOD, y
         iny 
         tya 
-        sta ZP_VAR_XX4_LO
+        sta ZP_VAR_XX4
         asl 
         asl 
         tax 
@@ -3644,12 +3644,13 @@ target_missile:                                                         ;$7D0E
         rts 
 
 ;===============================================================================
-; something to do with circles
+; something to do with circles?
 ;
 ;$7d1a:
         .byte   $04, $00, $00, $00, $00
 
-_7d1f:                                                                  ;$7D1F
+project_ship:                                           ; BBC: PROJ     ;$7D1F
+;===============================================================================
         lda ZP_SHIP_XPOS_LO
         sta ZP_VAR_P1
         lda ZP_SHIP_XPOS_HI
@@ -3703,7 +3704,7 @@ _7d62:                                                  ; BBC: PLANET   ;$7D62
         bcs _7d57
         ora ZP_SHIP_ZPOS_HI
         beq _7d57
-        jsr _7d1f
+        jsr project_ship
         bcs _7d57
         lda #> ELITE_MENUSCR_ADDR
         sta ZP_VAR_P2
@@ -5057,7 +5058,7 @@ _82be:                                                                  ;$82BE
 
         and # %01111111         ; remove the sign
         lsr                     ; divide by 2
-        cmp ZP_VAR_XX4_LO       ;?
+        cmp ZP_VAR_XX4          ;?
        .blt _82be               ;?
         beq _82ed               ;?
         sbc # $01               ; adjust for two's compliment
@@ -5078,9 +5079,9 @@ _82f3:                                                                  ;$82F3
 ;-------------------------------------------------------------------------------
         ; is the ship being removed the current missile target?
         ;
-        stx ZP_VAR_XX4_LO
+        stx ZP_VAR_XX4
         lda ZP_MISSILE_TARGET
-        cmp ZP_VAR_XX4_LO
+        cmp ZP_VAR_XX4
         bne :+
 
         ldy # .color_nybble( GREEN, HUD_COLOUR )
@@ -5091,7 +5092,7 @@ _82f3:                                                                  ;$82F3
         jsr _900d
 
 :                                                                       ;$8305
-        ldy ZP_VAR_XX4_LO
+        ldy ZP_VAR_XX4
         ldx SHIP_SLOTS, y
 
         ; is space station?
@@ -5122,7 +5123,7 @@ _8329:                                                                  ;$8329
 _832c:                                                                  ;$832C
         dec SHIP_TYPES, x
 
-        ldx ZP_VAR_XX4_LO
+        ldx ZP_VAR_XX4
 
         ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
@@ -7399,7 +7400,7 @@ _8fe9:                                                                  ;$8FE9
 
 _8fea:                                                                  ;$8FEA
 ;===============================================================================
-        sty ZP_9E               ; backup Y
+        sty ZP_PRESERVE_Y       ; backup Y
 
 wait_for_input:                                                         ;$8FEC
         ;-----------------------------------------------------------------------
@@ -7414,7 +7415,7 @@ wait_for_input:                                                         ;$8FEC
 
         lda _927e, x
 
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
         tax 
 _9001:                                                                  ;$9001
         rts 

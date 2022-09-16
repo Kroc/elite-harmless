@@ -1,8 +1,7 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;
-; "main_flight.asm":
+;===============================================================================
 ;
 ; main loop for flight control. if the player is in flight, this handles
 ; everything related to the flight simulation such as controls, moving ships
@@ -196,7 +195,7 @@ main_flight_loop:                                                       ;$1EC1
 
 main_roll_pitch:                                                        ;$1ECE
 ;===============================================================================
-; [1]:  compute roll & pitch
+; [1]:  compute roll & pitch:
 ;-------------------------------------------------------------------------------
         ; take the roll amount and prepare it for use in the 3D math:
         ;
@@ -551,7 +550,7 @@ main_lasers:                                                            ;$1FD5
 @ships: ldx # $00               ; begin with ship-slot 0                ;$202D
 
 process_ship:                                                           ;$202F
-;===============================================================================
+        ;=======================================================================
         stx ZP_PRESERVE_X       ; set aside ship slot for later
         lda SHIP_SLOTS, x       ; is that a ship in your slot?
         bne :+                  ; if so, process it

@@ -55,13 +55,17 @@ _9932:                                                  ; BBC: SHPPT    ;$9932
 ;===============================================================================
 ; draw a ship as a distance dot:
 ;
+; <bbcelite.com/deep_dives/backporting_the_flicker-free_algorithm.html>
 ;-------------------------------------------------------------------------------
-        jsr _9ad8
-        jsr _7d1f
+        ; flicker-free drawing doesn't erase the ship in one go,
+        ; instead erasing and redrawing each line spearately
+        ;
+        jsr _9ad8               ; erase ship first (if present)
+        jsr project_ship
         ora ZP_SHIP01_XPOS_pt2
         bne _995d
 
-        lda ZP_CIRCLE_YPOS_LO   ; could be K4 rather than circle, specifically
+        lda ZP_VAR_K4
         cmp # VIEWPORT_HEIGHT-2 ; why "-2", height of dot?
         bcs _995d               ; "off top of screen"
 
@@ -69,7 +73,7 @@ _9932:                                                  ; BBC: SHPPT    ;$9932
         jsr _9964               ; "Ship is point, could end if nono-2"
         ldy # $06               ; "index for edge heap"
 
-        lda ZP_CIRCLE_YPOS_LO   ; "#Y"
+        lda ZP_VAR_K4           ; "#Y"
         adc # $01               ; "1 pixel up"
         jsr _9964               ; "Ship is point, could end if nono-2"
 
@@ -80,18 +84,19 @@ _9932:                                                  ; BBC: SHPPT    ;$9932
         lda # $08               ; "skip first two edges on heap"
         jmp _a174
 
-_995b:                                                                  ;$995B
-        pla                     ; change return address?
+_995b:  pla                     ; change return address?                ;$995B
         pla                     ; change return address?
 
-; ".nono ; clear bit3 nothing to erase in next round, no draw."
-_995d:                                                                  ;$995D
-        lda # state::redraw ^$FF        ;=%11110111
+        ; ".nono ; clear bit3 nothing to erase in next round, no draw."
+        ;-----------------------------------------------------------------------
+_995d:  lda # state::redraw ^$FF        ;=%11110111                     ;$995D
         and ZP_SHIP_STATE
         sta ZP_SHIP_STATE
+
         rts 
 
-_9964:                                                                  ;$9964
+
+_9964:                                                  ; BBC: SHPT     ;$9964
 ;===============================================================================
 ; ".Shpt ; ship is point at screen center"
 ;
@@ -100,14 +105,16 @@ _9964:                                                                  ;$9964
         iny 
         iny 
         sta [ZP_SHIP_HEAP], y
-        lda ZP_SHIP01_XPOS_pt1
+        lda ZP_VAR_K3
         dey 
         sta [ZP_SHIP_HEAP], y
         adc # $03
         bcs _995b
+
         dey 
         dey 
         sta [ZP_SHIP_HEAP], y
+
         rts 
 
 
@@ -213,7 +220,7 @@ draw_ship:                                              ; BBC: LL9      ;$9A86
         bmi :-                  ; hi-bit indicates sun or planet
         
         lda # 31                ; set a default ship distance
-        sta ZP_VAR_XX4_LO       ;  (will be populated later)
+        sta ZP_VAR_XX4          ;  (will be populated later)
 
         ; is the ship being manually removed? (has to be erased from screen)
         ; this occurs when a ship either docks or is scooped (for cannisters)
@@ -306,7 +313,7 @@ _9ae6:                                                  ; BBC: LL10     ;$9AE6
 ;===============================================================================
 ; [2]:  check if a ship is within visible position / range:
 ;
-; in:   ZP_VAR_XX14_LO          default ship distance, 31, set in `draw_ship`
+; in:   ZP_VAR_XX4              default ship distance, 31, set in `draw_ship`
 ;-------------------------------------------------------------------------------
         lda ZP_SHIP_ZPOS_HI     ; check the ship's Z-position (fore/aft)
         cmp # 192               ; if > 192 distance ahead? ship is out of range,
@@ -388,7 +395,7 @@ _9ae6:                                                  ; BBC: LL10     ;$9AE6
         lsr 
         lsr 
         lsr 
-        sta ZP_VAR_XX4_LO       ; update ship-distance byte set in `draw_ship`
+        sta ZP_VAR_XX4          ; update ship-distance byte set in `draw_ship`
         bpl _9b3a               ; (always branches!)
         
         ; read the byte from the ship's hull definition that sets
@@ -503,7 +510,7 @@ _9b3a:                                                  ; BBC: LL17     ;$9B3A
         bpl :-
 
         inx                     ; (roll A over to 0)
-        stx ZP_VAR_XX4_LO       ; set distance to 0 (part of forced visibility)
+        stx ZP_VAR_XX4          ; set distance to 0 (part of forced visibility)
 
         ; skip over face-visbility checks since we've
         ; forced them all visible for the explosion
@@ -517,7 +524,7 @@ _9b8b:                                                  ; BBC: EE29     ;$9B8B
         lda [ZP_HULL_ADDR], y   ; read number of faces (*4)
         beq _9b88               ; no faces?
 
-        sta ZP_VAR_XX4_HI
+        sta ZP_VAR_XX20
 
         ldy # Hull::_12         ;=$12: "scaling of normals"?
         lda [ZP_HULL_ADDR], y
@@ -536,7 +543,7 @@ _9b8b:                                                  ; BBC: EE29     ;$9B8B
         tay 
         bne :-
 
-_9baa:  stx ZP_COUNT                                                    ;$9BAA
+_9baa:  stx ZP_VAR_XX17                                                 ;$9BAA
         lda ZP_VAR_XX18_8
         sta ZP_VAR_XX15_5
         lda ZP_VAR_K5
@@ -580,7 +587,7 @@ _9baa:  stx ZP_COUNT                                                    ;$9BAA
 _9bf2:  lda [ZP_TEMP_ADDR2], y                                          ;$9BF2
         sta ZP_VAR_XX12_1
         and # %00011111
-        cmp ZP_VAR_XX4_LO
+        cmp ZP_VAR_XX4
         bcs _9c0b
 
         tya 
@@ -610,7 +617,7 @@ _9c0b:  lda ZP_VAR_XX12_1                                               ;$9C0B
         lda [ZP_TEMP_ADDR2], y
         sta ZP_VAR_XX12_4
 
-        ldx ZP_COUNT
+        ldx ZP_VAR_XX17
         cpx # $04
         bcc _9c4b
 
@@ -730,7 +737,7 @@ _9ca9:  lda ZP_VAR_XX12_0                                               ;$9CA9
 _9cf4:  sta ZP_SHIP01_XPOS_pt1, x                                       ;$9CF4
         iny 
 
-_9cf7:  cpy ZP_VAR_XX4_HI                                               ;$9CF7
+_9cf7:  cpy ZP_VAR_XX20                                                 ;$9CF7
         bcs _9cfe
         jmp _9bf2
 
@@ -769,7 +776,7 @@ _9cfe:                                                  ; BBC: LL42     ;$9CFE
         ;
         ldy # Hull::vertex_count
         lda [ZP_HULL_ADDR], y
-        sta ZP_VAR_XX4_HI
+        sta ZP_VAR_XX20
 
         ; create a pointer in the ship's hull data to start
         ; at the vertex data that follows the hull definition:
@@ -785,7 +792,7 @@ _9cfe:                                                  ; BBC: LL42     ;$9CFE
         ldy # 0                 ; set counter for vertices;
         sty ZP_TEMP_COUNTER     ; (each is 6-bytes)
         ;-----------------------------------------------------------------------
-_9d45:  sty ZP_COUNT            ; set heap pointer to zero              ;$9D45
+_9d45:  sty ZP_VAR_XX17         ; set heap pointer to zero              ;$9D45
         lda [ZP_TEMP_ADDR2], y  ; read vertex byte #0: X-magnitude
         sta ZP_VAR_XX15_0
         iny 
@@ -802,7 +809,7 @@ _9d45:  sty ZP_COUNT            ; set heap pointer to zero              ;$9D45
         lda [ZP_TEMP_ADDR2], y  ; read vertex byte #3: signs & vis-distance
         sta T                   ; (keep this value in T)
         and # %00011111         ; extract the vertex visibility distance
-        cmp ZP_VAR_XX4_LO       ; compare with ship's z-distance (0-31)
+        cmp ZP_VAR_XX4          ; compare with ship's z-distance (0-31)
         bcc :+                  ; if not visible, skip vertex
 
         iny 
@@ -990,7 +997,6 @@ _9e2a:                                                  ; BBC: LL61     ;$9E2A
         sta U
         rts 
 
-
 ; ".LL62 ; Arrive from LL65 just below,
 ;  screen for -ve RU onto XX3 heap, index X=CNT"
 ;
@@ -1131,12 +1137,12 @@ _9f06:  clc                                                             ;$9F06
         lda ZP_TEMP_COUNTER
         adc # $04
         sta ZP_TEMP_COUNTER
-        lda ZP_COUNT
+        lda ZP_VAR_XX17
         adc # $06
         tay 
         bcs _9f1b
 
-        cmp ZP_VAR_XX4_HI
+        cmp ZP_VAR_XX20
         bcs _9f1b
 
         jmp _9d45
@@ -1156,29 +1162,26 @@ _9f1b:                                                  ; BBC: LL72     ;$9F1B
         sta ZP_SHIP_STATE       ;  on the screen, so that the game
         jmp draw_explosion      ;  knows to redraw it to erase it
 
-        ; ".EE31 ; no explosion"
-        ;-----------------------------------------------------------------------
-        ; TODO: these four instructions are not in the BBC version
-        ;
-_9f2a:  lda # state::redraw                                             ;$9F2A
+_9f2a:                                                  ; BBC: EE31     ;$9F2A
+;-------------------------------------------------------------------------------
+        lda # state::redraw                                             
         bit ZP_SHIP_STATE
-        beq :+
+        beq @redraw
 
         jsr _a178
 
-        lda # state::redraw     ; set the redraw bit
-
-        ; ".LL74 ; do New lines"
-:       ora ZP_SHIP_STATE                                               ;$9F35
+        ; set the redraw bit
+        lda # state::redraw
+@redraw:ora ZP_SHIP_STATE                                               ;$9F35
         sta ZP_SHIP_STATE
 
         ldy # Hull::edge_count  ; number of edges in the ship's hull
         lda [ZP_HULL_ADDR], y
-        sta ZP_VAR_XX4_HI
+        sta ZP_VAR_XX20
 
         ldy # 0                 ; edge counter
         sty U
-        sty ZP_COUNT
+        sty ZP_VAR_XX17
         inc U
 
         bit ZP_SHIP_STATE       ; is ship firing its laser?
@@ -1220,8 +1223,10 @@ _9f2a:  lda # state::redraw                                             ;$9F2A
 
         bcs _9f9f
 
-        ; insert a laser line into the ship's line-heap
+        ; laser line:
         ;-----------------------------------------------------------------------
+        ; insert a laser line into the ship's line-heap
+        ;
         ldy U                   ; get heap index (next free byte)
         lda ZP_LINE_X1          ; push laser line's X1 co-ordinate
         sta [ZP_SHIP_HEAP], y
@@ -1236,6 +1241,9 @@ _9f2a:  lda # state::redraw                                             ;$9F2A
         sta [ZP_SHIP_HEAP], y
         iny                     ; move to next (free) byte in heap
         sty U                   ; update the heap index
+
+        ; fallthrough
+        ; ...
 
 _9f9f:                                                  ; BBC: LL170    ;$9F9F
 ;===============================================================================
@@ -1256,15 +1264,18 @@ _9f9f:                                                  ; BBC: LL170    ;$9F9F
         lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
 
-        ldy ZP_COUNT
+        ldy ZP_VAR_XX17
 
-        ; ".LL75 ; -> &4539 ; count Visible edges"
-_9fb8:  lda [ZP_TEMP_ADDR2], y                                          ;$9FB8
-        cmp ZP_VAR_XX4_LO
+_9fb8:  ; in the original code, this label              ; BBC: LL75     ;$9FB8
+        ; has to come *after* the `ldy`
+
+        lda [ZP_TEMP_ADDR2], y
+        cmp ZP_VAR_XX4
         bcc _9fd6
 
         iny 
         lda [ZP_TEMP_ADDR2], y
+
         iny 
         sta ZP_VAR_P1
         and # %00001111
@@ -1284,8 +1295,9 @@ _9fb8:  lda [ZP_TEMP_ADDR2], y                                          ;$9FB8
         ; ".LLx78 ; edge not visible"
 _9fd6:  jmp _a15b               ; "edge not visible"?                   ;$9FD6
 
-        ; ".LL79 ; Visible edge"
-_9fd9:  lda [ZP_TEMP_ADDR2], y  ; "edge data byte #2"                   ;$9FD9
+_9fd9:  ; ".LL79 ; Visible edge"                                        ;$9FD9
+        ;-----------------------------------------------------------------------
+        lda [ZP_TEMP_ADDR2], y  ; "edge data byte #2"
         tax                     ; "index into node heap for first node of edge"
         iny                     ; "Y = 3"
         lda [ZP_TEMP_ADDR2], y  ; "edge data byte #3"
@@ -1639,7 +1651,7 @@ clip_line_flip:                                         ; BBC: LL147    ;$A01A
         ; `clip_point` can only operate on X1 & Y1!
         ;
         ; TODO: create a copy of `clip_point` that can operate
-        ;       on X2 / Y2; we've saved enough bytes elsewhere
+        ;       on X2 / Y2? we've saved enough bytes elsewhere
         ;
 @right: ldx ZP_LINE_XX1_LO                                              ;$A110
         lda ZP_LINE_XX2_LO
@@ -1684,9 +1696,6 @@ _a13f:                                                                  ;$A13F
 ;       ZP_LINE_X2              line-coord X2
 ;       ZP_LINE_Y2              line-coord Y2
 ;       ZP_TEMP_VAR             TODO: unknown
-;
-; TODO: this appears to write into the $FF20-$FFC0 range
-; TODO: is the heap-address fixed? can we optimise that?
 ;-------------------------------------------------------------------------------
         ldy U                   ; index of next free byte in heap
 
@@ -1710,9 +1719,11 @@ _a13f:                                                                  ;$A13F
         cpy ZP_TEMP_VAR         ; limit for edge-lines reached
        .bge _a172
 
-_a15b:  inc ZP_COUNT            ; increment edge counter                ;$A15B
-        ldy ZP_COUNT
-        cpy ZP_VAR_XX4_HI       ; all edges done?
+_a15b:                                                                  ;$A15B
+        ;-----------------------------------------------------------------------
+        inc ZP_VAR_XX17         ; increment edge counter
+        ldy ZP_VAR_XX17
+        cpy ZP_VAR_XX20         ; all edges done?
         bcs _a172               ;
 
         ; move to the next edge in the hull:
@@ -1731,17 +1742,18 @@ _a172:  lda U                   ; heap index?                           ;$A172
 _a174:  ldy # $00                                                       ;$A174
         sta [ZP_SHIP_HEAP], y
 
+
 _a178:                                                  ; BBC: LL155    ;$A178
 ;===============================================================================
 ; [12]: 
 ;-------------------------------------------------------------------------------
         ldy # 0                 ; check number of lines
         lda [ZP_SHIP_HEAP], y   ;  drawn for the ship
-        sta ZP_VAR_XX4_HI       ; set this as number of points?
+        sta ZP_VAR_XX20         ; set this as number of points?
         cmp # 4                 ; 1-point only? (4 bytes per point)
         bcc @rts                ; exit, not enough points for a line!
 
-        iny 
+        iny
 
 @draw:  ; draw a line from the line-heap:                               ;$A183
         ;-----------------------------------------------------------------------
@@ -1764,10 +1776,75 @@ _a178:                                                  ; BBC: LL155    ;$A178
         jsr draw_line
 
         iny 
-        cpy ZP_VAR_XX4_HI       ; keep drawing?
+
+        cpy ZP_VAR_XX20         ; keep drawing?
         bcc @draw
 
 @rts:   rts                                                             ;$A19E
+
+
+.ifdef  FEATURE_FLICKERFREE
+;///////////////////////////////////////////////////////////////////////////////
+
+redraw_ship_line:
+;===============================================================================
+; erase an old line and draw a new version of the same line:
+;
+;-------------------------------------------------------------------------------
+        ldy ZP_VAR_XX4
+        cpy ZP_VAR_XX20
+        php
+
+        ldx # 3                 ; copy 4 bytes for line-coords (X1/Y1/X2/Y2)
+:       lda ZP_VAR_XX15, x
+        sta ZP_VAR_XX12, x
+        dex
+        bpl :-
+
+        jsr draw_line
+        
+        lda [ZP_SHIP_HEAP], y
+        sta ZP_LINE_X1
+
+        lda ZP_VAR_XX12+0
+        sta [ZP_SHIP_HEAP], y
+
+        iny
+
+        lda [ZP_SHIP_HEAP], y
+        sta ZP_LINE_Y1
+
+        lda ZP_VAR_XX12+1
+        sta [ZP_SHIP_HEAP], y
+
+        iny
+
+        lda [ZP_SHIP_HEAP], y
+        sta ZP_LINE_X2
+
+        lda ZP_VAR_XX12+2
+        sta [ZP_SHIP_HEAP], y
+
+        iny
+
+        lda [ZP_SHIP_HEAP], y
+        sta ZP_LINE_Y2
+
+        lda ZP_VAR_XX12+3
+        sta [ZP_SHIP_HEAP], y
+
+        iny
+        sta ZP_VAR_XX4
+
+        plp
+        bcs @rts
+
+        jmp draw_line
+
+@rts:   rts
+
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 
 clip_point:                                             ; BBC: LL118    ;$A19F

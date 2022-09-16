@@ -18,7 +18,7 @@
 
 ZP_LINE_HEIGHT          := ZP_REG_H
 ZP_LINE_WIDTH           := ZP_REG_W
-ZP_LINE_RESTORE_Y       := ZP_9E
+ZP_LINE_RESTORE_Y       := ZP_PRESERVE_Y
 ZP_LINE_BLOCKS          := ZP_REG_W     ; repurpose line width
 
 ;=== HLINE

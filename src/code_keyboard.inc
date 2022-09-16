@@ -111,8 +111,8 @@ key_view_left           := key_f5
 key_view_right          := key_f7
 
 ; an array of key states to indicate which keys are pressed; the byte values
-; written out here are meaningless, this array is cleared with $00 when in use
-; and an entry is changed to $FF when that key is pressed
+; written out here are meaningless, this array is cleared with $00 when
+; in use and an entry is changed to $FF when that key is pressed
 ;
 ; the order of keys represented here is determined by the method used to read
 ; off the keyboard matrix, which is starting at the 64th index in this table

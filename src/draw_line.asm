@@ -121,7 +121,7 @@ _ab81:  .lobytes _ab81_addrs                                            ;$AB81
 _ab89:  .hibytes _ab81_addrs                                            ;$AB89
 
 
-draw_line:                                                              ;$AB91
+draw_line:                                              ; BBC: LL30     ;$AB91
 ;===============================================================================
 ; lines are drawn using a form of Bresenham's Line Algorithm;
 ; <https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm>
@@ -153,7 +153,7 @@ draw_line:                                                              ;$AB91
 ;       ZP_LINE_Y2              end Y-pos of line in viewport, in px
 ;       Y                       (preserved)
 ;-------------------------------------------------------------------------------
-        sty ZP_9E               ; preserve Y
+        sty ZP_PRESERVE_Y       ; preserve Y
 
         ; how do we know when to take a step vertically? an 'error' counter
         ; increments a set amount (here named "step fraction") based on the
@@ -223,7 +223,7 @@ draw_line_horz:                                                         ;$ABBB
 ;       ZP_REG_W                width of line, i.e. ABS(X2-X1)
 ;       ZP_REG_H                height of line, i.e. ABS(Y2-Y1)
 ;
-;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+;       Y will be clobbered with whatever was last saved at `ZP_PRESERVE_Y`!
 ;-------------------------------------------------------------------------------
         ldx ZP_LINE_X1
         cpx ZP_LINE_X2
@@ -327,7 +327,7 @@ draw_line_horzup:                                                       ;$AC19
 ;       ZP_REG_W                width of line
 ;       ZP_REG_H                height of line
 ;
-;       Y will be clobbered with whatever was last saved at `ZP_9E`!
+;       Y will be clobbered with whatever was last saved at `ZP_PRESERVE_Y`!
 ;-------------------------------------------------------------------------------
         ; get the address within the bitmap where we will be drawing,
         ; stored into `ZP_TEMP_ADDR`
@@ -375,7 +375,7 @@ draw_line_horzup:                                                       ;$AC19
 
 line_done1:                                                             ;$AC5D
         ;-----------------------------------------------------------------------
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!
 
 ; this series of routines represent an unrolled loop to draw pixels of the
@@ -743,7 +743,7 @@ _horzup_next_char:                                                      ;$AD78
 
 line_done2:                                                             ;$AD88
         ;-----------------------------------------------------------------------
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!
 
 
@@ -760,7 +760,7 @@ draw_line_horzdn:                                                       ;$AD8B
 ;       ZP_REG_W                width of line
 ;       ZP_REG_H                height of line
 ; out:  Y                       clobbered with whatever was last saved
-;                               at `ZP_9E`!
+;                               at `ZP_PRESERVE_Y`!
 ;-------------------------------------------------------------------------------
         ; get the char-cell bitmap address
         ; for the given X & Y pixel coords:
@@ -817,7 +817,7 @@ _adda:                                                                  ;$ADDA
 
 line_done3:                                                             ;$ADDD
         ;-----------------------------------------------------------------------
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!
 
 ; this series of routines represent an unrolled loop to draw pixels of the
@@ -1187,7 +1187,7 @@ _horzdn_next_char:                                                      ;$AEF8
 
 line_done4:                                                             ;$AF05
         ;-----------------------------------------------------------------------
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!
 
 
@@ -1356,7 +1356,7 @@ _vertrt_pixel_next:                                                     ;$AF8E
 :       dex                     ; one less pixel to draw                ;$AFB8
        .bnz _vertrt_pixel       ; any remaining?
 
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!
 
 _vertlt:                                                                ;$AFBE
@@ -1415,7 +1415,7 @@ _vertlt_pixel_next:                                                     ;$AFCA
         dex                     ; one less pixel to draw
         bne _vertlt_pixel       ; any remaining?
 
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
 :       rts                     ; line has been drawn!                  ;$AFF9
 
 
@@ -1431,7 +1431,7 @@ draw_straight_line:                                                     ;$AFFA
 ; this is reasonably fast as it marches 8-pixels
 ; at a time in the middle of the line
 ;-------------------------------------------------------------------------------
-        sty ZP_9E               ; preserve Y
+        sty ZP_PRESERVE_Y       ; preserve Y
 
         ; does the line start/end need to be flipped?
         ;
@@ -1534,7 +1534,7 @@ draw_straight_line:                                                     ;$AFFA
         eor [ZP_TEMP_ADDR], y
         sta [ZP_TEMP_ADDR], y
 
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!
 
 @tiny_line:                                                             ;$B073
@@ -1560,7 +1560,7 @@ draw_straight_line:                                                     ;$AFFA
         eor [ZP_TEMP_ADDR], y
         sta [ZP_TEMP_ADDR], y
 
-        ldy ZP_9E               ; restore Y
+        ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!
 
 ;-------------------------------------------------------------------------------

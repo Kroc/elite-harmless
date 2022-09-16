@@ -10,7 +10,8 @@
 ; this file was produced with the help of nc513 on the lemon64 forums,
 ; and Andy McFadden's Apple ][ Elite disassembly:
 ; <https://6502disassembly.com/a2-elite>
-
+;
+.linecont+
 
 .macro  .scoop_debris   scoop, debris
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -20,15 +21,15 @@
         ; it's not possible for a hull definition to drop food or textiles(?)
 .if     (scoop = 0)
         ; when the scoop type is zero, it really means zero
-        .byte   .nybl( $0, debris )
+        .byte   .nybl( debris, $0 )
 .else
         ; anything else is a type of cargo
-        .byte   .nybl( scoop-1, debris )
+        .byte   .nybl( debris, scoop-1 )
 .endif
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
-.macro  .vertex         vx, vy, vz, vis_dist, face1, face2, face3, face4
+.macro  .vertex         vx, vy, vz, face1, face2, face3, face4, vis_dist
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         .byte   vx & %01111111  ; X-position, without sign
         .byte   vy & %01111111  ; Y-position, without sign
@@ -36,14 +37,35 @@
         
         ; bits 0-4: distance 0-31 before this vertex becomes invsible
         ; bits 5-7: X, Y & Z sign-bits 
-        .byte   (vis_dist & %00001111) | \
+        .byte   (vis_dist & %00011111) | \
                 (vx & %10000000) | (vy & %10000000)>>1 | (vz & %10000000)>>2
         
-        
-        .byte   .nybl( face2, face1 )
-        .byte   .nybl( face4, face3 )
+        .byte   .nybl( face1, face2 )
+        .byte   .nybl( face3, face4 )
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro 
+.endmacro
+
+.macro  .edge           vertex1, vertex2, face1, face2, vis_dist
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        .byte   vis_dist
+        .byte   .nybl( face1, face2 )
+        .byte   vertex1 << 2, vertex2 << 2
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro
+
+.macro  .face           normx, normy, normz, vis_dist
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        ; bits 0-4: distance 0-31 before this face becomes invsible
+        ; bits 5-7: X, Y & Z sign-bits 
+        .byte   (vis_dist & %00011111) | (normx & %10000000) | \
+                (normy & %10000000)>>1 | (normz & %10000000)>>2
+
+        .byte   normx & %0111111
+        .byte   normy & %0111111
+        .byte   normz & %0111111
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+.endmacro
+
 
 .segment        "HULL_TABLE"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
