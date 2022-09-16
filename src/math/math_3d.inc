@@ -15,6 +15,93 @@
 ; describing everything using those terms. it also doesn't crank out the formal
 ; math notation on page.1 like every other math tutorial does :|
 ;
+.segment        "CODE_9A0C"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+_9a0c:                                                                  ;$9A0C
+;===============================================================================
+; returns A=Q+R, sign-bit S. regards two sign-bits in A,S.
+; only uses A (and stack). this is another example of the curious
+; "unsigned value+sign bit" math used at many places in Elite.
+; TODO: name proposal? add_bytes_external_sign?
+; we probably need a consistent naming for both the
+; unsigned_with_sign_bit and the unsigned_with_external_sign-variables
+;-------------------------------------------------------------------------------
+        eor S
+        bmi :+                  ; if (sign1 == sign2) return Q+R, keep sign
+        lda Q
+        clc 
+        adc R
+        rts 
+
+:       lda R                                                           ;$9A16
+        sec 
+        sbc Q
+        bcc :+                  ; if (R>=Q) return R-Q
+        clc 
+        rts 
+
+:       pha                                                             ;$9A1F
+        lda S                   ; if (R<Q) sign=-sign; return Q-R
+        eor # %10000000
+        sta S
+        pla 
+        eor # %11111111
+        adc # $01
+        rts 
+
+
+math_dot_product:                                       ; BBC: LL51     ;$9A2C
+;===============================================================================
+; <https://www.bbcelite.com/master/main/subroutine/ll51.html>
+;-------------------------------------------------------------------------------
+        ldx # $00
+        ldy # $00
+
+:       lda ZP_VAR_XX15_0                                               ;$9A30
+        sta Q
+        lda ZP_ROTATE, x
+        jsr _39ea               ; A=(A*Q)/256
+        sta T
+        lda ZP_VAR_XX15_1
+        eor ZP_ROTATE_M2x0_HI, x
+        sta S
+        lda ZP_VAR_XX15_2
+        sta Q
+        lda ZP_ROTATE_M2x1_LO, x
+        jsr _39ea               ; A=(A*Q)/256
+        sta Q
+        lda T
+        sta R
+        lda ZP_VAR_XX15_3
+        eor ZP_ROTATE_M2x1_HI, x
+        jsr _9a0c
+        sta T
+        lda ZP_VAR_XX15_4
+        sta Q
+        lda ZP_ROTATE_M2x2_LO, x
+        jsr _39ea               ; A=(A*Q)/256
+        sta Q
+        lda T
+        sta R
+        lda ZP_VAR_XX15_5
+        eor ZP_ROTATE_M2x2_HI, x
+        jsr _9a0c
+        sta ZP_VAR_XX12_0, y
+        lda S
+        sta ZP_VAR_XX12_1, y
+        iny 
+        iny 
+        txa 
+        clc 
+        adc # $06
+        tax 
+        cmp # $11
+        bcc :-
+
+        rts 
+
+
 .segment        "CODE_A44A"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
