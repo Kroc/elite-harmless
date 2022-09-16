@@ -47,6 +47,7 @@
 .include        "gfx/gfx_bitmap.asm"
 
 .include        "code_9900.asm"                                         ;$9900
+.include        "draw_ship.asm"                                         ;$9932
 .include        "code_lines.asm"                                        ;$A013
 .include        "math/math_3d.inc"                                      ;$A44A
 .include        "code_interrupts.asm"                                   ;$A8D9
