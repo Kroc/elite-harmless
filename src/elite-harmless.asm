@@ -45,6 +45,7 @@
 
 .include        "code_6A00.asm"
 .include        "code_9900.asm"
+.include        "code_lines.asm"
 .include        "math/math_3d.inc"
 .include        "code_interrupts.asm"
 
