@@ -2,6 +2,29 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
+.segment        "CODE_3B30"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+get_dust_speed:                                                         ;$3B30
+;===============================================================================
+; calculate dust speed:
+;
+; in:   Y                       dust particle index
+;-------------------------------------------------------------------------------
+        lda DUST_Z_HI, y
+
+        ; fallthrough
+        ; ...
+
+divide_by_player_speed:                                                 ;$3B33
+;===============================================================================
+; divide the number, given in A, by the player's speed:
+;-------------------------------------------------------------------------------
+        sta Q
+        lda ZP_PLAYER_SPEED
+
+        ; fallthrough
+        ; ...
 
 divide_unsigned:                                                        ;$3B37
 ;===============================================================================

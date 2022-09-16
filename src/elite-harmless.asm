@@ -37,8 +37,11 @@
 .include        "main_flight.asm"
 .include        "text/text_docked_code.asm"
 .include        "code_28ba.asm"
+
 .include        "math/math_square.asm"
 .include        "math/math_multiply_signed.asm"
+.include        "math/math_multiply+add.asm"
+.include        "math/math_divide.asm"
 
 .include        "save_data.asm"
 .include        "gfx/gfx_sprites.asm"

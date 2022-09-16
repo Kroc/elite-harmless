@@ -3460,9 +3460,8 @@ _3a32:                                                                  ;$3A32
         bne _3a32
         rts 
 
-        ;-----------------------------------------------------------------------
-
 _3a3f:                                                                  ;$3A3F
+        ;-----------------------------------------------------------------------
         lsr 
         ror ZP_VAR_P2
         ror ZP_VAR_P1
@@ -3471,79 +3470,9 @@ _3a3f:                                                                  ;$3A3F
         rts 
 
 
-; note: in the original, segment "CODE_3A48" goes here                  ;$34A8
-
-
-.segment        "CODE_3AB2"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-_3ab2:                                                                  ;$3AB2
-;===============================================================================
-        ldx ZP_SHIP_XPOS_LO, y
-        stx Q
-        lda ZP_VAR_XX15_0
-        jsr multiply_signed_into_RS
-        ldx ZP_SHIP_XPOS_SIGN, y
-        stx Q
-        lda ZP_VAR_XX15_1
-        jsr multiply_and_add
-        sta S
-        stx R
-        ldx ZP_SHIP_YPOS_HI, y
-        stx Q
-        lda ZP_VAR_XX15_2
-
-        ; fallthrough!
-        ;
-.include        "math/math_multiply+add.asm"                            ;$3ACE 
-
-
-_3b0d:                                                                  ;$3B0D
-;===============================================================================
-        stx Q
-        eor # %10000000
-        jsr multiply_and_add
-        tax 
-        and # %10000000
-        sta T
-        txa 
-        and # %01111111
-        ldx # $fe
-        stx ZP_TEMP_VAR
-_3b20:                                                                  ;$3B20
-        asl 
-        cmp # $60
-        bcc _3b27
-        sbc # $60
-_3b27:                                                                  ;$3B27
-        rol ZP_TEMP_VAR
-        bcs _3b20
-        lda ZP_TEMP_VAR
-        ora T
-        rts 
-
-
-get_dust_speed:                                                         ;$3B30
-;===============================================================================
-; calculate dust speed:
-;
-; in:   Y                       dust particle index
-;-------------------------------------------------------------------------------
-        lda DUST_Z_HI, y
-
-        ; fallthrough...
-        ;
-
-divide_by_player_speed:                                                 ;$3B33
-;===============================================================================
-; divide the number, given in A, by the player's speed:
-;-------------------------------------------------------------------------------
-        sta Q
-        lda ZP_PLAYER_SPEED
-
-        ; fallthrough!
-        ;
-.include        "math/math_divide.asm"                                  ;$3B37
+; NOTE: in the original, segment "CODE_3A48" appears here               ;$34A8
+; NOTE: in the original, segment "CODE_3AB2" appears here               ;$3AB2 
+; NOTE: in the original, segment "CODE_3B30" appears here               ;$3B30
 
 
 .segment        "CODE_3BC1"
