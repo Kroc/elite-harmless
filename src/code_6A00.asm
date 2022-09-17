@@ -3697,7 +3697,7 @@ _7d5f:                                                                  ;$7D5F
         jmp wipe_sun
 
 
-_7d62:                                                  ; BBC: PLANET   ;$7D62
+_PLANET:                                                ; BBC: PLANET   ;$7D62
 ;===============================================================================
         lda ZP_SHIP_ZPOS_SIGN
         cmp # $30

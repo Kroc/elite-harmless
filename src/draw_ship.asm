@@ -132,7 +132,7 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
 ;===============================================================================
 ; [1]:  
 ;-------------------------------------------------------------------------------
-:       jmp _7d62               ; go draw sun or planet                 ;$9A83
+:       jmp _PLANET             ; go draw sun or planet                 ;$9A83
 
 draw_ship:                                              ; BBC: LL9      ;$9A86
         ;=======================================================================
@@ -144,17 +144,28 @@ draw_ship:                                              ; BBC: LL9      ;$9A86
 
 .ifdef  FEATURE_FLICKERFREE
         ;///////////////////////////////////////////////////////////////////////
-        ldy # 1
-        sty ZP_VAR_XX14+0
-        dey
+        ; for flicker-free drawing we will need to walk through the lines
+        ; already in the ship's line-heap (from previous frame). the first
+        ; byte of the heap contains an index to the next free byte in the
+        ; heap (i.e. how many bytes were used), and the line co-ords start
+        ; from the 2nd byte onwards
+        ;
+        ldy # 1                 ; initialise a variable for reading lines
+        sty ZP_VAR_XX14+0       ; from the heap, starting at the 2nd byte
+        dey                     ; (set Y to zero for later)
 
-        lda # state::redraw
-        bit ZP_SHIP_STATE
-        bne :+
-        lda # 0
+        ; take a copy of the number of bytes in the ship's line heap:
+        ; however, if the ship isn't on-screen this field will contain
+        ; invalid data so first check if the ship was drawn previously
+        ;
+        lda # state::redraw     ; check the redraw flag on the ship
+        bit ZP_SHIP_STATE       ;  if set, we'll use the line-heap index
+        bne :+                  ;  as the number of bytes in the heap
+        lda # 0                 ; use 0 if ship is not on-screen
        .bit                     ; (skip next instruction)
-        lda [ZP_SHIP_HEAP], y
-:       sta ZP_VAR_XX14+1
+        lda [ZP_SHIP_HEAP], y   ; use the first byte, the size of the heap
+
+:       sta ZP_VAR_XX14+1       ; number of (old) bytes in heap to process
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; is the ship being manually removed? (has to be erased from screen)
@@ -172,13 +183,13 @@ draw_ship:                                              ; BBC: LL9      ;$9A86
         ;
         lda # state::debris     ; = is debris?
         bit ZP_SHIP_STATE       ; check against state of the ship
-        bne @9ac5               ; is debris
-        bpl @9ac5               ; 
+        bne @_EE28              ; is debris
+        bpl @_EE28              ; ? 
 
         ; erase ship and explode it:
         ;-----------------------------------------------------------------------
-        ; stop the ship firing and remove its 'just killed' state
-        ; as we're going to create the debris cloud
+        ; stop the ship firing and remove its 'just killed'
+        ; state as we're going to create the debris cloud
         ;
         ora ZP_SHIP_STATE
         and # (state::exploding | state::firing)^$FF    ;=%00111111
@@ -213,14 +224,14 @@ draw_ship:                                              ; BBC: LL9      ;$9A86
         cpy # $06               ; was this the 6th byte in the heap?
         bne :-                  ; if not, keep going
 
-@9ac5:  lda ZP_SHIP_ZPOS_SIGN   ; z-sign, i.e. fore or aft to us        ;$9AC5
-        bpl _9ae6               ; if visible to us, erase the ship
+@_EE28: lda ZP_SHIP_ZPOS_SIGN   ; z-sign, i.e. fore or aft to us        ;$9AC5
+        bpl _LL10               ; if visible to us, erase the ship
 
         ; fallthrough implies
         ; ship is behind us...
         ;
 
-_9ac9:                                                  ; BBC: LL14     ;$9AC9
+_LL14:                                                  ; BBC: LL14     ;$9AC9
         ;-----------------------------------------------------------------------
         lda ZP_SHIP_STATE       ; is the ship solid or a debris cloud?
         and # state::debris
@@ -244,7 +255,7 @@ _EE51:                                                  ; BBC: EE51     ;$9AD8
 
 :       rts                                                             ;$9AE5
 
-_9ae6:                                                  ; BBC: LL10     ;$9AE6
+_LL10:                                                  ; BBC: LL10     ;$9AE6
 ;===============================================================================
 ; [2]:  check if a ship is within visible position / range:
 ;
@@ -252,7 +263,7 @@ _9ae6:                                                  ; BBC: LL10     ;$9AE6
 ;-------------------------------------------------------------------------------
         lda ZP_SHIP_ZPOS_HI     ; check the ship's Z-position (fore/aft)
         cmp # 192               ; if > 192 distance ahead? ship is out of range,
-        bcs _9ac9               ;  so erase it from screen by drawing over it
+        bcs _LL14               ;  so erase it from screen by drawing over it
 
         ; ship is ahead of us, but is it visible to us?
         ;
@@ -272,7 +283,7 @@ _9ae6:                                                  ; BBC: LL10     ;$9AE6
         cmp ZP_SHIP_ZPOS_LO     ;  as the sign, so that the subtraction below
         lda ZP_SHIP_XPOS_HI     ;  borrows according to sign, allowing for
         sbc ZP_SHIP_ZPOS_HI     ;  comparing both positive & negative bounds
-        bcs _9ac9               ; if X >= Z, erase ship from screen
+        bcs _LL14               ; if X >= Z, erase ship from screen
 
         ; the same applies the the vertical visiblity range,
         ; with a 90deg field of view: (sideways view)
@@ -291,7 +302,7 @@ _9ae6:                                                  ; BBC: LL10     ;$9AE6
         cmp ZP_SHIP_ZPOS_LO     ;  as the sign, so that the subtraction below
         lda ZP_SHIP_YPOS_HI     ;  borrows according to sign, allowing for
         sbc ZP_SHIP_ZPOS_HI     ;  comparing both positive & negative bounds
-        bcs _9ac9               ; if Y >= Z, erase ship from screen
+        bcs _LL14               ; if Y >= Z, erase ship from screen
 
         ; are they firing their laser?
         ;-----------------------------------------------------------------------
@@ -331,7 +342,7 @@ _9ae6:                                                  ; BBC: LL10     ;$9AE6
         lsr 
         lsr 
         sta ZP_VAR_XX4          ; update ship-distance byte set in `draw_ship`
-        bpl _9b3a               ; (always branches!)
+        bpl _LL17               ; (always branches!)
         
         ; read the byte from the ship's hull definition that sets
         ; the LOD-distance at which the ship should become a dot
@@ -339,11 +350,11 @@ _9ae6:                                                  ; BBC: LL10     ;$9AE6
 _9b29:  ldy # Hull::lod_distance                                        ;$9B29
         lda [ZP_HULL_ADDR], y
         cmp ZP_SHIP_ZPOS_HI     ; compare ship distance (hi) and LOD-distance;
-        bcs _9b3a               ; if below LOD-distance, draw full wireframe
+        bcs _LL17               ; if below LOD-distance, draw full wireframe
 
         lda # state::debris     ; has the ship exploded into a debris cloud?
         and ZP_SHIP_STATE       ; if yes, draw as normal,
-        bne _9b3a               ;  which will draw the particles
+        bne _LL17               ;  which will draw the particles
 
         ; TODO: only place this routine is called,
         ;       could inline it here
@@ -351,7 +362,7 @@ _9b29:  ldy # Hull::lod_distance                                        ;$9B29
         jmp draw_ship_dot       ; if no, draw the ship as a distant dot
 
 
-_9b3a:                                                  ; BBC: LL17     ;$9B3A
+_LL17:                                                  ; BBC: LL17     ;$9B3A
 ;===============================================================================
 ; [3]:  
 ;-------------------------------------------------------------------------------
@@ -429,7 +440,7 @@ _9b3a:                                                  ; BBC: LL17     ;$9B3A
         ldy # Hull::face_count  ; select the face-count property
         lda ZP_SHIP_STATE       ; check the ship's state to see if
         and # state::debris     ;  it's solid or a cloud of debris
-        beq _9b8b               ; solid? -> draw wireframe
+        beq _EE29               ; solid? -> draw wireframe
 
 ;===============================================================================
 ; [4]:  set visibility for exploding ship
@@ -455,7 +466,7 @@ _9b3a:                                                  ; BBC: LL17     ;$9B3A
 _9b88:  jmp _LL42                                                       ;$9B88
 
 
-_9b8b:                                                  ; BBC: EE29     ;$9B8B
+_EE29:                                                  ; BBC: EE29     ;$9B8B
 ;===============================================================================
 ; [5]:  
 ;-------------------------------------------------------------------------------
@@ -756,7 +767,7 @@ _9d45:  sty ZP_VAR_XX17         ; set heap pointer to zero              ;$9D45
         and # %00001111         ; extract face 1 index
         tax                     ; check this face against
         lda ZP_VAR_XX2, x       ;  the visbility test done earlier
-        bne _9d91               ; if visible, skip other checks
+        bne _LL49               ; if visible, skip other checks
 
         lda ZP_VAR_P            ; retrieve face 1 & 2 byte
         lsr                     ;
@@ -765,7 +776,7 @@ _9d45:  sty ZP_VAR_XX17         ; set heap pointer to zero              ;$9D45
         lsr                     ;
         tax                     ; check face 2 against
         lda ZP_VAR_XX2, x       ;  the visibility test done earlier
-        bne _9d91               ; if visible, skip other checks
+        bne _LL49               ; if visible, skip other checks
 
         iny
         lda [ZP_TEMP_ADDR2], y  ; read vertex byte #5: face 3 & 4
@@ -773,7 +784,7 @@ _9d45:  sty ZP_VAR_XX17         ; set heap pointer to zero              ;$9D45
         and # %00001111         ; extract face 3 index
         tax                     ; check this face against
         lda ZP_VAR_XX2, x       ;  the visbility test done earlier
-        bne _9d91               ; if visible, skip other checks
+        bne _LL49               ; if visible, skip other checks
 
         lda ZP_VAR_P1           ; retrieve face 3 & 4 byte
         lsr                     ;
@@ -782,13 +793,13 @@ _9d45:  sty ZP_VAR_XX17         ; set heap pointer to zero              ;$9D45
         lsr                     ;
         tax                     ; check face 4 against
         lda ZP_VAR_XX2, x       ;  the visibility test done earlier
-        bne _9d91               ; if visible, skip other checks
+        bne _LL49               ; if visible, skip other checks
 
         ; no faces attached to this vertex are visible,
         ; so the vertex itself does not need to be visible
 :       jmp _9f06                                                       ;$9D8E
 
-_9d91:                                                  ; BBC: LL49     ;$9D91
+_LL49:                                                  ; BBC: LL49     ;$9D91
         ;=======================================================================
         lda T                   ; retrieve the byte with the X/Y/Z sign-bits
         sta ZP_VAR_XX15_1       ; store the X sign bit (other bits ignored)
@@ -890,7 +901,7 @@ _9d91:                                                  ; BBC: LL49     ;$9D91
         ; otherwise the ship wouldn't be visible (in front of us)
         ;
 @zsign: lda ZP_VAR_XX12_5                                               ;$9E16
-        bmi _9e64
+        bmi _LL56
 
         lda ZP_VAR_XX12_4
         clc 
@@ -950,7 +961,7 @@ _9e51:                                                  ; BBC: LL62     ;$9E51
         sta $0100, x
         jmp _9ec3
 
-_9e64:                                                  ; BBC: LL56     ;$9E64
+_LL56:                                                  ; BBC: LL56     ;$9E64
 ;===============================================================================
 ; [7]:  
 ;===============================================================================
@@ -1123,7 +1134,7 @@ _9f2a:                                                  ; BBC: EE31     ;$9F2A
         inc U
 
         bit ZP_SHIP_STATE       ; is ship firing its laser?
-        bvc _9f9f               ; no? skip over laser lines
+        bvc _LL170              ; no? skip over laser lines
 
         lda ZP_SHIP_STATE       ; stop the ship firing its laser
         and # state::firing^$FF ;  so it doesn't do so endlessly
@@ -1135,12 +1146,12 @@ _9f2a:                                                  ; BBC: EE31     ;$9F2A
         ldx $0100, y
         stx ZP_VAR_XX15_0
         inx 
-        beq _9f9f
+        beq _LL170
 
         ldx $0101, y
         stx ZP_VAR_XX15_1
         inx 
-        beq _9f9f
+        beq _LL170
 
         ldx $0102, y
         stx ZP_VAR_XX15_2
@@ -1159,7 +1170,7 @@ _9f2a:                                                  ; BBC: EE31     ;$9F2A
         dec ZP_VAR_XX15_4
 :       jsr clip_line                                                   ;$9F82
 
-        bcs _9f9f
+        bcs _LL170
 
         ; laser line:
         ;-----------------------------------------------------------------------
@@ -1183,7 +1194,7 @@ _9f2a:                                                  ; BBC: EE31     ;$9F2A
         ; fallthrough
         ; ...
 
-_9f9f:                                                  ; BBC: LL170    ;$9F9F
+_LL170:                                                 ; BBC: LL170    ;$9F9F
 ;===============================================================================
 ; [10]: calculate which edges are visible:
 ;===============================================================================
