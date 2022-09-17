@@ -33,18 +33,18 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
 
 .ifdef  FEATURE_FLICKERFREE
         ;///////////////////////////////////////////////////////////////////////
-        jsr @line               ; add first row of 4-pixel "dot"
+        jsr @line               ; add first half of the "dot"
 .else   ;///////////////////////////////////////////////////////////////////////
 
         ldy # 2                 ; set heap index for Y1
-        jsr @line               ; "Ship is point, could end if nono-2"
+        jsr @line               ; add the first half of the "dot"
         ldy # 6                 ; set heap index for next line
 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda ZP_VAR_K4           ; move to the next pixel row
-        adc # $01               ;  and draw the second half of the "dot"
-        jsr @line               ; 
+        lda ZP_VAR_K4
+        adc # $01               ; move to the next pixel row
+        jsr @line               ;  and draw the second half of the "dot"
 
         lda # state::redraw     ; set the ship's flag to indicate that
         ora ZP_SHIP_STATE       ;  it has been drawn on screen, and
@@ -54,9 +54,13 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
         ;///////////////////////////////////////////////////////////////////////
         jmp _LL155
 .else   ;///////////////////////////////////////////////////////////////////////
-        lda # $08               ; "skip first two edges on heap"
-        jmp _a174
+        ; two lines have been added to the ship's line heap; the first byte
+        ; of the heap needs be updated to the index of the next free byte
+        ;
+        lda # 8                 ; size of the ship's line heap -- 8 bytes
+        jmp _a174               ; jump to `sta [ZP_SHIP_HEAP], 0`
 
+        ;-----------------------------------------------------------------------
 @995b:  pla                     ; change return address?                ;$995B
         pla                     ; change return address?
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -84,7 +88,7 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
         sta ZP_LINE_Y1          ; as it's a horizontal line,
         sta ZP_LINE_Y2          ;  Y1 & Y2 will be the same
         
-        lda ZP_VAR_K3           ; ship X-coordinate
+        lda ZP_VAR_K3_LO        ; ship X-coordinate
         sta ZP_LINE_X1          ; start of line
         clc                     ;
         adc # 3                 ; now add 3 to get the X2 co-ordinate
@@ -1315,7 +1319,7 @@ _LL78:                                                  ; BBC: LL78     ;$A15B
 .ifdef  FEATURE_FLICKERFREE
         ;///////////////////////////////////////////////////////////////////////
         lda ZP_VAR_XX14         
-        cmp $30
+        cmp ZP_TEMP_COUNTER
         bcs _LL81
 
         lda ZP_TEMP_ADDR2_LO    ; take the low-address
@@ -1424,8 +1428,8 @@ redraw_ship_line:                                       ; BBC: LLX30
 ; erase an old line and draw a new version of the same line:
 ;
 ;-------------------------------------------------------------------------------
-        ldy ZP_VAR_XX4
-        cpy ZP_VAR_XX20
+        ldy ZP_VAR_XX14+0
+        cpy ZP_VAR_XX14+1
         php
 
         ldx # 3                 ; copy 4 bytes for line-coords (X1/Y1/X2/Y2)
@@ -1467,7 +1471,7 @@ redraw_ship_line:                                       ; BBC: LLX30
         sta [ZP_SHIP_HEAP], y
 
         iny
-        sta ZP_VAR_XX4
+        sta ZP_VAR_XX14+0
 
         plp
         bcs @rts

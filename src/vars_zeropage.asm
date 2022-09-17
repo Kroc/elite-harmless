@@ -143,6 +143,11 @@ ZP_VAR_K3               := $35                                          ;K3
 ZP_VAR_K3_LO            := $35                                          ;K3+0
 ZP_VAR_K3_HI            := $36                                          ;K3+1
 
+; used as a 16-bit X-position when drawing ships
+ZP_POINT_XX             := $35                                          ;K3
+ZP_POINT_XX_LO          := $35                                          ;K3+0
+ZP_POINT_XX_HI          := $36                                          ;K3+1
+
 ; used as a 16-bit X-position when drawing circles
 ; WARNING: overlaps with ZP_SHIP01_XPOS_pt1/2!
 ;
@@ -190,6 +195,11 @@ ZP_VAR_K4_HI            := $44                                          ;K4+1
 ZP_CIRCLE_YPOS          := ZP_VAR_K4
 ZP_CIRCLE_YPOS_LO       := ZP_VAR_K4_LO
 ZP_CIRCLE_YPOS_HI       := ZP_VAR_K4_HI
+
+; used as a 16-bit Y-position when drawing ships
+ZP_POINT_YY             := $43                                          ;K4
+ZP_POINT_YY_LO          := $43                                          ;K4+0
+ZP_POINT_YY_HI          := $44                                          ;K4+1
 
 ;-------------------------------------------------------------------------------
 
