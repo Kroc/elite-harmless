@@ -13,7 +13,10 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
 ;===============================================================================
 ; draw a ship as a distance dot:
 ;-------------------------------------------------------------------------------
-.ifndef FEATURE_FLICKERFREE
+        ; this call is exlcuded for flicker-free since the ship is
+        ; erased and redrawn line by line rather than all-in-one
+        ;
+.if     !.defined( FEATURE_FLICKERFREE )
         ;///////////////////////////////////////////////////////////////////////
         jsr _EE51               ; erase ship first (if present)
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -27,24 +30,30 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
         ora ZP_VAR_K3_HI        ; are either of the hi-bytes > 0?
         bne @novis              ; i.e. outside the screen
 
-        lda ZP_VAR_K4           ; is the Y-position below the viewport?
+        lda ZP_VAR_K4_LO        ; is the Y-position below the viewport?
         cmp # VIEWPORT_HEIGHT-2 ; (viewport is 144 high, not 256)
         bcs @novis              ; -> ship is no longer visible
 
 .ifdef  FEATURE_FLICKERFREE
         ;///////////////////////////////////////////////////////////////////////
-        jsr @line               ; add first half of the "dot"
-.else   ;///////////////////////////////////////////////////////////////////////
+        jsr @line               ; draw first half of the "dot"
+        
+        lda ZP_VAR_K4_LO        ; ship X-position;
+        clc                     ;
+        adc # 1                 ; move to the next pixel row
+        jsr @line               ;  and draw the second half of the "dot"
 
+.else   ;///////////////////////////////////////////////////////////////////////
         ldy # 2                 ; set heap index for Y1
         jsr @line               ; add the first half of the "dot"
         ldy # 6                 ; set heap index for next line
 
-.endif  ;///////////////////////////////////////////////////////////////////////
+        lda ZP_VAR_K4_LO        ; ship X-position;
+        adc # 1                 ; move to the next pixel row
+        
+        jsr @line               ; draw the second half of the "dot"
 
-        lda ZP_VAR_K4
-        adc # $01               ; move to the next pixel row
-        jsr @line               ;  and draw the second half of the "dot"
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda # state::redraw     ; set the ship's flag to indicate that
         ora ZP_SHIP_STATE       ;  it has been drawn on screen, and
@@ -87,12 +96,12 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
         ;///////////////////////////////////////////////////////////////////////
         sta ZP_LINE_Y1          ; as it's a horizontal line,
         sta ZP_LINE_Y2          ;  Y1 & Y2 will be the same
-        
+
         lda ZP_VAR_K3_LO        ; ship X-coordinate
         sta ZP_LINE_X1          ; start of line
         clc                     ;
         adc # 3                 ; now add 3 to get the X2 co-ordinate
-        bcc :+                  ; if clips the viewport,
+        bcc :+                  ; if it clips the viewport,
         lda # VIEWPORT_WIDTH-1  ;  keep it within
 :       sta ZP_LINE_X2          ;
 
@@ -441,6 +450,9 @@ _LL17:                                                  ; BBC: LL17     ;$9B3A
         lda ZP_SHIP_STATE       ; check the ship's state to see if
         and # state::debris     ;  it's solid or a cloud of debris
         beq _EE29               ; solid? -> draw wireframe
+
+        ; fallthrough
+        ; ...
 
 ;===============================================================================
 ; [4]:  set visibility for exploding ship
@@ -1102,7 +1114,7 @@ _LL72:                                                  ; BBC: LL72     ;$9F1B
 ;===============================================================================
         lda ZP_SHIP_STATE       ; is the ship exploding?
         and # state::debris
-        beq _9f2a
+        beq :+
 
         ; ship is exploding:
         ;
@@ -1111,9 +1123,8 @@ _LL72:                                                  ; BBC: LL72     ;$9F1B
         sta ZP_SHIP_STATE       ;  on the screen, so that the game
         jmp draw_explosion      ;  knows to redraw it to erase it
 
-_9f2a:                                                  ; BBC: EE31     ;$9F2A
-;-------------------------------------------------------------------------------
-        lda # state::redraw                                             
+        ;-----------------------------------------------------------------------
+:       lda # state::redraw                             ; BBC: EE31     ;$9F2A
         bit ZP_SHIP_STATE
         beq @redraw
 
@@ -1215,7 +1226,7 @@ _LL170:                                                 ; BBC: LL170    ;$9F9F
 
         ldy ZP_VAR_XX17
 
-_9fb8:  ; in the original code, this label              ; BBC: LL75     ;$9FB8
+_LL75:  ; in the original code, this label              ; BBC: LL75     ;$9FB8
         ; has to come *after* the `ldy`
 
         lda [ZP_TEMP_ADDR2], y
@@ -1230,7 +1241,7 @@ _9fb8:  ; in the original code, this label              ; BBC: LL75     ;$9FB8
         and # %00001111
         tax 
         lda ZP_SHIP01_XPOS_pt1, x
-        bne _9fd9
+        bne _LL79
 
         lda ZP_VAR_P1
         lsr 
@@ -1239,14 +1250,13 @@ _9fb8:  ; in the original code, this label              ; BBC: LL75     ;$9FB8
         lsr 
         tax 
         lda ZP_SHIP01_XPOS_pt1, x
-        bne _9fd9
+        bne _LL79
 
         ; ".LLx78 ; edge not visible"
 _9fd6:  jmp _LL78               ; "edge not visible"?                   ;$9FD6
 
-_9fd9:  ; ".LL79 ; Visible edge"                                        ;$9FD9
         ;-----------------------------------------------------------------------
-        lda [ZP_TEMP_ADDR2], y  ; "edge data byte #2"
+_LL79:  lda [ZP_TEMP_ADDR2], y  ; "edge data byte #2"                   ;$9FD9
         tax                     ; "index into node heap for first node of edge"
         iny                     ; "Y = 3"
         lda [ZP_TEMP_ADDR2], y  ; "edge data byte #3"
@@ -1285,7 +1295,7 @@ _9fd9:  ; ".LL79 ; Visible edge"                                        ;$9FD9
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-; NOTE: in the original, segment "CODE_A013" appears here               ;$A013
+; NOTE: in the original code, segment "CODE_A013" appears here          ;$A013
 
 
 .segment        "CODE_A13F"
@@ -1344,7 +1354,7 @@ _LL78:                                                  ; BBC: LL78     ;$A15B
         cpy ZP_VAR_XX20         ; all edges done?
         bcs _LL81               ;
 
-        jmp _9fb8
+        jmp _LL75
 _LL81:
 
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -1362,7 +1372,7 @@ _LL81:
         bcc :+                  ; but, did it overflow?
         inc ZP_TEMP_ADDR2_HI    ; yes, also increment the high-byte
 
-:       jmp _9fb8                                                       ;$A16F
+:       jmp _LL75                                                       ;$A16F
 
         ;-----------------------------------------------------------------------
 _LL81:  lda U                   ; heap index?           ; BBC: LL81     ;$A172
