@@ -182,9 +182,9 @@ draw_ship:                                              ; BBC: LL9      ;$9A86
         bne :+                  ;  as the number of bytes in the heap
         lda # 0                 ; use 0 if ship is not on-screen
        .bit                     ; (skip next instruction)
-        lda [ZP_SHIP_HEAP], y   ; use the first byte, the size of the heap
+:       lda [ZP_SHIP_HEAP], y   ; use the first byte, the size of the heap
 
-:       sta ZP_VAR_XX14+1       ; number of (old) bytes in heap to process
+        sta ZP_VAR_XX14+1       ; number of (old) bytes in heap to process
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; is the ship being manually removed? (has to be erased from screen)
@@ -1403,6 +1403,7 @@ _LL78:                                                  ; BBC: LL78     ;$A15B
         bcs _LL81
 
         lda ZP_TEMP_ADDR2_LO    ; take the low-address
+        clc
         adc # 4                 ; add 4-bytes
         sta ZP_TEMP_ADDR2_LO    ; write it back...
         bcc :+                  ; but, did it overflow?
@@ -1514,7 +1515,7 @@ redraw_ship_line:                                       ; BBC: LLX30
         php
 
         ldx # 3                 ; copy 4 bytes for line-coords (X1/Y1/X2/Y2)
-:       lda ZP_VAR_XX15, x
+:       lda ZP_LINE_X1, x
         sta ZP_VAR_XX12, x
         dex
         bpl :-
@@ -1552,7 +1553,7 @@ redraw_ship_line:                                       ; BBC: LLX30
         sta [ZP_SHIP_HEAP], y
 
         iny
-        sta ZP_VAR_XX14+0
+        sty ZP_VAR_XX14+0
 
         plp
         bcs @rts
