@@ -1153,6 +1153,12 @@ _LL72:                                                  ; BBC: LL72     ;$9F1B
 @redraw:ora ZP_SHIP_STATE                                               ;$9F35
         sta ZP_SHIP_STATE
 
+.ifdef  FEATURE_FLICKERFREE
+        ;///////////////////////////////////////////////////////////////////////
+        ldy # 0
+        sty ZP_VAR_XX17         ; edge counter
+        
+.else   ;///////////////////////////////////////////////////////////////////////
         ldy # Hull::edge_count  ; number of edges in the ship's hull
         lda [ZP_HULL_ADDR], y
         sta ZP_VAR_XX20
@@ -1161,6 +1167,7 @@ _LL72:                                                  ; BBC: LL72     ;$9F1B
         sty U
         sty ZP_VAR_XX17
         inc U
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         bit ZP_SHIP_STATE       ; is ship firing its laser?
         bvc _LL170              ; no? skip over laser lines
@@ -1203,6 +1210,10 @@ _LL72:                                                  ; BBC: LL72     ;$9F1B
 
         ; laser line:
         ;-----------------------------------------------------------------------
+.ifdef  FEATURE_FLICKERFREE
+        ;///////////////////////////////////////////////////////////////////////
+        jsr redraw_ship_line
+.else   ;///////////////////////////////////////////////////////////////////////
         ; insert a laser line into the ship's line-heap
         ;
         ldy U                   ; get heap index (next free byte)
@@ -1219,6 +1230,7 @@ _LL72:                                                  ; BBC: LL72     ;$9F1B
         sta [ZP_SHIP_HEAP], y
         iny                     ; move to next (free) byte in heap
         sty U                   ; update the heap index
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; fallthrough
         ; ...
@@ -1238,6 +1250,15 @@ _LL170:                                                 ; BBC: LL170    ;$9F9F
         adc ZP_HULL_ADDR_HI
         sta ZP_TEMP_ADDR2_HI
 
+.ifdef  FEATURE_FLICKERFREE
+        ;///////////////////////////////////////////////////////////////////////
+        ldy # Hull::_05         ;=$05: max.lines
+        lda [ZP_HULL_ADDR], y
+        sta ZP_TEMP_COUNTER
+
+_LL75:  ldy # 0
+
+.else   ;///////////////////////////////////////////////////////////////////////
         ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
         sta ZP_TEMP_VAR
@@ -1246,39 +1267,50 @@ _LL170:                                                 ; BBC: LL170    ;$9F9F
 
 _LL75:  ; in the original code, this label              ; BBC: LL75     ;$9FB8
         ; has to come *after* the `ldy`
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda [ZP_TEMP_ADDR2], y
         cmp ZP_VAR_XX4
-        bcc _9fd6
+        bcc _LLx78
 
         iny 
         lda [ZP_TEMP_ADDR2], y
 
+.if     !.defined( FEATURE_FLICKERFREE )
+        ;///////////////////////////////////////////////////////////////////////
         iny 
-        sta ZP_VAR_P1
+.endif  ;///////////////////////////////////////////////////////////////////////
+        sta ZP_VAR_P
         and # %00001111
         tax 
-        lda ZP_SHIP01_XPOS_pt1, x
+        lda ZP_VAR_XX2, x
         bne _LL79
 
-        lda ZP_VAR_P1
+        lda ZP_VAR_P
         lsr 
         lsr 
         lsr 
         lsr 
         tax 
-        lda ZP_SHIP01_XPOS_pt1, x
+        lda ZP_VAR_XX2, x
         bne _LL79
 
-        ; ".LLx78 ; edge not visible"
-_9fd6:  jmp _LL78               ; "edge not visible"?                   ;$9FD6
+_LLx78: jmp _LL78               ; "edge not visible"?                   ;$9FD6
 
+_LL79:                                                  ; BBC: LL79     ;$9FD9
         ;-----------------------------------------------------------------------
-_LL79:  lda [ZP_TEMP_ADDR2], y  ; "edge data byte #2"                   ;$9FD9
+.ifdef  FEATURE_FLICKERFREE
+        ;///////////////////////////////////////////////////////////////////////
+        iny
+        lda [ZP_TEMP_ADDR2], y
+        tax
+.else   ;///////////////////////////////////////////////////////////////////////
+        lda [ZP_TEMP_ADDR2], y  ; "edge data byte #2"
         tax                     ; "index into node heap for first node of edge"
         iny                     ; "Y = 3"
         lda [ZP_TEMP_ADDR2], y  ; "edge data byte #3"
         sta Q                   ; "index into node heap for other node of edge"
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         lda $0101, x
         sta ZP_VAR_XX15_1
@@ -1289,7 +1321,15 @@ _LL79:  lda [ZP_TEMP_ADDR2], y  ; "edge data byte #2"                   ;$9FD9
         lda $0103, x
         sta ZP_VAR_XX15_3
 
+.ifdef  FEATURE_FLICKERFREE
+        ;///////////////////////////////////////////////////////////////////////
+        iny
+        lda [ZP_TEMP_ADDR2], y
+        tax
+.else   ;///////////////////////////////////////////////////////////////////////
         ldx Q                   ; "other index into node heap for second node"
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         lda $0100, x
         sta ZP_VAR_XX15_4
         lda $0103, x
@@ -1300,18 +1340,16 @@ _LL79:  lda [ZP_TEMP_ADDR2], y  ; "edge data byte #2"                   ;$9FD9
         sta ZP_VAR_XX15_5
 
         jsr clip_line_flip      ; "CLIP2, take care of swop and clips"?
-        bcs _9fd6               ; "edge not visible"?
+        bcs _LLx78              ; "edge not visible"?
 
 .ifdef  FEATURE_FLICKERFREE
         ;///////////////////////////////////////////////////////////////////////
         jsr redraw_ship_line
-        jmp _LL78
-.else   ;///////////////////////////////////////////////////////////////////////
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         ; add lines to heap / draw lines?
         ; TODO: only ever called here -- we could inline it here
         jmp _LL80
-.endif  ;///////////////////////////////////////////////////////////////////////
-
 
 ; NOTE: in the original code, segment "CODE_A013" appears here          ;$A013
 
@@ -1331,6 +1369,8 @@ _LL80:                                                  ; BBC: LL80     ;$A13F
 ;       ZP_LINE_Y2              line-coord Y2
 ;       ZP_TEMP_VAR             TODO: unknown
 ;-------------------------------------------------------------------------------
+.if     !.defined( FEATURE_FLICKERFREE )
+        ;///////////////////////////////////////////////////////////////////////
         ldy U                   ; index of next free byte in heap
 
         ; push the line's co-ordinates (X1, Y1, X2, Y2),
@@ -1352,6 +1392,7 @@ _LL80:                                                  ; BBC: LL80     ;$A13F
 
         cpy ZP_TEMP_VAR         ; limit for edge-lines reached
        .bge _LL81
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 _LL78:                                                  ; BBC: LL78     ;$A15B
         ;-----------------------------------------------------------------------
@@ -1371,9 +1412,10 @@ _LL78:                                                  ; BBC: LL78     ;$A15B
         ldy ZP_VAR_XX17
         cpy ZP_VAR_XX20         ; all edges done?
         bcs _LL81               ;
-
         jmp _LL75
-_LL81:
+
+_LL81:  ; fallthrough to LL155
+        ; ...
 
 .else   ;///////////////////////////////////////////////////////////////////////
         inc ZP_VAR_XX17         ; increment edge counter
