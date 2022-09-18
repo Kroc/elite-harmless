@@ -61,7 +61,11 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
 
 .ifdef  FEATURE_FLICKERFREE
         ;///////////////////////////////////////////////////////////////////////
+        ; the "dot" has been drawn, but if the ship were a wireframe on the
+        ; previous frame the remainder of the lines still need erasing
+        ;
         jmp _LL155
+
 .else   ;///////////////////////////////////////////////////////////////////////
         ; two lines have been added to the ship's line heap; the first byte
         ; of the heap needs be updated to the index of the next free byte
@@ -76,14 +80,20 @@ draw_ship_dot:                                          ; BBC: SHPPT    ;$9932
 
         ; ship has been erased, and is no longer visible:
         ;-----------------------------------------------------------------------
-@novis: lda # state::redraw^$FF ; remove flag indicating that ship      ;$995D
+@novis: lda # state::redraw^$FF ; remove flag indicating the ship       ;$995D
         and ZP_SHIP_STATE       ;  has been drawn on screen --
         sta ZP_SHIP_STATE       ;  it will not need erasing again
 
 .ifdef  FEATURE_FLICKERFREE
         ;///////////////////////////////////////////////////////////////////////
+        ; we've determined that the ship isn't visible *this frame*,
+        ; so erase the old lines from the previous frame and return
+        ;
         jmp _LL155
+
 .else   ;///////////////////////////////////////////////////////////////////////
+        ; the original code erases the ship first,
+        ; so only needs to return at this time
         rts 
 .endif  ;///////////////////////////////////////////////////////////////////////
 
@@ -230,11 +240,11 @@ draw_ship:                                              ; BBC: LL9      ;$9A86
 :       iny                     ; increment heap index (bytes 3-6)      ;$9ABB
         jsr get_random_number
         sta [ZP_SHIP_HEAP], y
-        cpy # $06               ; was this the 6th byte in the heap?
+        cpy # 6                 ; was this the 6th byte in the heap?
         bne :-                  ; if not, keep going
 
-@_EE28: lda ZP_SHIP_ZPOS_SIGN   ; z-sign, i.e. fore or aft to us        ;$9AC5
-        bpl _LL10               ; if visible to us, erase the ship
+@_EE28: lda ZP_SHIP_ZPOS_SIGN   ; ship's z-sign, i.e. fore or aft to us ;$9AC5
+        bpl _LL10               ; if in-front, skip ahead to check FOV
 
         ; fallthrough implies
         ; ship is behind us...
@@ -249,6 +259,7 @@ _LL14:                                                  ; BBC: LL14     ;$9AC9
         lda ZP_SHIP_STATE
         and # state::redraw^$FF
         sta ZP_SHIP_STATE
+
         jmp draw_explosion      ; -> draw explosion cloud
 
 
@@ -809,7 +820,7 @@ _9d45:  sty ZP_VAR_XX17         ; set heap pointer to zero              ;$9D45
 
         ; no faces attached to this vertex are visible,
         ; so the vertex itself does not need to be visible
-:       jmp _9f06                                                       ;$9D8E
+:       jmp _LL50                                                       ;$9D8E
 
 _LL49:                                                  ; BBC: LL49     ;$9D91
         ;=======================================================================
@@ -923,7 +934,7 @@ _LL49:                                                  ; BBC: LL49     ;$9D91
         adc # 0
         sta U
 
-        jmp _9e83
+        jmp _LL57
 
 _9e2a:                                                  ; BBC: LL61     ;$9E2A
         ;=======================================================================
@@ -961,7 +972,7 @@ _9e2a:                                                  ; BBC: LL61     ;$9E2A
 ; ".LL62 ; Arrive from LL65 just below,
 ;  screen for -ve RU onto XX3 heap, index X=CNT"
 ;
-_9e51:                                                  ; BBC: LL62     ;$9E51
+_LL62:                                                  ; BBC: LL62     ;$9E51
         ;=======================================================================
         lda # $80
         sec 
@@ -971,7 +982,7 @@ _9e51:                                                  ; BBC: LL62     ;$9E51
         lda # $00
         sbc U
         sta $0100, x
-        jmp _9ec3
+        jmp _LL66
 
 _LL56:                                                  ; BBC: LL56     ;$9E64
 ;===============================================================================
@@ -985,23 +996,23 @@ _LL56:                                                  ; BBC: LL56     ;$9E64
         lda ZP_SHIP_ZPOS_HI     ; "z hi"
         sbc # 0
         sta U
-        bcc _9e7b               ; "underflow, make node close"
-        bne _9e83               ; "Enter Node additions done, UT=z"
+        bcc _LL140               ; "underflow, make node close"
+        bne _LL57               ; "Enter Node additions done, UT=z"
         
         lda T                   ; "restore z lo"
         cmp # 4                 ; "">= 4?"
-        bcs _9e83               ; "zlo big enough, Enter Node additions done"
+        bcs _LL57               ; "zlo big enough, Enter Node additions done"
 
         ; ".LL140 ; else make node close"
-_9e7b:                                                                  ;$9E7B
-        lda # $00               ; "hi"?
+        ;
+_LL140: lda # $00               ; "hi"?                                 ;$9E7B
         sta U
         lda # $04               ; "lo"?
         sta T
 
         ; scale result down to 8-bits
         ;-----------------------------------------------------------------------
-_9e83:  lda U                                           ; BBC: LL57     ;$9E83
+_LL57:  lda U                                           ; BBC: LL57     ;$9E83
         ora ZP_VAR_XX15_1
         ora ZP_VAR_XX15_4
         beq _LL60
@@ -1012,7 +1023,7 @@ _9e83:  lda U                                           ; BBC: LL57     ;$9E83
         ror ZP_VAR_XX15_3
         lsr U
         ror T
-        jmp _9e83
+        jmp _LL57
 
 _LL60:                                                  ; BBC: LL60     ;$9E9A
 ;===============================================================================
@@ -1026,16 +1037,16 @@ _LL60:                                                  ; BBC: LL60     ;$9E9A
         bcc :+
 
         jsr _9e2a
-        jmp _9ead
+        jmp _LL65
 
         ; ".LL69 ; small x angle"
 :       jsr math_divide_AQ                                              ;$9EAA
 
         ; ".LL65 ; both continue for scaling based on z"
-_9ead:  ldx ZP_TEMP_COUNTER                                             ;$9EAD
+_LL65:  ldx ZP_TEMP_COUNTER                                             ;$9EAD
 
         lda ZP_VAR_XX15_2
-        bmi _9e51
+        bmi _LL62
 
         lda R
         clc 
@@ -1048,7 +1059,7 @@ _9ead:  ldx ZP_TEMP_COUNTER                                             ;$9EAD
 
         ; ".LL66 ; also from LL62, XX3 node heap has xscreen node so far"
         ;
-_9ec3: .phx                     ; push X to stack (via A)               ;$9EC3
+_LL66: .phx                     ; push X to stack (via A)               ;$9EC3
 
         lda # $00
         sta U
@@ -1056,14 +1067,14 @@ _9ec3: .phx                     ; push X to stack (via A)               ;$9EC3
         sta Q
         lda ZP_VAR_XX15_3
         cmp Q
-        bcc _9eec
+        bcc _LL67
 
         jsr _9e2a
-        jmp _9eef
+        jmp _LL68
 
         ; ".LL70 ; arrive from below, Yscreen for -ve RU
         ; onto XX3 node heap, index X=CNT"
-_9ed9:  lda # $48                                                       ;$9ED9
+_LL70:  lda # $48                                                       ;$9ED9
         clc 
         adc R
         sta $0100, x
@@ -1071,17 +1082,17 @@ _9ed9:  lda # $48                                                       ;$9ED9
         lda # $00
         adc U
         sta $0100, x
-        jmp _9f06
+        jmp _LL50
 
         ; ".LL67 ; Arrive from LL66 above if XX15+3 < Q ; small yangle"
-_9eec:  jsr math_divide_AQ                                              ;$9EEC
+_LL67:  jsr math_divide_AQ                                              ;$9EEC
 
         ; ".LL68 ; both carry on, also arrive from LL66, scaling y based on z."
-_9eef:  pla                                                             ;$9EEF
+_LL68:  pla                                                             ;$9EEF
         tax 
         inx 
         lda ZP_VAR_XX15_5
-        bmi _9ed9
+        bmi _LL70
 
         lda # $48
         sec 
@@ -1094,7 +1105,7 @@ _9eef:  pla                                                             ;$9EEF
 
         ; ".LL50 ; also from LL70, Also from LL49-3.
         ; XX3 heap has yscreen, Next vertex."
-_9f06:  clc                                                             ;$9F06
+_LL50:  clc                                                             ;$9F06
         lda ZP_TEMP_COUNTER
         adc # $04
         sta ZP_TEMP_COUNTER
@@ -1123,12 +1134,19 @@ _LL72:                                                  ; BBC: LL72     ;$9F1B
         sta ZP_SHIP_STATE       ;  on the screen, so that the game
         jmp draw_explosion      ;  knows to redraw it to erase it
 
-        ;-----------------------------------------------------------------------
+        ;=======================================================================
+.ifdef  FEATURE_FLICKERFREE
+        ;///////////////////////////////////////////////////////////////////////
+:       ldy # Hull::edge_count
+        lda [ZP_HULL_ADDR], y
+        sta ZP_VAR_XX20
+.else   ;///////////////////////////////////////////////////////////////////////
 :       lda # state::redraw                             ; BBC: EE31     ;$9F2A
         bit ZP_SHIP_STATE
         beq @redraw
 
         jsr _LL155
+.endif  ;///////////////////////////////////////////////////////////////////////
 
         ; set the redraw bit
         lda # state::redraw
