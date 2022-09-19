@@ -3012,7 +3012,7 @@ _79ed:                                                                  ;$79ED
         lda ZP_SHIP01_YPOS_pt1
         clc 
         adc VAR_050E
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda ZP_SHIP01_XPOS_pt3
         adc # $00
         bmi _7a36
@@ -3032,7 +3032,7 @@ _79ed:                                                                  ;$79ED
         and # %11111101
         ora _79a7, x
         sta VIC_SPRITES_X       ;sprites 0-7 msb of x coordinate
-        ldx ZP_TEMP_ADDR_LO
+        ldx ZP_TEMP_ADDR1_LO
         sty VIC_SPRITE1_Y
         stx VIC_SPRITE1_X
         lda VIC_SPRITE_ENABLE
@@ -5048,12 +5048,12 @@ _82be:                                                                  ;$82BE
 
         ; get the Ship address from that index
         lda ship_addrs_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda ship_addrs_hi, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ldy # Ship::attack
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         bpl _82be               ; if bit 7 is unset, check next ship slot
 
         and # %01111111         ; remove the sign
@@ -5064,12 +5064,12 @@ _82be:                                                                  ;$82BE
         sbc # $01               ; adjust for two's compliment
         asl                     ; multiply by 2
         ora # %10000000         ; add the sign on again
-        sta [ZP_TEMP_ADDR], y   ; update the roll value
+        sta [ZP_TEMP_ADDR1], y  ; update the roll value
         bne _82be               ; if not zero, check next ship slot
 
 _82ed:                                                                  ;$82ED
         lda # $00
-        sta [ZP_TEMP_ADDR], y
+        sta [ZP_TEMP_ADDR1], y
         beq _82be               ; if zero, check the next ship slot
 
 _82f3:                                                                  ;$82F3
@@ -5149,12 +5149,12 @@ _834f:                                                                  ;$834F
         asl 
         tay 
         lda hull_pointers - 2, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda hull_pointers - 1, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ldy # $05
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta T
         lda ZP_VAR_P1
         sec 
@@ -5167,35 +5167,35 @@ _834f:                                                                  ;$834F
         asl 
         tay 
         lda ship_addrs_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda ship_addrs_hi, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ldy # $24
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta [ZP_SHIP_ADDR], y
         dey 
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta [ZP_SHIP_ADDR], y
         dey 
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta ZP_VALUE_pt2
         lda ZP_VAR_P2
         sta [ZP_SHIP_ADDR], y
         dey 
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta ZP_VALUE_pt1        ; radius?
         lda ZP_VAR_P1
         sta [ZP_SHIP_ADDR], y
         dey 
 _8399:                                                                  ;$8399
-        lda [ZP_TEMP_ADDR], y
+        lda [ZP_TEMP_ADDR1], y
         sta [ZP_SHIP_ADDR], y
         dey 
         bpl _8399
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sta ZP_SHIP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        lda ZP_TEMP_ADDR1_HI
         sta ZP_SHIP_ADDR_HI
         ldy T
 _83aa:                                                                  ;$83AA
@@ -6646,11 +6646,11 @@ _8ac7:                                                                  ;$8AC7
 
 _8ad9:                                                                  ;$8AD9
         ldy # $00
-        sty ZP_TEMP_ADDR_LO
+        sty ZP_TEMP_ADDR1_LO
         lda # $00
-        stx ZP_TEMP_ADDR_HI
+        stx ZP_TEMP_ADDR1_HI
 
-:       sta [ZP_TEMP_ADDR], y                                          ;$8AE1
+:       sta [ZP_TEMP_ADDR1], y                                          ;$8AE1
         iny 
         bne :-
         rts 

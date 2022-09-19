@@ -27,9 +27,9 @@ ZP_GOATSOUP_pt4         := $05
 ;-------------------------------------------------------------------------------
 
 ZP_TEMP_VAR             := $06  ; a temporary single byte
-ZP_TEMP_ADDR            := $07  ; a temporary word / addr
-ZP_TEMP_ADDR_LO         := $07
-ZP_TEMP_ADDR_HI         := $08
+ZP_TEMP_ADDR1           := $07  ; a temporary word / addr
+ZP_TEMP_ADDR1_LO        := $07
+ZP_TEMP_ADDR1_HI        := $08
 
 ;-------------------------------------------------------------------------------
 ; a "ship" is a runtime 3D object in-play, such as a ship, asteroid or space-

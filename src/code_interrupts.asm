@@ -409,20 +409,20 @@ init_mem:                                                               ;$AAB2
 .import __VARS_MAIN_SIZE__      ; and length
 
         lda #> __VARS_MAIN_RUN__
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; number of whole pages to copy
         ldx #< .page_count( __VARS_MAIN_SIZE__ )
 
         lda #< __VARS_MAIN_RUN__
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         tay                     ;=0
 
-:       sta [ZP_TEMP_ADDR], y                                           ;$AABD
+:       sta [ZP_TEMP_ADDR1], y                                          ;$AABD
         iny
         bne :-
 
-        inc ZP_TEMP_ADDR_HI     ; move to the next page
+        inc ZP_TEMP_ADDR1_HI    ; move to the next page
         dex
         bne :-
 

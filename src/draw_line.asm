@@ -330,16 +330,16 @@ draw_line_horzup:                                                       ;$AC19
 ;       Y will be clobbered with whatever was last saved at `ZP_PRESERVE_Y`!
 ;-------------------------------------------------------------------------------
         ; get the address within the bitmap where we will be drawing,
-        ; stored into `ZP_TEMP_ADDR`
+        ; stored into `ZP_TEMP_ADDR1`
         ;
         lda ZP_LINE_X1          ; horizontal pixel column
         and # %11111000         ; round to 8-bits, i.e. per char cell
         clc 
         adc row_to_bitmap_lo, y ; get bitmap address low-byte
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y ; get bitmap address high-byte
         adc # $00
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         tya                     ; get the pixel row again
         and # %00000111         ; mod 8 (0...7), i.e. row within cell
@@ -390,8 +390,8 @@ _horzup_col0:                                                           ;$AC60
         ;       Y               char cell row no. 0...7
         ;
         lda # %10000000         ; we will set the first pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzup_col0_next:                                                      ;$AC66
 
@@ -412,12 +412,12 @@ _horzup_col0_next:                                                      ;$AC66
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 320
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -433,8 +433,8 @@ _horzup_col1:                                                           ;$AC83
         ;       Y               char cell row no. 0...7
         ;
         lda # %01000000         ; we will set the second pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzup_col1_next:                                                      ;$AC89
 
@@ -455,12 +455,12 @@ _horzup_col1_next:                                                      ;$AC89
 
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 320
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -476,8 +476,8 @@ _horzup_col2:                                                           ;$ACA6
         ;       Y               char cell row no. 0...7
         ;
         lda # %00100000         ; we will set the third pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzup_col2_next:                                                      ;$ACAC
 
@@ -498,12 +498,12 @@ _horzup_col2_next:                                                      ;$ACAC
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 320
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -519,8 +519,8 @@ _horzup_col3:                                                           ;$ACC9
         ;       Y               char cell row no. 0...7
         ;
         lda # %00010000         ; we will set the fourth pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzup_col3_next:                                                      ;$ACCF
 
@@ -541,12 +541,12 @@ _horzup_col3_next:                                                      ;$ACCF
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 320
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -562,8 +562,8 @@ _horzup_col4:                                                           ;$ACEC
         ;       Y               char cell row no. 0...7
         ;
         lda # %00001000         ; we will set the fifth pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzup_col4_next:                                                      ;$ACF2
         dex                     ; one less pixel to draw
@@ -586,12 +586,12 @@ _horzup_col4_next:                                                      ;$ACF2
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 320
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -607,8 +607,8 @@ _horzup_col5:                                                           ;$AD0F
         ;       Y               char cell row no. 0...7
         ;
         lda # %00000100         ; we will set the sixth pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzup_col5_next:                                                      ;$AD15
 
@@ -629,12 +629,12 @@ _horzup_col5_next:                                                      ;$AD15
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 320
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -650,8 +650,8 @@ _horzup_col6:                                                           ;$AD32
         ;       Y               char cell row no. 0...7
         ;
         lda # %00000010         ; we will set the seventh pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzup_col6_next:                                                      ;$AD38
         dex                     ; one less pixel to draw
@@ -672,12 +672,12 @@ _horzup_col6_done:                                                      ;$AD39
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 320
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -693,8 +693,8 @@ _horzup_col7:                                                           ;$AD55
         ;       Y               char cell row no. 0...7
         ;
         lda # %00000001         ; we will set the eighth pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzup_col7_next:                                                      ;$AD5B
 
@@ -715,12 +715,12 @@ _horzup_col7_next:                                                      ;$AD5B
         
         ; subtract 320 from the current bitmap address
         ; i.e. move up one char-cell on the screen
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 320
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 320
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -731,14 +731,14 @@ _horzup_next_char:                                                      ;$AD78
         ;-----------------------------------------------------------------------
         ; move one char-cell to the right
         ; (add 8-bytes to the bitmap address)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $08
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcs :+                  ; moved to the next page?
 
         jmp _horzup_col0        ; begin drawing at column 0
 
-:       inc ZP_TEMP_ADDR_HI     ; increase bitmap hi-byte               ;$AD83
+:       inc ZP_TEMP_ADDR1_HI    ; increase bitmap hi-byte               ;$AD83
         jmp _horzup_col0        ; begin drawing at column 0
 
 line_done2:                                                             ;$AD88
@@ -766,22 +766,22 @@ draw_line_horzdn:                                                       ;$AD8B
         ; for the given X & Y pixel coords:
         ;
         lda row_to_bitmap_hi, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         lda ZP_LINE_X1          ; horizontal pixel column
         and # %11111000         ; round to 8-bits, i.e. per char cell
         adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcc :+
 
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
         clc 
 
 :       sbc # $f7               ; 255 - 8??                             ;$AD9E
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcs :+
 
-        dec ZP_TEMP_ADDR_HI
+        dec ZP_TEMP_ADDR1_HI
 
 :       tya                                                             ;$ADA6
         and # %00000111
@@ -832,8 +832,8 @@ _horzdn_col0:                                                           ;$ADE0
         ;       Y               char cell row no. 0...7
         ;
         lda # %10000000         ; we will set the first pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzdn_col0_next:                                                      ;$ADE6
 
@@ -854,12 +854,12 @@ _horzdn_col0_next:                                                      ;$ADE6
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; set Y to -8 (since we're counting upwards,
         ; it'll hit zero which is fastest to test for)
@@ -876,8 +876,8 @@ _horzdn_col1:                                                           ;$AE03
         ;       Y               char cell row no. 0...7
         ;
         lda # %01000000         ; we will set the second pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzdn_col1_next:                                                      ;$AE09
 
@@ -898,12 +898,12 @@ _horzdn_col1_next:                                                      ;$AE09
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; set Y to -8 (since we're counting upwards,
         ; it'll hit zero which is fastest to test for)
@@ -920,8 +920,8 @@ _horzdn_col2:                                                           ;$AE26
         ;       Y               char cell row no. 0...7
         ;
         lda # %00100000         ; we will set the third pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzdn_col2_next:                                                      ;$AE2C
 
@@ -942,12 +942,12 @@ _horzdn_col2_next:                                                      ;$AE2C
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; set Y to -8 (since we're counting upwards,
         ; it'll hit zero which is fastest to test for)
@@ -964,8 +964,8 @@ _horzdn_col3:                                                           ;$AE49
         ;       Y               char cell row no. 0...7
         ;
         lda # %00010000         ; we will set the fourth pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzdn_col3_next:                                                      ;$AE4F
 
@@ -986,12 +986,12 @@ _horzdn_col3_next:                                                      ;$AE4F
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; set Y to -8 (since we're counting upwards,
         ; it'll hit zero which is fastest to test for)
@@ -1008,8 +1008,8 @@ _horzdn_col4:                                                           ;$AE6C
         ;       Y               char cell row no. 0...7
         ;
         lda # %00001000         ; we will set the fifth pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzdn_col4_next:                                                      ;$AE72
 
@@ -1030,12 +1030,12 @@ _horzdn_col4_next:                                                      ;$AE72
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; set Y to -8 (since we're counting upwards,
         ; it'll hit zero which is fastest to test for)
@@ -1052,8 +1052,8 @@ _horzdn_col5:                                                           ;$AE8F
         ;       Y               char cell row no. 0...7
         ;
         lda # %00000100         ; we will set the sixth pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzdn_col5_next:                                                      ;$AE95
 
@@ -1074,12 +1074,12 @@ _horzdn_col5_next:                                                      ;$AE95
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; set Y to -8 (since we're counting upwards,
         ; it'll hit zero which is fastest to test for)
@@ -1096,8 +1096,8 @@ _horzdn_col6:                                                           ;$AEB2
         ;       Y               char cell row no. 0...7
         ;
         lda # %00000010         ; we will set the seventh pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzdn_col6_next:                                                      ;$AEB8
         dex                     ; one less pixel to draw
@@ -1118,12 +1118,12 @@ _horzdn_col6_done:                                                      ;$AEB9
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; set Y to -8 (since we're counting upwards,
         ; it'll hit zero which is fastest to test for)
@@ -1140,8 +1140,8 @@ _horzdn_col7:                                                           ;$AED5
         ;       Y               char cell row no. 0...7
         ;
         lda # %00000001         ; we will set the eighth pixel
-        eor [ZP_TEMP_ADDR], y   ; flip all pixels, masking the new one
-        sta [ZP_TEMP_ADDR], y   ; write combined pixels to screen
+        eor [ZP_TEMP_ADDR1], y  ; flip all pixels, masking the new one
+        sta [ZP_TEMP_ADDR1], y  ; write combined pixels to screen
 
 _horzdn_col7_next:                                                      ;$AEDB
 
@@ -1162,12 +1162,12 @@ _horzdn_col7_next:                                                      ;$AEDB
         
         ; add 320 to the current bitmap address, i.e. move down one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         adc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; set Y to -8 (since we're counting upwards,
         ; it'll hit zero which is fastest to test for)
@@ -1177,11 +1177,11 @@ _horzdn_col7_next:                                                      ;$AEDB
 
 _horzdn_next_char:                                                      ;$AEF8
         ;-----------------------------------------------------------------------
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $08
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcc :+
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
 
 :       jmp _horzdn_col0                                                ;$AF02
 
@@ -1231,10 +1231,10 @@ draw_line_vert:                                                         ;$AF08
         and # %11111000         ; clip to nearest char-cell (8px each)
         clc 
         adc row_to_bitmap_lo, y ; use the lookup-table to get bitmap
-        sta ZP_TEMP_ADDR_LO     ; address based on the pixel row
-        lda row_to_bitmap_hi, y ; and store in [ZP_TEMP_ADDR]
+        sta ZP_TEMP_ADDR1_LO    ; address based on the pixel row
+        lda row_to_bitmap_hi, y ; and store in `[ZP_TEMP_ADDR1]`
         adc # $00               ; (propogate any overflow from X)
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         ; get the row number (0-7)
         ; within the character cell
@@ -1311,8 +1311,8 @@ draw_line_vert:                                                         ;$AF08
 _vertrt_pixel:                                                          ;$AF88
         ;-----------------------------------------------------------------------
         lda ZP_BE               ; get the current pixel mask
-        eor [ZP_TEMP_ADDR], y   ; mask against the existing pixels
-        sta [ZP_TEMP_ADDR], y   ; write back the new pixels
+        eor [ZP_TEMP_ADDR1], y  ; mask against the existing pixels
+        sta [ZP_TEMP_ADDR1], y  ; write back the new pixels
 
 _vertrt_pixel_next:                                                     ;$AF8E
 
@@ -1321,12 +1321,12 @@ _vertrt_pixel_next:                                                     ;$AF8E
 
         ; subtract 320 from the current bitmap address, i.e. move up one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -1346,11 +1346,11 @@ _vertrt_pixel_next:                                                     ;$AF8E
 
         ; now move to the char-cell to the right
         ; (add 8 to the bitmap address)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         adc # $08
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcc :+
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
         clc 
         
 :       dex                     ; one less pixel to draw                ;$AFB8
@@ -1368,8 +1368,8 @@ _vertlt:                                                                ;$AFBE
 _vertlt_pixel:                                                          ;$AFC4
         ;-----------------------------------------------------------------------
         lda ZP_BE               ; get the current pixel mask
-        eor [ZP_TEMP_ADDR], y   ; mask against the existing
-        sta [ZP_TEMP_ADDR], y   ; write back the new pixels
+        eor [ZP_TEMP_ADDR1], y  ; mask against the existing
+        sta [ZP_TEMP_ADDR1], y  ; write back the new pixels
 
 _vertlt_pixel_next:                                                     ;$AFCA
 
@@ -1378,12 +1378,12 @@ _vertlt_pixel_next:                                                     ;$AFCA
 
         ; subtract 320 from the current bitmap address, i.e. move up one
         ; char-cell on the screen (note that carry is set, so 319 is used)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # < 319
-        sta ZP_TEMP_ADDR_LO
-        lda ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_LO
+        lda ZP_TEMP_ADDR1_HI
         sbc # > 319
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         ; begin at bottom of char-cell, row 7
         ldy # $07
@@ -1403,11 +1403,11 @@ _vertlt_pixel_next:                                                     ;$AFCA
 
         ; now move to the char-cell to the left
         ; (add 8 to the bitmap address)
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # $07
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcs :+
-        dec ZP_TEMP_ADDR_HI
+        dec ZP_TEMP_ADDR1_HI
 
 :       clc                                                             ;$AFF3
 
@@ -1452,16 +1452,16 @@ draw_straight_line:                                                     ;$AFFA
 
         ; get bitmap address:
         and # %00000111
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         txa 
         and # %11111000
         clc 
         adc row_to_bitmap_lo, y
         tay 
         bcc :+
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
 
 :       txa                                                             ;$B025
         and # %11111000
@@ -1483,8 +1483,8 @@ draw_straight_line:                                                     ;$AFFA
 
         ; draw left-hand side
         lda _2907, x
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         ; move to the next char-cell
         ; (add 8 to the bitmap address)
         tya 
@@ -1492,7 +1492,7 @@ draw_straight_line:                                                     ;$AFFA
         tay 
 
         bcc :+
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
 
 :       ldx ZP_BE                                                       ;$B04C
         dex 
@@ -1508,8 +1508,8 @@ draw_straight_line:                                                     ;$AFFA
         ; in:   X               number of char-cells wide to fill
         ;
         lda # %11111111
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
 
         ; add 8 to the bitmap address
         ; i.e. move one char-cell to the right
@@ -1519,7 +1519,7 @@ draw_straight_line:                                                     ;$AFFA
 
         ; catch overflow in the address low-byte
         bcc :+
-        inc ZP_TEMP_ADDR_HI
+        inc ZP_TEMP_ADDR1_HI
         clc 
 
 :       dex                                                             ;$B061
@@ -1531,8 +1531,8 @@ draw_straight_line:                                                     ;$AFFA
         and # %00000111
         tax 
         lda _2900, x
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
 
         ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!
@@ -1557,8 +1557,8 @@ draw_straight_line:                                                     ;$AFFA
         and ZP_C0               ; merge the two masks
 
         ; draw the "line" to screen
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
 
         ldy ZP_PRESERVE_Y       ; restore Y
         rts                     ; line has been drawn!

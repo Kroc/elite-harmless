@@ -8,12 +8,12 @@
 ;
         dey                                                             ;2
         bpl :+                                                          ;3/2
-        lda ZP_TEMP_ADDR_LO                                             ;3
+        lda ZP_TEMP_ADDR1_LO                                            ;3
         sbc #< 320                                                      ;2
-        sta ZP_TEMP_ADDR_LO                                             ;3
-        lda ZP_TEMP_ADDR_HI                                             ;3
+        sta ZP_TEMP_ADDR1_LO                                            ;3
+        lda ZP_TEMP_ADDR1_HI                                            ;3
         sbc #> 320                                                      ;2
-        sta ZP_TEMP_ADDR_HI                                             ;3
+        sta ZP_TEMP_ADDR1_HI                                            ;3
         ldy # 7                                                         ;2
 :       clc                     ; __9.125 (7 + 17/8), 18b
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -25,12 +25,12 @@
 ;
         iny                                                             ;2
         bne :+                                                          ;3/2
-        lda ZP_TEMP_ADDR_LO                                             ;3
+        lda ZP_TEMP_ADDR1_LO                                            ;3
         adc #< 319              ;+carry                                 ;2
-        sta ZP_TEMP_ADDR_LO                                             ;3
-        lda ZP_TEMP_ADDR_HI                                             ;3
+        sta ZP_TEMP_ADDR1_LO                                            ;3
+        lda ZP_TEMP_ADDR1_HI                                            ;3
         adc #> 319                                                      ;2
-        sta ZP_TEMP_ADDR_HI                                             ;3
+        sta ZP_TEMP_ADDR1_HI                                            ;3
         ldy # 248                                                       ;2
 :       clc                                                             ;2
                                 ; __9.125 (5 + 17/8), 17b
@@ -41,11 +41,11 @@
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; carry is and stays clear                                              ;cycles
 ;
-        lda ZP_TEMP_ADDR_LO                                             ;3
+        lda ZP_TEMP_ADDR1_LO                                            ;3
         adc # 8                                                         ;2
-        sta ZP_TEMP_ADDR_LO                                             ;3
+        sta ZP_TEMP_ADDR1_LO                                            ;3
         bcc :+                                                          ;3/2
-        inc ZP_TEMP_ADDR_HI                                             ;5
+        inc ZP_TEMP_ADDR1_HI                                            ;5
         clc                                                             ;2
 :                               ;__11.1875 (11 + 6/32) 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -60,8 +60,8 @@
         sta ZP_HLINE_COUNTER                                            ;3
         txa                                                             ;2
         and # mask              ; and #11100000                         ;2
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
         .hline_next_y_up        ;5.75 for CharV, normal:
         lda ZP_HLINE_COUNTER                                            ;3
         ldx # ($ff - mask)      ; set x to #00011111                    ;2
@@ -83,8 +83,8 @@ nextpos:
 _hline_last_up_trampoline:
 .endif
         beq exit                                                        ;2/3
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
         .hline_next_y_up                                                ;5.75
         lda ZP_HLINE_COUNTER                                            ;3
         ldx # ($ff-mask)        ; set new start of segment              ;2
@@ -101,8 +101,8 @@ nextpos:
         sta ZP_HLINE_COUNTER                                            ;3
         txa                                                             ;2
         and # mask              ; and #11100000                         ;2
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
         .hline_next_y_down                                              ;5.75
         lda ZP_HLINE_COUNTER                                            ;3
         ldx # ($ff - mask)      ; set x to #00011111                    ;2
@@ -124,8 +124,8 @@ nextpos:
 _hline_last_down_trampoline:
 .endif
         beq exit                                                        ;2/3
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
         .hline_next_y_down                                              ;5.75
         lda ZP_HLINE_COUNTER                                            ;3
         ldx # ($ff-mask)        ; mask for already processed bits       ;2
@@ -258,13 +258,13 @@ _hline_draw_after_slope:
         lda ZP_VAR_XX15_0
         sax _hline_begin_bit+1
         and # %11111000         ; start block * 8
-        sta ZP_TEMP_ADDR_LO    
+        sta ZP_TEMP_ADDR1_LO    
 
         lda ZP_VAR_XX15_2
         sax _hline_end_bit+1
         and # %11111000         ; end block * 8
         sec 
-        sbc ZP_TEMP_ADDR_LO     ; sbc begin_block * 8
+        sbc ZP_TEMP_ADDR1_LO    ; sbc begin_block * 8
         lsr 
         lsr 
         lsr 
@@ -295,11 +295,11 @@ _hline_begin_bit:
         ; init screen pointer
         clc 
         lda row_to_bitmap_lo, y
-        adc ZP_TEMP_ADDR_LO     ; at the moment, x%8
-        sta ZP_TEMP_ADDR_LO
+        adc ZP_TEMP_ADDR1_LO    ; at the moment, x%8
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
         adc # 0
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
         
         tya                     ; get the pixel row again
         and # %00000111         ; mod 8 (0...7), i.e. row within cell
@@ -307,11 +307,11 @@ _hline_begin_bit:
         tay                     ; Y = char cell row index
         bcs _hline_skip_down_adjustments
 _hline_down_adjustments:
-        lda ZP_TEMP_ADDR_LO
+        lda ZP_TEMP_ADDR1_LO
         sbc # (255 - 8)
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         bcs :+
-        dec ZP_TEMP_ADDR_HI
+        dec ZP_TEMP_ADDR1_HI
 :       tya 
         ora # %11111000
         tay 
@@ -340,8 +340,8 @@ _hline_up_to0:
         bcc _hline_up_to1                                               ;2/3
         tax                                                             ;2
         lda # %10000000                                                 ;2
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
         .hline_next_y_up                                                ;5.75
         txa                                                             ;2
         ldx # %01111111         ; set new start of segment              ;2
@@ -361,8 +361,8 @@ _hline_up_to7:
         adc ZP_HLINE_SLOPE      ; carry CLEAR: Stay at this y           ;3
         sta ZP_HLINE_COUNTER                                            ;3
         txa                                                             ;2
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
         bcc @skipy              ;_20 + 188/256                          ;2
         .hline_next_y_up                                                ;5.75
 @skipy: .hline_next_x_right                                             ;8
@@ -386,8 +386,8 @@ _hline_last_up_to0:
         bcc _hline_last_up_to1                                          ;2/3
         tax                                                             ;2
         lda # %10000000                                                 ;2
-        eor [ZP_TEMP_ADDR],y                                            ;5.03125
-        sta [ZP_TEMP_ADDR],y                                            ;6
+        eor [ZP_TEMP_ADDR1],y                                           ;5.03125
+        sta [ZP_TEMP_ADDR1],y                                           ;6
         .hline_next_y_up                                                ;5.75
         txa                                                             ;2
         ldx # %01111111         ; set new start of segment              ;2
@@ -407,8 +407,8 @@ _hline_last_up_to7:
         txa                                                             ;2
         and ZP_HLINE_ENDMASK                                            ;3
         beq _hline_exit2                                                ;2/3
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
 _hline_exit2:
         ldy ZP_LINE_RESTORE_Y   ; restore Y
         rts                     ; line has been drawn!
@@ -420,8 +420,8 @@ _hline_down_to0:
         bcc _hline_down_to1                                             ;2/3
         tax                                                             ;2
         lda # %10000000                                                 ;2
-        eor [ZP_TEMP_ADDR],y                                            ;5.03125
-        sta [ZP_TEMP_ADDR],y                                            ;6
+        eor [ZP_TEMP_ADDR1],y                                           ;5.03125
+        sta [ZP_TEMP_ADDR1],y                                           ;6
         .hline_next_y_down                                              ;5.75
         txa                                                             ;2
         ldx # %01111111         ; set new start of segment              ;2
@@ -441,8 +441,8 @@ _hline_down_to7:
         adc ZP_HLINE_SLOPE      ; carry CLEAR: Stay at this Y           ;3
         sta ZP_HLINE_COUNTER                                            ;3
         txa                                                             ;2
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
         bcc @skipy              ;_20 + 188/256                          ;2
         .hline_next_y_down                                              ;5.75
 @skipy: .hline_next_x_right                                             ;8
@@ -464,8 +464,8 @@ _hline_last_down_to0:
         bcc _hline_last_down_to1                                        ;2/3
         tax                                                             ;2
         lda # %10000000                                                 ;2
-        eor [ZP_TEMP_ADDR], y                                           ;5.03125
-        sta [ZP_TEMP_ADDR], y                                           ;6
+        eor [ZP_TEMP_ADDR1], y                                          ;5.03125
+        sta [ZP_TEMP_ADDR1], y                                          ;6
         .hline_next_y_down                                              ;5.75
         txa                                                             ;2
         ldx # %01111111         ; set new start of segment              ;2
@@ -485,8 +485,8 @@ _hline_last_down_to7:
         txa                                                             ;2
         and ZP_HLINE_ENDMASK                                            ;3
         beq _hline_exit4                                                ;2/3
-        eor [ZP_TEMP_ADDR],y                                            ;3
-        sta [ZP_TEMP_ADDR],y                                            ;3
+        eor [ZP_TEMP_ADDR1],y                                           ;3
+        sta [ZP_TEMP_ADDR1],y                                           ;3
 _hline_exit4:
         ldy ZP_LINE_RESTORE_Y   ; restore Y
 _hline_exit4_norestore:     
@@ -526,10 +526,10 @@ _sline_enter:
         ; init dst address (start of block)
         ldy ZP_VAR_XX15_1
         adc row_to_bitmap_lo, y
-        sta ZP_TEMP_ADDR_LO
+        sta ZP_TEMP_ADDR1_LO
         lda row_to_bitmap_hi, y
         adc # 0
-        sta ZP_TEMP_ADDR_HI
+        sta ZP_TEMP_ADDR1_HI
 
         tya 
         and # %00000111
@@ -550,8 +550,8 @@ _sline_beginblock8:
         lda _hline_startmask, x
         ldx ZP_LINE_BLOCKS
 _sline_loop:
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
         tya 
         adc # $08
         tay 
@@ -562,8 +562,8 @@ _sline_loop:
 _sline_lastblock:
         ldx ZP_SLINE_XOFF2
         and _hline_endmask, x
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
 _sline_exit1:
         ldy ZP_LINE_RESTORE_Y
         rts 
@@ -573,8 +573,8 @@ _sline_singleblock:
         lda _hline_startmask, x
         ldx ZP_SLINE_XOFF2
         and _hline_endmask, x
-        eor [ZP_TEMP_ADDR], y
-        sta [ZP_TEMP_ADDR], y
+        eor [ZP_TEMP_ADDR1], y
+        sta [ZP_TEMP_ADDR1], y
 _sline_exit2:
         ldy ZP_LINE_RESTORE_Y
         rts 

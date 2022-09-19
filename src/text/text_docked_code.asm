@@ -274,7 +274,7 @@ _2438:  ; restore state and exit                                        ;$2438
 
 _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
         ;-----------------------------------------------------------------------
-        sta ZP_TEMP_ADDR_LO     ; put token aside
+        sta ZP_TEMP_ADDR1_LO    ; put token aside
 
         ; put aside our current location in the text data
        .phy                     ; push Y to stack (via A)
@@ -302,7 +302,7 @@ _2441:  ; process msg tokens $5B..$80 (planet description tokens)       ;$2441
         ;
 .import _3eac
         
-        ldx ZP_TEMP_ADDR_LO
+        ldx ZP_TEMP_ADDR1_LO
         adc _3eac - $5B, x      ; TODO: use a constant for $5B
         jsr print_docked_str    ; print the new message
 

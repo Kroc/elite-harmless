@@ -341,7 +341,7 @@ _LL10:                                                  ; BBC: LL10     ;$9AE6
 
         ; determine level-of-detail to use:
         ;-----------------------------------------------------------------------
-        ; downscale the Z-position
+        ; downscale the Z-position;
         ; divide ship Z-position by 16:
         ;
         lda ZP_SHIP_ZPOS_LO     ; read Z-position (16-bits) into T.A
@@ -354,7 +354,7 @@ _LL10:                                                  ; BBC: LL10     ;$9AE6
         lsr                     ; divide by 8
         ror T                   ; (ripple to hi-byte)
         lsr                     ; divide by 16
-        bne _9b29               ; 
+        bne :+                  ; 
 
         lda T
         ror 
@@ -367,7 +367,7 @@ _LL10:                                                  ; BBC: LL10     ;$9AE6
         ; read the byte from the ship's hull definition that sets
         ; the LOD-distance at which the ship should become a dot
         ;
-_9b29:  ldy # Hull::lod_distance                                        ;$9B29
+:       ldy # Hull::lod_distance                                        ;$9B29
         lda [ZP_HULL_ADDR], y
         cmp ZP_SHIP_ZPOS_HI     ; compare ship distance (hi) and LOD-distance;
         bcs _LL17               ; if below LOD-distance, draw full wireframe
@@ -376,9 +376,6 @@ _9b29:  ldy # Hull::lod_distance                                        ;$9B29
         and ZP_SHIP_STATE       ; if yes, draw as normal,
         bne _LL17               ;  which will draw the particles
 
-        ; TODO: only place this routine is called,
-        ;       could inline it here
-        ;
         jmp draw_ship_dot       ; if no, draw the ship as a distant dot
 
 
@@ -936,7 +933,7 @@ _LL49:                                                  ; BBC: LL49     ;$9D91
 
         jmp _LL57
 
-_9e2a:                                                  ; BBC: LL61     ;$9E2A
+_LL61:                                                  ; BBC: LL61     ;$9E2A
         ;=======================================================================
         ; ".LL61 ; Handling division R=A/Q for case further down"
         ;
@@ -1036,7 +1033,7 @@ _LL60:                                                  ; BBC: LL60     ;$9E9A
         cmp Q
         bcc :+
 
-        jsr _9e2a
+        jsr _LL61
         jmp _LL65
 
         ; ".LL69 ; small x angle"
@@ -1069,7 +1066,7 @@ _LL66: .phx                     ; push X to stack (via A)               ;$9EC3
         cmp Q
         bcc _LL67
 
-        jsr _9e2a
+        jsr _LL61
         jmp _LL68
 
         ; ".LL70 ; arrive from below, Yscreen for -ve RU
@@ -1214,7 +1211,7 @@ _LL72:                                                  ; BBC: LL72     ;$9F1B
         ;///////////////////////////////////////////////////////////////////////
         jsr redraw_ship_line
 .else   ;///////////////////////////////////////////////////////////////////////
-        ; insert a laser line into the ship's line-heap
+        ; insert a laser line into the ship's line-heap:
         ;
         ldy U                   ; get heap index (next free byte)
         lda ZP_LINE_X1          ; push laser line's X1 co-ordinate
@@ -1239,10 +1236,19 @@ _LL170:                                                 ; BBC: LL170    ;$9F9F
 ;===============================================================================
 ; [10]: calculate which edges are visible:
 ;===============================================================================
+        ; set up a pointer to walk the edge data:
+        ;
+        ; the ship's hull structure contains an offset from
+        ; the beginning of the hull structure to the list of edges
+        ;
+        ; TODO: this field is probably relative because of the way the data
+        ; was assembled separately on BBC; we could make it an absolute
+        ; address for harmless to save a few cycles
+        ;
         ldy # Hull::edge_data_lo
         clc 
-        lda [ZP_HULL_ADDR], y
-        adc ZP_HULL_ADDR_LO
+        lda [ZP_HULL_ADDR], y   ; read lo-byte offset
+        adc ZP_HULL_ADDR_LO     ; add to the hull struct address
         sta ZP_TEMP_ADDR2_LO
 
         ldy # Hull::edge_data_hi
