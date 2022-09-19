@@ -192,8 +192,8 @@ print_target_system_distance:                           ; BBC: TT146    ;$6A68
 .import TKN_FLIGHT_LIGHT_YEARS:direct
         lda # TKN_FLIGHT_LIGHT_YEARS
 
-        ; fallthrough...
-        ;
+        ; fallthrough
+        ; ...
 
 print_flight_token_and_newpara:                         ; BBC: TT60     ;$6A84
 ;===============================================================================
@@ -203,8 +203,8 @@ print_flight_token_and_newpara:                         ; BBC: TT60     ;$6A84
 ;-------------------------------------------------------------------------------
         jsr print_flight_token
 
-        ; fallthrough...
-        ;
+        ; fallthrough
+        ; ...
 
 print_newpara:                                          ; BBC: TTX69    ;$6A87
 ;===============================================================================
@@ -213,16 +213,16 @@ print_newpara:                                          ; BBC: TTX69    ;$6A87
 ;-------------------------------------------------------------------------------
        .cursor_down             ; move cursor down a row,
                                 ; but does not reset col
-        ; fallthrough...
-        ;
+        ; fallthrough
+        ; ...
 
 print_newline_para:                                     ; BBC: TT69     ;$6A8A
 ;===============================================================================
         lda # %10000000         ; set bit 7 - sentance case
         sta ZP_PRINT_CASE
 
-        ; fallthrough...
-        ;
+        ; fallthrough
+        ; ...
 
 print_newline:                                          ; BBC: TT67     ;$6A8E
 ;===============================================================================
@@ -618,8 +618,8 @@ get_system_info:                                        ; BBC: TT24     ;$6BA9
         adc # $03               ;  add a floor of 3 (in case of zero)
         sta ZP_VAR_P            ;  put this aside for multiplication
 
-        lda TSYSTEM_GOVERNMENT  ; use the government as the other
-        adc # $04               ;  side of the equation; with a floor
+        lda TSYSTEM_GOVERNMENT  ; use the government as the other side
+        adc # $04               ;  of the equation; with a floor
         sta Q                   ;  of 4 (in case of zero)
 
         jsr multiply_unsigned_PQ
@@ -724,9 +724,9 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
 ;===============================================================================
 ; draws a cross-hair:
 ;
-; in:   ZP_8E           cross-hair X-position
-;       ZP_8F           cross-hair Y-position
-;       ZP_90           cross-hair size
+; in:   ZP_8E                   cross-hair X-position
+;       ZP_8F                   cross-hair Y-position
+;       ZP_90                   cross-hair size
 ;-------------------------------------------------------------------------------
         lda # 24                ; a default offset of 24. why?
         ldx ZP_SCREEN           ; check current screen
@@ -2238,8 +2238,8 @@ give_cash:                                                              ;$7481
 ;===============================================================================
 ; give the player cash:
 ; 
-; in:   X       cash-value, lo-byte
-;       Y       cash-value, hi-byte
+; in:   X                       cash-value, lo-byte
+;       Y                       cash-value, hi-byte
 ;-------------------------------------------------------------------------------
 .export give_cash
 
@@ -6978,10 +6978,12 @@ _8c61:                                                                  ;$8C61
         rts                     ; not needed due to `jmp` above
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-;===============================================================================
-; include code from "code_keyboard.inc"
-;
-.clear_keyboard                                                         ;$8C6D
+
+; NOTE: in the original code, segment "CODE_8C6D" appears here          ;$8C6D
+
+
+.segment        "CODE_8C7A"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -7068,12 +7070,12 @@ _8cc2:                                                                  ;$8CC2
         sta ZP_VAR_XX15_2
         rts 
 
-;===============================================================================
-; insert code from "code_keyboard.inc"
-;
-.key_states                                                             ;$8D0C
-.get_input                                                              ;$8D53
 
+; NOTE: in the original code, segment "CODE_8D0C" appears here          ;$8D0C
+
+
+.segment        "CODE_8E29"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 do_quickjump:                                                           ;$8E29
 ;===============================================================================

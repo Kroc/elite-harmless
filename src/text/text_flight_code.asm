@@ -2,8 +2,6 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "text_code_flight.asm":
-;
 
 _7717:                                                                  ;$7717
 ;===============================================================================
@@ -118,12 +116,18 @@ print_flight_token_with_colon:                                          ;$7779
 ;-------------------------------------------------------------------------------
         jsr print_flight_token
 
+        ; fallthrough
+        ; ...
+
 print_colon:                                                            ;$777C
 ;===============================================================================
 ; prints a colon, nothing else:
 ;
 ;-------------------------------------------------------------------------------
         lda # ':'
+
+        ; fallthrough
+        ; ...
 
 print_flight_token:                                                     ;$777E
 ;===============================================================================
@@ -345,12 +349,15 @@ _print_str:                                                             ;$77F9
         ; token messages 160+; subtract 160 for the message index
         sbc # 160
 
+        ; fallthrough
+        ; ...
+
 print_canned_message:                                                   ;$7813
-        ;=======================================================================
-        ; prints a canned message from the messages table
-        ;
-        ; in:   A       message index
-        ;
+;===============================================================================
+; prints a canned message from the messages table:
+;
+; in:   A                       message index
+;-------------------------------------------------------------------------------
         tax                     ; put the message index aside
 
         ; select the table of canned-messages

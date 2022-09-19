@@ -1,8 +1,7 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;
-; "code_keyboard.inc":
+;===============================================================================
 ;
 ; pieces of code relating to reading the hardware keyboard:
 ; (not key processing, which is handled throughout the code)
@@ -72,9 +71,9 @@
 ;
 .define .key_index( key_addr ) (key_addr - key_states)
 
-.macro  .key_states
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-; keyboard keys:
+.segment        "CODE_8D0C"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; keyboard keys:                                                        ;$8D0C
 ;
 ; map semantic names to the desired key-state memory locations.
 ; this lets you very easily remap controls for compile time
@@ -226,11 +225,7 @@ key_del:        .byte   '1'     ;=$40 - DELETE                          ;$8D4C
                 .byte   '7'                                             ;$8D52
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
 
-.macro  .get_input
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 get_input:                                                              ;$8D53
 ;===============================================================================
 ; read joystick & keyboard input:
@@ -432,11 +427,10 @@ get_input:                                                              ;$8D53
 
         rts 
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
 
-.macro  .clear_keyboard
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+.segment        "CODE_8C6D"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 clear_keyboard:                                                         ;$8C6D
 ;===============================================================================
 ; clear the keyboard state table:
@@ -450,6 +444,3 @@ clear_keyboard:                                                         ;$8C6D
         bpl :-                  ; keep going until all 64 are done
 
         rts 
-
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
