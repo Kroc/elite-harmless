@@ -409,7 +409,7 @@ echo "[OK]"
 #===============================================================================
 
 echo "  --------------------------------------"
-echo "* exomize:"
+echo "* elite-harmless-orig.d64:"
 echo "  --------------------------------------"
 
 # NB: `lda #$00 sta $d011` turns the screen "off" so no background is
@@ -417,7 +417,7 @@ echo "  --------------------------------------"
 # we don't need to turn the screen back on afterwards as Elite
 # does this itself during initialisation
 
-echo -n "- harmless-orig.prg                 "
+echo -n "- compress binaries...              "
 $exomizer \
     -s "lda #\$00 sta \$d011 sta \$d020" \
     -X "inc \$d020 dec \$d020" \
@@ -425,7 +425,19 @@ $exomizer \
     -- "build/harmless-orig.prg"
 echo "[OK]"
 
-echo -n "- harmless.prg                      "
+echo -n "- make floppy disk...               "
+$mkd64 \
+    -o release/elite-harmless-orig.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f build/harmless-orig.exo -t 17 -s 0 -n "HARMLESS" \
+    -P -w 1>/dev/null
+echo "[OK]"
+
+echo "  --------------------------------------"
+echo "* elite-harmless.d64:"
+echo "  --------------------------------------"
+
+echo -n "- compress binaries...              "
 $exomizer \
     -s "lda #\$00 sta \$d011 sta \$d020" \
     -X "inc \$d020 dec \$d020" \
@@ -433,7 +445,19 @@ $exomizer \
     -- "build/harmless.prg"
 echo "[OK]"
 
-echo -n "- harmless-fastlines.prg            "
+echo -n "- make floppy disk...               "
+$mkd64 \
+    -o release/elite-harmless.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f build/harmless.exo -t 17 -s 0 -n "HARMLESS" \
+    -P -w 1>/dev/null
+echo "[OK]"
+
+echo "  --------------------------------------"
+echo "* elite-harmless-fastlines.d64:"
+echo "  --------------------------------------"
+
+echo -n "- compress binaries...              "
 $exomizer \
     -s "lda #\$00 sta \$d011 sta \$d020" \
     -X "inc \$d020 dec \$d020" \
@@ -441,13 +465,37 @@ $exomizer \
     -- "build/harmless-fastlines.prg"
 echo "[OK]"
 
-echo -n "- harmless-hiram.prg                "
+echo -n "- make floppy disk...               "
+$mkd64 \
+    -o release/elite-harmless-fastlines.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f build/harmless-fastlines.exo -t 17 -s 0 -n "HARMLESS" \
+    -P -w 1>/dev/null
+echo "[OK]"
+
+echo "  --------------------------------------"
+echo "* elite-harmless-hiram.d64:"
+echo "  --------------------------------------"
+
+echo -n "- compress binaries...              "
 $exomizer \
     -s "lda #\$00 sta \$d011 sta \$d020" \
     -X "inc \$d020 dec \$d020" \
     -o "build/harmless-hiram.exo" \
     -- "build/harmless-hiram.prg"
 echo "[OK]"
+
+echo -n "- make floppy disk...               "
+$mkd64 \
+    -o release/elite-harmless-hiram.d64 \
+    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+    -f build/harmless-hiram.exo -t 17 -s 0 \
+    -n "HARMLESS" -P -w 1>/dev/null
+echo "[OK]"
+
+echo "  --------------------------------------"
+echo "* elite-harmless-hiram-fastlines.d64:"
+echo "  --------------------------------------"
 
 echo -n "- harmless-hiram-fastlines.prg      "
 $exomizer \
@@ -457,45 +505,7 @@ $exomizer \
     -- "build/harmless-hiram-fastlines.prg"
 echo "[OK]"
 
-#===============================================================================
-
-echo "  --------------------------------------"
-echo "* floppy:"
-echo "  --------------------------------------"
-
-echo -n "- elite-harmless-orig.d64           "
-$mkd64 \
-    -o release/elite-harmless-orig.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f build/harmless-orig.exo -t 17 -s 0 -n "HARMLESS" \
-    -P -w 1>/dev/null
-echo "[OK]"
-
-echo -n "- elite-harmless.d64                "
-$mkd64 \
-    -o release/elite-harmless.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f build/harmless.exo -t 17 -s 0 -n "HARMLESS" \
-    -P -w 1>/dev/null
-echo "[OK]"
-
-echo -n "- elite-harmless-fastlines.d64      "
-$mkd64 \
-    -o release/elite-harmless-fastlines.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f build/harmless-fastlines.exo -t 17 -s 0 -n "HARMLESS" \
-    -P -w 1>/dev/null
-echo "[OK]"
-
-echo -n "- elite-harmless-hiram.d64          "
-$mkd64 \
-    -o release/elite-harmless-hiram.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f build/harmless-hiram.exo -t 17 -s 0 \
-    -n "HARMLESS" -P -w 1>/dev/null
-echo "[OK]"
-
-echo -n "- elite-harmless-hiram-fastlines.d64"
+echo -n "- make floppy disk...               "
 $mkd64 \
     -o release/elite-harmless-hiram-fastlines.d64 \
     -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
@@ -507,6 +517,7 @@ echo "[OK]"
 
 # annoyingly `cl65` will always place object files in the same directory
 # as the source file, so we need to clean these out of "src" ourselves
+echo "  ======================================"
 echo -n "- cleaning up...                    "
 
 rm -f src/*.o
@@ -517,7 +528,6 @@ rm -f src/text/*.o
 
 echo "[OK]"
 
-echo "  ======================================"
 echo "* complete."
 echo 
 exit 0
