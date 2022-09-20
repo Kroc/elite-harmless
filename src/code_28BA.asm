@@ -3916,7 +3916,7 @@ mission_trumbles:                                                       ;$3DC0
         lda # MSG_DOCKED_MISSION_TRUMBLES
         jsr print_docked_str
 
-        jsr _81ee
+        jsr _TT17
         bcc _3d8a
 
         ldy # $c3

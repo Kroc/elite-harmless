@@ -28,6 +28,9 @@ check_cargo_capacity_add1:                                              ;$6A00
         sta CARGO_ITEM          ; item index?
         lda # $01
 
+        ; fallthrough
+        ; ...
+
 check_cargo_capacity:                                   ; BBC: tnpr     ;$6A05
 ;===============================================================================
 ; check if a purchase would fit your cargo hold:
@@ -684,8 +687,7 @@ galactic_chart:                                         ; BBC: TT22     ;$6C1C
         ; draw stars on chart:
         ;-----------------------------------------------------------------------
         ldx # $00
-_6c40:                                                                  ;$6C40
-        stx ZP_PRESERVE_X       ; backup current star index?
+:       stx ZP_PRESERVE_X       ; backup current star index?            ;$6C40
 
         ldx ZP_SEED_W1_HI
         ldy ZP_SEED_W2_LO
@@ -705,7 +707,7 @@ _6c40:                                                                  ;$6C40
         
         ldx ZP_PRESERVE_X       ; retrieve star index
         inx                     ; move to next star
-       .bnz _6c40               ; more stars to draw?
+       .bnz :-                  ; more stars to draw?
 
         ;-----------------------------------------------------------------------
 
@@ -717,8 +719,8 @@ _6c40:                                                                  ;$6C40
         lda # $04
         sta ZP_90
 
-        ; fallthrough...
-        ;
+        ; fallthrough
+        ; ...
 
 draw_crosshair:                                         ; BBC: TT15     ;$6C6D
 ;===============================================================================
@@ -1237,19 +1239,19 @@ inventory_screen:                                                       ;$6F16
         jsr print_fuel_and_cash
         lda SHIP_HOLD           ; cargo capacity of the player's ship
         cmp # $1a
-        bcc _6f37
+        bcc :+
 
 .import TKN_FLIGHT_LARGE_CARGO_BAY:direct
         lda # TKN_FLIGHT_LARGE_CARGO_BAY
         jsr print_flight_token
-_6f37:                                                                  ;$6F37
-        jmp _6e58
 
-;===============================================================================
+:       jmp _6e58                                                       ;$6F37
+
 
 ; dead code?
-
+;
 _6f3a:                                                                  ;$6F3a
+;===============================================================================
         jsr print_flight_token
 
         ; print "(Y/N)?"
@@ -1260,18 +1262,16 @@ _6f3a:                                                                  ;$6F3a
         jsr _8fea
         ora # %00100000
         cmp # $79
-        beq _6f50
+        beq :+
 
         lda # $6e               ;="N"
         jmp print_char
-_6f50:                                                                  ;$6F50
-        jsr print_char
+:       jsr print_char                                                  ;$6F50
         sec 
         rts 
 
-;===============================================================================
-
 _6f55:                                                                  ;$6F55
+;===============================================================================
        .phx                     ; push X to stack (via A)
         dey 
         tya 
@@ -1298,7 +1298,9 @@ _6f55:                                                                  ;$6F55
         lda ZP_92
         sta TSYSTEM_POS_X
         sta ZP_8E
+
 _6f82:                                                                  ;$6F82
+;===============================================================================
         lda ZP_SCREEN
         bmi _6fa9
 
@@ -1311,7 +1313,9 @@ _6f82:                                                                  ;$6F82
         sta ZP_90
         jmp draw_crosshair
 
+
 _6f98:                                                                  ;$6F98
+;===============================================================================
         sta ZP_92
         clc 
         adc ZP_91
@@ -1360,7 +1364,7 @@ _6fce:                                                                  ;$6FCE
 
 local_chart:                                                            ;$6FDB
 ;===============================================================================
-; short-range (local) chart
+; short-range (local) chart:
 ;
 ;-------------------------------------------------------------------------------
         ; set the clipping height?
@@ -3656,7 +3660,7 @@ project_ship:                                           ; BBC: PROJ     ;$7D1F
         lda ZP_SHIP_XPOS_HI
         sta ZP_VAR_P2
         lda ZP_SHIP_XPOS_SIGN
-        jsr _81c9
+        jsr _PLS6
         bcs _7d56
         lda ZP_VALUE_pt1        ; radius?
         adc # $80
@@ -3670,7 +3674,7 @@ project_ship:                                           ; BBC: PROJ     ;$7D1F
         sta ZP_VAR_P2
         lda ZP_SHIP_YPOS_SIGN
         eor # %10000000
-        jsr _81c9
+        jsr _PLS6
         bcs _7d56
 
         lda ZP_VALUE_pt1        ; radius?
@@ -3691,7 +3695,7 @@ _7d57:                                                                  ;$7D57
         lda ZP_SHIP_TYPE
         lsr 
         bcs _7d5f
-        jmp _80bb
+        jmp _WPLS2
 
 _7d5f:                                                                  ;$7D5F
         jmp wipe_sun
@@ -3723,8 +3727,8 @@ _7d84:                                                                  ;$7D84
         jmp draw_sun
 
 _7d8c:                                                                  ;$7D8C
-        jsr _80bb
-        jsr _8044
+        jsr _WPLS2
+        jsr draw_planet_outline
         bcs _7d98
         lda ZP_VALUE_pt2
         beq _7d99
@@ -3744,38 +3748,38 @@ _7d99:                                                                  ;$7D99
         eor # %10000000
         sta ZP_VAR_P1
         lda ZP_SHIP_M1x2_HI
-        jsr _81aa
+        jsr _PLS4
         ldx # $09
-        jsr _7e36
+        jsr _PLS1
         sta ZP_B2
         sty $45
-        jsr _7e36
+        jsr _PLS1
         sta ZP_B3
         sty ZP_ROTATE_M2x0_HI
         ldx # $0f
-        jsr _81ba
+        jsr _PLS5
         jsr _7e54
         lda ZP_SHIP_M0x2_HI
         eor # %10000000
         sta ZP_VAR_P1
         lda ZP_SHIP_M2x2_HI
-        jsr _81aa
+        jsr _PLS4
         ldx # $15
-        jsr _81ba
+        jsr _PLS5
         jmp _7e54
 
 _7de0:                                                                  ;$7DE0
         lda ZP_SHIP_M1x2_HI
         bmi _7d98
         ldx # $0f
-        jsr _8189
+        jsr _PLS3
         clc 
         adc ZP_SHIP01_XPOS_pt1
         sta ZP_SHIP01_XPOS_pt1
         tya 
         adc ZP_SHIP01_XPOS_pt2
         sta ZP_SHIP01_XPOS_pt2
-        jsr _8189
+        jsr _PLS3
         sta ZP_VAR_P1
 
         lda ZP_CIRCLE_YPOS_LO
@@ -3790,20 +3794,20 @@ _7de0:                                                                  ;$7DE0
         sta ZP_CIRCLE_YPOS_HI
 
         ldx # $09
-        jsr _7e36
+        jsr _PLS1
         lsr 
         sta ZP_B2
         sty $45
-        jsr _7e36
+        jsr _PLS1
         lsr 
         sta ZP_B3
         sty ZP_ROTATE_M2x0_HI
         ldx # $15
-        jsr _7e36
+        jsr _PLS1
         lsr 
         sta ZP_B4
         sty ZP_ROTATE_M2x1_LO
-        jsr _7e36
+        jsr _PLS1
         lsr 
         sta ZP_B5
         sty ZP_ROTATE_M2x1_HI
@@ -3813,7 +3817,9 @@ _7de0:                                                                  ;$7DE0
         sta ZP_AB
         jmp _7e58
 
-_7e36:                                                                  ;$7E36
+
+_PLS1:                                                  ; BBC: PLS1     ;$7E36
+;===============================================================================
         lda ZP_SHIP_XPOS_LO, x
         sta ZP_VAR_P1
         lda ZP_SHIP_XPOS_HI, x
@@ -3839,7 +3845,7 @@ _7e58:                                                                  ;$7E58
         ldx # $00
         stx ZP_TEMP_COUNTER
         dex 
-        stx ZP_A9
+        stx ZP_CIRCLE_FLAG
 _7e5f:                                                                  ;$7E5F
         lda ZP_AB
         and # %00011111
@@ -4329,8 +4335,10 @@ _7f67:                                                                  ;$7F67
         ;///////////////////////////////////////////////////////////////////////
         lda # $00               ; clear the line from the sun-buffer,
         sta SUN_BUFFER, y       ;  and move to the next
-.endif  ;///////////////////////////////////////////////////////////////////////
         beq @next               ; (always branches)
+.else   ;///////////////////////////////////////////////////////////////////////
+        bcs @next               ; (always branches)
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 @_801c:                                                                 ;$801C
         ;-----------------------------------------------------------------------
@@ -4361,30 +4369,45 @@ _7f67:                                                                  ;$7F67
         lda ZP_CIRCLE_XPOS_HI
         sta ZP_SUNX_HI
 
-_8043:  rts                                                             ;$8043
+:       rts                                                             ;$8043
 
 
-_8044:                                                                  ;$8044
+draw_planet_outline:                                    ; BBC: CIRCLE   ;$8044
 ;===============================================================================
-        jsr check_circle
-        bcs _8043               ; circle not valid? exit (RTS above us)
+; draw a planet's circle:
+;
+; this routine prepares the circle parameters for drawing a planet,
+; before falling through to the routine that actually draws circles 
+;
+; in:   ZP_CIRCLE_XPOS          X-position (signed, 16-bit), 0 is viewport top
+;       ZP_CIRCLE_YPOS          Y-position (signed, 16-bit), 0 is viewport left
+;       ZP_CIRCLE_RADIUS        radius (16-bit)
+;-------------------------------------------------------------------------------
+        jsr check_circle        ; check the circle bounds for visibility
+        bcs :-                  ; circle not visible? exit (RTS above us)
 
         lda # $00
         sta circle_lines_x
 
-        ldx ZP_VALUE_pt1
-        lda # $08
-        cpx # $08
-        bcc _805c
-        lsr 
-        cpx # $3c
-        bcc _805c
-        lsr 
-_805c:                                                                  ;$805C
-        sta ZP_CIRCLE_STEP
-
-        ; fallthrough...
+        ; change the number of lines used to draw the circle depending upon
+        ; visible size:
         ;
+        ldx ZP_CIRCLE_RADIUS    ; circle radius
+        lda # 8                 ; set circle-step to 8
+        cpx # 8                 ; circle radius < 8px?
+        bcc :+                  ; for radius < 8px, use circle-step of 8
+        lsr                     ; set circle-step to 4 (divide A by 2)
+        cpx # 60                ; circle radius < 60px?
+        bcc :+                  ; for radius < 60px, use circle-step of 4
+        lsr                     ; set circle-step to 2 (divide A by 2)
+
+        ; fallthrough implies radius >= 60px,
+        ; use a circle-step of 2
+
+:       sta ZP_CIRCLE_STEP                                              ;$805C
+
+        ; fallthrough
+        ; ...
 
 draw_circle:                                            ; BBC: CIRCLE2  ;$805E
 ;===============================================================================
@@ -4424,7 +4447,7 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
 ;       to the other quarters?
 ;-------------------------------------------------------------------------------
         ldx # $ff               ; set flag to reset ball-line heap
-        stx ZP_A9
+        stx ZP_CIRCLE_FLAG
         inx                     ; reset counter for ball-lines,
         stx ZP_TEMP_COUNTER     ; draw the circle from the bottom
 
@@ -4456,10 +4479,10 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         txa                     ; retrieve our lo-byte again
         clc                     ;  before continuing
 
-        ; centre the circle by adding the x-position to the value
+        ; centre the circle by adding the X-position to the value
         ; we just calculated and storing the result in K6
         ;
-:       adc ZP_CIRCLE_XPOS_LO   ; add the x-position lo-byte            ;$8081
+:       adc ZP_CIRCLE_XPOS_LO   ; add the X-position lo-byte            ;$8081
         sta ZP_VAR_K6           ;  to the current lo-byte in A
         lda ZP_CIRCLE_XPOS_HI   ; now do the hi-bytes
         adc T
@@ -4525,12 +4548,16 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         rts 
 
 
-_80bb:                                                                  ;$80BB
-        ldy circle_lines_x
-        bne _80f5
-_80c0:                                                                  ;$80C0
+_WPLS2:                                                 ; BBC: WPLS2    ;$80BB
+;===============================================================================
+        ; has a circle been drawn before? check first byte of circle-line
+        ; buffer; non-zero means empty, so skip ahead
+        ldy circle_lines_x      
+        bne rest_circle_line_buffer
+
+_80c0:                                                  ; BBC: WPL1     ;$80C0
         cpy ZP_CIRCLE_INDEX
-        bcs _80f5
+        bcs rest_circle_line_buffer
 
         lda circle_lines_y, y
         cmp # $ff
@@ -4563,19 +4590,23 @@ _80e6:                                                                  ;$80E6
         iny 
         jmp _80c0
 
-_80f5:                                                                  ;$80F5
+
+rest_circle_line_buffer:                                ; BBC: WP1      ;$80F5
+;===============================================================================
+; reset the circle line buffer:
+;-------------------------------------------------------------------------------
         lda # $01
-        sta ZP_CIRCLE_INDEX
-        lda # $ff
-        sta circle_lines_x
-_80fe:                                                                  ;$80FE
-        rts 
+        sta ZP_CIRCLE_INDEX     ; reset index
+        lda # $ff               ; write $FF to the first X-pos byte
+        sta circle_lines_x      ;  to indicate an empty line buffer
+
+:       rts                                                             ;$80FE
 
 
-wipe_sun:                                                               ;$80FF
+wipe_sun:                                               ; BBC: WPLS     ;$80FF
 ;===============================================================================
         lda SUN_BUFFER
-        bmi _80fe               ; $FF = nothing to draw, exit
+        bmi :-                  ; $FF = nothing to draw, exit
 
         ; copy sun's horizontal position to YY-LO/HI,
         ; as this is what the drawing operations use
@@ -4600,11 +4631,11 @@ wipe_sun:                                                               ;$80FF
         rts 
 
 
-clip_sun_line:                                                          ;$811E
+clip_sun_line:                                          ; BBC: EDGES    ;$811E
 ;===============================================================================
 ; clip a centred, horizontal line so that it fits within the viewport. this
-; routine is used when drawing circles as that is stored as a centre-point
-; and a series of half-widths for each scanline to trace the shape
+; routine is used when drawing the sun as that is stored as a centre-point
+; and a series of half-widths (radii) for each scanline to trace the shape
 ;
 ; note that YY is a signed 16-bit number because the sun can be so large as to
 ; be way off the sides of the screen, but still be partially visible on screen
@@ -4616,7 +4647,6 @@ clip_sun_line:                                                          ;$811E
 ;       ZP_VAR_XX15_0   X-position (viewport) of the left end of the line
 ;       ZP_VAR_XX15_2   X-position (viewport) of the right end of the line
 ;       Y               (preserved)
-;
 ;-------------------------------------------------------------------------------
         sta T                   ; put aside half-width
 
@@ -4668,7 +4698,7 @@ clip_sun_line:                                                          ;$811E
         rts 
 
 
-check_circle:                                                           ;$814F
+check_circle:                                           ; BBC: CHKON    ;$814F
 ;===============================================================================
 ; check a circle (to be drawn) is visible:
 ;
@@ -4677,8 +4707,8 @@ check_circle:                                                           ;$814F
 ;
 ; NOTE: for simplicity in calculations, the signed 16-bit circle X/Y position
 ;       of 0 matches position 0 in the *viewport*, so the 16-bit range is not
-;       exactly centred, and coordinates are relative to the viewport (0-256),
-;       not the C64's screen (0-320 px)
+;       exactly centred, and coordinates are relative to the viewport (0-255),
+;       not the C64's screen (0-319 px)
 ;
 ; in:   ZP_CIRCLE_XPOS          signed 16-bit X-position
 ;       ZP_CIRCLE_YPOS          signed 16-bit Y-position
@@ -4706,7 +4736,7 @@ check_circle:                                                           ;$814F
         adc ZP_CIRCLE_RADIUS    ; add the radius (i.e. bottom of circle)
         lda ZP_CIRCLE_XPOS_HI   ; circle X-position, hi-byte
         adc # 0                 ; (ripple the carry)
-        bmi _8187               ; if still negative, circle is not visible!
+        bmi _PL21               ; if still negative, circle is not visible!
 
         ; the circle will become invisible if the left-edge goes off
         ; the right-edge of the screen, indicated by the hi-byte of
@@ -4718,7 +4748,7 @@ check_circle:                                                           ;$814F
         lda ZP_CIRCLE_XPOS_HI   ; circle X-position, hi-byte
         sbc # 0                 ; (ripple the carry)
         bmi :+                  ; the left-edge is allowed to be off-screen
-        bne _8187               ; left-edge is > 255, circle is not visible!
+        bne _PL21               ; left-edge is > 255, circle is not visible!
 
         ; the circle will become invisible if the circle's bottom-edge goes
         ; off the top of the viewport. the 16-bit Y-position of the circle's
@@ -4730,7 +4760,7 @@ check_circle:                                                           ;$814F
         sta ZP_VAR_P2           ; save bottom of circle, lo-byte for drawing
         lda ZP_CIRCLE_YPOS_HI   ; get circle Y-position, hi-byte
         adc # 0                 ; (ripple the carry)
-        bmi _8187               ; if negative, the bottom is above the top!
+        bmi _PL21               ; if negative, the bottom is above the top!
         sta ZP_VAR_P3           ; save bottom of circle, hi-byte for drawing
 
         ; the circle will become invisible if the circle's top-edge goes off
@@ -4745,9 +4775,9 @@ check_circle:                                                           ;$814F
         tax                     ; put this (signed value) aside
         lda ZP_CIRCLE_YPOS_HI   ; get circle Y-position, hi-byte
         sbc # 0                 ; (ripple the carry)
-        bmi _81ec               ; the top-egde is allowed to be off-screen
+        bmi _PL44               ; the top-egde is allowed to be off-screen
                                 ; -- circle is visible (jump to CLC, RTS)
-        bne _8187               ; top-edge is > 255, circle is not visible!
+        bne _PL21               ; top-edge is > 255, circle is not visible!
         
         ; lastly, although we have determined the circle's top-edge is within
         ; 0-255, the viewport is shorter than that, so do one final check:
@@ -4757,86 +4787,118 @@ check_circle:                                                           ;$814F
 
         ; circle is invisible (outside bounds)
         ;-----------------------------------------------------------------------
-_8187:  sec                     ; return carry set                      ;$8187
+_PL21:  sec                     ; return carry set                      ;$8187
         rts 
 
 
-_8189:                                                                  ;$8189
+_PLS3:                                                  ; BBC: PLS3     ;$8189
 ;===============================================================================
-        jsr _7e36
+        jsr _PLS1
         sta ZP_VAR_P1
+
         lda # $de
         sta Q
         stx U
         jsr multiply_unsigned_PQ
+        
         ldx U
         ldy ZP_VALUE_pt4
-        bpl _81a7
+        bpl :+
         eor # %11111111
         clc 
         adc # $01
-        beq _81a7
+        beq :+
+        
         ldy # $ff
         rts 
 
-_81a7:                                                                  ;$81A7
-        ldy # $00
+:       ldy # $00                                                       ;$81A7
         rts 
 
-_81aa:                                                                  ;$81AA
+
+_PLS4:                                                  ; BBC: PLS4     ;$81AA
+;===============================================================================
         sta Q
         jsr _3c95
         ldx ZP_SHIP_M0x2_HI
-        bmi _81b5
+        bmi :+
         eor # %10000000
-_81b5:                                                                  ;$81B5
-        lsr 
+:       lsr                                                             ;$81B5
         lsr 
         sta ZP_AB
         rts 
 
-_81ba:                                                                  ;$81BA
-        jsr _7e36
+
+_PLS5:                                                  ; BBC: PLS5     ;$81BA
+;===============================================================================
+        jsr _PLS1
         sta ZP_B4
         sty ZP_ROTATE_M2x1_LO
-        jsr _7e36
+
+        jsr _PLS1
         sta ZP_B5
         sty ZP_ROTATE_M2x1_HI
+
         rts 
 
-_81c9:                                                                  ;$81C9
+
+_PLS6:                                                  ; BBC: PLS6     ;$81C9
+;===============================================================================
         jsr _3bc1
+
         lda ZP_VALUE_pt4
         and # %01111111
         ora ZP_VALUE_pt3
-        bne _8187
+        bne _PL21
+
         ldx ZP_VALUE_pt2
         cpx # $04
-        bcs _81ed
+        bcs _PL6
+
         lda ZP_VALUE_pt4
-        bpl _81ed
+        bpl _PL6
+
         lda ZP_VALUE_pt1        ; radius?
         eor # %11111111
         adc # $01
         sta ZP_VALUE_pt1        ; radius?
+
         txa 
         eor # %11111111
         adc # $00
         tax 
 
-_81ec:  clc                                                             ;$81EC 
-_81ed:  rts                                                             ;$81ED
+_PL44:  clc                                                             ;$81EC 
+_PL6:   rts                                                             ;$81ED
 
 
-_81ee:                                                                  ;$81EE
+.segment        "CODE_81EE"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+_TT17:                                                  ; BBC: TT17     ;$81EE
 ;===============================================================================
         jsr wait_for_input
         cmp # $59
-        beq _81ed
+
+        ; the original code does a relative branch from here to the `rts`
+        ; located in `_PLS6` but CA65 can't do this using the label `_PL6`
+        ; due to the segment boundary so we set the branch destination
+        ; manually
+        ;
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        beq *-6                 ; =`_PL6`
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; for elite-harmless, use the `rts` ahead
+        ; so we don't rely upon segment order
+        beq @rts
+.endif  ;///////////////////////////////////////////////////////////////////////
+
         cmp # $4e
-        bne _81ee
+        bne _TT17
+
         clc 
-        rts 
+@rts:   rts 
 
 
 _81fb:                                                                  ;$81FB
@@ -6189,10 +6251,9 @@ _8863:                                                                  ;$8863
 
         jsr _83ca
 
-_8882:                                                                  ;$8882
         ; set the stack pointer to the top ($01FF),
         ; (i.e. disregard all stack-use prior to this point)
-        ldx # $ff
+_8882:  ldx # $ff                                                       ;$8882
         txs 
 
         jsr _83df
@@ -6681,7 +6742,7 @@ _8ae7:                                                                  ;$8AE7
         lda # MSG_DOCKED_ARE_YOU_SURE
         jsr print_docked_str
 
-        jsr _81ee
+        jsr _TT17
         bcc @_8b0f
         jsr _8a0c               ; reset save data to default
         jmp _88f0
@@ -7404,7 +7465,7 @@ _8fea:                                                                  ;$8FEA
 ;===============================================================================
         sty ZP_PRESERVE_Y       ; backup Y
 
-wait_for_input:                                                         ;$8FEC
+wait_for_input:                                         ; BBC: DOKEY    ;$8FEC
         ;-----------------------------------------------------------------------
         ldy # 2
         jsr wait_frames

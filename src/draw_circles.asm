@@ -22,16 +22,16 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ; to indicate a break in line and the next entry will begin a new, visible,
 ; line (all hidden lines are skipped)
 ;
-; TOOD: why is flag (ZP_A9) needed if ZP_TEMP_COUNTER = 0 would indicate
-;       the same? is this because of keeping the heap for later erasing?
-;       for drawing two circles? (i.e. "crater")
+; TOOD: why is flag (ZP_CIRCLE_FLAG) needed if ZP_TEMP_COUNTER = 0;
+;       would indicate the same? is this because of keeping the heap
+;       for later erasing? for drawing two circles? (i.e. "crater")
 ;
 ; in:   ZP_TEMP_COUNTER         the current point number (0-64)
 ;       ZP_CIRCLE_STEP          number of steps around the circle (0-64)
 ;                               to increment to get to the next point (1+)
 ;       K6                      the X-position of the new point (16-bits)
 ;       T.X                     the Y-position of the new point (16-bits)
-;       ZP_A9                   set to $FF to indicate first point
+;       ZP_CIRCLE_FLAG          set to $FF to indicate first point
 ;       ZP_CIRCLE_RADIUS        circle's radius
 ;       ZP_CIRCLE_YPOS          circle's centre Y-position (16-bits),
 ;                               signed, 0 is the top of the viewport
@@ -50,10 +50,10 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         ; point to connect a line to, so we force a line-break to write
         ; the starting co-ords and wait for the next call to join the line
         ;
-        lda ZP_A9               ; get the flag parameter
+        lda ZP_CIRCLE_FLAG      ; get the flag parameter
         beq @clip               ; not the first point?
 
-        inc ZP_A9               ; roll flag over from $ff to 0
+        inc ZP_CIRCLE_FLAG      ; roll flag over from $ff to 0
 
         ; check if previous y-position is $FF,
         ; indicating a line break:

@@ -1,8 +1,7 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;
-; "code_init.asm":
+;===============================================================================
 ;
 ; once-off intialisation code for elite-harmless;
 ; original Elite uses "orig/orig_init.asm"
@@ -12,6 +11,7 @@
 ;
 .segment        "CODE_INIT"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 init:
 ;===============================================================================
         ; change the address of STOP key routine from $F6ED, to $FFED,

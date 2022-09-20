@@ -469,7 +469,7 @@ ZP_ALPHA                := $a6  ; a rotation variable used in matrix math
 
 ZP_A7                   := $a7  ;? x10  ; docked flag?
 ZP_A8                   := $a8  ;? x9
-ZP_A9                   := $a9  ;                                       ;FLAG
+ZP_CIRCLE_FLAG          := $a9  ; flag to indicate start of a circle    ;FLAG
 ZP_TEMP_COUNTER         := $aa  ; temporary counter, e.g. ball lines    ;CNT
 ZP_AB                   := $ab  ;? x12
 ZP_CIRCLE_STEP          := $ac  ; step size for drawing circles         ;STP
