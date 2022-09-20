@@ -3690,65 +3690,71 @@ _7d56:                                                                  ;$7D56
         rts 
 
 
-_7d57:                                                                  ;$7D57
+.segment        "CODE_7D57"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+_PL2:                                                   ; BBC: PL2      ;$7D57
 ;===============================================================================
         lda ZP_SHIP_TYPE
         lsr 
-        bcs _7d5f
+        bcs :+
         jmp _WPLS2
-
-_7d5f:                                                                  ;$7D5F
-        jmp wipe_sun
+:       jmp wipe_sun                                                    ;$7D5F
 
 
 _PLANET:                                                ; BBC: PLANET   ;$7D62
 ;===============================================================================
         lda ZP_SHIP_ZPOS_SIGN
         cmp # $30
-        bcs _7d57
+        bcs _PL2
         ora ZP_SHIP_ZPOS_HI
-        beq _7d57
+        beq _PL2
         jsr project_ship
-        bcs _7d57
+        bcs _PL2
         lda #> ELITE_MENUSCR_ADDR
         sta ZP_VAR_P2
         lda #< ELITE_MENUSCR_ADDR
         sta ZP_VAR_P1
         jsr _3bc1
         lda ZP_VALUE_pt2
-        beq _7d84
+        beq :+
         lda # $f8
         sta ZP_VALUE_pt1
-_7d84:                                                                  ;$7D84
-        lda ZP_SHIP_TYPE
+:       lda ZP_SHIP_TYPE                                                ;$7D84
         lsr 
-        bcc _7d8c
+        bcc _PL9 
 
         jmp draw_sun
 
-_7d8c:                                                                  ;$7D8C
+
+_PL9:                                                   ; BBC: PL9      ;$7D8C
+;===============================================================================
         jsr _WPLS2
         jsr draw_planet_outline
-        bcs _7d98
+        bcs _PL20
         lda ZP_VALUE_pt2
-        beq _7d99
-_7d98:                                                                  ;$7D98
+        beq _PL25
+_PL20:                                                  ; BBC: PL20     ;$7D98
         rts 
 
-_7d99:                                                                  ;$7D99
+_PL25:                                                  ; BBC: PL25     ;$7D99
         lda _1d0f
-        beq _7d98
+        beq _PL20
         lda ZP_SHIP_TYPE
         cmp # $80
-        bne _7de0
+        bne _PL26
+
         lda ZP_VALUE_pt1
         cmp # $06
-        bcc _7d98
+        bcc _PL20
+
         lda ZP_SHIP_M0x2_HI
         eor # %10000000
         sta ZP_VAR_P1
+
         lda ZP_SHIP_M1x2_HI
         jsr _PLS4
+
         ldx # $09
         jsr _PLS1
         sta ZP_B2
@@ -3758,7 +3764,7 @@ _7d99:                                                                  ;$7D99
         sty ZP_ROTATE_M2x0_HI
         ldx # $0f
         jsr _PLS5
-        jsr _7e54
+        jsr _PLS2
         lda ZP_SHIP_M0x2_HI
         eor # %10000000
         sta ZP_VAR_P1
@@ -3766,11 +3772,14 @@ _7d99:                                                                  ;$7D99
         jsr _PLS4
         ldx # $15
         jsr _PLS5
-        jmp _7e54
+        jmp _PLS2
 
-_7de0:                                                                  ;$7DE0
+
+_PL26:                                                  ; BBC: PL26     ;$7DE0
+;===============================================================================
         lda ZP_SHIP_M1x2_HI
-        bmi _7d98
+        bmi _PL20
+
         ldx # $0f
         jsr _PLS3
         clc 
@@ -3815,7 +3824,7 @@ _7de0:                                                                  ;$7DE0
         sta ZP_A8
         lda # $00
         sta ZP_AB
-        jmp _7e58
+        jmp _PLS22
 
 
 _PLS1:                                                  ; BBC: PLS1     ;$7E36
@@ -3838,15 +3847,22 @@ _7e4f:                                                                  ;$7E4F
         inx 
         rts 
 
-_7e54:                                                                  ;$7E54
+
+_PLS2:                                                  ; BBC: PLS2     ;$7E54
+;===============================================================================
         lda # $1f
         sta ZP_A8
-_7e58:                                                                  ;$7E58
+
+        ; fallthrough
+        ; ...
+
+_PLS22:                                                 ; BBC: PLS22    ;$7E58
+;===============================================================================
         ldx # $00
         stx ZP_TEMP_COUNTER
         dex 
         stx ZP_CIRCLE_FLAG
-_7e5f:                                                                  ;$7E5F
+_7e5f:                                                  ; BBC: PLL4     ;$7E5F
         lda ZP_AB
         and # %00011111
         tax 
@@ -3946,12 +3962,9 @@ _7f12:                                                                  ;$7F12
         rts 
 
 
-_7f13:                                                                  ;$7F13
-;===============================================================================
-        jmp wipe_sun
+_7f13:  jmp wipe_sun                                                    ;$7F13
 
-
-_7f16:                                                                  ;$7F16
+_7f16:                                                  ; BBC: PLF3     ;$7F16
 ;===============================================================================
 ; invert X value:
 ;-------------------------------------------------------------------------------
@@ -3960,12 +3973,12 @@ _7f16:                                                                  ;$7F16
         clc 
         adc # $01
         tax 
-_7f1d:                                                                  ;$7F1D
+_7f1d:                                                  ; BBC: PLF17    ;$7F1D
         lda # $ff
-        jmp _7f67
+        jmp _PLF5
 
 
-draw_sun:                                                               ;$7F22
+draw_sun:                                               ; BBC: SUN      ;$7F22
 ;===============================================================================
 ; calculate the scan-lines of a sun and draw it:
 ;
@@ -4125,7 +4138,7 @@ draw_sun:                                                               ;$7F22
         ; sun's radius fits within that space:
         ;
         cpx ZP_CIRCLE_RADIUS    ; when the radius doesn't fit,
-       .blt _7f67               ; clip it using the value we calculated (X)
+       .blt _PLF5               ; clip it using the value we calculated (X)
 
         ; the sun's south radius fits within the viewport:
         ; that's how many scanlines to draw for the bottom half of the sun
@@ -4133,7 +4146,7 @@ draw_sun:                                                               ;$7F22
 :       ldx ZP_CIRCLE_RADIUS                                            ;$7F63
         lda # $00
 
-_7f67:                                                                  ;$7F67
+_PLF5:                                                  ; BBC: PLF5     ;$7F67
         ;-----------------------------------------------------------------------
         ; X = number of scanlines to draw for the bottom-half of the sun?
         stx ZP_TEMP_ADDR2_LO
