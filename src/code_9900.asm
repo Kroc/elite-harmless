@@ -53,7 +53,7 @@ menuscr_hi:                                                             ;$9919
 .segment        "CODE_A2A0"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-move_ship:                                                              ;$A2A0
+move_ship:                                              ; BBC: MVEIT    ;$A2A0
 ;===============================================================================
 ; do_ship_ai? checks if A.I. needs running and appears to rotate and move
 ; the objcet
@@ -98,7 +98,7 @@ move_ship:                                                              ;$A2A0
 :       jsr _32ad                                                       ;$A2C8
 
 @a2cb:                                                                  ;$A2CB
-        jsr _b410
+        jsr _SCAN
 
         lda ZP_SHIP_SPEED       ; scale up the object's speed
         asl                     ; x2
@@ -345,7 +345,7 @@ _a3bf:                                                                  ;$A3BF
         lda ZP_SHIP_STATE
         ora # state::scanner
         sta ZP_SHIP_STATE
-        jmp _b410
+        jmp _SCAN
 
         ;-----------------------------------------------------------------------
 
@@ -554,10 +554,15 @@ _a60e:                                                                  ;$A60E
         rts 
 
 
-_a626:                                                                  ;$A626
+_PLUT:                                                  ; BBC: PLUT     ;$A626
 ;===============================================================================
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; we've inlined this at the call-site in elite-harmless
+        ;
         ldx COCKPIT_VIEW
         beq @rts
+.endif  ;///////////////////////////////////////////////////////////////////////
         dex 
         bne @a65f
 
@@ -892,7 +897,7 @@ _a795:                                                                  ;$A795
 .import TKN_FLIGHT_INCOMING_MISSILE:direct
         lda # TKN_FLIGHT_INCOMING_MISSILE
         ; print an on-screen message
-        jsr _900d
+        jsr _MESS
 
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
@@ -901,7 +906,7 @@ _a795:                                                                  ;$A795
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-ship_killed:                                                            ;$A7A6
+ship_killed:                                            ; BBC: EXNO2    ;$A7A6
 ;===============================================================================
 ; handles paperwork related to killing a ship;
 ; adding kill points, showing messages, &c.
@@ -923,7 +928,7 @@ ship_killed:                                                            ;$A7A6
 .import TKN_FLIGHT_RIGHT_ON_COMMANDER:direct
         lda # TKN_FLIGHT_RIGHT_ON_COMMANDER
         ; show an on-screen message
-        jsr _900d
+        jsr _MESS
 
 
 sound_play_explosion:                                                   ;$A7C3
@@ -1003,7 +1008,7 @@ play_sfx_05:                                                            ;$A80F
         ldy # $05
         bne play_sfx            ; (always branches)
 
-play_sfx_03:                                                            ;$A813
+play_sfx_03:                                            ; BBC: EXNO3    ;$A813
 ;===============================================================================
         ldy # $03
         bne play_sfx            ; (always branches)
@@ -1280,7 +1285,7 @@ _b0b5:                                                                  ;$B0B5
         rts 
 
 
-engage_ecm:                                                             ;$B0F4
+engage_ecm:                                             ; BBC: ECBLB2   ;$B0F4
 ;===============================================================================
         lda # 32                ; set the ECM counter to 32
         sta ECM_COUNTER
@@ -1291,7 +1296,10 @@ engage_ecm:                                                             ;$B0F4
         jsr play_sfx
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-_b0fd:                                                                  ;$B0FD
+        ; fallthrough
+        ; ...
+
+_b0fd:                                                  ; BBC: ECBLB    ;$B0FD
 ;===============================================================================
 ; light up the ECM indicator on the HUD?
 ;
@@ -1704,7 +1712,7 @@ _b40f:                                                                  ;$B40F
 :       rts 
 
 
-_b410:                                                                  ;$B410
+_SCAN:                                                  ; BBC: SCAN     ;$B410
 ;===============================================================================
 ; draw scanner stalk?
 ;

@@ -1901,7 +1901,8 @@ _3130:                                                                  ;$3130
 
         rts 
 
-eject_escapepod:                                                        ;$316E
+
+eject_escapepod:                                        ; BBC: ESCAPE   ;$316E
 ;===============================================================================
 ; eject escape pod:
 ;
@@ -1930,7 +1931,7 @@ _318a:                                                                  ;$318A
         dec ZP_SHIP_ATTACK
         bne _318a
 
-        jsr _b410
+        jsr _SCAN
 
         lda # $00
         ldx # .sizeof( Cargo )-1
@@ -2042,7 +2043,14 @@ _322b:                                                                  ;$322B
         bne _3290
 _322f:                                                                  ;$322F
         lda # $00
-        jsr _87b1
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        jsr or_xyz_hi           ; combine check with distance
+.else   ;///////////////////////////////////////////////////////////////////////
+        ora ZP_SHIP_XPOS_HI     ; there's really no need for a JSR for this
+        ora ZP_SHIP_YPOS_HI
+        ora ZP_SHIP_ZPOS_HI
+.endif  ;///////////////////////////////////////////////////////////////////////
         beq _3239
         jmp _3365
 
@@ -2265,7 +2273,7 @@ _3347:                                                                  ;$3347
         ;-----------------------------------------------------------------------
 
 _3351:                                                                  ;$3351
-        jsr _8c7b
+        jsr _SPS4
         jmp _34ac
 
         ;-----------------------------------------------------------------------
@@ -2276,7 +2284,7 @@ _3357:                                                                  ;$3357
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword( SHIP_TYPES + HULL_COREOLIS )
+        lda .loword( SHIP_TYPES + HULL_STATION )
         beq _3365
 
         lda ZP_SHIP_ATTACK
@@ -2388,7 +2396,14 @@ _33fa:                                                                  ;$33FA
 
 _33fd:                                                                  ;$33FD
         lda # $00
-        jsr _87b1
+.ifdef  OPTION_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        jsr or_xyz_hi           ; combine check with distance
+.else   ;///////////////////////////////////////////////////////////////////////
+        ora ZP_SHIP_XPOS_HI     ; there's really no need for a JSR for this
+        ora ZP_SHIP_YPOS_HI
+        ora ZP_SHIP_ZPOS_HI
+.endif  ;///////////////////////////////////////////////////////////////////////
         and # %11100000
         bne _3434
         ldx ZP_TEMP_COUNTER
@@ -2528,7 +2543,7 @@ _34bc:                                                                  ;$34BC
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword( SHIP_TYPES + HULL_COREOLIS )
+        lda .loword( SHIP_TYPES + HULL_STATION )
         bne _34cf
 _34cc:                                                                  ;$34CC
         jmp _3351
@@ -2766,8 +2781,10 @@ _3617:                                                                  ;$3617
         jmp _3616
 
 
-_363f:                                                                  ;$363F
+_HITCH:                                                 ; BBC: HITCH    ;$363F
 ;===============================================================================
+; is the current ship within the player's sights?
+;-------------------------------------------------------------------------------
         clc 
         lda ZP_SHIP_ZPOS_SIGN
         bne _367d
@@ -2851,7 +2868,7 @@ _3695:                                                                  ;$3695
         jmp spawn_ship
 
 
-fire_missile:                                                           ;$36A6
+fire_missile:                                           ; BBC: FRMIS    ;$36A6
 ;===============================================================================
         ; spawn a missile
         ldx # HULL_MISSILE
@@ -2882,7 +2899,7 @@ _36c5:                                                                  ;$36C5
 ;-------------------------------------------------------------------------------
         ; firing missile at space station?
         ; (not a good idea)
-        cmp # HULL_COREOLIS
+        cmp # HULL_STATION
         ; make the space-station hostile?
         beq _36f8
 
@@ -2930,7 +2947,7 @@ _36f8:                                                                  ;$36F8
 _3701:                                                                  ;$3701
 .import TKN_FLIGHT_MISSILE_JAMMED:direct
         lda # TKN_FLIGHT_MISSILE_JAMMED
-        jmp _900d               ; print an on-screen message
+        jmp _MESS               ; print an on-screen message
 
 
 _3706:                                                                  ;$3706
@@ -3582,7 +3599,7 @@ _3c4d:                                                                  ;$3C4D
         rts 
 
 
-dampen_toward_zero:                                                     ;$3C58
+dampen_toward_zero:                                     ; BBC: cntr     ;$3C58
 ;===============================================================================
 ; reduce a signed value toward zero by adding/subtracting 1 according to sign:
 ; this is used to dampen the roll/pitch values 
@@ -4026,7 +4043,7 @@ _3e65:                                                                  ;$3E65
 .tkn_docked_waitForAnyKey                                               ;$3E7C
 
 
-get_ship_addr:                                                          ;$3E87
+get_ship_addr:                                          ; BBC: GINF     ;$3E87
 ;===============================================================================
 ; a total of 11 3D-objects ("ships") can be 'in-play' at a time, each object
 ; has a block of runtime storage to keep track of its current state including

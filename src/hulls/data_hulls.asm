@@ -78,7 +78,7 @@
 ;
 hull_index      .set    0
 
-hull_pointers:                                                          ;$D000
+hull_pointers:                                          ; BBC: XX21     ;$D000
         ;-----------------------------------------------------------------------
         ; see includes below...
         ;

@@ -18,7 +18,7 @@ VAR_0441                :=$0441 ;?
 ; 11 available slots; a value of $00 represents an unused slot, otherwise
 ; the value is a hull index (see "hull_data.asm") 
 
-SHIP_SLOTS              :=$0452
+SHIP_SLOTS              :=$0452                                         ;FRIN
 
 SHIP_SLOT0              :=$0452
 SHIP_SLOT1              :=$0453
@@ -78,17 +78,18 @@ NUM_ASTEROIDS           :=$047f ; number of asteroids present
 
 DOCKCOM_STATE           :=$0480 ; docking computer state: $00 = OFF, $FF = ON
 
-ECM_STATE               :=$0481 ; if our ECM is enabled or not
+ECM_STATE               :=$0481 ; if our ECM is enabled or not          ;ECMP
 
 IS_WITCHSPACE           :=$0482 ; has misjump occurred?
 CABIN_HEAT              :=$0483 ; cabin temperature
 
-LASER_POWER             :=$0484 ; power level for current laser (bit 7 = beam)
+LASER_POWER             :=$0484 ; power level for current laser         ;LAS2
+                                ; (bit 7 = beam)
 
-COCKPIT_VIEW            :=$0486 ; (front, rear, left, right)
+COCKPIT_VIEW            :=$0486 ; (front, rear, left, right)            ;VIEW
 
-LASER_COUNTER           :=$0487 ; used to space shots between laser pulses
-LASER_HEAT              :=$0488 ; laser temperature
+LASER_COUNTER           :=$0487 ; used to space out laser pulses        ;LASCT
+LASER_HEAT              :=$0488 ; laser temperature                     ;GNTMP
 
 VAR_048A                :=$048a ;?
 OSD_DELAY               :=$048b ; a delay counter, used for on-screen messages
@@ -96,8 +97,8 @@ VAR_048C                :=$048c ; message ID on screen
 
 ;-------------------------------------------------------------------------------
 
-JOY_ROLL                :=$048d ; roll amount coming from input
-JOY_PITCH               :=$048e ; pitch amount coming from input
+JOY_ROLL                :=$048d ; roll amount coming from input         ;JSTX
+JOY_PITCH               :=$048e ; pitch amount coming from input        ;JSTY
 
 VAR_048F                :=$048f ;?
 VAR_0490                :=$0490 ;? (indexed by X)
@@ -171,7 +172,7 @@ PLAYER_COMPETITION      :=$04a7 ; status byte for competition requirements?
 PLAYER_GALAXY           :=$04a8 ; current galaxy number
 
 
-PLAYER_LASERS           :=$04a9 ; which laser is mounted to each view
+PLAYER_LASERS           :=$04a9 ; which laser is mounted to each view   ;LASER
 
 .enum   laser
         none            = %00000000     ; value for no laser fitted
@@ -212,44 +213,44 @@ SHIP_HOLD               :=$04af ; cargo capacity of the player's ship
 ; NOTE: the order here has to mimic that of the strings in "text_flight.asm",
 ;       (or vice-versa depending on how you see it)
 ;
-PLAYER_CARGO            :=$04b0
-CARGO_FOOD              :=$04b0 ; food
-CARGO_TEXTILES          :=$04b1 ; textiles
-CARGO_RADIOACTIVES      :=$04b2 ; radioactives
-CARGO_SLAVES            :=$04b3 ; slaves
-CARGO_ALCOHOL           :=$04b4 ; liquor & wines
-CARGO_LUXURIES          :=$04b5 ; luxuries
-CARGO_NARCOTICS         :=$04b6 ; narcotics
-CARGO_COMPUTERS         :=$04b7 ; computers
-CARGO_MACHINERY         :=$04b8 ; machinery
-CARGO_ALLOYS            :=$04b9 ; alloys
-CARGO_FIREARMS          :=$04ba ; firearms
-CARGO_FURS              :=$04bb ; furs
-CARGO_MINERALS          :=$04bc ; minerals
-CARGO_GOLD              :=$04bd ; gold
-CARGO_PLATINUM          :=$04be ; platinum
-CARGO_GEMS              :=$04bf ; gem-stones
-CARGO_ALIENS            :=$04c0 ; alien items
+PLAYER_CARGO            :=$04b0                                         ;QQ20
+CARGO_FOOD              :=$04b0 ; food                                  ;QQ20+0
+CARGO_TEXTILES          :=$04b1 ; textiles                              ;QQ20+1
+CARGO_RADIOACTIVES      :=$04b2 ; radioactives                          ;QQ20+2
+CARGO_SLAVES            :=$04b3 ; slaves                                ;QQ20+3
+CARGO_ALCOHOL           :=$04b4 ; liquor & wines                        ;QQ20+4
+CARGO_LUXURIES          :=$04b5 ; luxuries                              ;QQ20+5
+CARGO_NARCOTICS         :=$04b6 ; narcotics                             ;QQ20+6
+CARGO_COMPUTERS         :=$04b7 ; computers                             ;QQ20+7
+CARGO_MACHINERY         :=$04b8 ; machinery                             ;QQ20+8
+CARGO_ALLOYS            :=$04b9 ; alloys                                ;QQ20+9
+CARGO_FIREARMS          :=$04ba ; firearms                              ;QQ20+10
+CARGO_FURS              :=$04bb ; furs                                  ;QQ20+11
+CARGO_MINERALS          :=$04bc ; minerals                              ;QQ20+12
+CARGO_GOLD              :=$04bd ; gold                                  ;QQ20+13
+CARGO_PLATINUM          :=$04be ; platinum                              ;QQ20+14
+CARGO_GEMS              :=$04bf ; gem-stones                            ;QQ20+15
+CARGO_ALIENS            :=$04c0 ; alien items                           ;QQ20+16
 
 ; note that when the player is taking damage and has no shields
 ; there's a possibility of their cargo being destroyed but also
 ; the following equipment, which is why they are placed here
 ;
-PLAYER_ECM              :=$04c1 ; flag, player has an E.C.M.
-PLAYER_SCOOP            :=$04c2 ; flag, player has a fuel scoop
-PLAYER_EBOMB            :=$04c3 ; flag, player has energy bomb
+PLAYER_ECM              :=$04c1 ; flag, player has an E.C.M.            ;ECM
+PLAYER_SCOOP            :=$04c2 ; flag, player has a fuel scoop         ;BST
+PLAYER_EBOMB            :=$04c3 ; flag, player has energy bomb          ;BOMB
 PLAYER_EUNIT            :=$04c4 ; flag, player has extra energy unit
-PLAYER_DOCKCOM          :=$04c5 ; flag, player has a docking computer
+PLAYER_DOCKCOM          :=$04c5 ; flag, player has a docking computer   ;DKCMP
 
 ;-------------------------------------------------------------------------------
 
 PLAYER_GDRIVE           :=$04c6 ; player has a galactic hyper-drive?
-PLAYER_ESCAPEPOD        :=$04c7 ; player has an escape pod?
+PLAYER_ESCAPEPOD        :=$04c7 ; player has an escape pod?             ;ESCP
 
 PLAYER_KILLS_FRAC       :=$04cb ; kill total, fractional part
 
-PLAYER_MISSILES         :=$04cc ; number of missiles the player has
-PLAYER_MISSILE_ARMED    :=$0485 ; armed state of missile
+PLAYER_MISSILES         :=$04cc ; number of missiles the player has     ;NOMSL
+PLAYER_MISSILE_ARMED    :=$0485 ; armed state of missile                ;MSAR
 
 PLAYER_LEGAL            :=$04cd ; player's legal status
 

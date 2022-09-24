@@ -169,7 +169,7 @@ move_trumbles:                                                          ;$1E35
 
 main_flight_loop:                                                       ;$1EC1
 ;===============================================================================
-; MAIN FLIGHT LOOP
+; [1]:  MAIN FLIGHT LOOP
 ;-------------------------------------------------------------------------------
         ; seed the random-number-generator:
         ;
@@ -195,7 +195,7 @@ main_flight_loop:                                                       ;$1EC1
 
 main_roll_pitch:                                                        ;$1ECE
 ;===============================================================================
-; [1]:  compute roll & pitch:
+; [2]:  compute roll & pitch:
 ;-------------------------------------------------------------------------------
         ; take the roll amount and prepare it for use in the 3D math:
         ;
@@ -204,11 +204,10 @@ main_roll_pitch:                                                        ;$1ECE
         jsr dampen_toward_zero  ; apply damping
         txa                     ; transfer roll amount back to A
 
-        ; elite actually rotates the universe around the player(!),
-        ; therefore rolling to the right means rolling everything else
-        ; to the left which is why we do some sign flipping here whilst
-        ; preparing the angle. thanks goes to Mark Moxon's BBC disassembly
-        ; for this insight
+        ; elite actually rotates the universe around the player(!), therefore
+        ; rolling to the right means rolling everything else to the left which
+        ; is why we do some sign flipping here whilst preparing the angle.
+        ; thanks goes to Mark Moxon's BBC disassembly for this insight
 
         ; get the absolute value and some additional values useful
         ; for the math, including an inverted copy of the sign
@@ -232,17 +231,18 @@ main_roll_pitch:                                                        ;$1ECE
         ; via a 2's complement (flip all bits and add 1)
         eor # %11111111
         clc 
-        adc # $01
+        adc # 1
 
-        ; we now have the absolute roll amount
+        ; we now have the absolute roll amount (+|-127),
+        ; though this needs to be scaled down (+|-31):
         ;
-:       lsr                     ; divide by 2,                           ;$1EEE
+:       lsr                     ; divide by 2,                          ;$1EEE
         lsr                     ; divide by 4
-        cmp # $08               ;?
-       .bge :+
-        lsr 
+        cmp # 8                 ; for roll values < 32 to begin with
+       .bge :+                  ;  we divide once more so as to provide
+        lsr                     ;  finer precision in the small range
 
-:       sta ZP_ROLL_MAGNITUDE                                           ;$1EF5
+:       sta ZP_ROLL_MAGNITUDE   ; store [scaled] roll-amount            ;$1EF5
         ora ZP_ROLL_SIGN        ; add sign
         sta ZP_ALPHA            ; put aside for use in the matrix math
 
@@ -260,28 +260,35 @@ main_roll_pitch:                                                        ;$1ECE
         ;  this happens not to be related to the above few instructions)
         stx JOY_PITCH
         
-        sta ZP_INV_PITCH_SIGN
-        eor # %10000000
+        sta ZP_INV_PITCH_SIGN   ; keep the inverted copy of only the sign
+        eor # %10000000         ; flip the sign bit back again
         sta ZP_PITCH_SIGN       ; store as our "direction of pitch"
-        tya 
-        bpl :+
-        eor # %11111111
-:       adc # $04                                                       ;$1F15
-        lsr 
-        lsr 
-        lsr 
-        lsr 
-        cmp # $03
-        bcs :+
-        lsr 
 
-:       sta ZP_PITCH_MAGNITUDE                                          ;$1F20
-        ora ZP_PITCH_SIGN
+        ; scale the pitch amount. as the universe revolves around us
+        ; we start with the pitch input with a fliped sign
+        ;
+        tya                     ; pitch magnitude (with flipped sign)
+        bpl :+                  ; is it positive? skip negating
+        eor # %11111111         ; flip all bits
+:       adc # 4                 ; for negative numbers, add 4 (why?)    ;$1F15
+        lsr                     ; divide by 2
+        lsr                     ; divide by 4
+        lsr                     ; divide by 8
+        lsr                     ; divide by 16
+        cmp # 3                 ; for pitch values < 48 to begin with
+        bcs :+                  ;  we divide once more so as to provide
+        lsr                     ;  finer precision in the small range
+
+:       sta ZP_PITCH_MAGNITUDE  ; store [scaled] pitch amount           ;$1F20
+        ora ZP_PITCH_SIGN       ; add sign
         sta ZP_BETA             ; put aside for the matrix math
+
+        ; fallthrough
+        ; ...
 
 main_keys:
 ;===============================================================================
-; [2]:  handle key presses
+; [3]:  handle key presses:
 ;
 ; TODO: this section processes a number of key presses;
 ;       could we skip this when no keys are pressed by
@@ -294,7 +301,7 @@ main_keys:
 
         lda ZP_PLAYER_SPEED     ; current speed
         cmp # 40                ; are we at maximum speed?
-        bcs :+
+        bcs :+                  ; "captain, she cannae go any faster!"
 
         inc ZP_PLAYER_SPEED     ; increase player's speed
 
@@ -328,7 +335,7 @@ main_keys:
 
         ; target missile?
         ;-----------------------------------------------------------------------
-:       lda ZP_MISSILE_TARGET   ; is there a missile target?            ;$1F55
+:       lda ZP_MISSILE_TARGET   ; is there already a missile target?    ;$1F55
         bpl :+                  ; if yes, skip, cannot re-target
 
         lda key_missile_target  ; target missile key pressed?
@@ -362,7 +369,7 @@ main_keys:
 :       lda key_bomb            ; energy bomb key held?                 ;$1F77
        .bze :+                  ; no, skip ahead
 
-        ; enable the energy bomb; if present, it's value should be $FF,
+        ; enable the energy bomb; if present, it's value should be $7F,
         ; so shifting left makes it %11111110. if the player does not
         ; have a bomb (=$00), the value will remain zero
         ;
@@ -390,7 +397,7 @@ main_keys:
 
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
-        jsr stop_sound          ; stop all sound playing
+        jsr stop_sound          ; stop the docking music playing
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; activate escape pod?
@@ -445,17 +452,17 @@ main_keys:
         ;///////////////////////////////////////////////////////////////////////
         jsr _9204               ; play docking computer music
 .endif  ;///////////////////////////////////////////////////////////////////////
-:
 
-main_lasers:                                                            ;$1FD5
-;===============================================================================
-; [3]:  shoot lasers!
-;-------------------------------------------------------------------------------
+:       ; shoot lasers?                                                 ;$1FD5
+        ;-----------------------------------------------------------------------
         lda # $00                                                       
         sta ZP_LASER            ; clear laser-power for current view
-        sta ZP_SPEED_LO
 
         ; multiply player speed by 64:
+        ;
+        ; we take the player's ship speed, `ZP_PLAYER_SPEED`, 8-bit,
+        ; and multiply this by 64 into a 16-bit number `ZP_SPEED_LO|HI`
+        ;
         ; this could be done with 6 left-shifts,
         ;
         ;       %--------00111111       =$3F
@@ -480,11 +487,12 @@ main_lasers:                                                            ;$1FD5
         ;
         ; TODO: should this be cached and only re-calced on speed change?
         ;
-        lda ZP_PLAYER_SPEED     ; current player speed
+        sta ZP_SPEED_LO         ; lo-byte of calculated speed starts at 0
+        lda ZP_PLAYER_SPEED     ; take current player speed, 8-bit
                                 ; (this will be the high-byte)
         lsr                     ; right-shift once
         ror ZP_SPEED_LO         ; ripple down to the result, lo-byte
-        lsr                     ; right shift again again
+        lsr                     ; right shift again
         ror ZP_SPEED_LO         ; ripple down to the result, lo-byte
         sta ZP_SPEED_HI         ; store result hi-byte
 
@@ -492,22 +500,23 @@ main_lasers:                                                            ;$1FD5
         ; this counter spaces out the shots and is updated every vsync
         ;
         lda LASER_COUNTER       ; is the laser between pulses?
-        bne @ships              ; skip ahead if laser is between pulses
+        bne @nolaser            ; skip ahead if laser is between pulses
 
         lda joy_fire            ; is fire-key pressed?
-        beq @ships              ; no? skip ahead
+        beq @nolaser            ; no? skip ahead
 
         lda LASER_HEAT          ; check current laser heat
-        cmp # $f2               ; laser temp >= 242?
-        bcs @ships              ; don't fire if too hot
+        cmp # 242               ; laser temp >= 242?
+        bcs @nolaser            ; don't fire if too hot
 
         ; is there a laser mounted on this direction?
-        ; TODO: shouldn't we check for this first??
         ;
         ldx COCKPIT_VIEW        ; current facing direction
         lda PLAYER_LASERS, x    ; get type of laser mounted here
-        beq @ships              ; if zero, no laser, skip ahead
+        beq @nolaser            ; if zero, no laser, skip ahead
 
+        ; all checks passed, laser goes pew pew!
+        ;
         pha                     ; put aside laser type
         and # laser::power      ; extract just the laser power-level
         sta ZP_LASER            ; update laser-power for current view
@@ -536,25 +545,27 @@ main_lasers:                                                            ;$1FD5
 @201d:  jsr play_sfx                                                    ;$201D
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        jsr shoot_lasers        ; pew-pew!
+        jsr shoot_lasers        ; draw laser lines
         
         pla                     ; retrieve laser type
         bpl :+                  ; (skip over if not beam laser)
-        lda # $00               ; zero pulse-wait for beam-laser
+        lda # 0                 ; zero pulse-wait for beam-laser
 :       and # %11111010         ; set pulse-wait based on power-level   ;$2028
-        sta LASER_COUNTER
+        sta LASER_COUNTER       ; more power = slower fire rate
+
+@nolaser:
 
 ;===============================================================================
-; [4]:  process ship instances
+; [4]:  process ship instances:
 ;-------------------------------------------------------------------------------
-@ships: ldx # $00               ; begin with ship-slot 0                ;$202D
+        ldx # $00               ; begin with ship-slot 0                ;$202D
 
-process_ship:                                                           ;$202F
+process_ship:                                           ; BBC: MAL1     ;$202F
         ;=======================================================================
         stx ZP_PRESERVE_X       ; set aside ship slot for later
         lda SHIP_SLOTS, x       ; is that a ship in your slot?
         bne :+                  ; if so, process it
-        jmp _21fa               ; no more ships to process,
+        jmp _MA18               ; no more ships to process,
                                 ; you're just happy to see me
 
 :       sta ZP_SHIP_TYPE        ; put ship type aside                   ;$2039
@@ -588,21 +599,28 @@ process_ship:                                                           ;$202F
         lda hull_pointers-1, y  ; look up the hull data, hi-byte
         sta ZP_HULL_ADDR_HI
 
-;===============================================================================
-; [5]:  handle e-bomb explosion
-;-------------------------------------------------------------------------------
+        ; fallthrough
+        ; ...
+
+        ;=======================================================================
+        ; [5]:  handle e-bomb explosion: if an e-bomb is going off,
+        ;       check if this ship can be destroyed by it
+        ;-----------------------------------------------------------------------
         ; is the e-bomb active? (bit 7 set)
         ;
         lda PLAYER_EBOMB        ; check e-bomb state
         bpl @move               ; inactive, skip over
 
-        ; space station? -- cannot be destroyed by e-bomb
-        cpy # HULL_COREOLIS *2
-        beq @move
+        ; look for some exclusions:
+        ;
+        ; TODO: this should be a property of the hull so that
+        ;       it can be defined by data rather than code
+        ;
+        cpy # HULL_STATION *2   ; space station?
+        beq @move               ; cannot be destroyed by e-bomb
 
-        ; thargoid? -- also cannot be e-bombed
-        cpy # HULL_THARGOID *2
-        beq @move
+        cpy # HULL_THARGOID *2  ; thargoid?
+        beq @move               ; also cannot be e-bombed
 
         ; constrictor, cougar & dodo-station? -- also cannot be e-bombed
         ; WARN: this assumes any ID of constrictor or above are valid!
@@ -628,88 +646,91 @@ process_ship:                                                           ;$202F
         ldx ZP_SHIP_TYPE        ; retrieve ship-type again
         jsr ship_killed         ; add points to kill rank
 
-;===============================================================================
-; [6]:  move ship forward
-;-------------------------------------------------------------------------------
+        ; fallthrough
+        ; ...
+
+        ;=======================================================================
+        ; [6]:  move ship forward:
+        ;-----------------------------------------------------------------------
 @move:  jsr move_ship                                                   ;$2079
 
         ; copy the zero-page Ship back to its storage
         ;
         .zp_to_ship
 
-;===============================================================================
-; [7]:  collision checks
-;-------------------------------------------------------------------------------
-        ; is the ship exploding?
+        ;=======================================================================
+        ; [7]:  collision checks:
+        ;-----------------------------------------------------------------------
+        ; is the ship already exploding?
         ;
         lda ZP_SHIP_STATE
         and # state::exploding | state::debris
 
 .ifdef  OPTION_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr _87b1               ; combine check with distance
+        jsr or_xyz_hi           ; combine check with distance
 .else   ;///////////////////////////////////////////////////////////////////////
         ora ZP_SHIP_XPOS_HI     ; there's really no need for a JSR for this
         ora ZP_SHIP_YPOS_HI
         ora ZP_SHIP_ZPOS_HI
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ; if the ship is exploding / exploded or far away then skip
+        ; if the ship is exploding / exploded, or is otherwise too far away
+        ; to be considered for docking or scooping, then skip ahead
        .bnz @20e0               
 
-        ; check the near distance
-        lda ZP_SHIP_XPOS_LO
+        lda ZP_SHIP_XPOS_LO     ; check the near distance
         ora ZP_SHIP_YPOS_LO
         ora ZP_SHIP_ZPOS_LO
         ; if the high-bit is set on the lo-byte of any axis (>=128)
         ; then the ship is still far enough away, skip ahead
         bmi @20e0
 
-        ; collision!
+        ; potential for collision:
         ;-----------------------------------------------------------------------
         ldx ZP_SHIP_TYPE        ; sun or planet?
-        bmi @20e0               ; yes, deal with crashing into planet/star!
+        bmi @20e0               ; yes, cannot scoop or dock it, skip!
 
-        cpx # HULL_COREOLIS     ; space station?
+        cpx # HULL_STATION      ; space station?
         beq @dock               ; yes, handle space-station behaviour
 
         and # %11000000         ; is distance within 64?
-        bne @20e0
+        bne @20e0               ; if no, still too far away
 
         cpx # HULL_MISSILE      ; is it a missile?
-        beq @20e0               ; yes, skip
+        beq @20e0               ; yes, cannot scoop or dock, skip!
 
-;===============================================================================
-; [8]:  scooping
-;-------------------------------------------------------------------------------
         ; can we scoop this object?
         ;
-        ; get fuel scoop status ($00 = none, $80 = present)
-        lda PLAYER_SCOOP
-        ; is the object below the player? i.e. if its Y-position is negative.
+        lda PLAYER_SCOOP        ; fuel scoops? ($00 = none, $FF = present)
+        
+        ; is the object below the player? i.e. if its Y-position is negative,
         ; we've already established that it's near enough to us
         and ZP_SHIP_YPOS_SIGN
-        bpl big_damage          ; if not scoopable, skip
+        bpl big_damage          ; if no scoops / above us, collision!
 
+        ;=======================================================================
+        ; [8]:  scooping:
+        ;-----------------------------------------------------------------------
         ; attempt to scoop object
         ;
         cpx # HULL_CANNISTER    ; is this a cargo cannister?
         beq @can                ; yes, pick it up
 
-        ; read scoop data from the hull
+        ; read scoop data from the hull:
         ;
         ldy # Hull::scoop_debris
         lda [ZP_HULL_ADDR], y
         lsr                     ; down shift the top-nybble
-        lsr                     ; into the bottom nybble
+        lsr                     ;  into the bottom nybble
         lsr                     ; (cargo-data is held in the top-nybble,
         lsr                     ;  debris-data in the low-nybble)
        .bze big_damage          ; if zero, cannot be scooped?
         
-        ; the scoop-data in a hull definition provides which cargo type it
-        ; gives when scooped, already decremented by 1 to account for the
-        ; non-zero check below. a side-effect of this is that it's not
-        ; possible for a hull definition to drop food or textiles(?)
+        ; the scoop-data in a hull definition sets which cargo type it gives
+        ; when scooped, already decremented by 1 to account for the non-zero
+        ; check below. a side-effect of this is that it's not possible
+        ; for a hull definition to forcibly drop food or textiles(?)
         ;
         adc # $01               ; add 1 to cargo type
        .bnz @add                ; (always branches)
@@ -730,7 +751,7 @@ process_ship:                                                           ;$202F
         ;///////////////////////////////////////////////////////////////////////
         ; this has no effect due to the LDY after; it was probably
         ; the original offset for the cargo name strings
-        ldy # $4e
+        ldy # 78
 .endif  ;///////////////////////////////////////////////////////////////////////
         bcs explode_obj         ; cargo full, explode the cannister!
 
@@ -739,23 +760,23 @@ process_ship:                                                           ;$202F
         sta PLAYER_CARGO, y     ; update your cargo holdings
         tya
 
-        ; print the name of the cargo 
+        ; print the name of the cargo:
 .import TKN_FLIGHT_CARGO_TYPES:direct
         adc # TKN_FLIGHT_CARGO_TYPES
-        jsr _900d               ; print a message on-screen
+        jsr _MESS               ; print a message on-screen
 
-        ; mark cannister for removal:
-        ; (set bit 7)
-        asl ZP_SHIP_BEHAVIOUR
-        sec 
+        asl ZP_SHIP_BEHAVIOUR   ; mark cannister for removal
+        sec                     ; (set bit 7)
         ror ZP_SHIP_BEHAVIOUR
 
-        ; (remove ship?)
-@20e0:  jmp _2131                                                       ;$20E0
+        ; the ship has been scooped, and therefore cannot
+        ; be docked with, skip over the docking section
+@20e0:  jmp _MA26                                       ; BBC: MA65     ;$20E0
 
-;===============================================================================
-; [9]:  docking
-;-------------------------------------------------------------------------------
+
+        ;=======================================================================
+        ; [9]:  docking:
+        ;-----------------------------------------------------------------------
         ; is the station hostile? ship slot 1 is always reserved for
         ; the sun or space-station, so we can refer to its bytes directly
         ;
@@ -764,72 +785,89 @@ process_ship:                                                           ;$202F
        .bnz dock_fail           ; cannot dock!
 
         ; check the rotation of the station:
+        ; the angle of rotation around our nose
+        ; must be within 26 degrees (either way)
         ;
         lda ZP_SHIP_M0x2_HI
-        cmp # 214
+        cmp # 214               ; (radians?) < 26 degrees?
         bcc dock_fail
 
-        ; check angle of approach:
+        ; check angle of approach: we must be pointing
+        ; within a 22 degree up/down angle of approach
         ;
-        jsr _8c7b               ; get vector to station
-        lda ZP_VAR_XX15_2
-        cmp # 89
+        jsr _SPS4               ; get vector to station
+        lda ZP_VEC_Z
+        cmp # 89                ; (radians?) < 22 degrees?
         bcc dock_fail
 
-        ; check rotation of slot:
+        ; check rotation of slot: we must be pointing
+        ; within 36.6 degrees left/right of the slot
         ;
-        lda ZP_SHIP_M1x0_HI
+        lda ZP_SHIP_M1x0_HI     ; rotation from "roof" (top, looking down)
         and # %01111111         ; (remove sign)
-        cmp # 80
+        cmp # 80                ; (radians?) < 36.6 degrees?
         bcc dock_fail
 
-dock_ok:                                                                ;$2101
-        ;-----------------------------------------------------------------------
+        ; all conditions met for docking
+        ; with the station, we can go in!
+
+dock_ok:                                                ; BBC: GOIN     ;$2101
+        ;=======================================================================
         ; docking successful!
+        ;
         ; NOTE: escape capsule jumps here to return you to the station
         ;
         jsr stop_sound          ; stop all sound playing
         jmp docked              ; handle docked screen
         
-dock_fail:                                                              ;$2107
-        ;-----------------------------------------------------------------------
+dock_fail:                                              ; BBC: MA62     ;$2107
+        ;=======================================================================
         ; docking fail!
         ;
         lda ZP_PLAYER_SPEED     ; check approach speed
-        cmp # $05               ; going slow?
+        cmp # 5                 ; going slow?
         bcc small_damage        ; slow; take damage
         jmp _87d0               ; fast; explode
 
+
+        ;=======================================================================
+        ; [10]: collision!
+        ;-----------------------------------------------------------------------
 explode_obj:                                                            ;$2110
         ;-----------------------------------------------------------------------
+        ; this entry point is for when a cannister is destroyed,
+        ; by colliding with it / scooping with a full hull
+        ;
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
-        jsr play_sfx_03
+        jsr play_sfx_03         ; cannister exploding sound
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ; set 'exploding' state (bit 7)
+        ; set 'exploding' state (bit 7) on the ship
         ;
-        ; TODO: can this be more efficiently combined with the below copy?
         asl ZP_SHIP_STATE       ; push bit 7 off
         sec                     ; set carry and...
         ror ZP_SHIP_STATE       ; ...shift the carry into bit 7
-        bne _2131               ; (always brunches)
+        bne _MA26               ; (always brunches)
 
-small_damage:                                                           ;$211A
+small_damage:                                           ; BBC: MA67     ;$211A
         ;-----------------------------------------------------------------------
         ; player takes damage from colliding with object
         ; (either a cannister that cannot be scooped, or the mailslot)
+        ;
+        ; TODO: should the player's ship be sent into a spin instead?
+        ;       this slow-down is perhaps intentionally for stopping the
+        ;       player flying through the space station at full speed?
         ;
         lda # 1                 ; slow down
         sta ZP_PLAYER_SPEED
         lda # 5                 ; take '5' damage
         bne apply_damage        ; (always branches)
 
-big_damage:                                                             ;$2122
+big_damage:                                             ; BBC: MA58     ;$2122
         ;-----------------------------------------------------------------------
-        ; set 'exploding' state (bit 7)
+        ; set 'exploding' state (bit 7) on the ship
         ;
-        ; TODO: can this be more efficiently combined with the above copy?
         asl ZP_SHIP_STATE       ; push bit 7 off
         sec                     ; set carry and...
         ror ZP_SHIP_STATE       ; ...shift the carry into bit 7
@@ -841,7 +879,7 @@ big_damage:                                                             ;$2122
         sec                     ; we'll introduce a high-bit (128)   
         ror                     ; divide by 2 and insert the high-bit (+128)
 
-apply_damage:                                                           ;$212B
+apply_damage:                                           ; BBC: MA63     ;$212B
         ;-----------------------------------------------------------------------
         ; apply the amount of damage in A to the player, depleting the shields.
         ; if they're gone, take damage directly which may cause loss of cargo
@@ -853,29 +891,38 @@ apply_damage:                                                           ;$212B
         jsr play_sfx_03
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ; should the ship be removed?
+        ;=======================================================================
+        ; [11]: missile & laser hit testing:
+        ;-----------------------------------------------------------------------
+        ; if the ship has been scooped (cannister)
+        ; or docked, remove it from the scanner
         ;
-_2131:  lda ZP_SHIP_BEHAVIOUR                                           ;$2131
-        bpl :+                  ; is bit 7 set? if no, skip over
-        jsr _b410               ; remove from scanner dispay (?)
+_MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
+        bpl :+                  ;  the ship is removed from the scanner
+        jsr _SCAN               ;  by redrawing the stalk to erase it
 
-;===============================================================================
-; [10]: missile & laser hit testing
-;-------------------------------------------------------------------------------
 :       lda ZP_SCREEN           ; are we in the cockpit-view?           ;$2138
-       .bnz @_21ab              ; no? skip ahead
+       .bnz @_MA15              ; no? skip ahead
 
-        ; since the universe rotates around the player in elite, we need to
+        ; since the universe rotates around the player in Elite, we need to
         ; make sure that the X/Y/Z axes in the ship instance match the current
         ; view into space, i.e. when looking left or right the X & Z axes are
         ; flipped. this is so that code below does not have to differentiate
         ; between view directions
         ;
-        jsr _a626               ; BBC: PLUT
+.if     !.defined( OPTION_ORIGINAL )
+        ;///////////////////////////////////////////////////////////////////////
+        ; in the BBC code, this check is inlined to save the JSR,
+        ; but was not included in the C64 version
+        ;
+        ldx COCKPIT_VIEW        ; if already facing forward,
+        beq @hitch              ;  no correction needed
+.endif  ;///////////////////////////////////////////////////////////////////////
+        jsr _PLUT               ; flip the axes
 
         ; check if the current ship instance is within the player's sights
         ;
-        jsr _363f               ; BBC: HITCH
+@hitch: jsr _HITCH
         bcc @draw               ; not in sights, skip over
 
         ; ship is in player's sights:
@@ -915,7 +962,7 @@ _2131:  lda ZP_SHIP_BEHAVIOUR                                           ;$2131
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         lda ZP_SHIP_TYPE        ; things we've shot with our laser:
-        cmp # HULL_COREOLIS     ; the station!?
+        cmp # HULL_STATION      ; the station!?
         beq @angry              ; shot the station, uh oh...
         cmp # HULL_CONSTRICTOR  ; constrictor & cougar (and above)?
         bcc @hit                ; no, skip over
@@ -993,7 +1040,7 @@ _2131:  lda ZP_SHIP_BEHAVIOUR                                           ;$2131
         ; (I felt this needed drawing attention to as it's easy to miss)
 @draw:  jsr draw_ship                                                   ;$21A8
 
-@_21ab:                                                                 ;$21AB
+@_MA15:                                                 ; BBC: MA15     ;$21AB
         ; update the zero-page copy of the ship's energy level
         ; back to the ship's instance storage
         ;
@@ -1058,7 +1105,7 @@ _2131:  lda ZP_SHIP_BEHAVIOUR                                           ;$2131
         ;
         ; (flight token for printing player's current cash)
         lda # TKN_FLIGHT_FN_PLAYER_CASH
-        jsr _900d               ; print an in-flight message
+        jsr _MESS               ; print an in-flight message
 
 @clear: ; clear the ship-slot and shuffle down the rest:                ;$21E2
         ;-----------------------------------------------------------------------
@@ -1106,10 +1153,11 @@ _2131:  lda ZP_SHIP_BEHAVIOUR                                           ;$2131
         jmp process_ship        ; process the next ship
 
 
+_MA18:                                                  ; BBC: MA18     ;$21FA
 ;===============================================================================
-; [11]:  recharge shields:
+; [?]:  recharge shields:
 ;-------------------------------------------------------------------------------
-_21fa:  lda PLAYER_EBOMB        ; check energy bomb state               ;$21FA
+        lda PLAYER_EBOMB        ; check energy bomb state
         bpl :+                  ; skip over if not going off
 
         ; the on-going state of the e-bomb is managed by shifting bits
@@ -1153,7 +1201,7 @@ _21fa:  lda PLAYER_EBOMB        ; check energy bomb state               ;$21FA
         sta PLAYER_ENERGY
 
 ;===============================================================================
-; [12]: spawn space-station:
+; [?]:  spawn space-station:
 ;-------------------------------------------------------------------------------
         ; there is no space-station in witchspace!
         ;
@@ -1176,7 +1224,7 @@ _21fa:  lda PLAYER_EBOMB        ; check energy bomb state               ;$21FA
         ;
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword( SHIP_TYPES + HULL_COREOLIS )
+        lda .loword( SHIP_TYPES + HULL_STATION )
        .bnz _2277
 
         tay                     ; set Y to zero (because of previous branch)
@@ -1239,7 +1287,7 @@ _2283:                                                                  ;$2283
         cmp PLAYER_ENERGY
         bcc _2292
         asl                     ; !! print "energy low"? (msg 100 / $64)
-        jsr _900d               ; print an on-screen message
+        jsr _MESS               ; print an on-screen message
 _2292:                                                                  ;$2292
         ldy # $ff
         sty VAR_06F3
@@ -1279,7 +1327,7 @@ _22c2:                                                                  ;$22C2
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword( SHIP_TYPES + HULL_COREOLIS )
+        lda .loword( SHIP_TYPES + HULL_STATION )
         bne _231c
 
         ldy # .sizeof( Ship )
@@ -1347,7 +1395,7 @@ _2303:                                                                  ;$2303
 
         lda # $a0               ; "FUEL SCOOPS ON"?
 _2319:                                                                  ;$2319
-        jsr _900d               ; print an on-screen message
+        jsr _MESS               ; print an on-screen message
 _231c:                                                                  ;$231C
         lda LASER_POWER
         beq _2330

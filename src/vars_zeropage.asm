@@ -270,19 +270,20 @@ ZP_VAR_YY_HI            := $60
 ZP_SUNX_LO              := $61  ; something to do with drawing the sun
 ZP_SUNX_HI              := $62  ; as above
 
-ZP_BETA                 := $63  ; a rotation variable used in matrix math
+ZP_BETA                 := $63  ; rotation variable used in matrix math ;BETA
 
-ZP_PITCH_MAGNITUDE      := $64  ; unsigned pitch rotation value,
+ZP_PITCH_MAGNITUDE      := $64  ; unsigned pitch rotation value,        ;BET1
                                 ; note that $94 is the pitch rotation sign
 
 ZP_65                   := $65  ; hyperspace counter (inner)?
 ZP_66                   := $66  ; hyperspace counter (outer)?
 
-ECM_COUNTER             := $67  ; ECM counter
+ECM_COUNTER             := $67  ; ECM counter                           ;ECMA
 
-ZP_ROLL_MAGNITUDE       := $68  ; unsigned roll rotation value
-ZP_ROLL_SIGN            := $69  ; roll rotation sign
-ZP_INV_ROLL_SIGN        := $6a  ; inverse roll rotation sign (for easier math)
+ZP_ROLL_MAGNITUDE       := $68  ; unsigned roll rotation value          ;ALP1
+ZP_ROLL_SIGN            := $69  ; roll rotation sign                    ;ALP2
+ZP_INV_ROLL_SIGN        := $6a  ; inverse roll rotation sign            ;ALP2+1
+                                ; (for easier math)
 
 ; line co-ords:
 ;-------------------------------------------------------------------------------
@@ -326,7 +327,7 @@ ZP_DELTA_XX_HI          := ZP_VAR_XX12_3                                ;XX12+3
 ZP_DELTA_YY_LO          := ZP_VAR_XX12_4                                ;XX12+4
 ZP_DELTA_YY_HI          := ZP_VAR_XX12_5                                ;XX12+5
 
-; and as 8-bit parameters:
+; as 8-bit line parameters:
 ;
 ZP_LINE_X1              := ZP_VAR_XX15_0                                ;X1
 ZP_LINE_Y1              := ZP_VAR_XX15_1                                ;Y1
@@ -338,6 +339,12 @@ ZP_DELTA_Y              := ZP_DELTA_YY_LO                               ;XX12+4
 
 ZP_LINE_SLOPE           := ZP_VAR_XX12_2                                ;XX12+2
 ZP_LINE_DIR             := ZP_VAR_XX12_3                                ;XX12+3
+
+; as an 8-bit [x y z] vector:
+;
+ZP_VEC_X                := ZP_VAR_XX15_0                                ;XX15+0
+ZP_VEC_Y                := ZP_VAR_XX15_1                                ;XX15+1
+ZP_VEC_Z                := ZP_VAR_XX15_2                                ;XX15+2
 
 ;-------------------------------------------------------------------------------
 ; a 4-byte big-endian number buffer for working with big integers:
@@ -356,8 +363,9 @@ ZP_CIRCLE_RADIUS        := ZP_VALUE_pt1                                 ;K
 ZP_CIRCLE_RADIUS_LO     := ZP_VALUE_pt1                                 ;K+0
 ZP_CIRCLE_RADIUS_HI     := ZP_VALUE_pt2                                 ;K+1
 
-ZP_LASER                := $7b  ; laser power for current view (bit 7 = beam)
-ZP_MISSILE_TARGET       := $7c  ; missile target?
+ZP_LASER                := $7b  ; laser power for current view          ;LAS
+                                ; (bit 7 = beam)
+ZP_MISSILE_TARGET       := $7c  ; missile target?                       ;MSTG
 ZP_7D                   := $7d  ;
 
 ZP_CIRCLE_INDEX         := $7e  ; circle line-buffer index             ;LSP
@@ -414,12 +422,12 @@ ZP_91                   := $91  ;? x9
 ZP_92                   := $92  ;? x6
 ZP_93                   := $93  ;? x4
 
-ZP_PITCH_SIGN           := $94  ; pitch sign
-ZP_INV_PITCH_SIGN       := $95  ; inverted pitch sign
+ZP_PITCH_SIGN           := $94  ; pitch sign                            ;BET2
+ZP_INV_PITCH_SIGN       := $95  ; inverted pitch sign                   ;BET2+1
 
-ZP_PLAYER_SPEED         := $96
-ZP_SPEED_LO             := $97  ; player speed * 64, lo-byte
-ZP_SPEED_HI             := $98  ; player speed * 64, hi-byte
+ZP_PLAYER_SPEED         := $96                                          ;DELTA
+ZP_SPEED_LO             := $97  ; player speed * 64, lo-byte            ;DELT4+0
+ZP_SPEED_HI             := $98  ; player speed * 64, hi-byte            ;DELT4+1
 
 U                       := $99  ; a common pseudo-register named "U"
 Q                       := $9a  ; a common pseudo-register named "Q"
@@ -463,9 +471,9 @@ MAIN_COUNTER            := $a3  ;? x18 "MOVE COUNTER"?
 
 ;                       := $a4  ;UNUSED?
 
-ZP_SHIP_TYPE            := $a5  ; temporary holding place for X-register
+ZP_SHIP_TYPE            := $a5  ; current ship type being processed     TYPE
 
-ZP_ALPHA                := $a6  ; a rotation variable used in matrix math
+ZP_ALPHA                := $a6  ; rotation variable used in matrix math ;ALPHA
 
 ZP_A7                   := $a7  ;? x10  ; docked flag?
 ZP_A8                   := $a8  ;? x9

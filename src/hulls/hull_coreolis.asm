@@ -7,6 +7,10 @@
 hull_index              .set hull_index + 1
 HULL_COREOLIS           = hull_index                                    ;=$02
 
+; the game changes the pointer to the space station based on the
+; local system, so this serves as a generic index for that
+HULL_STATION            = hull_index                    ; BBC: SST
+
 ; in the BBC version every kill was worth one point but in other ports the
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
 HULL_COREOLIS_KILL      = 0     ;= 0.00

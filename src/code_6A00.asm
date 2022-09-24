@@ -17,7 +17,7 @@
 .segment        "CODE_6A00"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-check_cargo_capacity_add1:                                              ;$6A00
+check_cargo_capacity_add1:                              ; BBC: tnpr1    ;$6A00
 ;===============================================================================
 ; check if 1 tonne of a given item will fit in your cargo:
 ;
@@ -1822,7 +1822,7 @@ _71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71F2
         
 .import TKN_FLIGHT_GALACTIC_HYPERSPACE:direct
         lda # TKN_FLIGHT_GALACTIC_HYPERSPACE
-        jsr _900d               ; print on-screen message?
+        jsr _MESS               ; print on-screen message?
 _7217:                                                                  ;$7217
         lda TSYSTEM_POS_X
         sta PSYSTEM_POS_X
@@ -3213,7 +3213,7 @@ _7b2a:                                                                  ;$7B2A
         dey 
         bpl _7b2a
         stx ZP_PRESERVE_X
-        jsr _b410
+        jsr _SCAN
         ldx ZP_PRESERVE_X
 
         ldy # Ship::state
@@ -3289,10 +3289,10 @@ _7b6f:                                                                  ;$7B6F
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword( SHIP_TYPES + HULL_COREOLIS )
+        lda .loword( SHIP_TYPES + HULL_STATION )
         bne _7ba8
 
-        jsr _8c7b
+        jsr _SPS4
 
         jmp _7bab
 
@@ -3371,7 +3371,7 @@ _7bcc:                                                                  ;$7BCC
         jmp _b09d                       ; draw multi-color pixel?
 
 
-damage_player:                                                          ;$7BD2
+damage_player:                                          ; BBC: OOPS     ;$7BD2
 ;===============================================================================
 ; applies a damage amount to the player's shields and, if they're depleted,
 ; directly to the hull (energy banks). if the player's energy-level reaches
@@ -3500,7 +3500,7 @@ _7c61:                                                                  ;$7C61
         sta ZP_SHIP_HEAP_HI
 
         ; select 'station' ship-type
-        lda # HULL_COREOLIS
+        lda # HULL_STATION
 
         ; fallthrough...
         ;
@@ -3543,7 +3543,7 @@ spawn_ship:                                                             ;$7C6B
 
         ; is space station?
         ; TODO: why does the space-station not use the line heap?
-        cpy # HULL_COREOLIS *2
+        cpy # HULL_STATION *2
         beq _7cc4
 
         ; allocate the max. number of lines needed to draw the ship
@@ -3641,7 +3641,7 @@ _7d03:                                                                  ;$7D03
         rts 
 
 
-untarget_missile:                                                       ;$7D0C
+untarget_missile:                                       ; BBC: ABORT    ;$7D0C
 ;===============================================================================
         ldx # $ff               ; clear missile target
 
@@ -3912,7 +3912,7 @@ _82a4:                                                                  ;$82A4
         sta SHIP_SLOT1
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        sta .loword( SHIP_TYPES + HULL_COREOLIS )
+        sta .loword( SHIP_TYPES + HULL_STATION )
         
         jsr _b10e
         
@@ -3984,14 +3984,14 @@ _82f3:                                                                  ;$82F3
 
 .import TKN_FLIGHT_TARGET_LOST:direct
         lda # TKN_FLIGHT_TARGET_LOST
-        jsr _900d
+        jsr _MESS
 
 :                                                                       ;$8305
         ldy ZP_VAR_XX4
         ldx SHIP_SLOTS, y
 
         ; is space station?
-        cpx # HULL_COREOLIS
+        cpx # HULL_STATION
         beq _82a4
 
         ; is constrictor?
@@ -4192,7 +4192,7 @@ _83ed:                                                                  ;$83ED
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword( SHIP_TYPES + HULL_COREOLIS )
+        lda .loword( SHIP_TYPES + HULL_STATION )
         beq _8430
 
         jsr _b10e
@@ -4262,7 +4262,7 @@ _8475:                                                                  ;$8475
        .bnz :+                  ; no? skip over
 
         lda VAR_04E6
-        jsr _900d               ; print on-screen message
+        jsr _MESS               ; print on-screen message
         
         ; clear the on-screen message(?)
         lda # $00
@@ -4400,7 +4400,7 @@ _8501:                                                                  ;$8501
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword( SHIP_TYPES + HULL_COREOLIS )
+        lda .loword( SHIP_TYPES + HULL_STATION )
         bne _8562
         
         txa 
@@ -4429,7 +4429,7 @@ _855f:                                                                  ;$855F
 _8562:                                                                  ;$8562
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        lda .loword( SHIP_TYPES + HULL_COREOLIS )
+        lda .loword( SHIP_TYPES + HULL_STATION )
         beq _856a
 _8567:                                                                  ;$8567
         jmp _8627
@@ -4898,13 +4898,20 @@ _87b0:                                                                  ;$87B0
         rts 
 
 
-_87b1:                                                                  ;$87B1
+.ifdef  OPTION_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
+; this routine is inlined in elite-harmless
+;
+or_xyz_hi:                                              ; BBC: MAS4     ;$87B1
 ;===============================================================================
+; is the current ship being inspected > 255 distance in any direction?
+;-------------------------------------------------------------------------------
         ora ZP_SHIP_XPOS_HI
         ora ZP_SHIP_YPOS_HI
         ora ZP_SHIP_ZPOS_HI
-
         rts 
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
 
 _87b8:                                                                  ;$87B8
@@ -4947,8 +4954,11 @@ debug_brk:                                                              ;$87B9
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
 
-_87d0:                                                                  ;$87D0
+
+_87d0:                                                  ; BBC: DEATH    ;$87D0
 ;===============================================================================
+; the player did exploder:
+;-------------------------------------------------------------------------------
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         jsr play_sfx_03
@@ -5880,11 +5890,15 @@ _8c61:                                                                  ;$8C61
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 .ifdef  OPTION_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
+;///////////////////////////////////////////////////////////////////////////////
         rts                     ; superfluous rts                       ;$8C7A
-.endif  ;///////////////////////////////////////////////////////////////////////
+;///////////////////////////////////////////////////////////////////////////////
+.endif
 
-_8c7b:                                                                  ;$8C7B
+_SPS4:                                                  ; BBC: SPS4     ;$8C7B
+;===============================================================================
+; get vector to space-station:
+;-------------------------------------------------------------------------------
         ldx # $00
         jsr _7c11
 
@@ -5971,7 +5985,7 @@ _8cc2:                                                                  ;$8CC2
 .segment        "CODE_8E29"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-do_quickjump:                                                           ;$8E29
+do_quickjump:                                           ; BBC: WARP     ;$8E29
 ;===============================================================================
         ; reasons not to quick-jump:
         ;
@@ -5979,7 +5993,7 @@ do_quickjump:                                                           ;$8E29
         lda SHIP_SLOT2, x
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
-        ora .loword( SHIP_TYPES + HULL_COREOLIS )
+        ora .loword( SHIP_TYPES + HULL_STATION )
         ora IS_WITCHSPACE       ; we are in witchspace
        .bnz @nojump             ; -- cannot quick-jump
 
@@ -6325,14 +6339,17 @@ _9002:                                                                  ;$9002
         jsr _905d
         pla 
 
-_900d:                                                                  ;$900D
+        ; fallthrough
+        ; ...
+
+_MESS:                                                  ; BBC: MESS     ;$900D
 ;===============================================================================
 ; prints an on-screen message:
 ; e.g. "INCOMING MISSILE"
 ;
-; in:   A       ?
+; in:   A                       flight token
 ;-------------------------------------------------------------------------------
-.export _900d
+.export _MESS
         pha                     ; put aside flight message to print
         lda # 16                ; ident-level of message?
 
@@ -6443,7 +6460,7 @@ damage_cargo:                                                           ;$906A
         txa 
 .import TKN_FLIGHT_CARGO_TYPES:direct
         adc # TKN_FLIGHT_CARGO_TYPES
-        jmp _900d               ; print on-screen message?
+        jmp _MESS               ; print on-screen message?
 
         ;-----------------------------------------------------------------------
 :       beq @ecm                                                        ;$908F
@@ -6452,17 +6469,17 @@ damage_cargo:                                                           ;$906A
 
         txa 
         adc # $5d               ; TODO: flight token, but what one??
-        jmp _900d               ; print on-screen message?
+        jmp _MESS               ; print on-screen message?
 
 @ecm:                                                                   ;$909B
 .import TKN_FLIGHT_ECM_SYSTEM:direct
         lda # TKN_FLIGHT_ECM_SYSTEM
-        jmp _900d               ; print on-screen message?
+        jmp _MESS               ; print on-screen message?
 
 @scoop:                                                                 ;$90A0
 .import TKN_FLIGHT_FUEL_SCOOPS:direct
         lda # TKN_FLIGHT_FUEL_SCOOPS
-        jmp _900d               ; print on-screen message?
+        jmp _MESS               ; print on-screen message?
 
 
 ;===============================================================================
@@ -6689,6 +6706,9 @@ _920d:                                                                  ;$920D
         
         bit _1d0d
         bmi _91fd               ; rts
+
+        ; fallthrough
+        ; ...
 
 _9222:                                                                  ;$9222
 
