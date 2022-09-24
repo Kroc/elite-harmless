@@ -60,7 +60,7 @@ move_trumbles:                                                          ;$1E35
         asl                     ; take the counter 0-5 and multiply by 2,
         tay                     ; for the interlaced X & Y positions
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn the I/O area on to manage the sprites
         lda # C64_MEM::IO_ONLY
@@ -150,7 +150,7 @@ move_trumbles:                                                          ;$1E35
         sta VIC_SPRITE2_X, y    ; set the Trumble™'s new X-position
         cli                     ; re-enable interrupts
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn I/O off, go back to 64K RAM
         lda # C64_MEM::ALL
@@ -666,7 +666,7 @@ process_ship:                                           ; BBC: MAL1     ;$202F
         lda ZP_SHIP_STATE
         and # state::exploding | state::debris
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr or_xyz_hi           ; combine check with distance
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -747,7 +747,7 @@ process_ship:                                           ; BBC: MAL1     ;$202F
         ; carry clear = yes, carry set = no. note that this returns A=1
 @add:   jsr check_cargo_capacity_add1                                   ;$20C5
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this has no effect due to the LDY after; it was probably
         ; the original offset for the cargo name strings
@@ -834,7 +834,7 @@ dock_fail:                                              ; BBC: MA62     ;$2107
         ; [10]: collision!
         ;-----------------------------------------------------------------------
 explode_obj:                                                            ;$2110
-        ;-----------------------------------------------------------------------
+        ;=======================================================================
         ; this entry point is for when a cannister is destroyed,
         ; by colliding with it / scooping with a full hull
         ;
@@ -851,8 +851,8 @@ explode_obj:                                                            ;$2110
         bne _MA26               ; (always brunches)
 
 small_damage:                                           ; BBC: MA67     ;$211A
-        ;-----------------------------------------------------------------------
-        ; player takes damage from colliding with object
+        ;=======================================================================
+        ; player takes damage from colliding with ship
         ; (either a cannister that cannot be scooped, or the mailslot)
         ;
         ; TODO: should the player's ship be sent into a spin instead?
@@ -865,7 +865,7 @@ small_damage:                                           ; BBC: MA67     ;$211A
         bne apply_damage        ; (always branches)
 
 big_damage:                                             ; BBC: MA58     ;$2122
-        ;-----------------------------------------------------------------------
+        ;=======================================================================
         ; set 'exploding' state (bit 7) on the ship
         ;
         asl ZP_SHIP_STATE       ; push bit 7 off
@@ -910,7 +910,7 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
         ; flipped. this is so that code below does not have to differentiate
         ; between view directions
         ;
-.if     !.defined( OPTION_ORIGINAL )
+.if     !.defined( BUILD_ORIGINAL )
         ;///////////////////////////////////////////////////////////////////////
         ; in the BBC code, this check is inlined to save the JSR,
         ; but was not included in the C64 version
@@ -1038,7 +1038,8 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
 
         ; *** DRAW THE SHIP ON THE SCREEN ***
         ; (I felt this needed drawing attention to as it's easy to miss)
-@draw:  jsr draw_ship                                                   ;$21A8
+        ;
+@draw:  jsr draw_ship                                   ; BBC: MA8      ;$21A8
 
 @_MA15:                                                 ; BBC: MA15     ;$21AB
         ; update the zero-page copy of the ship's energy level
@@ -1115,7 +1116,7 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
         ; TODO: since skipping over unused slots is plenty fast enough,
         ;       maybe we could do away with this requirement
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; once shuffled down, execution jumps back to `process_ship`,
         ; so this jump can be considered an end-point of this routine
@@ -1348,7 +1349,7 @@ _22c2:                                                                  ;$22C2
 
 .ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn the I/O area on to manage the sprites
         lda # C64_MEM::IO_ONLY
@@ -1365,7 +1366,7 @@ _22c2:                                                                  ;$22C2
         and # %00000011
         sta VIC_SPRITE_ENABLE
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL

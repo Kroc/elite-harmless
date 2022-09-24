@@ -75,7 +75,7 @@ HUD_COLOUR              = YELLOW
 ; we store a pre-constructed bitmap screen in the binary, doing away with
 ; a lot of code spread throughout the game to erase and rebuild the screen
 ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; simply reserve the 8K of space for the original game
         .res    $2000
@@ -106,7 +106,7 @@ HUD_COLOUR              = YELLOW
 ;
 .segment        "VIC_SCR_MAIN"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-.ifndef OPTION_ORIGINAL
+.if     !.defined( BUILD_ORIGINAL )
         ;///////////////////////////////////////////////////////////////////////
         ; in elite-harmless we include the screen RAM, as it will be used,
         ; in the binary so that we don't waste code space programatically
@@ -119,7 +119,7 @@ HUD_COLOUR              = YELLOW
 
 .segment        "VIC_SCR_MENU"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-.ifndef OPTION_ORIGINAL
+.if     !.defined( BUILD_ORIGINAL )
         ;///////////////////////////////////////////////////////////////////////
         ; include the entire default menu screen RAM
         .koala_screen   "build/screen_menu.koa", 0, 0, 1000
@@ -146,7 +146,7 @@ HUD_COLOUR              = YELLOW
 ;
 ; ROW 1                                                                 ;$EF90
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .koala_bitmap   "build/screen_main.koa", 18, 0, 40
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ HUD_COLOUR              = YELLOW
 
 ; ROW 2
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .koala_bitmap   "build/screen_main.koa", 19, 0, 40
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ HUD_COLOUR              = YELLOW
 
 ; ROW 3
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .koala_bitmap   "build/screen_main.koa", 20, 0, 40
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ HUD_COLOUR              = YELLOW
 
 ; ROW 4
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .koala_bitmap   "build/screen_main.koa", 21, 0, 40
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -182,7 +182,7 @@ HUD_COLOUR              = YELLOW
 
 ; ROW 5
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .koala_bitmap   "build/screen_main.koa", 22, 0, 40
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -191,7 +191,7 @@ HUD_COLOUR              = YELLOW
 
 ; ROW 6
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .koala_bitmap   "build/screen_main.koa", 23, 0, 40
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ HUD_COLOUR              = YELLOW
 
 ; ROW 7
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .koala_bitmap   "build/screen_main.koa", 24, 0, 40
 
@@ -231,7 +231,7 @@ HUD_COLOUR              = YELLOW
 ;
 ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos( 18, 0 )
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 .segment        "HUD_COLORSCR"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -266,7 +266,7 @@ ELITE_HUD_COLORSCR_ADDR := ELITE_MAINSCR_ADDR + .scrpos( 18, 0 )
 ;
 .proc   gfx_colorram_init                                               ;$795A
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; include the HUD's colour RAM data from the Koala image
         .koala_color    "build/screen_main.koa", 18, 0, (7 * 40)
@@ -413,7 +413,7 @@ _bmprow31 = ELITE_BITMAP_ADDR + .bmppos( 31, 4 ) ;=$66E0
         _bmprow31, _bmprow31, _bmprow31, _bmprow31, \
         _bmprow31, _bmprow31, _bmprow31, _bmprow31
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
 
 .define _rowtobmp \

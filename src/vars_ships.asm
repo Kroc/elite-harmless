@@ -150,7 +150,7 @@ ship_addrs_hi   := ship_addrs + 1
         ; copy the given Ship to the
         ; working space in zero page
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this is the original copy routine
         ;                                       ; bytes/tally   cycles/tally
@@ -221,7 +221,7 @@ ship_addrs_hi   := ship_addrs + 1
         ; copy the working ship struct in zero-page
         ; back to its storage space
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this is the original copy routine
         ;                                       ; bytes/tally   cycles/tally

@@ -176,7 +176,7 @@ circle_lines_x:                                         ; BBC: LSX2     ;$26A4
 ;===============================================================================
 ; RAM used for X-coords for circle line-drawing
 ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this is junk code/data left in memory
         ; in this unitialised table
@@ -221,7 +221,7 @@ circle_lines_y:                                         ; BBC: LSY2     ;$27A4
 ;===============================================================================
 ; RAM used for Y-coords for circle line-drawing
 ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this is junk code/data left in memory
         ; in this unitialised table
@@ -916,7 +916,7 @@ _PLF5:                                                  ; BBC: PLF5     ;$7F67
         ; NOTE: `clip_sun_line` already removes the line
         ;       from the sun-buffer, so this is redundant
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # $00               ; clear the line from the sun-buffer,
         sta SUN_BUFFER, y       ;  and move to the next

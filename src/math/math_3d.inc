@@ -266,7 +266,7 @@ rotate_ship_axis:                                                    ;$A4A1
 
         ldx ZP_SHIP + mYx0_LO, y
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; this instruction appears entirely unecessary as `multiply_and_add`
         ; will blindly overwrite `ZP_VAR_P` anyway. if compiling elite-harmless
@@ -280,7 +280,7 @@ rotate_ship_axis:                                                    ;$A4A1
         sta ZP_SHIP+mYx1_HI, y  ; write back the hi-byte
         stx ZP_SHIP+mYx1_LO, y  ; write back the lo-byte
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; as before, this instruction is unecessary
         stx ZP_VAR_P
@@ -298,7 +298,7 @@ rotate_ship_axis:                                                    ;$A4A1
         sta ZP_SHIP+mYx0_HI, y  ; write back the hi-byte
         stx ZP_SHIP+mYx0_LO, y  ; write back the lo-byte
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; as before, this instruction is unecessary
         stx ZP_VAR_P
@@ -321,7 +321,7 @@ rotate_ship_axis:                                                    ;$A4A1
         
         ldx ZP_SHIP + mYx2_LO, y
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; as before, this instruction is unecessary
         stx ZP_VAR_P
@@ -334,7 +334,7 @@ rotate_ship_axis:                                                    ;$A4A1
         sta ZP_SHIP+mYx1_HI, y  ; write back the hi-byte
         stx ZP_SHIP+mYx1_LO, y  ; write back the lo-byte
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; as before, this instruction is unecessary
         stx ZP_VAR_P

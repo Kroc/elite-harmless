@@ -7,7 +7,7 @@
 .segment        "CODE_28BA"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 ; unused / unreferenced?
 ;$28BA:
@@ -101,7 +101,7 @@ draw_line_divider:                                      ; BBC: NLIN2    ;$28E5
 ; in:   A                       Y-position of line
 ;
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         sta ZP_VAR_XX15_1       ; set Y-position of line,
         sta ZP_VAR_XX15_3       ; both start and end (straight)
@@ -115,7 +115,7 @@ draw_line_divider:                                      ; BBC: NLIN2    ;$28E5
         dex                     ; roll around to 255
         stx ZP_VAR_XX15_2       ; set line-end
         
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jmp draw_line
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -270,7 +270,7 @@ paint_particle:                                                         ;$293A
         ; we could instead use this to grow dust in more detail, using
         ; a single-pixel bitmask for far, far away dust particles
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda ZP_VAR_Z            ; "pixel distance"
         cmp # 144               ; is the dust-particle >= 144 Z-distance?
@@ -351,7 +351,7 @@ move_dust_front:                                                        ;$2A40
 
         ; divide result by 4:
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda R                   ; unnecessary, A is R after `get_dust_speed`
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -891,7 +891,7 @@ print_flight_token_and_newline_and_indent:                              ;$2D61
 ;===============================================================================
         jsr print_flight_token_and_newline
         lda # 6
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         jmp set_cursor_col
 .else
         sta ZP_CURSOR_COL
@@ -1513,7 +1513,7 @@ print_char:                                                             ;$2F24
         jsr _print_chars
 
         ; move to the next line
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # TXT_NEWLINE
         jsr paint_char
@@ -2043,7 +2043,7 @@ _322b:                                                                  ;$322B
         bne _3290
 _322f:                                                                  ;$322F
         lda # $00
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr or_xyz_hi           ; combine check with distance
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -2396,7 +2396,7 @@ _33fa:                                                                  ;$33FA
 
 _33fd:                                                                  ;$33FD
         lda # $00
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr or_xyz_hi           ; combine check with distance
 .else   ;///////////////////////////////////////////////////////////////////////

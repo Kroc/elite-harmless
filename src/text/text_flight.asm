@@ -839,7 +839,7 @@ _0a91:  ;$1D: 143.                                                      ;$0A91
         .tkn                                                            ;=$3E
 
 _0a98:  ;$1E: 144.                                                      ;$0A98
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .byte   _HYPHEN, _HYPHEN, _HYPHEN, _HYPHEN
         .byte   __, "E", __, "L", __, "I", __, "T", __, "E", __
@@ -860,7 +860,7 @@ _0ab2:  ;$20: 146.                                                      ;$0AB2
         .byte   $2b, "GAME", __, "O", _VE, "R", __end
         .tkn                                                            ;=$03
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; padding
         .byte   $00, $00, $00, $00                                      ;$0ABC

@@ -304,7 +304,7 @@ draw_line_horz:                                                         ;$ABBB
         ; overflows a step vertically will be taken
         sta ZP_REG_H
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         clc                     ; unneccessary, the carry is reset on cpy
 .endif  ;///////////////////////////////////////////////////////////////////////

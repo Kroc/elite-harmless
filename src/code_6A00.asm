@@ -117,7 +117,7 @@ set_page_6a2f:                                                          ;$6A2F
         jsr _28d5               ; loads A & X with $0F
         lda # $30
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -543,7 +543,7 @@ _6b5a:                                                                  ;$6B5A
         jsr print_newpara
         jmp _3d2f               ; (not in the BBC code)
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         rts                     ; extraneous
 .endif
 
@@ -656,7 +656,7 @@ galactic_chart:                                         ; BBC: TT22     ;$6C1C
         lda # page::chart_galaxy
         jsr set_page            ; switch pages, clearing the screen
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # $10
         jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
@@ -765,7 +765,7 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
 
         ; draw the horizontal line of the cross-hair:
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         sta ZP_VAR_XX15_1
         sta ZP_VAR_XX15_3
@@ -1376,7 +1376,7 @@ local_chart:                                                            ;$6FDB
         lda # page::chart_local ; screen-ID for short-range (local) chart
         jsr set_page            ; switch pages, clearing the screen
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # $10
         jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
@@ -2288,7 +2288,7 @@ _74a5:                                                                  ;$74A5
         rts 
 
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .byte   $52, $2e, $44, $2e, $43, $4f ,$44, $45  ;="R.D.CODE"    ;$74AF
         .byte   $0d                                     ;=\n
@@ -2807,7 +2807,7 @@ _78bc:                                                                  ;$78BC
         cpy # $12
         bne _78d6
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jmp _795a               ; in the original, this is a double-jump
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -2896,7 +2896,7 @@ _7948:                                                                  ;$7948
         rts 
 
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 _795a:                                                                  ;$795A
 ;===============================================================================
@@ -2964,7 +2964,7 @@ _79a7:                                                                  ;$79A7
 
 _79a9:                                                                  ;$79A9
 ;===============================================================================
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn the I/O area on to manage the sprites
         lda # C64_MEM::IO_ONLY
@@ -3088,7 +3088,7 @@ _7a78:                                                                  ;$7A78
         pla 
         sta ZP_GOATSOUP_pt2     ;?
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL
@@ -3251,7 +3251,7 @@ clear_sun_buffer:                                                       ;$7B4F
 
         rts 
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 original_7b5e:                                                          ;$75BE
 ;===============================================================================
@@ -3718,7 +3718,7 @@ _TT17:                                                  ; BBC: TT17     ;$81EE
         ; due to the segment boundary so we set the branch destination
         ; manually
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         beq *-6                 ; =`_PL6`
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -3820,7 +3820,7 @@ disable_sprites:                                                        ;$8273
 ; disable all sprites: (for example, when switching to menu screen)
 ;
 ;-------------------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; ensure the I/O is enabled so we can talk to the VIC-II:
         lda # C64_MEM::IO_ONLY
@@ -3833,7 +3833,7 @@ disable_sprites:                                                        ;$8273
         lda # %00000000
         sta VIC_SPRITE_ENABLE
 
-.ifndef OPTION_ORIGINAL
+.ifndef BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         dec CPU_CONTROL
         rts 
@@ -3887,7 +3887,7 @@ _828f:                                                                  ;$828F
 ; NOTE: this routine is inlined in elite-harmless,
 ;       see `process_ship`
 ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 
 clear_ship_slot:                                                        ;$829A
@@ -4860,7 +4860,7 @@ _877e:                                                                  ;$877E
         lda # %10000000
         sta ZP_PRINT_CASE
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # TXT_NEWLINE
         jsr print_char
@@ -4898,7 +4898,7 @@ _87b0:                                                                  ;$87B0
         rts 
 
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 ; this routine is inlined in elite-harmless
 ;
@@ -4923,7 +4923,7 @@ _87b8:                                                                  ;$87B8
 ; the unused and incomplete debug code can be removed
 ; in non-original builds
 ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 ; BRK routine, set up by `debug_for_brk`
 ;
@@ -4967,13 +4967,13 @@ _87d0:                                                  ; BBC: DEATH    ;$87D0
         asl ZP_PLAYER_SPEED
         asl ZP_PLAYER_SPEED
         ldx # $18
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr original_7b5e       ; dead code, just an rts
 .endif  ;///////////////////////////////////////////////////////////////////////
         jsr set_page
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr drawViewportBorders
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -5049,7 +5049,7 @@ _8851:                                                                  ;$8851
         bne _8851
         ldx # $1f
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr original_7b5e       ; dead code, just an rts
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -5228,7 +5228,7 @@ _8920:                                                                  ;$8920
 
         jsr clear_keyboard
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # $20
         jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
@@ -5256,7 +5256,7 @@ _8920:                                                                  ;$8920
         jsr spawn_ship
 
         ; print "--- E L I T E ---"
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # 6
 .else   ;///////////////////////////////////////////////////////////////////////
@@ -5486,7 +5486,7 @@ _8a6a:                                                                  ;$8A6A
         lda # $10
         sta VAR_050C
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # TXT_NEWLINE
         jmp paint_char
@@ -5538,7 +5538,7 @@ _8ac7:                                                                  ;$8AC7
 
         rts 
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         rts                     ; extraneous `rts`
 
@@ -5686,7 +5686,7 @@ _8ae7:                                                                  ;$8AE7
         lda # 40                ; raster line 40
         sta VIC_RASTER
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn KERNAL & I/O area off
         lda # C64_MEM::ALL
@@ -5721,7 +5721,7 @@ _8bbf:                                                                  ;$8BBF
 _8bc0:                                                                  ;$8BC0
         jsr swap_zp_shadow      ; why is this needed?
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # C64_MEM::IO_KERNAL
         sei                     ; disable interrupts
@@ -5757,7 +5757,7 @@ _8bc0:                                                                  ;$8BC0
         ldy # $00               ; X.Y is filename address
         jmp KERNAL_SETNAM
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ;bug / unused code? (`jmp` instead of `jsr` above)
         ;
@@ -5818,7 +5818,7 @@ _8c0d:                                                                  ;$8C0D
         lda # 40                ; raster line 40
         sta VIC_RASTER
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn off KERNAL & I/O, go back to 64K RAM
         lda # C64_MEM::ALL
@@ -5863,7 +5863,7 @@ _illegal:                                                               ;$8C55
         jsr wait_for_input              ; press any key
         jmp _8ae7
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 _8c60:  rts                                                             ;$8C60
 ;///////////////////////////////////////////////////////////////////////////////
@@ -5877,7 +5877,7 @@ _8c61:                                                                  ;$8C61
         jsr wait_for_input
         jmp _8ae7
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         rts                     ; not needed due to `jmp` above
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -5889,7 +5889,7 @@ _8c61:                                                                  ;$8C61
 .segment        "CODE_8C7A"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
         rts                     ; superfluous rts                       ;$8C7A
 ;///////////////////////////////////////////////////////////////////////////////
@@ -6049,7 +6049,7 @@ do_quickjump:                                           ; BBC: WARP     ;$8E29
         jmp play_sfx
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         rts                     ; extraneous `rts`                      ;$8E81
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -6072,7 +6072,7 @@ get_ctrl:                                                               ;$8E92
         rts 
 
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 ; read key?
 ; ununsed / unreferenced?
@@ -6712,7 +6712,7 @@ _920d:                                                                  ;$920D
 
 _9222:                                                                  ;$9222
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # C64_MEM::IO_ONLY
         jsr set_memory_layout
@@ -6726,7 +6726,7 @@ _9222:                                                                  ;$9222
         ; stop the currently playing song
         jsr sound_stop
 
-.ifndef OPTION_ORIGINAL
+.if     !.defined( BUILD_ORIGINAL )
         ;///////////////////////////////////////////////////////////////////////
         dec CPU_CONTROL         ; disable I/O
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -6764,7 +6764,7 @@ _9245:                                                                  ;$9245
 
         jsr _a817
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn on I/O to access the SID
         lda # C64_MEM::IO_ONLY
@@ -6792,7 +6792,7 @@ _9245:                                                                  ;$9245
         lda # 15                ; set SID volume
         sta SID_VOLUME_CTRL     ; (TODO: is 15 considered min or max?)
 
-.ifndef OPTION_ORIGINAL
+.if     !.defined( BUILD_ORIGINAL )
         ;///////////////////////////////////////////////////////////////////////
         dec CPU_CONTROL         ; disable I/O
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -6800,7 +6800,7 @@ _9245:                                                                  ;$9245
 
 _9266:                                                                  ;$9266
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL

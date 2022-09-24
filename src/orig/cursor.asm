@@ -7,7 +7,7 @@
 
 .macro  .cursor_down
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         jsr cursor_down
 .else
         inc ZP_CURSOR_ROW
@@ -17,7 +17,7 @@
 
 .macro  .cursor_down_jmp
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         jmp cursor_down
 .else
         inc ZP_CURSOR_ROW
@@ -28,7 +28,7 @@
 
 .macro  .set_cursor_col
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         jsr set_cursor_col
 .else
         sta ZP_CURSOR_COL
@@ -38,7 +38,7 @@
 
 .macro  .set_cursor_row
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         jsr set_cursor_row
 .else
         sta ZP_CURSOR_ROW
@@ -47,7 +47,7 @@
 .endmacro
 
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 .segment    "CODE_6A25"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

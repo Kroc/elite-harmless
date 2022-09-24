@@ -95,7 +95,7 @@ divide_unsigned:                                                        ;$3B37
 :       rol ZP_VAR_P            ; 128                                   ;$3B82
         
         ; end of P = A/Q
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ldx # $00               ; unneccessary, cancelled out by the tax below
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ math_divide_AQ:                                         ; BBC: LL28     ;$99AF
         ; here follows the remnants of the older BBC
         ; code to do the division by rotation
         ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         bcs @rtsff              ; return $FF, presumably when A > Q     ; $99E9
 

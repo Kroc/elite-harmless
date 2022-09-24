@@ -418,7 +418,7 @@ _LL17:                                                  ; BBC: LL17     ;$9B3A
 
         ; copy ship co-ordinates:
         ;-----------------------------------------------------------------------
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ldx # 8                 ; copy 9 bytes (0-based)
 :       lda ZP_SHIP, x                                             ;$9B66

@@ -86,7 +86,7 @@ interrupt_end_XA:                                                       ;$A8ED
 ;-------------------------------------------------------------------------------
        .plx                     ; restore X (via A)
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; the original source code uses the last-set memory layout state
         ; recorded by the central routine for restoring the memory layout
@@ -125,7 +125,7 @@ interrupt:                                                              ;$A8FA
         ;
         lda CPU_CONTROL         ; read current memory map
 
-.ifndef OPTION_ORIGINAL
+.if     !.defined( BUILD_ORIGINAL )
         ;///////////////////////////////////////////////////////////////////////
         ; in elite-harmless, we use an optimisation technique described by
         ; Gregory Naçu in his article "The 6510 Processor Port":
@@ -325,7 +325,7 @@ interrupt_end_YXA:                                                      ;$AA04
        .ply                     ; restore Y
        .plx                     ; restore X
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; the original source code uses the last-set memory layout state
         ; recorded by the central routine for restoring the memory layout
@@ -446,7 +446,7 @@ init_mem:                                                               ;$AAB2
         lda #> chrout
         sta KERNAL_VECTOR_CHROUT+1
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; change the C64's memory layout, turn off the BASIC & KERNAL ROMs
         ; leaving just the I/O registers ($D000...)
@@ -497,7 +497,7 @@ init_mem:                                                               ;$AAB2
         lda # 40
         sta VIC_RASTER
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; switch off the ROMs, leaving 64K of RAM
         lda CPU_CONTROL
@@ -550,7 +550,7 @@ nmi_null:                                                               ;$AB27
         rti                     ; "ReTurn from Interrupt"
 
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
 ; unused / unreferenced?
 

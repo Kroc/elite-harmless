@@ -2247,7 +2247,7 @@ _1a5c:                                                                  ;$1A5C
         .byte   __end
         
         ; 26.   unused
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         .byte   FN_CAPS_ON, "WELCOME", __, "TO", __, "THE", __
         .byte   "SEVENTEENTH", __, "GALAXY!"

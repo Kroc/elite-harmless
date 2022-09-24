@@ -45,7 +45,7 @@ tkn_docked_fn1D:                                                        ;$3E5A
         lda # 6
        .set_cursor_row
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr original_250b       ; dead code, just an RTS
 .endif  ;///////////////////////////////////////////////////////////////////////

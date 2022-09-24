@@ -68,10 +68,10 @@ echo
 echo "* build original Elite"
 echo "  ======================================"
 
-# assemble 'original' version of the code; the `OPTION_ORIGINAL` symbol
+# assemble 'original' version of the code; the `BUILD_ORIGINAL` symbol
 # is used within the files to exlcude changed code from the original
 
-options="-DOPTION_ORIGINAL -DFEATURE_AUDIO -DFEATURE_TRUMBLES"
+options="-DBUILD_ORIGINAL -DFEATURE_AUDIO -DFEATURE_TRUMBLES"
 
 # assemble the HUD bitmap into a Koala file we can pick bytes from.
 # we won't use a linker script for this as we don't need to include

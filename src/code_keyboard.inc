@@ -215,7 +215,7 @@ key_del:        .byte   '1'     ;=$40 - DELETE                          ;$8D4C
 ;
 ; TODO: expand keyboard reading for the 128 keyboard?
 ;
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
                 .byte   '2'                                             ;$8D4D
                 .byte   '3'                                             ;$8D4E
@@ -236,7 +236,7 @@ get_input:                                                              ;$8D53
 ;-------------------------------------------------------------------------------
        .phy                     ; preserve Y
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; enable the I/O shield
         lda # C64_MEM::IO_ONLY
@@ -408,7 +408,7 @@ get_input:                                                              ;$8D53
 
 :                                                                       ;$8E1E
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn the I/O shield off and
         ; return to 'game' memory layout

@@ -556,7 +556,7 @@ _a60e:                                                                  ;$A60E
 
 _PLUT:                                                  ; BBC: PLUT     ;$A626
 ;===============================================================================
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; we've inlined this at the call-site in elite-harmless
         ;
@@ -667,7 +667,7 @@ _a6ae:                                                                  ;$A6AE
 _a6ba:                                                                  ;$A6BA
         lda # page::cockpit
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -685,7 +685,7 @@ _a6ba:                                                                  ;$A6BA
 
 _a6d4:                                                                  ;$A6D4
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn the I/O area on to manage the sprites
         lda # C64_MEM::IO_ONLY
@@ -753,7 +753,7 @@ _a700:                                                                  ;$A700
         sta VIC_SPRITE_ENABLE
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; turn off I/O, go back to 64K RAM
         lda # C64_MEM::ALL
@@ -849,7 +849,7 @@ _a75d:                                                                  ;$A75D
 .import TKN_FLIGHT_DIRECTIONS:direct
         lda COCKPIT_VIEW
         ora # TKN_FLIGHT_DIRECTIONS
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         jsr print_flight_token
         jsr print_space
@@ -868,7 +868,7 @@ _a75d:                                                                  ;$A75D
         dex 
         stx ZP_PRINT_CASE
 
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         rts 
 .endif  ;///////////////////////////////////////////////////////////////////////
@@ -1422,7 +1422,7 @@ chrout:                                                                 ;$B155
         bne paint_char          ; if it's not RETURN, process it
 
         ; handle the RETURN code
-.ifdef  OPTION_ORIGINAL
+.ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         lda # TXT_NEWLINE
         jsr paint_char
