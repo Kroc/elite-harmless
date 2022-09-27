@@ -31,36 +31,98 @@ HULL_HERMIT_KILL        = 85    ;= 0.33
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_hermit                                                     ;$DD35
         ;-----------------------------------------------------------------------
-        ; does not scoop as anything, drops up to 7 debris!
-        .scoop_debris   0, 7                                            ;$DD35
-        
-        .byte                                 $00, $19                  ;$DD36
-        .byte   $4a, $9e, $45, $00, $32, $36, $15, $00
-        .byte   $00, $38, $32, $b4, $1e, $00, $00, $01                  ;$DD40
-        .byte   $02, $00, $50, $00, $1f, $ff, $ff, $50
-        .byte   $0a, $00, $df, $ff, $ff, $00, $50, $00                  ;$DD50
-        .byte   $5f, $ff, $ff, $46, $28, $00, $5f, $ff
-        .byte   $ff, $3c, $32, $00, $1f, $65, $dc, $32                  ;$DD60
-        .byte   $00, $3c, $1f, $ff, $ff, $28, $00, $46
-        .byte   $9f, $10, $32, $00, $1e, $4b, $3f, $ff                  ;$DD70
-        .byte   $ff, $00, $32, $3c, $7f, $98, $ba, $1f
-        .byte   $72, $00, $04, $1f, $d6, $00, $10, $1f                  ;$DD80
-        .byte   $c5, $0c, $10, $1f, $b4, $08, $0c, $1f
-        .byte   $a3, $04, $08, $1f, $32, $04, $18, $1f                  ;$DD90
-        .byte   $31, $08, $18, $1f, $41, $08, $14, $1f
-        .byte   $10, $14, $18, $1f, $60, $00, $14, $1f                  ;$DDA0
-        .byte   $54, $0c, $14, $1f, $20, $00, $18, $1f
-        .byte   $65, $10, $14, $1f, $a8, $04, $20, $1f                  ;$DDB0
-        .byte   $87, $04, $1c, $1f, $d7, $00, $1c, $1f
-        .byte   $dc, $10, $1c, $1f, $c9, $0c, $1c, $1f                  ;$DDC0
-        .byte   $b9, $0c, $20, $1f, $ba, $08, $20, $1f
-        .byte   $98, $1c, $20, $1f, $09, $42, $51, $5f                  ;$DDD0
-        .byte   $09, $42, $51, $9f, $48, $40, $1f, $df
-        .byte   $40, $49, $2f, $5f, $2d, $4f, $41, $1f                  ;$DDE0
-        .byte   $87, $0f, $23, $1f, $26, $4c, $46, $bf
-        .byte   $42, $3b, $27, $ff, $43, $0f, $50, $7f                  ;$DDF0
-        .byte   $42, $0e, $4b, $ff, $46, $50, $28, $7f
-        .byte   $3a, $66, $33, $3f, $51, $09, $43, $3f                  ;$DE00
-        .byte   $2f, $5e, $3f
+        .proc   header
+
+        scoop           = 0
+        debris          = 7
+        target_area     = 80
+        max_edges       = 17
+        laser_vertex    = 0
+        explosion_count = 11
+        bounty          = 0
+        lod_distance    = 50
+        max_energy      = 180
+        max_speed       = 30
+        normal_scaling  = 1
+        laser_power     = 0
+        missile_count   = 2
+ 
+        .hull
+ 
+        .endproc
+
+        .proc   vertices
+        ;-----------------------------------------------------------------------
+        ;          X     Y     Z  face: 1   2   3   4          vis       num
+        .vertex    0,   80,    0,      15, 15, 15, 15,          31      ; #0
+        .vertex  -80,  -10,    0,      15, 15, 15, 15,          31      ; #1
+        .vertex    0,  -80,    0,      15, 15, 15, 15,          31      ; #2
+        .vertex   70,  -40,    0,      15, 15, 15, 15,          31      ; #3
+        .vertex   60,   50,    0,       5,  6, 12, 13,          31      ; #4
+        .vertex   50,    0,   60,      15, 15, 15, 15,          31      ; #5
+        .vertex  -40,    0,   70,       0,  1,  2,  3,          31      ; #6
+        .vertex    0,   30,  -75,      15, 15, 15, 15,          31      ; #7
+        .vertex    0,  -50,  -60,       8,  9, 10, 11,          31      ; #8
+
+        .endproc
+
+        vertex_bytes = .sizeof( vertices )
+ 
+        ; some BBC versions reuse the edge and face data
+        ; from the asteroid but the C64 duplicates the data
+        ; <www.bbcelite.com/compare/main/variable/ship_rock_hermit.html>
+        ;
+        .proc   edges
+        ;-----------------------------------------------------------------------
+        ; vertex 1   2    face 1   2           vis                       num
+        .edge    0,  1,        2,  7,           31                      ; #0
+        .edge    0,  4,        6, 13,           31                      ; #1
+        .edge    3,  4,        5, 12,           31                      ; #2
+        .edge    2,  3,        4, 11,           31                      ; #3
+        .edge    1,  2,        3, 10,           31                      ; #4
+        .edge    1,  6,        2,  3,           31                      ; #5
+        .edge    2,  6,        1,  3,           31                      ; #6
+        .edge    2,  5,        1,  4,           31                      ; #7
+        .edge    5,  6,        0,  1,           31                      ; #8
+        .edge    0,  5,        0,  6,           31                      ; #9
+        .edge    3,  5,        4,  5,           31                      ; #10
+        .edge    0,  6,        0,  2,           31                      ; #11
+        .edge    4,  5,        5,  6,           31                      ; #12
+        .edge    1,  8,        8, 10,           31                      ; #13
+        .edge    1,  7,        7,  8,           31                      ; #14
+        .edge    0,  7,        7, 13,           31                      ; #15
+        .edge    4,  7,       12, 13,           31                      ; #16
+        .edge    3,  7,        9, 12,           31                      ; #17
+        .edge    3,  8,        9, 11,           31                      ; #18
+        .edge    2,  8,       10, 11,           31                      ; #19
+        .edge    7,  8,        8,  9,           31                      ; #20
+
+        .endproc
+
+        edges_offset = edges - header
+        edges_bytes  = .sizeof( edges )
+ 
+        .proc   faces
+        ;-----------------------------------------------------------------------
+        ;    normalx normaly normalz           vis                       num
+        .face      9,     66,     81,           31                      ; #0
+        .face      9,    -66,     81,           31                      ; #1
+        .face    -72,     64,     31,           31                      ; #2
+        .face    -64,    -73,     47,           31                      ; #3
+        .face     45,    -79,     65,           31                      ; #4
+        .face    135,     15,     35,           31                      ; #5
+        .face     38,     76,     70,           31                      ; #6
+        .face    -66,     59,    -39,           31                      ; #7
+        .face    -67,    -15,    -80,           31                      ; #8
+        .face     66,    -14,    -75,           31                      ; #9
+        .face    -70,    -80,    -40,           31                      ; #10
+        .face     58,   -102,    -51,           31                      ; #11
+        .face     81,      9,    -67,           31                      ; #12
+        .face     47,     94,    -63,           31                      ; #13
+
+        .endproc
+
+        faces_offset = faces - header
+        face_bytes   = .sizeof( faces )
 
 .endproc

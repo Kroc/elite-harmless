@@ -31,30 +31,82 @@ HULL_SIDEWINDER_KILL    = 85    ;= 0.33
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_sidewinder                                                 ;$DEE5
         ;-----------------------------------------------------------------------
-        ; does not scoop as anything, does not drop any debris:
-        .scoop_debris   0, 0                                            ;$DEE5
-        
-        .byte                                 $81, $10                  ;$DEE6
-        .byte   $50, $8c, $41, $00, $1e, $3c, $0f, $32
-        .byte   $00, $1c, $14, $46, $25, $00, $00, $02                  ;$DEF0
-        .byte   $10, $20, $00, $24, $9f, $10, $54, $20
-        .byte   $00, $24, $1f, $20, $65, $40, $00, $1c                  ;$DF00
-        .byte   $3f, $32, $66, $40, $00, $1c, $bf, $31
-        .byte   $44, $00, $10, $1c, $3f, $10, $32, $00                  ;$DF10
-        .byte   $10, $1c, $7f, $43, $65, $0c, $06, $1c
-        .byte   $af, $33, $33, $0c, $06, $1c, $2f, $33                  ;$DF20
-        .byte   $33, $0c, $06, $1c, $6c, $33, $33, $0c
-        .byte   $06, $1c, $ec, $33, $33, $1f, $50, $00                  ;$DF30
-        .byte   $04, $1f, $62, $04, $08, $1f, $20, $04
-        .byte   $10, $1f, $10, $00, $10, $1f, $41, $00                  ;$DF40
-        .byte   $0c, $1f, $31, $0c, $10, $1f, $32, $08
-        .byte   $10, $1f, $43, $0c, $14, $1f, $63, $08                  ;$DF50
-        .byte   $14, $1f, $65, $04, $14, $1f, $54, $00
-        .byte   $14, $0f, $33, $18, $1c, $0c, $33, $1c                  ;$DF60
-        .byte   $20, $0c, $33, $18, $24, $0c, $33, $20
-        .byte   $24, $1f, $00, $20, $08, $9f, $0c, $2f                  ;$DF70
-        .byte   $06, $1f, $0c, $2f, $06, $3f, $00, $00
-        .byte   $70, $df, $0c, $2f, $06, $5f, $00, $20                  ;$DF80
-        .byte   $08, $5f, $0c, $2f, $06
+        .proc   header
+
+        scoop           = 0
+        debris          = 0
+        target_area     = 65
+        max_edges       = 16
+        laser_vertex    = 0
+        explosion_count = 6
+        bounty          = 50
+        lod_distance    = 20
+        max_energy      = 70
+        max_speed       = 37
+        normal_scaling  = 2
+        laser_power     = 2
+        missile_count   = 0
+ 
+        .hull
+ 
+        .endproc
+
+        .proc   vertices
+        ;-----------------------------------------------------------------------
+        ;          X     Y     Z  face: 1   2   3   4          vis       num
+        .vertex  -32,    0,   36,       0,  1,  4,  5,          31      ; #0
+        .vertex   32,    0,   36,       0,  2,  5,  6,          31      ; #1
+        .vertex   64,    0,  -28,       2,  3,  6,  6,          31      ; #2
+        .vertex  -64,    0,  -28,       1,  3,  4,  4,          31      ; #3
+        .vertex    0,   16,  -28,       0,  1,  2,  3,          31      ; #4
+        .vertex    0,  -16,  -28,       3,  4,  5,  6,          31      ; #5
+        .vertex  -12,    6,  -28,       3,  3,  3,  3,          15      ; #6
+        .vertex   12,    6,  -28,       3,  3,  3,  3,          15      ; #7
+        .vertex   12,   -6,  -28,       3,  3,  3,  3,          12      ; #8
+        .vertex  -12,   -6,  -28,       3,  3,  3,  3,          12      ; #9
+
+        .endproc
+
+        vertex_bytes = .sizeof( vertices )
+ 
+        .proc   edges
+        ;-----------------------------------------------------------------------
+        ; vertex 1   2    face 1   2           vis                       num
+        .edge    0,  1,        0,  5,           31                      ; #0
+        .edge    1,  2,        2,  6,           31                      ; #1
+        .edge    1,  4,        0,  2,           31                      ; #2
+        .edge    0,  4,        0,  1,           31                      ; #3
+        .edge    0,  3,        1,  4,           31                      ; #4
+        .edge    3,  4,        1,  3,           31                      ; #5
+        .edge    2,  4,        2,  3,           31                      ; #6
+        .edge    3,  5,        3,  4,           31                      ; #7
+        .edge    2,  5,        3,  6,           31                      ; #8
+        .edge    1,  5,        5,  6,           31                      ; #9
+        .edge    0,  5,        4,  5,           31                      ; #10
+        .edge    6,  7,        3,  3,           15                      ; #11
+        .edge    7,  8,        3,  3,           12                      ; #12
+        .edge    6,  9,        3,  3,           12                      ; #13
+        .edge    8,  9,        3,  3,           12                      ; #14
+
+        .endproc
+
+        edges_offset = edges - header
+        edges_bytes  = .sizeof( edges )
+ 
+        .proc   faces
+        ;-----------------------------------------------------------------------
+        ;    normalx normaly normalz           vis                       num
+        .face      0,     32,      8,           31                      ; #0
+        .face    -12,     47,      6,           31                      ; #1
+        .face     12,     47,      6,           31                      ; #2
+        .face      0,      0,   -112,           31                      ; #3
+        .face    -12,    -47,      6,           31                      ; #4
+        .face      0,    -32,      8,           31                      ; #5
+        .face     12,    -47,      6,           31                      ; #6
+
+        .endproc
+
+        faces_offset = faces - header
+        face_bytes   = .sizeof( faces )
 
 .endproc

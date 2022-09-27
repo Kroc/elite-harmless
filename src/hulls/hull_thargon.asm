@@ -31,23 +31,63 @@ HULL_THARGON_KILL       = 33    ;= 0.128
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_thargon                                                    ;$EBBD
         ;-----------------------------------------------------------------------
-        ; scooping a thargon gets you valuable "alien items"
-        .scoop_debris   Cargo::aliens, 0                                ;$EBBD
-        
-        .byte                                 $40, $06                  ;$EBBE
-        .byte   $e6, $50, $45, $00, $12, $3c, $0f, $32                  ;$EBC0
-        .byte   $00, $1c, $14, $14, $1e, $e7, $00, $02
-        .byte   $10, $09, $00, $28, $9f, $01, $55, $09                  ;$EBD0
-        .byte   $26, $0c, $df, $01, $22, $09, $18, $20
-        .byte   $ff, $02, $33, $09, $18, $20, $bf, $03                  ;$EBE0
-        .byte   $44, $09, $26, $0c, $9f, $04, $55, $09
-        .byte   $00, $08, $3f, $15, $66, $09, $0a, $0f                  ;$EBF0
-        .byte   $7f, $12, $66, $09, $06, $1a, $7f, $23
-        .byte   $66, $09, $06, $1a, $3f, $34, $66, $09                  ;$EC00
-        .byte   $0a, $0f, $3f, $45, $66, $9f, $24, $00
-        .byte   $00, $5f, $14, $05, $07, $7f, $2e, $2a                  ;$EC10
-        .byte   $0e, $3f, $24, $00, $68, $3f, $2e, $2a
-        .byte   $0e, $1f, $14, $05, $07, $1f, $24, $00                  ;$EC20
-        .byte   $00
+        .proc   header
+
+        scoop           = Cargo::aliens
+        debris          = 0
+        target_area     = 40
+        max_edges       = 17
+        laser_vertex    = 0
+        explosion_count = 3
+        bounty          = 50
+        lod_distance    = 20
+        max_energy      = 20
+        max_speed       = 30
+        normal_scaling  = 2
+        laser_power     = 2
+        missile_count   = 0
+
+        .hull
+
+        .endproc
+
+        .proc   vertices
+        ;-----------------------------------------------------------------------
+        ;          X     Y     Z  face: 1   2   3   4          vis       num
+        .vertex   -9,    0,   40,       1,  0,  5,  5,          31      ; #0
+        .vertex   -9,  -38,   12,       1,  0,  2,  2,          31      ; #1
+        .vertex   -9,  -24,  -32,       2,  0,  3,  3,          31      ; #2
+        .vertex   -9,   24,  -32,       3,  0,  4,  4,          31      ; #3
+        .vertex   -9,   38,   12,       4,  0,  5,  5,          31      ; #4
+        .vertex    9,    0,   -8,       5,  1,  6,  6,          31      ; #5
+        .vertex    9,  -10,  -15,       2,  1,  6,  6,          31      ; #6
+        .vertex    9,   -6,  -26,       3,  2,  6,  6,          31      ; #7
+        .vertex    9,    6,  -26,       4,  3,  6,  6,          31      ; #8
+        .vertex    9,   10,  -15,       5,  4,  6,  6,          31      ; #9
+
+        .endproc
+
+        vertex_bytes = .sizeof( vertices )
+
+        ; the Thargon reuses the edges from the cannister!
+        ;
+        edges_offset = ::hull_cannister::edges - header
+        edges_bytes  = .sizeof( ::hull_cannister::edges )
+
+        .proc   faces
+        ;-----------------------------------------------------------------------
+        ;    normalx normaly normalz           vis                       num
+        .face    -36,      0,      0,           31                      ; #0
+        .face     20,     -5,      7,           31                      ; #1
+        .face     46,    -42,    -14,           31                      ; #2
+        .face     36,      0,   -104,           31                      ; #3
+        .face     46,     42,    -14,           31                      ; #4
+        .face     20,      5,      7,           31                      ; #5
+        .face     36,      0,      0,           31                      ; #6
+
+        .endproc
+
+        faces_offset = faces - header
+        face_bytes   = .sizeof( faces )
 
 .endproc

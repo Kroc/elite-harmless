@@ -31,16 +31,63 @@ HULL_SPLINTER_KILL      = 10    ;= 0.039
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_splinter                                                   ;$D573
         ;-----------------------------------------------------------------------
-        ; scooping a splinter will get you some minerals
-        .scoop_debris   Cargo::minerals, 0                              ;$D573
-        
-        .byte                       $00, $01, $78, $44                  ;$D574
-        .byte   $1d, $00, $16, $18, $06, $00, $00, $10
-        .byte   $08, $14, $0a, $fd, $00, $05, $00, $18                  ;$D580
-        .byte   $19, $10, $df, $12, $33, $00, $0c, $0a
-        .byte   $3f, $02, $33, $0b, $06, $02, $5f, $01                  ;$D590
-        .byte   $33, $0c, $2a, $07, $1f, $01, $22, $1f
-        .byte   $23, $00, $04, $1f, $03, $04, $08, $1f                  ;$D5A0
-        .byte   $01, $08, $0c, $1f, $12, $0c, $00
+        .proc   header
+
+        scoop           = Cargo::minerals
+        debris          = 0
+        target_area     = 16
+        max_edges       = 7
+        laser_vertex    = 0
+        explosion_count = 4
+        bounty          = 0
+        lod_distance    = 8
+        max_energy      = 20
+        max_speed       = 10
+        normal_scaling  = 5
+        laser_power     = 0
+        missile_count   = 0
+
+        .hull
+
+        .endproc
+
+        .proc   vertices
+        ;-----------------------------------------------------------------------
+        ;          X     Y     Z  face: 1   2   3   4          vis       num
+        .vertex  -24,  -25,   16,       2,  1,  3,  3,          31      ; #0
+        .vertex    0,   12,  -10,       2,  0,  3,  3,          31      ; #1
+        .vertex   11,   -6,    2,       1,  0,  3,  3,          31      ; #2
+        .vertex   12,   42,    7,       1,  0,  2,  2,          31      ; #3
+
+        .endproc
+
+        vertex_bytes = .sizeof( vertices )
+
+        ; the splinter reuses the edges from the escape pod!
+        ;
+        edges_offset = ::hull_escape::edges - header
+        edges_bytes  = .sizeof( ::hull_escape::edges )
+
+        .proc   faces
+        ;-----------------------------------------------------------------------
+        ;    normalx normaly normalz           vis                       num
+        .face     35,      0,      4,           31                      ; #0
+        .face      3,      4,      8,           31                      ; #1
+        .face      1,      8,     12,           31                      ; #2
+        .face     18,     12,      0,           31                      ; #3
+
+        .endproc
+
+        ; BUG! in the original code the face-offset is wrong and points into
+        ; the shuttle hull's header! thanks goes to Andy McFadden for pointing
+        ; this out in his disasembly: <https://6502disassembly.com/a2-elite/>
+        ;
+.ifdef  BUILD_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        faces_offset = $0044
+.else   ;///////////////////////////////////////////////////////////////////////
+        faces_offset = faces - header
+.endif  ;///////////////////////////////////////////////////////////////////////
+        face_bytes   = .sizeof( faces )
 
 .endproc

@@ -26,7 +26,7 @@ check_cargo_capacity_add1:                              ; BBC: tnpr1    ;$6A00
 ; out:  carry   clear = fits, set = overflow
 ;-------------------------------------------------------------------------------
         sta CARGO_ITEM          ; item index?
-        lda # $01
+        lda # 1
 
         ; fallthrough
         ; ...

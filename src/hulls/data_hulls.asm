@@ -1,8 +1,7 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;
-; "data_hulls.asm":
+;===============================================================================
 ;
 ; this file defines the 3D vector models
 ; of the various ships / objects in the game
@@ -13,37 +12,63 @@
 ;
 .linecont+
 
-.macro  .scoop_debris   scoop, debris
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        ; the scoop-data in a hull definition provides which cargo type it
-        ; gives when scooped, already decremented by 1 to account for the
-        ; non-zero check used when scooping. a side-effect of this is that
-        ; it's not possible for a hull definition to drop food or textiles(?)
-.if     (scoop = 0)
-        ; when the scoop type is zero, it really means zero
-        .byte   .nybl( debris, $0 )
-.else
-        ; anything else is a type of cargo
-        .byte   .nybl( debris, scoop-1 )
-.endif
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
+.struct HullVertex
+        vx              .byte
+        vy              .byte
+        vz              .byte
+        signs_vis       .byte
+        faces1and2      .byte
+        faces3and4      .byte
+.endstruct
 
 .macro  .vertex         vx, vy, vz, face1, face2, face3, face4, vis_dist
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        .byte   vx & %01111111  ; X-position, without sign
-        .byte   vy & %01111111  ; Y-position, without sign
-        .byte   vz & %01111111  ; Z-position, without sign
-        
+        .local  sx, sy, sz
+        .local  ax, ay, az
+        .if (vx < 0)
+                sx .set 1
+                ax .set -vx
+        .else
+                sx .set 0
+                ax .set vx
+        .endif
+        .if (vy < 0)
+                sy .set 1
+                ay .set -vy
+        .else
+                sy .set 0
+                ay .set vy
+        .endif
+        .if (vz < 0)
+                sz .set 1
+                az .set -vz
+        .else
+                sz .set 0
+                az .set vz
+        .endif
+
+        ; first three bytes of the vertex
+        ; are the X, Y & Z magnitudes
+        ;
+        .byte   ax              ; X-position, without sign
+        .byte   ay              ; Y-position, without sign
+        .byte   az              ; Z-position, without sign
+
         ; bits 0-4: distance 0-31 before this vertex becomes invsible
-        ; bits 5-7: X, Y & Z sign-bits 
-        .byte   (vis_dist & %00011111) | \
-                (vx & %10000000) | (vy & %10000000)>>1 | (vz & %10000000)>>2
-        
+        ; bits 5-7: X, Y & Z sign-bits
+        .byte   vis_dist | sx << 7 | sy << 6 | sz << 5
+
         .byte   .nybl( face1, face2 )
         .byte   .nybl( face3, face4 )
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
+
+.struct HullEdge
+        vis_dist        .byte
+        face1and2       .byte
+        vertex1         .byte
+        vertex2         .byte
+.endstruct
 
 .macro  .edge           vertex1, vertex2, face1, face2, vis_dist
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -53,16 +78,44 @@
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
+.struct HullFace
+        signs_vis       .byte
+        normalx         .byte
+        normaly         .byte
+        normalz         .byte
+.endstruct
+
 .macro  .face           normx, normy, normz, vis_dist
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        .local  sx, sy, sz
+        .local  ax, ay, az
+        .if (normx < 0)
+                sx .set 1
+                ax .set -normx
+        .else
+                sx .set 0
+                ax .set normx
+        .endif
+        .if (normy < 0)
+                sy .set 1
+                ay .set -normy
+        .else
+                sy .set 0
+                ay .set normy
+        .endif
+        .if (normz < 0)
+                sz .set 1
+                az .set -normz
+        .else
+                sz .set 0
+                az .set normz
+        .endif
+
         ; bits 0-4: distance 0-31 before this face becomes invsible
         ; bits 5-7: X, Y & Z sign-bits 
-        .byte   (vis_dist & %00011111) | (normx & %10000000) | \
-                (normy & %10000000)>>1 | (normz & %10000000)>>2
+        .byte   vis_dist | sx <<7 | sy <<6 | sz <<5
 
-        .byte   normx & %0111111
-        .byte   normy & %0111111
-        .byte   normz & %0111111
+        .byte   ax, ay, az
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
 
@@ -105,7 +158,7 @@ hull_kill_hi:                                                           ;$D084
         ;
 
 ;===============================================================================
-; NOTE: THE ORDER OF THESE INCLUDES DETERMINES THEIR INDICES,
+; NOTE: THE ORDER OF THESE INCLUDES DETERMINES THEIR INDICES,           ;$D0A5
 ;       AND THE ORDER OF THE DATA IN THE TABLES!
 ;
 .include "hulls/hull_missile.asm"               ; $01: missile

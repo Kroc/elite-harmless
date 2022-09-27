@@ -242,7 +242,7 @@ ZP_ROTATE_M0x2_HI       := $56                                          ;XX16+17
 ;-------------------------------------------------------------------------------
 
 ; pointer to a hull data structure:
-; (verticies, edges, faces &c.)
+; (vertices, edges, faces &c.)
 ZP_HULL_ADDR            := $57                                          ;XX0
 ZP_HULL_ADDR_LO         := $57                                          ;XX0+0
 ZP_HULL_ADDR_HI         := $58                                          ;XX0+1

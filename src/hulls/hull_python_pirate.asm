@@ -31,39 +31,103 @@ HULL_PYTHON_PIRATE_KILL = 298   ;= 1.16
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_py_pirate                                                  ;$E7BD
         ;-----------------------------------------------------------------------
-        ; does not scoop as anything, drops up to 2 debris:
-        .scoop_debris   0, 2                                            ;$E7BD
-        
-        .byte                                 $00, $19                  ;$E7BE
-        .byte   $56, $be, $59, $00, $2a, $42, $1a, $c8                  ;$E7C0
-        .byte   $00, $34, $28, $fa, $14, $00, $00, $00
-        .byte   $1b, $00, $00, $e0, $1f, $10, $32, $00                  ;$E7D0
-        .byte   $30, $30, $1f, $10, $54, $60, $00, $10
-        .byte   $3f, $ff, $ff, $60, $00, $10, $bf, $ff                  ;$E7E0
-        .byte   $ff, $00, $30, $20, $3f, $54, $98, $00
-        .byte   $18, $70, $3f, $89, $cc, $30, $00, $70                  ;$E7F0
-        .byte   $bf, $b8, $cc, $30, $00, $70, $3f, $a9
-        .byte   $cc, $00, $30, $30, $5f, $32, $76, $00                  ;$E800
-        .byte   $30, $20, $7f, $76, $ba, $00, $18, $70
-        .byte   $7f, $ba, $cc, $1f, $32, $00, $20, $1f                  ;$E810
-        .byte   $20, $00, $0c, $1f, $31, $00, $08, $1f
-        .byte   $10, $00, $04, $1f, $59, $08, $10, $1f                  ;$E820
-        .byte   $51, $04, $08, $1f, $37, $08, $20, $1f
-        .byte   $40, $04, $0c, $1f, $62, $0c, $20, $1f                  ;$E830
-        .byte   $a7, $08, $24, $1f, $84, $0c, $10, $1f
-        .byte   $b6, $0c, $24, $07, $88, $0c, $14, $07                  ;$E840
-        .byte   $bb, $0c, $28, $07, $99, $08, $14, $07
-        .byte   $aa, $08, $28, $1f, $a9, $08, $1c, $1f                  ;$E850
-        .byte   $b8, $0c, $18, $1f, $c8, $14, $18, $1f
-        .byte   $c9, $14, $1c, $1f, $ac, $1c, $28, $1f                  ;$E860
-        .byte   $cb, $18, $28, $1f, $98, $10, $14, $1f
-        .byte   $ba, $24, $28, $1f, $54, $04, $10, $1f                  ;$E870
-        .byte   $76, $20, $24, $9f, $1b, $28, $0b, $1f
-        .byte   $1b, $28, $0b, $df, $1b, $28, $0b, $5f                  ;$E880
-        .byte   $1b, $28, $0b, $9f, $13, $26, $00, $1f
-        .byte   $13, $26, $00, $df, $13, $26, $00, $5f                  ;$E890
-        .byte   $13, $26, $00, $bf, $19, $25, $0b, $3f
-        .byte   $19, $25, $0b, $7f, $19, $25, $0b, $ff                  ;$E8A0
-        .byte   $19, $25, $0b, $3f, $00, $00, $70
+        .proc   header
+
+        scoop           = 0
+        debris          = 2
+        target_area     = 80
+        max_edges       = 22
+        laser_vertex    = 0
+        explosion_count = 9
+        bounty          = 200
+        lod_distance    = 40
+        max_energy      = 250
+        max_speed       = 20
+        normal_scaling  = 0
+        laser_power     = 3
+        missile_count   = 3
+ 
+        .hull
+ 
+        .endproc
+
+        .proc   vertices
+        ;-----------------------------------------------------------------------
+        ;          X     Y     Z  face: 1   2   3   4          vis       num
+        .vertex    0,    0,  224,       0,  1,  2,  3,          31      ; #0
+        .vertex    0,   48,   48,       0,  1,  4,  5,          31      ; #1
+        .vertex   96,    0,  -16,      15, 15, 15, 15,          31      ; #2
+        .vertex  -96,    0,  -16,      15, 15, 15, 15,          31      ; #3
+        .vertex    0,   48,  -32,       4,  5,  8,  9,          31      ; #4
+        .vertex    0,   24, -112,       9,  8, 12, 12,          31      ; #5
+        .vertex  -48,    0, -112,       8, 11, 12, 12,          31      ; #6
+        .vertex   48,    0, -112,       9, 10, 12, 12,          31      ; #7
+        .vertex    0,  -48,   48,       2,  3,  6,  7,          31      ; #8
+        .vertex    0,  -48,  -32,       6,  7, 10, 11,          31      ; #9
+        .vertex    0,  -24, -112,      10, 11, 12, 12,          31      ; #10
+
+        .endproc
+
+        vertex_bytes = .sizeof( vertices )
+ 
+        ; some BBC versions reuse the edge and face data from
+        ; the non-pirate Python but the C64 duplicates the data
+        ; <www.bbcelite.com/compare/main/variable/ship_python_p.html>
+        ;
+        .proc   edges
+        ;-----------------------------------------------------------------------
+        ; vertex 1   2    face 1   2           vis                       num
+        .edge    0,  8,        2,  3,           31                      ; #0
+        .edge    0,  3,        0,  2,           31                      ; #1
+        .edge    0,  2,        1,  3,           31                      ; #2
+        .edge    0,  1,        0,  1,           31                      ; #3
+        .edge    2,  4,        9,  5,           31                      ; #4
+        .edge    1,  2,        1,  5,           31                      ; #5
+        .edge    2,  8,        7,  3,           31                      ; #6
+        .edge    1,  3,        0,  4,           31                      ; #7
+        .edge    3,  8,        2,  6,           31                      ; #8
+        .edge    2,  9,        7, 10,           31                      ; #9
+        .edge    3,  4,        4,  8,           31                      ; #10
+        .edge    3,  9,        6, 11,           31                      ; #11
+        .edge    3,  5,        8,  8,            7                      ; #12
+        .edge    3, 10,       11, 11,            7                      ; #13
+        .edge    2,  5,        9,  9,            7                      ; #14
+        .edge    2, 10,       10, 10,            7                      ; #15
+        .edge    2,  7,        9, 10,           31                      ; #16
+        .edge    3,  6,        8, 11,           31                      ; #17
+        .edge    5,  6,        8, 12,           31                      ; #18
+        .edge    5,  7,        9, 12,           31                      ; #19
+        .edge    7, 10,       12, 10,           31                      ; #20
+        .edge    6, 10,       11, 12,           31                      ; #21
+        .edge    4,  5,        8,  9,           31                      ; #22
+        .edge    9, 10,       10, 11,           31                      ; #23
+        .edge    1,  4,        4,  5,           31                      ; #24
+        .edge    8,  9,        6,  7,           31                      ; #25
+
+        .endproc
+
+        edges_offset = edges - header
+        edges_bytes  = .sizeof( edges )
+ 
+        .proc   faces
+        ;-----------------------------------------------------------------------
+        ;    normalx normaly normalz           vis                       num
+        .face    -27,     40,     11,           31                      ; #0
+        .face     27,     40,     11,           31                      ; #1
+        .face    -27,    -40,     11,           31                      ; #2
+        .face     27,    -40,     11,           31                      ; #3
+        .face    -19,     38,      0,           31                      ; #4
+        .face     19,     38,      0,           31                      ; #5
+        .face    -19,    -38,      0,           31                      ; #6
+        .face     19,    -38,      0,           31                      ; #7
+        .face    -25,     37,    -11,           31                      ; #8
+        .face     25,     37,    -11,           31                      ; #9
+        .face     25,    -37,    -11,           31                      ; #10
+        .face    -25,    -37,    -11,           31                      ; #11
+        .face      0,      0,   -112,           31                      ; #12
+        .endproc
+
+        faces_offset = faces - header
+        face_bytes   = .sizeof( faces )
 
 .endproc

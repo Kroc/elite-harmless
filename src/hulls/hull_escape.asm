@@ -31,19 +31,64 @@ HULL_ESCAPE_KILL        = 16    ;= 0.06
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_escape                                                     ;$D2BF
         ;-----------------------------------------------------------------------
-        ; scooping an escape capsule nets you some slaves!
-        .scoop_debris   Cargo::slaves, 0                                ;$D2BF
+        .proc   header
+ 
+        scoop           = Cargo::slaves
+        debris          = 0
+        target_area     = 16
+        max_edges       = 7
+        laser_vertex    = 0
+        explosion_count = 4
+        bounty          = 0
+        lod_distance    = 8
+        max_energy      = 17
+        max_speed       = 8
+        normal_scaling  = 4
+        laser_power     = 0
+        missile_count   = 0
+ 
+        .hull
+ 
+        .endproc
+ 
+        .proc   vertices
+        ;-----------------------------------------------------------------------
+        ;          X     Y     Z  face: 1   2   3   4          vis       num
+        .vertex   -7,    0,   36,       2,  1,  3,  3,          31      ; #0
+        .vertex   -7,  -14,  -12,       2,  0,  3,  3,          31      ; #1
+        .vertex   -7,   14,  -12,       1,  0,  3,  3,          31      ; #2
+        .vertex   21,    0,    0,       1,  0,  2,  2,          31      ; #3
         
-        .byte   $00, $01, $2c, $44, $1d, $00, $16, $18                  ;$D2C0
-        .byte   $06, $00, $00, $10, $08, $11, $08, $00
-        .byte   $00, $04, $00, $07, $00, $24, $9f, $12                  ;$D2D0
-        .byte   $33, $07, $0e, $0c, $ff, $02, $33, $07
-        .byte   $0e, $0c, $bf, $01, $33, $15, $00, $00                  ;$D2E0
-        .byte   $1f, $01, $22, $1f, $23, $00, $04, $1f
-        .byte   $03, $04, $08, $1f, $01, $08, $0c, $1f                  ;$D2F0
-        .byte   $12, $0c, $00, $1f, $13, $00, $08, $1f
-        .byte   $02, $0c, $04, $3f, $34, $00, $7a, $1f                  ;$D300
-        .byte   $27, $67, $1e, $5f, $27, $67, $1e, $9f
-        .byte   $70, $00, $00                                           ;$D310
+        .endproc
+ 
+        vertex_bytes = .sizeof( vertices )
+ 
+        .proc   edges
+        ;-----------------------------------------------------------------------
+        ; vertex 1   2    face 1   2           vis                       num
+        .edge    0,  1,        3,  2,           31                      ; #0
+        .edge    1,  2,        3,  0,           31                      ; #1
+        .edge    2,  3,        1,  0,           31                      ; #2
+        .edge    3,  0,        2,  1,           31                      ; #3
+        .edge    0,  2,        3,  1,           31                      ; #4
+        .edge    3,  1,        2,  0,           31                      ; #5
+        
+        .endproc
+
+        edges_offset = edges - header
+        edges_bytes  = .sizeof( edges )
+ 
+        .proc   faces
+        ;-----------------------------------------------------------------------
+        ;    normalx normaly normalz           vis                       num
+        .face     52,      0,   -122,           31                      ; #0
+        .face     39,    103,     30,           31                      ; #1
+        .face     39,   -103,     30,           31                      ; #2
+        .face   -112,      0,      0,           31                      ; #3
+        
+        .endproc
+ 
+        faces_offset = faces - header
+        face_bytes   = .sizeof( faces )
 
 .endproc

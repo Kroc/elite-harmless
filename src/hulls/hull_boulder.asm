@@ -31,29 +31,82 @@ HULL_BOULDER_KILL       = 6     ;= 0.02
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_boulder                                                    ;$D3FB
         ;-----------------------------------------------------------------------
-        ; does not scoop as anything, does not drop any debris:
-        .scoop_debris   0, 0                                            ;$D3FB
+        .proc   header
+
+        scoop           = 0
+        debris          = 0
+        target_area     = 30
+        max_edges       = 12
+        laser_vertex    = 0
+        explosion_count = 2
+        bounty          = 1
+        lod_distance    = 20
+        max_energy      = 20
+        max_speed       = 30
+        normal_scaling  = 2
+        laser_power     = 0
+        missile_count   = 0
+
+        .hull
+
+        .endproc
+
+        .proc   vertices
+        ;-----------------------------------------------------------------------
+        ;          X     Y     Z  face: 1   2   3   4          vis       num
+        .vertex  -18,   37,  -11,       1,  0,  9,  5,          31      ; #0
+        .vertex   30,    7,   12,       2,  1,  6,  5,          31      ; #1
+        .vertex   28,   -7,  -12,       3,  2,  7,  6,          31      ; #2
+        .vertex    2,    0,  -39,       4,  3,  8,  7,          31      ; #3
+        .vertex  -28,   34,  -30,       4,  0,  9,  8,          31      ; #4
+        .vertex    5,  -10,   13,      15, 15, 15, 15,          31      ; #5
+        .vertex   20,   17,  -30,      15, 15, 15, 15,          31      ; #6
+
+        .endproc
         
-        .byte                       $84, $03, $3e, $7a                  ;$D3FC
-        .byte   $31, $00, $0e, $2a, $0f, $01, $00, $28                  ;$D400
-        .byte   $14, $14, $1e, $00, $00, $02, $00, $12
-        .byte   $25, $0b, $bf, $01, $59, $1e, $07, $0c                  ;$D410
-        .byte   $1f, $12, $56, $1c, $07, $0c, $7f, $23
-        .byte   $67, $02, $00, $27, $3f, $34, $78, $1c                  ;$D420
-        .byte   $22, $1e, $bf, $04, $89, $05, $0a, $0d
-        .byte   $5f, $ff, $ff, $14, $11, $1e, $3f, $ff                  ;$D430
-        .byte   $ff, $1f, $15, $00, $04, $1f, $26, $04
-        .byte   $08, $1f, $37, $08, $0c, $1f, $48, $0c                  ;$D440
-        .byte   $10, $1f, $09, $10, $00, $1f, $01, $00
-        .byte   $14, $1f, $12, $04, $14, $1f, $23, $08                  ;$D450
-        .byte   $14, $1f, $34, $0c, $14, $1f, $04, $10
-        .byte   $14, $1f, $59, $00, $18, $1f, $56, $04                  ;$D460
-        .byte   $18, $1f, $67, $08, $18, $1f, $78, $0c
-        .byte   $18, $1f, $89, $10, $18, $df, $0f, $03                  ;$D470
-        .byte   $08, $9f, $07, $0c, $1e, $5f, $20, $2f
-        .byte   $18, $ff, $03, $27, $07, $ff, $05, $04                  ;$D480
-        .byte   $01, $1f, $31, $54, $08, $3f, $70, $15
-        .byte   $15, $7f, $4c, $23, $52, $3f, $16, $38                  ;$D490
-        .byte   $89, $3f, $28, $6e, $26
+        vertex_bytes = .sizeof( vertices )
+
+        .proc   edges
+        ;-----------------------------------------------------------------------
+        ; vertex 1   2    face 1   2           vis                       num
+        .edge    0,  1,        5,  1,           31                      ; #0
+        .edge    1,  2,        6,  2,           31                      ; #1
+        .edge    2,  3,        7,  3,           31                      ; #2
+        .edge    3,  4,        8,  4,           31                      ; #3
+        .edge    4,  0,        9,  0,           31                      ; #4
+        .edge    0,  5,        1,  0,           31                      ; #5
+        .edge    1,  5,        2,  1,           31                      ; #6
+        .edge    2,  5,        3,  2,           31                      ; #7
+        .edge    3,  5,        4,  3,           31                      ; #8
+        .edge    4,  5,        4,  0,           31                      ; #9
+        .edge    0,  6,        9,  5,           31                      ; #10
+        .edge    1,  6,        6,  5,           31                      ; #11
+        .edge    2,  6,        7,  6,           31                      ; #12
+        .edge    3,  6,        8,  7,           31                      ; #13
+        .edge    4,  6,        9,  8,           31                      ; #14
+
+        .endproc
+        
+        edges_offset = edges - header
+        edges_bytes  = .sizeof( edges )
+
+        .proc   faces
+        ;-----------------------------------------------------------------------
+        ;    normalx normaly normalz           vis                       num
+        .face    -15,     -3,      8,           31                      ; #0
+        .face     -7,     12,     30,           31                      ; #1
+        .face     32,    -47,     24,           31                      ; #2
+        .face     -3,    -39,     -7,           31                      ; #3
+        .face     -5,     -4,     -1,           31                      ; #4
+        .face     49,     84,      8,           31                      ; #5
+        .face    112,     21,    -21,           31                      ; #6
+        .face     76,    -35,    -82,           31                      ; #7
+        .face     22,     56,   -137,           31                      ; #8
+        .face     40,    110,    -38,           31                      ; #9
+
+        .endproc
+
+        faces_offset = faces - header
+        face_bytes   = .sizeof( faces )
 
 .endproc

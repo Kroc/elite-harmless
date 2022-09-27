@@ -31,17 +31,59 @@ HULL_PLATE_KILL         = 10    ;= 0.039
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_plate                                                      ;$D313
         ;-----------------------------------------------------------------------
-        ; scooping a plate will get you some alloys
-        .scoop_debris   Cargo::alloys, 0                                ;$D313
-        
-        .byte                       $64, $00, $2c, $3c                  ;$D314
-        .byte   $15, $00, $0a, $18, $04, $00, $00, $04
-        .byte   $05, $10, $10, $00, $00, $03, $00, $0f                  ;$D320
-        .byte   $16, $09, $ff, $ff, $ff, $0f, $26, $09
-        .byte   $bf, $ff, $ff, $13, $20, $0b, $14, $ff                  ;$D330
-        .byte   $ff, $0a, $2e, $06, $54, $ff, $ff, $1f
-        .byte   $ff, $00, $04, $10, $ff, $04, $08, $14                  ;$D340
-        .byte   $ff, $08, $0c, $10, $ff, $0c, $00, $00
-        .byte   $00, $00, $00                                           ;$D350
+        .proc   header
+
+        scoop           = Cargo::alloys
+        debris          = 0
+        target_area     = 10
+        max_edges       = 5
+        laser_vertex    = 0
+        explosion_count = 1
+        bounty          = 0
+        lod_distance    = 5
+        max_energy      = 16
+        max_speed       = 16
+        normal_scaling  = 3
+        laser_power     = 0
+        missile_count   = 0
+
+        .hull
+
+        .endproc
+
+        .proc   vertices
+        ;-----------------------------------------------------------------------
+        ;          X     Y     Z  face: 1   2   3   4          vis       num
+        .vertex  -15,  -22,   -9,      15, 15, 15, 15,          31      ; #0
+        .vertex  -15,   38,   -9,      15, 15, 15, 15,          31      ; #1
+        .vertex   19,   32,   11,      15, 15, 15, 15,          20      ; #2
+        .vertex   10,  -46,    6,      15, 15, 15, 15,          20      ; #3
+
+        .endproc
+
+        vertex_bytes = .sizeof( vertices )
+
+        .proc   edges
+        ;-----------------------------------------------------------------------
+        ; vertex 1   2    face 1   2           vis                       num
+        .edge    0,  1,       15, 15,           31                      ; #0
+        .edge    1,  2,       15, 15,           16                      ; #1
+        .edge    2,  3,       15, 15,           20                      ; #2
+        .edge    3,  0,       15, 15,           16                      ; #3
+
+        .endproc
+
+        edges_offset = edges - header
+        edges_bytes  = .sizeof( edges )
+
+        .proc   faces
+        ;-----------------------------------------------------------------------
+        ;    normalx normaly normalz           vis                       num
+        .face      0,      0,      0,            0                      ; #0
+
+        .endproc
+
+        faces_offset = faces - header
+        face_bytes   = .sizeof( faces )
 
 .endproc

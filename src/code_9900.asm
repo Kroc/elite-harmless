@@ -254,7 +254,7 @@ _a3bf:                                                                  ;$A3BF
         ;-----------------------------------------------------------------------
         ; apply the roll & pitch rotation to the ship's compound matrix:
         ; this creates a single matrix that can apply both roll & pitch to the
-        ; verticies in one operation, i.e. we do not have to calculate roll &
+        ; vertices in one operation, i.e. we do not have to calculate roll &
         ; pitch separately for each vertex point in the shape
         ;
 :       ldy # MATRIX_ROW0                                               ;$A3D3
