@@ -360,51 +360,51 @@ echo "[OK]"
 
 # elite-harmless-hiram:
 #-------------------------------------------------------------------------------
-echo -n "- elite-harmless-hiram.cfg          "
-
-options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,-DFEATURE_TRUMBLES,-DFEATURE_FLICKERFREE"
-
-# note that the text database has to be assembled separately from the main code
-# due to the rather insane complexity which is best not leaked into  the global
-# scope along with the main source code
-
-$cl65 $options \
-    --config "link/elite-harmless-hiram.cfg" \
-    --start-addr \$0400 \
-     -m "build/elite-harmless-hiram.map" -vm \
-    -Ln "build/elite-harmless-hiram.ll" \
-     -o "build/harmless-hiram.prg" \
-        "src/elite-harmless.asm" \
-        "src/text/text_pairs.asm" \
-        "src/text/text_flight.asm" \
-        "src/text/text_docked.asm" \
-        "src/c64/prgheader.asm"
-    
-echo "[OK]"
+#echo -n "- elite-harmless-hiram.cfg          "
+#
+#options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,#-DFEATURE_TRUMBLES,-DFEATURE_FLICKERFREE"
+#
+## note that the text database has to be assembled separately from the main code
+## due to the rather insane complexity which is best not leaked into  the global
+## scope along with the main source code
+#
+#$cl65 $options \
+#    --config "link/elite-harmless-hiram.cfg" \
+#    --start-addr \$0400 \
+#     -m "build/elite-harmless-hiram.map" -vm \
+#    -Ln "build/elite-harmless-hiram.ll" \
+#     -o "build/harmless-hiram.prg" \
+#        "src/elite-harmless.asm" \
+#        "src/text/text_pairs.asm" \
+#        "src/text/text_flight.asm" \
+#        "src/text/text_docked.asm" \
+#        "src/c64/prgheader.asm"
+#    
+#echo "[OK]"
 
 # elite-harmless-hiram-fastlines:
 #-------------------------------------------------------------------------------
-echo -n "- elite-harmless-hiram-fastlines.cfg"
-
-options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,-DFEATURE_FASTLINES,-DFEATURE_TRUMBLES,-DFEATURE_FLICKERFREE"
-
-# note that the text database has to be assembled separately from the main code
-# due to the rather insane complexity which is best not leaked into  the global
-# scope along with the main source code
-
-$cl65 $options \
-    --config "link/elite-harmless-hiram.cfg" \
-    --start-addr \$0400 \
-     -m "build/elite-harmless-hiram-fastlines.map" -vm \
-    -Ln "build/elite-harmless-hiram-fastlines.ll" \
-     -o "build/harmless-hiram-fastlines.prg" \
-        "src/elite-harmless.asm" \
-        "src/text/text_pairs.asm" \
-        "src/text/text_flight.asm" \
-        "src/text/text_docked.asm" \
-        "src/c64/prgheader.asm"
-
-echo "[OK]"
+#echo -n "- elite-harmless-hiram-fastlines.cfg"
+#
+#options="--cpu 6502X -Wa -DFEATURE_AUDIO,-DFEATURE_MATHTABLES,#-DFEATURE_FASTLINES,-DFEATURE_TRUMBLES,-DFEATURE_FLICKERFREE"
+#
+## note that the text database has to be assembled separately from the main code
+## due to the rather insane complexity which is best not leaked into  the global
+## scope along with the main source code
+#
+#$cl65 $options \
+#    --config "link/elite-harmless-hiram.cfg" \
+#    --start-addr \$0400 \
+#     -m "build/elite-harmless-hiram-fastlines.map" -vm \
+#    -Ln "build/elite-harmless-hiram-fastlines.ll" \
+#     -o "build/harmless-hiram-fastlines.prg" \
+#        "src/elite-harmless.asm" \
+#        "src/text/text_pairs.asm" \
+#        "src/text/text_flight.asm" \
+#        "src/text/text_docked.asm" \
+#        "src/c64/prgheader.asm"
+#
+#echo "[OK]"
 
 #===============================================================================
 
@@ -473,45 +473,45 @@ $mkd64 \
     -P -w 1>/dev/null
 echo "[OK]"
 
-echo "  --------------------------------------"
-echo "* elite-harmless-hiram.d64:"
-echo "  --------------------------------------"
-
-echo -n "- compress binaries...              "
-$exomizer \
-    -s "lda #\$00 sta \$d011 sta \$d020" \
-    -X "inc \$d020 dec \$d020" \
-    -o "build/harmless-hiram.exo" \
-    -- "build/harmless-hiram.prg"
-echo "[OK]"
-
-echo -n "- make floppy disk...               "
-$mkd64 \
-    -o release/elite-harmless-hiram.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f build/harmless-hiram.exo -t 17 -s 0 \
-    -n "HARMLESS" -P -w 1>/dev/null
-echo "[OK]"
-
-echo "  --------------------------------------"
-echo "* elite-harmless-hiram-fastlines.d64:"
-echo "  --------------------------------------"
-
-echo -n "- harmless-hiram-fastlines.prg      "
-$exomizer \
-    -s "lda #\$00 sta \$d011 sta \$d020" \
-    -X "inc \$d020 dec \$d020" \
-    -o "build/harmless-hiram-fastlines.exo" \
-    -- "build/harmless-hiram-fastlines.prg"
-echo "[OK]"
-
-echo -n "- make floppy disk...               "
-$mkd64 \
-    -o release/elite-harmless-hiram-fastlines.d64 \
-    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
-    -f build/harmless-hiram-fastlines.exo -t 17 -s 0 \
-    -n "HARMLESS" -P -w 1>/dev/null
-echo "[OK]"
+#echo "  --------------------------------------"
+#echo "* elite-harmless-hiram.d64:"
+#echo "  --------------------------------------"
+#
+#echo -n "- compress binaries...              "
+#$exomizer \
+#    -s "lda #\$00 sta \$d011 sta \$d020" \
+#    -X "inc \$d020 dec \$d020" \
+#    -o "build/harmless-hiram.exo" \
+#    -- "build/harmless-hiram.prg"
+#echo "[OK]"
+#
+#echo -n "- make floppy disk...               "
+#$mkd64 \
+#    -o release/elite-harmless-hiram.d64 \
+#    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+#    -f build/harmless-hiram.exo -t 17 -s 0 \
+#    -n "HARMLESS" -P -w 1>/dev/null
+#echo "[OK]"
+#
+#echo "  --------------------------------------"
+#echo "* elite-harmless-hiram-fastlines.d64:"
+#echo "  --------------------------------------"
+#
+#echo -n "- harmless-hiram-fastlines.prg      "
+#$exomizer \
+#    -s "lda #\$00 sta \$d011 sta \$d020" \
+#    -X "inc \$d020 dec \$d020" \
+#    -o "build/harmless-hiram-fastlines.exo" \
+#    -- "build/harmless-hiram-fastlines.prg"
+#echo "[OK]"
+#
+#echo -n "- make floppy disk...               "
+#$mkd64 \
+#    -o release/elite-harmless-hiram-fastlines.d64 \
+#    -m cbmdos -d "ELITE:HARMLESS" -i "KROC " \
+#    -f build/harmless-hiram-fastlines.exo -t 17 -s 0 \
+#    -n "HARMLESS" -P -w 1>/dev/null
+#echo "[OK]"
 
 #===============================================================================
 
