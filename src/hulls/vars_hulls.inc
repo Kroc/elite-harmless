@@ -11,7 +11,7 @@
 .struct Hull
         ;=======================================================================
         scoop_debris    .byte   ; nybbles; hi = scoop, lo = debris      ;+$00
-        _0102           .word   ; "missile lock area"?                  ;+$01
+        target_area     .word   ; target lock-on area                   ;+$01
         edge_data_lo    .byte   ; edge data offset, lo-byte             ;+$03
         face_data_lo    .byte   ; face data offset, lo-byte             ;+$04
         _05             .byte   ; max.lines                             ;+$05

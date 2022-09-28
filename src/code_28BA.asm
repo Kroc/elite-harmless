@@ -2816,7 +2816,7 @@ _HITCH:                                                 ; BBC: HITCH    ;$363F
         adc S
         bcs _367e
         sta S
-        ldy # Hull::_0102 + 1   ;=$02: "missile lock area" hi-byte?
+        ldy # Hull::target_area+1   ;=$02: "missile lock area" hi-byte?
         lda [ZP_HULL_ADDR], y
         cmp S
         bne _367d
@@ -2879,7 +2879,7 @@ fire_missile:                                           ; BBC: FRMIS    ;$36A6
         jsr get_ship_addr
 
         lda SHIP_SLOTS, x
-        jsr _36c5
+        jsr _ANGRY
 
         ldy # .color_nybble( DKGREY, HUD_COLOUR )
         jsr untarget_missile
@@ -2893,11 +2893,10 @@ fire_missile:                                           ; BBC: FRMIS    ;$36A6
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-_36c5:                                                                  ;$36C5
+_ANGRY:                                                 ; BBC: ANGRY    ;$36C5
 ;===============================================================================
-; target / fire missile?
 ;-------------------------------------------------------------------------------
-        ; firing missile at space station?
+        ; firing at space station?
         ; (not a good idea)
         cmp # HULL_STATION
         ; make the space-station hostile?

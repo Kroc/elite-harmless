@@ -2241,7 +2241,7 @@ _745a:                                                                  ;$745A
         ; fallthrough
         ; ...
 
-give_cash:                                                              ;$7481
+give_cash:                                              ; BBC: MCASH    ;$7481
 ;===============================================================================
 ; give the player cash:
 ; 
@@ -3645,9 +3645,12 @@ untarget_missile:                                       ; BBC: ABORT    ;$7D0C
 ;===============================================================================
         ldx # $ff               ; clear missile target
 
-target_missile:                                                         ;$7D0E
+        ; fallthrough
+        ; ...
+
+target_missile:                                         ; BBC: ABORT2   ;$7D0E
 ;===============================================================================
-; in:   X       missile target. is this a slot number?
+; in:   X       slot number of ship to target
 ;       Y       a pair of colour nybbles, as used on the bitmap screen,
 ;               to colour the missile block on the HUD
 ;-------------------------------------------------------------------------------
@@ -4885,17 +4888,19 @@ illegal_cargo:                                                          ;$8798
         rts 
 
 
-_87a4:                                                                  ;$87A4
+_FAROF:                                                 ; BBC: FAROF    ;$87A4
 ;===============================================================================
-        lda # $e0
-_87a6:                                                                  ;$87A6
-        cmp ZP_SHIP_XPOS_HI
-        bcc _87b0
+; is a ship too far away (left scanner range?)
+;-------------------------------------------------------------------------------
+        lda # 224               ; this is the distance upper-bound
+
+_87a6:  cmp ZP_SHIP_XPOS_HI                                             ;$87A6
+        bcc :+
         cmp ZP_SHIP_YPOS_HI
-        bcc _87b0
+        bcc :+
         cmp ZP_SHIP_ZPOS_HI
-_87b0:                                                                  ;$87B0
-        rts 
+
+:       rts                                                             ;$87B0
 
 
 .ifdef  BUILD_ORIGINAL

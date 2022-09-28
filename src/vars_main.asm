@@ -80,7 +80,7 @@ DOCKCOM_STATE           :=$0480 ; docking computer state: $00 = OFF, $FF = ON
 
 ECM_STATE               :=$0481 ; if our ECM is enabled or not          ;ECMP
 
-IS_WITCHSPACE           :=$0482 ; has misjump occurred?
+IS_WITCHSPACE           :=$0482 ; has misjump occurred? (witchspace)    MJ
 CABIN_HEAT              :=$0483 ; cabin temperature
 
 LASER_POWER             :=$0484 ; power level for current laser         ;LAS2
@@ -92,7 +92,7 @@ LASER_COUNTER           :=$0487 ; used to space out laser pulses        ;LASCT
 LASER_HEAT              :=$0488 ; laser temperature                     ;GNTMP
 
 VAR_048A                :=$048a ;?
-OSD_DELAY               :=$048b ; a delay counter, used for on-screen messages
+OSD_DELAY               :=$048b ; delay counter for on-screen messages  ;DLY
 VAR_048C                :=$048c ; message ID on screen
 
 ;-------------------------------------------------------------------------------
@@ -252,7 +252,7 @@ PLAYER_KILLS_FRAC       :=$04cb ; kill total, fractional part
 PLAYER_MISSILES         :=$04cc ; number of missiles the player has     ;NOMSL
 PLAYER_MISSILE_ARMED    :=$0485 ; armed state of missile                ;MSAR
 
-PLAYER_LEGAL            :=$04cd ; player's legal status
+PLAYER_LEGAL            :=$04cd ; player's legal status                 ;FIST
 
 ; market availability:
 ; (quantity of goods on sale)

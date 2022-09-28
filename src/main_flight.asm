@@ -553,6 +553,9 @@ main_keys:
 :       and # %11111010         ; set pulse-wait based on power-level   ;$2028
         sta LASER_COUNTER       ; more power = slower fire rate
 
+        ; laser handled, fallthrough
+        ; to the next step
+        ;
 @nolaser:
 
 ;===============================================================================
@@ -891,6 +894,10 @@ apply_damage:                                           ; BBC: MA63     ;$212B
         jsr play_sfx_03
 .endif  ;///////////////////////////////////////////////////////////////////////
 
+        ; collision damage applied,
+        ; fallthrough to next step
+        ; ...
+
         ;=======================================================================
         ; [11]: missile & laser hit testing:
         ;-----------------------------------------------------------------------
@@ -920,7 +927,8 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
 .endif  ;///////////////////////////////////////////////////////////////////////
         jsr _PLUT               ; flip the axes
 
-        ; check if the current ship instance is within the player's sights
+        ; check if the current ship instance
+        ; is within the player's sights
         ;
 @hitch: jsr _HITCH
         bcc @draw               ; not in sights, skip over
@@ -950,8 +958,8 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
         ;-----------------------------------------------------------------------
         ; `ZP_LASER` is only set if our laser is actually firing
         ;
-:       lda ZP_LASER            ; is there a laser on the current view? ;$2153
-       .bze @draw               ; no laser, skip onwards
+:       lda ZP_LASER            ; is your laser firing?                 ;$2153
+       .bze @draw               ; no, skip onwards
 
         ; ship is in player's sights, lasers are firing;
         ; make the sound of laser striking metal
@@ -964,22 +972,22 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
         lda ZP_SHIP_TYPE        ; things we've shot with our laser:
         cmp # HULL_STATION      ; the station!?
         beq @angry              ; shot the station, uh oh...
-        cmp # HULL_CONSTRICTOR  ; constrictor & cougar (and above)?
-        bcc @hit                ; no, skip over
-
+        
         ; the Constrictor and Cougar cannot be damaged
         ; with anything less than military lasers:
         ;
+        ; TODO: this check must be considered when adding new ships, i.e.
+        ; ships placed after the Constrictor require military lasers
+        ;
+        cmp # HULL_CONSTRICTOR  ; constrictor & cougar (and above)?
+        bcc @hit                ; no, skip over
+
         lda ZP_LASER            ; player's laser power
         cmp # 23                ; TODO: confirm and const this!
         bne @angry              ; hit!
 
-        ; divide laser power by 4, making it highly ineffective
-        ; against the Constrictor or Cougar
-        ;
-        ; TODO: does this not account for bit 7 (beam)?
-        lsr ZP_LASER
-        lsr ZP_LASER
+        lsr ZP_LASER            ; divide laser power by 4, making it highly
+        lsr ZP_LASER            ; ineffective against the Constrictor or Cougar
 
         ; laser has hit ship!
         ;-----------------------------------------------------------------------
@@ -988,14 +996,19 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
 @hit:   lda ZP_SHIP_ENERGY      ; ship's energy-level                   ;$2170
         sec 
         sbc ZP_LASER            ; subtract player's laser power
-        bcs @_21a1              ; if energy remains, skip ahead
+        bcs @noexp              ; if energy remains, skip ahead
 
         ; explode the ship:
         ;-----------------------------------------------------------------------
+        ; set the "exploding" bit on the ship:
+        ;
         asl ZP_SHIP_STATE       ; remove bit 7
         sec                     ; take a 1 from the bit bucket
         ror ZP_SHIP_STATE       ; shift it into bit 7
 
+        ; what type of debris should it drop?
+        ; check for asteroids first (for mining)
+        ;
         lda ZP_SHIP_TYPE        ; retrieve which type of ship this is
         cmp # HULL_ASTEROID     ; an asteroid?
         bne @debris             ; skip for non-asteroids
@@ -1030,40 +1043,43 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
         ldx ZP_SHIP_TYPE        ; retrieve ship-type again
         jsr ship_killed         ; add points to the player's kill-rank
                                 ; TODO: returns A = 0, no?
-@_21a1:                                                                 ;$21A1
-        sta ZP_SHIP_ENERGY      ; update the ships energy level
 
-@angry: lda ZP_SHIP_TYPE                                                ;$21A3
-        jsr _36c5               ; make hostile?
+@noexp: sta ZP_SHIP_ENERGY      ; update the ships energy level         ;$21A1
 
+@angry: lda ZP_SHIP_TYPE        ; again, go by ship type                ;$21A3
+        jsr _ANGRY              ; make hostile
+
+        ;=======================================================================
+        ; [12]: bounties & felonies:
+        ;=======================================================================
         ; *** DRAW THE SHIP ON THE SCREEN ***
         ; (I felt this needed drawing attention to as it's easy to miss)
         ;
 @draw:  jsr draw_ship                                   ; BBC: MA8      ;$21A8
 
-@_MA15:                                                 ; BBC: MA15     ;$21AB
         ; update the zero-page copy of the ship's energy level
         ; back to the ship's instance storage
         ;
         ; TODO: why do we do this, when we could defer copying the whole
         ;       ship instance to later in the main loop??
-        ldy # Ship::energy
+@_MA15: ldy # Ship::energy                              ; BBC: MA15     ;$21AB
         lda ZP_SHIP_ENERGY
         sta [ZP_SHIP_ADDR], y
 
         ; when will you learn that your actions have consequences?
         ;-----------------------------------------------------------------------
-        ; check the high-bit of the behaviour flags,
-        ; this indicates if the ship needs to be removed from play
+        ; check the high-bit of the behaviour flags, this indicates if the ship
+        ; needs to be removed from play -- you can't get bounties for ships
+        ; that have disappeared (e.g. docked)
+        ;
         lda ZP_SHIP_BEHAVIOUR
-        bmi @clear              ; bit 7 set?
+        bmi @clear              ; if bit 7 set, ship has been removed, skip
 
-        ; is the ship currently exploding?
-        lda ZP_SHIP_STATE
-        bpl @_21e5              ; bit 7 not set?
+        lda ZP_SHIP_STATE       ; is the ship currently exploding?
+        bpl @_MAC1              ; if not exploding, skip ahead
 
-        and # state::debris     ; TODO: not in the BBC code
-        beq @_21e5
+        and # state::debris     ; has the ship finished exploding?
+        beq @_MAC1              ; if no, keep waiting
 
         ; did we blow up a police ship?
         ; the behaviour bit for police (%01000000 = 64) is used as the
@@ -1091,7 +1107,7 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
         ;       to be "no bounty", care must be taken to not give a ship a
         ;       round hexadecimal bounty, i.e. $??00
         ;
-        ldy # Hull::bounty      ; (bounty lo-byte)
+        ldy # Hull::bounty+0    ; (bounty lo-byte)
         lda [ZP_HULL_ADDR], y   ; read from the hull structure
        .bze @clear              ; skip if no bountry (=0)
 
@@ -1119,7 +1135,7 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
 .ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
         ; once shuffled down, execution jumps back to `process_ship`,
-        ; so this jump can be considered an end-point of this routine
+        ; so this jump can be considered an end-point of the loop
         jmp clear_ship_slot
 .else   ;///////////////////////////////////////////////////////////////////////
         ; in the original code it jumps to another routine that only contains
@@ -1133,30 +1149,34 @@ _MA26:  lda ZP_SHIP_BEHAVIOUR   ; check the "remove" flag, if set       ;$2131
         jmp process_ship        ; process next ship (continue loop)
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        ;
-@_21e5: lda ZP_SHIP_TYPE                                                ;$21E5
-        bmi :+                  ; planet or sun?
+        ; execution jumps here if the ship has not been destroyed
+        ;-----------------------------------------------------------------------
+@_MAC1: lda ZP_SHIP_TYPE        ; skip over for planets and suns        ;$21E5
+        bmi :+                  ;
 
-        ; out of range
-        jsr _87a4
-        bcc @clear
+        ; has the ship gone out of range?
+        ; (> 224 in any direction)
+        jsr _FAROF
+        bcc @clear              ; if yes, remove the ship from the slot
 
         ; process next ship:
         ;-----------------------------------------------------------------------
         ; update the ship's stored state with the current working state
         ;
-:       ldy # Ship::state                                               ;$21EE
-        lda ZP_SHIP_STATE
-        sta [ZP_SHIP_ADDR], y
+:       ldy # Ship::state       ; index of ship state byte              ;$21EE
+        lda ZP_SHIP_STATE       ; read working copy in zero-page
+        sta [ZP_SHIP_ADDR], y   ; write back to the ship slot
 
         ldx ZP_PRESERVE_X       ; retrieve current ship-slot being processed...
         inx                     ; move to the next ship-slot
         jmp process_ship        ; process the next ship
 
+        ; this ends the `process_ship` loop
+        ; started back in stage 4
 
 _MA18:                                                  ; BBC: MA18     ;$21FA
 ;===============================================================================
-; [?]:  recharge shields:
+; [13]: bomb & shields:
 ;-------------------------------------------------------------------------------
         lda PLAYER_EBOMB        ; check energy bomb state
         bpl :+                  ; skip over if not going off
@@ -1429,7 +1449,7 @@ _2345:                                                                  ;$2345
         jmp move_dust
 
 
-spawn_debris:                                                           ;$234C
+spawn_debris:                                           ; BBC: SPIN2    ;$234C
 ;===============================================================================
 ; when a ship is destroyed, attempt to spawn debris according
 ; to the debris info in the ship's hull structure
