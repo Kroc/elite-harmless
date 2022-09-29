@@ -44,6 +44,7 @@
 
 .include        "code_6A00.asm"                                         ;$6A00
 .include        "orig/orig_init.asm"                                    ;$75E4
+.include        "text/text_flight_code.asm"                             ;$7717
 .include        "gfx/gfx_bitmap.asm"
 
 .include        "code_9900.asm"                                         ;$9900

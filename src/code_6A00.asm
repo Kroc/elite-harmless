@@ -2710,9 +2710,11 @@ _76e9:                                                                  ;$76E9
         rts 
 
 
-;===============================================================================
-.include        "text/text_flight_code.asm"                             ;$7727
+; NOTE: in the original code, segment "CODE_7717" appears here          ;$7717
 
+
+.segment        "CODE_784F"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 swap_zp_shadow:                                                         ;$784F
 ;===============================================================================
@@ -2729,7 +2731,6 @@ swap_zp_shadow:                                                         ;$784F
 
         rts 
 
-
 _785f:                                                                  ;$785F
 ;===============================================================================
 ; unused / unreferenced?
@@ -2737,6 +2738,7 @@ _785f:                                                                  ;$785F
         lda ZP_SHIP_STATE
         ora # state::exploding | state::debris
         sta ZP_SHIP_STATE
+rts_7865:
         rts 
 
 
@@ -2791,8 +2793,18 @@ _78aa:                                                                  ;$78AA
         and # state::firing ^$FF        ;=%10111111
         sta ZP_SHIP_STATE
         and # state::redraw
-        beq rts_784e
 
+.ifdef  BUILD_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        ; in the original code, this branches to an `rts` instruction
+        ; way, way back which is now in another segement ("CODE_7717")
+        ; so we have to specify this branch destination manually
+        ;
+        beq *-($78b5-$784e)     ;=`rts_784e`
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; for elite-harmless we can pick a nearer RTS within the segment
+        beq rts_7865
+.endif  ;///////////////////////////////////////////////////////////////////////
         ldy # $02
         lda [ZP_SHIP_HEAP], y
         tay 
@@ -2895,6 +2907,7 @@ _7948:                                                                  ;$7948
 
         lda ship_00 + Ship::zpos                                     ;=$F906
         sta ZP_GOATSOUP_pt4
+
         rts 
 
 

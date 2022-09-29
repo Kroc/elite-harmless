@@ -47,6 +47,7 @@
 .include        "gfx/gfx_sprites.asm"
 
 .include        "code_6A00.asm"
+.include        "text/text_flight_code.asm"
 .include        "code_9900.asm"
 .include        "draw_ship.asm"
 .include        "code_lines.asm"
