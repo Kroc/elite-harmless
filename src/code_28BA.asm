@@ -633,11 +633,8 @@ _2c1a:                                                                  ;$2C1A
         sta DUST_Y_HI, y
         bne _2bed
 
-_2c2d:                                                                  ;$2C2D
+_MAS1:                                                  ; BBC: MAS1     ;$2C2D
 ;===============================================================================
-; BBC: MAS1
-;
-;-------------------------------------------------------------------------------
         lda ZP_SHIP_XPOS_LO, y
         asl 
         sta ZP_VALUE_pt2
@@ -667,7 +664,10 @@ _2c4e:                                                                  ;$2C4E
 ;-------------------------------------------------------------------------------
         lda # $00
 
-_2c50:                                                                  ;$2C50
+        ; fallthrough
+        ; ...
+
+_MAS2:                                                  ; BBC: MAS2     ;$2C50
 ;===============================================================================
 ; get a [rough] maximum-distance to a ship:
 ;
@@ -738,7 +738,7 @@ status_screen:                                                          ;$2C9B
 ;-------------------------------------------------------------------------------
         lda # page::status
         jsr set_page_6a2f
-        jsr _70ab
+        jsr _TT111
 
         lda # 7
        .set_cursor_col
@@ -749,7 +749,7 @@ status_screen:                                                          ;$2C9B
         jsr print_flight_token_and_divider
         
         lda # $0f
-        ldy ZP_A7
+        ldy ZP_IS_DOCKED
         bne _2c7d
 
         ; print "GREEN", "RED" or "YELLOW":
@@ -2003,7 +2003,7 @@ _31f1:                                                                  ;$31F1
         jsr randomize
         inc ZP_VAR_XX20
         bne _31d5
-        jsr _70ab
+        jsr _TT111
         jsr _6f82
 
 .ifdef  FEATURE_AUDIO
@@ -2023,7 +2023,7 @@ _3208:                                                                  ;$3208
         sta TSYSTEM_POS_X
         lda ZP_SEED_W0_HI
         sta TSYSTEM_POS_Y
-        jsr _70ab
+        jsr _TT111
         jsr _6f82
         jsr text_buffer_off
         jmp _877e
@@ -3802,7 +3802,7 @@ _3d2f:                                                                  ;$3D2F
         ora TSYSTEM_DISTANCE_HI
        .bnz _3d6f
 
-        lda ZP_A7
+        lda ZP_IS_DOCKED
         bpl _3d6f
         ldy # $00
 _3d3d:                                                                  ;$3D3D
@@ -3869,7 +3869,7 @@ mission_blueprints_begin:                                               ;$3D7D
 _3d87:                                                                  ;$3D87
         jsr print_docked_str
 _3d8a:                                                                  ;$3D8A
-        jmp _88e7
+        jmp _BAY
 
 
 mission_blueprints_ceerdi:                                              ;$3D8D
@@ -3943,7 +3943,7 @@ mission_trumbles:                                                       ;$3DC0
         inc PLAYER_TRUMBLES_LO
 
         ; start the normal docked screen?
-        jmp _88e7
+        jmp _BAY
 
 ;///////////////////////////////////////////////////////////////////////////////
 .endif
@@ -4069,11 +4069,9 @@ get_ship_addr:                                          ; BBC: GINF     ;$3E87
         rts 
 
 
-set_psystem_to_tsystem:                                                 ;$3E95
+set_tsystem_to_psystem:                                 ; BBC: ping     ;$3E95
 ;===============================================================================
-; copy present system co-ordinates to target system co-ordinates,
-; i.e. you have arrived at your destination
-;
+; copy target system co-ordinates to present system co-ordinates:
 ;-------------------------------------------------------------------------------
         ldx # 1
 :       lda PSYSTEM_POS, x                                              ;$3E97

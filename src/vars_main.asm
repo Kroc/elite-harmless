@@ -80,7 +80,7 @@ DOCKCOM_STATE           :=$0480 ; docking computer state: $00 = OFF, $FF = ON
 
 ECM_STATE               :=$0481 ; if our ECM is enabled or not          ;ECMP
 
-IS_WITCHSPACE           :=$0482 ; has misjump occurred? (witchspace)    MJ
+IS_WITCHSPACE           :=$0482 ; has misjump occurred? (witchspace)    ;MJ
 CABIN_HEAT              :=$0483 ; cabin temperature
 
 LASER_POWER             :=$0484 ; power level for current laser         ;LAS2
@@ -91,7 +91,7 @@ COCKPIT_VIEW            :=$0486 ; (front, rear, left, right)            ;VIEW
 LASER_COUNTER           :=$0487 ; used to space out laser pulses        ;LASCT
 LASER_HEAT              :=$0488 ; laser temperature                     ;GNTMP
 
-VAR_048A                :=$048a ;?
+VAR_048A                :=$048a ; "extra vessels" spawning counter      ;EV
 OSD_DELAY               :=$048b ; delay counter for on-screen messages  ;DLY
 VAR_048C                :=$048c ; message ID on screen
 
@@ -239,7 +239,7 @@ CARGO_ALIENS            :=$04c0 ; alien items                           ;QQ20+16
 PLAYER_ECM              :=$04c1 ; flag, player has an E.C.M.            ;ECM
 PLAYER_SCOOP            :=$04c2 ; flag, player has a fuel scoop         ;BST
 PLAYER_EBOMB            :=$04c3 ; flag, player has energy bomb          ;BOMB
-PLAYER_EUNIT            :=$04c4 ; flag, player has extra energy unit
+PLAYER_EUNIT            :=$04c4 ; flag, player has extra energy unit    ;ENGY
 PLAYER_DOCKCOM          :=$04c5 ; flag, player has a docking computer   ;DKCMP
 
 ;-------------------------------------------------------------------------------
@@ -287,9 +287,9 @@ VAR_04E2                :=$04e2 ;?
 
 VAR_04E6                :=$04e6 ;?
 
-PLAYER_SHIELD_FRONT     :=$04e7
-PLAYER_SHIELD_REAR      :=$04e8
-PLAYER_ENERGY           :=$04e9
+PLAYER_SHIELD_FRONT     :=$04e7                                         ;FSH
+PLAYER_SHIELD_REAR      :=$04e8                                         ;ASH
+PLAYER_ENERGY           :=$04e9                                         ;ENERGY
 
 VAR_04EA                :=$04ea ;?
 VAR_04EB                :=$04eb ;?
@@ -297,22 +297,22 @@ VAR_04EB                :=$04eb ;?
 SHIP_LINES_LO           :=$04f2 ; ship lines pointer lo-byte
 SHIP_LINES_HI           :=$04f3 ; ship lines pointer hi-byte
 
-VAR_04F4                :=$04f4 ; temp copy of seed? (indexed by X)
+VAR_04F4                :=$04f4 ; temp copy of seed? (indexed by X)     ;QQ2
 VAR_04FA                :=$04fa ; temp copy of seed? (indexed by X)
 
 ; target system:                                                        ; BBC:
 ;-------------------------------------------------------------------------------
 TSYSTEM_DATA            :=$0500
-TSYSTEM_ECONOMY         :=$0500 ; economy type 0-7                      ; QQ3
-TSYSTEM_GOVERNMENT      :=$0501 ; government type 0-7                   ; QQ4
-TSYSTEM_TECHLEVEL       :=$0502 ; tech-level 0-14                       ; QQ5
-TSYSTEM_POPULATION      :=$0503                                         ; QQ6
-TSYSTEM_PRODUCTIVITY    :=$0505                                         ; QQ7
-TSYSTEM_PRODUCTIVITY_LO :=$0505                                         ; QQ7+0
-TSYSTEM_PRODUCTIVITY_HI :=$0506                                         ; QQ7+1
-TSYSTEM_DISTANCE        :=$0507                                         ; QQ8
-TSYSTEM_DISTANCE_LO     :=$0507                                         ; QQ8+0
-TSYSTEM_DISTANCE_HI     :=$0508                                         ; QQ8+1
+TSYSTEM_ECONOMY         :=$0500 ; economy type 0-7                      ;QQ3
+TSYSTEM_GOVERNMENT      :=$0501 ; government type 0-7                   ;QQ4
+TSYSTEM_TECHLEVEL       :=$0502 ; tech-level 0-14                       ;QQ5
+TSYSTEM_POPULATION      :=$0503                                         ;QQ6
+TSYSTEM_PRODUCTIVITY    :=$0505                                         ;QQ7
+TSYSTEM_PRODUCTIVITY_LO :=$0505                                         ;QQ7+0
+TSYSTEM_PRODUCTIVITY_HI :=$0506                                         ;QQ7+1
+TSYSTEM_DISTANCE        :=$0507                                         ;QQ8
+TSYSTEM_DISTANCE_LO     :=$0507                                         ;QQ8+0
+TSYSTEM_DISTANCE_HI     :=$0508                                         ;QQ8+1
 TSYSTEM_POS             :=$0509
 TSYSTEM_POS_X           :=$0509
 TSYSTEM_POS_Y           :=$050a
@@ -326,15 +326,15 @@ PSYSTEM_ECONOMY         :=$04ee ; present system economy size
 
 VAR_04EC                :=$04ec ; used with market prices
 VAR_04ED                :=$04ed ; quantity of item
-CARGO_ITEM              :=$04ef ; type of item                          ; QQ29
+CARGO_ITEM              :=$04ef ; type of item                          ;QQ29
 
 PSYSTEM_GOVERNMENT      :=$04f0
 PSYSTEM_TECHLEVEL       :=$04f1
 PSYSTEM_POS             :=$049a
-PSYSTEM_POS_X           :=$049a                                         ; QQ0
-PSYSTEM_POS_Y           :=$049b                                         ; QQ1
+PSYSTEM_POS_X           :=$049a                                         ;QQ0
+PSYSTEM_POS_Y           :=$049b                                         ;QQ1
 
-SEED_GALAXY             :=$049c ; seed for the current galaxy           ; QQ21
+SEED_GALAXY             :=$049c ; seed for the current galaxy           ;QQ21
 SEED_GALAXY_W0          :=$049c ; first word
 SEED_GALAXY_W0_LO       :=$049c ; lo-byte of first word
 SEED_GALAXY_W0_HI       :=$049d ; hi-byte of first word
@@ -346,8 +346,8 @@ SEED_GALAXY_W2_LO       :=$04a0 ; lo-byte of third word
 SEED_GALAXY_W2_HI       :=$04a1 ; hi-byte of third word
 
 ;-------------------------------------------------------------------------------
-; NOTE: there are up-to 13 dust-particles at a time
-; DUST_COUNT is only ever set to $0C (in `_83ed`) or $03 (in `_73c1`)
+; NOTE: there are up-to 13 dust-particles at a time. `DUST_COUNT`
+; is only ever set to $0C (in `_83ed`) or $03 (in `_73c1`)
 ; TODO: define the arrays below based on this
 ;
 DUST_MAX                = 13
@@ -379,6 +379,6 @@ VAR_06F0                :=$06f0 ;?
 VAR_06F1                :=$06f1 ;?
 VAR_06F3                :=$06f3 ;?
 
-LINE_SWAP               :=$06f4 ; flag for line start/end swapped       ; SWAP
+LINE_SWAP               :=$06f4 ; flag for line start/end swapped       ;SWAP
 
-VAR_06FB                :=$06fb ; title screen ship z-distance?
+VAR_SDIST               :=$06fb ; title screen ship z-distance          ;SDIST

@@ -2,8 +2,6 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "vars_flags.asm":
-;
 ; user preferences & some runtime flags
 ;
 .segment        "VARS_FLAGS"
@@ -62,6 +60,8 @@ opt_sfx:        ; SFX enabled?                                          ;$1D12
                 ; (this interpretation of this flag might be incorrect;
                 ;  it could be an "SFX playing" flag, or for music instead)
         .byte   $00
+
+;-------------------------------------------------------------------------------
 
 _1d13:
         .byte   $00

@@ -1,8 +1,7 @@
 ; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
-;
-; "text_docked.asm":
+;===============================================================================
 ;
 ; this file stores the strings typically used when docked (as well as the title
 ; screen), but also the planet descriptions as those are highly complex and
@@ -704,7 +703,7 @@ _msg_index     .set 0
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         ; increment the msg ID, but don't define any symbol
-         _msg_index .set _msg_index + 1
+        _msg_index .set _msg_index + 1
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 .endmacro
@@ -760,7 +759,7 @@ txt_docked:                                                             ;$0E00
         .byte   __, __, LOAD_NEW_COMMANDER, __
         .byte   FN_CAPS_ON, "(Y/N)?", FN_CAPS_OFF
         .byte   FN_NEWLINE, FN_NEWLINE, __end
-        .msg_id "06"
+        .msg_id "LOAD_NEW_COMMANDER_YN"
 
         ; $07:
         .byte   "P", RE, "SS SPA", CE, __, OR, __, "FI", RE

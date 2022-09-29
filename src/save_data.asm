@@ -18,7 +18,7 @@
 _25a6:                                                                  ;$25A6
         .byte   $3a, $30, $2e,$45                       ;":0.E"?
 
-; 85 bytes here get copied by `_88f0` to $0490..$04E4
+; 85 bytes here get copied by `_DFAULT` to $0490..$04E4
 
 _25aa:                                                                  ;$25AA
         .byte   $2e                                     ;"."?

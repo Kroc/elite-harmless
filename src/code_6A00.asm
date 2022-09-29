@@ -1003,7 +1003,7 @@ _6dbf:                                                                  ;$6DBF
         lda # $10
         sta VAR_050C
         lda # $20
-        jmp _86a4
+        jmp _FRCE
 
 _6dc9:                                                                  ;$6DC9
         lda # $40
@@ -1595,7 +1595,7 @@ get_galaxy_seed:                                        ; BBC: TT81     ;$70A0
         rts 
 
 
-_70ab:                                                                  ;$70AB
+_TT111:                                                 ; BBC: TT111    ;$70AB
 ;===============================================================================
         jsr get_galaxy_seed
         ldy # $7f
@@ -1704,7 +1704,7 @@ _714f:                                                                  ;$714F
         jmp print_docked_str
 
 _715c:                                                                  ;$715C
-        lda ZP_A7
+        lda ZP_IS_DOCKED
         bne _714f
 
         lda ZP_66               ; hyperspace countdown (outer)?
@@ -1779,7 +1779,7 @@ _71bc:                                                                  ;$71BC
         jmp _7224
 
 _71c4:                                                                  ;$71C4
-        jsr _70ab
+        jsr _TT111
         jmp _7176
 
 _71ca:                                                                  ;$71CA
@@ -1808,7 +1808,7 @@ _71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71F2
         sta TSYSTEM_POS_X
         sta TSYSTEM_POS_Y
         jsr _741c
-        jsr _70ab
+        jsr _TT111
         ldx # $05
 
 :       lda ZP_SEED, x                                                  ;$7202
@@ -1823,7 +1823,9 @@ _71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71F2
 .import TKN_FLIGHT_GALACTIC_HYPERSPACE:direct
         lda # TKN_FLIGHT_GALACTIC_HYPERSPACE
         jsr _MESS               ; print on-screen message?
-_7217:                                                                  ;$7217
+
+_jmp:                                                   ; BBC: jmp      ;$7217
+;===============================================================================
         lda TSYSTEM_POS_X
         sta PSYSTEM_POS_X
         lda TSYSTEM_POS_Y
@@ -2029,9 +2031,9 @@ _731a:                                                                  ;$731A
 
 ;7334 - dead code?
 
-        jsr _70ab
+        jsr _TT111
 _7337:                                                                  ;$7337
-        jsr _7217
+        jsr _jmp
 
         ldx # $05
 :       lda VAR_04FA, x                                                    ;$733C
@@ -2181,11 +2183,11 @@ _73dd:                                                                  ;$73DD
         inc ZP_SCREEN
 
 _741c:  ; launch ship from docking?                                     ;$741C
-        ldx ZP_A7
+        ldx ZP_IS_DOCKED
         beq _744b
         jsr _379e
         jsr _83df
-        jsr _70ab
+        jsr _TT111
         inc ZP_SHIP_ZPOS_SIGN
         jsr _7a8c
         lda # $80
@@ -2204,7 +2206,7 @@ _741c:  ; launch ship from docking?                                     ;$741C
         jsr _37b2
 _744b:                                                                  ;$744B
         ldx # $00               ; change cockpit view direction
-        stx ZP_A7
+        stx ZP_IS_DOCKED
         jmp _a6ba
 
 _7452:                                                                  ;$7452
@@ -2298,7 +2300,7 @@ _74a5:                                                                  ;$74A5
 .segment        "CODE_74B8"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-_74b8:   jmp _88e7                                                      ;$74B8
+_74b8:   jmp _BAY                                                       ;$74B8
 
 equipment_screen:                                                       ;$74BB
 ;===============================================================================
@@ -2399,7 +2401,7 @@ _7549:                                                                  ;$7549
 
         stx PLAYER_MISSILES
 
-        jsr _845c               ; update missile blocks on HUD
+        jsr _msblob             ; update missile blocks on HUD
         lda # $01
 _755f:                                                                  ;$755F
 .import TKN_FLIGHT_LARGE_CARGO_BAY:direct
@@ -2451,7 +2453,7 @@ _75a1:                                                                  ;$75A1
         jsr print_flight_token
 _75b3:                                                                  ;$75B3
         jsr _7627
-        jmp _88e7
+        jmp _BAY
 
 
 _75b9:                                                                  ;$75B9
@@ -2612,7 +2614,7 @@ _7693:                                                                  ;$7693
 _7695:                                                                  ;$7695
 ;===============================================================================
         jsr _6f82
-        jsr _70ab
+        jsr _TT111
         jsr _6f82
         jmp tkn_docked_fn15
 
@@ -3059,7 +3061,7 @@ _7a38:                                                                  ;$7A38
         bne _7a38
         ldy U
 _7a46:                                                                  ;$7A46
-        jsr _84ae
+        jsr get_random_number_clc
         sta ZP_VAR_Z
         lda ZP_SHIP01_XPOS_pt2
         sta R
@@ -3104,13 +3106,13 @@ _7a78:                                                                  ;$7A78
         rts 
 
 _7a86:                                                                  ;$7A86
-        jsr _84ae
+        jsr get_random_number_clc
         jmp _7a6c
 
 
 _7a8c:                                                                  ;$7A8C
 ;===============================================================================
-        jsr _845c               ; update missile blocks on HUD
+        jsr _msblob             ; update missile blocks on HUD
 
         lda # $7f
         sta ZP_SHIP_ROLL
@@ -3263,11 +3265,12 @@ original_7b5e:                                                          ;$75BE
 :       dex                     ; overflow, set to max (255)            ;$7B5F
         rts 
 
-recharge_shield:                                                        ;$7B61
+
+recharge_shield:                                        ; BBC: SHD      ;$7B61
 ;===============================================================================
 ; recharge a shield by one tick:
 ;
-; in:   X       selected shield current energy level
+; in:   X                       selected shield current energy level
 ;-------------------------------------------------------------------------------
 .export recharge_shield
 
@@ -3276,16 +3279,15 @@ recharge_shield:                                                        ;$7B61
 _7b64:                                                                  ;$7B64
         dec PLAYER_ENERGY       ; take energy from the ship's main banks
         php 
-        bne _7b6d
+        bne :+
         inc PLAYER_ENERGY
-_7b6d:                                                                  ;$7B6D
-        plp 
+:       plp                                                             ;$7B6D
         rts 
 
 
 _7b6f:                                                                  ;$7B6F
 ;===============================================================================
-        jsr _b09d                       ; draw multi-color pixel?
+        jsr _b09d               ; draw multi-color pixel?
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
@@ -3377,7 +3379,7 @@ damage_player:                                          ; BBC: OOPS     ;$7BD2
 ; directly to the hull (energy banks). if the player's energy-level reaches
 ; zero or below, the routine will kill the player 
 ;
-; in:   A       amount to damage the player
+; in:   A                       amount to damage the player
 ;-------------------------------------------------------------------------------
         sta T                   ; put aside damage value
 
@@ -3423,7 +3425,7 @@ damage_player:                                          ; BBC: OOPS     ;$7BD2
         ; apply excess damage directly to your hull!
         ;
         ; due to the subtraction before, the A register contains the
-        ; negative amount of overdlow. we add this to the player energy
+        ; negative amount of overflow. we add this to the player energy
         ; level to effectively subtract it instead
         ;
 @hull:  adc PLAYER_ENERGY                                               ;$7BFE
@@ -3650,9 +3652,9 @@ untarget_missile:                                       ; BBC: ABORT    ;$7D0C
 
 target_missile:                                         ; BBC: ABORT2   ;$7D0E
 ;===============================================================================
-; in:   X       slot number of ship to target
-;       Y       a pair of colour nybbles, as used on the bitmap screen,
-;               to colour the missile block on the HUD
+; in:   X                       slot number of ship to target
+;       Y                       a pair of colour nybbles, as used on the bitmap
+;                               screen, to colour the missile block on the HUD
 ;-------------------------------------------------------------------------------
         stx ZP_MISSILE_TARGET   ; set missile target
         ldx PLAYER_MISSILES     ; get the number of missiles
@@ -3877,7 +3879,7 @@ _828f:                                                                  ;$828F
 ;===============================================================================
 ; change the line-heap address:
 ;
-; in:   P2.P1   address
+; in:   P2.P1                   address
 ;-------------------------------------------------------------------------------
         ; transfer the address in P1/P2 to the ship lines pointer
         lda ZP_VAR_P1
@@ -4136,7 +4138,7 @@ _83ca:                                                                  ;$83CA
         bpl :-
 
         txa                     ; set A = 0 (saves a byte over `lda # $00`)
-        sta ZP_A7               ; docked flag?
+        sta ZP_IS_DOCKED        ; docked flag?
 
         ; erase $04E7...$04E9
         ; player sheild and energy
@@ -4233,7 +4235,7 @@ clear_zp_ship:                                                          ;$8447
         rts 
 
 
-_845c:                                                                  ;$845C
+_msblob:                                                ; BBC: msblob   ;$845C
 ;===============================================================================
 ; update missile blocks on HUD?
 ;
@@ -4296,17 +4298,23 @@ _848d:                                                                  ;$848D
         ora # attack::active | attack::target   ;=%11000000
         sta ZP_SHIP_ATTACK
 
-_84ae:                                                                  ;$84AE
+        ; fallthrough
+        ; ...
+
+get_random_number_clc:                                                  ;$84AE
 ;===============================================================================
         clc 
 
+        ; fallthrough
+        ; ...
+
 get_random_number:                                      ; BBC: DORND    ;$84AF
 ;===============================================================================
-; generate an 8-bit 'random' number
+; generate an 8-bit 'random' number:
 ;
-; out:  A       random number between 0-255?
-;       X       (clobbered?)
-;       Y       (preserved)
+; out:  A                       random number between 0-255?
+;       X                       (clobbered?)
+;       Y                       (preserved)
 ;-------------------------------------------------------------------------------
         lda ZP_GOATSOUP_pt1
         rol 
@@ -4675,10 +4683,11 @@ _8627:                                                                  ;$8627
 
 @_86a1:                                                                 ;$86A1
         jsr _81fb
-_86a4:                                                                  ;$86A4
+
+_FRCE:                                                  ; BBC: FRCE     ;$86A4
         jsr @_86b1
 
-        lda ZP_A7
+        lda ZP_IS_DOCKED
         beq :+
 
         ; begin next frame?
@@ -4693,38 +4702,38 @@ _86a4:                                                                  ;$86A4
 @_86b1:                                                                 ;$86B1
         ; key for status page pressed?
         ; (default '8' in original Elite)
-        cmp # .key_index(key_status)
+        cmp # .key_index( key_status )
         bne :+                  ; no? skip over
         jmp status_screen       ; switch to the status screen
 
         ; key for galactic chart pressed?
         ; (default '4' in original Elite)
-:       cmp # .key_index(key_chart_galactic)                            ;$86B8
+:       cmp # .key_index( key_chart_galactic )                          ;$86B8
         bne :+                  ; no? skip over
         jmp galactic_chart      ; switch to galactic chart screen
 
         ; key for local (short-range) chart pressed?
         ; (default '5' in original Elite)
-:       cmp # .key_index(key_chart_local)                               ;$86BF
+:       cmp # .key_index( key_chart_local )                             ;$86BF
         bne :+                  ; no? skip over
         jmp local_chart         ; switch to local chart screen
 
         ; key for planetary information pressed?
         ; (default '6' in original Elite)
-:       cmp # .key_index(key_planet)                                    ;$86C6
+:       cmp # .key_index( key_planet )                                  ;$86C6
         bne :+                  ; no? skip over
-        jsr _70ab               ; prepare planet seed?
+        jsr _TT111              ; prepare planet seed?
         jmp planet_screen       ; switch to planetary information screen
 
         ; key for inventory screen pressed?
         ; (default '9' in original Elite)
-:       cmp # .key_index(key_inventory)                                 ;$68D0
+:       cmp # .key_index( key_inventory )                               ;$68D0
         bne :+                  ; no? skip over
         jmp inventory_screen    ; switch to inventory screen
 
         ; key for market prices screen pressed?
         ; (default '7' in original Elite)
-:       cmp # .key_index(key_market)                                    ;$86D7
+:       cmp # .key_index( key_market )                                  ;$86D7
         bne :+                  ; no? skip over
         jmp market_screen       ; switch to market prices screen
 
@@ -4732,45 +4741,45 @@ _86a4:                                                                  ;$86A4
         bne :+                  ; no? skip over
         jmp _741c               ; launch?!
 
-:       bit ZP_A7                                                       ;$86E5
+:       bit ZP_IS_DOCKED                                                ;$86E5
         bpl @_870d
 
         ; key for buy equipment screen pressed?
         ; (default '3' in original Elite)
-        cmp # .key_index(key_buy_equipment)
+        cmp # .key_index( key_buy_equipment )
         bne :+                  ; no? skip over
         jmp equipment_screen    ; switch to buy equipment screen
 
         ; key for buy cargo screen pressed?
         ; (default '1' in original Elite)
-:       cmp # .key_index(key_buy_cargo)                                 ;$86F0
+:       cmp # .key_index( key_buy_cargo )                               ;$86F0
         bne :+                  ; no? skip over
         jmp buy_screen          ; switch to buy cargo screen
 
 :       cmp # $12               ; '@'?                                  ;$86F7
         bne @_8706
-        jsr _8ae7
+        jsr _SVE
         bcc :+
-        jmp _88ac               ;? (do something on disk-error?)
-:       jmp _88e7                                                       ;$8703
+        jmp _QU5                ;? (do something on disk-error?)
+:       jmp _BAY                                                        ;$8703
 
         ; key for sell cargo screen pressed?
         ; (default '2' in original Elite)
 @_8706:                                                                 ;$8706
-        cmp # .key_index(key_sell_cargo)
+        cmp # .key_index( key_sell_cargo )
         bne @_8724
         jmp sell_cargo          ; switch to sell cargo screen
 
 @_870d: ; cockpit view keys:                                            ;$870D
         ;-----------------------------------------------------------------------
         ; rear view -- 'F3' by default
-        cmp # .key_index(key_view_rear)
+        cmp # .key_index( key_view_rear )
         beq @rear
         ; left view -- 'F5' by default
-        cmp # .key_index(key_view_left)
+        cmp # .key_index( key_view_left )
         beq @left
         ; right view -- 'F7' by default
-        cmp # .key_index(key_view_right)
+        cmp # .key_index( key_view_right )
         bne @_8724
 
         ; select right view:
@@ -4805,7 +4814,7 @@ _86a4:                                                                  ;$86A4
 
         cmp # $2b               ; 'c'?
         bne :+
-        lda ZP_A7
+        lda ZP_IS_DOCKED
         beq _877d
 
         lda ZP_SCREEN
@@ -4828,7 +4837,7 @@ _86a4:                                                                  ;$86A4
         bne :+
 
         jsr _6f82
-        jsr set_psystem_to_tsystem
+        jsr set_tsystem_to_psystem
         jmp _6f82
 
 :       jsr _6f55                                                       ;$875C
@@ -4877,8 +4886,6 @@ _877e:                                                                  ;$877E
 illegal_cargo:                                                          ;$8798
 ;===============================================================================
 ; do you have any illegal cargo?
-;
-; TODO: is this a quantity (like tonnes), or just bit-flags?
 ;-------------------------------------------------------------------------------
         lda CARGO_SLAVES
         clc 
@@ -5099,16 +5106,18 @@ _8863:                                                                  ;$8863
 
         jsr _83ca
 
+_8882:                                                  ; BBC: BR1      ;$8882
+;===============================================================================
         ; set the stack pointer to the top ($01FF),
         ; (i.e. disregard all stack-use prior to this point)
-_8882:  ldx # $ff                                                       ;$8882
+        ldx # $ff
         txs 
 
         jsr _83df
         jsr clear_keyboard
 
-        lda # 3
-       .set_cursor_col
+        lda # 3                 ; move text-cursor to column 3
+       .set_cursor_col          ; (on viewport)
 
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
@@ -5119,67 +5128,89 @@ _8882:  ldx # $ff                                                       ;$8882
         ldx # HULL_COBRAMK3
 
         ; print "load new commander (Y/N)?"
-.import MSG_DOCKED_06:direct
-        lda # MSG_DOCKED_06
-        ldy # $d2
-        jsr _8920
+.import MSG_DOCKED_LOAD_NEW_COMMANDER_YN:direct
+        lda # MSG_DOCKED_LOAD_NEW_COMMANDER_YN
 
-        cmp # $27
-        bne _88ac
+        ldy # 210               ; ship distance
+        jsr _TITLE              ; draw title screen, wait for keypress
 
-        jsr _9245
-        jsr _88f0
-        jsr _8ae7
+        cmp # $27               ; "Y"? (PETSCII? scancode?)
+        bne _QU5
+
+        jsr _9245               ; (something to do with sound)
+        jsr _DFAULT             ; reset save state to default
+        jsr _SVE                ; show load menu
 
 .ifdef  FEATURE_AUDIO
         ;///////////////////////////////////////////////////////////////////////
         jsr _91fe
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-_88ac:                                                                  ;$88AC
-        jsr _88f0
-        jsr _845c               ; update missile blocks on HUD
+_QU5:   jsr _DFAULT             ; reset save state to default           ;$88AC
+        jsr _msblob             ; reset missile blocks on HUD
 
         ; "press space or fire commander"
 .import MSG_DOCKED_PRESS_SPACE_OR_FIRE_COMMANDER:direct
         lda # MSG_DOCKED_PRESS_SPACE_OR_FIRE_COMMANDER
-        ldx # HULL_ADDER
-        ldy # $30
-        jsr _8920
 
-        jsr _9245
-        jsr set_psystem_to_tsystem
-        jsr _70ab
-        jsr _7217
+        ldx # HULL_ADDER        ; switch ship to an Adder
+        ldy # 48                ; ship distance
+        jsr _TITLE              ; draw title screen, wait for keypress
 
-        ; restore default galaxy seed?
-        ldx # $05
+        ; start new game:
+        ;-----------------------------------------------------------------------
+        jsr _9245               ; (something to do with sound)
+
+        jsr set_tsystem_to_psystem
+        jsr _TT111              ; initialise planet seed?
+        jsr _jmp
+
+        ; copy current random seed
+        ldx # 5                 ; 6-byte counter
 :       lda ZP_SEED, x                                                  ;$88C9
         sta VAR_04F4, x
         dex 
         bpl :-
 
-        inx 
-        stx VAR_048A
+        inx                     ; set X to 0 (loop exits with X = $FF)
+        stx VAR_048A            ; set extra vesels spawning counter to 0
 
-        ; set the present system from the target system
+        ; set the present system data
+        ; from the target system
         lda TSYSTEM_ECONOMY
         sta PSYSTEM_ECONOMY
         lda TSYSTEM_TECHLEVEL
         sta PSYSTEM_TECHLEVEL
         lda TSYSTEM_GOVERNMENT
         sta PSYSTEM_GOVERNMENT
-_88e7:                                                                  ;$88E7
-        lda # $ff
-        sta ZP_A7
 
-        lda # $25
-        jmp _86a4
+        ; fallthrough to begin
+        ; docked at station
+        ; ...
 
-
-_88f0:                                                                  ;$88F0
+_BAY:                                                   ; BBC: BAY      ;$88E7
 ;===============================================================================
-; new game file?
+; this is the entry point for docking -- execution jumps here when:
+;
+; 1.    loading or starting a new game
+; 2.    docking your ship via normal means
+; 3.    after using an escape pod
+; 4.    after selling cargo
+; 5.    various input errors such as not enough cash,
+;       not enough cargo or inputting out-of-range numbers
+;-------------------------------------------------------------------------------
+        lda # $ff               ; set "docked" flag
+        sta ZP_IS_DOCKED
+
+        ; "press" the status page key to jump to the status screen first
+        lda # .key_index( key_status )
+        jmp _FRCE
+
+
+_DFAULT:                                                ; BBC: DFAULT   ;$88F0
+;===============================================================================
+; reset the player's in-memory save game to default:
+; i.e. when starting a new game
 ;-------------------------------------------------------------------------------
         ; copy the default game file into the current game state(?)
         ;
@@ -5211,15 +5242,15 @@ _8912:                                                                  ;$8912
         rts 
 
 
-_8920:                                                                  ;$8920
+_TITLE:                                                 ; BBC: TITLE    ;$8920
 ;===============================================================================
 ; draw the title screen:
 ;
 ; in:   A                       a docked-string token to print
 ;       X                       which ship model to display
-;       Y                       ? e.g. $D2
+;       Y                       ship distance, i.e. scale on screen
 ;-------------------------------------------------------------------------------
-        sty VAR_06FB            ; z-distance?
+        sty VAR_SDIST           ; z-distance
         pha                     ; keep A parameter
         stx ZP_SHIP_TYPE        ; put aside ship-type
 
@@ -5337,7 +5368,7 @@ _8920:                                                                  ;$8920
         dec ZP_SHIP_ZPOS_HI
 :       jsr move_ship                                                   ;$89C6
 
-        ldx VAR_06FB            ; title screen ship z-distance?
+        ldx VAR_SDIST           ; title screen ship z-distance?
         stx ZP_SHIP_ZPOS_LO
 
         lda MAIN_COUNTER
@@ -5566,7 +5597,7 @@ _8ad9:                                                                  ;$8AD9
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-_8ae7:                                                                  ;$8AE7
+_SVE:                                                   ; BBC: SVE      ;$8AE7
 ;===============================================================================
 ; data menu
 ;-------------------------------------------------------------------------------
@@ -5593,7 +5624,7 @@ _8ae7:                                                                  ;$8AE7
         jsr _TT17
         bcc @_8b0f
         jsr _8a0c               ; reset save data to default
-        jmp _88f0
+        jmp _DFAULT
 
 @_8b0f:                                                                 ;$8B0F
         ;-----------------------------------------------------------------------
@@ -5607,7 +5638,7 @@ _8ae7:                                                                  ;$8AE7
         lda opt_device          ; get current device $FF = disk, $00 = tape
         eor # %11111111         ; flip!
         sta opt_device          ; and write back
-        jmp _8ae7
+        jmp _SVE
 
 @_8b1c:                                                                 ;$8B1C
         ;-----------------------------------------------------------------------
@@ -5704,11 +5735,11 @@ _8ae7:                                                                  ;$8AE7
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         cli 
-        jsr swap_zp_shadow      ; TODO: why is this needed?
+        jsr swap_zp_shadow
         plp 
         cli 
         bcs :+
-        jsr _88f0
+        jsr _DFAULT
         jsr wait_for_input
 
         clc 
@@ -5866,7 +5897,7 @@ _illegal:                                                               ;$8C55
         jsr print_docked_str
 
         jsr wait_for_input              ; press any key
-        jmp _8ae7
+        jmp _SVE
 
 .ifdef  BUILD_ORIGINAL
 ;///////////////////////////////////////////////////////////////////////////////
@@ -5880,7 +5911,7 @@ _8c61:                                                                  ;$8C61
         jsr print_docked_str
 
         jsr wait_for_input
-        jmp _8ae7
+        jmp _SVE
 
 .ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
@@ -6010,7 +6041,7 @@ do_quickjump:                                           ; BBC: WARP     ;$8E29
         ; note that A is zero due to the
         ; tests above mandating a zero result
         tay 
-        jsr _2c50
+        jsr _MAS2
         cmp # $02               ; minimum distance? ($020000?)
         bcc @nojump
 

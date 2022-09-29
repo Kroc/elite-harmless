@@ -707,7 +707,7 @@ process_ship:                                           ; BBC: MAL1     ;$202F
         ;
         lda PLAYER_SCOOP        ; fuel scoops? ($00 = none, $FF = present)
         
-        ; is the object below the player? i.e. if its Y-position is negative,
+        ; is the object below the player? i.e. if its Y-position is negative;
         ; we've already established that it's near enough to us
         and ZP_SHIP_YPOS_SIGN
         bpl big_damage          ; if no scoops / above us, collision!
@@ -1184,11 +1184,14 @@ _MA18:                                                  ; BBC: MA18     ;$21FA
         ; the on-going state of the e-bomb is managed by shifting bits
         ; off the top of a byte instead of using a typical counter
         asl PLAYER_EBOMB
-        bmi :+
+        bmi :+                  ; so long as a 1 is popped off, skip over
 
+        ; when the ebomb counter empties, return
+        ; the viewport to monochrome rendering
         jsr _2367
 
         ; only every 8 frames...
+        ;=======================================================================
 :       lda MAIN_COUNTER                                                ;$2207
         and # %00000111         ; module 8 (0-7)
         bne _227a               ; =0? (skip for 7 of 8 frames) 
@@ -1215,25 +1218,31 @@ _MA18:                                                  ; BBC: MA18     ;$21FA
 
         ; recharge ship's main energy banks
         ;-----------------------------------------------------------------------
-:       sec                                                             ;$2224
-        lda PLAYER_EUNIT
+        ; energy increase by 1 normally, but the presence
+        ; of an energy unit increases charge rate to 2
+:       sec                     ; add 1 by default                      ;$2224
+        lda PLAYER_EUNIT        ; if this is zero, carry will do the +1
         adc PLAYER_ENERGY
         bcs :+
         sta PLAYER_ENERGY
 
 ;===============================================================================
-; [?]:  spawn space-station:
+; [14]: spawn space-station:
+;       
+;       every 32 iterations of the main loop, we check to see if
+;       the player is near enough to the planet to spawn the space-station
 ;-------------------------------------------------------------------------------
         ; there is no space-station in witchspace!
         ;
 :       lda IS_WITCHSPACE       ; check witchspace flag, $FF = true     ;$2230
-       .bnz _2277               ; if non-zero, skip spawning station
+       .bnz _MA23S              ; if non-zero, skip spawning station
 
-        ; we only check that the space-station is within range every 32 frames
+        ; we only check that the space-station
+        ; is within range every 32 frames
         ;
         lda MAIN_COUNTER        ; current frame-count
         and # %00011111         ; modulo 32, i.e. 0-31
-       .bnz _2283               ; skip every frame other than 0
+       .bnz _MA93               ; skip every frame other than 0
 
         ; is the space-station already present?
         ;
@@ -1246,11 +1255,11 @@ _MA18:                                                  ; BBC: MA18     ;$21FA
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
         lda .loword( SHIP_TYPES + HULL_STATION )
-       .bnz _2277
+       .bnz _MA23S
 
         tay                     ; set Y to zero (because of previous branch)
-        jsr _2c50               ; calculate distance to planet
-        bne _2277               ; not close enough, skip
+        jsr _MAS2               ; calculate rough distance to planet
+        bne _MA23S              ; not close enough, skip
 
         ; spawn the station in:
         ;-----------------------------------------------------------------------
@@ -1263,6 +1272,7 @@ _MA18:                                                  ; BBC: MA18     ;$21FA
         ldx # Ship::acceleration + .sizeof( Ship::acceleration )-1
 
         ; copy from ship slot 0 to the zero-page working space
+        ; TODO: this can be optionally unrolled
         ;
 :       lda ship_00, x                                                  ;$2248
         sta ZP_SHIP, x
@@ -1270,38 +1280,38 @@ _MA18:                                                  ; BBC: MA18     ;$21FA
         bpl :-
 
         inx                     ; X=0
-        ldy # $09
-        jsr _2c2d
-        bne _2277
+        ldy # 9                 ; MATRIX_ROW0?
+        jsr _MAS1
+        bne _MA23S
 
         ldx # $03
         ldy # $0b
-        jsr _2c2d
-        bne _2277
+        jsr _MAS1
+        bne _MA23S
 
         ldx # $06
         ldy # $0d
-        jsr _2c2d
-        bne _2277
+        jsr _MAS1
+        bne _MA23S
         
         lda # $c0
         jsr _87a6
-        bcc _2277
+        bcc _MA23S
 
         jsr wipe_sun
         jsr _7c24
-_2277:                                                                  ;$2277
+_MA23S:                                                                 ;$2277
         jmp _231c
 
         ;-----------------------------------------------------------------------
 
 _227a:                                                                  ;$227A
         lda IS_WITCHSPACE
-        bne _2277
+        bne _MA23S
 
         lda MAIN_COUNTER
         and # %00011111
-_2283:                                                                  ;$2283
+_MA93:                                                                  ;$2283
         cmp # $0a
         bne _22b5
         lda # $32
@@ -1352,7 +1362,7 @@ _22c2:                                                                  ;$22C2
         bne _231c
 
         ldy # .sizeof( Ship )
-        jsr _2c50
+        jsr _MAS2
        .bnz _231c
 
         jsr _2c5c

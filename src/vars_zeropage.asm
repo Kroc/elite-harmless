@@ -467,7 +467,7 @@ ZP_VAR_Z                := $a1  ; a common "Z" variable
 
 ZP_VAR_XX13             := $a2  ;                                       ;XX13
 
-MAIN_COUNTER            := $a3  ;? x18 "MOVE COUNTER"?
+MAIN_COUNTER            := $a3  ; main counter; a frame counter         MCNT
 
 ;                       := $a4  ;UNUSED?
 
@@ -475,7 +475,7 @@ ZP_SHIP_TYPE            := $a5  ; current ship type being processed     TYPE
 
 ZP_ALPHA                := $a6  ; rotation variable used in matrix math ;ALPHA
 
-ZP_A7                   := $a7  ;? x10  ; docked flag?
+ZP_IS_DOCKED            := $a7  ; is docked flag: $00 = no, $FF = yes   ;QQ12
 ZP_A8                   := $a8  ;? x9
 ZP_CIRCLE_FLAG          := $a9  ; flag to indicate start of a circle    ;FLAG
 ZP_TEMP_COUNTER         := $aa  ; temporary counter, e.g. ball lines    ;CNT
