@@ -2,14 +2,13 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
-; "text_docked_fns.inc":
-;
 ; a series of in-string functions, assigned to the first 32 "docked" string
-; tokens. these are stored as macros in this file because their physical
-; location in the original code is all over the place
+; tokens. these are separated into segments in this file because their
+; physical location in the original code is all over the place
 ;
-.macro  .tkn_docked_fn16_17_1D
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+.segment        "CODE_3E41"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 tkn_docked_fn16:                                                        ;$3E41
 ;===============================================================================
 .export tkn_docked_fn16
@@ -52,11 +51,10 @@ tkn_docked_fn1D:                                                        ;$3E5A
         
         jmp tkn_docked_fn0D
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
 
-.macro  .tkn_docked_waitForAnyKey
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+.segment        "CODE_3E7C"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 tkn_docked_waitForAnyKey:                                               ;$3E7C
 ;===============================================================================
 ; press any key!
@@ -76,11 +74,10 @@ tkn_docked_waitForAnyKey:                                               ;$3E7C
         
         rts 
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
 
-.macro  .tkn_docked_incoming_message
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+.segment        "CODE_3E37"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 tkn_docked_incoming_message:                                            ;$3E37
 ;===============================================================================
 ; print "INCOMING MESSAGE" on screen and wait a bit
@@ -99,11 +96,10 @@ tkn_docked_incoming_message:                                            ;$3E37
         ldy # 100
         jmp wait_frames
 
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro
 
-.macro  .tkn_docked_fn_media
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+.segment        "CODE_8AB5"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 tkn_docked_fn_mediaCurrent:                                             ;$8AB5
 ;===============================================================================
 ; print the currently selected load/save media: "disk" or "tape"
@@ -131,6 +127,3 @@ tkn_docked_fn_mediaOther:                                               ;$8ABE
         sec                     ; subtract the following:
         sbc opt_device          ; $FF = disk,   $00 = tape
         jmp print_docked_str    ; $02 = "DISK", $03 = "TAPE"
-
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-.endmacro

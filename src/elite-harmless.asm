@@ -9,7 +9,6 @@
 .include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
-.include        "text/text_docked_fns.inc"
 .include        "code_keyboard.inc"
 
 .include        "code_init.asm"
@@ -37,6 +36,7 @@
 .include        "main_flight.asm"
 .include        "text/text_docked_code.asm"
 .include        "code_28ba.asm"
+.include        "text/text_docked_fns.inc"
 
 .include        "math/math_square.asm"
 .include        "math/math_multiply_signed.asm"

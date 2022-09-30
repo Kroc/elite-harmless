@@ -11,7 +11,6 @@
 .include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
-.include        "text/text_docked_fns.inc"
 .include        "code_keyboard.inc"
 
 ; due to a limitation, CA65 cannot 'look-ahead' for scopes (including procs &
@@ -40,6 +39,7 @@
 .include        "math/math_multiply_signed.asm"                         ;$3A48
 .include        "math/math_multiply+add.asm"                            ;$3AB2
 .include        "math/math_divide.asm"                                  ;$3B30
+.include        "text/text_docked_fns.inc"                              ;$3E37
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
 
 .include        "code_6A00.asm"                                         ;$6A00

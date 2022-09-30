@@ -4012,11 +4012,14 @@ _3e31:                                                                  ;$3E31
         bne _3dbe               ; always branches
 
 ;===============================================================================
-; insert these docked-token functions from "text_docked_fns.asm"
+; insert the docked-token functions from "text_docked_fns.asm"
 ;
-.tkn_docked_incoming_message                                            ;$3E37
-.tkn_docked_fn16_17_1D                                                  ;$3E41
+; NOTE: in the original code, segment "CODE_3E37" apperas here          ;$3E37
+; NOTE: in the original code, segment "CODE_3E41" appears here          ;$3E41
 
+
+.segment        "CODE_3E65"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _3e65:                                                                  ;$3E65
 ;===============================================================================
@@ -4039,8 +4042,11 @@ _3e65:                                                                  ;$3E65
 ;===============================================================================
 ; insert this docked-token function from "text_docked_fns.asm"
 ;
-.tkn_docked_waitForAnyKey                                               ;$3E7C
+; NOTE: in the original code, segment "CODE_3E7C" appears here          ;$3E7C
 
+
+.segment        "CODE_3E87"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 get_ship_addr:                                          ; BBC: GINF     ;$3E87
 ;===============================================================================
