@@ -3192,7 +3192,7 @@ _7a9f:                                                                  ;$7A9F
         jsr spawn_ship
 _7af3:                                                                  ;$7AF3
         lda ZP_SCREEN           ; are we in the cockpit-view?
-       .bnz _7b1a               ; no? skip ahead
+       .bnz _WPSHPS             ; no? skip ahead
 _7af7:                                                                  ;$7AF7
         ldy DUST_COUNT          ; number of dust particles
 _7afa:                                                                  ;$7AFA
@@ -3210,9 +3210,12 @@ _7afa:                                                                  ;$7AFA
         jsr draw_particle
         dey 
         bne _7afa
-_7b1a:                                                                  ;$7B1A
-        ; begin with ship-slot 0
-        ldx # $00
+
+_WPSHPS:                                                ; BBC: WPSHPS   ;$7B1A
+;===============================================================================
+; clear all ships from the scanner:
+;-------------------------------------------------------------------------------
+        ldx # 0                 ; begin with ship-slot 0
 _7b1c:                                                                  ;$7B1C
         lda SHIP_SLOTS, x
         beq _7b44
@@ -3477,7 +3480,7 @@ _7c11:                                                                  ;$7C11
 
 _7c24:                                                                  ;$7C24
 ;===============================================================================
-        jsr _b10e
+        jsr _SPBLB
         ldx # attack::active | attack::ecm      ;=%10000001
         stx ZP_SHIP_ATTACK
 
@@ -3932,7 +3935,7 @@ _82a4:                                                                  ;$82A4
         ;       parameter size and silence an assembler warning
         sta .loword( SHIP_TYPES + HULL_STATION )
         
-        jsr _b10e
+        jsr _SPBLB
         
         lda # $06
         sta ZP_SHIP_YPOS_SIGN
@@ -3983,7 +3986,8 @@ _82be:                                                                  ;$82BE
 _82ed:                                                                  ;$82ED
         lda # $00
         sta [ZP_TEMP_ADDR1], y
-        beq _82be               ; if zero, check the next ship slot
+        beq _82be               ; (always branches)
+
 
 _82f3:                                                                  ;$82F3
 ;===============================================================================
@@ -4138,30 +4142,40 @@ _83c9:                                                                  ;$83C9
         rts 
 
 
-_83ca:                                                                  ;$83CA
+_RESET:                                                 ; BBC: RESET    ;$83CA
 ;===============================================================================
-        ; clear ships slots and some other data?
-        jsr _8ac7               ; erase $0452...$048C (58 bytes)
+; clears the "local bubble" of universe around the player:
+;-------------------------------------------------------------------------------
+        ; empty the local bubble of ships
+        jsr _ZERO
 
-        ; erase $63...$69
-        ; (pitch, roll, hyperspace countdown?)
-        ldx # $06
+        ; erase variables for pitch, roll
+        ; and ECM / hyperspace countdown
+        ; 
+        ; NOTE: this doesn't erase `ZP_INV_ROLL_SIGN`
+        ;       at the end but happens not to matter
+        ldx # 6
 :       sta ZP_BETA, x                                                  ;$83CF
         dex 
         bpl :-
 
-        txa                     ; set A = 0 (saves a byte over `lda # $00`)
-        sta ZP_IS_DOCKED        ; docked flag?
+        txa                     ; set A = $FF
+        sta ZP_IS_DOCKED        ; flag as being docked
 
-        ; erase $04E7...$04E9
-        ; player sheild and energy
-        ldx # $02
+        ; fill the aft & fore shields and energy banks:
+        ; note that A is still $FF
+        ldx # 2
 :       sta PLAYER_SHIELD_FRONT, x                                      ;$83D9
         dex 
         bpl :-
 
-_83df:                                                                  ;$83DF
+        ; fallthrough
+        ; ...
+
+_83df:                                                  ; BBC: RES2?    ;$83DF
 ;===============================================================================
+; NOTE: this interposer is not present in the BBC code!
+;-------------------------------------------------------------------------------
         jsr stop_sound          ; stop all sound playing
 
         lda PLAYER_EBOMB
@@ -4169,80 +4183,111 @@ _83df:                                                                  ;$83DF
 
         jsr _2367
         sta PLAYER_EBOMB
-_83ed:                                                                  ;$83ED
+
+        ; fallthrough
+        ; ...
+
+_83ed:                                                  ; BBC: RES2     ;$83ED
+;===============================================================================
+        ; reset the space dust:
+        ;
         lda # DUST_MAX-1
         sta DUST_COUNT          ; number of dust particles
 
-        ; clear line-buffer?
-        ldx # $ff
-        stx circle_lines_x
-        stx circle_lines_y
-        stx ZP_MISSILE_TARGET   ; no missile target
+        ldx # $ff               ; mark ball-line heap,
+        stx circle_lines_x      ;  used for drawing planets,
+        stx circle_lines_y      ;  as empty
 
+        stx ZP_MISSILE_TARGET   ; set no missile target
+
+        ; reset pitch & roll to centre:
+        ;
         lda # $80
         sta JOY_PITCH
-        sta ZP_ROLL_SIGN
+        sta ZP_ROLL_SIGN        ; set roll and pitch sign
         sta ZP_PITCH_SIGN
-
         asl                     ;=0
         sta ZP_BETA
         sta ZP_PITCH_MAGNITUDE
-        sta ZP_INV_ROLL_SIGN
+        sta ZP_INV_ROLL_SIGN    ; set the inverted signs too!
         sta ZP_INV_PITCH_SIGN
+
+        ; reset frame counter used for spacing actions across frames
         sta MAIN_COUNTER
+
 .ifdef  FEATURE_TRUMBLES
         ;///////////////////////////////////////////////////////////////////////
-        sta TRUMBLES_ONSCREEN   ; number of Trumble™ sprites on-screen
+        sta TRUMBLES_ONSCREEN   ; clear number of Trumble™ sprites on-screen
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        lda # $03
+        lda # 3
         sta ZP_PLAYER_SPEED
         sta ZP_ALPHA
         sta ZP_ROLL_MAGNITUDE
 
-        lda # $10
+        ; text printing colour?
+        lda # .color_nybble( WHITE, BLACK )                             ;=$10
         sta VAR_050C
 
-        lda # $00               ;?
-        sta ZP_B7
-        lda # $8F               ;?
+        lda # $00               ; TODO: something to do with viewport height,
+        sta ZP_B7               ;       but not present in BBC code
+        lda # VIEWPORT_HEIGHT-1
         sta ZP_VIEWH
 
+        ; are we within space station range?
+        ; (check for the presence of a station in the ship count)
+        ; 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning
         lda .loword( SHIP_TYPES + HULL_STATION )
-        beq _8430
+        beq :+
 
-        jsr _b10e
-_8430:                                                                  ;$8430
-        lda ECM_COUNTER         ; is an ECM already active?
-        beq _8437
-        jsr _a786
-_8437:                                                                  ;$8437
-        jsr _7b1a
-        jsr _8ac7               ; clear ship slots and other vars
+        jsr _SPBLB              ; light the "space station" bulb
 
-        lda #< ELITE_HEAP_TOP
+:       lda ECM_COUNTER         ; is an ECM already active?             ;$8430
+        beq :+                  ; if not, skip over
+
+        jsr _ECMOF              ; clear ECM state / HUD indicator
+
+:       jsr _WPSHPS             ; remove all ships from the scanner     ;$8437
+        jsr _ZERO               ; clear ship slots and other vars
+
+        lda #< ELITE_HEAP_TOP   ; reset the ship line heap to the top
         sta SHIP_LINES_LO
         lda #> ELITE_HEAP_TOP
         sta SHIP_LINES_HI
 
+        ; fallthrough
+        ; ...
 
-clear_zp_ship:                                                          ;$8447
+clear_zp_ship:                                          ; BBC: ZINF     ;$8447
 ;===============================================================================
 ; clear the zero-page `Ship` instance:
 ;-------------------------------------------------------------------------------
         ldy # .sizeof( Ship )-1
         lda # $00
-:       sta ZP_SHIP_XPOS_LO, y                                          ;$844B
+:       sta ZP_SHIP, y                                                  ;$844B
         dey 
         bpl :-
 
-        ; set the default $6000 vector scale?
-        lda # $60
+        ; configure the projection / rotation matrix:
+        ;
+        ; "96 * 256 (&6000) represents 1 in the orientation vectors, while
+        ; -96 * 256 (&E000) represents -1. We already set the vectors to zero
+        ; above, so we just need to set up the high bytes of the diagonal 
+        ; values and we're done. The negative nosev [z] makes the ship
+        ; point towards us, as the z-axis points into the screen"
+        ;
+        ;       X: [  1,  0,  0 ]
+        ;       Y: [  0,  1,  0 ]
+        ;       Z: [  0,  0, -1 ]
+        ;
+        ; <https://www.bbcelite.com/master/main/subroutine/zinf.html>
+        ;
+        lda # >(96 * 256)       ;=$6000
         sta ZP_SHIP_M1x1_HI
         sta ZP_SHIP_M2x0_HI
-        ora # %10000000
+        ora # %10000000         ; set negative sign for last number
         sta ZP_SHIP_M0x2_HI
 
         rts 
@@ -5117,7 +5162,7 @@ _8863:                                                                  ;$8863
         ldx # $ff
         txs 
 
-        jsr _83ca
+        jsr _RESET
 
 _8882:                                                  ; BBC: BR1      ;$8882
 ;===============================================================================
@@ -5267,10 +5312,11 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
         pha                     ; keep A parameter
         stx ZP_SHIP_TYPE        ; put aside ship-type
 
+        ; flag, only on C64?
         lda # $ff
         sta _1d13
 
-        jsr _83ca
+        jsr _RESET
 
         lda # $00
         sta _1d13
@@ -5572,15 +5618,17 @@ _8ab4:                                                                  ;$8AB4
 .tkn_docked_fn_media                                                    ;$8AB5
 
 
-_8ac7:                                                                  ;$8AC7
+_ZERO:                                                  ; BBC: ZERO     ;$8AC7
 ;===============================================================================
-; erase $0452...$048C
+; clear the ship slots and related variables:
 ;-------------------------------------------------------------------------------
-        ldx # $3a               ;=58
-        lda # $00
-
-        ; $0452 is SHIP_SLOTS, but in this context
-        ; is some kind of larger data-block?
+        ; erase the ship slots and the flight variables
+        ; up to and including `VAR_048C`
+        ;
+        ; TODO: this should be made into its own segement
+        ;
+        ldx # VAR_048C - SHIP_SLOTS
+        lda # 0
 :       sta SHIP_SLOTS, x                                               ;$8ACB
         dex 
         bpl :-
@@ -6096,6 +6144,8 @@ do_quickjump:                                           ; BBC: WARP     ;$8E29
         ;///////////////////////////////////////////////////////////////////////
         ldy # $06               ; "sound low beep"?
         jmp play_sfx
+.else   ;///////////////////////////////////////////////////////////////////////
+        rts
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 .ifdef  BUILD_ORIGINAL

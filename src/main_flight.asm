@@ -1451,7 +1451,7 @@ _233a:                                                                  ;$233A
         dec ECM_COUNTER
         bne _2345
 _2342:                                                                  ;$2342
-        jsr _a786
+        jsr _ECMOF
 _2345:                                                                  ;$2345
         lda ZP_SCREEN           ; are we in the cockpit-view?
        .bnz rts_2366            ; (no? exit)

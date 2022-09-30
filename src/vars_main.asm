@@ -13,11 +13,18 @@
 VAR_0403                :=$0403
 VAR_0441                :=$0441 ;?
 
+; "local bubble"
 ;-------------------------------------------------------------------------------
+; this section, from `SHIP_SLOTS` to `VAR_048C` describes
+; the local "bubble" of universe around the player
+;
+; TODO: this should be bound by a segment to avoid
+;       accidental breakage if variables are moved
+;
 ; up to 11 3D-objects ("ships") can be in the game at a time. these are the
 ; 11 available slots; a value of $00 represents an unused slot, otherwise
 ; the value is a hull index (see "hull_data.asm") 
-
+;
 SHIP_SLOTS              :=$0452                                         ;FRIN
 
 SHIP_SLOT0              :=$0452
@@ -32,7 +39,7 @@ SHIP_SLOT8              :=$045a
 SHIP_SLOT9              :=$045b
 SHIP_SLOT10             :=$045c
 
-; this is an array to count the number of each type of ship in play.
+; this is an array to count the number of each type of ship in play:
 ; as it is indexed by the ship-type, the order is determined by the
 ; order of hulls in "hull_data.asm". for the original, unmodified Elite,
 ; the resepective addresses and ship-types are listed below:
@@ -287,15 +294,19 @@ VAR_04E2                :=$04e2 ;?
 
 VAR_04E6                :=$04e6 ;?
 
+; TODO: these variables are erased together by `_RESET`
+;       so should be bound by a segment
+;-------------------------------------------------------------------------------
 PLAYER_SHIELD_FRONT     :=$04e7                                         ;FSH
 PLAYER_SHIELD_REAR      :=$04e8                                         ;ASH
 PLAYER_ENERGY           :=$04e9                                         ;ENERGY
+;-------------------------------------------------------------------------------
 
 VAR_04EA                :=$04ea ;?
 VAR_04EB                :=$04eb ;?
 
-SHIP_LINES_LO           :=$04f2 ; ship lines pointer lo-byte
-SHIP_LINES_HI           :=$04f3 ; ship lines pointer hi-byte
+SHIP_LINES_LO           :=$04f2 ; ship lines pointer lo-byte            ;SLSP+0
+SHIP_LINES_HI           :=$04f3 ; ship lines pointer hi-byte            ;SLSP+1
 
 VAR_04F4                :=$04f4 ; temp copy of seed? (indexed by X)     ;QQ2
 VAR_04FA                :=$04fa ; temp copy of seed? (indexed by X)
@@ -352,7 +363,7 @@ SEED_GALAXY_W2_HI       :=$04a1 ; hi-byte of third word
 ;
 DUST_MAX                = 13
 
-DUST_COUNT              :=$050b ; number of dust particles
+DUST_COUNT              :=$050b ; number of dust particles              ;NOSTM
 DUST_X_HI               :=$06a2 ;..$06AE: X-positions of dust-particles
 DUST_X_LO               :=$06af ;..$06BB: fractional X-positions
 DUST_Y_HI               :=$06bc ;..$06C8: Y-positions of dust-particles

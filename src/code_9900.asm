@@ -681,7 +681,7 @@ _a6ba:                                                                  ;$A6BA
 
         jsr set_page            ; switch to cockpit view
         jsr dust_swap_xy        ; is this an opt: avoid rand
-        jsr _7b1a
+        jsr _WPSHPS
 
 _a6d4:                                                                  ;$A6D4
 
@@ -878,7 +878,11 @@ _a75d:                                                                  ;$A75D
 _a785:                                                                  ;$A785
         rts 
 
-_a786:                                                                  ;$A786
+
+_ECMOF:                                                 ; BBC: ECMOF    ;$A786
+;===============================================================================
+; switch ECM off; clearing the ECM indicator on the HUD:
+;-------------------------------------------------------------------------------
         lda # $00               ; disable ECM:
         sta ECM_COUNTER         ; zero-out ECM counter
         sta ECM_STATE           ; mark our ECM as inactive
@@ -1315,8 +1319,10 @@ _b0fd:                                                  ; BBC: ECBLB    ;$B0FD
         rts 
 
 
-_b10e:                                                                  ;$B10E
+_SPBLB:                                                 ; BBC: SPBLB    ;$B10E
 ;===============================================================================
+; light the space station bulb on the dashboard:
+;-------------------------------------------------------------------------------
         lda ELITE_MAINSCR_ADDR + .scrpos( 23, 28 )      ;=$67B4
         eor # %11100000
         sta ELITE_MAINSCR_ADDR + .scrpos( 23, 28 )      ;=$67B4

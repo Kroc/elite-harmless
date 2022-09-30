@@ -265,11 +265,13 @@ ZP_VAR_YY               := $5f
 ZP_VAR_YY_LO            := $5f
 ZP_VAR_YY_HI            := $60
 
-;-------------------------------------------------------------------------------
-
 ZP_SUNX_LO              := $61  ; something to do with drawing the sun
 ZP_SUNX_HI              := $62  ; as above
 
+;-------------------------------------------------------------------------------
+; this block of variables is erased by `_RESET`
+; TODO: these should be bound by a segment
+;
 ZP_BETA                 := $63  ; rotation variable used in matrix math ;BETA
 
 ZP_PITCH_MAGNITUDE      := $64  ; unsigned pitch rotation value,        ;BET1
@@ -494,6 +496,7 @@ ZP_B3                   := $b3  ;? x11
 ZP_B4                   := $b4  ;? x9
 ZP_B5                   := $b5  ;? x10
 ZP_B6                   := $b6  ;? x9
+
 ZP_B7                   := $b7  ;? x4
 
 ZP_VIEWH                := $b8  ; screen Y-value for clipping drawing
