@@ -39,7 +39,7 @@
 .include        "math/math_multiply_signed.asm"                         ;$3A48
 .include        "math/math_multiply+add.asm"                            ;$3AB2
 .include        "math/math_divide.asm"                                  ;$3B30
-.include        "text/text_docked_fns.inc"                              ;$3E37
+.include        "text/text_docked_fns.asm"                              ;$3E37
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
 
 .include        "code_6A00.asm"                                         ;$6A00

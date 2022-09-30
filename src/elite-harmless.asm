@@ -36,7 +36,7 @@
 .include        "main_flight.asm"
 .include        "text/text_docked_code.asm"
 .include        "code_28ba.asm"
-.include        "text/text_docked_fns.inc"
+.include        "text/text_docked_fns.asm"
 
 .include        "math/math_square.asm"
 .include        "math/math_multiply_signed.asm"
