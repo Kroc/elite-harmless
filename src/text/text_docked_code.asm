@@ -60,7 +60,7 @@ _237e:                                                                  ;$237E
         bne _23a0
 
 
-print_docked_str:                                                       ;$2390
+print_docked_str:                                       ; BBC: DETOK    ;$2390
 ;===============================================================================
 ; prints one of the strings from "text_docked.asm"
 ;

@@ -29,7 +29,7 @@ _1d06:          ; dampening toggle?
         .byte   $00
 _1d07:          ; keyboard auto-recentrering?
         .byte   $00
-_1d08:
+_PATG:          ; flag to skip printing credits!? (Pause and press X)
         .byte   $00
 _1d09:
         .byte   $00
@@ -40,7 +40,7 @@ opt_flipvert:   ; flip the vertical axis?                               ;$1D0A
 opt_flipaxis:   ; flip both axises                                      ;$1D0B
         .byte   $00
 
-_1d0c:
+opt_joystick:   ; joystick enabled?
         .byte   $00
 _1d0d:
         .byte   $00

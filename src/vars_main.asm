@@ -92,12 +92,13 @@ CABIN_HEAT              :=$0483 ; cabin temperature
 
 LASER_POWER             :=$0484 ; power level for current laser         ;LAS2
                                 ; (bit 7 = beam)
-
+PLAYER_MISSILE_ARMED    :=$0485 ; armed state of missile                ;MSAR
 COCKPIT_VIEW            :=$0486 ; (front, rear, left, right)            ;VIEW
 
 LASER_COUNTER           :=$0487 ; used to space out laser pulses        ;LASCT
 LASER_HEAT              :=$0488 ; laser temperature                     ;GNTMP
 
+                        ;;$0489 ; unused?
 VAR_048A                :=$048a ; "extra vessels" spawning counter      ;EV
 OSD_DELAY               :=$048b ; delay counter for on-screen messages  ;DLY
 VAR_048C                :=$048c ; message ID on screen
@@ -108,10 +109,15 @@ JOY_ROLL                :=$048d ; roll amount coming from input         ;JSTX
 JOY_PITCH               :=$048e ; pitch amount coming from input        ;JSTY
 
 VAR_048F                :=$048f ;?
-VAR_0490                :=$0490 ;? (indexed by X)
-VAR_0491                :=$0491 ;?
+VAR_0490                :=$0490 ;?
 
-MISSION_FLAGS           :=$0499
+; beginning of save data:
+;===============================================================================
+SAVE_DATA               :=$0491
+
+; commander / file name?
+;
+VAR_0491                :=$0491 ; 7-bytes, 8th byte is $0D (carriage-return?)
 
 .enum   missions
         constrictor_begin       = %00000001
@@ -125,58 +131,35 @@ MISSION_FLAGS           :=$0499
         trumbles                = %00010000
 .endenum
 
-; got Trumbles™?
-;
-.ifdef  FEATURE_TRUMBLES
-;///////////////////////////////////////////////////////////////////////////////
+MISSION_FLAGS           :=$0499                                         ;TP
 
-PLAYER_TRUMBLES         :=$04c9 ; number of Trumbles™ in the player's hold
-PLAYER_TRUMBLES_LO      :=$04c9
-PLAYER_TRUMBLES_HI      :=$04ca
+PSYSTEM_POS             :=$049a
+PSYSTEM_POS_X           :=$049a                                         ;QQ0
+PSYSTEM_POS_Y           :=$049b                                         ;QQ1
 
-TRUMBLES_ONSCREEN       :=$0510 ; number of Trumbles™ on-screen; up to 6
-
-; the amount each Trumble™ moves X / Y
-; (these are interlaced)
-;
-TRUMBLES_MOVE_X         :=$0511
-TRUMBLES_MOVE_Y         :=$0512
-
-TRUMBLES_MOVE_X0        :=$0511
-TRUMBLES_MOVE_Y0        :=$0512
-TRUMBLES_MOVE_X1        :=$0513
-TRUMBLES_MOVE_Y1        :=$0514
-TRUMBLES_MOVE_X2        :=$0515
-TRUMBLES_MOVE_Y2        :=$0516
-TRUMBLES_MOVE_X3        :=$0517
-TRUMBLES_MOVE_Y3        :=$0518
-TRUMBLES_MOVE_X4        :=$0519
-TRUMBLES_MOVE_Y4        :=$051A
-TRUMBLES_MOVE_X5        :=$051B
-TRUMBLES_MOVE_Y5        :=$051C
-TRUMBLES_MOVE_X6        :=$051D
-TRUMBLES_MOVE_Y6        :=$051E
-TRUMBLES_MOVE_X7        :=$051F ; UNUSED! There is no 7th Trumble™ on-screen!
-TRUMBLES_MOVE_Y7        :=$0520 ; UNUSED! There is no 7th Trumble™ on-screen!
-
-TRUMBLES_XPOS_LO        :=$0521 ; X-positions 0-328, for Trumble™ 0-5, lo-bytes
-TRUMBLES_XPOS_HI        :=$0531 ; X-positions 0-328, for Trumble™ 0-5, hi-bytes
-
-;///////////////////////////////////////////////////////////////////////////////
-.endif
+SEED_GALAXY             :=$049c ; seed for the current galaxy:          ;QQ21
+SEED_GALAXY_W0          :=$049c ; first word
+SEED_GALAXY_W0_LO       :=$049c ; lo-byte of first word
+SEED_GALAXY_W0_HI       :=$049d ; hi-byte of first word
+SEED_GALAXY_W1          :=$049e ; second word
+SEED_GALAXY_W1_LO       :=$049e ; lo-byte of second word
+SEED_GALAXY_W1_HI       :=$049f ; hi-byte of second word
+SEED_GALAXY_W2          :=$04a0 ; third word
+SEED_GALAXY_W2_LO       :=$04a0 ; lo-byte of third word
+SEED_GALAXY_W2_HI       :=$04a1 ; hi-byte of third word
 
 ; player's cash:
-PLAYER_CASH             :=$04a2
+PLAYER_CASH             :=$04a2                                         ;CASH
 PLAYER_CASH_pt1         :=$04a2
 PLAYER_CASH_pt2         :=$04a3
 PLAYER_CASH_pt3         :=$04a4
 PLAYER_CASH_pt4         :=$04a5
 
-PLAYER_FUEL             :=$04a6
+PLAYER_FUEL             :=$04a6                                         ;QQ14
 
-PLAYER_COMPETITION      :=$04a7 ; status byte for competition requirements?
+PLAYER_COMPETITION      :=$04a7 ; competition flags                     ;COK
 
-PLAYER_GALAXY           :=$04a8 ; current galaxy number
+PLAYER_GALAXY           :=$04a8 ; current galaxy number                 ;GCNT
 
 
 PLAYER_LASERS           :=$04a9 ; which laser is mounted to each view   ;LASER
@@ -192,9 +175,11 @@ PLAYER_LASER_REAR       :=$04aa ; rear (aft) laser
 PLAYER_LASER_LEFT       :=$04ab ; left laser
 PLAYER_LASER_RIGHT      :=$04ac ; right laser
 
-;-------------------------------------------------------------------------------
+; $04AD/E are unused; up and down lasers were planned originally, but removed
 
-SHIP_HOLD               :=$04af ; cargo capacity of the player's ship
+; cargo:
+;-------------------------------------------------------------------------------
+SHIP_HOLD               :=$04af ; cargo capacity of the player's ship   ;CRGO
 
 .struct Cargo
         food            .byte   ;+$00
@@ -248,49 +233,97 @@ PLAYER_SCOOP            :=$04c2 ; flag, player has a fuel scoop         ;BST
 PLAYER_EBOMB            :=$04c3 ; flag, player has energy bomb          ;BOMB
 PLAYER_EUNIT            :=$04c4 ; flag, player has extra energy unit    ;ENGY
 PLAYER_DOCKCOM          :=$04c5 ; flag, player has a docking computer   ;DKCMP
-
 ;-------------------------------------------------------------------------------
 
-PLAYER_GDRIVE           :=$04c6 ; player has a galactic hyper-drive?
+PLAYER_GDRIVE           :=$04c6 ; player has a galactic hyper-drive?    ;GYHP
 PLAYER_ESCAPEPOD        :=$04c7 ; player has an escape pod?             ;ESCP
 
 PLAYER_KILLS_FRAC       :=$04cb ; kill total, fractional part
 
 PLAYER_MISSILES         :=$04cc ; number of missiles the player has     ;NOMSL
-PLAYER_MISSILE_ARMED    :=$0485 ; armed state of missile                ;MSAR
 
 PLAYER_LEGAL            :=$04cd ; player's legal status                 ;FIST
 
 ; market availability:
+;-------------------------------------------------------------------------------
 ; (quantity of goods on sale)
 ;
-VAR_MARKET              :=$04ce
-VAR_MARKET_FOOD         :=$04ce ; quantity of food on sale
-VAR_MARKET_TEXTILES     :=$04cf ; quantity of textiles on sale
-VAR_MARKET_RADIOACTIVES :=$04d0 ; quantity of radioactives on sale
-VAR_MARKET_SLAVES       :=$04d1 ; quantity of slaves on sale
-VAR_MARKET_ALCOHOL      :=$04d2 ; quantity of liquor & wines on sale
-VAR_MARKET_LUXURIES     :=$04d3 ; quantity of luxuries on sale
-VAR_MARKET_NARCOTICS    :=$04d4 ; quantity of narcotics on sale
-VAR_MARKET_COMPUTERS    :=$04d5 ; quantity of computers on sale
-VAR_MARKET_MACHINERY    :=$04d6 ; quantity of machinery on sale
-VAR_MARKET_ALLOYS       :=$04d7 ; quantity of alloys on sale
-VAR_MARKET_FIREARMS     :=$04d8 ; quantity of firearms on sale
-VAR_MARKET_FURS         :=$04d9 ; quantity of furs on sale
-VAR_MARKET_MINERALS     :=$04da ; quantity of minerals on sale
-VAR_MARKET_GOLD         :=$04db ; quantity of gold on sale
-VAR_MARKET_PLATINUM     :=$04dc ; quantity of platinum on sale
-VAR_MARKET_GEMS         :=$04dd ; quantity of gem-stones on sale
-VAR_MARKET_ALIENS       :=$04de ; quantity of alien items on sale
+MARKET                  :=$04ce                                         ;AVL
+MARKET_FOOD             :=$04ce ; quantity of food on sale              ;AVL+0
+MARKET_TEXTILES         :=$04cf ; quantity of textiles on sale          ;AVL+1
+MARKET_RADIOACTIVES     :=$04d0 ; quantity of radioactives on sale      ;AVL+2
+MARKET_SLAVES           :=$04d1 ; quantity of slaves on sale            ;AVL+3
+MARKET_ALCOHOL          :=$04d2 ; quantity of liquor & wines on sale    ;AVL+4
+MARKET_LUXURIES         :=$04d3 ; quantity of luxuries on sale          ;AVL+5
+MARKET_NARCOTICS        :=$04d4 ; quantity of narcotics on sale         ;AVL+6
+MARKET_COMPUTERS        :=$04d5 ; quantity of computers on sale         ;AVL+7
+MARKET_MACHINERY        :=$04d6 ; quantity of machinery on sale         ;AVL+8
+MARKET_ALLOYS           :=$04d7 ; quantity of alloys on sale            ;AVL+9
+MARKET_FIREARMS         :=$04d8 ; quantity of firearms on sale          ;AVL+10
+MARKET_FURS             :=$04d9 ; quantity of furs on sale              ;AVL+11
+MARKET_MINERALS         :=$04da ; quantity of minerals on sale          ;AVL+12
+MARKET_GOLD             :=$04db ; quantity of gold on sale              ;AVL+13
+MARKET_PLATINUM         :=$04dc ; quantity of platinum on sale          ;AVL+14
+MARKET_GEMS             :=$04dd ; quantity of gem-stones on sale        ;AVL+15
+MARKET_ALIENS           :=$04de ; quantity of alien items on sale       ;AVL+16
 
-VAR_MARKET_RANDOM       :=$04df ; random variance for market prices
-
+MARKET_RANDOM           :=$04df ; random variance for market prices     ;QQ26
 ;-------------------------------------------------------------------------------
 
+PLAYER_KILLS            :=$04e0                                         ;TALLY
 PLAYER_KILLS_LO         :=$04e0 ; number of kills, lo-byte
 PLAYER_KILLS_HI         :=$04e1 ; number of kills, hi-byte
 
-VAR_04E2                :=$04e2 ;?
+; checksum:
+;-------------------------------------------------------------------------------
+VAR_04E2                :=$04e2 ; save count                            ;SVC
+VAR_04E3                :=$04e3                                         ;CHK2
+VAR_04E4                :=$04e4                                         ;CHK
+;===============================================================================
+; (end of save data block)
+
+
+; got Trumbles™?
+;
+.ifdef  FEATURE_TRUMBLES
+;///////////////////////////////////////////////////////////////////////////////
+
+PLAYER_TRUMBLES         :=$04c9 ; number of Trumbles™ in the player's hold
+PLAYER_TRUMBLES_LO      :=$04c9
+PLAYER_TRUMBLES_HI      :=$04ca
+
+TRUMBLES_ONSCREEN       :=$0510 ; number of Trumbles™ on-screen; up to 6
+
+; the amount each Trumble™ moves X / Y
+; (these are interlaced)
+;
+TRUMBLES_MOVE_X         :=$0511
+TRUMBLES_MOVE_Y         :=$0512
+
+TRUMBLES_MOVE_X0        :=$0511
+TRUMBLES_MOVE_Y0        :=$0512
+TRUMBLES_MOVE_X1        :=$0513
+TRUMBLES_MOVE_Y1        :=$0514
+TRUMBLES_MOVE_X2        :=$0515
+TRUMBLES_MOVE_Y2        :=$0516
+TRUMBLES_MOVE_X3        :=$0517
+TRUMBLES_MOVE_Y3        :=$0518
+TRUMBLES_MOVE_X4        :=$0519
+TRUMBLES_MOVE_Y4        :=$051A
+TRUMBLES_MOVE_X5        :=$051B
+TRUMBLES_MOVE_Y5        :=$051C
+TRUMBLES_MOVE_X6        :=$051D
+TRUMBLES_MOVE_Y6        :=$051E
+TRUMBLES_MOVE_X7        :=$051F ; UNUSED! There is no 7th Trumble™ on-screen!
+TRUMBLES_MOVE_Y7        :=$0520 ; UNUSED! There is no 7th Trumble™ on-screen!
+
+TRUMBLES_XPOS_LO        :=$0521 ; X-positions 0-328, for Trumble™ 0-5, lo-bytes
+TRUMBLES_XPOS_HI        :=$0531 ; X-positions 0-328, for Trumble™ 0-5, hi-bytes
+
+;///////////////////////////////////////////////////////////////////////////////
+.endif
+
+;-------------------------------------------------------------------------------
 
 VAR_04E6                :=$04e6 ;?
 
@@ -341,20 +374,6 @@ CARGO_ITEM              :=$04ef ; type of item                          ;QQ29
 
 PSYSTEM_GOVERNMENT      :=$04f0
 PSYSTEM_TECHLEVEL       :=$04f1
-PSYSTEM_POS             :=$049a
-PSYSTEM_POS_X           :=$049a                                         ;QQ0
-PSYSTEM_POS_Y           :=$049b                                         ;QQ1
-
-SEED_GALAXY             :=$049c ; seed for the current galaxy           ;QQ21
-SEED_GALAXY_W0          :=$049c ; first word
-SEED_GALAXY_W0_LO       :=$049c ; lo-byte of first word
-SEED_GALAXY_W0_HI       :=$049d ; hi-byte of first word
-SEED_GALAXY_W1          :=$049e ; second word
-SEED_GALAXY_W1_LO       :=$049e ; lo-byte of second word
-SEED_GALAXY_W1_HI       :=$049f ; hi-byte of second word
-SEED_GALAXY_W2          :=$04a0 ; third word
-SEED_GALAXY_W2_LO       :=$04a0 ; lo-byte of third word
-SEED_GALAXY_W2_HI       :=$04a1 ; hi-byte of third word
 
 ;-------------------------------------------------------------------------------
 ; NOTE: there are up-to 13 dust-particles at a time. `DUST_COUNT`

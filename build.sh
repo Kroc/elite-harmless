@@ -8,8 +8,6 @@
 # stop further processing on any error
 set -e
 
-#===============================================================================
-
 cl65="cl65 \
     --debug-info \
     --include-dir src \
@@ -33,6 +31,7 @@ mkd64="mkd64"
 encrypt="python3 link/encrypt.py"
 exomizer="./bin/exomizer/src/exomizer sfx \$0400 -q"
 
+#===============================================================================
 
 clear
 echo "building Elite : Harmless"

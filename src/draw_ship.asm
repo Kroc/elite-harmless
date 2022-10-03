@@ -759,7 +759,7 @@ _LL42:                                                  ; BBC: LL42     ;$9CFE
         sta ZP_TEMP_ADDR2_HI
 
         ldy # 0                 ; set counter for vertices;
-        sty ZP_TEMP_COUNTER     ; (each is 6-bytes)
+        sty ZP_TEMP_COUNTER1    ; (each is 6-bytes)
         ;-----------------------------------------------------------------------
 _9d45:  sty ZP_VAR_XX17         ; set heap pointer to zero              ;$9D45
         lda [ZP_TEMP_ADDR2], y  ; read vertex byte #0: X-magnitude
@@ -1040,7 +1040,7 @@ _LL60:                                                  ; BBC: LL60     ;$9E9A
 :       jsr math_divide_AQ                                              ;$9EAA
 
         ; ".LL65 ; both continue for scaling based on z"
-_LL65:  ldx ZP_TEMP_COUNTER                                             ;$9EAD
+_LL65:  ldx ZP_TEMP_COUNTER1                                            ;$9EAD
 
         lda ZP_VAR_XX15_2
         bmi _LL62
@@ -1103,9 +1103,9 @@ _LL68:  pla                                                             ;$9EEF
         ; ".LL50 ; also from LL70, Also from LL49-3.
         ; XX3 heap has yscreen, Next vertex."
 _LL50:  clc                                                             ;$9F06
-        lda ZP_TEMP_COUNTER
+        lda ZP_TEMP_COUNTER1
         adc # $04
-        sta ZP_TEMP_COUNTER
+        sta ZP_TEMP_COUNTER1
         lda ZP_VAR_XX17
         adc # $06
         tay 
@@ -1260,7 +1260,7 @@ _LL170:                                                 ; BBC: LL170    ;$9F9F
         ;///////////////////////////////////////////////////////////////////////
         ldy # Hull::_05         ;=$05: max.lines
         lda [ZP_HULL_ADDR], y
-        sta ZP_TEMP_COUNTER
+        sta ZP_TEMP_COUNTER1
 
 _LL75:  ldy # 0
 
@@ -1406,7 +1406,7 @@ _LL78:                                                  ; BBC: LL78     ;$A15B
 .ifdef  FEATURE_FLICKERFREE
         ;///////////////////////////////////////////////////////////////////////
         lda ZP_VAR_XX14         
-        cmp ZP_TEMP_COUNTER
+        cmp ZP_TEMP_COUNTER1
         bcs _LL81
 
         lda ZP_TEMP_ADDR2_LO    ; take the low-address

@@ -22,11 +22,11 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
 ; to indicate a break in line and the next entry will begin a new, visible,
 ; line (all hidden lines are skipped)
 ;
-; TOOD: why is flag (ZP_CIRCLE_FLAG) needed if ZP_TEMP_COUNTER = 0;
+; TOOD: why is flag (`ZP_CIRCLE_FLAG`) needed if `ZP_TEMP_COUNTER1` = 0;
 ;       would indicate the same? is this because of keeping the heap
 ;       for later erasing? for drawing two circles? (i.e. "crater")
 ;
-; in:   ZP_TEMP_COUNTER         the current point number (0-64)
+; in:   ZP_TEMP_COUNTER1        the current point number (0-64)
 ;       ZP_CIRCLE_STEP          number of steps around the circle (0-64)
 ;                               to increment to get to the next point (1+)
 ;       K6                      the X-position of the new point (16-bits)
@@ -152,10 +152,10 @@ draw_circle_line:                                       ; BBC: BLINE    ;$2977
         lda ZP_VAR_K6_3
         sta ZP_VAR_K5_3
 
-        lda ZP_TEMP_COUNTER
+        lda ZP_TEMP_COUNTER1
         clc 
         adc ZP_CIRCLE_STEP
-        sta ZP_TEMP_COUNTER
+        sta ZP_TEMP_COUNTER1
 
         rts 
 
@@ -396,7 +396,7 @@ _PL26:                                                  ; BBC: PL26     ;$7DE0
         lda # $40
         sta ZP_A8
         lda # $00
-        sta ZP_AB
+        sta ZP_TEMP_COUNTER2
         jmp _PLS22
 
 
@@ -432,11 +432,11 @@ _PLS2:                                                  ; BBC: PLS2     ;$7E54
 _PLS22:                                                 ; BBC: PLS22    ;$7E58
 ;===============================================================================
         ldx # $00
-        stx ZP_TEMP_COUNTER
+        stx ZP_TEMP_COUNTER1
         dex 
         stx ZP_CIRCLE_FLAG
 _7e5f:                                                  ; BBC: PLL4     ;$7E5F
-        lda ZP_AB
+        lda ZP_TEMP_COUNTER2
         and # %00011111
         tax 
         lda table_sin, x        
@@ -447,12 +447,12 @@ _7e5f:                                                  ; BBC: PLL4     ;$7E5F
         lda ZP_B5
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VALUE_pt1        ; VALUE_pt1 = B5 * abs(sin(AB))
-        ldx ZP_AB
+        ldx ZP_TEMP_COUNTER2
         cpx # $21               ; AB > pi : invert matrix sign
         lda # $00               ;   (because sin turns negative at $21)
         ror 
         sta ZP_ROTATE_M2x2_HI   ; store the sign
-        lda ZP_AB
+        lda ZP_TEMP_COUNTER2
         clc 
         adc # $10               ; offset in sine-table: sin(x+pi/2) = cos(x)
         and # %00011111
@@ -465,7 +465,7 @@ _7e5f:                                                  ; BBC: PLL4     ;$7E5F
         lda ZP_B2
         jsr _39ea               ; A=(A*Q)/256
         sta ZP_VAR_P1           ; P1 = B2 * abs(cos(AB))
-        lda ZP_AB
+        lda ZP_TEMP_COUNTER2
         adc # $0f
         and # %00111111
         cmp # $21
@@ -524,11 +524,11 @@ _7efd:                                                                  ;$7EFD
         beq _7f06
         bcs _7f12
 _7f06:                                                                  ;$7F06
-        lda ZP_AB
+        lda ZP_TEMP_COUNTER2
         clc 
         adc ZP_CIRCLE_STEP
         and # %00111111
-        sta ZP_AB
+        sta ZP_TEMP_COUNTER2
         jmp _7e5f
 
 _7f12:                                                                  ;$7F12
@@ -617,7 +617,7 @@ draw_sun:                                               ; BBC: SUN      ;$7F22
         rol                     ; (shift the carry bit in)
         cpx # 16                ; sun radius >= 32?
         rol                     ; (shift the carry bit in)
-        sta ZP_TEMP_COUNTER     ; "fringe size"
+        sta ZP_TEMP_COUNTER1    ; "fringe size"
 
         ; clip bottom of sun to viewport:
         ;-----------------------------------------------------------------------
@@ -828,7 +828,7 @@ _PLF5:                                                  ; BBC: PLF5     ;$7F67
         ;-----------------------------------------------------------------------
         ; TODO: we should be able to pluck a faster random number from somewhere
         jsr get_random_number   ; randomise the fringe each frame
-        and ZP_TEMP_COUNTER     ; limit to the fringe-size chosen earlier
+        and ZP_TEMP_COUNTER1    ; limit to the fringe-size chosen earlier
         clc                     ; add the fringe to...
         adc Q                   ; ...the scanline's half-width
         bcc :+                  ; if adding the fringe takes it over 256,
@@ -1034,17 +1034,17 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         ldx # $ff               ; set flag to reset ball-line heap
         stx ZP_CIRCLE_FLAG
         inx                     ; reset counter for ball-lines,
-        stx ZP_TEMP_COUNTER     ; draw the circle from the bottom
+        stx ZP_TEMP_COUNTER1    ; draw the circle from the bottom
 
         ; calculate x-position of point:
         ;-----------------------------------------------------------------------
-.loop:  lda ZP_TEMP_COUNTER     ; current point in the circle           ;$8065
+.loop:  lda ZP_TEMP_COUNTER1    ; current point in the circle           ;$8065
         jsr multiply_by_sin     ; calculate: A = radius * sin(counter)
 
         ldx # $00               ; T will be our hi-byte
         stx T                   ;  so set that to zero
 
-        ldx ZP_TEMP_COUNTER     ; left or right half of circle?
+        ldx ZP_TEMP_COUNTER1    ; left or right half of circle?
         cpx # 33                ; points 0-32 = right half
         bcc :+                  ; skip ahead for right-side
 
@@ -1081,7 +1081,7 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         ; index would reverse the direction of the curve -- a cosine
         ; (note: `multiply_by_sin` automatically wraps the input)
         ;
-        lda ZP_TEMP_COUNTER     ; take our current point index and
+        lda ZP_TEMP_COUNTER1    ; take our current point index and
         clc                     ;  add 16 to it to offset
         adc # 16                ;  the sine into its cosine
         jsr multiply_by_sin     ;  i.e. A = radius * cosine(counter)
@@ -1096,7 +1096,7 @@ draw_circle:                                            ; BBC: CIRCLE2  ;$805E
         ; or right, we are efectively checking for top or bottom as adding one
         ; quarter rotates the problem 90deg
         ;
-        lda ZP_TEMP_COUNTER     ; take our current point index
+        lda ZP_TEMP_COUNTER1    ; take our current point index
         adc # 15                ;  add 15
         and # %00111111         ;  wrap at 64 (0...63)
         cmp # 33                ; points 0-32 = "bottom" half
@@ -1410,7 +1410,7 @@ _PLS4:                                                  ; BBC: PLS4     ;$81AA
         eor # %10000000
 :       lsr                                                             ;$81B5
         lsr 
-        sta ZP_AB
+        sta ZP_TEMP_COUNTER2
         rts 
 
 

@@ -226,11 +226,13 @@ key_del:        .byte   '1'     ;=$40 - DELETE                          ;$8D4C
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-get_input:                                                              ;$8D53
+get_input:                                              ; BBC: RDKEY    ;$8D53
 ;===============================================================================
 ; read joystick & keyboard input:
 ;
-; out:  A       index of key pressed
+; out:  carry   set if a key was pressed. note that joystick input can still
+;               "press" keys, but will not return carry set from this routine!
+;       A       index of key pressed
 ;       X       copy of above
 ;       Y       (preserved)
 ;-------------------------------------------------------------------------------
@@ -258,7 +260,7 @@ get_input:                                                              ;$8D53
 
         ; read joystick?
         ;-----------------------------------------------------------------------
-        ldx _1d0c               ; joystick control enabled?
+        ldx opt_joystick        ; joystick control enabled?
        .bze :+
 
         lda CIA1_PORTA

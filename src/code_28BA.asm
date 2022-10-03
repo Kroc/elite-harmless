@@ -850,7 +850,7 @@ _2d25:                                                                  ;$2D25
         bcc _2d1c
         ldx # $00
 _2d2f:                                                                  ;$2D2F
-        stx ZP_TEMP_COUNTER
+        stx ZP_TEMP_COUNTER1
 
         ; print "FRONT" / "REAR" / "LEFT" / "RIGHT"
 .import TKN_FLIGHT_DIRECTIONS:direct
@@ -862,7 +862,7 @@ _2d2f:                                                                  ;$2D2F
         jsr print_flight_token_and_space
 
         lda # $67
-        ldx ZP_TEMP_COUNTER
+        ldx ZP_TEMP_COUNTER1
         ldy PLAYER_LASERS, x
         cpy # laser::beam | $0f
         bne _2d4a
@@ -880,7 +880,7 @@ _2d50:                                                                  ;$2D50
 _2d56:                                                                  ;$2D56
         jsr print_flight_token_and_newline_and_indent
 _2d59:                                                                  ;$2D59
-        ldx ZP_TEMP_COUNTER
+        ldx ZP_TEMP_COUNTER1
         inx 
         cpx # $04
         bcc _2d2f
@@ -2151,7 +2151,7 @@ _32ad:                                                                  ;$32AD
         lda #> VAR_0403
         sta ZP_B1
         lda # $16
-        sta ZP_AB
+        sta ZP_TEMP_COUNTER2
         cpx # $01
         beq _3244
         cpx # $02
@@ -2301,7 +2301,7 @@ _336e:                                                                  ;$336E
         jsr _8c8a
         ldy # $0a
         jsr _3ab2
-        sta ZP_TEMP_COUNTER
+        sta ZP_TEMP_COUNTER1
         lda ZP_SHIP_TYPE
         cmp # $01
         bne _3381
@@ -2406,7 +2406,7 @@ _33fd:                                                                  ;$33FD
 .endif  ;///////////////////////////////////////////////////////////////////////
         and # %11100000
         bne _3434
-        ldx ZP_TEMP_COUNTER
+        ldx ZP_TEMP_COUNTER1
         cpx # $a0
         bcc _3434
 
@@ -2454,10 +2454,10 @@ _3442:                                                                  ;$3442
         bcs _3454
 _344b:                                                                  ;$344B
         jsr _35d5
-        lda ZP_TEMP_COUNTER
+        lda ZP_TEMP_COUNTER1
         eor # %10000000
 _3452:                                                                  ;$3452
-        sta ZP_TEMP_COUNTER
+        sta ZP_TEMP_COUNTER1
 _3454:                                                                  ;$3454
         ldy # $10
         jsr _3ab2
@@ -2492,9 +2492,9 @@ _346c:                                                                  ;$346C
         ora ZP_SHIP_ROLL
         sta ZP_SHIP_ROLL
 _348d:                                                                  ;$348D
-        lda ZP_TEMP_COUNTER
+        lda ZP_TEMP_COUNTER1
         bmi _349a
-        cmp ZP_AB
+        cmp ZP_TEMP_COUNTER2
         bcc _349a
         lda #> $0300            ; TODO: ???
         sta ZP_SHIP_ACCEL
@@ -2539,7 +2539,7 @@ _34bc:                                                                  ;$34BC
         lsr 
         sta ZP_B0
         lda # $1d
-        sta ZP_AB
+        sta ZP_TEMP_COUNTER2
 
         ; NOTE: `.loword` is needed here to force a 16-bit
         ;       parameter size and silence an assembler warning

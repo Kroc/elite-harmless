@@ -78,9 +78,13 @@ cursor_down:                                                            ;$6A2B
         inc ZP_CURSOR_ROW
         rts 
 
-; stubbed-out routine in the original code
-;
-unused__6a2e:                                                           ;$6A2E
+
+_DOVDU19:                                               ; BBC: DOVDU19  ;$6A2E
+;===============================================================================
+; stubbed-out routine in the original code; this used to be part of
+; the BBC Master code to set the multi-colour palette for the viewport:
+; <https://www.bbcelite.com/master/main/subroutine/dovdu19.html>
+;-------------------------------------------------------------------------------
         rts 
 
 ;///////////////////////////////////////////////////////////////////////////////

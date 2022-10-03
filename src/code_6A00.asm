@@ -119,7 +119,7 @@ set_page_6a2f:                                                          ;$6A2F
 
 .ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
+        jsr _DOVDU19            ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         rts 
@@ -658,8 +658,8 @@ galactic_chart:                                         ; BBC: TT22     ;$6C1C
 
 .ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        lda # $10
-        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
+        lda # 16                ; BBC: set colour palette for viewport
+        jsr _DOVDU19            ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         lda # 7
@@ -979,10 +979,10 @@ _6d79:                                                                  ;$6D79
         clc 
         adc PLAYER_CARGO, y
         sta PLAYER_CARGO, y
-        lda VAR_MARKET_FOOD, y  ; update quantity available for sale?
+        lda MARKET_FOOD, y      ; update quantity available for sale?
         sec 
         sbc R
-        sta VAR_MARKET_FOOD, y  ; quantity available for sale?
+        sta MARKET_FOOD, y      ; quantity available for sale?
         pla 
         beq _6da4
         jsr _761f
@@ -1378,8 +1378,8 @@ local_chart:                                                            ;$6FDB
 
 .ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        lda # $10
-        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
+        lda # 16                ; BBC: set colour palette for viewport
+        jsr _DOVDU19            ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; print the page title:
@@ -1901,7 +1901,7 @@ _7246:                                                                  ;$7246
         ldx ZP_8E
         lda _90a6, x
         sta ZP_8F
-        lda VAR_MARKET_RANDOM
+        lda MARKET_RANDOM
         and _90a8, x
         clc 
         adc _90a5, x
@@ -1928,7 +1928,7 @@ _728e:                                                                  ;$728E
 
         ldy ZP_92
         lda # $05
-        ldx VAR_MARKET_FOOD, y
+        ldx MARKET_FOOD, y
         stx VAR_04ED
         clc 
         beq _72af
@@ -2017,7 +2017,7 @@ _731a:                                                                  ;$731A
         sta ZP_90
         clc 
         lda # $00
-        sta VAR_MARKET_ALIENS
+        sta MARKET_ALIENS
 
 :       dey                                                             ;$7329
         bmi :+
@@ -2052,7 +2052,7 @@ _7337:                                                                  ;$7337
         sta PSYSTEM_GOVERNMENT
 
         jsr get_random_number
-        sta VAR_MARKET_RANDOM
+        sta MARKET_RANDOM
 
         ldx # $00
         stx ZP_VAR_XX4
@@ -2061,7 +2061,7 @@ _7365:                                                                  ;$7365
         sta ZP_8F
         jsr _731a
         lda _90a8, x
-        and VAR_MARKET_RANDOM
+        and MARKET_RANDOM
         clc 
         adc _90a7, x
         ldy ZP_8F
@@ -2079,7 +2079,7 @@ _7384:                                                                  ;$7384
 _7388:                                                                  ;$7388
         ldy ZP_VAR_XX4
         and # %00111111
-        sta VAR_MARKET_FOOD, y
+        sta MARKET_FOOD, y
         iny 
         tya 
         sta ZP_VAR_XX4
@@ -2162,7 +2162,7 @@ _73dd:                                                                  ;$73DD
         jsr _3795
 
 :       jsr get_ctrl                                                    ;$73F5
-        and _1d08
+        and _PATG
         bmi _73ac
         jsr get_random_number
         cmp # $fd
@@ -2857,12 +2857,12 @@ _78f7:                                                                  ;$78F7
         sta ZP_SHIP01_XPOS_pt1, x
         dex 
         bpl _78f7
-        sty ZP_TEMP_COUNTER
+        sty ZP_TEMP_COUNTER1
         ldy # $02
 _7903:                                                                  ;$7903
         iny 
         lda [ZP_SHIP_HEAP], y
-        eor ZP_TEMP_COUNTER
+        eor ZP_TEMP_COUNTER1
         sta $ffff, y                    ;!?
         cpy # $06
         bne _7903
@@ -2899,7 +2899,7 @@ _7911:                                                                  ;$7911
 _7948:                                                                  ;$7948
         dey 
         bpl _7911
-        ldy ZP_TEMP_COUNTER
+        ldy ZP_TEMP_COUNTER1
         cpy ZP_A8
         bcc _78f5
         pla 
@@ -3033,7 +3033,7 @@ _79ed:                                                                  ;$79ED
         sta ZP_SHIP01_XPOS_pt1, x
         dex 
         bpl _79ed
-        sty ZP_TEMP_COUNTER
+        sty ZP_TEMP_COUNTER1
         lda ZP_SHIP01_YPOS_pt1
         clc 
         adc VAR_050E
@@ -3068,7 +3068,7 @@ _7a36:                                                                  ;$7A36
 _7a38:                                                                  ;$7A38
         iny 
         lda [ZP_SHIP_HEAP], y
-        eor ZP_TEMP_COUNTER
+        eor ZP_TEMP_COUNTER1
         sta $ffff, y            ;!?
         cpy # $06
         bne _7a38
@@ -3094,7 +3094,7 @@ _7a46:                                                                  ;$7A46
 _7a6c:                                                                  ;$7A6C
         dey 
         bpl _7a46
-        ldy ZP_TEMP_COUNTER
+        ldy ZP_TEMP_COUNTER1
         cpy ZP_A8
         bcs _7a78
         jmp _79eb
@@ -3767,7 +3767,7 @@ _81fb:                                                                  ;$81FB
 _8204:                                                                  ;$8204
         ;-----------------------------------------------------------------------
         jsr _8ee3
-        lda _1d0c
+        lda opt_joystick
         beq _8244
         lda joy_left
         bit joy_right
@@ -4270,7 +4270,7 @@ clear_zp_ship:                                          ; BBC: ZINF     ;$8447
         dey 
         bpl :-
 
-        ; configure the projection / rotation matrix:
+        ; configure the scaling / rotation matrix:
         ;
         ; "96 * 256 (&6000) represents 1 in the orientation vectors, while
         ; -96 * 256 (&E000) represents -1. We already set the vectors to zero
@@ -4670,7 +4670,7 @@ _8627:                                                                  ;$8627
 :       lda ZP_SCREEN           ; are we in the cockpit-view?           ;$8645
        .bze @_8654              ; yes, skip ahead
 
-        and _1d08
+        and _PATG
         lsr 
         bcs @_8654
 
@@ -5248,7 +5248,8 @@ _QU5:   jsr _DFAULT             ; reset save state to default           ;$88AC
 
 _BAY:                                                   ; BBC: BAY      ;$88E7
 ;===============================================================================
-; this is the entry point for docking -- execution jumps here when:
+; this is the entry point for docking
+; -- execution jumps here when:
 ;
 ; 1.    loading or starting a new game
 ; 2.    docking your ship via normal means
@@ -5272,31 +5273,35 @@ _DFAULT:                                                ; BBC: DFAULT   ;$88F0
 ;-------------------------------------------------------------------------------
         ; copy the default game file into the current game state(?)
         ;
+        ; note that X decrements downwards toward zero but the zeroth-byte
+        ; is not copied (`bne` check) so the addresses are -1'd to compensate
+        ;
         ldx # 84                ; size of new-game data?
-:       lda _25aa, x                                                    ;$88F2
-        sta VAR_0490, x         ; seed goes in $049C+
+:       lda _25ab-1, x                                                  ;$88F2
+        sta SAVE_DATA-1, x
         dex 
         bne :-
 
         ; set the screen to cockpit-view
         ; (note that X = 0 due to the loop logic above)
         stx ZP_SCREEN
-_88fd:                                                                  ;$88FD
-        jsr _89eb
+
+@chk:   jsr _CHECK              ; calculate checksum                    ;$88FD
         cmp _25ff
-        bne _88fd
+        bne @chk
+
         eor # %10101001
         tax 
         lda PLAYER_COMPETITION
         cpx _25fd
-        beq _8912
+        beq :+
         ora # %10000000
-_8912:                                                                  ;$8912
-        ora # %01000000
+:       ora # %01000000                                                 ;$8912
         sta PLAYER_COMPETITION
         jsr _89f9
         cmp _25fe
-        bne _88fd
+        bne @chk
+
         rts 
 
 
@@ -5312,21 +5317,22 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
         pha                     ; keep A parameter
         stx ZP_SHIP_TYPE        ; put aside ship-type
 
-        ; flag, only on C64?
-        lda # $ff
+        lda # $ff               ; TODO: flag, only on C64?
         sta _1d13
 
-        jsr _RESET
+        jsr _RESET              ; reset ship parameters in order
+                                ; to use a different model
 
-        lda # $00
+        lda # $00               ; TODO: flag, only on C64
         sta _1d13
 
-        jsr clear_keyboard
+        jsr clear_keyboard      ; clear keyboard state so that the
+                                ; title screen isn't instantly skipped
 
 .ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        lda # $20
-        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
+        lda # 32                ; BBC: set colour palette for viewport
+        jsr _DOVDU19            ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ; clear the screen, setting the 'page' for the title screen
@@ -5334,16 +5340,20 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
         jsr set_page
 
         ; set screen to cockpit-view
-        lda # $00
+        lda # page::cockpit
         sta ZP_SCREEN
 
-        lda # $60
+        ; reset the scaling / rotation vector:
+        ; TODO: this matrix is different from the one set via `_RESET`, why?
+        ;
+        lda # >(96 * 256)       ;=$6000
         sta ZP_SHIP_M0x2_HI
-        lda # $60
+        lda # >(96 * 256)       ;=$6000 (unceccesary instruction?)
         sta ZP_SHIP_ZPOS_HI
         ldx # $7f
         stx ZP_SHIP_ROLL
         stx ZP_SHIP_PITCH
+
         inx 
         stx ZP_PRINT_CASE
         
@@ -5363,13 +5373,13 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
         lda # TKN_FLIGHT_ELITE
         jsr print_flight_token_and_newline
 
-        lda # $0a
+        lda # $0a               ; newline, but should be $0C? `TXT_NEWLINE`
         jsr print_char
 
         lda # 6
        .set_cursor_col
 
-        lda _1d08
+        lda _PATG               ; flag to skip printing credits!?
         beq :+
 
         ; print "by d.braben & i.bell"
@@ -5377,6 +5387,10 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
         lda # MSG_DOCKED_BY_DBRABEN_AND_IBELL
         jsr print_docked_str
 
+        ; this was some debug code that prints the whole font to screen:
+        ;
+.ifdef  BUILD_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         ; NOTE: `_87b8` appears in the unused debug handler
 :       lda _87b8                                                       ;$8978
         beq @_8994
@@ -5392,12 +5406,15 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
         iny 
         lda [ZP_FD], y
         bne :-
+.endif  ;///////////////////////////////////////////////////////////////////////
 
-@_8994:                                                                 ;$8994
-        ldy # $00
-        sty ZP_PLAYER_SPEED
-        sty _1d0c
+@_8994: ldy # $00               ; set player speed to 0 so that         ;$8994
+        sty ZP_PLAYER_SPEED     ;  the ship remains in place!
+        sty opt_joystick        ; reset to keyboard controls
 
+        ; print the docked string token passed into the routine, i.e.
+        ; "load new commander (Y/N)" or "press space or fire commander"
+        ;
         lda # 15
         sta ZP_CURSOR_ROW
         lda # 1
@@ -5409,77 +5426,110 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
 
         lda # 3
        .set_cursor_col
+
+        ; this has been stubbed out; in the BBC code
+        ; this is where "ACORNSOFT 1986" would be
         lda # TXT_NEWLINE
         jsr print_docked_str
 
-        lda # $0c
-        sta ZP_AB
+        lda # 12
+        sta ZP_TEMP_COUNTER2
 
-        lda # $05
+        lda # 5
         sta MAIN_COUNTER
 
-        lda # $ff
-        sta _1d0c
-@_89be:                                                                 ;$89BE
-        lda ZP_SHIP_ZPOS_HI
+        lda # $ff               ; enable joystick??
+        sta opt_joystick        ; (default for C64?)
+
+        ; spin the ship!
+        ;-----------------------------------------------------------------------
+@spin:  lda ZP_SHIP_ZPOS_HI                                             ;$89BE
         cmp # $01
         beq :+
         dec ZP_SHIP_ZPOS_HI
 :       jsr move_ship                                                   ;$89C6
 
-        ldx VAR_SDIST           ; title screen ship z-distance?
-        stx ZP_SHIP_ZPOS_LO
+        ; the ship's X / Y & Z position are fixed each frame to avoid
+        ; slight drift occurring from mathematical imprecision
+        ;
+        ldx VAR_SDIST           ; retrieve title screen ship z-distance
+        stx ZP_SHIP_ZPOS_LO     ; keep the ship from moving away
 
-        lda MAIN_COUNTER
-        and # %00000011
-        lda # $00
+.ifdef  BUILD_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        lda MAIN_COUNTER        ; these instructions have no effect; they must
+        and # %00000011         ;  have been from an older implementation
+.endif  ;///////////////////////////////////////////////////////////////////////
+
+        lda # $00               ; fix the ship's X & Y position
         sta ZP_SHIP_XPOS_LO
         sta ZP_SHIP_YPOS_LO
-        jsr draw_ship
+
+        jsr draw_ship           ; redraw the ship
+        
+        ; read in the key / joystick state:
+        ;
+        ; NOTE: returns carry set if a key was pressed. this carry
+        ;       will be held through the next few instructions
+        ;
         jsr get_input
 
-        dec MAIN_COUNTER
-        bit joy_fire
-        bmi :+
-        bcc @_89be
-        inc _1d0c
+        dec MAIN_COUNTER        ; (unused?)
+
+        bit joy_fire            ; check for joystick fire button
+        bmi :+                  ; if pressed, skip out
+        
+        bcc @spin               ; if no key pressed, keep spinning
+
+        ; if key is pressed instead of fire,
+        ; disable joystick input
+        inc opt_joystick
 
 :       rts                                                             ;$89EA
 
 
-_89eb:                                                                  ;$89EB
+_CHECK:                                                 ; BBC: CHECK    ;$89EB
 ;===============================================================================
-; checksum file data?
+; checksum last saved player data:
+;
+; out:  A                       checksum byte
 ;-------------------------------------------------------------------------------
-        ldx # 73
+        ; the number of bytes to checksum is the size of the save data block,
+        ; less 3 as the checksum bytes and data size are tacked on the end
+        ;
+        ldx # 73                ; size of data block - 3
         clc 
-        txa 
-:       adc _25b2, x                                                    ;$89EF
-        eor _25b3, x
-        dex 
-        bne :-
+        txa                     ; seed the checksum with the data size
+:       adc _25ab+7, x          ; add the X-1'th byte to the checksum   ;$89EF
+        eor _25ab+8, x          ; and XOR with the X'th byte
+        dex                     ; decrement count
+        bne :-                  ; keep going until the first byte
+
         rts 
 
 
 _89f9:                                                                  ;$89F9
 ;===============================================================================
-        ldx # 73
+; checksum routine unique to C64?
+;-------------------------------------------------------------------------------
+        ldx # 73                ; size of data block - 3
         clc 
         txa 
 :       stx T                                                           ;$89FD
         eor T
         ror 
-        adc _25b2, x
-        eor _25b3, x
+        adc _25ab+7, x
+        eor _25ab+8, x
         dex 
         bne :-
         rts 
 
 
-_8a0c:                                                                  ;$8A0C
+_8a0c:                                                  ; BBC: JAMESON  ;$8A0C
 ;===============================================================================
-; reset the current save-game -- copies a dummy save game
-; over the current save game data
+; reset the current save-game:
+;
+; copies a dummy save game over the current save game data
 ;-------------------------------------------------------------------------------
         ; copy $2619..$267A to $25AB..$260C
 
@@ -5729,7 +5779,7 @@ _SVE:                                                   ; BBC: SVE      ;$8AE7
 
         jsr _89f9
         sta _25fe
-        jsr _89eb
+        jsr _CHECK              ; calculate checksum
         sta _25ff
         pha 
         ora # %10000000
@@ -6341,7 +6391,7 @@ _8f70:                                                                  ;$8F70
         jsr _3c6f
 _8f78:                                                                  ;$8F78
         stx JOY_PITCH
-        lda _1d0c
+        lda opt_joystick
         beq _8f9d
         lda DOCKCOM_STATE
         bne _8f9d
@@ -6374,7 +6424,7 @@ _8fb5:                                                                  ;$8FB5
         iny 
         cpy # $0a
         bne _8fb5
-        bit _1d08
+        bit _PATG
         bpl _8fca
 _8fc2:                                                                  ;$8FC2
         jsr _8eba               ; flip a flag?

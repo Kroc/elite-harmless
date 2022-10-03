@@ -1495,13 +1495,13 @@ spawn_multiple:                                                         ;$2359
 ; in:   A                       number of items to spawn
 ;       X                       ship-type to spawn, e.g. cargo cannister
 ;-------------------------------------------------------------------------------
-        sta ZP_TEMP_COUNTER
+        sta ZP_TEMP_COUNTER1
         beq rts_2366            ; zero-flag will not be set by STA!
 
 :       lda # $00                                                       ;$235D
         jsr _370a               ; NOTE: spawns ship-type in X
         
-        dec ZP_TEMP_COUNTER
+        dec ZP_TEMP_COUNTER1
         bne :-
 
 rts_2366:                                                               ;$2366

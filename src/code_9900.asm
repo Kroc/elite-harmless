@@ -669,7 +669,7 @@ _a6ba:                                                                  ;$A6BA
 
 .ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr unused__6a2e        ; DEAD CODE! this is just an RTS!
+        jsr _DOVDU19        ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ldy ZP_SCREEN           ; are we in the cockpit-view?
@@ -681,7 +681,7 @@ _a6ba:                                                                  ;$A6BA
 
         jsr set_page            ; switch to cockpit view
         jsr dust_swap_xy        ; is this an opt: avoid rand
-        jsr _WPSHPS
+        jsr _WPSHPS             ; clear the scanner
 
 _a6d4:                                                                  ;$A6D4
 
@@ -1734,8 +1734,8 @@ _SCAN:                                                  ; BBC: SCAN     ;$B410
         ldx ZP_SHIP_TYPE        ; is it a sun or planet? (bit 7)
         bmi :-                  ; no? exit now (RTS above us)
 
-        lda _267e, x
-        sta ZP_32
+        lda _267e, x            ; TODO: colour or bitmask for multi-colour
+        sta ZP_32               ;       pixels on the scanner?
 
         ; within range? (scanner shows 16-bits of 24-bit range?)
         ; object X/Y/Z position is 24-bits, so this is the
@@ -1747,7 +1747,7 @@ _SCAN:                                                  ; BBC: SCAN     ;$B410
         ; or +/- 8388607 signed, or 16'777'215 unsigned
         ;
         and # %11000000         ; modulo 16'384? (1024 divisions of 24-bits)
-        bne _b40f
+        bne :-                  ; (RTS above us)
 
         lda ZP_SHIP_XPOS_HI
         clc 
