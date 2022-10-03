@@ -11,23 +11,27 @@ HULL_THARGON            = hull_index                                    ;=$1E
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
 HULL_THARGON_KILL       = 33    ;= 0.128
 
-.segment        "HULL_TABLE"                                            ;$D000..
+.segment        "HULL_TABLE"                                            ;$D000+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .addr   hull_thargon                                            ;$D03A/B
 
-.segment        "HULL_TYPE"                                             ;$D042..
+.segment        "HULL_TYPE"                                             ;$D042+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   $04                                                     ;$D05F
 
-.segment        "HULL_KILL_LO"                                          ;$D063..
+.segment        "HULL_KILL_LO"                                          ;$D063+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   < HULL_THARGON_KILL                                     ;$D080
 
-.segment        "HULL_KILL_HI"                                          ;$D084..
+.segment        "HULL_KILL_HI"                                          ;$D084+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   > HULL_THARGON_KILL                                     ;$D0A1
 
-.segment        "HULL_DATA"                                             ;$D0A5..
+.segment        "CODE_276E"                                             ;$276E+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        .byte   %10101010                                               ;$278B
+
+.segment        "HULL_DATA"                                             ;$D0A5+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_thargon                                                    ;$EBBD
         ;-----------------------------------------------------------------------

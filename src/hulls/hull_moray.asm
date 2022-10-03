@@ -11,23 +11,27 @@ HULL_MORAY              = hull_index                                    ;=$1C
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
 HULL_MORAY_KILL         = 192   ;= 0.75
 
-.segment        "HULL_TABLE"                                            ;$D000..
+.segment        "HULL_TABLE"                                            ;$D000+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .addr   hull_moray                                              ;$D036/7
 
-.segment        "HULL_TYPE"                                             ;$D042..
+.segment        "HULL_TYPE"                                             ;$D042+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   $0c                                                     ;$D05D
 
-.segment        "HULL_KILL_LO"                                          ;$D063..
+.segment        "HULL_KILL_LO"                                          ;$D063+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   < HULL_MORAY_KILL                                       ;$D07E
 
-.segment        "HULL_KILL_HI"                                          ;$D084..
+.segment        "HULL_KILL_HI"                                          ;$D084+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   > HULL_MORAY_KILL                                       ;$D09F
 
-.segment        "HULL_DATA"                                             ;$D0A5..
+.segment        "CODE_276E"                                             ;$276E+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        .byte   %10101010                                               ;$2789
+
+.segment        "HULL_DATA"                                             ;$D0A5+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_moray                                                      ;$E9C9
         ;-----------------------------------------------------------------------

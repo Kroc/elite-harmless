@@ -11,23 +11,27 @@ HULL_SHUTTLE            = hull_index                                    ;=$09
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
 HULL_SHUTTLE_KILL       = 16    ;= 0.062
 
-.segment        "HULL_TABLE"                                            ;$D000..
+.segment        "HULL_TABLE"                                            ;$D000+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .addr   hull_shuttle                                            ;$D010/1
 
-.segment        "HULL_TYPE"                                             ;$D042..
+.segment        "HULL_TYPE"                                             ;$D042+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   $21                                                     ;$D04A
 
-.segment        "HULL_KILL_LO"                                          ;$D063..
+.segment        "HULL_KILL_LO"                                          ;$D063+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   < HULL_SHUTTLE_KILL                                     ;$D06B
 
-.segment        "HULL_KILL_HI"                                          ;$D084..
+.segment        "HULL_KILL_HI"                                          ;$D084+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   > HULL_SHUTTLE_KILL                                     ;$D08C
 
-.segment        "HULL_DATA"                                             ;$D0A5..
+.segment        "CODE_276E"                                             ;$276E+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        .byte   %10101010                                               ;$2776
+
+.segment        "HULL_DATA"                                             ;$D0A5+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_shuttle                                                    ;$D5AF
         ;-----------------------------------------------------------------------

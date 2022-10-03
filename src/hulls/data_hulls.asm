@@ -157,6 +157,19 @@ hull_kill_hi:                                                           ;$D084
         ; see includes below...
         ;
 
+.segment        "CODE_276E"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; colour of ships on scanner?
+; bitmask for multi-colour pixels?
+;
+_267e:                                                                  ;$267E
+        ;-----------------------------------------------------------------------
+        .byte   $00             ; index 0 is unused (no ship)           ;$267E
+
+        ; see includes below
+        ; ...
+
+
 ;===============================================================================
 ; NOTE: THE ORDER OF THESE INCLUDES DETERMINES THEIR INDICES,           ;$D0A5
 ;       AND THE ORDER OF THE DATA IN THE TABLES!
@@ -196,3 +209,14 @@ hull_kill_hi:                                                           ;$D084
 .include "hulls/hull_dodo.asm"                  ; $21: station (dodo)
 
                                                                         ;$EF90
+
+.segment        "CODE_276E"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+.ifdef  BUILD_ORIGINAL
+;///////////////////////////////////////////////////////////////////////////////
+; trailing junk bytes in this segment
+;
+.byte   $00, $00, $00, $00
+
+;///////////////////////////////////////////////////////////////////////////////
+.endif

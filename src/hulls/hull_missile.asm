@@ -11,23 +11,27 @@ HULL_MISSILE            = hull_index                    ; BBC: MSL      ;=$01
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
 HULL_MISSILE_KILL       = 149   ;= 0.58
 
-.segment        "HULL_TABLE"                                            ;$D000..
+.segment        "HULL_TABLE"                                            ;$D000+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .addr   hull_missile                                            ;$D000/1
 
-.segment        "HULL_TYPE"                                             ;$D042..
+.segment        "HULL_TYPE"                                             ;$D042+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   $00                                                     ;$D042
 
-.segment        "HULL_KILL_LO"                                          ;$D063..
+.segment        "HULL_KILL_LO"                                          ;$D063+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   < HULL_MISSILE_KILL                                     ;$D063
 
-.segment        "HULL_KILL_HI"                                          ;$D084..
+.segment        "HULL_KILL_HI"                                          ;$D084+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   > HULL_MISSILE_KILL                                     ;$D084
 
-.segment        "HULL_DATA"                                             ;$D0A5..
+.segment        "CODE_276E"                                             ;$276E+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        .byte   %11111111                                               ;$276E
+
+.segment        "HULL_DATA"                                             ;$D0A5+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_missile                                                    ;$D0A5
         ;-----------------------------------------------------------------------

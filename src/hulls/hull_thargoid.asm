@@ -11,23 +11,27 @@ HULL_THARGOID           = hull_index                                    ;=$1D
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
 HULL_THARGOID_KILL      = 682   ;= 2.66
 
-.segment        "HULL_TABLE"                                            ;$D000..
+.segment        "HULL_TABLE"                                            ;$D000+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .addr   hull_thargoid                                           ;$D038/9
 
-.segment        "HULL_TYPE"                                             ;$D042..
+.segment        "HULL_TYPE"                                             ;$D042+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   $0c                                                     ;$D05E
 
-.segment        "HULL_KILL_LO"                                          ;$D063..
+.segment        "HULL_KILL_LO"                                          ;$D063+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   < HULL_THARGOID_KILL                                    ;$D07F
 
-.segment        "HULL_KILL_HI"                                          ;$D084..
+.segment        "HULL_KILL_HI"                                          ;$D084+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   > HULL_THARGOID_KILL                                    ;$D0A0
 
-.segment        "HULL_DATA"                                             ;$D0A5..
+.segment        "CODE_276E"                                             ;$276E+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        .byte   %01011010                                               ;$278A
+
+.segment        "HULL_DATA"                                             ;$D0A5+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_thargoid                                                   ;$EAA1
         ;-----------------------------------------------------------------------

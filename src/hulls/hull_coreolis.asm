@@ -15,7 +15,7 @@ HULL_STATION            = hull_index                    ; BBC: SST
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
 HULL_COREOLIS_KILL      = 0     ;= 0.00
 
-.segment        "HULL_TABLE"                                            ;$D000..
+.segment        "HULL_TABLE"                                            ;$D000+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 hull_pointer_station:                                                   ;$D002
         ;-----------------------------------------------------------------------
@@ -28,19 +28,23 @@ hull_pointer_station:                                                   ;$D002
         ;
         .addr   hull_coreolis                                           ;$D002/3
 
-.segment        "HULL_TYPE"                                             ;$D042..
+.segment        "HULL_TYPE"                                             ;$D042+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   $00                                                     ;$D043
 
-.segment        "HULL_KILL_LO"                                          ;$D063..
+.segment        "HULL_KILL_LO"                                          ;$D063+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   < HULL_COREOLIS_KILL                                    ;$D064
 
-.segment        "HULL_KILL_HI"                                          ;$D084..
+.segment        "HULL_KILL_HI"                                          ;$D084+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   > HULL_COREOLIS_KILL                                    ;$D085
 
-.segment        "HULL_DATA"                                             ;$D0A5..
+.segment        "CODE_276E"                                             ;$276E+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        .byte   %11111111                                               ;$276F
+
+.segment        "HULL_DATA"                                             ;$D0A5+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_coreolis                                                   ;$D1A3
         ;-----------------------------------------------------------------------

@@ -11,28 +11,32 @@ HULL_DODO               = hull_index                                    ;=$21
 ; kill value is fractional and varies by object, where $0100 (256) = 1 point
 HULL_DODO_KILL          = 0     ;= 0.00
 
-.segment        "HULL_TABLE"                                            ;$D000..
+.segment        "HULL_TABLE"                                            ;$D000+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-hull_pointer_dodo:
+hull_pointer_dodo:                                                      ;$D040
         ;-----------------------------------------------------------------------
         hull_pointer_dodo_lo := hull_pointer_dodo+0
         hull_pointer_dodo_hi := hull_pointer_dodo+1
         
-        .addr   hull_dodo                                               ;$D040
+        .addr   hull_dodo                                               ;$D040/1
 
-.segment        "HULL_TYPE"                                             ;$D042..
+.segment        "HULL_TYPE"                                             ;$D042+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   $00                                                     ;$D062
 
-.segment        "HULL_KILL_LO"                                          ;$D063..
+.segment        "HULL_KILL_LO"                                          ;$D063+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   < HULL_DODO_KILL                                        ;$D083
 
-.segment        "HULL_KILL_HI"                                          ;$D084..
+.segment        "HULL_KILL_HI"                                          ;$D084+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         .byte   > HULL_DODO_KILL                                        ;$D0A4
 
-.segment        "HULL_DATA"                                             ;$D0A5..
+.segment        "CODE_276E"                                             ;$276E+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        .byte   %10101010                                               ;$278E
+
+.segment        "HULL_DATA"                                             ;$D0A5+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 .proc   hull_dodo                                                       ;$EE2D
         ;-----------------------------------------------------------------------

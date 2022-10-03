@@ -215,11 +215,5 @@ _2619:                                                                  ;$2619
         .byte   $00
         .byte   $00
 
-        ; colour of ships on scanner?
-        ; bitmask for multi-colour pixels?
-_267e:                                                                  ;$267E
-        .byte   $00, $ff, $ff, $aa, $aa, $aa, $55, $55
-        .byte   $55, $aa, $aa, $aa, $aa, $aa, $aa, $55
-        .byte   $aa, $aa, $aa, $aa, $aa, $aa, $aa, $aa
-        .byte   $aa, $aa, $aa, $aa, $aa, $5a, $aa, $aa
-        .byte   $00, $aa, $00, $00, $00, $00
+
+; NOTE: in the original code, segment "CODE_276E" appears here          ;$276E
