@@ -216,4 +216,4 @@ _2619:                                                                  ;$2619
         .byte   $00
 
 
-; NOTE: in the original code, segment "CODE_276E" appears here          ;$276E
+; NOTE: in the original code, segment "CODE_267E" appears here          ;$276E
