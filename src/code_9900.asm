@@ -1759,7 +1759,7 @@ _SCAN:                                                  ; BBC: SCAN     ;$B410
         bpl :+                  ; if positive, skip over the invert
 
         eor # %11111111         ; flip the bits...
-        adc # $01               ; and add 1
+        adc # 1                 ; and add 1
 
 :       adc # $7b               ;=123 (centre X on scanner?)            ;$B438
         sta ZP_VAR_XX15_0

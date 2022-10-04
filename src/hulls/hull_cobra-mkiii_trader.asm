@@ -2,7 +2,7 @@
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
-; cobra mk-III
+; cobra mk-III (trader)
 ;-------------------------------------------------------------------------------
 hull_index              .set hull_index + 1
 HULL_COBRAMK3           = hull_index                                    ;=$0B

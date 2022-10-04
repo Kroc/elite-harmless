@@ -162,7 +162,7 @@ hull_kill_hi:                                                           ;$D084
 ; colour of ships on scanner?
 ; bitmask for multi-colour pixels?
 ;
-_267e:                                                                  ;$267E
+_267e:                                                  ; BBC: scacol?  ;$267E
         ;-----------------------------------------------------------------------
         .byte   $00             ; index 0 is unused (no ship)           ;$267E
 
@@ -184,7 +184,7 @@ _267e:                                                                  ;$267E
 .include "hulls/hull_splinter.asm"              ; $08: splinter
 .include "hulls/hull_shuttle.asm"               ; $09: shuttle
 .include "hulls/hull_transporter.asm"           ; $0A: transporter
-.include "hulls/hull_cobra-mkiii.asm"           ; $0B: cobra mk.III, trader
+.include "hulls/hull_cobra-mkiii_trader.asm"    ; $0B: cobra mk.III, trader
 .include "hulls/hull_python_trader.asm"         ; $0C: python, trader
 .include "hulls/hull_boa.asm"                   ; $0D: boa
 .include "hulls/hull_anaconda.asm"              ; $0E: anaconda
