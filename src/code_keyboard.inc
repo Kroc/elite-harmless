@@ -446,3 +446,35 @@ clear_keyboard:                                                         ;$8C6D
         bpl :-                  ; keep going until all 64 are done
 
         rts 
+
+
+.segment        "CODE_81EE"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+_GETYN:                                                 ; BBC: GETYN    ;$81EE
+;===============================================================================
+; wait for a "Y" (yes) or "N" (no) input:
+;
+;===============================================================================
+        jsr wait_for_input
+        cmp # 'y'               ; (PETSCII)
+
+        ; the original code does a relative branch from here to the `rts`
+        ; located in `_PLS6` but CA65 can't do this using the label `_PL6`
+        ; due to the segment boundary so we set the branch destination
+        ; manually
+        ;
+.ifdef  BUILD_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
+        beq *-6                 ; =`_PL6`
+.else   ;///////////////////////////////////////////////////////////////////////
+        ; for elite-harmless, use the `rts` ahead
+        ; so we don't rely upon segment order
+        beq @rts
+.endif  ;///////////////////////////////////////////////////////////////////////
+
+        cmp # 'n'               ; (PETSCII)
+        bne _GETYN
+
+        clc 
+@rts:   rts 
