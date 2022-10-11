@@ -9,7 +9,7 @@
 .include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
-.include        "code_keyboard.inc"
+.include        "code_input.asm"
 
 .include        "code_init.asm"
 ; (must be below "code_init.asm" due to appending of code to `CODE_INIT` above)

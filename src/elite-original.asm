@@ -11,7 +11,7 @@
 .include        "hulls/vars_hulls.inc"
 
 .include        "vars_zeropage.asm"
-.include        "code_keyboard.inc"
+.include        "code_input.asm"
 
 ; due to a limitation, CA65 cannot 'look-ahead' for scopes (including procs &
 ; structs) and therefore our `Ship` struct must be loaded in before it

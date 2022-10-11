@@ -3,7 +3,7 @@
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;===============================================================================
 ;
-; pieces of code relating to reading the hardware keyboard:
+; pieces of code relating to reading the joystick and keyboard hardware:
 ; (not key processing, which is handled throughout the code)
 ;
 ; the C64 keyboard is an extremely simple piece of hardware; it has no
