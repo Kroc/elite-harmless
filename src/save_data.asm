@@ -9,53 +9,68 @@
 
 .segment        "SAVE_DATA"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-; file-name?
-
-_25a6:                                                                  ;$25A6
-        .byte   $3a, $30, $2e, $45, $2e                 ;":0.E."
-
-; save data; length might be 97 bytes
 ;
-_25ab:                                                                  ;$25AB
+;             +----------+ >-------------------------------------------.
+;       $25A6 | disk-cmd |                                             |
+;             +----------+ <----------------------.      saved to <----+
+;       $25AB | filename |                        |        disk        |
+;             +----------+ >---.                  |                    |
+;       $25B3 | SaveData |     |                  |                    |
+;             |          |     +---- checksummed  +---- copied from    |
+;             |          |     |         |        |       default      |
+;             +----------+ >---'         |        |                    |
+;       $25FD | checksum | <-------------'        |                    |
+;             +----------+ <----------------------' >------------------'
+;       $2600 | unused   |
+;             +----------+
+;
+save_data:
+;===============================================================================
+save_prefix:                                                            ;$25A6
+        .byte   $3a, $30, $2e, $45, $2e                 ;":0.E."
+save_name:                                                              ;$25AB
         .byte   $6a, $61, $6d, $65, $73, $6f, $6e       ;"jameson"?
         .byte   $0d
 
-.proc   _25b3                                                           ;$25B3
+; this is the checksummed-region
+; that contains the actual game state:
+;
+.proc   checksum_data                                                   ;$25B3
 ;-------------------------------------------------------------------------------
-        .byte   $00             ; MISSION_FLAGS
-        .byte   $00             ; PSYSTEM_POS_X
-        .byte   $00             ; PSYSTEM_POS_Y
+        .byte   %00000000       ; MISSION_FLAGS
+        .byte   0               ; PSYSTEM_POS_X
+        .byte   0               ; PSYSTEM_POS_Y
         .word   $0000           ; SEED_GALAXY_W0
         .word   $0000           ; SEED_GALAXY_W1
         .word   $0000           ; SEED_GALAXY_W2
         .dword  $00000000       ; PLAYER_CASH
-        .byte   $00             ; PLAYER_FUEL
-        .byte   $00             ; PLAYER_COMPETITION
-        .byte   $00             ; PLAYER_GALAXY
-        .byte   $00             ; PLAYER_LASER_FRONT
-        .byte   $00             ; PLAYER_LASER_REAR
-        .byte   $00             ; PLAYER_LASER_LEFT
-        .byte   $00             ; PLAYER_LASER_RIGHT
-        .byte   $00             ; "PLAYER_LASER_UP" (unused)
-        .byte   $00             ; "PLAYER_LASER_DOWN" (unused)
-        .byte   $00             ; SHIP_HOLD
-        .byte   $00             ; CARGO_FOOD
-        .byte   $00             ; CARGO_TEXTILES
-        .byte   $00             ; CARGO_RADIOACTIVES
-        .byte   $00             ; CARGO_SLAVES
-        .byte   $00             ; CARGO_ALCOHOL
-        .byte   $00             ; CARGO_LUXURIES
-        .byte   $00             ; CARGO_NARCOTICS
-        .byte   $00             ; CARGO_COMPUTERS
-        .byte   $00             ; CARGO_MACHINERY
-        .byte   $00             ; CARGO_ALLOYS
-        .byte   $00             ; CARGO_FIREARMS
-        .byte   $00             ; CARGO_FURS
-        .byte   $00             ; CARGO_MINERALS
-        .byte   $00             ; CARGO_GOLD
-        .byte   $00             ; CARGO_PLATINUM
-        .byte   $00             ; CARGO_GEMS
-        .byte   $00             ; CARGO_ALIENS
+        .byte   0               ; PLAYER_FUEL
+        .byte   %0000000        ; PLAYER_COMPETITION
+        .byte   0               ; PLAYER_GALAXY
+        .byte   0               ; PLAYER_LASER_FRONT
+        .byte   0               ; PLAYER_LASER_REAR
+        .byte   0               ; PLAYER_LASER_LEFT
+        .byte   0               ; PLAYER_LASER_RIGHT
+        .byte   0               ; "PLAYER_LASER_UP" (unused)
+        .byte   0               ; "PLAYER_LASER_DOWN" (unused)
+        .byte   0               ; SHIP_HOLD
+        .byte   0               ; CARGO_FOOD
+        .byte   0               ; CARGO_TEXTILES
+        .byte   0               ; CARGO_RADIOACTIVES
+        .byte   0               ; CARGO_SLAVES
+        .byte   0               ; CARGO_ALCOHOL
+        .byte   0               ; CARGO_LUXURIES
+        .byte   0               ; CARGO_NARCOTICS
+        .byte   0               ; CARGO_COMPUTERS
+        .byte   0               ; CARGO_MACHINERY
+        .byte   0               ; CARGO_ALLOYS
+        .byte   0               ; CARGO_FIREARMS
+        .byte   0               ; CARGO_FURS
+        .byte   0               ; CARGO_MINERALS
+        .byte   0               ; CARGO_GOLD
+        .byte   0               ; CARGO_PLATINUM
+        .byte   0               ; CARGO_GEMS
+        .byte   0               ; CARGO_ALIENS
         .byte   $00             ; PLAYER_ECM
         .byte   $00             ; PLAYER_SCOOP
         .byte   $00             ; PLAYER_EBOMB
@@ -67,50 +82,58 @@ _25ab:                                                                  ;$25AB
         .byte   $00             ; (unused)
         .byte   $00             ; (unused)
         .byte   $00             ; PLAYER_KILLS_FRAC
-        .byte   $00             ; PLAYER_MISSILES
-        .byte   $00             ; PLAYER_LEGAL
-        .byte   $10             ; MAKRET_FOOD
-        .byte   $0f             ; MARKET_TEXTILES
-        .byte   $11             ; MARKET_RADIOACTIVES
-        .byte   $00             ; MARKET_SLAVES
-        .byte   $03             ; MARKET_ALCOHOL
-        .byte   $1c             ; MARKET_LUXURIES
-        .byte   $0e             ; MARKET_NARCOTICS
-        .byte   $00             ; MARKET_COMPUTERS
-        .byte   $00             ; MARKET_MACHINERY
-        .byte   $0A             ; MARKET_ALLOYS
-        .byte   $00             ; MARKET_FIREAMRS
-        .byte   $11             ; MARKET_FURS
-        .byte   $3a             ; MARKET_MINERALS
-        .byte   $07             ; MARKET_GOLD
-        .byte   $09             ; MARKET_PLATINUM
-        .byte   $08             ; MARKET_GEMS
-        .byte   $00             ; MARKET_ALIENS
-        .byte   $00             ; MARKET_RANDOM
-        .word   $0000           ; PLAYER_KILLS
-
-        .byte   $80             ; save-count?
-
-; checksum?
-
-_25fd:                                                                  ;$25FD
-        .byte   $00             ; block size
-_25fe:                                                                  ;$25FE
-        .byte   $00             ; CHK2
-_25ff:                                                                  ;$25FF
-        .byte   $00             ; CHK
+        .byte   0               ; PLAYER_MISSILES
+        .byte   %00000000       ; PLAYER_LEGAL
+        .byte   16              ; MAKRET_FOOD
+        .byte   15              ; MARKET_TEXTILES
+        .byte   17              ; MARKET_RADIOACTIVES
+        .byte   0               ; MARKET_SLAVES
+        .byte   3               ; MARKET_ALCOHOL
+        .byte   28              ; MARKET_LUXURIES
+        .byte   14              ; MARKET_NARCOTICS
+        .byte   0               ; MARKET_COMPUTERS
+        .byte   0               ; MARKET_MACHINERY
+        .byte   10              ; MARKET_ALLOYS
+        .byte   0               ; MARKET_FIREAMRS
+        .byte   17              ; MARKET_FURS
+        .byte   58              ; MARKET_MINERALS
+        .byte   7               ; MARKET_GOLD
+        .byte   9               ; MARKET_PLATINUM
+        .byte   8               ; MARKET_GEMS
+        .byte   0               ; MARKET_ALIENS
+        .byte   0               ; MARKET_RANDOM
+        .word   0               ; PLAYER_KILLS
 .endproc
 
-_25fd   := _25b3::_25fd
-_25fe   := _25b3::_25fe
-_25ff   := _25b3::_25ff
+checksum_data_size = .sizeof( checksum_data )
+
+;-------------------------------------------------------------------------------
+        .byte   128             ; save-count?
+checksum_bytes:                                                         ;$25FD
+        .byte   $00             ; number of bytes checksummed?
+
+; after death, the game state is reset from the last-saved state,
+; from the file/player-name, down to just before the checksum bytes
+; (these are not needed at runtime)
+;
+save_reset_size = * - save_name
+
+; save checksum and verification bytes:
+;-------------------------------------------------------------------------------
+checksum2:                                              ; BBC: CHK2     ;$25FE
+        .byte   $00
+checksum1:                                              ; BBC: CHK      ;$25FF
+        .byte   $00
+
+save_data_size = * - save_data
 
 
 .segment        "SAVE_DEFAULT"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-;$2600: unreferenced / unused data?
-
-        .byte   $00, $00, $00, $00, $00, $00, $00, $00
+; TODO: these should be part of SAVE_DATA above,
+;       but should not factor into the size calculations
+;
+        .byte   $00, $00, $00, $00, $00, $00, $00, $00                  ;$2600
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
         .byte   $00, $00, $00, $00
 
@@ -122,7 +145,8 @@ _25ff   := _25b3::_25ff
 ; dummy/default save-data. this gets copied over the 'current'
 ; save data during game initialisation. length: 97 bytes
 ;
-_2619:                                                                  ;$2619
+default_name:                                                           ;$2619
+;-------------------------------------------------------------------------------
         ; commander name
         .byte   $4a ,$41, $4d, $45, $53, $4f, $4e       ;"JAMESON"
         .byte   $0d
@@ -133,70 +157,70 @@ _2619:                                                                  ;$2619
         .word   ELITE_SEED      ; SEED_GALAXY -- see "elite.inc"
         .dbyt   0, 1000         ; PLAYER_CASH, "100.00 cr"
         .byte   70              ; PLAYER_FUEL, "7.0"
-        .byte   $00             ; PLAYER_COMPETITON
-        .byte   $00             ; PLAYER_GALAXY
+        .byte   %00000000       ; PLAYER_COMPETITON
+        .byte   0               ; PLAYER_GALAXY
         .byte   15              ; PLAYER_LASER_FRONT
-        .byte   $00             ; PLAYER_LASER_REAR
-        .byte   $00             ; PLAYER_LASER_LEFT
-        .byte   $00             ; PLAYER_LASER_RIGHT
-        .byte   $00             ; "PLAYER_LASER_UP" (unused)
-        .byte   $00             ; "PLAYER_LASER_DOWN" (unused)
+        .byte   0               ; PLAYER_LASER_REAR
+        .byte   0               ; PLAYER_LASER_LEFT
+        .byte   0               ; PLAYER_LASER_RIGHT
+        .byte   0               ; "PLAYER_LASER_UP" (unused)
+        .byte   0               ; "PLAYER_LASER_DOWN" (unused)
         .byte   22              ; SHIP_HOLD
-        .byte   $00             ; CARGO_FOOD
-        .byte   $00             ; CARGO_TEXTILES
-        .byte   $00             ; CARGO_RADIOACTIVES
-        .byte   $00             ; CARGO_SLAVES
-        .byte   $00             ; CARGO_ALCOHOL
-        .byte   $00             ; CARGO_LUXURIES
-        .byte   $00             ; CARGO_NARCOTICS
-        .byte   $00             ; CARGO_COMPUTERS
-        .byte   $00             ; CARGO_MACHINERY
-        .byte   $00             ; CARGO_ALLOYS
-        .byte   $00             ; CARGO_FIREARMS
-        .byte   $00             ; CARGO_FURS
-        .byte   $00             ; CARGO_MINERALS
-        .byte   $00             ; CARGO_GOLD
-        .byte   $00             ; CARGO_PLATINUM
-        .byte   $00             ; CARGO_GEMS
-        .byte   $00             ; CARGO_ALIENS
-        .byte   $00             ; PLAYER_ECM
-        .byte   $00             ; PLAYER_SCOOP
-        .byte   $00             ; PLAYER_EBOMB
-        .byte   $00             ; PLAYER_EUNIT
-        .byte   $00             ; PLAYER_DOCKCOM
-        .byte   $00             ; PLAYER_GDRIVE
-        .byte   $00             ; PLAYER_ESCAPEPOD
-        .byte   $00             ; (unused)
-        .byte   $00             ; (unused)
-        .byte   $00             ; (unused)
-        .byte   $00             ; PLAYER_KILLS_FRAC
+        .byte   0               ; CARGO_FOOD
+        .byte   0               ; CARGO_TEXTILES
+        .byte   0               ; CARGO_RADIOACTIVES
+        .byte   0               ; CARGO_SLAVES
+        .byte   0               ; CARGO_ALCOHOL
+        .byte   0               ; CARGO_LUXURIES
+        .byte   0               ; CARGO_NARCOTICS
+        .byte   0               ; CARGO_COMPUTERS
+        .byte   0               ; CARGO_MACHINERY
+        .byte   0               ; CARGO_ALLOYS
+        .byte   0               ; CARGO_FIREARMS
+        .byte   0               ; CARGO_FURS
+        .byte   0               ; CARGO_MINERALS
+        .byte   0               ; CARGO_GOLD
+        .byte   0               ; CARGO_PLATINUM
+        .byte   0               ; CARGO_GEMS
+        .byte   0               ; CARGO_ALIENS
+        .byte   0               ; PLAYER_ECM
+        .byte   0               ; PLAYER_SCOOP
+        .byte   0               ; PLAYER_EBOMB
+        .byte   0               ; PLAYER_EUNIT
+        .byte   0               ; PLAYER_DOCKCOM
+        .byte   0               ; PLAYER_GDRIVE
+        .byte   0               ; PLAYER_ESCAPEPOD
+        .byte   0               ; (unused)
+        .byte   0               ; (unused)
+        .byte   0               ; (unused)
+        .byte   0               ; PLAYER_KILLS_FRAC
         .byte   3               ; PLAYER_MISSILES
-        .byte   $00             ; PLAYER_LEGAL
-        .byte   $10             ; MARKET_FOOD
-        .byte   $0f             ; MARKET_TEXTILES
-        .byte   $11             ; MARKET_RADIOACTIVES
-        .byte   $00             ; MARKET_SLAVES
-        .byte   $03             ; MARKET_ALCOHOL
-        .byte   $1c             ; MARKET_LUXURIES
-        .byte   $0e             ; MARKET_NARCOTICS
-        .byte   $00             ; MARKET_COMPUTERS
-        .byte   $00             ; MARKET_MACHINERY
-        .byte   $0a             ; MARKET_ALLOYS
-        .byte   $00             ; MARKET_FIREARMS
-        .byte   $11             ; MARKET_FURS
-        .byte   $3a             ; MARKET_MINERALS
-        .byte   $07             ; MARKET_GOLD
-        .byte   $09             ; MARKET_PLATINUM
-        .byte   $08             ; MARKET_GEMS
-        .byte   $00             ; MARKET_ALIENS
-        .byte   $00             ; MARKET_RANDOM
-        .word   $00             ; PLAYER_KILLS
+        .byte   %00000000       ; PLAYER_LEGAL
+        .byte   16              ; MARKET_FOOD
+        .byte   15              ; MARKET_TEXTILES
+        .byte   17              ; MARKET_RADIOACTIVES
+        .byte   0               ; MARKET_SLAVES
+        .byte   3               ; MARKET_ALCOHOL
+        .byte   28              ; MARKET_LUXURIES
+        .byte   14              ; MARKET_NARCOTICS
+        .byte   0               ; MARKET_COMPUTERS
+        .byte   0               ; MARKET_MACHINERY
+        .byte   10              ; MARKET_ALLOYS
+        .byte   0               ; MARKET_FIREARMS
+        .byte   17              ; MARKET_FURS
+        .byte   58              ; MARKET_MINERALS
+        .byte   7               ; MARKET_GOLD
+        .byte   9               ; MARKET_PLATINUM
+        .byte   8               ; MARKET_GEMS
+        .byte   0               ; MARKET_ALIENS
+        .byte   0               ; MARKET_RANDOM
+        .word   0               ; PLAYER_KILLS
 
-        .byte   $80             ; save count?
+        .byte   128             ; save count?
         .byte   $aa             ; CHK2?
         .byte   $27             ; CHK?
 
-        .byte   $03             ;?
+        .byte   3               ;?
 
         .byte   $00             ; 16 unused bytes, same as BBC
         .byte   $00
@@ -216,4 +240,4 @@ _2619:                                                                  ;$2619
         .byte   $00
 
 
-; NOTE: in the original code, segment "CODE_267E" appears here          ;$276E
+; NOTE: in the original code, segment "CODE_267E" appears here          ;$267E

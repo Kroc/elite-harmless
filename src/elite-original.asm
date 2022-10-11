@@ -46,6 +46,7 @@
 .include        "orig/orig_init.asm"                                    ;$75E4
 .include        "text/text_flight_code.asm"                             ;$7717
 .include        "gfx/gfx_bitmap.asm"
+.include        "menu_save.asm"                                         ;$8AE7
 
 .include        "code_9900.asm"                                         ;$9900
 .include        "draw_ship.asm"                                         ;$9932

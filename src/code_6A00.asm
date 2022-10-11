@@ -544,8 +544,9 @@ _6b5a:                                                                  ;$6B5A
         jmp _3d2f               ; (not in the BBC code)
 
 .ifdef  BUILD_ORIGINAL
+        ;///////////////////////////////////////////////////////////////////////
         rts                     ; extraneous
-.endif
+.endif  ;///////////////////////////////////////////////////////////////////////
 
 
 get_system_info:                                        ; BBC: TT24     ;$6BA9
@@ -3531,7 +3532,7 @@ spawn_ship:                                                             ;$7C6B
 
         ; find an empty slot to add the ship:
         ;-----------------------------------------------------------------------
-        ldx # $00
+        ldx # 0
 :       lda SHIP_SLOTS, x       ; is this ship-slot occupied?           ;$7C6F
        .bze @new                ; no, this slot is free
         inx                     ; continue to the next slot
@@ -3729,10 +3730,10 @@ _7d56:                                                                  ;$7D56
 .segment        "CODE_81EE"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-_TT17:                                                  ; BBC: TT17     ;$81EE
+_GETYN:                                                 ; BBC: GETYN    ;$81EE
 ;===============================================================================
         jsr wait_for_input
-        cmp # $59
+        cmp # 'y'               ; (PETSCII)
 
         ; the original code does a relative branch from here to the `rts`
         ; located in `_PLS6` but CA65 can't do this using the label `_PL6`
@@ -3748,8 +3749,8 @@ _TT17:                                                  ; BBC: TT17     ;$81EE
         beq @rts
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-        cmp # $4e
-        bne _TT17
+        cmp # 'n'               ; (PETSCII)
+        bne _GETYN
 
         clc 
 @rts:   rts 
@@ -5196,7 +5197,7 @@ _8882:                                                  ; BBC: BR1      ;$8882
         bne _QU5
 
         jsr _9245               ; (something to do with sound)
-        jsr _DFAULT             ; reset save state to default
+        jsr _88f0               ; reset game to last saved state?
         jsr _SVE                ; show load menu
 
 .ifdef  FEATURE_AUDIO
@@ -5204,7 +5205,7 @@ _8882:                                                  ; BBC: BR1      ;$8882
         jsr _91fe
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-_QU5:   jsr _DFAULT             ; reset save state to default           ;$88AC
+_QU5:   jsr _88f0               ; reset game to last saved state?       ;$88AC
         jsr _msblob             ; reset missile blocks on HUD
 
         ; "press space or fire commander"
@@ -5266,19 +5267,22 @@ _BAY:                                                   ; BBC: BAY      ;$88E7
         jmp _FRCE
 
 
-_DFAULT:                                                ; BBC: DFAULT   ;$88F0
+_88f0:                                                  ; BBC: DFAULT?  ;$88F0
 ;===============================================================================
-; reset the player's in-memory save game to default:
-; i.e. when starting a new game
+; resets the game to the last-saved state; e.g. if the player dies, the game
+; reverts to the last save. a copy of the last save is always kept in RAM
+; to avoid having to go to disk
+;
 ;-------------------------------------------------------------------------------
-        ; copy the default game file into the current game state(?)
-        ;
         ; note that X decrements downwards toward zero but the zeroth-byte
         ; is not copied (`bne` check) so the addresses are -1'd to compensate
+        ; and the counter is +1'd to account for the unused 0th iteration.
+        ; this was done to allow the posibility of save data to be >128
+        ; bytes, even though it isn't in original elite
         ;
-        ldx # 84                ; size of new-game data?
-:       lda _25ab-1, x                                                  ;$88F2
-        sta SAVE_DATA-1, x
+        ldx # save_reset_size+1 ; note: defined in "save_data.asm"
+:       lda save_name-1, x      ; copy from the last saved game...      ;$88F2
+        sta GAME_DATA-1, x      ; ...to the in-play game state
         dex 
         bne :-
 
@@ -5286,20 +5290,21 @@ _DFAULT:                                                ; BBC: DFAULT   ;$88F0
         ; (note that X = 0 due to the loop logic above)
         stx ZP_SCREEN
 
-@chk:   jsr _CHECK              ; calculate checksum                    ;$88FD
-        cmp _25ff
-        bne @chk
+@chk:   jsr calc_checksum1                                              ;$88FD
+        cmp checksum1           ; compare against last-saved checksum1
+        bne @chk                ; if no-match, infinite loop?
 
         eor # %10101001
         tax 
         lda PLAYER_COMPETITION
-        cpx _25fd
+        cpx checksum_bytes
         beq :+
         ora # %10000000
 :       ora # %01000000                                                 ;$8912
         sta PLAYER_COMPETITION
-        jsr _89f9
-        cmp _25fe
+
+        jsr calc_checksum2      ; run second-checksum (C64 only)
+        cmp checksum2
         bne @chk
 
         rts 
@@ -5389,8 +5394,6 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
 
         ; this was some debug code that prints the whole font to screen:
         ;
-.ifdef  BUILD_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
         ; NOTE: `_87b8` appears in the unused debug handler
 :       lda _87b8                                                       ;$8978
         beq @_8994
@@ -5406,7 +5409,6 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
         iny 
         lda [ZP_FD], y
         bne :-
-.endif  ;///////////////////////////////////////////////////////////////////////
 
 @_8994: ldy # $00               ; set player speed to 0 so that         ;$8994
         sty ZP_PLAYER_SPEED     ;  the ship remains in place!
@@ -5466,7 +5468,7 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
         sta ZP_SHIP_YPOS_LO
 
         jsr draw_ship           ; redraw the ship
-        
+
         ; read in the key / joystick state:
         ;
         ; NOTE: returns carry set if a key was pressed. this carry
@@ -5478,7 +5480,7 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
 
         bit joy_fire            ; check for joystick fire button
         bmi :+                  ; if pressed, skip out
-        
+
         bcc @spin               ; if no key pressed, keep spinning
 
         ; if key is pressed instead of fire,
@@ -5488,38 +5490,47 @@ _TITLE:                                                 ; BBC: TITLE    ;$8920
 :       rts                                                             ;$89EA
 
 
-_CHECK:                                                 ; BBC: CHECK    ;$89EB
+calc_checksum1:                                         ; BBC: CHECK    ;$89EB
 ;===============================================================================
 ; checksum last saved player data:
 ;
 ; out:  A                       checksum byte
 ;-------------------------------------------------------------------------------
-        ; the number of bytes to checksum is the size of the save data block,
-        ; less 3 as the checksum bytes and data size are tacked on the end
+        ; see "save_data.asm", where the region of save data checksummed
+        ; is defined as this doesn't include the checksum bytes themselves
         ;
-        ldx # 73                ; size of data block - 3
+        ldx # checksum_data_size
         clc 
         txa                     ; seed the checksum with the data size
-:       adc _25ab+7, x          ; add the X-1'th byte to the checksum   ;$89EF
-        eor _25ab+8, x          ; and XOR with the X'th byte
+:       adc checksum_data-1, x  ; add the X-1'th byte to the checksum   ;$89EF
+        eor checksum_data-0, x  ; and XOR with the X'th byte
         dex                     ; decrement count
         bne :-                  ; keep going until the first byte
 
         rts 
 
 
-_89f9:                                                                  ;$89F9
+calc_checksum2:                                                         ;$89F9
 ;===============================================================================
 ; checksum routine unique to C64?
+;
+; a more involved checksum routine that scrambles by XORing with the
+; byte index first and shifting right; this was obviously intended to
+; be tougher to hack than the BBC variant
+;
+; out:  A                       checksum byte
 ;-------------------------------------------------------------------------------
-        ldx # 73                ; size of data block - 3
+        ; see "save_data.asm", where the region of save data checksummed
+        ; is defined as this doesn't include the checksum bytes themselves
+        ;
+        ldx # checksum_data_size
         clc 
         txa 
-:       stx T                                                           ;$89FD
+:       stx T                   ; use the byte-index to scramble        ;$89FD
         eor T
         ror 
-        adc _25ab+7, x
-        eor _25ab+8, x
+        adc checksum_data-1, x
+        eor checksum_data-0, x
         dex 
         bne :-
         rts 
@@ -5529,14 +5540,14 @@ _8a0c:                                                  ; BBC: JAMESON  ;$8A0C
 ;===============================================================================
 ; reset the current save-game:
 ;
-; copies a dummy save game over the current save game data
+; copies a dummy save game over the last-saved game data
 ;-------------------------------------------------------------------------------
         ; copy $2619..$267A to $25AB..$260C
 
         ldy # $61               ;=97; length of the save-data
 
-:       lda _2619, y                                                    ;$8A0E
-        sta _25ab, y            ; seed would be in $25B6?
+:       lda default_name, y                                             ;$8A0E
+        sta save_name, y
         dey 
         bpl :-
 
@@ -5553,13 +5564,13 @@ _8a1d:                                                                  ;$8A1D
         sta _8bbf
 _8a25:                                                                  ;$8A25
         lda ZP_SHIP_YPOS_SIGN, x
-        sta _25ab, x
+        sta save_name, x
         dex 
         bpl _8a25
 _8a2d:                                                                  ;$8A2D
         ldx # $07
 _8a2f:                                                                  ;$8A2F
-        lda _25ab, x
+        lda save_name, x
         sta ZP_SHIP_YPOS_SIGN, x
         dex 
         bpl _8a2f
@@ -5568,7 +5579,7 @@ _8a2f:                                                                  ;$8A2F
 _8a38:                                                                  ;$8A38
         ldx # $04
 _8a3a:                                                                  ;$8A3A
-        lda _25a6, x
+        lda save_prefix, x
         sta ZP_SHIP_XPOS_LO, x
         dex 
         bpl _8a3a
@@ -5709,328 +5720,7 @@ _8ad9:                                                                  ;$8AD9
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-_SVE:                                                   ; BBC: SVE      ;$8AE7
-;===============================================================================
-; data menu
-;-------------------------------------------------------------------------------
-        ; display the data menu on screen
-.import MSG_DOCKED_DATA_MENU:direct
-
-        lda # MSG_DOCKED_DATA_MENU
-        jsr print_docked_str
-
-        jsr wait_for_input
-        cmp # '1'
-        beq @_8b1c
-        cmp # '2'
-        beq @_8b27
-        cmp # '3'
-        beq @_8b11
-        cmp # '4'
-        bne @_8b0f
-
-.import MSG_DOCKED_ARE_YOU_SURE:direct
-        lda # MSG_DOCKED_ARE_YOU_SURE
-        jsr print_docked_str
-
-        jsr _TT17
-        bcc @_8b0f
-        jsr _8a0c               ; reset save data to default
-        jmp _DFAULT
-
-@_8b0f:                                                                 ;$8B0F
-        ;-----------------------------------------------------------------------
-        clc 
-        rts 
-
-@_8b11:                                                                 ;$8B11
-        ;-----------------------------------------------------------------------
-        ; change disk to tape and vice versa
-        ;
-        lda opt_device          ; get current device $FF = disk, $00 = tape
-        eor # %11111111         ; flip!
-        sta opt_device          ; and write back
-        jmp _SVE
-
-@_8b1c:                                                                 ;$8B1C
-        ;-----------------------------------------------------------------------
-        jsr _8a38
-        jsr _8c0d
-        jsr _8a1d
-        sec 
-        rts 
-
-@_8b27:                                                                 ;$8B27
-        ;-----------------------------------------------------------------------
-        jsr _8a38
-        jsr _8a1d
-        lsr VAR_04E2
-
-.import MSG_DOCKED_COMPETITION_NUMBER:direct
-        lda # MSG_DOCKED_COMPETITION_NUMBER
-        jsr print_docked_str
-
-        ; copy $0499..$04E5 (data to be saved?)
-        ldx # $4c
-:       lda MISSION_FLAGS, x                                            ;$8B37
-        sta _25b3, x
-        dex 
-        bpl :-
-
-        jsr _89f9
-        sta _25fe
-        jsr _CHECK              ; calculate checksum
-        sta _25ff
-        pha 
-        ora # %10000000
-        sta ZP_VALUE_pt1
-        eor PLAYER_COMPETITION
-        sta ZP_VALUE_pt3
-        eor PLAYER_CASH_pt3     ;?
-        sta ZP_VALUE_pt2
-        eor # %01011010
-        eor PLAYER_KILLS_HI
-        sta ZP_VALUE_pt4
-        clc 
-        jsr print_large_value
-        jsr print_newline
-        jsr print_newline
-        pla 
-        eor # %10101001
-        sta _25fd
-        jsr _8bc0               ; NOTE: enables KERNAL
-
-        lda #< _25b3
-        sta ZP_FD
-        lda #> _25b3
-        sta ZP_FE
-
-        ; save to disk:
-        ; the linker will define the location and size of the save-data block
-.import __SAVE_DATA_RUN__
-.import __SAVE_DATA_SIZE__
-
-        ; data is located at the pointer in $FD/$FE
-        lda # ZP_FD
-        ldx #< (__SAVE_DATA_RUN__ + __SAVE_DATA_SIZE__)
-        ldy #> (__SAVE_DATA_RUN__ + __SAVE_DATA_SIZE__)
-        jsr KERNAL_SAVE
-        php 
-
-        sei 
-        bit CIA1_INTERRUPT
-        lda # %00000001
-        sta CIA1_INTERRUPT
-
-        ldx # $00
-        stx interrupt_split
-        inx 
-        stx VIC_INTERRUPT_CONTROL
-
-        lda VIC_SCREEN_CTL1
-        and # vic_screen_ctl1::raster_line ^$FF
-        sta VIC_SCREEN_CTL1
-
-        lda # 40                ; raster line 40
-        sta VIC_RASTER
-
-.ifdef  BUILD_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        ; turn KERNAL & I/O area off
-        lda # C64_MEM::ALL
-        jsr set_memory_layout
-.else   ;///////////////////////////////////////////////////////////////////////
-        ; optimisation for changing the memory map,
-        ; with thanks to: <http://www.c64os.com/post?p=83>
-        dec CPU_CONTROL         ; turn off KERNAL
-        dec CPU_CONTROL         ; turn off I/O
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-        cli 
-        jsr swap_zp_shadow
-        plp 
-        cli 
-        bcs :+
-        jsr _DFAULT
-        jsr wait_for_input
-
-        clc 
-        rts 
-
-:       jmp _8c61                                                       ;$8BBB
-
-
-;===============================================================================
-_8bbe:                                                                  ;$8BBE
-        .byte   $07             ; file name length?
-_8bbf:                                                                  ;$8BBF
-        .byte   $07
-
-_8bc0:                                                                  ;$8BC0
-        jsr swap_zp_shadow      ; why is this needed?
-
-.ifdef  BUILD_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        lda # C64_MEM::IO_KERNAL
-        sei                     ; disable interrupts
-        jsr set_memory_layout
-.else   ;///////////////////////////////////////////////////////////////////////
-        sei                     ; disable interrupts
-        inc CPU_CONTROL
-        inc CPU_CONTROL
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-        lda # %00000000
-        sta VIC_INTERRUPT_CONTROL
-        cli 
-        lda # %10000001
-        sta CIA1_INTERRUPT
-
-        lda # $c0               ;?
-        jsr KERNAL_SETMSG
-
-        ; select TAPE or DISK
-        ldx opt_device          ; selected load/save device (disk/tape)
-        inx                     ; $FF = disk, $00 = tape?
-        lda _8c0b, x            ; $00 = disk, $01 = tape
-        tax                     ; X = device ID
-
-        lda # $01               ; logical file number
-        ldy # $00               ; secondary address
-        jsr KERNAL_SETLFS       ; note that X is device ID
-
-        ; TODO: why should the filename be in $0E??
-        lda _8bbe               ; filename length
-        ldx # $0e               ; $000E?
-        ldy # $00               ; X.Y is filename address
-        jmp KERNAL_SETNAM
-
-.ifdef  BUILD_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        ;bug / unused code? (`jmp` instead of `jsr` above)
-        ;
-        ; print "disk"
-.import MSG_DOCKED_MEDIAS:direct
-        lda # MSG_DOCKED_MEDIAS
-        jsr print_docked_str
-
-        jsr wait_for_input
-        ora # %00010000
-        jsr paint_char
-        pha 
-        jsr print_crlf
-        pla 
-        cmp # $30
-        bcc _8c53
-        cmp # $34
-
-        rts 
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-_8c0b:  ; device number table                                           ;$8C0B
-        ;-----------------------------------------------------------------------
-        ; TODO: remove tape code
-        ;
-        .byte   DEV_DRV8
-        .byte   DEV_TAPE
-
-
-_8c0d:                                                                  ;$8C0D
-;===============================================================================
-        jsr _8bc0               ; select drive & filename?
-                                ; NOTE: enables KERNAL
-
-        ; load the file into the disk buffer
-        lda # $00               ; "LOAD"
-        ldx #< ELITE_DISK_BUFFER
-        ldy #> ELITE_DISK_BUFFER
-        jsr KERNAL_LOAD
-
-        ; push load result to stack
-        ; (carry is set if there was an error)
-        php 
-
-        lda # %00000001
-        sta CIA1_INTERRUPT
-        sei 
-
-        ldx # $00
-        stx interrupt_split
-        inx 
-        stx VIC_INTERRUPT_CONTROL
-
-        lda VIC_SCREEN_CTL1
-        and # vic_screen_ctl1::raster_line ^$FF
-        sta VIC_SCREEN_CTL1
-
-        lda # 40                ; raster line 40
-        sta VIC_RASTER
-
-.ifdef  BUILD_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        ; turn off KERNAL & I/O, go back to 64K RAM
-        lda # C64_MEM::ALL
-        jsr set_memory_layout
-.else   ;///////////////////////////////////////////////////////////////////////
-        ; optimisation for changing the memory map,
-        ; with thanks to: <http://www.c64os.com/post?p=83>
-        dec CPU_CONTROL         ; turn off KERNAL
-        dec CPU_CONTROL         ; turn off I/O
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-        cli 
-        jsr swap_zp_shadow      ; why is this needed?
-
-        ; check the result of the load
-        plp 
-        cli 
-        bcs _8c61               ; carry set = error
-        lda ELITE_DISK_BUFFER
-        bmi _illegal
-
-        ; copy the save file from the disk buffer over the current data?
-        ; copy $CF00...$CF4C to $25B3...$25FF
-        ldy # $4c                       ; length is $FF-$4C
-
-:       lda ELITE_DISK_BUFFER, y                                        ;$8C4A
-        sta _25b3, y
-        dey 
-        bpl :-
-_8c53:                                                                  ;$8C53
-        sec 
-        rts 
-
-_illegal:                                                               ;$8C55
-        ;-----------------------------------------------------------------------
-        ; file is invalid
-        ;
-.import MSG_DOCKED_ILLEGAL_FILE:direct
-        lda # MSG_DOCKED_ILLEGAL_FILE   ; display "illegal Elite II file"
-        jsr print_docked_str
-
-        jsr wait_for_input              ; press any key
-        jmp _SVE
-
-.ifdef  BUILD_ORIGINAL
-;///////////////////////////////////////////////////////////////////////////////
-_8c60:  rts                                                             ;$8C60
-;///////////////////////////////////////////////////////////////////////////////
-.endif
-
-_8c61:                                                                  ;$8C61
-.import MSG_DOCKED_ERROR:direct
-        lda # MSG_DOCKED_ERROR
-        jsr print_docked_str
-
-        jsr wait_for_input
-        jmp _SVE
-
-.ifdef  BUILD_ORIGINAL
-        ;///////////////////////////////////////////////////////////////////////
-        rts                     ; not needed due to `jmp` above
-.endif  ;///////////////////////////////////////////////////////////////////////
-
-
+; NOTE: in the original code, segment "CODE_8AE7" appears here          ;$8AE7
 ; NOTE: in the original code, segment "CODE_8C6D" appears here          ;$8C6D
 
 
