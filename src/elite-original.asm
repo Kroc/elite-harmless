@@ -28,7 +28,7 @@
 ; that must be available before "text_docked_code.asm"
 .include        "orig/cursor.asm"                                       ;$6A25
 
-.include        "code_1D81.asm"                                         ;$1D81
+.include        "code_1d81.asm"                                         ;$1D81
 .include        "orig/orig_debug.asm"                                   ;$1E14
 .include        "main_flight.asm"                                       ;$1E21
 .include        "text/text_docked_code.asm"                             ;$2372
@@ -42,7 +42,7 @@
 .include        "text/text_docked_fns.asm"                              ;$3E37
 .include        "gfx/gfx_sprites.asm"                                   ;$6800
 
-.include        "code_6A00.asm"                                         ;$6A00
+.include        "code_6a00.asm"                                         ;$6A00
 .include        "orig/orig_init.asm"                                    ;$75E4
 .include        "text/text_flight_code.asm"                             ;$7717
 .include        "gfx/gfx_bitmap.asm"
