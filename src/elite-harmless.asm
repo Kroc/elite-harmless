@@ -32,7 +32,7 @@
 ; that must be available before "text_docked_code.asm"
 .include        "orig/cursor.asm"
 
-.include        "code_1D81.asm"
+.include        "code_1d81.asm"
 .include        "main_flight.asm"
 .include        "text/text_docked_code.asm"
 .include        "code_28ba.asm"
@@ -46,7 +46,7 @@
 .include        "save_data.asm"
 .include        "gfx/gfx_sprites.asm"
 
-.include        "code_6A00.asm"
+.include        "code_6a00.asm"
 .include        "text/text_flight_code.asm"
 .include        "menu_save.asm"
 .include        "code_9900.asm"
