@@ -416,13 +416,13 @@ ZP_VAR_XX18_8           := $8d  ; Z-sign (note: isn't part of K5/6)     ;XX18+8
 ; temp variable storage?
 ; these three are reused sometimes as temporaries
 ;
-ZP_8E                   := $8e  ; cross-hair X-position                 ;QQ19
-ZP_8F                   := $8f  ; cross-hair Y-position                 ;QQ19+1
-ZP_90                   := $90  ; cross-hair size                       ;QQ19+2
-
-ZP_91                   := $91  ;? x9
-ZP_92                   := $92  ;? x6
-ZP_93                   := $93  ;? x4
+ZP_VAR_QQ19             := $8e                                          ;QQ19
+ZP_VAR_QQ19_0           := $8e  ; cross-hair X-position                 ;QQ19+0
+ZP_VAR_QQ19_1           := $8f  ; cross-hair Y-position                 ;QQ19+1
+ZP_VAR_QQ19_2           := $90  ; cross-hair size                       ;QQ19+2
+ZP_VAR_QQ19_3           := $91  ;? x9                                   ;QQ19+3
+ZP_VAR_QQ19_4           := $92  ;? x6                                   ;QQ19+4
+ZP_VAR_QQ19_5           := $93  ;? x4                                   ;QQ19+5
 
 ZP_PITCH_SIGN           := $94  ; pitch sign                            ;BET2
 ZP_INV_PITCH_SIGN       := $95  ; inverted pitch sign                   ;BET2+1

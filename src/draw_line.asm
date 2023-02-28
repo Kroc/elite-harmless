@@ -153,7 +153,7 @@ draw_line:                                              ; BBC: LL30     ;$AB91
 ;       ZP_LINE_Y2              end Y-pos of line in viewport, in px
 ;       Y                       (preserved)
 ;-------------------------------------------------------------------------------
-        sty ZP_PRESERVE_Y       ; preserve Y
+        sty ZP_PRESERVE_Y       ; preserve incoming Y
 
         ; how do we know when to take a step vertically? an 'error' counter
         ; increments a set amount (here named "step fraction") based on the

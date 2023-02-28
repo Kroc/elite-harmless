@@ -451,7 +451,7 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
 :       lda ZP_SEED_W1_HI       ; XOR this byte                         ;$6B3B
         eor ZP_SEED_W0_HI       ;  with that byte
         and # %00000111         ;  and take the low 3 bits
-        sta ZP_8E               ; (preserve for later)
+        sta ZP_VAR_QQ19_0       ; (preserve for later)
         cmp # 6                 ; the lower 5 values
         bcs :+                  ;  will get the adjective
 
@@ -471,7 +471,7 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
 :       lda ZP_SEED_W2_HI                                               ;$6B4C
         and # %00000011         ; take two bits from the seed
         clc                     ;  and add the bits we XORed
-        adc ZP_8E               ;  together earlier, and from this
+        adc ZP_VAR_QQ19_0       ;  together earlier, and from this
         and # %00000111         ;  modulo 8 to select species
 
         ; print "RODENT" | "FROG" | "LIZARD" | "LOBSTER" | "BIRD" |
@@ -481,10 +481,9 @@ _6ad3:  lda TSYSTEM_ECONOMY                                             ;$6AD3
         adc # TKN_FLIGHT_SPECIES
         jsr print_flight_token
 
-_6b5a:                                                                  ;$6B5A
         ; append "s)"
 .import TKN_FLIGHT_S:direct
-        lda # TKN_FLIGHT_S      ; print "s"; e.g. "RODENTS"
+_6b5a:  lda # TKN_FLIGHT_S      ; print "s"; e.g. "RODENTS"             ;$6B5A
         jsr print_flight_token
 .import TKN_FLIGHT_RPAREN:direct
         lda # TKN_FLIGHT_RPAREN ; and the closing paren
@@ -713,12 +712,12 @@ galactic_chart:                                         ; BBC: TT22     ;$6C1C
         ;-----------------------------------------------------------------------
 
         lda TSYSTEM_POS_X
-        sta ZP_8E
+        sta ZP_VAR_QQ19_0
         lda TSYSTEM_POS_Y
         lsr 
-        sta ZP_8F
-        lda # $04
-        sta ZP_90
+        sta ZP_VAR_QQ19_1
+        lda # $04               ; cross-hair size
+        sta ZP_VAR_QQ19_2
 
         ; fallthrough
         ; ...
@@ -727,42 +726,42 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
 ;===============================================================================
 ; draws a cross-hair:
 ;
-; in:   ZP_8E                   cross-hair X-position
-;       ZP_8F                   cross-hair Y-position
-;       ZP_90                   cross-hair size
+; in:   ZP_VAR_QQ19_0           cross-hair X-position
+;       ZP_VAR_QQ19_1           cross-hair Y-position
+;       ZP_VAR_QQ19_2           cross-hair size
 ;-------------------------------------------------------------------------------
         lda # 24                ; a default offset of 24. why?
         ldx ZP_SCREEN           ; check current screen
         bpl :+                  ; skip over if not short-range chart
-        lda # $00               ; change the offset to 0
+        lda # 0                 ; change the offset to 0
 
-:       sta ZP_93               ; record the offset chosen              ;$6C75
+:       sta ZP_VAR_QQ19_5       ; record the offset chosen              ;$6C75
 
         ; clip the cross-hair:
         ;-----------------------------------------------------------------------
         ; left edge:
         ;
-        lda ZP_8E               ; retrieve cross-hair X-position
+        lda ZP_VAR_QQ19_0       ; retrieve cross-hair X-position
         sec                     ; subtract cross-hair size
-        sbc ZP_90               ;  to get left-most position
+        sbc ZP_VAR_QQ19_2       ;  to get left-most position
         bcs :+                  ; underflow?
         lda # $00               ; clip against left edge
 :       sta ZP_VAR_XX15_0       ; set line starting X                   ;$6C80
 
         ; right edge:
         ;
-        lda ZP_8E               ; retrieve cross-hair X-position
+        lda ZP_VAR_QQ19_0       ; retrieve cross-hair X-position
         clc                     ; add cross-hair size
-        adc ZP_90               ;  to get right-most position
+        adc ZP_VAR_QQ19_2       ;  to get right-most position
         bcc :+                  ; overflow?
         lda # $ff               ; clip against right edge
 :       sta ZP_VAR_XX15_2       ; set line ending X                     ;$6C8B
 
         ; centre-point:
         ;
-        lda ZP_8F               ; retrieve cross-hair Y-position
+        lda ZP_VAR_QQ19_1       ; retrieve cross-hair Y-position
         clc                     ; add the offset (?)
-        adc ZP_93               ;  to get centre-point Y position
+        adc ZP_VAR_QQ19_5       ;  to get centre-point Y position
 
         ; draw the horizontal line of the cross-hair:
         ;
@@ -781,21 +780,21 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
 
         ; top edge:
         ;
-        lda ZP_8F               ; retrieve cross-hair Y-position
+        lda ZP_VAR_QQ19_1       ; retrieve cross-hair Y-position
         sec                     ; subtract cross-hair size
-        sbc ZP_90               ;  to get top-most position
+        sbc ZP_VAR_QQ19_2       ;  to get top-most position
         bcs :+                  ; underflow?
         lda # $00               ; clip against top edge
 :       clc                     ; add the offset (?)                    ;$6CA2
-        adc ZP_93
+        adc ZP_VAR_QQ19_5
         sta ZP_VAR_XX15_1
 
         ; bottom edge:
         ;
-        lda ZP_8F               ; retrieve cross-hair Y-position
+        lda ZP_VAR_QQ19_1       ; retrieve cross-hair Y-position
         clc
-        adc ZP_90               ; add cross-hair size
-        adc ZP_93               ;  and the offset (?)
+        adc ZP_VAR_QQ19_2       ; add cross-hair size
+        adc ZP_VAR_QQ19_5       ;  and the offset (?)
         cmp # 152               ; overrun bottom of chart?
         bcc :+
         ldx ZP_SCREEN           ; check which screen
@@ -803,7 +802,7 @@ draw_crosshair:                                         ; BBC: TT15     ;$6C6D
         lda # 151               ; clip for short-range
 :       sta ZP_VAR_XX15_3                                               ;$6CB8
 
-        lda ZP_8E
+        lda ZP_VAR_QQ19_0
         sta ZP_VAR_XX15_0
         sta ZP_VAR_XX15_2
         ; TODO: line-validation not required (Y1 & Y2 are in correct order),
@@ -816,12 +815,12 @@ draw_range_local:                                       ; BBC: TT126    ;$6CC3
 ; TODO: calculate position from constants
 ;-------------------------------------------------------------------------------
         lda # 104               ; cross-hair X-position
-        sta ZP_8E
+        sta ZP_VAR_QQ19_0
         lda # 90                ; cross-hair Y-position
-        sta ZP_8F
+        sta ZP_VAR_QQ19_1
 
         lda # 16                ; cross-hair size
-        sta ZP_90
+        sta ZP_VAR_QQ19_2
 
         jsr draw_crosshair
 
@@ -850,21 +849,21 @@ draw_range_circle:                                      ; BBC: TT14     ;$6CDA
         sta ZP_CIRCLE_RADIUS
 
         lda PSYSTEM_POS_X       ; get X-position of present system
-        sta ZP_8E               ; this will be cross-hair centre position X
+        sta ZP_VAR_QQ19_0       ; this will be cross-hair centre position X
 
         lda PSYSTEM_POS_Y       ; get Y-position of present system
         lsr                     ; divide by 2 to scale down to 128 height
-        sta ZP_8F               ; this will be cross-hair centre position Y
+        sta ZP_VAR_QQ19_1       ; this will be cross-hair centre position Y
 
         lda # 7                 ; set cross-hair size
-        sta ZP_90
+        sta ZP_VAR_QQ19_2
 
         jsr draw_crosshair
 
-        lda ZP_8F               ; add 24 (?) to the Y-position of
+        lda ZP_VAR_QQ19_1       ; add 24 (?) to the Y-position of
         clc                     ;  the cross-hair so that the centre
         adc # 24                ;  of the circle matches the centre
-        sta ZP_8F               ;  of the cross hair
+        sta ZP_VAR_QQ19_1       ;  of the cross hair
 
         ; fallthrough to draw the circle
         ; ...
@@ -873,13 +872,13 @@ draw_chart_circle:                                      ; BBC: TT128    ;$6CFE
 ;===============================================================================
 ; draw a circle on a chart:
 ;
-; this routine transfers the 8-bit cross-hair parameters
-; into the 16-bit circle-drawing parameters before invoking
+; this routine transfers the 8-bit cross-hair parameters into the 16-bit
+; circle-drawing parameters before invoking the regular circle drawing routine
 ;-------------------------------------------------------------------------------
-        lda ZP_8E               ; get cross-hair X-position
+        lda ZP_VAR_QQ19_0       ; get cross-hair X-position
         sta ZP_CIRCLE_XPOS_LO   ; set circle X-position, lo-byte
 
-        lda ZP_8F               ; get cross-hair Y-position
+        lda ZP_VAR_QQ19_1       ; get cross-hair Y-position
         sta ZP_CIRCLE_YPOS_LO   ; set circle Y-position, lo-byte
 
         ; the circle X & Y positions are 16-bit, so set the hi-bytes to 0
@@ -1108,7 +1107,7 @@ _6e5d:                                                                  ;$6E5d
         asl 
         tay 
         lda _90a6, y
-        sta ZP_8F
+        sta ZP_VAR_QQ19_1
        .phx                     ; push X to stack (via A)
         jsr print_newline_para
 
@@ -1282,24 +1281,24 @@ _6f55:                                                                  ;$6F55
         jsr wait_for_frame
         jsr _6f82
         pla 
-        sta ZP_91
+        sta ZP_VAR_QQ19_3
 
         lda TSYSTEM_POS_Y
         jsr _6f98
 
-        lda ZP_92
+        lda ZP_VAR_QQ19_4
         sta TSYSTEM_POS_Y
-        sta ZP_8F
+        sta ZP_VAR_QQ19_1
 
         pla 
-        sta ZP_91
+        sta ZP_VAR_QQ19_3
 
         lda TSYSTEM_POS_X
         jsr _6f98
 
-        lda ZP_92
+        lda ZP_VAR_QQ19_4
         sta TSYSTEM_POS_X
-        sta ZP_8E
+        sta ZP_VAR_QQ19_0
 
         ; fallthrough
         ; ...
@@ -1310,21 +1309,21 @@ _6f82:                                                                  ;$6F82
         bmi _6fa9
 
         lda TSYSTEM_POS_X
-        sta ZP_8E
+        sta ZP_VAR_QQ19_0
         lda TSYSTEM_POS_Y
         lsr 
-        sta ZP_8F
+        sta ZP_VAR_QQ19_1
         lda # $04
-        sta ZP_90
+        sta ZP_VAR_QQ19_2
         jmp draw_crosshair
 
 
 _6f98:                                                                  ;$6F98
 ;===============================================================================
-        sta ZP_92
+        sta ZP_VAR_QQ19_4
         clc 
-        adc ZP_91
-        ldx ZP_91
+        adc ZP_VAR_QQ19_3
+        ldx ZP_VAR_QQ19_3
         bmi _6fa4
         bcc _6fa6
         rts 
@@ -1332,7 +1331,7 @@ _6f98:                                                                  ;$6F98
 _6fa4:                                                                  ;$6FA4
         bcc _6fa8
 _6fa6:                                                                  ;$6FA6
-        sta ZP_92
+        sta ZP_VAR_QQ19_4
 _6fa8:                                                                  ;$6FA8
         rts 
 
@@ -1349,7 +1348,7 @@ _6fb8:                                                                  ;$6FB8
         asl 
         clc 
         adc # $68
-        sta ZP_8E
+        sta ZP_VAR_QQ19_0
         lda TSYSTEM_POS_Y
         sec 
         sbc PSYSTEM_POS_Y
@@ -1361,9 +1360,9 @@ _6fce:                                                                  ;$6FCE
         asl 
         clc 
         adc # $5a
-        sta ZP_8F
-        lda # $08
-        sta ZP_90
+        sta ZP_VAR_QQ19_1
+        lda # $08               ; cross-hair size
+        sta ZP_VAR_QQ19_2
         jmp draw_crosshair
 
 
@@ -1633,7 +1632,7 @@ _70d1:                                                                  ;$70D1
         ldx # 5
 _70dd:                                                                  ;$70DD
         lda ZP_SEED, x
-        sta ZP_8E, x
+        sta ZP_VAR_QQ19_0, x
         dex 
         bpl _70dd
         lda U
@@ -1644,7 +1643,7 @@ _70e8:                                                                  ;$70E8
         bne _70b6
         ldx # $05
 _70f1:                                                                  ;$70F1
-        lda ZP_8E, x
+        lda ZP_VAR_QQ19_0, x
         sta ZP_SEED, x
         dex 
         bpl _70f1
@@ -1888,10 +1887,10 @@ _7244:                                                                  ;$7244
 
 _7246:                                                                  ;$7246
         pha 
-        sta ZP_92
+        sta ZP_VAR_QQ19_4
         asl 
         asl 
-        sta ZP_8E
+        sta ZP_VAR_QQ19_0
         lda IS_WITCHSPACE
         bne _7244
 
@@ -1910,9 +1909,9 @@ _7246:                                                                  ;$7246
         lda # 14
        .set_cursor_col
 
-        ldx ZP_8E
+        ldx ZP_VAR_QQ19_0
         lda _90a6, x
-        sta ZP_8F
+        sta ZP_VAR_QQ19_1
         lda MARKET_RANDOM
         and _90a8, x
         clc 
@@ -1920,16 +1919,16 @@ _7246:                                                                  ;$7246
         sta VAR_04EC
         jsr _72b8
         jsr _731a
-        lda ZP_8F
+        lda ZP_VAR_QQ19_1
         bmi _7288
         lda VAR_04EC
-        adc ZP_91
+        adc ZP_VAR_QQ19_3
         jmp _728e
 
 _7288:                                                                  ;$7288
         lda VAR_04EC
         sec 
-        sbc ZP_91
+        sbc ZP_VAR_QQ19_3
 _728e:                                                                  ;$728E
         sta VAR_04EC
         sta ZP_VAR_P1
@@ -1938,7 +1937,7 @@ _728e:                                                                  ;$728E
         sec 
         jsr print_num16
 
-        ldy ZP_92
+        ldy ZP_VAR_QQ19_4
         lda # $05
         ldx MARKET_FOOD, y
         stx VAR_04ED
@@ -1953,7 +1952,7 @@ _72af:                                                                  ;$72AF
         lda # $2d
         bne _72c7
 _72b8:                                                                  ;$72B8
-        lda ZP_8F
+        lda ZP_VAR_QQ19_1
         and # %01100000
         beq _72ca
         cmp # $20
@@ -2023,20 +2022,20 @@ _7305:                                                                  ;$7305
 
 _731a:                                                                  ;$731A
 ;===============================================================================
-        lda ZP_8F
+        lda ZP_VAR_QQ19_1
         and # %00011111
         ldy PSYSTEM_ECONOMY
-        sta ZP_90
+        sta ZP_VAR_QQ19_2
         clc 
         lda # $00
         sta MARKET_ALIENS
 
 :       dey                                                             ;$7329
         bmi :+
-        adc ZP_90
+        adc ZP_VAR_QQ19_2
         jmp :-
 
-:       sta ZP_91                                                       ;$7331
+:       sta ZP_VAR_QQ19_3                                               ;$7331
         rts 
 
 ;===============================================================================
@@ -2070,21 +2069,21 @@ _7337:                                                                  ;$7337
         stx ZP_VAR_XX4
 _7365:                                                                  ;$7365
         lda _90a6, x
-        sta ZP_8F
+        sta ZP_VAR_QQ19_1
         jsr _731a
         lda _90a8, x
         and MARKET_RANDOM
         clc 
         adc _90a7, x
-        ldy ZP_8F
+        ldy ZP_VAR_QQ19_1
         bmi _7381
         sec 
-        sbc ZP_91
+        sbc ZP_VAR_QQ19_3
         jmp _7384
 
 _7381:                                                                  ;$7381
         clc 
-        adc ZP_91
+        adc ZP_VAR_QQ19_3
 _7384:                                                                  ;$7384
         bpl _7388
         lda # $00
@@ -2687,7 +2686,7 @@ _76e9:                                                                  ;$76E9
         ; backup seed?
         ldx # $05
 :       lda ZP_SEED, x                                                  ;$76EB
-        sta ZP_8E, x
+        sta ZP_VAR_QQ19_0, x
         dex 
         bpl :-
 
@@ -2714,7 +2713,7 @@ _76e9:                                                                  ;$76E9
         ldx # $05
 
         ;-----------------------------------------------------------------------
-:       lda ZP_8E, x                                                    ;$770F
+:       lda ZP_VAR_QQ19_0, x                                            ;$770F
         sta ZP_SEED, x
         dex 
         bpl :-
@@ -2733,7 +2732,7 @@ swap_zp_shadow:                                                         ;$784F
 ; swap zero-page with its shadow
 ; (copies $36...$FF to $CE36...$CEFF)
 ;-------------------------------------------------------------------------------
-        ldx # $36               ; $36 makes no sense
+        ldx # $36               ; TODO: $36 makes no sense
 :       lda $00, x              ; read A from the zero-page             ;$7851
         ldy ELITE_ZP_SHADOW, x  ; read Y from the shadow
         sta ELITE_ZP_SHADOW, x  ; write A to the shadow
@@ -5670,7 +5669,7 @@ _8ab4:                                                                  ;$8AB4
 ; in the original code, segment "CODE_8AB5" appears here                ;$8AB5
 
 
-.segment        "CODE_8AC7"
+.segment        "CODE_8AC7"                                             ;$8AC7
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _ZERO:                                                  ; BBC: ZERO     ;$8AC7
@@ -5717,7 +5716,7 @@ _8ad9:                                                                  ;$8AD9
 ; NOTE: in the original code, segment "CODE_8C6D" appears here          ;$8C6D
 
 
-.segment        "CODE_8C7A"
+.segment        "CODE_8C7A"                                             ;$8C7A
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 .ifdef  BUILD_ORIGINAL
@@ -5813,7 +5812,7 @@ _8cc2:                                                                  ;$8CC2
 ; NOTE: in the original code, segment "CODE_8D0C" appears here          ;$8D0C
 
 
-.segment        "CODE_8E29"
+.segment        "CODE_8E29"                                             ;$8E29
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 do_quickjump:                                           ; BBC: WARP     ;$8E29
