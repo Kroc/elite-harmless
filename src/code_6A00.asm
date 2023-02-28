@@ -5131,7 +5131,7 @@ _8863:                                                                  ;$8863
         lda hull_pointer_station_hi
         sta _8861+1
 
-        jsr _8a0c               ; reset the save data to default
+        jsr _JAMESON            ; reset the save data to default
 
         ; set the stack pointer to the top ($01FF),
         ; (i.e. disregard all stack-use prior to this point)
@@ -5172,7 +5172,7 @@ _8882:                                                  ; BBC: BR1      ;$8882
         bne _QU5
 
         jsr _9245               ; (something to do with sound)
-        jsr _88f0               ; reset game to last saved state?
+        jsr _DFAULT             ; reset game to last saved state
         jsr _SVE                ; show load menu
 
 .ifdef  FEATURE_AUDIO
@@ -5180,7 +5180,7 @@ _8882:                                                  ; BBC: BR1      ;$8882
         jsr _91fe
 .endif  ;///////////////////////////////////////////////////////////////////////
 
-_QU5:   jsr _88f0               ; reset game to last saved state?       ;$88AC
+_QU5:   jsr _DFAULT             ; reset game to last saved state        ;$88AC
         jsr _msblob             ; reset missile blocks on HUD
 
         ; "press space or fire commander"
@@ -5242,7 +5242,7 @@ _BAY:                                                   ; BBC: BAY      ;$88E7
         jmp _FRCE
 
 
-_88f0:                                                  ; BBC: DFAULT?  ;$88F0
+_DFAULT:                                                ; BBC: DFAULT   ;$88F0
 ;===============================================================================
 ; resets the game to the last-saved state; e.g. if the player dies, the game
 ; reverts to the last save. a copy of the last save is always kept in RAM
@@ -5487,7 +5487,7 @@ calc_checksum1:                                         ; BBC: CHECK    ;$89EB
 
 calc_checksum2:                                                         ;$89F9
 ;===============================================================================
-; checksum routine unique to C64?
+; secondary checksum for last saved player data:
 ;
 ; a more involved checksum routine that scrambles by XORing with the
 ; byte index first and shifting right; this was obviously intended to
@@ -5511,11 +5511,12 @@ calc_checksum2:                                                         ;$89F9
         rts 
 
 
-_8a0c:                                                  ; BBC: JAMESON  ;$8A0C
+_JAMESON:                                               ; BBC: JAMESON  ;$8A0C
 ;===============================================================================
 ; reset the current save-game:
 ;
-; copies a dummy save game over the last-saved game data
+; copies a dummy save game over the last-saved game data; note that
+; this doesn't change the in-play game state, only the last-saved state
 ;-------------------------------------------------------------------------------
         ; copy $2619..$267A to $25AB..$260C
 
@@ -5526,7 +5527,7 @@ _8a0c:                                                  ; BBC: JAMESON  ;$8A0C
         dey 
         bpl :-
 
-        ldy # $07
+        ldy # $07               ; reset commander-name length
         sty _8bbf
 
         rts 
@@ -5551,6 +5552,7 @@ _8a2f:                                                                  ;$8A2F
         bpl _8a2f
         rts 
 
+        ; get filename input?
 _8a38:                                                                  ;$8A38
         ldx # $04
 _8a3a:                                                                  ;$8A3A

@@ -10,17 +10,17 @@
 .segment        "SAVE_DATA"
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ;
-;             +----------+ >-------------------------------------------.
-;       $25A6 | disk-cmd |                                             |
-;             +----------+ <----------------------.      saved to <----+
-;       $25AB | filename |                        |        disk        |
-;             +----------+ >---.                  |                    |
-;       $25B3 | SaveData |     |                  |                    |
-;             |          |     +---- checksummed  +---- copied from    |
-;             |          |     |         |        |       default      |
-;             +----------+ >---'         |        |                    |
-;       $25FD | checksum | <-------------'        |                    |
-;             +----------+ <----------------------' >------------------'
+;             +----------+
+;       $25A6 | disk-cmd |
+;             +----------+
+;       $25AB | filename |
+;             +----------+ >---.
+;       $25B3 | SaveData |     |
+;             |          |     +---- checksummed
+;             |          |     |         |
+;             +----------+ >---'         |
+;       $25FD | checksum | <-------------'
+;             +----------+
 ;       $2600 | unused   |
 ;             +----------+
 ;
@@ -105,6 +105,7 @@ save_name:                                                              ;$25AB
         .word   0               ; PLAYER_KILLS
 .endproc
 
+.EXPORT checksum_data_size
 checksum_data_size = .sizeof( checksum_data )
 
 ;-------------------------------------------------------------------------------
@@ -125,19 +126,19 @@ checksum2:                                              ; BBC: CHK2     ;$25FE
 checksum1:                                              ; BBC: CHK      ;$25FF
         .byte   $00
 
-save_data_size = * - save_data
+.EXPORT save_data_size
+save_data_size = * - checksum_data
 
+save_data_end = *
 
-.segment        "SAVE_DEFAULT"
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-; TODO: these should be part of SAVE_DATA above,
-;       but should not factor into the size calculations
-;
+        ; unused data!
         .byte   $00, $00, $00, $00, $00, $00, $00, $00                  ;$2600
         .byte   $00, $00, $00, $00, $00, $00, $00, $00
         .byte   $00, $00, $00, $00
 
-;===============================================================================
+
+.segment        "SAVE_DEFAULT"
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; this is the start of the default save block
 
         .byte   $3a, $30, $2e, $45, $2e         ;":0.E."

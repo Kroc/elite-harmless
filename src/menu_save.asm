@@ -7,7 +7,10 @@
 
 _SVE:                                                   ; BBC: SVE      ;$8AE7
 ;===============================================================================
-; data menu
+; data menu:
+;
+; out:  carry   clear   no change; nothing was loaded
+;               set     new data was loaded!
 ;-------------------------------------------------------------------------------
         ; display the data menu on screen
         ;
@@ -32,11 +35,11 @@ _SVE:                                                   ; BBC: SVE      ;$8AE7
         lda # MSG_DOCKED_ARE_YOU_SURE
         jsr print_docked_str
 
-        jsr _GETYN
-        bcc @exit
+        jsr _GETYN              ; wait for "Y" or "N" keypress
+        bcc @exit               ; if "N", exit menu
 
-        jsr _8a0c               ; reset save data to default
-        jmp _88f0
+        jsr _JAMESON            ; reset save data to default
+        jmp _DFAULT             ; reset game state to last saved state
 
         ; exit save menu, no change:
         ;=======================================================================
@@ -55,63 +58,71 @@ _SVE:                                                   ; BBC: SVE      ;$8AE7
 @load:  jsr _8a38                                                       ;$8B1C
         jsr _8c0d
         jsr _8a1d
-        sec 
-        rts 
+        sec                     ; return carry set to indicate new data
+        rts                     ; -- the internal state will need updating
 
         ; save commander:
         ;=======================================================================
 @save:  jsr _8a38                                                       ;$8B27
         jsr _8a1d
+
+        ; competition number:
+        ;-----------------------------------------------------------------------
         lsr VAR_04E2
 
 .import MSG_DOCKED_COMPETITION_NUMBER:direct
         lda # MSG_DOCKED_COMPETITION_NUMBER
         jsr print_docked_str
 
-        ; copy $0499..$04E5 (data to be saved?)
-        ldx # $4c
+        ; update the last-saved state by copying from
+        ; the in-play state to the last-saved area
+        ;
+        ldx # save_data_size-1                                          ;=$4C
 :       lda MISSION_FLAGS, x                                            ;$8B37
         sta checksum_data, x
         dex 
         bpl :-
 
-        jsr calc_checksum2
+        ; calculate and display the competition number:
+        ;
+        jsr calc_checksum2      ; update the checksums in the last-saved state
         sta checksum2
         jsr calc_checksum1
         sta checksum1
-        pha 
-        ora # %10000000
-        sta ZP_VALUE_pt1
-        eor PLAYER_COMPETITION
-        sta ZP_VALUE_pt3
-        eor PLAYER_CASH_pt3     ;?
-        sta ZP_VALUE_pt2
-        eor # %01011010
-        eor PLAYER_KILLS_HI
+        pha                     ; keep a copy of checksum 1 for later
+
+        ora # %10000000         ; set bit 7 -- make number always "big"
+        sta ZP_VALUE_pt1        ; (note that this number is big-Endian)
+        eor PLAYER_COMPETITION  ; XOR that with the competition flags
+        sta ZP_VALUE_pt3        ;  and use as the third byte
+        eor PLAYER_CASH_pt3     ; XOR again with byte 3 of player's cash
+        sta ZP_VALUE_pt2        ;  (also big-Endian)
+        eor # %01011010         ; 
+        eor PLAYER_KILLS_HI     ; XOR with hi byte (>255) of player kill count
         sta ZP_VALUE_pt4
-        clc 
-        jsr print_large_value
+        clc                     ; don't use a decimal point!
+        jsr print_large_value   ; print the 4-byte big-Endian number
         jsr print_newline
         jsr print_newline
-        pla 
-        eor # %10101001
+
+        pla                     ; return to original checksum1
+        eor # %10101001         ; "randomise"?
         sta checksum_bytes
+
         jsr _8bc0               ; NOTE: enables KERNAL
 
+        ; set the starting address of the data to save to disk/tape:
+        ;
         lda #< checksum_data
         sta ZP_FD
         lda #> checksum_data
         sta ZP_FE
 
         ; save to disk:
-        ; the linker will define the location and size of the save-data block
-.import __SAVE_DATA_RUN__
-.import __SAVE_DATA_SIZE__
-
-        ; data is located at the pointer in $FD/$FE
-        lda # ZP_FD
-        ldx #< (__SAVE_DATA_RUN__ + __SAVE_DATA_SIZE__)
-        ldy #> (__SAVE_DATA_RUN__ + __SAVE_DATA_SIZE__)
+        ;
+        lda # ZP_FD             ; data is located at the pointer in $FD/$FE
+        ldx #< save_data_end    ; set last address of save block
+        ldy #> save_data_end    ; (KERNAL doesn't use a size)
         jsr KERNAL_SAVE
         php 
 
@@ -149,7 +160,7 @@ _SVE:                                                   ; BBC: SVE      ;$8AE7
         plp 
         cli 
         bcs :+
-        jsr _88f0               ; rest game to last-saved state?
+        jsr _DFAULT             ; rest game to last-saved state
         jsr wait_for_input
 
         clc 

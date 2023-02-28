@@ -455,6 +455,8 @@ _GETYN:                                                 ; BBC: GETYN    ;$81EE
 ;===============================================================================
 ; wait for a "Y" (yes) or "N" (no) input:
 ;
+; out:  carry   set             "Y" was pressed
+;               clear           "N" was pressed
 ;===============================================================================
         jsr wait_for_input
         cmp # 'y'               ; (PETSCII)
@@ -474,7 +476,7 @@ _GETYN:                                                 ; BBC: GETYN    ;$81EE
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         cmp # 'n'               ; (PETSCII)
-        bne _GETYN
+        bne _GETYN              ; if neither "Y" or "N", wait for another key
 
         clc 
 @rts:   rts 
