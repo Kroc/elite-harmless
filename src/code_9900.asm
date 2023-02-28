@@ -1,4 +1,4 @@
-; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
+; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2023,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
@@ -46,11 +46,11 @@ menuscr_hi:                                                             ;$9919
         .hibytes menuscr_pos
 
 
-; NOTE: in the original code, segment "CODE_9932" appears here
+; NOTE: in the original code, segment "CODE_9932" appears here          ;$9932
 ; NOTE: in the original code, segment "CODE_A19F" appears here          ;$A19F
 
 
-.segment        "CODE_A2A0"
+.segment        "CODE_A2A0"                                             ;$A2A0
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 move_ship:                                              ; BBC: MVEIT    ;$A2A0
@@ -359,7 +359,7 @@ _a3bf:                                                                  ;$A3BF
 ; NOTE: in the original, segment "CODE_A4A1" appears here               ;$A4A1
 
 
-.segment        "CODE_A508"
+.segment        "CODE_A508"                                             ;$A508
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _a508:                                                                  ;$A508
@@ -669,7 +669,7 @@ _a6ba:                                                                  ;$A6BA
 
 .ifdef  BUILD_ORIGINAL
         ;///////////////////////////////////////////////////////////////////////
-        jsr _DOVDU19        ; DEAD CODE! this is just an RTS!
+        jsr _DOVDU19            ; DEAD CODE! this is just an RTS!
 .endif  ;///////////////////////////////////////////////////////////////////////
 
         ldy ZP_SCREEN           ; are we in the cockpit-view?
@@ -796,9 +796,8 @@ set_page:                                                               ;$A72F
 ; switch screen page:
 ;
 ; in:   A                       page to switch to; e.g. cockpit-view, galactic
-;                                chart &c. see the `page` constants defined in
-;                                "vars_zeropage.asm"
-;
+;                               chart &c. see the `page` constants defined in
+;                               "vars_zeropage.asm"
 ;-------------------------------------------------------------------------------
         sta ZP_SCREEN           ; set the variable for current active page
 
@@ -934,6 +933,8 @@ ship_killed:                                            ; BBC: EXNO2    ;$A7A6
         ; show an on-screen message
         jsr _MESS
 
+        ; fallthrough
+        ; ...
 
 sound_play_explosion:                                                   ;$A7C3
 ;===============================================================================
@@ -1182,7 +1183,7 @@ _a8bd:                                                                  ;$A8BD
 ; NOTE: in the original code, "code_interrupts.asm" appears here
 ; NOTE: in the original code, "draw_lines.asm" appears here
 ;
-.segment        "CODE_B09D"
+.segment        "CODE_B09D"                                             ;$B09D
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _b09d:                                                                  ;$B09D
@@ -1413,7 +1414,6 @@ chrout:                                                                 ;$B155
 ; this is due to the data being copied over as-is from the BBC
 ;
 ; in:   A                       ASCII code of character to print
-;
 ;-------------------------------------------------------------------------------
         ; re-define the use of some zero-page variables for this routine
         ZP_CHROUT_CHARADDR      := ZP_VAR_P2
@@ -1466,6 +1466,9 @@ paint_newline:                                                          ;$B179
 ; NOTE: called only ever by `_2c7d`!
 ;-------------------------------------------------------------------------------
         lda # TXT_NEWLINE
+
+        ; fallthrough
+        ; ...
 
 paint_char:                                                             ;$B17B
 ;===============================================================================

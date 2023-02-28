@@ -1,4 +1,4 @@
-; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2022,
+; Elite C64 disassembly / Elite : Harmless, cc-by-nc-sa 2018-2023,
 ; see LICENSE.txt. "Elite" is copyright / trademark David Braben & Ian Bell,
 ; All Rights Reserved. <github.com/Kroc/elite-harmless>
 ;
@@ -14,7 +14,7 @@
 .import TKN_FLIGHT_pair2:absolute
 
 
-.segment        "CODE_6A00"
+.segment        "CODE_6A00"                                             ;$6A00
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 check_cargo_capacity_add1:                              ; BBC: tnpr1    ;$6A00
@@ -101,7 +101,7 @@ check_cargo_capacity:                                   ; BBC: tnpr     ;$6A05
 ; NOTE: in the original code, "orig/cursor.asm" appears here            ;$6A25
 
 
-.segment        "CODE_6A2F"
+.segment        "CODE_6A2F"                                             ;$6A2F
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 set_page_6a2f:                                                          ;$6A2F
@@ -866,8 +866,8 @@ draw_range_circle:                                      ; BBC: TT14     ;$6CDA
         adc # 24                ;  of the circle matches the centre
         sta ZP_8F               ;  of the cross hair
 
-        ; fallthrough to draw the circle...
-        ;
+        ; fallthrough to draw the circle
+        ; ...
 
 draw_chart_circle:                                      ; BBC: TT128    ;$6CFE
 ;===============================================================================
@@ -1271,6 +1271,7 @@ _6f3a:                                                                  ;$6F3a
         sec 
         rts 
 
+
 _6f55:                                                                  ;$6F55
 ;===============================================================================
        .phx                     ; push X to stack (via A)
@@ -1299,6 +1300,9 @@ _6f55:                                                                  ;$6F55
         lda ZP_92
         sta TSYSTEM_POS_X
         sta ZP_8E
+
+        ; fallthrough
+        ; ...
 
 _6f82:                                                                  ;$6F82
 ;===============================================================================
@@ -1825,6 +1829,9 @@ _71f2:  ; the $60 also forms an RTS, jumped to from just after _71ca    ;$71F2
         lda # TKN_FLIGHT_GALACTIC_HYPERSPACE
         jsr _MESS               ; print on-screen message?
 
+        ; fallthrough
+        ; ...
+
 _jmp:                                                   ; BBC: jmp      ;$7217
 ;===============================================================================
         lda TSYSTEM_POS_X
@@ -1851,12 +1858,16 @@ print_int16:                                                            ;$7234
 ;-------------------------------------------------------------------------------
         clc 
 
+        ; fallthrough
+        ; ...
+
 print_num16:                                            ; BBC: pr5      ;$7235
 ;===============================================================================
 ; print 16-bit value in X/Y: -- decimal point included if carry set
 ;-------------------------------------------------------------------------------
         lda # $05               ; max. no. digits -- is this 5 or 6?
         jmp print_medium_value
+
 
 _723a:                                                                  ;$723A
 .import TKN_FLIGHT_RANGE:direct
@@ -2298,7 +2309,7 @@ _74a5:                                                                  ;$74A5
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-.segment        "CODE_74B8"
+.segment        "CODE_74B8"                                             ;$74B8
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _74b8:   jmp _BAY                                                       ;$74B8
@@ -2714,7 +2725,7 @@ _76e9:                                                                  ;$76E9
 ; NOTE: in the original code, segment "CODE_7717" appears here          ;$7717
 
 
-.segment        "CODE_784F"
+.segment        "CODE_784F"                                             ;$784F
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 swap_zp_shadow:                                                         ;$784F
@@ -3212,6 +3223,9 @@ _7afa:                                                                  ;$7AFA
         dey 
         bne _7afa
 
+        ; fallthrough
+        ; ...
+
 _WPSHPS:                                                ; BBC: WPSHPS   ;$7B1A
 ;===============================================================================
 ; clear all ships from the scanner:
@@ -3281,7 +3295,6 @@ original_7b5e:                                                          ;$75BE
 
 :       dex                     ; overflow, set to max (255)            ;$7B5F
         rts 
-
 
 recharge_shield:                                        ; BBC: SHD      ;$7B61
 ;===============================================================================
@@ -3728,7 +3741,7 @@ _7d56:                                                                  ;$7D56
 ; NOTE: in the original code, segment "CODE_81EE" appears here          ;$81EE
 
 
-.segment        "CODE_81FB"
+.segment        "CODE_81FB"                                             ;$81FB
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _81fb:                                                                  ;$81FB
@@ -3864,7 +3877,7 @@ current_memory_layout:                                                  ;$828E
 .endif  ;///////////////////////////////////////////////////////////////////////
 
 
-.segment        "CODE_828F"
+.segment        "CODE_828F"                                             ;$828F
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 _828f:                                                                  ;$828F
@@ -4612,6 +4625,9 @@ _8612:                                                                  ;$8612
 
         dec ZP_VAR_XX13
         bpl _8612
+
+        ; fallthrough
+        ; ...
 
 _8627:                                                                  ;$8627
 ;===============================================================================
