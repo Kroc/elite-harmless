@@ -1,4 +1,4 @@
-# v80
+# Elite Harmless
 
 TL;DR: This project has moved to [codeberg.org/Kroc/elite-harmless](https://codeberg.org/Kroc/elite-harmless)
 
